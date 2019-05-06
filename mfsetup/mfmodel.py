@@ -1,0 +1,463 @@
+import sys
+import os
+# kludge for now to path to code in mfutils repo
+sys.path.append('{}/../mfutils'.format(os.path.split(__file__)[0]))
+import time
+import shutil
+import numpy as np
+import flopy
+mf6 = flopy.mf6
+from flopy.discretization.structuredgrid import StructuredGrid
+from discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, deactivate_idomain_above
+from fileio import load, dump, check_source_files, load_array, save_array
+from gis import get_values_at_points
+from utils import update, write_bbox_shapefile, regrid, \
+    get_sr_bounding_box, get_input_arguments, fill_layers
+from units import convert_length_units, convert_time_units
+
+
+class MF6model(mf6.ModflowGwf):
+    """Class representing a MODFLOW-6 model.
+    """
+
+    source_path = os.path.split(__file__)[0]
+    # default configuration
+    cfg = load(source_path + '/mf_defaults.yml')
+    cfg['filename'] = source_path + '/mf_defaults.yml'
+
+    def __init__(self, simulation, cfg=None,
+                 modelname='model', exe_name='mf6',
+                 version='mf6', **kwargs):
+        mf6.ModflowGwf.__init__(self, simulation,
+                                modelname, exe_name=exe_name, version=version,
+                                **kwargs)
+
+        # property attributes
+        self._modelgrid = None
+        self._idomain = None
+        self._isbc = None
+
+        self._features = {} # dictionary for caching shapefile datasets in memory
+
+        self._load_cfg(cfg)  # update configuration dict with values in cfg
+
+        # arrays remade during this session
+        self.updated_arrays = set()
+
+    @property
+    def nper(self):
+        return self.cfg['tdis']['dimensions'].get('nper', 1)
+
+    @property
+    def nlay(self):
+        return self.cfg['dis']['dimensions'].get('nlay', 1)
+
+    @property
+    def nrow(self):
+        if self.modelgrid.grid_type == 'structured':
+            return self.modelgrid.nrow
+
+    @property
+    def ncol(self):
+        if self.modelgrid.grid_type == 'structured':
+            return self.modelgrid.ncol
+
+    @property
+    def length_units(self):
+        return self.cfg['dis']['options']['length_units']
+
+    @property
+    def modelgrid(self):
+        if self._modelgrid is None:
+            kwargs = self.cfg.get('grid').copy()
+            if kwargs is not None:
+                if np.isscalar(kwargs['delr']):
+                    kwargs['delr'] = np.ones(kwargs['ncol'], dtype=float) * kwargs['delr']
+                if np.isscalar(kwargs['delc']):
+                    kwargs['delc'] = np.ones(kwargs['nrow'], dtype=float) * kwargs['delc']
+                kwargs.pop('nrow')
+                kwargs.pop('ncol')
+                kwargs['angrot'] = kwargs.pop('rotation')
+                self._modelgrid = StructuredGrid(**kwargs)
+        return self._modelgrid
+
+    @property
+    def tmpdir(self):
+        return self.cfg['intermediate_data']['tmpdir']
+
+    @property
+    def idomain(self):
+        """3D array indicating which cells will be included in the simulation.
+        Made a property so that it can be easily updated when any packages
+        it depends on change.
+        """
+        if self._idomain is None and 'DIS' in self.packagelist:
+            idomain = np.abs(~np.isnan(self.dis.botm.array).astype(int))
+            # remove cells that are above stream cells
+            if 'SFR' in self.get_package_list():
+                idomain = deactivate_idomain_above(idomain, self.sfr.reach_data)
+            self._idomain = idomain
+        return self._idomain
+
+    @property
+    def isbc(self):
+        """3D array summarizing the boundary conditions in each model cell.
+       -1 : constant head
+        0 : no boundary conditions
+        1 : sfr
+        2 : well
+        3 : ghb
+        """
+        if 'DIS' not in self.get_package_list():
+            return None
+        elif self._isbc is None:
+            isbc = np.zeros((self.nlay, self.nrow, self.ncol))
+            isbc[0] = self._isbc2d
+
+            lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
+            layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
+            # lakes must be at least 10% into a layer to get simulated in that layer
+            below = layer_tops > lake_botm_elevations + 0.1
+            for i, ibelow in enumerate(below[1:]):
+                if np.any(ibelow):
+                    isbc[i+1][ibelow] = self._isbc2d[ibelow]
+            # add other bcs
+            if 'SFR' in self.get_package_list():
+                k, i, j = self.sfr.reach_data['k'], \
+                          self.sfr.reach_data['i'], \
+                          self.sfr.reach_data['j']
+                isbc[k, i, j][isbc[k, i, j] != 1] = 3
+            if 'WEL' in self.get_package_list():
+                k, i, j = self.wel.stress_period_data[0]['k'], \
+                          self.wel.stress_period_data[0]['i'], \
+                          self.wel.stress_period_data[0]['j']
+                isbc[k, i, j][isbc[k, i, j] == 0] = -1
+            self._isbc = isbc
+            self._lakarr = None
+        return self._isbc
+
+
+    def _load_cfg(self, cfg):
+        """Load configuration file; update cfg dictionary."""
+        if isinstance(cfg, str):
+            assert os.path.exists(cfg), "config file {} not found".format(cfg)
+            updates = load(cfg)
+            updates['filename'] = cfg
+        elif isinstance(cfg, dict):
+            updates = cfg
+        else:
+            raise TypeError("unrecognized input for cfg")
+
+        # make sure empty variables get initialized as dicts
+        for k, v in self.cfg.items():
+            if v is None:
+                k[v] = {}
+        for k, v in updates.items():
+            if v is None:
+                k[v] = {}
+        update(self.cfg, updates)
+
+        # setup or load the simulation
+        kwargs = self.cfg['simulation'].copy()
+        if os.path.exists('{}.nam'.format(kwargs['sim_name'])):
+            kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
+            self._sim = mf6.MFSimulation.load(**kwargs)
+        else:
+            # create simulation
+            kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
+            self._sim = mf6.MFSimulation(**kwargs)
+
+        # make sure that the intermediate and model_ws folders exist
+        self.external_path = self.cfg['external_path']
+        for folder in [self.cfg['intermediate_data']['tmpdir'],
+                       self.cfg['simulation']['sim_ws'],
+                       self.external_path]:
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+
+    def load_array(self, filename):
+        """Load an array and check the shape.
+        """
+        return load_array(filename, shape=(self.nrow, self.ncol))
+
+    def get_flopy_external_file_input(self, var):
+        """Repath intermediate external file input to the
+        external file path that MODFLOW will use. Copy the
+        file because MF6 flopy reads and writes to the same location.
+
+        Parameters
+        ----------
+        var : str
+            key in self.cfg['intermediate_data'] dict
+
+        Returns
+        -------
+        input : dict or list of dicts
+            MODFLOW6 external file input format
+            {'filename': <filename>}
+        """
+        intermediate_paths = self.cfg['intermediate_data'][var]
+        if isinstance(intermediate_paths, str):
+            intermediate_paths = [intermediate_paths]
+        external_path = os.path.basename(os.path.normpath(self.external_path))
+        input = []
+        for f in intermediate_paths:
+            outf = os.path.join(external_path, os.path.split(f)[1])
+            input.append({'filename': outf})
+            shutil.copy(f, os.path.normpath(self.external_path))
+        if len(input) == 1:
+            input = input[0]
+        return input
+
+    def get_raster_values_at_cell_centers(self, raster):
+        """Sample raster values at centroids
+        of model grid cells."""
+        values = get_values_at_points(raster,
+                                      x=self.modelgrid.xcellcenters.ravel(),
+                                      y=self.modelgrid.ycellcenters.ravel(),
+                                      )
+        if self.modelgrid.grid_type == 'structured':
+            values = np.reshape(values, (self.nrow, self.ncol))
+        return values
+
+    def get_raster_statistics_for_cells(self, top, stat='mean'):
+        """Compute zonal statics for raster pixels within
+        each model cell.
+        """
+        raise NotImplementedError()
+
+    def setup_grid(self):
+        """set the grid info dict
+        (grid object will be updated automatically)"""
+        grid = self.cfg['setup_grid'].copy()
+        grid_file = grid.pop('grid_file').format(self.name)
+
+        # arguments supplied to DIS have priority over those supplied to setup_grid
+        for param in ['nrow', 'ncol']:
+            grid.update({param: self.cfg['dis']['dimensions'][param]})
+        for param in ['delr', 'delc']:
+            grid.update({param: self.cfg['dis']['griddata'][param]})
+
+        self.cfg['grid'] = grid
+        dump(grid_file, self.cfg['grid'])
+
+    def setup_external_filepaths(self, package, variable_name,
+                                 filename_format, nfiles=1):
+        """Set up external file paths for a MODFLOW package variable. Sets paths
+        for intermediate files, which are written from the (processed) source data.
+        Intermediate files are supplied to Flopy as external files for a given package
+        variable. Flopy writes external files to a specified location when the MODFLOW
+        package file is written. This method gets the external file paths that
+        will be written by FloPy, and puts them in the configuration dictionary
+        under their respective variables.
+
+        Parameters
+        ----------
+        package : str
+            Three-letter package abreviation (e.g. 'DIS' for discretization)
+        variable_name : str
+            FloPy name of variable represented by external files (e.g. 'top' or 'botm')
+        filename_format : str
+            File path to the external file(s). Can be a string representing a single file
+            (e.g. 'top.dat'), or for variables where a file is written for each layer or
+            stress period, a format string that will be formated with the zero-based layer
+            number (e.g. 'botm{}.dat') for files botm0.dat, botm1.dat, ...
+        nfiles : int
+            Number of external files for the variable (e.g. nlay or nper)
+
+        Returns
+        -------
+        Adds intermediated file paths to model.cfg[<package>]['intermediate_data']
+        Adds external file paths to model.cfg[<package>][<variable_name>]
+        """
+        package = package.lower()
+
+        # intermediate data
+        filename_format = os.path.split(filename_format)[-1]
+        intermediate_files = [os.path.join(self.tmpdir,
+                                             filename_format).format(i) for i in range(nfiles)]
+        if nfiles == 1:
+            intermediate_files = intermediate_files[0]
+        self.cfg['intermediate_data'][variable_name] = intermediate_files
+
+        # external array(s) read by MODFLOW
+        # (set to reflect expected locations where flopy will save them)
+        external_files = [os.path.join(self.model_ws,
+                                       self.external_path,
+                                       filename_format.format(i)) for i in range(nfiles)]
+        if nfiles == 1:
+            external_files = external_files[0]
+        self.cfg[package][variable_name] = external_files
+
+
+    def setup_dis(self):
+        """
+        Setup DIS package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'dis'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        minimum_layer_thickness = self.cfg['dis']['minimum_layer_thickness']
+        remake_arrays = self.cfg['dis']['remake_arrays']
+        regrid_top_from_dem = self.cfg['dis']['regrid_top_from_dem']
+
+        # source data
+        top_file = self.cfg['dis']['source_data']['top']
+        botm_files = self.cfg['dis']['source_data']['botm']
+        elevation_units = self.cfg['dis']['source_data']['elevation_units']
+
+        # set paths to intermediate files and external files
+        self.setup_external_filepaths(package, 'top', self.cfg['dis']['top_filename'],
+                                      nfiles=1)
+        self.setup_external_filepaths(package, 'botm', self.cfg['dis']['botm_filename_fmt'],
+                                      nfiles=self.nlay)
+        self.setup_external_filepaths(package, 'idomain', self.cfg['dis']['idomain_filename_fmt'],
+                                      nfiles=self.nlay)
+
+        if remake_arrays:
+            check_source_files(botm_files.values())
+
+            # resample the top from the DEM
+            if regrid_top_from_dem:
+                check_source_files(top_file)
+                elevation_units_mult = convert_length_units(elevation_units, self.length_units)
+                #top = self.get_raster_statistics_for_cells(top)
+                top = self.get_raster_values_at_cell_centers(top_file)
+                # save out the model top
+                top *= elevation_units_mult
+                save_array(self.cfg['intermediate_data']['top'], top, fmt='%.2f')
+                self.updated_arrays.add('top')
+            else:
+                top = self.load_array(self.cfg['intermediate_data']['top'])
+
+            # sample botm elevations from rasters
+            sorted_keys = sorted(botm_files.keys())
+            assert sorted_keys[-1] == self.nlay - 1, \
+                "Max bottom layer specified is {}: {}; " \
+                "need to provide surface for model botm".format(sorted_keys[-1],
+                                                                botm_files[sorted_keys[-1]])
+            all_surfaces = np.zeros((self.nlay+1, self.nrow, self.ncol), dtype=float) * np.nan
+            all_surfaces[0] = top
+            for k, rasterfile in botm_files.items():
+                all_surfaces[k+1] = self.get_raster_values_at_cell_centers(botm_files[k])
+
+            # for layers without a surface, set bottom elevation
+            # so that layer thicknesses between raster surfaces are equal
+            all_surfaces = fill_layers(all_surfaces)
+
+            # fix any layering conflicts and save out botm files
+            botm = np.array(all_surfaces[1:])
+            botm = fix_model_layer_conflicts(top, botm,
+                                             minimum_thickness=minimum_layer_thickness)
+            for i, f in enumerate(self.cfg['intermediate_data']['botm']):
+                save_array(f, botm[i], fmt='%.2f')
+            self.updated_arrays.add('botm')
+
+            # setup idomain from invalid botm elevations
+            self._idomain = np.abs(~np.isnan(botm).astype(int))
+
+            for i, f in enumerate(self.cfg['intermediate_data']['idomain']):
+                save_array(f, self.idomain[i], fmt='%.2f')
+            self.updated_arrays.add('idomain')
+            self._isbc = None # reset the isbc property
+
+        else: # check bottom of layer 1 to confirm that it is the right shape
+            self.load_array(self.cfg['intermediate_data']['botm'][0])
+
+        # put together keyword arguments for dis package
+        kwargs = self.cfg['grid'].copy() # nrow, ncol, delr, delc
+        kwargs.update(self.cfg['dis']['dimensions']) # nper, nlay, etc.
+        kwargs.update(self.cfg['dis']['griddata'])
+
+        # we need flopy to read the intermediate files
+        # (it will write the files listed under [<package>][<variable>] names in cfg)
+        kwargs.update({'top': self.get_flopy_external_file_input('top'),
+                       'botm': self.get_flopy_external_file_input('botm'),
+                       'idomain': self.get_flopy_external_file_input('idomain')
+                      })
+
+        # modelgrid: dis arguments
+        remaps = {'xoff': 'xorigin', 'yoff': 'yorigin', 'rotation': 'angrot'}
+        for modelgridk, disk in remaps.items():
+            kwargs[disk] = kwargs.pop(modelgridk)
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
+        dis = mf6.ModflowGwfdis(model=self, **kwargs)
+
+        # check layer thicknesses (in case bad files were read in)
+        isvalid = verify_minimum_layer_thickness(self, minimum_layer_thickness)
+        if not isvalid:
+            botm = fix_model_layer_conflicts(self.dis.top.array,
+                                             self.dis.botm.array,
+                                             minimum_thickness=minimum_layer_thickness)
+            for i, f in enumerate(sorted(self.cfg['intermediate_data']['botm'])):
+                save_array(f, botm[i], fmt='%.2f')
+
+            # horrible kludge to deal with flopy external file handling
+            dis = mf6.ModflowGwfdis(model=self, **kwargs)
+
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return dis
+
+    @staticmethod
+    def setup_from_yaml(yamlfile, verbose=False):
+        """Make a model from scratch, using information in a yamlfile.
+
+        Parameters
+        ----------
+        yamlfile : str (filepath)
+            Configuration file in YAML format with inset setup information.
+
+        Returns
+        -------
+        m : MF6model.MF6model instance
+        """
+
+        cfg = MF6model.load_cfg(yamlfile, verbose=verbose)
+        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
+        t0 = time.time()
+
+        # create simulation
+        sim = flopy.mf6.MFSimulation(**cfg['simulation'])
+        cfg['model']['simulation'] = sim
+
+        m = MF6model(cfg=cfg, **cfg['model'])
+
+        if 'grid' not in m.cfg.keys():
+            m.setup_grid()
+
+        # set up all of the packages specified in the config file
+        package_list = m.cfg['nam']['packages']
+        for pkg in package_list:
+            package_setup = getattr(MF6model, 'setup_{}'.format(pkg[:3]))
+            package_setup(m)
+
+        print('finished setting up model in {:.2f}s'.format(time.time() - t0))
+        print('\n{}'.format(m))
+        # Export a grid outline shapefile.
+        #write_bbox_shapefile(m.sr, '../gis/model_bounds.shp')
+        #print('wrote bounding box shapefile')
+        return m
+
+
+    @staticmethod
+    def load_cfg(yamlfile, verbose=False):
+        """Load model configuration info, adjusting paths to model_ws."""
+        cfg = load(yamlfile)
+        cfg['model'].update({'verbose': verbose})
+        cfg['simulation']['sim_ws'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
+                                                cfg['simulation']['sim_ws'])
+        cfg['intermediate_data']['tmpdir'] = os.path.join(cfg['simulation']['sim_ws'],
+                                                          cfg['intermediate_data']['tmpdir'])
+        cfg['external_path'] = os.path.join(cfg['simulation']['sim_ws'],
+                                            cfg['external_path'])
+        grid_file = os.path.join(cfg['simulation']['sim_ws'],
+                                 os.path.split(cfg['setup_grid']['grid_file'])[-1])
+        cfg['setup_grid']['grid_file'] = grid_file
+        return cfg

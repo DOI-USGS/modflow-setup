@@ -1,0 +1,115 @@
+simulation:
+  sim_name: 'mfsim'
+  version: 'mf6'
+  sim_ws: '.'
+
+model:
+  modelname: 'model'
+
+intermediate_data:
+  tmpdir: 'tmp/'
+
+setup_grid:
+  grid_file: '{}_grid.yml' # inset grid info will be written to this file
+  rotation: 0
+
+nam:
+  list_filename_fmt: '{}.list'
+  options: ['print_input',
+            'print_flows',
+            'save_flows',
+            'newton'
+  ]
+  packages: ['dis6',
+             'ic6',
+             'npf6',
+             'oc6',
+             'sto6',
+             'sfr6',
+             'wel6'
+  ]
+
+dis:
+  options:
+    length_units: 'meters'
+  dimensions:
+  griddata:
+  top_filename: "top.dat"
+  botm_filename_fmt: "botm{:d}.dat"
+  idomain_filename_fmt: "idomain{:d}.dat"
+  minimum_layer_thickness: 1 # m
+
+tdis:
+  options:
+    time_units: 'days'
+    start_date_time: '1870-01-01'
+  dimensions:
+    nper: 1
+  perioddata:
+
+
+ic:
+  strt_filename_fmt: "strt{:d}.dat"
+  griddata:
+
+npf:
+  options: ['save_flows'
+  ]
+  griddata:
+    icelltype: 1
+  k_filename_fmt: "k{:d}.dat"
+  k33_filename_fmt: "h33{:d}.dat"
+
+sto:
+  options: ['save_flows']
+  griddata:
+    iconvert: 1
+  sy_filename_fmt: "sy{:d}.dat"
+  ss_filename_fmt: "ss{:d}.dat"
+  steady: {0: True, 1: False}
+
+rch:
+  options: ['print_input', 'print_flows', 'save_flows', 'readasarrays']
+  rech_filename_fmt: "rch{:d}.dat"
+
+sfr:
+  options: ['save_flows']
+  budget_fileout: 'sfr_out.bin'
+  stage_fileout: 'sfr_stage.bin'
+  obs6_filein_fmt: '{}.sfr.obs6'
+  output_path: 'sfr'
+
+wel:
+  options: ['print_input', 'print_flows', 'save_flows']
+  lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
+
+oc:
+  head_fileout_fmt: '{}.hds'
+  budget_fileout_fmt: '{}.hds'
+  period_options: {0: ['save head last',
+                       'save budget last']
+  }
+
+obs:
+  default_columns:
+    x_location_col: 'x_5070' # x coordinates in wtm
+    y_location_col: 'y_5070' # y coordinates in wtm
+
+ims:
+  options:
+    print_option: 'all'
+    complexity: 'moderate'
+    'csv_output fileout': 'solver_out.csv'
+  nonlinear:
+    outer_hclose: 1.e-3
+    outer_maximum: 1000
+    under_relaxation:  'dbd'
+    under_relaxation_theta: 0.9
+    under_relaxation_kappa: 0.1
+    under_relaxation_gamma: 0.2
+    under_relaxation_momentum: 0.001
+  linear:
+    inner_maximum: 100
+    inner_hclose: 1.e-3
+    inner_rclose: 0.1
+
