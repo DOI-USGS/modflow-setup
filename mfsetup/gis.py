@@ -395,10 +395,7 @@ def get_values_at_points(rasterfile, x=None, y=None,
     -----
     requires gdal
     """
-    try:
-        import gdal
-    except:
-        print('This function requires gdal.')
+    from osgeo import gdal
 
     # read in sample points
     if x is not None and isinstance(x[0], tuple):

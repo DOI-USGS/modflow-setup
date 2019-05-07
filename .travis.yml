@@ -1,20 +1,40 @@
 language: python
-python:
-  - 3.6
-cache:
-  directories:
-    - $HOME/.cache/pip
-    - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
+#python:
+#  - 3.6
+#cache:
+#  directories:
+#    - $HOME/.cache/pip
+#    - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
+
+matrix:
+  include:
+    - env: ENV_FILE="ci/py36.yml"
 
 install:
+  - sudo apt-get update
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update conda
+  - conda info -a
+
+  - conda env create --file="${ENV_FILE}"
+  - source activate test
+  - pip install -e .
+  - conda list
+
   # Install this package and the packages listed in requirements.txt.
-  - pip install .
+  #- pip install .
   # Install extra requirements for running tests and building docs.
-  - pip install -r requirements-dev.txt
+  #- pip install -r requirements-dev.txt
 
 script:
   - coverage run -m pytest  # Run the tests and check for test coverage.
   - coverage report -m  # Generate test coverage report.
+
+after_success:
   - codecov  # Upload the report to codecov.
-  - flake8 --max-line-length=115  # Enforce code style (but relax line length limit a bit).
-  - make -C docs html  # Build the documentation.
+  #- flake8 --max-line-length=115  # Enforce code style (but relax line length limit a bit).
+  #- make -C docs html  # Build the documentation.
