@@ -396,7 +396,7 @@ def get_values_at_points(rasterfile, x=None, y=None,
     requires gdal
     """
     try:
-        import gdal
+        from osgeo import gdal
     except:
         print('This function requires gdal.')
 

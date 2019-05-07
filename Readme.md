@@ -3,8 +3,9 @@ MFsetup
 -----------------------------------------------
 Package to facilitate setup of a MODFLOW-6 rgroundwater flow model with the SFR package.
 ### Version 0.0.0
-[![Build Status](https://img.shields.io/travis/aleaf/mfsetup.svg)](https://travis-ci.org/aleaf/mfsetup)
-[![PyPI Version](https://img.shields.io/pypi/v/mfsetup.svg)](https://pypi.python.org/pypi/mfsetup)
+[![Build Status](https://travis-ci.org/aleaf/MFsetup.svg?branch=master)](https://travis-ci.org/aleaf/MFsetup)
+[![Coverage Status](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)
+
 
 
 
