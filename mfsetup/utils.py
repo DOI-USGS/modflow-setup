@@ -3,8 +3,13 @@ import inspect
 import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
-from gis import df2shp
+from .gis import df2shp
 
+
+def compare_nan_array(func, a, thresh):
+    out = ~np.isnan(a)
+    out[out] = func(a[out], thresh)
+    return out
 
 def update(d, u):
     """Recursively update a dictionary of varying depth
@@ -51,35 +56,51 @@ def get_input_arguments(kwargs, function, warn=True):
     return input_kwargs
 
 
-def get_sr_bounding_box(sr):
-    """Get bounding box of potentially rotated sr
-    as a shapely Polygon object."""
-    x0 = sr.xedge[0]
-    x1 = sr.xedge[-1]
-    y0 = sr.yedge[0]
-    y1 = sr.yedge[-1]
+def get_grid_bounding_box(modelgrid):
+    """Get bounding box of potentially rotated modelgrid
+    as a shapely Polygon object.
+
+    Parameters
+    ----------
+    modelgrid : flopy.discretization.StructuredGrid instance
+    """
+    mg = modelgrid
+    #x0 = mg.xedge[0]
+    #x1 = mg.xedge[-1]
+    #y0 = mg.yedge[0]
+    #y1 = mg.yedge[-1]
+
+    x0 = mg.xyedges[0][0]
+    x1 = mg.xyedges[0][-1]
+    y0 = mg.xyedges[1][0]
+    y1 = mg.xyedges[1][-1]
 
     # upper left point
-    x0r, y0r = sr.transform(x0, y0)
+    #x0r, y0r = mg.transform(x0, y0)
+    x0r, y0r = mg.get_coords(x0, y0)
 
     # upper right point
-    x1r, y1r = sr.transform(x1, y0)
+    #x1r, y1r = mg.transform(x1, y0)
+    x1r, y1r = mg.get_coords(x1, y0)
 
     # lower right point
-    x2r, y2r = sr.transform(x1, y1)
+    #x2r, y2r = mg.transform(x1, y1)
+    x2r, y2r = mg.get_coords(x1, y1)
 
     # lower left point
-    x3r, y3r = sr.transform(x0, y1)
+    #x3r, y3r = mg.transform(x0, y1)
+    x3r, y3r = mg.get_coords(x0, y1)
+
     return Polygon([(x3r, y3r), (x0r, y0r),
                     (x1r, y1r), (x2r, y2r),
                     (x3r, y3r)])
 
 
-def write_bbox_shapefile(sr, outshp):
-    outline = get_sr_bounding_box(sr)
+def write_bbox_shapefile(modelgrid, outshp):
+    outline = get_grid_bounding_box(modelgrid)
     df2shp(pd.DataFrame({'desc': ['model bounding box'],
                          'geometry': [outline]}),
-           outshp, epsg=sr.epsg)
+           outshp, epsg=modelgrid.epsg)
 
 
 def regrid(arr, sr, sr2, mask1=None, mask2=None, method='linear'):

@@ -12,7 +12,7 @@ from shapely.geometry import shape, mapping, Polygon
 import pyproj
 import numpy as np
 import pandas as pd
-from fileio import load_array
+from .fileio import load_array
 
 
 def df2shp(dataframe, shpname, geo_column='geometry', index=False,

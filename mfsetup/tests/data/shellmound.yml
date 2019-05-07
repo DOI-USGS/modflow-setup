@@ -1,7 +1,7 @@
 simulation:
   sim_name: 'shellmound'
   version: 'mf6'
-  sim_ws: 'shellmound'
+  sim_ws: '../tmp/shellmound'
 
 model:
   simulation: 'shellmound'
@@ -49,17 +49,17 @@ dis:
     delc: 1000.
   source_data:
     elevation_units: 'feet'
-    top: '../../sfr/dem/dem_mean_elevs.tif' # DEM file; path relative to setup script
+    top: 'mfsetup/tests/data/rasters/meras_100m_dem.tif' # DEM file; path relative to setup script
     botm:
-      0: '../../meras3/source_data/sir2008-5098/rasters/vkbg_surf.tif' # Vicksburg-Jackson Group (top)
-      1: '../../meras3/source_data/sir2008-5098/rasters/ucaq_surf.tif' # Upper Claiborne aquifer (top)
-      2: '../../meras3/source_data/sir2008-5098/rasters/mccu_surf.tif' # Middle Claiborne confining unit (top)
-      3: '../../meras3/source_data/sir2008-5098/rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
-      6: '../../meras3/source_data/sir2008-5098/rasters/lccu_surf.tif' # Lower Claiborne confining unit (top)
-      8: '../../meras3/source_data/sir2008-5098/rasters/lcaq_surf.tif' # Lower Claiborne aquifer (top)
-      9: '../../meras3/source_data/sir2008-5098/rasters/mwaq_surf.tif' # Middle Wilcox aquifer (top)
-      10: '../../meras3/source_data/sir2008-5098/rasters/lwaq_surf.tif' # Lower Wilcox aquifer (top)
-      12: '../../meras3/source_data/sir2008-5098/rasters/mdwy_surf.tif' # Midway confining unit (top)
+      0: 'mfsetup/tests/data/rasters/vkbg_surf.tif' # Vicksburg-Jackson Group (top)
+      1: 'mfsetup/tests/data/rasters/ucaq_surf.tif' # Upper Claiborne aquifer (top)
+      2: 'mfsetup/tests/data/rasters/mccu_surf.tif' # Middle Claiborne confining unit (top)
+      3: 'mfsetup/tests/data/rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
+      6: 'mfsetup/tests/data/rasters/lccu_surf.tif' # Lower Claiborne confining unit (top)
+      8: 'mfsetup/tests/data/rasters/lcaq_surf.tif' # Lower Claiborne aquifer (top)
+      9: 'mfsetup/tests/data/rasters/mwaq_surf.tif' # Middle Wilcox aquifer (top)
+      10: 'mfsetup/tests/data/rasters/lwaq_surf.tif' # Lower Wilcox aquifer (top)
+      12: 'mfsetup/tests/data/rasters/mdwy_surf.tif' # Midway confining unit (top)
   top_filename: "top.dat"
   botm_filename_fmt: "botm{:d}.dat"
   idomain_filename_fmt: "idomain{:d}.dat"

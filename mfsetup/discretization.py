@@ -77,6 +77,8 @@ def fix_model_layer_conflicts(top_array, botm_array,
     -------
     new_botm_array : 3D numpy array of new layer bottom elevations
     """
+    top_array = top_array.copy()
+    botm_array = botm_array.copy()
     nlay, nrow, ncol = botm_array.shape
     if ibound_array is None:
         ibound_array = np.ones(botm_array.shape, dtype=int)
@@ -87,9 +89,10 @@ def fix_model_layer_conflicts(top_array, botm_array,
     for i in np.arange(1, nlay + 1):
         active = ibound_array[i - 1] > 0.
         thicknesses = new_layer_elevs[i - 1] - new_layer_elevs[i]
-        too_thin = thicknesses < minimum_thickness
-        new_layer_elevs[i, active & too_thin] = new_layer_elevs[i - 1, active & too_thin] - minimum_thickness
-    assert np.diff(new_layer_elevs, axis=0)[ibound_array > 0].max() * -1 == minimum_thickness
+        with np.errstate(invalid='ignore'):
+            too_thin = active & (thicknesses < minimum_thickness)
+        new_layer_elevs[i, too_thin] = new_layer_elevs[i - 1, too_thin] - minimum_thickness
+    assert np.nanmax(np.diff(new_layer_elevs, axis=0)[ibound_array > 0]) * -1 >= minimum_thickness
     return new_layer_elevs[1:]
 
 
@@ -131,20 +134,17 @@ def get_layer(botm_array, i, j, elev):
     return layers
 
 
-def verify_minimum_layer_thickness(model, minimum_layer_thickness):
-    m = model
-
-    if m.bas6 is None:
-        ib = np.ones(m.dis.botm.array.shape, dtype=int)
-    else:
-        ib = m.bas6.ibound.array
-    # check the botms
-    validbotms = np.abs((minimum_layer_thickness +
-              np.diff(m.dis.botm.array, axis=0)[ib[1:] > 0].max())) \
-              < 1e-3
-    # check layer 1
-    layer1valid = np.abs(np.min((m.dis.top.array - m.dis.botm.array[0])[ib[0] != 0])
-            - minimum_layer_thickness) < 1e-3
-    return np.all([validbotms, layer1valid])
+def verify_minimum_layer_thickness(top, botm, isactive, minimum_layer_thickness):
+    """Verify that model layer thickness is equal to or
+    greater than a minimum thickness."""
+    top = top.copy()
+    botm = botm.copy()
+    isactive = isactive.copy().astype(bool)
+    nlay, nrow, ncol = botm.shape
+    all_layers = np.zeros((nlay+1, nrow, ncol))
+    all_layers[0] = top
+    all_layers[1:] = botm
+    isvalid = np.nanmax(np.diff(all_layers, axis=0)[isactive]) * -1 >= minimum_layer_thickness
+    return isvalid
 
 

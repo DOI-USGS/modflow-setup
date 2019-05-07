@@ -1,7 +1,9 @@
 import os
 import json
 import yaml
+import time
 import numpy as np
+import pandas as pd
 from flopy.utils import SpatialReference
 
 def check_source_files(fileslist):
@@ -55,19 +57,26 @@ def load_sr(filename):
 def load_yml(yml_file):
     """Load yaml file into a dictionary."""
     with open(yml_file) as src:
-        cfg = yaml.load(src)
+        cfg = yaml.load(src, Loader=yaml.Loader)
     return cfg
 
 
 def dump_yml(yml_file, data):
     """Write a dictionary to a yaml file."""
     with open(yml_file, 'w') as output:
-        yaml.dump(data, output)
+        yaml.dump(data, output, Dumper=yaml.Dumper)
 
 
 def load_array(filename, shape=None):
     """Load an array, ensuring the correct shape."""
-    arr = np.loadtxt(filename)
+    t0 = time.time()
+    txt = 'loading {}'.format(filename)
+    if shape is not None:
+        txt += ', shape={}'.format(shape)
+    print(txt, end=', ')
+    # arr = np.loadtxt
+    # pd.read_csv is >3x faster than np.load_txt
+    arr = pd.read_csv(filename, delim_whitespace=True, header=None).values
     if shape is not None:
         if arr.shape != shape:
             if arr.size == np.prod(shape):
@@ -75,10 +84,13 @@ def load_array(filename, shape=None):
             else:
                 raise ValueError("Data in {} have size {}; should be {}"
                                  .format(filename, arr.shape, shape))
+    print("took {:.2f}s".format(time.time() - t0))
     return arr
 
 
 def save_array(filename, arr, **kwargs):
     """Save and array and print that it was written."""
+    t0 = time.time()
     np.savetxt(filename, arr, **kwargs)
-    print('wrote {}'.format(filename))
+    print('wrote {}'.format(filename), end=', ')
+    print("took {:.2f}s".format(time.time() - t0))

@@ -8,12 +8,12 @@ import numpy as np
 import flopy
 mf6 = flopy.mf6
 from flopy.discretization.structuredgrid import StructuredGrid
-from discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, deactivate_idomain_above
-from fileio import load, dump, check_source_files, load_array, save_array
-from gis import get_values_at_points
-from utils import update, write_bbox_shapefile, regrid, \
-    get_sr_bounding_box, get_input_arguments, fill_layers
-from units import convert_length_units, convert_time_units
+from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, deactivate_idomain_above
+from .fileio import load, dump, check_source_files, load_array, save_array
+from .gis import get_values_at_points
+from .utils import update, write_bbox_shapefile, regrid, \
+    get_grid_bounding_box, get_input_arguments, fill_layers
+from .units import convert_length_units, convert_time_units
 
 
 class MF6model(mf6.ModflowGwf):
@@ -80,6 +80,12 @@ class MF6model(mf6.ModflowGwf):
                 kwargs['angrot'] = kwargs.pop('rotation')
                 self._modelgrid = StructuredGrid(**kwargs)
         return self._modelgrid
+
+    @property
+    def bbox(self):
+        if self._bbox is None and self.sr is not None:
+            self._bbox = get_grid_bounding_box(self.modelgrid)
+        return self._bbox
 
     @property
     def tmpdir(self):
@@ -167,17 +173,24 @@ class MF6model(mf6.ModflowGwf):
             kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
             self._sim = mf6.MFSimulation(**kwargs)
 
-        # make sure that the intermediate and model_ws folders exist
+        # make sure that the output paths exist
         self.external_path = self.cfg['external_path']
-        for folder in [self.cfg['intermediate_data']['tmpdir'],
+        output_paths = [self.cfg['intermediate_data']['tmpdir'],
                        self.cfg['simulation']['sim_ws'],
-                       self.external_path]:
+                       self.external_path]
+        output_paths += list(self.cfg['postprocessing']['output_folders'].values())
+        for folder in output_paths:
             if not os.path.exists(folder):
                 os.makedirs(folder)
 
     def load_array(self, filename):
         """Load an array and check the shape.
         """
+        if isinstance(filename, list):
+            arrays = []
+            for f in filename:
+                arrays.append(load_array(f, shape=(self.nrow, self.ncol)))
+            return np.array(arrays)
         return load_array(filename, shape=(self.nrow, self.ncol))
 
     def get_flopy_external_file_input(self, var):
@@ -209,13 +222,13 @@ class MF6model(mf6.ModflowGwf):
             input = input[0]
         return input
 
-    def get_raster_values_at_cell_centers(self, raster):
+    def get_raster_values_at_cell_centers(self, raster, out_of_bounds_errors='coerce'):
         """Sample raster values at centroids
         of model grid cells."""
         values = get_values_at_points(raster,
                                       x=self.modelgrid.xcellcenters.ravel(),
                                       y=self.modelgrid.ycellcenters.ravel(),
-                                      )
+                                      out_of_bounds_errors=out_of_bounds_errors)
         if self.modelgrid.grid_type == 'structured':
             values = np.reshape(values, (self.nrow, self.ncol))
         return values
@@ -226,7 +239,7 @@ class MF6model(mf6.ModflowGwf):
         """
         raise NotImplementedError()
 
-    def setup_grid(self):
+    def setup_grid(self, write_shapefile=True):
         """set the grid info dict
         (grid object will be updated automatically)"""
         grid = self.cfg['setup_grid'].copy()
@@ -240,6 +253,12 @@ class MF6model(mf6.ModflowGwf):
 
         self.cfg['grid'] = grid
         dump(grid_file, self.cfg['grid'])
+        if write_shapefile:
+            write_bbox_shapefile(self.modelgrid,
+                                 os.path.join(self.cfg['postprocessing']['output_folders']['shapefiles'],
+                                              '{}_bbox.shp'.format(self.name)))
+
+
 
     def setup_external_filepaths(self, package, variable_name,
                                  filename_format, nfiles=1):
@@ -292,7 +311,7 @@ class MF6model(mf6.ModflowGwf):
 
     def setup_dis(self):
         """
-        Setup DIS package.
+        Sets up the DIS package.
 
         Parameters
         ----------
@@ -361,10 +380,13 @@ class MF6model(mf6.ModflowGwf):
             self.updated_arrays.add('botm')
 
             # setup idomain from invalid botm elevations
-            self._idomain = np.abs(~np.isnan(botm).astype(int))
+            idomain = np.ones((self.nlay, self.nrow, self.ncol))
+            idomain[np.isnan(botm)] = 0
+            idomain = idomain.astype(int)
+            self._idomain = idomain.astype(int)
 
             for i, f in enumerate(self.cfg['intermediate_data']['idomain']):
-                save_array(f, self.idomain[i], fmt='%.2f')
+                save_array(f, self.idomain[i], fmt='%d')
             self.updated_arrays.add('idomain')
             self._isbc = None # reset the isbc property
 
@@ -384,26 +406,194 @@ class MF6model(mf6.ModflowGwf):
                       })
 
         # modelgrid: dis arguments
-        remaps = {'xoff': 'xorigin', 'yoff': 'yorigin', 'rotation': 'angrot'}
+        remaps = {'xoff': 'xorigin',
+                  'yoff': 'yorigin',
+                  'rotation': 'angrot'}
+
         for modelgridk, disk in remaps.items():
             kwargs[disk] = kwargs.pop(modelgridk)
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
+
+        # create the dis package
         dis = mf6.ModflowGwfdis(model=self, **kwargs)
 
+        print('Checking layer thicknesses...')
+        # get copies of arrays as they are in the DIS package
+        # so that arrays only have to be fetched from MFArray instances once
+        # if array's weren't recreated, flopy will load them from external files
+        #top = self.dis.top.array.copy()
+        #botm = self.dis.botm.array.copy()
+        #idomain = self.dis.idomain.array.copy()
+        # MF6 array access is too slow; read arrays directly for now
+        if not remake_arrays:
+            top = self.load_array(self.cfg['intermediate_data']['top'])
+            botm = self.load_array(self.cfg['intermediate_data']['botm'])
+            idomain = self.load_array(self.cfg['intermediate_data']['idomain'])
+            self._idomain = idomain.astype(int)
+
         # check layer thicknesses (in case bad files were read in)
-        isvalid = verify_minimum_layer_thickness(self, minimum_layer_thickness)
+        isvalid = verify_minimum_layer_thickness(top, botm, idomain,
+                                                 minimum_layer_thickness)
         if not isvalid:
-            botm = fix_model_layer_conflicts(self.dis.top.array,
-                                             self.dis.botm.array,
+            print('Fixing cell thicknesses less than {} {}'.format(minimum_layer_thickness, self.length_units))
+            botm = fix_model_layer_conflicts(top,
+                                             botm,
+                                             idomain,
                                              minimum_thickness=minimum_layer_thickness)
             for i, f in enumerate(sorted(self.cfg['intermediate_data']['botm'])):
                 save_array(f, botm[i], fmt='%.2f')
 
             # horrible kludge to deal with flopy external file handling
+            kwargs.update({'botm': self.get_flopy_external_file_input('botm'),
+                           })
             dis = mf6.ModflowGwfdis(model=self, **kwargs)
 
-        print("finished in {:.2f}s\n".format(time.time() - t0))
+        print("{} setup finished in {:.2f}s\n".format(package.upper(), time.time() - t0))
         return dis
+
+    def setup_tdis(self):
+        """
+        Sets up the TDIS package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'tdis'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        tdis = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return tdis
+
+    def setup_ic(self):
+        """
+        Sets up the IC package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'ic'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        ic = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return ic
+
+    def setup_npf(self):
+        """
+        Sets up the NPF package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'npf'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        npf = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return npf
+
+    def setup_sto(self):
+        """
+        Sets up the STO package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'sto'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        sto = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return sto
+
+    def setup_rch(self):
+        """
+        Sets up the RCH package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'rch'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        rch = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return rch
+
+    def setup_sfr(self):
+        """
+        Sets up the SFR package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'sfr'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        sfr = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return sfr
+
+    def setup_wel(self):
+        """
+        Sets up the WEL package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'wel'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        wel = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return wel
+
+    def setup_oc(self):
+        """
+        Sets up the OC package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'oc'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        oc = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return oc
 
     @staticmethod
     def setup_from_yaml(yamlfile, verbose=False):
@@ -435,7 +625,7 @@ class MF6model(mf6.ModflowGwf):
         # set up all of the packages specified in the config file
         package_list = m.cfg['nam']['packages']
         for pkg in package_list:
-            package_setup = getattr(MF6model, 'setup_{}'.format(pkg[:3]))
+            package_setup = getattr(MF6model, 'setup_{}'.format(pkg.strip('6')))
             package_setup(m)
 
         print('finished setting up model in {:.2f}s'.format(time.time() - t0))
@@ -445,19 +635,31 @@ class MF6model(mf6.ModflowGwf):
         #print('wrote bounding box shapefile')
         return m
 
-
     @staticmethod
     def load_cfg(yamlfile, verbose=False):
-        """Load model configuration info, adjusting paths to model_ws."""
-        cfg = load(yamlfile)
+        """Load model configuration info, adjusting paths to model_ws.
+        """
+
+        source_path = os.path.split(__file__)[0]
+        # default configuration
+        cfg = load(source_path + '/mf_defaults.yml')
+        cfg['filename'] = source_path + '/mf_defaults.yml'
+
+        # recursively update defaults with information from yamlfile
+        update(cfg, load(yamlfile))
         cfg['model'].update({'verbose': verbose})
         cfg['simulation']['sim_ws'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
                                                 cfg['simulation']['sim_ws'])
-        cfg['intermediate_data']['tmpdir'] = os.path.join(cfg['simulation']['sim_ws'],
-                                                          cfg['intermediate_data']['tmpdir'])
-        cfg['external_path'] = os.path.join(cfg['simulation']['sim_ws'],
-                                            cfg['external_path'])
-        grid_file = os.path.join(cfg['simulation']['sim_ws'],
-                                 os.path.split(cfg['setup_grid']['grid_file'])[-1])
-        cfg['setup_grid']['grid_file'] = grid_file
+
+        def set_path(path):
+            return os.path.join(cfg['simulation']['sim_ws'],
+                                path)
+
+        cfg['intermediate_data']['tmpdir'] = set_path(cfg['intermediate_data']['tmpdir'])
+        cfg['external_path'] = set_path(cfg['external_path'])
+        cfg['setup_grid']['grid_file'] = set_path(os.path.split(cfg['setup_grid']['grid_file'])[-1])
+        mapping = {'shapefiles': 'shps'}
+        for f in cfg['postprocessing']['output_folders']:
+            path = mapping.get(f, f)
+            cfg['postprocessing']['output_folders'][f] = set_path(path)
         return cfg
