@@ -21,11 +21,12 @@ setup_grid:
 
 nam:
   list_filename_fmt: '{}.list'
-  options: ['print_input',
-            'print_flows',
-            'save_flows',
-            'newton'
-  ]
+  options:
+    print_input: True
+    print_flows: True
+    save_flows: True
+    newton: True
+
   packages: ['dis6',
              'ic6',
              'npf6',
@@ -68,26 +69,31 @@ dis:
 tdis:
   options:
     time_units: 'days'
-    start_date_time: '1870-01-01'
+    start_date_time: '2008-10-01'
+    end_date_time: '2016-10-01' # specify end date, and nper or freq to have perlen automatically set
   dimensions:
-    nper: 1
+    nper: 16 # Only used if perlen is None, or in combination with freq if an end_date isn't specified.
   perioddata:
-
+    perlen: # Specify perlen as a list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
+    freq: '6MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
+    nstp: 15
+    tsmult: 1.5
 
 ic:
   strt_filename_fmt: "strt{:d}.dat"
   griddata:
 
 npf:
-  options: ['save_flows'
-  ]
+  options:
+    save_flows: True
   griddata:
     icelltype: 1
   k_filename_fmt: "k{:d}.dat"
   k33_filename_fmt: "h33{:d}.dat"
 
 sto:
-  options: ['save_flows']
+  options:
+    save_flows: True
   griddata:
     iconvert: 1
   sy_filename_fmt: "sy{:d}.dat"
@@ -95,18 +101,26 @@ sto:
   steady: {0: True, 1: False}
 
 rch:
-  options: ['print_input', 'print_flows', 'save_flows', 'readasarrays']
+  options:
+    print_input: True
+    print_flows: True
+    save_flows: True
+    readasarrays: True
   rech_filename_fmt: "rch{:d}.dat"
 
 sfr:
-  options: ['save_flows']
+  options:
+    save_flows: True
   budget_fileout: 'sfr_out.bin'
   stage_fileout: 'sfr_stage.bin'
   obs6_filein_fmt: '{}.sfr.obs6'
   output_path: 'sfr'
 
 wel:
-  options: ['print_input', 'print_flows', 'save_flows']
+  options:
+    print_input: True
+    print_flows: True
+    save_flows: True
   lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
 
 oc:

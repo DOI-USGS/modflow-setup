@@ -11,6 +11,7 @@ def compare_nan_array(func, a, thresh):
     out[out] = func(a[out], thresh)
     return out
 
+
 def update(d, u):
     """Recursively update a dictionary of varying depth
     d with items from u.
@@ -25,6 +26,8 @@ def update(d, u):
             d[k] = v
     return d
 
+
+
 def get_input_arguments(kwargs, function, warn=True):
     """Return subset of keyword arguments in kwargs dict
     that are valid parameters to a function or method.
@@ -38,6 +41,7 @@ def get_input_arguments(kwargs, function, warn=True):
     -------
     input_kwargs : dict
     """
+    np.set_printoptions(threshold=20)
     print('\narguments to {}:'.format(function.__qualname__))
     params = inspect.signature(function)
     input_kwargs = {}

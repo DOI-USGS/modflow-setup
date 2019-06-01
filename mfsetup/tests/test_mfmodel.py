@@ -8,13 +8,14 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import box
 import flopy
+mf6 = flopy.mf6
 from ..fileio import load
 from ..mfmodel import MF6model
 
 
 @pytest.fixture(scope="module")
 def simulation(cfg):
-    sim = flopy.mf6.MFSimulation(**cfg['simulation'])
+    sim = mf6.MFSimulation(**cfg['simulation'])
     return sim
 
 
@@ -65,6 +66,64 @@ def test_external_file_path_setup(model):
                          model.external_path,
                          botm_file_fmt.format(i)) for i in range(model.nlay)]
 
+def test_perrioddata(model):
+    m = model
+    pd0 = m.perioddata.copy()
+    assert pd0 is not None
+
+    m.cfg['sto']['steady'] = {0: True,
+                              1: False}
+    # Explicit stress period setup
+    m.cfg['tdis']['options']['start_date_time'] = '2008-10-01'
+    m.cfg['tdis']['perioddata']['perlen'] = [1] * 11
+    m.cfg['tdis']['perioddata']['nstp'] = [5] * 11
+    m.cfg['tdis']['perioddata']['tsmult'] = 1.5
+    m._perioddata = None
+    pd1 = m.perioddata.copy()
+    assert pd1['start_datetime'][0] == pd1['start_datetime'][1] == pd1['end_datetime'][0]
+    assert pd1['end_datetime'][1] == pd.Timestamp(m.cfg['tdis']['options']['start_date_time']) + \
+           pd.Timedelta(m.cfg['tdis']['perioddata']['perlen'][1], unit=m.time_units)
+    assert pd1['nstp'][0] == 1
+    assert pd1['tsmult'][0] == 1
+
+    # Start date, freq and nper
+    m.cfg['tdis']['options']['end_date_time'] = None
+    m.cfg['tdis']['perioddata']['perlen'] = None
+    m.cfg['tdis']['dimensions']['nper'] = 11
+    m.cfg['tdis']['perioddata']['freq'] = 'D'
+    m.cfg['tdis']['perioddata']['nstp'] = 5
+    m.cfg['tdis']['perioddata']['tsmult'] = 1.5
+    m._perioddata = None
+    pd2 = m.perioddata.copy()
+    assert pd2.equals(pd1)
+
+    # Start date, end date, and nper
+    m.cfg['tdis']['options']['end_date_time'] = '2008-10-11'
+    m.cfg['tdis']['perioddata']['freq'] = None
+    m._perioddata = None
+    pd3 = m.perioddata.copy()
+    assert pd3.equals(pd1)
+
+    # Start date, end date, and freq
+    m.cfg['tdis']['perioddata']['freq'] = 'D'
+    m._perioddata = None
+    pd4 = m.perioddata.copy()
+    assert pd4.equals(pd1)
+
+    # end date, freq and nper
+    m.cfg['tdis']['options']['start_date_time'] = None
+    m._perioddata = None
+    pd5 = m.perioddata.copy()
+    assert pd5.equals(pd1)
+
+    # month end vs month start freq
+    m.cfg['tdis']['perioddata']['freq'] = '6M'
+    m.cfg['tdis']['options']['start_date_time'] = '2008-10-01'
+    m.cfg['tdis']['options']['end_date_time'] = '2016-10-01'
+    m.cfg['tdis']['perioddata']['nstp'] = 15
+    m._perioddata = None
+    pd6 = m.perioddata.copy()
+    assert pd6.equals(pd0)
 
 def test_dis_setup(model_with_grid):
 
@@ -95,10 +154,19 @@ def test_dis_setup(model_with_grid):
     # need to add assertion for shapefile bounds being in right place
     assert True
 
+def test_tdis_setup(model):
+
+    m = model
+    tdis = m.setup_tdis()
+    assert isinstance(tdis, mf6.ModflowTdis)
+    period_df = pd.DataFrame(tdis.perioddata.array)
+    period_df['perlen'] = period_df['perlen'].astype(float)
+    assert period_df.equals(m.perioddata[['perlen', 'nstp', 'tsmult']])
 
 def test_sto_setup(model_with_grid):
 
     m = model_with_grid
+    sto = m.setup_sto()
     m.cfg['dis']['nper'] = 4
     m.cfg['dis']['perlen'] = [1, 1, 1, 1]
     m.cfg['dis']['nstp'] = [1, 1, 1, 1]

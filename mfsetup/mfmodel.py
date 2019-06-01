@@ -11,6 +11,7 @@ from flopy.discretization.structuredgrid import StructuredGrid
 from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, deactivate_idomain_above
 from .fileio import load, dump, check_source_files, load_array, save_array
 from .gis import get_values_at_points
+from .tdis import setup_perioddata
 from .utils import update, write_bbox_shapefile, regrid, \
     get_grid_bounding_box, get_input_arguments, fill_layers
 from .units import convert_length_units, convert_time_units
@@ -36,6 +37,8 @@ class MF6model(mf6.ModflowGwf):
         self._modelgrid = None
         self._idomain = None
         self._isbc = None
+        self._nper = None
+        self._perioddata = None
 
         self._features = {} # dictionary for caching shapefile datasets in memory
 
@@ -46,7 +49,10 @@ class MF6model(mf6.ModflowGwf):
 
     @property
     def nper(self):
-        return self.cfg['tdis']['dimensions'].get('nper', 1)
+        if self._nper is None:
+            self._set_period_data()
+            self._nper = len(self.perioddata)
+        return self._nper
 
     @property
     def nlay(self):
@@ -65,6 +71,10 @@ class MF6model(mf6.ModflowGwf):
     @property
     def length_units(self):
         return self.cfg['dis']['options']['length_units']
+
+    @property
+    def time_units(self):
+        return self.cfg['tdis']['options']['time_units']
 
     @property
     def modelgrid(self):
@@ -86,6 +96,26 @@ class MF6model(mf6.ModflowGwf):
         if self._bbox is None and self.sr is not None:
             self._bbox = get_grid_bounding_box(self.modelgrid)
         return self._bbox
+
+    @property
+    def perioddata(self):
+        """DataFrame summarizing stress period information.
+        Columns:
+          start_datetime : pandas datetimes; start date/time of each stress period
+          (does not include steady-state periods)
+          end_datetime : pandas datetimes; end date/time of each stress period
+          (does not include steady-state periods)
+          time : float; cumulative MODFLOW time (includes steady-state periods)
+          per : zero-based stress period
+          perlen : stress period length in model time units
+          nstp : number of timesteps in the stress period
+          tsmult : timestep multiplier for stress period
+          steady : True=steady-state, False=Transient
+          oc : MODFLOW-6 output control options
+        """
+        if self._perioddata is None:
+            self._set_period_data()
+        return self._perioddata
 
     @property
     def tmpdir(self):
@@ -182,6 +212,18 @@ class MF6model(mf6.ModflowGwf):
         for folder in output_paths:
             if not os.path.exists(folder):
                 os.makedirs(folder)
+
+    def _set_period_data(self):
+        """Sets up the perioddata DataFrame."""
+        perioddata = self.cfg['tdis']['perioddata'].copy()
+        if perioddata.get('perlen_units') is None:
+            perioddata['model_time_units'] = self.time_units
+        perioddata.update({'nper': self.cfg['tdis']['dimensions']['nper'],
+                           'steady': self.cfg['sto']['steady'],
+                           'oc': self.cfg['oc']['period_options']})
+        self._perioddata = setup_perioddata(self.cfg['tdis']['options']['start_date_time'],
+                                            self.cfg['tdis']['options'].get('end_date_time'),
+                                            **perioddata)
 
     def load_array(self, filename):
         """Load an array and check the shape.
@@ -465,7 +507,14 @@ class MF6model(mf6.ModflowGwf):
         package = 'tdis'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        tdis = None
+        perioddata = mf6.ModflowTdis.perioddata.empty(self, self.nper)
+        for col in ['perlen', 'nstp', 'tsmult']:
+            perioddata[col] = self.perioddata[col].values
+        tdis = mf6.ModflowTdis(self.simulation,
+                               time_units=self.time_units,
+                               start_date_time=self.perioddata['start_datetime'][0].strftime('%Y-%m-%d'),
+                               nper=self.nper,
+                               perioddata=perioddata)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return tdis
 
@@ -519,9 +568,14 @@ class MF6model(mf6.ModflowGwf):
         package = 'sto'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        sto = None
+        kwargs = self.cfg['sto']['options'].copy()
+        kwargs.update(self.cfg['sto']['griddata'].copy())
+        kwargs['steady_state'] = {k: v for k, v in self.cfg['sto']['steady'].items() if v}
+        kwargs['transient'] = {k: True for k, v in self.cfg['sto']['steady'].items() if not v}
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsto)
+        #sto = mf6.ModflowGwfsto(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
-        return sto
+        return #sto
 
     def setup_rch(self):
         """

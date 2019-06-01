@@ -12,7 +12,8 @@ lenuni_values = {'unknown': 0,
                  'cm': 3
                  }
 
-lenuni_text = {v: k for k, v in lenuni_values.items()}
+fullnames = {'unknown', 'feet', 'meters', 'centimeters'}
+lenuni_text = {v: k for k, v in lenuni_values.items() if k in fullnames}
 
 itmuni_values = {"unknown": 0,
                  "seconds": 1,
@@ -26,6 +27,13 @@ itmuni_values = {"unknown": 0,
                  "d": 4,
                  "y": 5
                  }
+
+# convert from model length units to the unit abbreviations that pandas uses
+pandas_units = {"seconds": "s",
+                "minutes": "m",
+                "hours": "h",
+                "days": "D"
+                }
 
 itmuni_text = {v: k for k, v in itmuni_values.items()}
 
@@ -51,7 +59,7 @@ def convert_length_units(lenuni1, lenuni2):
     if isinstance(lenuni2, str):
         lenuni2 = lenuni_values.get(lenuni2.lower(), 0)
 
-    mults = {(1, 2): 0.3048,
+    mults = {(1, 2): 1 * 0.3048,
              (1, 3): 100 * 0.3048,
              (2, 3): 100
              }
