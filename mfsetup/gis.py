@@ -422,7 +422,7 @@ def get_values_at_points(rasterfile, x=None, y=None,
     if rasterfile.endswith('.asc'):
         data, meta = read_arc_ascii(rasterfile)
         xul, dx, rx, yul, ry, dy = meta['geotransform']
-        nodata = meta['nodata']
+        nodata = meta['nodata_value']
     else:
         # open the raster
         gdata = gdal.Open(rasterfile)
@@ -455,7 +455,7 @@ def get_values_at_points(rasterfile, x=None, y=None,
     return results
 
 
-def intersect(feature, sr, id_column=None,
+def intersect(feature, grid, id_column=None,
               epsg=None,
               proj4=None):
     """Intersect a feature with the model grid, using
@@ -469,7 +469,7 @@ def intersect(feature, sr, id_column=None,
     id_column : str
         Column with unique integer identifying each feature; values
         from this column will be assigned to the output raster.
-    sr : flopy.utils.SpatialReference instance
+    grid : grid.StructuredGrid instance
     epsg : int
         EPSG code for feature coordinate reference system. Optional,
         but an epgs code or proj4 string must be supplied if feature
@@ -489,8 +489,9 @@ def intersect(feature, sr, id_column=None,
         print('This method requires rasterio.')
         return
 
-    trans = Affine(sr.delr[0], 0., sr.xul,
-                   0., -sr.delc[0], sr.yul) * Affine.rotation(sr.rotation)
+    #trans = Affine(sr.delr[0], 0., sr.xul,
+    #               0., -sr.delc[0], sr.yul) * Affine.rotation(sr.rotation)
+    trans = grid.transform
 
     if isinstance(feature, str):
         proj4 = get_proj4(feature)
@@ -506,15 +507,15 @@ def intersect(feature, sr, id_column=None,
     # handle shapefiles in different CRS than model grid
     reproject = False
     if proj4 is not None:
-        if proj4 != sr.proj4_str:
+        if proj4 != grid.proj_str:
             reproject = True
-    elif epsg is not None and sr.epsg is not None:
-        if epsg != sr.epsg:
+    elif epsg is not None and grid.epsg is not None:
+        if epsg != grid.epsg:
             reproject = True
             from fiona.crs import to_string, from_epsg
             proj4 = to_string(from_epsg(epsg))
     if reproject:
-        df['geometry'] = project(df.geometry.values, proj4, sr.proj4_str)
+        df['geometry'] = project(df.geometry.values, proj4, grid.proj_str)
 
     # create list of GeoJSON features, with unique value for each feature
     if id_column is None:
@@ -523,8 +524,9 @@ def intersect(feature, sr, id_column=None,
         numbers = df[id_column].tolist()
     geoms = list(zip(df.geometry, numbers))
     result = features.rasterize(geoms,
-                                out_shape=(sr.nrow, sr.ncol),
+                                out_shape=(grid.nrow, grid.ncol),
                                 transform=trans)
+    assert result.sum(axis=(0, 1)) != 0, "Nothing was intersected!"
     return result.astype(np.int32)
 
 

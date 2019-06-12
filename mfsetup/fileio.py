@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from flopy.utils import SpatialReference, mfreadnam, TemporalReference
 from .grid import MFsetupGrid
-from .utils import get_input_arguments
+from .utils import get_input_arguments, update
 
 
 def check_source_files(fileslist):
@@ -110,6 +110,7 @@ def dump_yml(yml_file, data):
         yaml.dump(data, output)#, Dumper=yaml.Dumper)
     print('wrote {}'.format(yml_file))
 
+
 def load_array(filename, shape=None):
     """Load an array, ensuring the correct shape."""
     t0 = time.time()
@@ -137,6 +138,249 @@ def save_array(filename, arr, **kwargs):
     np.savetxt(filename, arr, **kwargs)
     print('wrote {}'.format(filename), end=', ')
     print("took {:.2f}s".format(time.time() - t0))
+
+
+def load_cfg(cfgfile, default_file='/mfnwt_defaults.yml'):
+    """
+
+    Parameters
+    ----------
+    cfgfile : str
+        Path to MFsetup configuration file (json or yaml)
+
+    Returns
+    -------
+    cfg : dict
+        Dictionary of configuration data
+    """
+    print('loading configuration file {}...'.format(cfgfile))
+    source_path = os.path.split(__file__)[0]
+    # default configuration
+    default_cfg = load(source_path + default_file)
+    default_cfg['filename'] = source_path + default_file
+
+    # recursively update defaults with information from yamlfile
+    cfg = default_cfg.copy()
+    update(cfg, load(cfgfile))
+    cfg['model'].update({'verbose': cfgfile})
+    cfg['filename'] = os.path.abspath(cfgfile)
+
+    # convert relative paths in the configuration dictionary
+    # to absolute paths, based on the location of the config file
+    config_file_location = os.path.split(os.path.abspath(cfgfile))[0]
+    cfg = set_cfg_paths_to_absolute(cfg, config_file_location)
+    return cfg
+
+
+def set_cfg_paths_to_absolute(cfg, config_file_location):
+    if cfg['model']['version'] == 'mf6':
+        file_path_keys_relative_to_config = [
+            'simulation.sim_ws',
+            'parent.simulation.sim_ws',
+            'parent.headfile',
+        ]
+    else:
+        file_path_keys_relative_to_config = [
+            'model.model_ws',
+            'parent.model_ws',
+            'parent.headfile',
+            'nwt.use_existing_file'
+        ]
+    file_path_keys_relative_to_model_ws = [
+        'setup_grid.grid_file'
+    ]
+    # add additional paths by looking for source_data
+    for pckgname, pckg in cfg.items():
+        if isinstance(pckg, dict):
+            if 'source_data' in pckg.keys():
+                file_keys = _parse_file_path_keys_from_source_data(pckg['source_data'])
+                for key in file_keys:
+                    file_path_keys_relative_to_config. \
+                        append('.'.join([pckgname, 'source_data', key]))
+            for loc in ['output_files',
+                        'output_folders',
+                        'output_folder']:
+                if loc in pckg.keys():
+                    file_keys = _parse_file_path_keys_from_source_data(pckg[loc], paths=True)
+                    for key in file_keys:
+                        file_path_keys_relative_to_model_ws. \
+                            append('.'.join([pckgname, loc, key]).strip('.'))
+
+    # set locations that are relative to configuration file
+    cfg = _set_absolute_paths_to_location(file_path_keys_relative_to_config,
+                                         config_file_location, cfg)
+
+    # set locations that are relative to model_ws
+    cfg = _set_absolute_paths_to_location(file_path_keys_relative_to_model_ws,
+                                         cfg['model']['model_ws'],
+                                         cfg)
+    return cfg
+
+
+def _set_path(keys, abspath, cfg):
+    """From a sequence of keys that point to a file
+    path in a nested dictionary, convert the file
+    path at that location from relative to absolute,
+    based on a provided absolute path.
+
+    Parameters
+    ----------
+    keys : sequence or str of dict keys separated by '.'
+        that point to a relative path
+        Example: 'parent.model_ws' for cfg['parent']['model_ws']
+    abspath : absolute path
+    cfg : dictionary
+
+    Returns
+    -------
+    updates cfg with an absolute path based on abspath,
+    at the location in the dictionary specified by keys.
+    """
+    if isinstance(keys, str):
+        keys = keys.split('.')
+    d = cfg[keys[0]]
+    for level in range(1, len(keys)):
+        if level == len(keys) - 1:
+            k = keys[level]
+            if k in d:
+                if d[k] is not None:
+                    d[k] = os.path.join(abspath, d[k])
+            elif k.isdigit():
+                k = int(k)
+                if d[k] is not None:
+                    d[k] = os.path.join(abspath, d[k])
+        else:
+            d = d[keys[level]]
+    return cfg
+
+
+def _set_absolute_paths_to_location(paths, location, cfg):
+    """Set relative file paths in a configuration dictionary
+    to a specified location.
+
+    Parameters
+    ----------
+    paths : sequence
+        Sequence of dictionary keys read by set_path.
+        e.g. ['parent.model_ws', 'parent.headfile']
+    location : str (path to folder)
+    cfg : configuration dictionary  (as read in by load_cfg)
+
+    """
+    for keys in paths:
+        cfg = _set_path(keys, location, cfg)
+    return cfg
+
+
+def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False):
+    """Parse a source data entry in the configuration file.
+
+    pseudo code:
+    For each key or item in source_data,
+        If it is a string that ends with a valid extension,
+            a file is expected.
+        If it is a dict or list,
+            it is expected to be a file or set of files with metadata.
+        For each item in the dict or list,
+            If it is a string that ends with a valid extension,
+                a file is expected.
+            If it is a dict or list,
+                A set of files corresponding to
+                model layers or stress periods is expected.
+
+    valid source data file extensions: csv, shp, tif, asc
+
+    Parameters
+    ----------
+    source_data : dict
+    prefix : str
+        text to prepend to results, e.g.
+        keys = prefix.keys
+    paths = Bool
+        if True, overrides check for valid extension
+
+    Returns
+    -------
+    keys
+    """
+    valid_extensions = ['csv', 'shp', 'tif', 'ref', 'dat', 'yml', 'json']
+    keys = []
+    if isinstance(source_data, str):
+        return ['']
+    if isinstance(source_data, list):
+        items = enumerate(source_data)
+    elif isinstance(source_data, dict):
+        items = source_data.items()
+    for k0, v in items:
+        if isinstance(v, str):
+            if v[-3:] in valid_extensions or paths:
+                keys.append(k0)
+            elif 'output' in source_data:
+                keys.append(k0)
+        elif isinstance(v, list):
+            for i, v1 in enumerate(v):
+                if paths or isinstance(v1, str) and v1[-3:] in valid_extensions:
+                    keys.append('.'.join([str(k0), str(i)]))
+        elif isinstance(v, dict):
+            keys += _parse_file_path_keys_from_source_data(v, prefix=k0, paths=paths)
+    if prefix is not None:
+        keys = ['{}.{}'.format(prefix, k) for k in keys]
+    return keys
+
+
+def setup_external_filepaths(model, package, variable_name,
+                             filename_format, nfiles=1):
+    """Set up external file paths for a MODFLOW package variable. Sets paths
+    for intermediate files, which are written from the (processed) source data.
+    Intermediate files are supplied to Flopy as external files for a given package
+    variable. Flopy writes external files to a specified location when the MODFLOW
+    package file is written. This method gets the external file paths that
+    will be written by FloPy, and puts them in the configuration dictionary
+    under their respective variables.
+
+    Parameters
+    ----------
+    model : mfsetup.MF6model or mfsetup.MFnwtModel instance
+        Model with cfg attribute to update.
+    package : str
+        Three-letter package abreviation (e.g. 'DIS' for discretization)
+    variable_name : str
+        FloPy name of variable represented by external files (e.g. 'top' or 'botm')
+    filename_format : str
+        File path to the external file(s). Can be a string representing a single file
+        (e.g. 'top.dat'), or for variables where a file is written for each layer or
+        stress period, a format string that will be formated with the zero-based layer
+        number (e.g. 'botm{}.dat') for files botm0.dat, botm1.dat, ...
+    nfiles : int
+        Number of external files for the variable (e.g. nlay or nper)
+
+    Returns
+    -------
+    Adds intermediated file paths to model.cfg[<package>]['intermediate_data']
+    For MODFLOW-6 models, Adds external file paths to model.cfg[<package>][<variable_name>]
+    """
+    package = package.lower()
+
+    # intermediate data
+    filename_format = os.path.split(filename_format)[-1]
+    intermediate_files = [os.path.normpath(os.path.join(model.tmpdir,
+                                         filename_format).format(i)) for i in range(nfiles)]
+    #if nfiles == 1:
+    #    intermediate_files = intermediate_files[0]
+    model.cfg['intermediate_data'][variable_name] = intermediate_files
+
+    # external array(s) read by MODFLOW
+    # (set to reflect expected locations where flopy will save them)
+    external_files = [os.path.normpath(os.path.join(model.model_ws,
+                                   model.external_path,
+                                   filename_format.format(i))) for i in range(nfiles)]
+    model.cfg['external_files'][variable_name] = external_files
+    #if nfiles == 1:
+    #    external_files = external_files[0]
+    if model.version == 'mf6':
+        model.cfg[package][variable_name] = external_files
+    else:
+        model.cfg[package][variable_name] = intermediate_files
 
 def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
     """Execute the code in flopy.modflow.Modflow.load"""

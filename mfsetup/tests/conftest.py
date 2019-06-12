@@ -1,11 +1,18 @@
 import os
 import shutil
 import pytest
-from ..mfmodel import MF6model
+from ..mf6model import MF6model
+
+
+@pytest.fixture(scope="session")
+def mfnwt_inset_test_cfg_path():
+    return 'mfsetup/tests/data/mfnwt_inset_test.yml'
+
 
 @pytest.fixture(scope="module")
 def cfg_path():
     return 'mfsetup/tests/data/shellmound.yml'
+
 
 @pytest.fixture(scope="module")
 def cfg(cfg_path):
@@ -13,6 +20,7 @@ def cfg(cfg_path):
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
+
 
 @pytest.fixture(scope="module", autouse=True)
 def tmpdir():
@@ -25,8 +33,9 @@ def tmpdir():
 
 @pytest.fixture(scope="module", autouse=True)
 def reset_dirs(cfg):
-    folders = [cfg['intermediate_data']['tmpdir'],
-               cfg['external_path'],
+    cfg = cfg.copy()
+    folders = [cfg['intermediate_data']['output_folder'],
+               cfg.get('external_path', cfg['model'].get('external_path')),
                cfg['gisdir']
                ]
     for folder in folders:

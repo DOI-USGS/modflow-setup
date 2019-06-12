@@ -7,12 +7,19 @@ lenuni_values = {'unknown': 0,
                  'feet': 1,
                  'meters': 2,
                  'centimeters': 3,
+                 'millimeters': 4,
+                 'inches': 10,
+                 'miles': 11,
                  'ft': 1,
                  'm': 2,
-                 'cm': 3
+                 'cm': 3,
+                 'mm': 4,
+                 'in': 10,
+                 'mi': 11
                  }
 
-fullnames = {'unknown', 'feet', 'meters', 'centimeters'}
+fullnames = {'unknown', 'feet', 'meters', 'centimeters',
+             'seconds', 'minutes', 'hours', 'days', 'years'}
 lenuni_text = {v: k for k, v in lenuni_values.items() if k in fullnames}
 
 itmuni_values = {"unknown": 0,
@@ -35,7 +42,7 @@ pandas_units = {"seconds": "s",
                 "days": "D"
                 }
 
-itmuni_text = {v: k for k, v in itmuni_values.items()}
+itmuni_text = {v: k for k, v in itmuni_values.items() if k in fullnames}
 
 
 def convert_length_units(lenuni1, lenuni2):
@@ -61,22 +68,24 @@ def convert_length_units(lenuni1, lenuni2):
 
     mults = {(1, 2): 1 * 0.3048,
              (1, 3): 100 * 0.3048,
-             (2, 3): 100
+             (1, 4): 1000 * 0.3048,
+             (1, 10): 1 * 12,
+             (1, 11): 1 / 5280,
+             (2, 3): 100,
+             (2, 4): 1000,
+             (2, 10): 1 * 12 / .3048,
+             (2, 11): 1 / (.3048 * 5280),
+             (3, 4): 100,
+             (3, 10): 1 * 12 / (1000 * .3048),
+             (3, 11): 1 / (.3048 * 5280 * 100),
+             (4, 10): 1 * 12 / (1000 * .3048),
+             (4, 11): 1 / (.3048 * 5280 * 1000),
              }
-    convert_length_units = np.ones((4, 4), dtype=float)
+    convert_length_units = np.ones((12, 12), dtype=float)
     for (u0, u1), mult in mults.items():
         convert_length_units[u0, u1] = mult
         convert_length_units[u1, u0] = 1 / mult
     mult = convert_length_units[lenuni1, lenuni2]
-
-    #convert_length_units = np.identity((4, 4), dtype=float)
-    #convert_length_units[1, 2] = 0.3048
-    #convert_length_units[2, 1] = 1/convert_length_units[1, 2]
-    #convert_length_units[1, 3] = 100 * convert_length_units[1, 2]
-    #convert_length_units[3, 1] = 1/convert_length_units[1, 3]
-    #convert_length_units[2, 3] = 100
-    #convert_length_units[3, 2] = 1/convert_length_units[2, 3]
-    #mult = convert_length_units[lenuni1, lenuni2]
     return mult
 
 
@@ -133,3 +142,13 @@ def get_unit_text(length_unit, time_unit, length_unit_exp):
             (2, 4, 3): 'cmd'
             }
     return text.get((length_unit, time_unit, length_unit_exp), 'units')
+
+
+def convert_flux_units(input_length_units, input_time_units,
+                       output_length_units, output_time_units):
+    # TODO: add support for areas and volumes
+
+    lmult = convert_length_units(input_length_units, output_length_units)
+    tmult = convert_time_units(input_time_units, output_time_units)
+    return lmult * tmult
+

@@ -29,6 +29,23 @@ class MFsetupGrid(StructuredGrid):
             yll = self._yul_to_yll(yul)
             self.set_coord_info(xoff=xll, yoff=yll, epsg=epsg, proj4=proj4)
 
+    def __eq__(self, other):
+        if not isinstance(other, StructuredGrid):
+            return False
+        if not np.allclose(other.xoff, self.xoff):
+            return False
+        if not np.allclose(other.yoff, self.yoff):
+            return False
+        if not np.allclose(other.angrot, self.angrot):
+            return False
+        if not np.allclose(other.proj4, self.proj4):
+            return False
+        if not np.array_equal(other.delr, self.delr):
+            return False
+        if not np.array_equal(other.delc, self.delc):
+            return False
+        return True
+
     @property
     def xul(self):
         x0 = self.xyedges[0][0]
@@ -97,7 +114,6 @@ class MFsetupGrid(StructuredGrid):
         self._vertices = self._cell_vert_list(ii, jj)
 
 
-
 def get_ij(grid, x, y, local=False):
     """Return the row and column of a point or sequence of points
     in real-world coordinates.
@@ -127,6 +143,7 @@ def get_ij(grid, x, y, local=False):
         j = (np.abs(xcp.transpose() - x)).argmin(axis=0)
         i = (np.abs(ycp.transpose() - y)).argmin(axis=0)
     return i, j
+
 
 def get_grid_bounding_box(modelgrid):
     """Get bounding box of potentially rotated modelgrid
@@ -177,67 +194,5 @@ def write_bbox_shapefile(sr, outshp):
            outshp, epsg=sr.epsg)
 
 
-def regrid(arr, sr, sr2, mask1=None, mask2=None, method='linear'):
-    """Interpolate array values from one model grid to another,
-    using scipy.interpolate.griddata.
-
-    Parameters
-    ----------
-    arr : 2D numpy array
-        Source data
-    sr : flopy.utils.SpatialReference instance
-        Source grid
-    sr2 : flopy.utils.SpatialReference instance
-        Destination grid (to interpolate onto)
-    mask1 : boolean array
-        mask for source grid. Areas that are masked will be converted to
-        nans, and not included in the interpolation.
-    mask2 : boolean array
-        mask denoting active area for destination grid.
-        The mean value will be applied to inactive areas if linear interpolation
-        is used (not for integer/categorical arrays).
-    method : str
-        interpolation method ('nearest', 'linear', or 'cubic')
-    """
-    try:
-        from scipy.interpolate import griddata
-    except:
-        print('scipy not installed\ntry pip install scipy')
-        return None
-
-    arr = arr.copy()
-    # only include points specified by mask
-    x, y = sr.xcellcenters, sr.ycellcenters
-    if mask1 is not None:
-        mask1 = mask1.astype(bool)
-        #nodataval = arr[~mask1][0]
-        #arr[~mask1] = np.nan
-        arr = arr[mask1]
-        x = x[mask1]
-        y = y[mask1]
-
-    points = np.array([x.ravel(), y.ravel()]).transpose()
-
-    arr2 = griddata(points, arr.flatten(),
-                 (sr2.xcellcenters, sr2.ycellcenters),
-                 method=method, fill_value=np.nan)
-
-    # fill any areas that are nan
-    # (new active area includes some areas not in uwsp model)
-    fill = np.isnan(arr2)
-
-    # if new active area is supplied, fill areas outside of that too
-    if mask2 is not None:
-        mask2 = mask2.astype(bool)
-        fill = ~mask2 | fill
-
-    # only fill with mean value if linear interpolation used
-    # (floating point arrays)
-    if method == 'linear':
-        fill_value = np.nanmean(arr2)
-        arr2[fill] = np.nanmean(arr2[~fill])
-    #else:
-    #    arr2[fill] = nodataval
-    return arr2
 
 

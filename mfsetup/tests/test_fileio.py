@@ -1,8 +1,7 @@
 import os
 import numpy as np
 import pytest
-from ..fileio import load_array, dump_yml, load_yml, load_modelgrid
-
+from ..fileio import load, load_array, dump_yml, load_yml, load_modelgrid, load_cfg
 
 
 @pytest.fixture
@@ -44,3 +43,27 @@ def test_load_grid():
         assert True
     else:
         pass
+
+
+
+
+
+def test_load_cfg(mfnwt_inset_test_cfg_path):
+    cfg_pathed = load_cfg(mfnwt_inset_test_cfg_path)
+    cfg = load(mfnwt_inset_test_cfg_path)
+    config_file_location = os.path.split(os.path.abspath(mfnwt_inset_test_cfg_path))[0]
+    assert cfg_pathed['nwt']['use_existing_file'] is None
+
+    p1 = os.path.normpath(cfg_pathed['model']['model_ws'])
+    p2 = os.path.normpath(os.path.join(config_file_location, cfg['model']['model_ws']))
+    assert p1 == p2
+
+    p1 = os.path.normpath(cfg_pathed['rch']['source_data']['infiltration_arrays']['filenames'][0])
+    p2 = os.path.normpath(os.path.join(config_file_location,
+                                       cfg['rch']['source_data']['infiltration_arrays']['filenames'][0]))
+    assert p1 == p2
+
+    p1 = os.path.normpath(cfg_pathed['hyd']['source_data']['filenames'][0])
+    p2 = os.path.normpath(os.path.join(config_file_location, cfg['hyd']['source_data']['filenames'][0]))
+    assert p1 == p2
+

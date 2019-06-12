@@ -266,3 +266,44 @@ def export_shapefile(filename, modelgrid, data, kper=None,
     if prj is None:
         prj = modelgrid.prj
     df2shp(df, filename, epsg=epsg, proj4=proj_str, prj=prj)
+
+
+def get_surface_bc_flux(cbbobj, txt, kstpkper=(0, 0), idx=0):
+    """Read a flow component from MODFLOW binary cell budget output;
+
+    Parameters
+    ----------
+    cbbobj : open file handle (instance of flopy.utils.binaryfile.CellBudgetFile
+    txt : cell budget record to read (e.g. 'STREAM LEAKAGE')
+    kstpkper : tuple
+        (timestep, stress period) to read
+    idx : index of list returned by cbbobj (usually 0)
+
+    Returns
+    -------
+    arr : ndarray
+    """
+    nrow, ncol, nlay = cbbobj.nrow, cbbobj.ncol, cbbobj.nlay
+    results = cbbobj.get_data(text=txt, kstpkper=kstpkper, idx=idx)
+    # this logic needs some cleanup
+    if len(results) > 0:
+        results = results[0]
+    else:
+        print('no data found at {} for {}'.format(kstpkper, txt))
+        return
+    if isinstance(results, list) and txt == 'RECHARGE':
+        results = results[1]
+    if results.size == 0:
+        print('no data found at {} for {}'.format(kstpkper, txt))
+        return
+    if results.shape == (nlay, nrow, ncol):
+        return results
+    elif results.shape == (1, nrow, ncol):
+        return results[0]
+    elif len(results.shape) == 1 and \
+            len({'node', 'q'}.difference(set(results.dtype.names))) == 0:
+        arr = np.zeros(nlay * nrow * ncol, dtype=float)
+        arr[results.node - 1] = results.q
+        arr = np.reshape(arr, (nlay, nrow, ncol))
+        arr = arr.sum(axis=0)
+        return arr

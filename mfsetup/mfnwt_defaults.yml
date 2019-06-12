@@ -1,0 +1,156 @@
+
+intermediate_data:
+  output_folder: 'tmp/'
+
+model:
+  modelname: 'model'
+  model_ws: 'model/'
+  exe_name: 'mfnwt'
+  version: 'mfnwt'
+  external_path: 'external/'
+  hiKlakes_value: 1.e4
+  default_lake_depth: 2 # m; default depth to assume when setting up lak package or high-k lakes (layer 1 bottom is adjusted to achieve this thickness)
+  start_date_time: '2011-01-01'
+  end_date_time:
+  packages: ['dis',
+             'bas6',
+             'oc',
+             'upw',
+             'rch',
+             'lak',
+             'sfr',
+             'wel',
+             'mnw2',
+             'hyd',
+             'gag',
+             'nwt'
+  ]
+
+setup_grid:
+  remake: True
+  variable_mappings:
+    xll: "xoff"
+    yll: "Yoff"
+  output_files:
+    grid_file: 'grid.yml'
+
+postprocessing:
+  output_folders:
+    pdfs: 'postproc/pdfs'
+    rasters: 'postproc/rasters'
+    shapefiles: 'postproc/shps'
+
+dis:
+  top_filename_fmt: "top.dat"
+  botm_filename_fmt: "botm{:d}.dat"
+  minimum_layer_thickness: 1 # m
+  remake_top: True
+  nper: 1
+  nlay: 5
+  lenuni: 2 # meters
+  itmuni: 4 # days
+  steady: True
+
+bas6:
+  hnoflo: -9999
+  ibound_filename_fmt: "ibound{:d}.dat"
+  strt_filename_fmt: "strt{:d}.dat"
+  headfile:
+  remake_arrays: True
+
+upw:
+  hk_filename_fmt: "hk{:d}.dat"
+  vka_filename_fmt: "vka{:d}.dat"
+  sy_filename_fmt: "sy{:d}.dat"
+  ss_filename_fmt: "ss{:d}.dat"
+  ipakcb: 53 # unit for writing cell budget output
+  hdry: -9999
+  laytyp: 1
+  layvka: 0
+
+rch:
+  remake_arrays: True
+  rech_mult: 1
+  rech_filename_fmt: "finf{:d}.dat"
+
+lak:
+  lakarr_filename_fmt: 'lakarr{:d}.dat'
+  bdlknc_filename_fmt: 'bdlknc{:d}.dat'
+  lakzones: 'lakzones.dat' # file containing zones for lakebed leakance
+  theta: -0.7  # semi-implicit; negative value indicates that surfdep is read
+  nssitr: 800  # number of Newton iterations for solution of lake stage, for each MODFLOW iteration.
+  sscncr: 0.0000001  # lake stage convergence criterion
+  surfdep: 0.1  # undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)
+  precip: 0.00228 # m/d == 32.7 in/yr; from LPR report average value
+  evap: 0.00165 # m/d == 23.7 in/yr; ballpark value from LPR report
+  littoral_leakance: 0.045 # 1/d
+  profundal_leakance: 0.025 # 1/d
+  output_files:
+    lookup_file: 'lak_lookup.csv'
+
+sfr:
+  output_path: 'sfr'
+
+wel:
+  options: ['SPECIFY', '0.01']
+  period_stats: {0: 'mean'} # statistic to apply to each stress period 'mean' to average all data; <monthname> to average values for a given month across the period (e.g. 'august')
+  output_files:
+    lookup_file: 'wel_lookup.csv' # mapping of wel package data to site numbers
+
+mnw:
+  defaults: {losstype: 'skin',
+             pumploc: -1,
+             rw: 0.1, # well radius, m
+             rskin: 0.1524, # radius to outer limit of skin
+             kskin: 50 # m/day
+  }
+
+oc:
+  head_fileout_fmt: '{}.hds'
+  budget_fileout_fmt: '{}.cbc'
+  period_options: {0: ['save head',
+                       'save budget']
+  }
+
+hyd:
+  hydnoh: -999
+  default_columns:
+    x_location_col: 'x_utm' # x coordinates in wtm
+    y_location_col: 'y_utm' # y coordinates in wtm
+  column_mappings:
+    hydlbl: ['obsprefix', 'obsnme', 'common_name']
+
+gag:
+  starting_unit_number: 250
+  lak_outtype: 1 # see gage package documentation for Data Set 2a outtype
+  sfr_outtype: 0 # see gage package documentation for Data Set 2b outtype
+  column_mappings:
+    x_location_col: ['x_utm', 'X']
+    y_location_col: ['y_utm', 'Y']
+
+nwt:
+  headtol: 1.e-6
+  fluxtol: 6000
+  maxiterout: 1000
+  thickfact: 0.00001
+  linmeth: 2
+  iprnwt: 1
+  ibotav: 1
+  options: 'SPECIFIED'
+  Continue: True
+  dbdtheta: 0.9
+  dbdkappa: 0.00001
+  dbdgamma: 0
+  momfact: 0
+  backflag: 0
+  iacl: 2
+  norder: 0
+  level: 7
+  north: 0
+  iredsys: 0
+  rrctols: 0
+  idroptol: 1
+  epsrn: 0.01
+  hclosexmd: 1.e-5
+  mxiterxmd: 85
+  use_existing_file:

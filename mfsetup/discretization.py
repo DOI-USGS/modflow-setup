@@ -58,6 +58,50 @@ def deactivate_idomain_above(idomain, reach_data):
     return idomain
 
 
+def fill_layers(array):
+    """Fill empty layers in a 3D array by linearly interpolating
+    between the values above and below. Layers are defined
+    as empty if they contain all nan values. In the example of
+    model layer elevations, this would create equal layer thicknesses
+    between layer surfaces with values.
+
+    Parameters
+    ----------
+    array : 3D numpy.ndarray
+
+    Returns
+    -------
+    filled : ndarray of same shape as array
+    """
+    def get_next_below(seq, value):
+        for item in sorted(seq):
+            if item > value:
+                return item
+
+    def get_next_above(seq, value):
+        for item in sorted(seq[::-1]):
+            if item < value:
+                return item
+
+    nlay = array.shape[0]
+    layers_with_values = [k for k in range(nlay) if not np.all(np.isnan(array[k]), axis=(0, 1))]
+    empty_layers = [k for k in range(nlay) if k not in layers_with_values]
+
+    for k in empty_layers:
+        nextabove = get_next_above(layers_with_values, k)
+        nextbelow = get_next_below(layers_with_values, k)
+
+        # linearly interpolate layer values between next layers
+        # above and below that have values
+        # (in terms of elevation
+        n = nextbelow - nextabove
+        diff = (array[nextbelow] - array[nextabove]) / n
+        for i in range(k, nextbelow):
+            array[i] = array[i - 1] + diff
+        k = i
+    return array
+
+
 def fix_model_layer_conflicts(top_array, botm_array,
                               ibound_array=None,
                               minimum_thickness=3):
@@ -144,7 +188,6 @@ def verify_minimum_layer_thickness(top, botm, isactive, minimum_layer_thickness)
     all_layers = np.zeros((nlay+1, nrow, ncol))
     all_layers[0] = top
     all_layers[1:] = botm
-    isvalid = np.nanmax(np.diff(all_layers, axis=0)[isactive]) * -1 >= minimum_layer_thickness
+    isvalid = np.nanmax(np.diff(all_layers, axis=0)[isactive]) * -1 + 1e-4 >= \
+              minimum_layer_thickness
     return isvalid
-
-

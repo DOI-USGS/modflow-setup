@@ -1,6 +1,7 @@
 import sys
 sys.path.append('..')
 import time
+from copy import deepcopy
 import shutil
 import os
 import pytest
@@ -10,7 +11,7 @@ from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
 from ..fileio import load
-from ..mfmodel import MF6model
+from ..mf6model import MF6model
 
 
 @pytest.fixture(scope="module")
@@ -21,6 +22,8 @@ def simulation(cfg):
 
 @pytest.fixture(scope="module")
 def model(cfg, simulation):
+    cfg = cfg.copy()
+    #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = simulation
     m = MF6model(cfg=cfg, **cfg['model'])
     return m
@@ -28,6 +31,7 @@ def model(cfg, simulation):
 
 @pytest.fixture(scope="module")
 def model_with_grid(model):
+    #model = deepcopy(model)
     model.setup_grid()
     return model
 
@@ -42,32 +46,44 @@ def model_setup(cfg_path):
     return m
 
 
+def test_simulation(simulation):
+    assert True
+
+
+def test_model(model):
+    assert True
+
+
+def test_model_with_grid(model_with_grid):
+    assert True
+
 def test_external_file_path_setup(model):
 
-    top_filename = model.cfg['dis']['top_filename']
-    botm_file_fmt = model.cfg['dis']['botm_filename_fmt']
-    model.setup_external_filepaths('dis', 'top',
+    m = model #deepcopy(model)
+    top_filename = m.cfg['dis']['top_filename']
+    botm_file_fmt = m.cfg['dis']['botm_filename_fmt']
+    m.setup_external_filepaths('dis', 'top',
                                    top_filename,
                                    nfiles=1)
-    model.setup_external_filepaths('dis', 'botm',
+    m.setup_external_filepaths('dis', 'botm',
                                    botm_file_fmt,
-                                   nfiles=model.nlay)
-    assert model.cfg['intermediate_data']['top'] == \
-           os.path.join(model.tmpdir, os.path.split(top_filename)[-1])
-    assert model.cfg['intermediate_data']['botm'] == \
-           [os.path.join(model.tmpdir, botm_file_fmt).format(i)
-                                  for i in range(model.nlay)]
-    assert model.cfg['dis']['top'] == \
-           os.path.join(model.model_ws,
-                        model.external_path,
+                                   nfiles=m.nlay)
+    assert m.cfg['intermediate_data']['top'] == \
+           os.path.join(m.tmpdir, os.path.split(top_filename)[-1])
+    assert m.cfg['intermediate_data']['botm'] == \
+           [os.path.join(m.tmpdir, botm_file_fmt).format(i)
+                                  for i in range(m.nlay)]
+    assert m.cfg['dis']['top'] == \
+           os.path.join(m.model_ws,
+                        m.external_path,
                         os.path.split(top_filename)[-1])
-    assert model.cfg['dis']['botm'] == \
-           [os.path.join(model.model_ws,
-                         model.external_path,
-                         botm_file_fmt.format(i)) for i in range(model.nlay)]
+    assert m.cfg['dis']['botm'] == \
+           [os.path.join(m.model_ws,
+                         m.external_path,
+                         botm_file_fmt.format(i)) for i in range(m.nlay)]
 
 def test_perrioddata(model):
-    m = model
+    m = model #deepcopy(model)
     pd0 = m.perioddata.copy()
     assert pd0 is not None
 
@@ -127,7 +143,7 @@ def test_perrioddata(model):
 
 def test_dis_setup(model_with_grid):
 
-    m = model_with_grid
+    m = model_with_grid #deepcopy(model_with_grid)
     # test intermediate array creation
     m.cfg['dis']['remake_arrays'] = True
     m.cfg['dis']['regrid_top_from_dem'] = True
@@ -154,18 +170,20 @@ def test_dis_setup(model_with_grid):
     # need to add assertion for shapefile bounds being in right place
     assert True
 
+
 def test_tdis_setup(model):
 
-    m = model
+    m = model #deepcopy(model)
     tdis = m.setup_tdis()
     assert isinstance(tdis, mf6.ModflowTdis)
     period_df = pd.DataFrame(tdis.perioddata.array)
     period_df['perlen'] = period_df['perlen'].astype(float)
     assert period_df.equals(m.perioddata[['perlen', 'nstp', 'tsmult']])
 
+
 def test_sto_setup(model_with_grid):
 
-    m = model_with_grid
+    m = deepcopy(model_with_grid)
     sto = m.setup_sto()
     m.cfg['dis']['nper'] = 4
     m.cfg['dis']['perlen'] = [1, 1, 1, 1]
@@ -176,9 +194,9 @@ def test_sto_setup(model_with_grid):
     #assert m.cfg['dis']['steady'] == [True, False, False, True]
     #assert dis.steady.array.tolist() == [True, False, False, True]
 
-def test_yaml_setup(model_setup):
 
-    m = model_setup
+def test_yaml_setup(model_setup):
+    m = deepcopy(model_setup)
     try:
         success, buff = m.run_model(silent=False)
     except:

@@ -1,0 +1,32 @@
+
+intermediate_data:
+  tmpdir: 'tmp/'
+
+model:
+  modelname: 'inset'
+  model_ws: 'inset/'
+  exe_name: 'mfnwt'
+  external_path: 'external/'
+  parent_stress_periods: [0] # zero-based stress periods in parent model to include
+  default_lake_depth: 2 # m; default depth to assume when setting up lak package or high-k lakes (layer 1 bottom is adjusted to achieve this thickness)
+  start_date_time: '2011-01-01'
+  end_date_time:
+  packages: ['dis',
+             'bas6',
+             'oc',
+             'upw',
+             'rch',
+             'lak',
+             'sfr',
+             'wel',
+             'mnw2',
+             'hyd',
+             'gag',
+             'nwt'
+  ]
+
+parent:
+  load_only: ['dis']
+  check: False
+  forgive: False
+  hiKlakes_value: 1.e4
