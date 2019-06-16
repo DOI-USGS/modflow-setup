@@ -58,6 +58,7 @@ class MFnwtModel(Modflow):
         self._modelgrid = None
         self._bbox = None
         self._parent = parent
+        self._parent_layers = None
         self.__parent_mask = None
         self.__lakarr2d = None
         self.__isbc2d = None
@@ -201,6 +202,18 @@ class MFnwtModel(Modflow):
         return self._parent
 
     @property
+    def parent_layers(self):
+        """Mapping between layers in source model and
+        layers in destination model."""
+        self._parent_layers = None
+        if self._parent_layers is None:
+            parent_layers = self.cfg['dis'].get('source_data', {}).get('botm', {}).get('from_parent')
+            if parent_layers is None:
+                parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
+            self._parent_layers = parent_layers
+        return self._parent_layers
+
+    @property
     def package_list(self):
         return [p for p in self._package_setup_order
                 if p in self.cfg['model']['packages']]
@@ -293,15 +306,18 @@ class MFnwtModel(Modflow):
         each layer is based on bathymetry and model layer thickness.
         """
         if self._lakarr is None:
-            lakarr_file_fmt = self.cfg['lak']['lakarr_filename_fmt']
-            intermediate_lakarrfiles = ['{}/{}'.format(self.tmpdir,
-                                                       lakarr_file_fmt.format(i))
-                                        for i in range(self.nlay)]
-            self.cfg['intermediate_data']['lakarr'] = intermediate_lakarrfiles
-            self.cfg['lak']['lakarr'] = [os.path.join(self.model_ws,
-                                                      self.external_path,
-                                                      lakarr_file_fmt.format(i))
-                                         for i in range(self.nlay)]
+            #lakarr_file_fmt = self.cfg['lak']['lakarr_filename_fmt']
+            #intermediate_lakarrfiles = ['{}/{}'.format(self.tmpdir,
+            #                                           lakarr_file_fmt.format(i))
+            #                            for i in range(self.nlay)]
+            #self.cfg['intermediate_data']['lakarr'] = intermediate_lakarrfiles
+            #self.cfg['lak']['lakarr'] = [os.path.join(self.model_ws,
+            #                                          self.external_path,
+            #                                          lakarr_file_fmt.format(i))
+            #                             for i in range(self.nlay)]
+            self.setup_external_filepaths('lak', 'lakarr',
+                                          self.cfg['lak']['{}_filename_fmt'.format('lakarr')],
+                                          nfiles=self.nlay)
             if self.isbc is None:
                 return None
             else:
@@ -310,7 +326,7 @@ class MFnwtModel(Modflow):
                 for k in range(self.nlay):
                     lakarr[k][self.isbc[k] == 1] = self._lakarr2d[self.isbc[k] == 1]
             for k, ilakarr in enumerate(lakarr):
-                save_array(intermediate_lakarrfiles[k], ilakarr, fmt='%d')
+                save_array(self.cfg['intermediate_data']['lakarr'][k], ilakarr, fmt='%d')
             self._lakarr = lakarr
         return self._lakarr
 
@@ -1023,10 +1039,10 @@ class MFnwtModel(Modflow):
 
         # resample the top from the DEM
         if self.cfg['dis']['remake_top']:
-            self._setup_array2(package, 'top')
+            self._setup_array2(package, 'top', write_fmt='%.2f')
 
         # make the botm array
-        self._setup_array2(package, 'botm', by_layer=True)
+        self._setup_array2(package, 'botm', by_layer=True, write_fmt='%.2f')
 
         # put together keyword arguments for dis package
         kwargs = self.cfg['grid'].copy() # nrow, ncol, delr, delc
@@ -1057,20 +1073,14 @@ class MFnwtModel(Modflow):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
-        # source data
-        #headfile = self.cfg['parent']['headfile']
-        #headfile_stress_period = self.cfg['model']['parent_stress_periods'][0]
-        #check_source_files([self.cfg['parent']['headfile']])
-
         # make the strt array
         self._setup_array2(package, 'strt', by_layer=True)
+        
+        # make the ibound array
+        self._setup_array2(package, 'ibound', by_layer=True, write_fmt='%d')
 
-        kwargs = {}
-        kwargs = get_input_arguments(kwargs, fm.ModflowBas)
-        bas = fm.ModflowBas(model=self,
-                             hnoflo=self.cfg['bas']['hnoflo'],
-                             ibound=intermediate_iboundfiles,
-                             strt=intermediate_strtfiles)
+        kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
+        bas = fm.ModflowBas(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return bas
 

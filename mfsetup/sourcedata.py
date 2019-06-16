@@ -1,6 +1,7 @@
 import os
 import numbers
 import numpy as np
+from flopy.utils import binaryfile as bf
 from .fileio import save_array
 from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness
 from .gis import get_values_at_points
@@ -94,17 +95,21 @@ class SourceData:
 
 class ArraySourceData(SourceData):
     """Subclass for handling array-based source data."""
-    def __init__(self, filenames=None, length_units='unknown', time_units='unknown',
+    def __init__(self, variable, filenames=None, length_units='unknown', time_units='unknown',
                  dest_model=None, source_modelgrid=None, source_array=None,
                  from_source_model_layers=None, by_layer=False,
                  resample_method='nearest', vmin=-1e30, vmax=1e30,
                  multiplier=1.):
 
-        SourceData.__init__(self, filenames=filenames, length_units=length_units, time_units=time_units,
+        SourceData.__init__(self, filenames=filenames,
+                            length_units=length_units, time_units=time_units,
                             dest_model=dest_model)
 
+        self.variable = variable
         self.source_modelgrid = source_modelgrid
         self._source_mask = None
+        if from_source_model_layers == {}:
+            from_source_model_layers = None
         self.from_source_model_layers = from_source_model_layers
         self.source_array = None
         if source_array is not None:
@@ -122,8 +127,8 @@ class ArraySourceData(SourceData):
     @property
     def dest_source_layer_mapping(self):
         nlay = self.dest_model.nlay
-        if self.from_source_model_layers is None and self.source_array is not None:
-            return {k: k for k in range(self.source_array.shape[0])}
+        if self.from_source_model_layers is None:
+            return self.dest_model.parent_layers
         elif self.from_source_model_layers is not None:
             nspecified = len(self.from_source_model_layers)
             if self.by_layer and nspecified != nlay:
@@ -295,20 +300,116 @@ class ArraySourceData(SourceData):
         return SourceData.from_config(data, type='array', **kwargs)
 
 
+class MFBinaryArraySourceData(ArraySourceData):
+    """Subclass for handling MODFLOW binary array data
+    that may come from another model."""
+    def __init__(self, variable, filename=None,
+                 length_units='unknown', time_units='unknown',
+                 dest_model=None, source_modelgrid=None,
+                 from_source_model_layers=None, by_layer=False,
+                 resample_method='nearest', vmin=-1e30, vmax=1e30
+                 ):
+
+        ArraySourceData.__init__(self, variable=variable,
+                                 length_units=length_units, time_units=time_units,
+                                 dest_model=dest_model, source_modelgrid=source_modelgrid,
+                                 from_source_model_layers=from_source_model_layers,
+                                 by_layer=by_layer,
+                                 resample_method=resample_method, vmin=vmin, vmax=vmax)
+
+        self.filename = filename
+
+    @property
+    def dest_source_layer_mapping(self):
+        nlay = self.dest_model.nlay
+        # if mapping between source and dest model layers isn't specified
+        # use property from dest model
+        # this will be the DIS package layer mapping if specified
+        # otherwise same layering is assumed for both models
+        if self.from_source_model_layers is None:
+            return self.dest_model.parent_layers
+        elif self.from_source_model_layers is not None:
+            nspecified = len(self.from_source_model_layers)
+            if self.by_layer and nspecified != nlay:
+                raise Exception("Variable should have {} layers "
+                                "but only {} are specified: {}"
+                                .format(nlay, nspecified, self.from_source_model_layers))
+            return self.from_source_model_layers
+
+    def get_data(self, **kwargs):
+        """Get array data from binary file for a single time;
+        regrid from source model to dest model and transfer layer
+        data from source model to dest model based on from_source_model_layers
+        argument to class.
+
+        Parameters
+        ----------
+        kwargs : keyword arguments to flopy.utils.binaryfile.HeadFile
+
+        Returns
+        -------
+        data : dict
+            Dictionary of 2D arrays keyed by destination model layer.
+        """
+
+        if self.filename.endswith('hds'):
+            bfobj = bf.HeadFile(self.filename)
+            self.source_array = bfobj.get_data(**kwargs)
+
+        elif self.filename[:-4] in {'.cbb', '.cbc'}:
+            raise NotImplementedError('Cell Budget files not supported yet.')
+
+        data = {}
+        for dest_k, source_k in self.dest_source_layer_mapping.items():
+
+            # destination model layers copied from source model layers
+            if source_k <= 0:
+                arr = self.source_array[0]
+            elif np.round(source_k, 4) in range(self.source_array.shape[0]):
+                source_k = int(np.round(source_k, 4))
+                arr = self.source_array[source_k]
+            # destination model layers that are a weighted average
+            # of consecutive source model layers
+            # TODO: add transmissivity-based weighting if upw exists
+            else:
+                weight0 = source_k - np.floor(source_k)
+                source_k0 = int(np.floor(source_k))
+                source_k1 = int(np.ceil(source_k))
+                arr = weighted_average_between_layers(self.source_array[source_k0],
+                                                      self.source_array[source_k1],
+                                                      weight0=weight0)
+            # interpolate from source model using source model grid
+            # otherwise assume the grids are the same
+            if self.source_modelgrid is not None:
+                # exclude invalid values in interpolation from parent model
+                mask = self._source_grid_mask & (arr > self.vmin) & (arr < self.vmax)
+
+                arr = self.regrid_from_source_model(arr,
+                                                    mask=mask,
+                                                    method='linear')
+
+            assert arr.shape == self.dest_modelgrid.shape[1:]
+            data[dest_k] = arr * self.mult * self.unit_conversion
+
+        self.data = data
+        return data
+
+
 class MFArrayData(SourceData):
     """Subclass for handling array-based source data that can
     be scalars, lists of scalars, array data or filepath(s) to arrays on
     same model grid."""
-    def __init__(self, filenames=None, values=None, length_units='unknown', time_units='unknown',
+    def __init__(self, variable, filenames=None, values=None, length_units='unknown', time_units='unknown',
                  dest_model=None, vmin=-1e30, vmax=1e30, by_layer=False,
                  multiplier=1.):
 
         SourceData.__init__(self, filenames=filenames, length_units=length_units, time_units=time_units,
                             dest_model=dest_model)
 
+        self.variable = variable
         self.values = values
-        self.vmin = vmin,
-        self.vmax = vmax,
+        self.vmin = vmin
+        self.vmax = vmax
         self.mult = multiplier
         self.dest_modelgrid = getattr(self.dest_model, 'modelgrid', None)
         self.by_layer = by_layer
@@ -384,19 +485,21 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
 
     # data specified directly
     if data is not None:
-        sd = MFArrayData(values=data, dest_model=model,
+        sd = MFArrayData(variable=var, values=data, dest_model=model,
                          vmin=vmin, vmax=vmax,
                          **kwargs)
 
     # data specified as source_data
     else:
         cfg = model.cfg[package].get('source_data', {})
-        from_model_keys = [k for k in cfg.get(var, {}).keys() if 'from_' in k]
+        cfg_data = cfg.get(var, {'from_parent': {}})
+        from_model_keys = [k for k in cfg_data.keys() if 'from_' in k]
         from_model = True if len(from_model_keys) > 0 else False
         # data from files
         if var in cfg and not from_model:
             # TODO: files option doesn't support interpolation between top and botm[0]
             sd = ArraySourceData.from_config(model.cfg[package]['source_data'][var],
+                                             variable=var,
                                              dest_model=model,
                                              vmin=vmin, vmax=vmax,
                                              **kwargs)
@@ -404,42 +507,48 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
         # data regridded from parent model
         elif from_model:
             key = from_model_keys[0]
+            from_source_model_layers = cfg_data[key].copy() #cfg[var][key].copy()
             modelname = key.split('_')[1]
             filenames = None
             # TODO: generalize this to allow for more than one source model
             if modelname == 'parent':
                 source_model = model.parent
-            # the botm array has to be handled differently
-            # because dest. layers may be interpolated between
-            # model top and first botm
-            if var == 'botm':
-                nlay, nrow, ncol = source_model.dis.botm.array.shape
-                source_array = np.zeros((nlay+1, nrow, ncol))
-                source_array[0] = source_model.dis.top.array
-                source_array[1:] = source_model.dis.botm.array
-                from_source_model_layers = {k: v+1 for k, v in cfg[var][key].items()}
-            else:
-                source_array = getattr(source_model, source_package).__dict__[var].array
-                cfg_data = cfg[var][key].copy()
-                from_source_model_layers = cfg_data
-                if 'filename' in cfg_data:
-                    filenames = [cfg_data.pop('filename')]
-                if 'filenames' in cfg_data:
-                    filenames = cfg_data.pop('filenames')
-                if filenames:
-                    from_source_model_layers = None
-                    source_array = None
 
-            #if var in ['hk', 'vka'] or np.any(~model.dis.steady.array):
-            sd = ArraySourceData(filenames=filenames,
-                                 dest_model=model,
-                                 source_modelgrid=source_model.modelgrid,
-                                 source_array=source_array,
-                                 from_source_model_layers=from_source_model_layers,
-                                 length_units=model.cfg[modelname]['length_units'],
-                                 time_units=model.cfg[modelname]['time_units'],
-                                 vmin=vmin, vmax=vmax,
-                                 **kwargs)
+            # data from parent model MODFLOW binary output
+            if 'binaryfile' in from_source_model_layers:
+                filename = from_source_model_layers.pop('binaryfile')
+                sd = MFBinaryArraySourceData(variable=var, filename=filename,
+                                             dest_model=model,
+                                             source_modelgrid=source_model.modelgrid,
+                                             from_source_model_layers=from_source_model_layers,
+                                             length_units=model.cfg[modelname]['length_units'],
+                                             time_units=model.cfg[modelname]['time_units'],
+                                             vmin=vmin, vmax=vmax,
+                                             **kwargs)
+
+            # data read from Flopy instance of parent model
+            else:
+                # the botm array has to be handled differently
+                # because dest. layers may be interpolated between
+                # model top and first botm
+                if var == 'botm':
+                    nlay, nrow, ncol = source_model.dis.botm.array.shape
+                    source_array = np.zeros((nlay+1, nrow, ncol))
+                    source_array[0] = source_model.dis.top.array
+                    source_array[1:] = source_model.dis.botm.array
+                    from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
+                else:
+                    source_array = getattr(source_model, source_package).__dict__[var].array
+
+                sd = ArraySourceData(variable=var, filenames=filenames,
+                                     dest_model=model,
+                                     source_modelgrid=source_model.modelgrid,
+                                     source_array=source_array,
+                                     from_source_model_layers=from_source_model_layers,
+                                     length_units=model.cfg[modelname]['length_units'],
+                                     time_units=model.cfg[modelname]['time_units'],
+                                     vmin=vmin, vmax=vmax,
+                                     **kwargs)
             if var == 'vka':
                 model.cfg['upw']['layvka'] = getattr(source_model, source_package).layvka.array[0]
         else:
@@ -481,6 +590,9 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
             data[i][model.isbc[0] == 2] = model.lake_recharge[i]
             # zero-values to lak package lakes
             data[i][model.isbc[0] == 1] = 0.
+    elif var == 'ibound':
+        for i, arr in data.items():
+            data[i][model.isbc[i] == 1] = 0.
     elif var in ['hk', 'k']:
         for i, arr in data.items():
             data[i][model.isbc[i] == 2] = model.cfg['model'].get('hiKlakes_value', 1e4)

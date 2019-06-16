@@ -1,5 +1,5 @@
 """
-Functions related to the TDIS package
+Functions related to temporal discretization
 """
 import numpy as np
 import pandas as pd

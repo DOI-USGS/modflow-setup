@@ -209,23 +209,23 @@ def test_bas_setup(inset_with_dis):
 
     # test intermediate array creation
     bas = m.setup_bas6()
-    arrayfiles = m.cfg['intermediate_data']['lakarr'] + \
-                 m.cfg['intermediate_data']['strt'] + \
+    arrayfiles = m.cfg['intermediate_data']['strt'] + \
                  m.cfg['intermediate_data']['ibound']
+                 #m.cfg['intermediate_data']['lakarr']
     for f in arrayfiles:
         assert os.path.exists(f)
 
     # test using previously made external files as input
     if m.version == 'mf6':
-        assert m.cfg['bas']['strt'] == m.cfg['external_files']['strt']
-        assert m.cfg['bas']['ibound'] == m.cfg['external_files']['ibound']
+        assert m.cfg['bas6']['strt'] == m.cfg['external_files']['strt']
+        assert m.cfg['bas6']['ibound'] == m.cfg['external_files']['ibound']
     else:
-        assert m.cfg['bas']['strt'] == m.cfg['intermediate_data']['strt']
-        assert m.cfg['bas']['ibound'] == m.cfg['intermediate_data']['ibound']
+        assert m.cfg['bas6']['strt'] == m.cfg['intermediate_data']['strt']
+        assert m.cfg['bas6']['ibound'] == m.cfg['intermediate_data']['ibound']
     bas = m.setup_bas6()
     bas.write_file()
-    arrayfiles = m.cfg['bas']['strt'] + \
-                 m.cfg['bas']['ibound']
+    arrayfiles = m.cfg['bas6']['strt'] + \
+                 m.cfg['bas6']['ibound']
     for f in arrayfiles:
         assert os.path.exists(f)
     assert os.path.exists(bas.fn_path)

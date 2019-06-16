@@ -3,7 +3,9 @@ import copy
 import pytest
 import numpy as np
 from ..fileio import _parse_file_path_keys_from_source_data
-from ..sourcedata import SourceData, ArraySourceData, TabularSourceData, MFArrayData, weighted_average_between_layers
+from ..sourcedata import (SourceData, ArraySourceData, TabularSourceData,
+                          MFArrayData, MFBinaryArraySourceData,
+                          weighted_average_between_layers)
 from ..units import convert_length_units, convert_time_units
 from mfsetup import MFnwtModel
 
@@ -53,7 +55,8 @@ def source_data_cases(tmpdir, inset_with_grid):
                    }},
              {'infiltration_arrays':
                   {'filenames':
-                       {0: inf_array
+                       {0: inf_array,
+                        2: inf_array
                         },
                    'mult': 0.805,
                    'length_units': 'inches',
@@ -73,7 +76,6 @@ def source_data_cases(tmpdir, inset_with_grid):
                    2: botm1,
                    },
               'elevation_units': 'feet',
-              'top': 'junk.tif'
               },
              {'grid_file': 'grid.yml'},
              {'pdfs': 'postproc/pdfs',
@@ -113,6 +115,10 @@ def source_data_from_model_cases(inset):
         },
             'source_modelgrid': inset.parent.modelgrid,
             'source_array': inset.parent.dis.botm.array
+        },
+        {'from_parent': {
+            'binaryfile': os.path.normpath(os.path.join(inset._config_path, 'plainfieldlakes/pfl.hds'))
+        }
         }
     ]
     return cases
@@ -140,28 +146,37 @@ def test_parse_source_data(source_data_cases,
     sd = TabularSourceData.from_config(cases[3]['features_shapefile'])
     assert isinstance(sd.filenames, dict)
 
+    var = 'rech'
     sd = SourceData.from_config(cases[4]['infiltration_arrays'],
+                                variable=var,
                                 type='array')
     assert isinstance(sd.filenames, dict)
     assert sd.unit_conversion == 1. # no dest model
 
+    # test conversion to model units
     sd = ArraySourceData.from_config(cases[4]['infiltration_arrays'],
+                                     variable=var,
                                      dest_model=model)
     assert isinstance(sd.filenames, dict)
     assert sd.unit_conversion == convert_length_units('inches', 'meters') *\
         convert_time_units('years', 'days')
     data = sd.get_data()
     assert isinstance(data, dict)
-    assert len(data) == 1
+    assert len(data) == len(cases[4]['infiltration_arrays']['filenames'])
     assert data[0].shape == model.modelgrid.shape[1:]
     assert sd.unit_conversion == 1/12 * .3048 * 1/365.25
 
-    sd = ArraySourceData.from_config(cases[6]['hk'], dest_model=model)
+    # test averaging of layer between two files
+    sd = ArraySourceData.from_config(cases[6]['hk'],
+                                     variable='hk',
+                                     dest_model=model)
     data = sd.get_data()
     assert isinstance(sd.filenames, dict)
     assert np.allclose(data[1].mean(axis=(0, 1)), cases[6]['hk'][1])
 
+    # test averaging of layers provided in source array
     sd = ArraySourceData.from_config(source_data_from_model_cases[0],
+                                     variable='botm',
                                      dest_model=model)
     data = sd.get_data()
     mask = sd._source_grid_mask
@@ -173,6 +188,30 @@ def test_parse_source_data(source_data_cases,
                                         method='linear')
     assert np.allclose(np.mean([arr0, arr1], axis=(0)), data[0])
 
+    # TODO: write test for multiplier intermediate layers
+
+    # test mapping of layers from binary file;
+    # based on layer bottom mapping
+    filename = source_data_from_model_cases[2]['from_parent']['binaryfile']
+    source_model = inset_with_grid.parent
+    modelname = 'parent'
+    inset_with_grid._parent_layers = {0: -0.5, 1: 0, 2: 1, 3: 2, 4: 3}
+    sd = MFBinaryArraySourceData(variable='strt', filename=filename,
+                                 dest_model=model,
+                                 source_modelgrid=source_model.modelgrid,
+                                 from_source_model_layers={},
+                                 length_units=model.cfg[modelname]['length_units'],
+                                 time_units=model.cfg[modelname]['time_units'])
+    data = sd.get_data()
+    # first two layers in dest model should both be from parent layer 0
+    mask = sd._source_grid_mask
+    arr0 = sd.regrid_from_source_model(sd.source_array[0],
+                                       mask=mask,
+                                       method='linear')
+    assert np.array_equal(data[0], data[1])
+    assert np.array_equal(arr0, data[0])
+    inset_with_grid._parent_layers = None # reset
+
 
 @pytest.mark.parametrize('values, length_units, time_units, mult, expected',
                          [(0.001, 'meters', 'days', 1, 0.001),
@@ -181,7 +220,9 @@ def test_parse_source_data(source_data_cases,
                           ])
 def test_mfarraydata(values, length_units, time_units, mult, expected,
                      inset_with_grid, tmpdir):
-    mfad = MFArrayData(values=values,
+    variable = 'rech'
+    mfad = MFArrayData(variable=variable,
+                       values=values,
                        multiplier=mult,
                        length_units=length_units,
                        time_units=time_units,
@@ -192,7 +233,8 @@ def test_mfarraydata(values, length_units, time_units, mult, expected,
 
     values = [values, values*2]
     expected = expected * 2
-    mfad = MFArrayData(values=values,
+    mfad = MFArrayData(variable=variable,
+                       values=values,
                        multiplier=mult,
                        length_units=length_units,
                        time_units=time_units,
@@ -202,7 +244,8 @@ def test_mfarraydata(values, length_units, time_units, mult, expected,
 
     values = {0: values[0], 2: values[1]*2}
     expected = expected * 2
-    mfad = MFArrayData(values=values,
+    mfad = MFArrayData(variable=variable,
+                       values=values,
                        multiplier=mult,
                        length_units=length_units,
                        time_units=time_units,
@@ -216,7 +259,8 @@ def test_mfarraydata(values, length_units, time_units, mult, expected,
     origdata = data.copy()
     np.savetxt(arrayfile0, origdata[0])
     np.savetxt(arrayfile2, origdata[2])
-    mfad = MFArrayData(values={0: arrayfile0,
+    mfad = MFArrayData(variable=variable,
+                       values={0: arrayfile0,
                                2: arrayfile2},
                        multiplier=mult,
                        length_units=length_units,
@@ -242,6 +286,7 @@ def test_parse_source_data_file_keys(source_data_cases):
                  'infiltration_arrays.filenames.2'
                  ],
                 ['botm.0', 'botm.2', 'top'],
+                ['hk.0', 'hk.2'],
                 ['grid_file'],
                 ['pdfs', 'rasters', 'shapefiles']
                 ]

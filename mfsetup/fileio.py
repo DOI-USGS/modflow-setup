@@ -303,7 +303,10 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
     -------
     keys
     """
-    valid_extensions = ['csv', 'shp', 'tif', 'ref', 'dat', 'yml', 'json']
+    valid_extensions = ['csv', 'shp', 'tif',
+                        'ref', 'dat',
+                        'yml', 'json',
+                        'hds', 'cbb', 'cbc']
     keys = []
     if isinstance(source_data, str):
         return ['']
