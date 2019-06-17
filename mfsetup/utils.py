@@ -1,5 +1,7 @@
 import collections
 import inspect
+import json
+import pprint
 import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
@@ -48,16 +50,27 @@ def get_input_arguments(kwargs, function, warn=True):
     for k, v in kwargs.items():
         if k in params.parameters:
             input_kwargs[k] = v
-            print('{}: {}'.format(k, v))
+            print_item(k, v)
         else:
             not_arguments[k] = v
     if warn:
         print('\nother arguments:')
         for k, v in not_arguments.items():
-            print('{}: {}'.format(k, v))
+            #print('{}: {}'.format(k, v))
+            print_item(k, v)
     print('\n')
     return input_kwargs
 
+
+def print_item(k, v):
+    print('{}: '.format(k), end='')
+    if isinstance(v, dict):
+        #print(json.dumps(v, indent=4))
+        pprint.pprint(v)
+    elif isinstance(v, list):
+        pprint.pprint(v)
+    else:
+        print(v)
 
 def get_packages(namefile):
     packages = []

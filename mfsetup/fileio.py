@@ -244,7 +244,7 @@ def _set_path(keys, abspath, cfg):
             k = keys[level]
             if k in d:
                 if d[k] is not None:
-                    d[k] = os.path.join(abspath, d[k])
+                    d[k] = os.path.normpath(os.path.join(abspath, d[k]))
             elif k.isdigit():
                 k = int(k)
                 if d[k] is not None:
@@ -364,26 +364,45 @@ def setup_external_filepaths(model, package, variable_name,
     """
     package = package.lower()
 
+    # in lieu of a way to get these from Flopy somehow
+    transient2D_variables = {'rech',
+                             'finf', 'pet', 'extdp', 'extwc',
+                             }
+    transient3D_variables = {'lakarr', 'bdlknc'}
+
+    model.get_package(package)
     # intermediate data
     filename_format = os.path.split(filename_format)[-1]
     intermediate_files = [os.path.normpath(os.path.join(model.tmpdir,
-                                         filename_format).format(i)) for i in range(nfiles)]
-    #if nfiles == 1:
-    #    intermediate_files = intermediate_files[0]
-    model.cfg['intermediate_data'][variable_name] = intermediate_files
+                          filename_format).format(i)) for i in range(nfiles)]
+
+    if variable_name in transient2D_variables:
+        model.cfg['intermediate_data'][variable_name] = {i: f for i, f in
+                                                         enumerate(intermediate_files)}
+    elif variable_name in transient3D_variables:
+        model.cfg['intermediate_data'][variable_name] = {0: intermediate_files}
+    else:
+        model.cfg['intermediate_data'][variable_name] = intermediate_files
 
     # external array(s) read by MODFLOW
     # (set to reflect expected locations where flopy will save them)
     external_files = [os.path.normpath(os.path.join(model.model_ws,
                                    model.external_path,
                                    filename_format.format(i))) for i in range(nfiles)]
-    model.cfg['external_files'][variable_name] = external_files
-    #if nfiles == 1:
-    #    external_files = external_files[0]
-    if model.version == 'mf6':
-        model.cfg[package][variable_name] = external_files
+
+    if variable_name in transient2D_variables:
+        model.cfg['external_files'][variable_name] = {i: f for i, f in
+                                                         enumerate(external_files)}
+    elif variable_name in transient3D_variables:
+        model.cfg['external_files'][variable_name] = {0: external_files}
     else:
-        model.cfg[package][variable_name] = intermediate_files
+        model.cfg['external_files'][variable_name] = external_files
+
+    if model.version == 'mf6':
+        model.cfg[package][variable_name] = model.cfg['external_files'][variable_name]
+    else:
+        model.cfg[package][variable_name] = model.cfg['intermediate_data'][variable_name]
+
 
 def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
     """Execute the code in flopy.modflow.Modflow.load"""

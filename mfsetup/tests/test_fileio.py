@@ -18,7 +18,6 @@ def data():
                   }
             }
 
-
 def test_dump_yml(data, tmpdir):
     outfile = os.path.join(tmpdir, 'junk.yml')
     dump_yml(outfile, data)
@@ -43,6 +42,7 @@ def test_load_grid():
         assert True
     else:
         pass
+
 
 def test_load_cfg(mfnwt_inset_test_cfg_path):
     cfg_pathed = load_cfg(mfnwt_inset_test_cfg_path)

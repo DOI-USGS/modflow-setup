@@ -149,6 +149,26 @@ def test_regrid_nearest(inset_with_grid):
     assert np.allclose(rg1, rg2)
 
 
+def test_set_lakarr(inset_with_dis):
+    m = inset_with_dis
+    if 'lak' in m.package_list:
+        lakes_shapefile = m.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
+        assert lakes_shapefile is not None
+        assert m._lakarr2d.sum() > 0
+        assert m._isbc2d.sum() > 0  # requires
+        assert m.isbc.sum() > 0  # requires DIS package
+        assert m.lakarr.sum() > 0  # requires isbc to be set
+        if m.version == 'mf6':
+            externalfiles = m.cfg['external_files']['lakarr']
+        else:
+            externalfiles = m.cfg['intermediate_data']['lakarr']
+        assert isinstance(externalfiles, list)
+        for f in externalfiles:
+            assert os.path.exists(f)
+    else:
+        assert m._lakarr2d.sum() == 0
+
+
 def test_dis_setup(inset_with_grid):
 
     m = inset_with_grid  #deepcopy(inset_with_grid)
@@ -250,10 +270,10 @@ def test_rch_setup(inset_with_dis):
     inf_array = 'mfsetup/tests/data/plainfieldlakes/source_data/' \
                 'net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif'
 
-    m.cfg['rch']['source_data']['infiltration']['filename'] = inf_array
+    m.cfg['rch']['source_data']['rech']['filename'] = inf_array
     m.cfg['rch']['rech'] = None
-    m.cfg['rch']['source_data']['infiltration']['length_units'] = 'inches'
-    m.cfg['rch']['source_data']['infiltration']['time_units'] = 'years'
+    m.cfg['rch']['source_data']['rech']['length_units'] = 'inches'
+    m.cfg['rch']['source_data']['rech']['time_units'] = 'years'
     rch = m.setup_rch()
     arrayfiles = m.cfg['intermediate_data']['rech']
     assert len(arrayfiles) == 1
@@ -387,11 +407,11 @@ def test_lak_setup(inset_with_dis):
     m = inset_with_dis  #deepcopy(inset_with_dis)
 
     # fill in stage area volume file
-    df = pd.read_csv(m.cfg['lak']['stage_area_volume'])
-    cols = [s.lower() for s in df.columns]
-    if 'hydroid' not in cols:
-        df['hydroid'] = m.cfg['lak']['include_lakes'][0]
-        df.to_csv(m.cfg['lak']['stage_area_volume'], index=False)
+    #df = pd.read_csv(m.cfg['lak']['stage_area_volume'])
+    #cols = [s.lower() for s in df.columns]
+    #if 'hydroid' not in cols:
+    #    df['hydroid'] = m.cfg['lak']['include_lakes'][0]
+    #    df.to_csv(m.cfg['lak']['stage_area_volume'], index=False)
 
     lak = m.setup_lak()
     lak.write_file()
@@ -399,11 +419,11 @@ def test_lak_setup(inset_with_dis):
     assert not np.any(np.isnan(lak.bdlknc.array))
     assert np.any(lak.bdlknc.array == m.cfg['lak']['littoral_leakance'])
     assert np.any(lak.bdlknc.array == m.cfg['lak']['profundal_leakance'])
-    assert os.path.exists(m.cfg['lak']['lookup_file'])
+    assert os.path.exists(m.cfg['lak']['output_files']['lookup_file'])
     assert lak.lakarr.array.sum() > 0
     tabfiles = m.cfg['lak']['tab_files']
     for f in tabfiles:
-        assert os.path.exists(f)
+        assert os.path.exists(os.path.join(m.model_ws, f))
     namfile = os.path.join(m.model_ws, m.namefile)
     if os.path.exists(namfile):
         shutil.copy(namfile, namfile+'.bak')
@@ -444,6 +464,16 @@ def test_nwt_setup(inset):
     m.cfg['nwt']['use_existing_file'] = None
     nwt = m.setup_nwt()
     nwt.write_file()
+
+
+def test_oc_setup(inset):
+    m = inset
+    oc = m.setup_oc()
+    for (kper, kstp), words in oc.stress_period_data.items():
+        assert kstp == m.perioddata.loc[kper, 'nstp'] - 1
+        assert words == m.perioddata.loc[kper, 'oc']
+
+    # TODO: add datetime comments to OC file
 
 
 def test_hyd_setup(inset_with_dis):

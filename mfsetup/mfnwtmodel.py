@@ -283,18 +283,11 @@ class MFnwtModel(Modflow):
         if self.__lakarr2d is None:
             lakarr2d = np.zeros((self.nrow, self.ncol))
             if 'lak' in self.package_list:
-                lakes_shapefile = self.cfg['lak']['source_data'].get('lakes_shapefile')
-                if lakes_shapefile is not None:
-                    shapefile = lakes_shapefile['filename']
-                    id_column = lakes_shapefile.get('id_column')
-                    include_lakes = lakes_shapefile.get('include_lakes')
-                lakesdata = self.load_features(shapefile)
-                if lakesdata is not None:
-                    if include_lakes is not None:
-                        lakarr2d = make_lakarr2d(self.modelgrid,
-                                                 lakesdata,
-                                                 include_hydroids=include_lakes,
-                                                 id_column=id_column)
+                lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile', {}).copy()
+                lakesdata = self.load_features(**lakes_shapefile) # caches loaded features
+                lakes_shapefile['lakesdata'] = lakesdata
+                lakes_shapefile.pop('filename')
+                lakarr2d = make_lakarr2d(self.modelgrid, **lakes_shapefile)
             self.__lakarr2d = lakarr2d
             self.__isbc2d = None
         return self.__lakarr2d
@@ -306,15 +299,6 @@ class MFnwtModel(Modflow):
         each layer is based on bathymetry and model layer thickness.
         """
         if self._lakarr is None:
-            #lakarr_file_fmt = self.cfg['lak']['lakarr_filename_fmt']
-            #intermediate_lakarrfiles = ['{}/{}'.format(self.tmpdir,
-            #                                           lakarr_file_fmt.format(i))
-            #                            for i in range(self.nlay)]
-            #self.cfg['intermediate_data']['lakarr'] = intermediate_lakarrfiles
-            #self.cfg['lak']['lakarr'] = [os.path.join(self.model_ws,
-            #                                          self.external_path,
-            #                                          lakarr_file_fmt.format(i))
-            #                             for i in range(self.nlay)]
             self.setup_external_filepaths('lak', 'lakarr',
                                           self.cfg['lak']['{}_filename_fmt'.format('lakarr')],
                                           nfiles=self.nlay)
@@ -326,7 +310,7 @@ class MFnwtModel(Modflow):
                 for k in range(self.nlay):
                     lakarr[k][self.isbc[k] == 1] = self._lakarr2d[self.isbc[k] == 1]
             for k, ilakarr in enumerate(lakarr):
-                save_array(self.cfg['intermediate_data']['lakarr'][k], ilakarr, fmt='%d')
+                save_array(self.cfg['intermediate_data']['lakarr'][0][k], ilakarr, fmt='%d')
             self._lakarr = lakarr
         return self._lakarr
 
@@ -342,11 +326,11 @@ class MFnwtModel(Modflow):
         if self.__isbc2d is None:
             isbc = np.zeros((self.nrow, self.ncol))
             lakesdata = None
-            lakes_shapefile = self.cfg['lak']['source_data'].get('lakes_shapefile')
+            lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
             if lakes_shapefile is not None:
-                if isinstance(lakes_shapefile, dict):
-                    lakes_shapefile = lakes_shapefile['filename']
-                lakesdata = self.load_features(lakes_shapefile)
+                if isinstance(lakes_shapefile, str):
+                    lakes_shapefile = {'filename': lakes_shapefile}
+                lakesdata = self.load_features(**lakes_shapefile)
             if lakesdata is not None:
                 isanylake = intersect(lakesdata, self.modelgrid)
                 isbc[isanylake > 0] = 2
@@ -695,7 +679,9 @@ class MFnwtModel(Modflow):
                         filter = bbox.bounds
 
                 df = shp2df(filename, filter=filter)
+                df.columns = [c.lower() for c in df.columns]
                 if id_column is not None and include_ids is not None:
+                    id_column = id_column.lower()
                     df = df.loc[df[id_column].isin(include_ids)]
                 if features_proj_str.lower() != model_proj_str:
                     df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
@@ -834,7 +820,7 @@ class MFnwtModel(Modflow):
                                             id_column=id_column, include_ids=include_ids,
                                             filter=self.parent.modelgrid.bbox.bounds,
                                             cache=False)
-                    rows = df.loc[df[id_column].isin(include_ids)]
+                    rows = df.loc[df[id_column.lower()].isin(include_ids)]
                     features = rows.geometry.tolist()
                 if isinstance(features, list):
                     if len(features) > 1:
@@ -1151,84 +1137,33 @@ class MFnwtModel(Modflow):
 
     def setup_oc(self):
 
-        print('setting up OC package...')
+        package = 'oc'
+        print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        words = self.cfg['oc']['period_options']
         stress_period_data = {}
-        for kper in range(self.nper):
-            last = self.dis.nstp.array[kper] - 1
-            stress_period_data[(kper, last)] = words.get(kper, words[0])
-            #for kstp in range(self.dis.nstp.array[kper]):
+        for i, r in self.perioddata.iterrows():
+            stress_period_data[(r.per, r.nstp -1)] = r.oc
+
+        kwargs = self.cfg['oc']
+        kwargs['stress_period_data'] = stress_period_data
+        kwargs = get_input_arguments(kwargs, fm.ModflowOc)
+        oc = fm.ModflowOc(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
-        return fm.ModflowOc(self, stress_period_data=stress_period_data)
+        return oc
 
     def setup_rch(self):
         package = 'rch'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        rech_file_fmt = self.cfg['rch']['rech_filename_fmt']
 
-        # recharge specified directly as 'rech' variable
-        rech = self.cfg['rch'].get('rech')
-        if rech is not None:
-            rech = MFArrayData(values=rech,
-                               multiplier=self.cfg['rch'].get('mult', 1.),
-                               length_units=self.cfg['rch'].get('rech_length_units', 'unknown'),
-                               time_units=self.cfg['rch'].get('rech_time_units', 'unknown'),
-                               dest_model=self
-                               )
-            data = rech.get_data()
-
-        # recharge specified as source_data
-        else:
-            # recharge input from raster or array data
-            if 'source_data' in self.cfg['rch']:
-                rech = ArraySourceData.from_config(self.cfg['rch']['source_data']['infiltration'],
-                                                   dest_model=self)
-                data = rech.get_data()
-
-            # recharge regridded from parent model
-            elif self.parent is not None:
-                if 'RCH' not in self.parent.get_package_list():
-                    rchfile = '{}/{}.rch'.format(self.parent.model_ws,
-                                                 self.parent.name)
-                    uzffile = rchfile[:-4] + '.uzf'
-                    if os.path.exists(rchfile):
-                        parent_rch = fm.ModflowRch.load(rchfile,
-                                                        model=self.parent)
-                        nper = self.parent.rch.rech.array.shape[0]
-                        inf_array = self.parent.rch.rech.array[:, 0]
-                    elif os.path.exists(uzffile):
-                        parent_uzf = fm.ModflowUzf1.load(uzffile,
-                                                         model=self.parent)
-                        nper = self.parent.uzf.finf.array.shape[0]
-                        inf_array = self.parent.uzf.finf.array[:, 0]
-                rech = ArraySourceData(dest_model=self,
-                                       source_modelgrid=self.parent.modelgrid,
-                                       source_array=inf_array)
-                data = rech.get_data()
-
-            else:
-                return
-
-        # intermediate data
-        # set paths to intermediate files and external files
-        self.setup_external_filepaths(package, 'rech', rech_file_fmt,
-                                      nfiles=len(data))
-
-        # write out array data to intermediate files
-        # assign lake recharge values (water balance surplus) for any high-K lakes
-        for i, arr in data.items():
-            arr[self.isbc[0] == 2] = self.lake_recharge[i]
-            # zero-values to lak package lakes
-            arr[self.isbc[0] == 1] = 0.
-            np.savetxt(self.cfg['intermediate_data']['rech'][i], arr, fmt='%.6e')
+        # make the rech array
+        self._setup_array2(package, 'rech')
 
         # create flopy package instance
-        rch = fm.ModflowRch(self,
-                            rech={i: f for i, f in
-                                  enumerate(self.cfg['intermediate_data']['rech'])},
-                            ipakcb=self.ipakcb)
+        kwargs = self.cfg['rch']
+        kwargs['ipakcb'] = self.ipakcb
+        kwargs = get_input_arguments(kwargs, fm.ModflowRch)
+        rch = fm.ModflowRch(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return rch
 
@@ -1606,61 +1541,38 @@ class MFnwtModel(Modflow):
         if self.lakarr.sum() == 0:
             print("lakes_shapefile not specified, or no lakes in model area")
             return
+
         # source data
-        nlakes = len(self.cfg['lak']['include_lakes'])  # number of lakes
-        lakesdata = self.load_features(self.cfg['source_data'].get('lakes_shapefile'))
+        source_data = self.cfg['lak']['source_data']
+        lakesdata = self.load_features(**source_data['lakes_shapefile'])
+        id_column = source_data['lakes_shapefile']['id_column'].lower()
+        nlakes = len(lakesdata)
 
         # lake package settings
-        theta = self.cfg['lak']['theta']
-        nssitr = self.cfg['lak']['nssitr']
-        sscncr = self.cfg['lak']['sscncr']
-        surfdep = self.cfg['lak']['surfdep']
-        littoral_leakance = self.cfg['lak']['littoral_leakance']
-        profundal_leakance = self.cfg['lak']['profundal_leakance']
-        stage_area_volume_file = self.cfg['lak'].get('stage_area_volume')
-        tab_files_argument = self.cfg['lak'].get('tab_files')  # configured below if None
-        tab_units = self.cfg['lak'].get('tab_units')
         start_tab_units_at = 150  # default starting number for iunittab
 
-        # intermediate files
-        intermediate_lakzones = os.path.join(self.tmpdir,
-                                           os.path.split(self.cfg['lak']['lakzones'])[-1])
-        bdlknc_file_fmt = self.cfg['lak']['bdlknc_filename_fmt']
-        intermediate_bdlkncfiles = ['{}/{}'.format(self.tmpdir,
-                                                   bdlknc_file_fmt.format(i))
-                                    for i in range(self.nlay)]
-        self.cfg['intermediate_data']['bdlknc'] = intermediate_bdlkncfiles
-
-        # external arrays read by MODFLOW
-        # (set to reflect expected locations where flopy will save them)
-        self.cfg['lak']['bdlknc'] = [os.path.join(self.model_ws,
-                                                  self.external_path,
-                                                  bdlknc_file_fmt.format(i))
-                                     for i in range(self.nlay)]
-
         # set up the tab files, if any
-        if stage_area_volume_file is not None:
+        if 'stage_area_volume_file' in source_data:
             print('setting up tabfiles...')
-            df = pd.read_csv(stage_area_volume_file)
-            if self.cfg['lak'].get('stage_area_volume_column_mappings') is not None:
-                df.rename(columns=self.cfg['lak'].get('stage_area_volume_column_mappings'),
-                          inplace=True)
-            df.columns = [c.lower() for c in df.columns]
-            lakes = df.groupby('hydroid')
-            n_included_lakes = len(set(self.cfg['lak']['include_lakes']).\
+            sd = TabularSourceData.from_config(source_data['stage_area_volume_file'])
+            df = sd.get_data()
+
+            lakes = df.groupby(id_column)
+            n_included_lakes = len(set(lakesdata[id_column]).\
                                    intersection(set(lakes.groups.keys())))
             assert n_included_lakes == nlakes, "stage_area_volume (tableinput) option" \
                                                " requires info for each lake, " \
-                                               "only these HYDROIDs found:\n{}".format(df.hydroid.tolist())
+                                               "only these HYDROIDs found:\n{}".format(df[id_column].tolist())
             tab_files = []
             tab_units = []
-            for i, hydroid in enumerate(self.cfg['lak']['include_lakes']):
-                dfl = lakes.get_group(hydroid)
+            for i, id in enumerate(lakesdata[id_column].tolist()):
+                dfl = lakes.get_group(id)
                 assert len(dfl) == 151, "151 values required for each lake; " \
-                                        "only {} for HYDROID {} in {}".format(len(dfl), hydroid, stage_area_volume_file)
+                                        "only {} for HYDROID {} in {}"\
+                    .format(len(dfl), id, source_data['stage_area_volume_file'])
                 tabfilename = '{}/{}/{}_stage_area_volume.dat'.format(self.model_ws,
                                                                       self.external_path,
-                                                                      hydroid)
+                                                                      id)
                 dfl[['stage', 'volume', 'area']].to_csv(tabfilename, index=False, header=False,
                                                         sep=' ', float_format='%.5e')
                 print('wrote {}'.format(tabfilename))
@@ -1673,32 +1585,34 @@ class MFnwtModel(Modflow):
             # (need to give path relative to model_ws, not folder that flopy is working in)
             tab_files_argument = [f.replace(self.model_ws, '').strip('/') for f in tab_files]
 
-        # make the arrays or load them
-        if 'lakzones' not in self.updated_arrays:
-            lakzones = make_bdlknc_zones(self.modelgrid, lakesdata,
-                                         include_hydroids=self.cfg['lak']['include_lakes'])
-            save_array(intermediate_lakzones, lakzones, fmt='%d')
-            self.updated_arrays.add('lakzones')
-        else:
-            lakzones = load_array(intermediate_lakzones)
+        self.setup_external_filepaths('lak', 'lakzones',
+                                      self.cfg['lak']['{}_filename_fmt'.format('lakzones')],
+                                      nfiles=1)
+        self.setup_external_filepaths('lak', 'bdlknc',
+                                      self.cfg['lak']['{}_filename_fmt'.format('bdlknc')],
+                                      nfiles=self.nlay)
 
-        if 'bdlknc' not in self.updated_arrays:
-            bdlknc = np.zeros((self.nlay, self.nrow, self.ncol))
-            # make the areal footprint of lakebed leakance from the zones (layer 1)
-            bdlknc[0] = make_bdlknc2d(lakzones, littoral_leakance, profundal_leakance)
-            for k in range(self.nlay):
-                if k > 0:
-                    # for each underlying layer, assign profundal leakance to cells were isbc == 1
-                    bdlknc[k][self.isbc[k] == 1] = profundal_leakance
-                save_array(intermediate_bdlkncfiles[k], bdlknc[k], fmt='%.6e')
-            self.updated_arrays.add('bdlknc')
+        # make the arrays or load them
+        lakzones = make_bdlknc_zones(self.modelgrid, lakesdata,
+                                     include_ids=lakesdata[id_column])
+        save_array(self.cfg['intermediate_data']['lakzones'][0], lakzones, fmt='%d')
+
+        bdlknc = np.zeros((self.nlay, self.nrow, self.ncol))
+        # make the areal footprint of lakebed leakance from the zones (layer 1)
+        bdlknc[0] = make_bdlknc2d(lakzones,
+                                  self.cfg['lak']['littoral_leakance'],
+                                  self.cfg['lak']['profundal_leakance'])
+        for k in range(self.nlay):
+            if k > 0:
+                # for each underlying layer, assign profundal leakance to cells were isbc == 1
+                bdlknc[k][self.isbc[k] == 1] = self.cfg['lak']['profundal_leakance']
+            save_array(self.cfg['intermediate_data']['bdlknc'][0][k], bdlknc[k], fmt='%.6e')
 
         # save a lookup file mapping lake ids to hydroids
-        lak_lookup_file = os.path.join(self.model_ws, os.path.split(self.cfg['lak']['lookup_file'])[1])
-        self.cfg['lak']['lookup_file'] = lak_lookup_file
         df = pd.DataFrame({'lakid': np.arange(1, nlakes+1),
-                           'hydroid': self.cfg['lak']['include_lakes']})
-        df.to_csv(lak_lookup_file, index=False)
+                           'hydroid': lakesdata[id_column].values})
+        df.to_csv(self.cfg['lak']['output_files']['lookup_file'],
+                  index=False)
 
         # get estimates of stage from model top, for specifying ranges
         stages = []
@@ -1712,8 +1626,6 @@ class MFnwtModel(Modflow):
         tol = 5  # specify lake stage range as +/- this value
         ssmn, ssmx = stages - tol, stages + tol
         stage_range = list(zip(ssmn, ssmx))
-        lakarr_spd = {0: self.cfg['intermediate_data']['lakarr']}
-        bdlknc_spd = {0: self.cfg['intermediate_data']['bdlknc']}
 
         # set up dataset 9
         flux_data = {}
@@ -1727,23 +1639,18 @@ class MFnwtModel(Modflow):
             flux_data[i] = flux_data_i
         options = ['tableinput'] if tab_files_argument is not None else None
 
-        lak = fm.mflak.ModflowLak(self,
-                                  nlakes=nlakes,
-                                  theta=theta,
-                                  nssitr=nssitr,
-                                  sscncr=sscncr,
-                                  surfdep=surfdep,
-                                  stages=stages,
-                                  stage_range=stage_range,
-                                  lakarr=lakarr_spd,
-                                  bdlknc=bdlknc_spd,
-                                  flux_data=flux_data,
-                                  tab_files=tab_files_argument, #This needs to be in the order of the lake IDs!
-                                  tab_units=tab_units,
-                                  options=options,
-                                  ipakcb=self.ipakcb,
-                                  lwrt=0
-                                  )
+        kwargs = self.cfg['lak']
+        kwargs['nlakes'] = len(lakesdata)
+        kwargs['stages'] = stages
+        kwargs['stage_range'] = stage_range
+        kwargs['flux_data'] = flux_data
+        kwargs['tab_files'] = tab_files_argument  #This needs to be in the order of the lake IDs!
+        kwargs['tab_units'] = tab_units
+        kwargs['options'] = options
+        kwargs['ipakcb'] = self.ipakcb
+        kwargs['lwrt'] = 0
+        kwargs = get_input_arguments(kwargs, fm.mflak.ModflowLak)
+        lak = fm.ModflowLak(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return lak
 

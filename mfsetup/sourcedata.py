@@ -1,10 +1,11 @@
 import os
 import numbers
 import numpy as np
+import pandas as pd
 from flopy.utils import binaryfile as bf
 from .fileio import save_array
 from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness
-from .gis import get_values_at_points
+from .gis import get_values_at_points, shp2df
 from .grid import get_ij
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .units import convert_length_units, convert_time_units, convert_flux_units
@@ -459,17 +460,47 @@ class TabularSourceData(SourceData):
 
     def __init__(self, filenames, id_column=None, include_ids=None,
                  length_units='unknown', time_units='unknown',
+                 column_mappings=None,
                  dest_model=None):
         SourceData.__init__(self, filenames=filenames, length_units=length_units, time_units=time_units,
                             dest_model=dest_model)
 
         self.id_column = id_column
         self.include_ids = include_ids
+        self.column_mappings = column_mappings
         assert True
 
     @staticmethod
     def from_config(data, **kwargs):
         return SourceData.from_config(data, type='tabular', **kwargs)
+
+    def get_data(self):
+
+        dfs = []
+        for i, f in self.filenames.items():
+            if f.endswith('.shp') or f.endswith('.dbf'):
+                df = shp2df(f)
+
+            elif f.endswith('.csv'):
+                df = pd.read_csv(f)
+
+            dfs.append(df)
+
+        df = pd.concat(dfs)
+        if self.id_column is not None:
+            df.index = df[self.id_column]
+        if self.include_ids is not None:
+            df = df.loc[self.include_ids]
+
+        # rename any columns specified in config file to required names
+        df.rename(columns=self.column_mappings, inplace=True)
+        df.columns = [c.lower() for c in df.columns]
+
+        # drop any extra unnamed columns from accidental saving of the index on to_csv
+        drop_columns = [c for c in df.columns if 'unnamed' in c]
+        df.drop(drop_columns, axis=1, inplace=True)
+
+        return df
 
 
 def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
