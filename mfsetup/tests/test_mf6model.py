@@ -57,6 +57,7 @@ def test_model(model):
 def test_model_with_grid(model_with_grid):
     assert True
 
+
 def test_external_file_path_setup(model):
 
     m = model #deepcopy(model)
@@ -69,18 +70,19 @@ def test_external_file_path_setup(model):
                                    botm_file_fmt,
                                    nfiles=m.nlay)
     assert m.cfg['intermediate_data']['top'] == \
-           os.path.join(m.tmpdir, os.path.split(top_filename)[-1])
+           [os.path.normpath(os.path.join(m.tmpdir, os.path.split(top_filename)[-1]))]
     assert m.cfg['intermediate_data']['botm'] == \
-           [os.path.join(m.tmpdir, botm_file_fmt).format(i)
+           [os.path.normpath(os.path.join(m.tmpdir, botm_file_fmt).format(i))
                                   for i in range(m.nlay)]
     assert m.cfg['dis']['top'] == \
-           os.path.join(m.model_ws,
+           [os.path.normpath(os.path.join(m.model_ws,
                         m.external_path,
-                        os.path.split(top_filename)[-1])
+                        os.path.split(top_filename)[-1]))]
     assert m.cfg['dis']['botm'] == \
-           [os.path.join(m.model_ws,
+           [os.path.normpath(os.path.join(m.model_ws,
                          m.external_path,
-                         botm_file_fmt.format(i)) for i in range(m.nlay)]
+                         botm_file_fmt.format(i))) for i in range(m.nlay)]
+
 
 def test_perrioddata(model):
     m = model #deepcopy(model)
@@ -141,6 +143,7 @@ def test_perrioddata(model):
     pd6 = m.perioddata.copy()
     assert pd6.equals(pd0)
 
+
 def test_dis_setup(model_with_grid):
 
     m = model_with_grid #deepcopy(model_with_grid)
@@ -148,7 +151,7 @@ def test_dis_setup(model_with_grid):
     m.cfg['dis']['remake_arrays'] = True
     m.cfg['dis']['regrid_top_from_dem'] = True
     dis = m.setup_dis()
-    arrayfiles = [m.cfg['intermediate_data']['top']] + \
+    arrayfiles = m.cfg['intermediate_data']['top'] + \
                  m.cfg['intermediate_data']['botm']
     for f in arrayfiles:
         assert os.path.exists(f)
@@ -159,7 +162,7 @@ def test_dis_setup(model_with_grid):
     m.cfg['dis']['regrid_top_from_dem'] = False
     dis = m.setup_dis()
     dis.write()
-    arrayfiles = [m.cfg['dis']['top']] + \
+    arrayfiles = m.cfg['dis']['top'] + \
                  m.cfg['dis']['botm']
     for f in arrayfiles:
         assert os.path.exists(f)
@@ -183,7 +186,7 @@ def test_tdis_setup(model):
 
 def test_sto_setup(model_with_grid):
 
-    m = deepcopy(model_with_grid)
+    m = model_with_grid  #deepcopy(model_with_grid)
     sto = m.setup_sto()
     m.cfg['dis']['nper'] = 4
     m.cfg['dis']['perlen'] = [1, 1, 1, 1]
@@ -196,7 +199,7 @@ def test_sto_setup(model_with_grid):
 
 
 def test_yaml_setup(model_setup):
-    m = deepcopy(model_setup)
+    m = model_setup  #deepcopy(model_setup)
     try:
         success, buff = m.run_model(silent=False)
     except:

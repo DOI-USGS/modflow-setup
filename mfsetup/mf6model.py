@@ -117,6 +117,43 @@ class MF6model(mf6.ModflowGwf):
         return self._perioddata
 
     @property
+    def parent(self):
+        return self._parent
+
+    @property
+    def parent_layers(self):
+        """Mapping between layers in source model and
+        layers in destination model."""
+        self._parent_layers = None
+        if self._parent_layers is None:
+            parent_layers = self.cfg['dis'].get('source_data', {}).get('botm', {}).get('from_parent')
+            if parent_layers is None:
+                parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
+            self._parent_layers = parent_layers
+        return self._parent_layers
+
+    @property
+    def package_list(self):
+        return [p for p in self._package_setup_order
+                if p in self.cfg['model']['packages']]
+
+    @property
+    def perimeter_bc_type(self):
+        """Dictates how perimeter boundaries are set up.
+
+        if 'head'; a constant head package is created
+            from the parent model starting heads
+        if 'flux'; a specified flux boundary is created
+            from parent model cell by cell flow output
+            """
+        perimeter_boundary_type = self.cfg['model'].get('perimeter_boundary_type')
+        if perimeter_boundary_type is not None:
+            if 'head' in perimeter_boundary_type:
+                return 'head'
+            if 'flux' in perimeter_boundary_type:
+                return 'flux'
+
+    @property
     def tmpdir(self):
         return self.cfg['intermediate_data']['tmpdir']
 
@@ -210,6 +247,8 @@ class MF6model(mf6.ModflowGwf):
         for folder in output_paths:
             if not os.path.exists(folder):
                 os.makedirs(folder)
+        # other variables
+        self.cfg['external_files'] = {}
 
     def _set_period_data(self):
         """Sets up the perioddata DataFrame."""
@@ -373,7 +412,7 @@ class MF6model(mf6.ModflowGwf):
                 top = self.get_raster_values_at_cell_centers(top_file)
                 # save out the model top
                 top *= elevation_units_mult
-                save_array(self.cfg['intermediate_data']['top'], top, fmt='%.2f')
+                save_array(self.cfg['intermediate_data']['top'][0], top, fmt='%.2f')
                 self.updated_arrays.add('top')
             else:
                 top = self.load_array(self.cfg['intermediate_data']['top'])

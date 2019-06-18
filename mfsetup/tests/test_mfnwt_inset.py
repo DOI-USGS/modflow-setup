@@ -59,6 +59,11 @@ def inset_with_dis(inset_with_grid):
     return m
 
 
+def test_load_cfg(mfnwt_inset_test_cfg_path):
+    cfg = mfnwt_inset_test_cfg_path
+    assert True
+
+
 def test_inset(inset):
     assert isinstance(inset, MFnwtModel)
 
@@ -93,7 +98,7 @@ def test_regrid_linear(inset_with_grid):
     # test basic regrid with no masking
     rg1 = m.regrid_from_parent(arr, method='linear')
     rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid,
-                 mask1=m._parent_mask,
+                 mask1=m.parent_mask,
                  method='linear')
     rg3 = regrid(arr, m.parent.modelgrid, m.modelgrid,
                  method='linear')
@@ -162,8 +167,9 @@ def test_set_lakarr(inset_with_dis):
             externalfiles = m.cfg['external_files']['lakarr']
         else:
             externalfiles = m.cfg['intermediate_data']['lakarr']
-        assert isinstance(externalfiles, list)
-        for f in externalfiles:
+        assert isinstance(externalfiles, dict)
+        assert isinstance(externalfiles[0], list)
+        for f in externalfiles[0]:
             assert os.path.exists(f)
     else:
         assert m._lakarr2d.sum() == 0
@@ -283,8 +289,9 @@ def test_rch_setup(inset_with_dis):
     # check that high-K lake recharge was assigned correctly
     highklake_recharge = m.rch.rech.array[0, 0][m.isbc[0] == 2]
     assert np.diff(highklake_recharge).sum() == 0
-    val = (m.cfg['lak']['precip'] - m.cfg['lak']['evap'])  # this won't pass if these aren't in model units
-    assert np.allclose(highklake_recharge[0], val)
+    for per in range(len(highklake_recharge)):
+        val = (m.cfg['lak']['precip'][per] - m.cfg['lak']['evap'][per])  # this won't pass if these aren't in model units
+        assert np.allclose(highklake_recharge[per], val)
 
     # test writing of MODFLOW arrays
     rch.write_file()
@@ -458,7 +465,7 @@ def test_lak_setup(inset_with_dis):
 def test_nwt_setup(inset):
 
     m = inset  #deepcopy(inset)
-    m.cfg['nwt']['use_existing_file'] = 'test/data/RGN_rjh_3_23_18.NWT'
+    m.cfg['nwt']['use_existing_file'] = os.path.abspath('mfsetup/tests/data/RGN_rjh_3_23_18.NWT')
     nwt = m.setup_nwt()
     nwt.write_file()
     m.cfg['nwt']['use_existing_file'] = None

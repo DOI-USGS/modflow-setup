@@ -28,9 +28,10 @@ from .units import convert_length_units, convert_time_units, convert_flux_units,
 from .wateruse import get_mean_pumping_rates, resample_pumping_rates
 from sfrmaker import lines
 from sfrmaker.utils import assign_layers
+from .mfmodel import MFmodelMixin
 
 
-class MFnwtModel(Modflow):
+class MFnwtModel(MFmodelMixin, Modflow):
     """Class representing a MODFLOW-NWT model"""
 
     source_path = os.path.split(__file__)[0]
@@ -43,6 +44,7 @@ class MFnwtModel(Modflow):
         Modflow.__init__(self, modelname, exe_name=exe_name, version=version,
                          model_ws=model_ws, external_path=external_path,
                          **kwargs)
+        MFmodelMixin.__init__(self, parent=parent)
 
         # default configuration
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
@@ -50,38 +52,8 @@ class MFnwtModel(Modflow):
                                      'wel', 'mnw2', 'gag', 'hyd', 'nwt']
         self.cfg = load(self.source_path + '/mfnwt_defaults.yml')
         self.cfg['filename'] = self.source_path + '/mfnwt_defaults.yml'
-
-        # property attributes
-        self._nper = None
-        self._perioddata = None
-        self._sr = None
-        self._modelgrid = None
-        self._bbox = None
-        self._parent = parent
-        self._parent_layers = None
-        self.__parent_mask = None
-        self.__lakarr2d = None
-        self.__isbc2d = None
-        self._ibound = None
-        self._lakarr = None
-        self._isbc = None
-        self._lake_bathymetry = None
-        self._precipitation = None
-        self._evaporation = None
-        self._lake_recharge = None
-
-        # flopy settings
-        self._mg_resync = False
-
-        self._features = {} # dictionary for caching shapefile datasets in memory
-
         self._load_cfg(cfg)  # update configuration dict with values in cfg
 
-        # arrays remade during this session
-        self.updated_arrays = set()
-
-        # cache of interpolation weights to speed up regridding
-        self._interp_weights = None
 
     def __repr__(self):
         txt = '{} model:\n'.format(self.name)
@@ -115,7 +87,6 @@ class MFnwtModel(Modflow):
         #if other.sr != self.sr:
         #    return False
         return True
-
 
     @property
     def nper(self):
@@ -227,11 +198,12 @@ class MFnwtModel(Modflow):
         if 'flux'; a specified flux boundary is created
             from parent model cell by cell flow output
             """
-
-        if 'head' in self.cfg['model']['perimeter_boundary_type']:
-            return 'head'
-        if 'flux' in self.cfg['model']['perimeter_boundary_type']:
-            return 'flux'
+        perimeter_boundary_type = self.cfg['model'].get('perimeter_boundary_type')
+        if perimeter_boundary_type is not None:
+            if 'head' in perimeter_boundary_type:
+                return 'head'
+            if 'flux' in perimeter_boundary_type:
+                return 'flux'
 
     @property
     def ipakcb(self):
@@ -253,11 +225,11 @@ class MFnwtModel(Modflow):
         return self._interp_weights
 
     @property
-    def _parent_mask(self):
+    def parent_mask(self):
         """Boolean array indicating window in parent model grid (subset of cells)
         that encompass the inset model domain. Used to speed up interpolation
         of parent grid values onto inset grid."""
-        if self.__parent_mask is None:
+        if self._parent_mask is None:
             x, y = np.squeeze(self.bbox.exterior.coords.xy)
             pi, pj = get_ij(self.parent.modelgrid, x, y)
             pad = 2
@@ -265,32 +237,12 @@ class MFnwtModel(Modflow):
             j0, j1 = pj.min() - pad, pj.max() + pad
             mask = np.zeros((self.parent.nrow, self.parent.ncol), dtype=bool)
             mask[i0:i1, j0:j1] = True
-            self.__parent_mask = mask
-        return self.__parent_mask
+            self._parent_mask = mask
+        return self._parent_mask
 
     @property
     def nlakes(self):
-        lakes = self.cfg['lak'].get('include_lakes')
-        if lakes is None:
-            return 0
-        else:
-            return len(lakes)
-
-    @property
-    def _lakarr2d(self):
-        """2-D array of areal extent of lakes. Non-zero values
-        correspond to lak package IDs."""
-        if self.__lakarr2d is None:
-            lakarr2d = np.zeros((self.nrow, self.ncol))
-            if 'lak' in self.package_list:
-                lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile', {}).copy()
-                lakesdata = self.load_features(**lakes_shapefile) # caches loaded features
-                lakes_shapefile['lakesdata'] = lakesdata
-                lakes_shapefile.pop('filename')
-                lakarr2d = make_lakarr2d(self.modelgrid, **lakes_shapefile)
-            self.__lakarr2d = lakarr2d
-            self.__isbc2d = None
-        return self.__lakarr2d
+        return np.max(self.lakarr)
 
     @property
     def lakarr(self):
@@ -323,7 +275,7 @@ class MFnwtModel(Modflow):
         2 : high-k lake
         3 : sfr
         """
-        if self.__isbc2d is None:
+        if self._isbc_2d is None:
             isbc = np.zeros((self.nrow, self.ncol))
             lakesdata = None
             lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
@@ -343,9 +295,9 @@ class MFnwtModel(Modflow):
                 i, j = self.wel.stress_period_data[0]['i'], \
                        self.wel.stress_period_data[0]['j']
                 isbc[i, j][isbc[i, j] == 0] = -1
-            self.__isbc2d = isbc
+            self._isbc_2d = isbc
             self._lake_bathymetry = None
-        return self.__isbc2d
+        return self._isbc_2d
 
     @property
     def ibound(self):
@@ -749,7 +701,7 @@ class MFnwtModel(Modflow):
                           mask1=mask,
                           method=method)
         if method == 'linear':
-            parent_values = parent_array.flatten()[self._parent_mask.flatten()]
+            parent_values = parent_array.flatten()[self.parent_mask.flatten()]
             regridded = interpolate(parent_values,
                                     *self.interp_weights)
         elif method == 'nearest':
@@ -908,109 +860,7 @@ class MFnwtModel(Modflow):
         setup_external_filepaths(self, package, variable_name,
                                  filename_format, nfiles=nfiles)
 
-    def _setup_array(self, variable, intermediate_files,
-                     varname, multiplier=1, regrid_from_parent=False,
-                     regrid_method='nearest',
-                     fmt='%.6e'):
-        """Set up an array variable that may be entered as
-        a scalar, external file, or a list that may be a
-        mix of scalars and external files.
-
-        Parameters
-        ----------
-        variable : scalar, external file, or a list that may be a mix of scalars and external files
-            MODFLOW/Flopy array input (Util2D-like)
-        intermediate_files : list of external file paths
-            External files that will be supplied to Flopy as input for variable.
-        varname : str; Flopy variable name (e.g. 'hk' or 'ss'
-            Name of the variable. Used to assign appropriate values for areas with lakes,
-            keep track of what arrays have been created, and for exception reporting
-            in the case of unrecognized input.
-        multiplier : scalar
-            Multiply array values by this amount.
-        regrid_from_parent : bool
-            If True, variable is a 3D numpy array (nper x nrow x ncol) or (nlay x nrow x ncol)
-            from parent model. Interpolate values onto inset grid.
-        regrid_method : str; ('nearest' or 'linear')
-            How inset values are sampled from parent model array.
-        fmt : str (numpy.savetxt-style output format, default='%.6f')
-        """
-        print('setting up {}...'.format(varname))
-        kh_highk_lakes = float(self.cfg['parent'].get('hiKlakes_value', 1e4))
-
-        var = variable
-
-        if isinstance(var, str) or np.isscalar(var):
-            var = [var] * len(intermediate_files)
-        knt = 0  # separate counter for inset layers (if var is from parent model)
-        for i, ivar in enumerate(var):
-            if isinstance(ivar, str):
-                # sample "source_data" that may not be on same grid
-                if ivar.endswith(".asc") or ivar.endswith(".tif"):
-                    ivar = get_values_at_points(ivar,
-                                                self.modelgrid.xcellcenters.ravel(),
-                                                self.modelgrid.ycellcenters.ravel())
-                    ivar = np.reshape(ivar, (self.nrow, self.ncol))
-                # read numpy array on same grid
-                else:
-                    ivar = self.load_array(ivar)
-            # convert scalar to numpy array
-            elif np.isscalar(ivar):
-                ivar = np.ones((self.nrow, self.ncol)) * ivar
-            # interpolate variable from parent model arrays to inset model grid
-            elif regrid_from_parent:
-
-                # exclude high-k lake values in interpolation from parent model
-                if varname in ['sy', 'ss']:
-                    mask = self._parent_mask & (ivar < 1.)
-                elif varname == 'hk':
-                    mask = self._parent_mask & (ivar < kh_highk_lakes)
-                elif varname == 'vka':
-                    mask = self._parent_mask & (ivar < kh_highk_lakes)
-                elif varname == 'rech':
-                    mask = self._parent_mask #& (ivar > 0.)
-                else:
-                    mask = None
-                ivar = self.regrid_from_parent(ivar, mask=mask,
-                                               method=regrid_method)
-            elif isinstance(ivar, np.ndarray) and ivar.size == self.nrow * self.ncol:
-                if ivar.shape != (self.nrow, self.ncol):
-                    ivar = np.reshape(ivar, (self.nrow, self.ncol))
-            else:
-                raise ValueError("unrecognized input for {}: {}".format(varname, ivar))
-
-            # handle lakes
-            if varname == 'rech':
-                # assign high-k lake recharge for stress period
-                # apply in same units as source recharge array
-                ivar[self.isbc[0] == 2] = self.lake_recharge[i] * 1/self.cfg['rch']['unit_conversion']
-                # zero-values to lak package lakes
-                ivar[self.isbc[0] == 1] = 0.
-
-            # convert to inset layering by iterating thru
-            # each inset layer within the parent layer
-            # TODO: need to generalize layer setup similar to MF6model
-            nsublayers = 1
-            if self.nlay - self.parent.nlay == 1 and \
-                    len(var) == 4 and knt == 0 and \
-                    varname in ['strt', 'hk', 'vka', 'sy', 'ss']:
-                nsublayers = 2
-            for ii in range(nsublayers):
-                iivar = ivar.copy()
-                # handle lakes
-                if varname == 'hk':
-                    iivar[self.isbc[knt] == 2] = kh_highk_lakes
-                elif varname == 'vka':
-                    pass # not sure what if anything needs to be done for vka
-                elif varname == 'sy':
-                    iivar[self.isbc[knt] == 2] = 1.0
-                elif varname == 'ss':
-                    iivar[self.isbc[knt] == 2] = 1.0
-                save_array(intermediate_files[knt], iivar * multiplier, fmt=fmt)
-                knt += 1
-        self.updated_arrays.add(varname)
-
-    def _setup_array2(self, package, var, vmin=-1e30, vmax=1e30,
+    def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
                       source_model=None, source_package=None,
                       **kwargs):
         return setup_array(self, package, var, vmin=vmin, vmax=vmax,
@@ -1025,10 +875,10 @@ class MFnwtModel(Modflow):
 
         # resample the top from the DEM
         if self.cfg['dis']['remake_top']:
-            self._setup_array2(package, 'top', write_fmt='%.2f')
+            self._setup_array(package, 'top', write_fmt='%.2f')
 
         # make the botm array
-        self._setup_array2(package, 'botm', by_layer=True, write_fmt='%.2f')
+        self._setup_array(package, 'botm', by_layer=True, write_fmt='%.2f')
 
         # put together keyword arguments for dis package
         kwargs = self.cfg['grid'].copy() # nrow, ncol, delr, delc
@@ -1060,10 +910,10 @@ class MFnwtModel(Modflow):
         t0 = time.time()
 
         # make the strt array
-        self._setup_array2(package, 'strt', by_layer=True)
+        self._setup_array(package, 'strt', by_layer=True)
         
         # make the ibound array
-        self._setup_array2(package, 'ibound', by_layer=True, write_fmt='%d')
+        self._setup_array(package, 'ibound', by_layer=True, write_fmt='%d')
 
         kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
         bas = fm.ModflowBas(model=self, **kwargs)
@@ -1157,7 +1007,7 @@ class MFnwtModel(Modflow):
         t0 = time.time()
 
         # make the rech array
-        self._setup_array2(package, 'rech')
+        self._setup_array(package, 'rech')
 
         # create flopy package instance
         kwargs = self.cfg['rch']
@@ -1198,14 +1048,14 @@ class MFnwtModel(Modflow):
                     source_package = ext
                     break
 
-        self._setup_array2(package, 'hk', vmin=0, vmax=hiKlakes_value,
+        self._setup_array(package, 'hk', vmin=0, vmax=hiKlakes_value,
                            source_package=source_package, by_layer=True)
-        self._setup_array2(package, 'vka', vmin=0, vmax=hiKlakes_value,
+        self._setup_array(package, 'vka', vmin=0, vmax=hiKlakes_value,
                            source_package=source_package, by_layer=True)
         if np.any(~self.dis.steady.array):
-            self._setup_array2(package, 'sy', vmin=0, vmax=1,
+            self._setup_array(package, 'sy', vmin=0, vmax=1,
                                source_package=source_package, by_layer=True)
-            self._setup_array2(package, 'ss', vmin=0, vmax=1,
+            self._setup_array(package, 'ss', vmin=0, vmax=1,
                                source_package=source_package, by_layer=True)
             sy = self.cfg['intermediate_data']['sy']
             ss = self.cfg['intermediate_data']['ss']
@@ -1230,6 +1080,10 @@ class MFnwtModel(Modflow):
 
         This will need some additional customization if pumping is mixed with
         the perimeter fluxes.
+
+
+        TODO: generalize well package setup with specific input requirements
+
 
         """
 
@@ -1522,7 +1376,7 @@ class MFnwtModel(Modflow):
 
         # create the SFR package
         sfr.create_ModflowSfr2(model=self, istcb2=223)
-        self.__isbc2d = None # reset BCs arrays
+        self._isbc_2d = None # reset BCs arrays
         self._isbc = None
 
         # export shapefiles of lines, routing, cell polygons, inlets and outlets
@@ -1674,10 +1528,10 @@ class MFnwtModel(Modflow):
         return nwt
 
     def setup_hyd(self):
-
+        """TODO: generalize hydmod setup with specific input requirements"""
         print('setting up HYDMOD package...')
         t0 = time.time()
-        obs_info_files = self.cfg['hyd'].get('observation_data')
+        obs_info_files = self.cfg['hyd'].get('source_data', {}).get('filenames')
         if obs_info_files is None:
             print("No observation data for hydmod.")
             return
@@ -1714,41 +1568,6 @@ class MFnwtModel(Modflow):
             print(f)
             df = read_observation_data(f, column_info,
                                        column_mappings=self.cfg['hyd'].get('column_mappings'))
-            #df = pd.read_csv(f)
-            #df.columns = [s.lower() for s in df.columns]
-            #df['file'] = f
-            #xcol = col_info.get('x_location_col')
-            #ycol = col_info.get('y_location_col')
-            #obstype_col = col_info.get('obstype_col')
-            #if xcol is None or xcol.lower() not in df.columns:
-            #    raise ValueError("Column {} not in {}; need to specify x_location_col in config file"
-            #                     .format(xcol, f))
-            #else:
-            #    print('    x location col: {}'.format(xcol))
-            #if ycol is None or ycol.lower() not in df.columns:
-            #    raise ValueError("Column {} not in {}; need to specify y_location_col in config file"
-            #                     .format(ycol, f))
-            #else:
-            #    print('    y location col: {}'.format(ycol))
-            #rename = {xcol.lower(): 'x',
-            #          ycol.lower(): 'y'
-            #          }
-            #if obstype_col is not None:
-            #    rename.update({obstype_col.lower(): 'obs_type'})
-            #    print('    observation type col: {}'.format(obstype_col))
-            #else:
-            #    print('    no observation type col specified; observations assumed to be heads')
-            #column_mappings = self.cfg['hyd'].get('column_mappings')
-            #if column_mappings is not None:
-            #    for k, v in column_mappings.items():
-            #        if not isinstance(v, list):
-            #            v = [v]
-            #        for vi in v:
-            #            rename.update({vi.lower(): k.lower()})
-            #            if vi in df.columns:
-            #                print('    observation label column: {}'.format(vi))
-            #df.rename(columns=rename, inplace=True)
-
             if 'obs_type' in df.columns and 'pckg' not in df.columns:
                 df['pckg'] = [pckg.get(s, 'BAS') for s in df['obs_type']]
             elif 'pckg' not in df.columns:
@@ -1821,8 +1640,9 @@ class MFnwtModel(Modflow):
             lak_gagelocs = list(np.arange(1, nlak_gages+1) * -1)
             lak_gagerch = [0] * nlak_gages # dummy list to maintain index position
             lak_outtype = [self.cfg['gag']['lak_outtype']] * nlak_gages
+            # TODO: make private attribute to facilitate keeping track of lake IDs
             lak_files = ['lak{}_{}.ggo'.format(i+1, hydroid)
-                         for i, hydroid in enumerate(self.cfg['lak']['include_lakes'])]
+                         for i, hydroid in enumerate(self.cfg['lak']['source_data']['lakes_shapefile']['include_ids'])]
 
         # need to add streams at some point
         nstream_gages = 0
@@ -1939,56 +1759,6 @@ class MFnwtModel(Modflow):
     def load_cfg(yamlfile, verbose=False):
         """Load model configuration info, adjusting paths to model_ws."""
         return load_cfg(yamlfile, default_file='/mfnwt_defaults.yml')
-        #print('loading configuration file {}...'.format(yamlfile))
-        #source_path = os.path.split(__file__)[0]
-        ## default configuration
-        #cfg = load(source_path + '/mfnwt_defaults.yml')
-        #cfg['filename'] = source_path + '/mfnwt_defaults.yml'
-#
-        ## recursively update defaults with information from yamlfile
-        #update(cfg, load(yamlfile))
-        #cfg['model'].update({'verbose': verbose})
-#
-        #cfg = set_absolute_paths_to_location()
-        ## set paths relative to config file
-        ## TODO: need more general way to handle paths
-        #cfg['model']['model_ws'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                        cfg['model']['model_ws'])
-        #cfg['parent']['model_ws'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                         cfg['parent']['model_ws'])
-        #cfg['parent']['headfile'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                         cfg['parent']['headfile'])
-        #if cfg['setup_grid'].get('features_file') is not None:
-        #    cfg['setup_grid']['features_file'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                         cfg['setup_grid']['features_file'])
-        #skip_keys = ['elevation_units']
-        #for k, v in cfg.get('source_data', {}).items():
-        #    if k not in skip_keys:
-        #        cfg['source_data'][k] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                         v)
-        #if cfg.get('hyd', {}).get('observation_data') is not None:
-        #    for i, f in enumerate(cfg['hyd']['observation_data']):
-        #        cfg['hyd']['observation_data'][i] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                                         f)
-        #if cfg['setup_grid'].get('features_file') is not None:
-        #    cfg['setup_grid']['features_file'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                         cfg['setup_grid']['features_file'])
-        #if cfg.get('lak', {}).get('stage_area_volume') is not None:
-        #    cfg['lak']['stage_area_volume'] = os.path.join(os.path.split(os.path.abspath(yamlfile))[0],
-        #                                         cfg['lak']['stage_area_volume'])
-        #def set_path(relative_path):
-        #    return os.path.join(cfg['model']['model_ws'],
-        #                        relative_path)
-        #cfg['intermediate_data']['tmpdir'] = set_path(cfg['intermediate_data']['tmpdir'])
-        ##cfg['model']['external_path'] = set_path(cfg['model']['external_path'])
-        #cfg['setup_grid']['grid_file'] = set_path(os.path.split(cfg['setup_grid']['grid_file'])[-1])
-        #mapping = {'shapefiles': 'shps'}
-        #for k, v in cfg['postprocessing']['output_folders'].items():
-        #    if k in mapping.keys():
-        #        cfg['postprocessing']['output_folders'][mapping[k]] = cfg['postprocessing']['output_folders'].pop(k)
-        #for k, v in cfg['postprocessing']['output_folders'].items():
-        #    cfg['postprocessing']['output_folders'][k] = set_path(v)
-        #return cfg
 
     @staticmethod
     def load(yamlfile, load_only=None, verbose=False, forgive=False, check=False):

@@ -161,8 +161,8 @@ class ArraySourceData(SourceData):
         that encompass the inset model domain. Used to speed up interpolation
         of parent grid values onto inset grid."""
         if self._source_mask is None:
-            if self.dest_model._parent_mask.shape == self.source_modelgrid.xcellcenters.shape:
-                mask = self.dest_model._parent_mask
+            if self.dest_model.parent_mask.shape == self.source_modelgrid.xcellcenters.shape:
+                mask = self.dest_model.parent_mask
             else:
                 x, y = np.squeeze(self.dest_model.bbox.exterior.coords.xy)
                 pi, pj = get_ij(self.source_modelgrid, x, y)

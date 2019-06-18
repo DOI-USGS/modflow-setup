@@ -54,9 +54,9 @@ def test_load_cfg(mfnwt_inset_test_cfg_path):
     p2 = os.path.normpath(os.path.join(config_file_location, cfg['model']['model_ws']))
     assert p1 == p2
 
-    p1 = os.path.normpath(cfg_pathed['rch']['source_data']['infiltration']['filenames'][0])
+    p1 = os.path.normpath(cfg_pathed['rch']['source_data']['rech']['filenames'][0])
     p2 = os.path.normpath(os.path.join(config_file_location,
-                                       cfg['rch']['source_data']['infiltration']['filenames'][0]))
+                                       cfg['rch']['source_data']['rech']['filenames'][0]))
     assert p1 == p2
 
     p1 = os.path.normpath(cfg_pathed['hyd']['source_data']['filenames'][0])

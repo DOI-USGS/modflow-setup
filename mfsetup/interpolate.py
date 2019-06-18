@@ -15,8 +15,8 @@ def get_source_dest_model_xys(source_model, dest_model, source_mask=None):
     """
     source_modelgrid = source_model.modelgrid
     if source_mask is None:
-        if dest_model._parent_mask.shape == source_modelgrid.xcellcenters.shape:
-            source_mask = dest_model._parent_mask
+        if dest_model.parent_mask.shape == source_modelgrid.xcellcenters.shape:
+            source_mask = dest_model.parent_mask
         else:
             source_mask = np.ones(source_modelgrid.xcellcenters.shape, dtype=bool)
     else:
