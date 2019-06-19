@@ -7,12 +7,14 @@ import os
 import pytest
 import numpy as np
 import pandas as pd
+import rasterio
 from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
 from ..discretization import get_layer_thicknesses
 from ..fileio import load
 from ..mf6model import MF6model
+from ..utils import get_input_arguments
 
 
 @pytest.fixture(scope="module")
@@ -52,7 +54,8 @@ def model(cfg, simulation):
     cfg = cfg.copy()
     #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = simulation
-    m = MF6model(cfg=cfg, **cfg['model'])
+    kwargs = get_input_arguments(cfg['model'], MF6model)
+    m = MF6model(cfg=cfg, **kwargs)
     return m
 
 
@@ -61,6 +64,16 @@ def model_with_grid(model):
     #model = deepcopy(model)
     model.setup_grid()
     return model
+
+
+@pytest.fixture(scope="function")
+def model_with_dis(model_with_grid):
+    print('pytest fixture model_with_grid')
+    m = model_with_grid  #deepcopy(inset_with_grid)
+    m.setup_tdis()
+    m.cfg['dis']['remake_top'] = True
+    dis = m.setup_dis()
+    return m
 
 
 @pytest.fixture(scope="module")
@@ -183,12 +196,37 @@ def test_perrioddata(model):
     assert pd6.equals(pd0)
 
 
+def test_set_lakarr(model_with_dis):
+    m = model_with_dis
+    if 'lak' in m.package_list:
+        lakes_shapefile = m.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
+        assert lakes_shapefile is not None
+        assert m._lakarr2d.sum() > 0
+        assert m._isbc2d.sum() > 0  # requires
+        assert m.isbc.sum() > 0  # requires DIS package
+        assert m.lakarr.sum() > 0  # requires isbc to be set
+        if m.version == 'mf6':
+            externalfiles = m.cfg['external_files']['lakarr']
+        else:
+            externalfiles = m.cfg['intermediate_data']['lakarr']
+        assert isinstance(externalfiles, dict)
+        assert isinstance(externalfiles[0], list)
+        for f in externalfiles[0]:
+            assert os.path.exists(f)
+    else:
+        assert m._lakarr2d.sum() == 0
+        assert m._isbc2d.sum() == 0
+        assert m.isbc.sum() == 0  # requires DIS package
+        assert m.lakarr.sum() == 0  # requires isbc to be set
+
+
 def test_dis_setup(model_with_grid):
 
     m = model_with_grid #deepcopy(model_with_grid)
     # test intermediate array creation
     m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
+    assert isinstance(dis, mf6.ModflowGwfdis)
     assert 'DIS' in m.get_package_list()
     arrayfiles = m.cfg['intermediate_data']['top'] + \
                  m.cfg['intermediate_data']['botm'] + \
@@ -219,6 +257,15 @@ def test_dis_setup(model_with_grid):
         assert os.path.exists(f['filename'])
     assert os.path.exists(os.path.join(m.model_ws, dis.filename))
 
+    # check that units were converted (or not)
+    assert np.allclose(dis.top.array.mean(), 126, atol=10)
+    mcaq = m.cfg['dis']['source_data']['botm']['filenames'][3]
+    assert 'mcaq' in mcaq
+    with rasterio.open(mcaq) as src:
+        mcaq_data = src.read(1)
+        mcaq_data[mcaq_data == src.meta['nodata']] = np.nan
+    assert np.allclose(m.dis.botm.array[3].mean() / .3048, np.nanmean(mcaq_data), atol=5)
+
 
 def test_tdis_setup(model):
 
@@ -230,18 +277,13 @@ def test_tdis_setup(model):
     assert period_df.equals(m.perioddata[['perlen', 'nstp', 'tsmult']])
 
 
-def test_sto_setup(model_with_grid):
+def test_sto_setup(model_with_dis):
 
-    m = model_with_grid  #deepcopy(model_with_grid)
+    m = model_with_dis  #deepcopy(model_with_grid)
     sto = m.setup_sto()
-    m.cfg['dis']['nper'] = 4
-    m.cfg['dis']['perlen'] = [1, 1, 1, 1]
-    m.cfg['dis']['nstp'] = [1, 1, 1, 1]
-    m.cfg['dis']['tsmult'] = [1, 1, 1, 1]
-    m.cfg['dis']['steady'] = [1, 0, 0, 1]
-    # check settings
-    #assert m.cfg['dis']['steady'] == [True, False, False, True]
-    #assert dis.steady.array.tolist() == [True, False, False, True]
+    assert isinstance(sto, mf6.ModflowGwfsto)
+    assert np.allclose(sto.sy.array.mean(), m.cfg['sto']['griddata']['sy'])
+    assert np.allclose(sto.ss.array.mean(), m.cfg['sto']['griddata']['ss'])
 
 
 def test_yaml_setup(mf6_test_cfg_path):

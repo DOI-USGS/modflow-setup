@@ -318,6 +318,8 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
                         'yml', 'json',
                         'hds', 'cbb', 'cbc']
     keys = []
+    if source_data is None:
+        return []
     if isinstance(source_data, str):
         return ['']
     if isinstance(source_data, list):

@@ -6,6 +6,21 @@ simulation:
 model:
   modelname: 'model'
   version: 'mf6'
+  hiKlakes_value: 1.e4
+  default_lake_depth: 2 # m; default depth to assume when setting up lak package or high-k lakes (layer 1 bottom is adjusted to achieve this thickness)
+  start_date_time: '2011-01-01'
+  end_date_time:
+  packages: ['dis',
+             'tdis',
+             'oc',
+             'npf',
+             'rch',
+             'lak',
+             'sfr',
+             'wel',
+             'maw',
+             'ims'
+  ]
 
 parent:
 
@@ -98,6 +113,9 @@ sfr:
   stage_fileout: 'sfr_stage.bin'
   obs6_filein_fmt: '{}.sfr.obs6'
   output_path: 'sfr'
+
+lak:
+  lakarr_filename_fmt: 'lakarr{:d}.dat'
 
 wel:
   options:

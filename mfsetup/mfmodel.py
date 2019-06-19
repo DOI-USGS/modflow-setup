@@ -203,6 +203,8 @@ class MFsetupMixin():
         """3-D array of lake extents in each layer. Non-zero values
         correspond to lak package IDs. Extent of lake in
         each layer is based on bathymetry and model layer thickness.
+
+        TODO : figure out how to handle lakes with MF6
         """
         if self._lakarr is None:
             self.setup_external_filepaths('lak', 'lakarr',

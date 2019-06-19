@@ -400,11 +400,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         perioddata = mf6.ModflowTdis.perioddata.empty(self, self.nper)
         for col in ['perlen', 'nstp', 'tsmult']:
             perioddata[col] = self.perioddata[col].values
-        tdis = mf6.ModflowTdis(self.simulation,
-                               time_units=self.time_units,
-                               start_date_time=self.perioddata['start_datetime'][0].strftime('%Y-%m-%d'),
-                               nper=self.nper,
-                               perioddata=perioddata)
+        kwargs = self.cfg['tdis']['options']
+        kwargs['nper'] = self.nper
+        kwargs['perioddata'] = perioddata
+        kwargs = get_input_arguments(kwargs, mf6.ModflowTdis)
+        tdis = mf6.ModflowTdis(self.simulation, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return tdis
 
@@ -455,17 +455,29 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         -----
 
         """
+
+        if np.all(self.perioddata['steady']):
+            print('Skipping STO package, no transient stress periods...')
+            return
+
         package = 'sto'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
+
+        # make the botm array
+        self._setup_array(package, 'sy', by_layer=True, write_fmt='%.6e')
+
+        # make the idomain array
+        self._setup_array(package, 'ss', by_layer=True, write_fmt='%.6e')
+
         kwargs = self.cfg['sto']['options'].copy()
         kwargs.update(self.cfg['sto']['griddata'].copy())
         kwargs['steady_state'] = {k: v for k, v in self.cfg['sto']['steady'].items() if v}
         kwargs['transient'] = {k: True for k, v in self.cfg['sto']['steady'].items() if not v}
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsto)
-        #sto = mf6.ModflowGwfsto(self, **kwargs)
+        sto = mf6.ModflowGwfsto(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
-        return #sto
+        return sto
 
     def setup_rch(self):
         """

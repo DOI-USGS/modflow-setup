@@ -6,6 +6,16 @@ simulation:
 model:
   simulation: 'shellmound'
   modelname: 'shellmound'
+  packages: ['dis',
+             'tdis',
+             'oc',
+             'npf',
+             'rch',
+             'sfr',
+             'wel',
+             'maw',
+             'ims'
+  ]
 
 external_path: 'external/'
 
@@ -49,21 +59,21 @@ dis:
     delr: 1000.
     delc: 1000.
   source_data:
-    elevation_units: 'feet'
     top:
-      filename: 'rasters/meras_100m_dem.tif' # DEM file; path relative to setup script
+      filename: 'shellmound/rasters/meras_100m_dem.tif' # DEM file; path relative to setup script
       elevation_units: 'meters'
     botm:
       filenames:
-        0: 'rasters/vkbg_surf.tif' # Vicksburg-Jackson Group (top)
-        1: 'rasters/ucaq_surf.tif' # Upper Claiborne aquifer (top)
-        2: 'rasters/mccu_surf.tif' # Middle Claiborne confining unit (top)
-        3: 'rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
-        6: 'rasters/lccu_surf.tif' # Lower Claiborne confining unit (top)
-        8: 'rasters/lcaq_surf.tif' # Lower Claiborne aquifer (top)
-        9: 'rasters/mwaq_surf.tif' # Middle Wilcox aquifer (top)
-        10: 'rasters/lwaq_surf.tif' # Lower Wilcox aquifer (top)
-        12: 'rasters/mdwy_surf.tif' # Midway confining unit (top)
+        0: 'shellmound/rasters/vkbg_surf.tif' # Vicksburg-Jackson Group (top)
+        1: 'shellmound/rasters/ucaq_surf.tif' # Upper Claiborne aquifer (top)
+        2: 'shellmound/rasters/mccu_surf.tif' # Middle Claiborne confining unit (top)
+        3: 'shellmound/rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
+        6: 'shellmound/rasters/lccu_surf.tif' # Lower Claiborne confining unit (top)
+        8: 'shellmound/rasters/lcaq_surf.tif' # Lower Claiborne aquifer (top)
+        9: 'shellmound/rasters/mwaq_surf.tif' # Middle Wilcox aquifer (top)
+        10: 'shellmound/rasters/lwaq_surf.tif' # Lower Wilcox aquifer (top)
+        12: 'shellmound/rasters/mdwy_surf.tif' # Midway confining unit (top)
+      elevation_units: 'feet'
   top_filename_fmt: "top.dat"
   botm_filename_fmt: "botm{:d}.dat"
   idomain_filename_fmt: "idomain{:d}.dat"
@@ -91,7 +101,9 @@ npf:
   options:
     save_flows: True
   griddata:
-    icelltype: 1
+    icelltype: 1 # variable sat. thickness in all layers
+  source_data:
+
   k_filename_fmt: "k{:d}.dat"
   k33_filename_fmt: "h33{:d}.dat"
 
@@ -100,6 +112,8 @@ sto:
     save_flows: True
   griddata:
     iconvert: 1
+    sy: 0.25
+    ss: 1.e-6
   sy_filename_fmt: "sy{:d}.dat"
   ss_filename_fmt: "ss{:d}.dat"
   steady: {0: True, 1: False}
