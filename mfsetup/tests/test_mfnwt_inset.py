@@ -59,8 +59,8 @@ def inset_with_dis(inset_with_grid):
     return m
 
 
-def test_load_cfg(mfnwt_inset_test_cfg_path):
-    cfg = mfnwt_inset_test_cfg_path
+def test_load_cfg(cfg):
+    cfg = cfg
     assert True
 
 
@@ -184,6 +184,7 @@ def test_dis_setup(inset_with_grid):
     m.cfg['dis']['lenuni'] = 2  # meters
     m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
+    assert 'DIS' in m.get_package_list()
     arrayfiles = m.cfg['intermediate_data']['top'] +\
                  m.cfg['intermediate_data']['botm']
     for f in arrayfiles:

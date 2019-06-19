@@ -111,7 +111,7 @@ def dump_yml(yml_file, data):
     print('wrote {}'.format(yml_file))
 
 
-def load_array(filename, shape=None):
+def load_array(filename, shape=None, nodata=-9999):
     """Load an array, ensuring the correct shape."""
     t0 = time.time()
     txt = 'loading {}'.format(filename)
@@ -128,13 +128,18 @@ def load_array(filename, shape=None):
             else:
                 raise ValueError("Data in {} have size {}; should be {}"
                                  .format(filename, arr.shape, shape))
+    arr[arr == nodata] = np.nan
     print("took {:.2f}s".format(time.time() - t0))
     return arr
 
 
-def save_array(filename, arr, **kwargs):
+def save_array(filename, arr, nodata=-9999,
+               **kwargs):
     """Save and array and print that it was written."""
+    if isinstance(filename, dict) and 'filename' in filename.keys():
+        filename = filename.copy().pop('filename')
     t0 = time.time()
+    arr[np.isnan(arr)] = nodata
     np.savetxt(filename, arr, **kwargs)
     print('wrote {}'.format(filename), end=', ')
     print("took {:.2f}s".format(time.time() - t0))
@@ -179,6 +184,8 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
             'parent.simulation.sim_ws',
             'parent.headfile',
         ]
+        model_ws = os.path.normpath(os.path.join(config_file_location,
+                                                 cfg['simulation']['sim_ws']))
     else:
         file_path_keys_relative_to_config = [
             'model.model_ws',
@@ -186,6 +193,8 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
             'parent.headfile',
             'nwt.use_existing_file'
         ]
+        model_ws = os.path.normpath(os.path.join(config_file_location,
+                                                 cfg['model']['model_ws']))
     file_path_keys_relative_to_model_ws = [
         'setup_grid.grid_file'
     ]
@@ -212,7 +221,7 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
 
     # set locations that are relative to model_ws
     cfg = _set_absolute_paths_to_location(file_path_keys_relative_to_model_ws,
-                                         cfg['model']['model_ws'],
+                                         model_ws,
                                          cfg)
     return cfg
 
@@ -239,18 +248,19 @@ def _set_path(keys, abspath, cfg):
     if isinstance(keys, str):
         keys = keys.split('.')
     d = cfg[keys[0]]
-    for level in range(1, len(keys)):
-        if level == len(keys) - 1:
-            k = keys[level]
-            if k in d:
-                if d[k] is not None:
-                    d[k] = os.path.normpath(os.path.join(abspath, d[k]))
-            elif k.isdigit():
-                k = int(k)
-                if d[k] is not None:
-                    d[k] = os.path.join(abspath, d[k])
-        else:
-            d = d[keys[level]]
+    if d is not None:
+        for level in range(1, len(keys)):
+            if level == len(keys) - 1:
+                k = keys[level]
+                if k in d:
+                    if d[k] is not None:
+                        d[k] = os.path.normpath(os.path.join(abspath, d[k]))
+                elif k.isdigit():
+                    k = int(k)
+                    if d[k] is not None:
+                        d[k] = os.path.join(abspath, d[k])
+            else:
+                d = d[keys[level]]
     return cfg
 
 
@@ -359,6 +369,9 @@ def setup_external_filepaths(model, package, variable_name,
 
     Returns
     -------
+    filepaths : list
+        List of external file paths
+
     Adds intermediated file paths to model.cfg[<package>]['intermediate_data']
     For MODFLOW-6 models, Adds external file paths to model.cfg[<package>][<variable_name>]
     """
@@ -399,9 +412,15 @@ def setup_external_filepaths(model, package, variable_name,
         model.cfg['external_files'][variable_name] = external_files
 
     if model.version == 'mf6':
-        model.cfg[package][variable_name] = model.cfg['external_files'][variable_name]
+        filepaths = [{'filename': f}
+                     for f in model.cfg['external_files'][variable_name]]
     else:
-        model.cfg[package][variable_name] = model.cfg['intermediate_data'][variable_name]
+        filepaths = model.cfg['intermediate_data'][variable_name]
+
+    # set package variable input (to Flopy)
+    model.cfg[package][variable_name] = filepaths
+
+    return filepaths
 
 
 def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):

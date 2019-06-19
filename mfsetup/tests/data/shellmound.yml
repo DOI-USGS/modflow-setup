@@ -10,7 +10,7 @@ model:
 external_path: 'external/'
 
 intermediate_data:
-  tmpdir: 'tmp/'
+  output_folder: 'tmp/'
 
 setup_grid:
   grid_file: '{}_grid.yml' # inset grid info will be written to this file
@@ -50,21 +50,25 @@ dis:
     delc: 1000.
   source_data:
     elevation_units: 'feet'
-    top: 'mfsetup/tests/data/rasters/meras_100m_dem.tif' # DEM file; path relative to setup script
+    top:
+      filename: 'rasters/meras_100m_dem.tif' # DEM file; path relative to setup script
+      elevation_units: 'meters'
     botm:
-      0: 'mfsetup/tests/data/rasters/vkbg_surf.tif' # Vicksburg-Jackson Group (top)
-      1: 'mfsetup/tests/data/rasters/ucaq_surf.tif' # Upper Claiborne aquifer (top)
-      2: 'mfsetup/tests/data/rasters/mccu_surf.tif' # Middle Claiborne confining unit (top)
-      3: 'mfsetup/tests/data/rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
-      6: 'mfsetup/tests/data/rasters/lccu_surf.tif' # Lower Claiborne confining unit (top)
-      8: 'mfsetup/tests/data/rasters/lcaq_surf.tif' # Lower Claiborne aquifer (top)
-      9: 'mfsetup/tests/data/rasters/mwaq_surf.tif' # Middle Wilcox aquifer (top)
-      10: 'mfsetup/tests/data/rasters/lwaq_surf.tif' # Lower Wilcox aquifer (top)
-      12: 'mfsetup/tests/data/rasters/mdwy_surf.tif' # Midway confining unit (top)
-  top_filename: "top.dat"
+      filenames:
+        0: 'rasters/vkbg_surf.tif' # Vicksburg-Jackson Group (top)
+        1: 'rasters/ucaq_surf.tif' # Upper Claiborne aquifer (top)
+        2: 'rasters/mccu_surf.tif' # Middle Claiborne confining unit (top)
+        3: 'rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
+        6: 'rasters/lccu_surf.tif' # Lower Claiborne confining unit (top)
+        8: 'rasters/lcaq_surf.tif' # Lower Claiborne aquifer (top)
+        9: 'rasters/mwaq_surf.tif' # Middle Wilcox aquifer (top)
+        10: 'rasters/lwaq_surf.tif' # Lower Wilcox aquifer (top)
+        12: 'rasters/mdwy_surf.tif' # Midway confining unit (top)
+  top_filename_fmt: "top.dat"
   botm_filename_fmt: "botm{:d}.dat"
   idomain_filename_fmt: "idomain{:d}.dat"
   minimum_layer_thickness: 1 # m
+  drop_thin_cells: True
 
 tdis:
   options:

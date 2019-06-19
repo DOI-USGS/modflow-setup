@@ -28,10 +28,10 @@ from .units import convert_length_units, convert_time_units, convert_flux_units,
 from .wateruse import get_mean_pumping_rates, resample_pumping_rates
 from sfrmaker import lines
 from sfrmaker.utils import assign_layers
-from .mfmodel import MFmodelMixin
+from .mfmodel import MFsetupMixin
 
 
-class MFnwtModel(MFmodelMixin, Modflow):
+class MFnwtModel(MFsetupMixin, Modflow):
     """Class representing a MODFLOW-NWT model"""
 
     source_path = os.path.split(__file__)[0]
@@ -44,7 +44,7 @@ class MFnwtModel(MFmodelMixin, Modflow):
         Modflow.__init__(self, modelname, exe_name=exe_name, version=version,
                          model_ws=model_ws, external_path=external_path,
                          **kwargs)
-        MFmodelMixin.__init__(self, parent=parent)
+        MFsetupMixin.__init__(self, parent=parent)
 
         # default configuration
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
@@ -54,6 +54,8 @@ class MFnwtModel(MFmodelMixin, Modflow):
         self.cfg['filename'] = self.source_path + '/mfnwt_defaults.yml'
         self._load_cfg(cfg)  # update configuration dict with values in cfg
 
+        # property arrays
+        self._ibound = None
 
     def __repr__(self):
         txt = '{} model:\n'.format(self.name)
@@ -89,21 +91,8 @@ class MFnwtModel(MFmodelMixin, Modflow):
         return True
 
     @property
-    def nper(self):
-        if self.perioddata is not None:
-            return len(self.perioddata)
-
-    @property
     def nlay(self):
         return self.cfg['dis'].get('nlay', 1)
-
-    @property
-    def nrow(self):
-        return self.modelgrid.nrow
-
-    @property
-    def ncol(self):
-        return self.modelgrid.ncol
 
     @property
     def length_units(self):
@@ -114,190 +103,9 @@ class MFnwtModel(MFmodelMixin, Modflow):
         return itmuni_text[self.cfg['dis']['itmuni']]
 
     @property
-    def sr(self):
-        if self._sr is None:
-            pass
-            #kwargs = self.cfg.get('grid').copy()
-            #if kwargs is not None:
-            #    if np.isscalar(kwargs['delr']):
-            #        kwargs['delr'] = np.ones(kwargs['ncol'], dtype=float) * kwargs['delr']
-            #    if np.isscalar(kwargs['delc']):
-            #        kwargs['delc'] = np.ones(kwargs['nrow'], dtype=float) * kwargs['delc']
-            #    kwargs.pop('nrow')
-            #    kwargs.pop('ncol')
-            #    self._sr = SpatialReference(**kwargs)
-        return self._sr
-
-    @property
-    def modelgrid(self):
-        if self._modelgrid is None:
-            kwargs = self.cfg.get('grid').copy()
-            if kwargs is not None:
-                if np.isscalar(kwargs['delr']):
-                    kwargs['delr'] = np.ones(kwargs['ncol'], dtype=float) * kwargs['delr']
-                if np.isscalar(kwargs['delc']):
-                    kwargs['delc'] = np.ones(kwargs['nrow'], dtype=float) * kwargs['delc']
-                kwargs['lenuni'] = 2 # use units of meters for model grid
-                kwargs = get_input_arguments(kwargs, MFsetupGrid)
-                self._modelgrid = MFsetupGrid(**kwargs)
-        return self._modelgrid
-
-    @property
-    def bbox(self):
-        if self._bbox is None and self.modelgrid is not None:
-            self._bbox = self.modelgrid.bbox
-        return self._bbox
-
-    @property
-    def perioddata(self):
-        """DataFrame summarizing stress period information.
-        Columns:
-          start_datetime : pandas datetimes; start date/time of each stress period
-          (does not include steady-state periods)
-          end_datetime : pandas datetimes; end date/time of each stress period
-          (does not include steady-state periods)
-          time : float; cumulative MODFLOW time (includes steady-state periods)
-          per : zero-based stress period
-          perlen : stress period length in model time units
-          nstp : number of timesteps in the stress period
-          tsmult : timestep multiplier for stress period
-          steady : True=steady-state, False=Transient
-          oc : MODFLOW-6 output control options
-        """
-        if self._perioddata is None:
-            self._set_perioddata()
-        return self._perioddata
-
-    @property
-    def parent(self):
-        return self._parent
-
-    @property
-    def parent_layers(self):
-        """Mapping between layers in source model and
-        layers in destination model."""
-        self._parent_layers = None
-        if self._parent_layers is None:
-            parent_layers = self.cfg['dis'].get('source_data', {}).get('botm', {}).get('from_parent')
-            if parent_layers is None:
-                parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
-            self._parent_layers = parent_layers
-        return self._parent_layers
-
-    @property
-    def package_list(self):
-        return [p for p in self._package_setup_order
-                if p in self.cfg['model']['packages']]
-
-    @property
-    def perimeter_bc_type(self):
-        """Dictates how perimeter boundaries are set up.
-
-        if 'head'; a constant head package is created
-            from the parent model starting heads
-        if 'flux'; a specified flux boundary is created
-            from parent model cell by cell flow output
-            """
-        perimeter_boundary_type = self.cfg['model'].get('perimeter_boundary_type')
-        if perimeter_boundary_type is not None:
-            if 'head' in perimeter_boundary_type:
-                return 'head'
-            if 'flux' in perimeter_boundary_type:
-                return 'flux'
-
-    @property
     def ipakcb(self):
         """By default write everything to one cell budget file."""
         return self.cfg['upw'].get('ipakcb', 53)
-
-    @property
-    def tmpdir(self):
-        return self.cfg['intermediate_data']['output_folder']
-
-    @property
-    def interp_weights(self):
-        """For a given parent, only calculate interpolation weights
-        once to speed up re-gridding of arrays to inset."""
-        if self._interp_weights is None:
-            parent_xy, inset_xy = get_source_dest_model_xys(self.parent,
-                                                                        self)
-            self._interp_weights = interp_weights(parent_xy, inset_xy)
-        return self._interp_weights
-
-    @property
-    def parent_mask(self):
-        """Boolean array indicating window in parent model grid (subset of cells)
-        that encompass the inset model domain. Used to speed up interpolation
-        of parent grid values onto inset grid."""
-        if self._parent_mask is None:
-            x, y = np.squeeze(self.bbox.exterior.coords.xy)
-            pi, pj = get_ij(self.parent.modelgrid, x, y)
-            pad = 2
-            i0, i1 = pi.min() - pad, pi.max() + pad
-            j0, j1 = pj.min() - pad, pj.max() + pad
-            mask = np.zeros((self.parent.nrow, self.parent.ncol), dtype=bool)
-            mask[i0:i1, j0:j1] = True
-            self._parent_mask = mask
-        return self._parent_mask
-
-    @property
-    def nlakes(self):
-        return np.max(self.lakarr)
-
-    @property
-    def lakarr(self):
-        """3-D array of lake extents in each layer. Non-zero values
-        correspond to lak package IDs. Extent of lake in
-        each layer is based on bathymetry and model layer thickness.
-        """
-        if self._lakarr is None:
-            self.setup_external_filepaths('lak', 'lakarr',
-                                          self.cfg['lak']['{}_filename_fmt'.format('lakarr')],
-                                          nfiles=self.nlay)
-            if self.isbc is None:
-                return None
-            else:
-                # assign lakarr values from 3D isbc array
-                lakarr = np.zeros((self.nlay, self.nrow, self.ncol))
-                for k in range(self.nlay):
-                    lakarr[k][self.isbc[k] == 1] = self._lakarr2d[self.isbc[k] == 1]
-            for k, ilakarr in enumerate(lakarr):
-                save_array(self.cfg['intermediate_data']['lakarr'][0][k], ilakarr, fmt='%d')
-            self._lakarr = lakarr
-        return self._lakarr
-
-    @property
-    def _isbc2d(self):
-        """2-D array indicating which cells have lakes.
-        -1 : well
-        0 : no lake
-        1 : lak package lake (lakarr > 0)
-        2 : high-k lake
-        3 : sfr
-        """
-        if self._isbc_2d is None:
-            isbc = np.zeros((self.nrow, self.ncol))
-            lakesdata = None
-            lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
-            if lakes_shapefile is not None:
-                if isinstance(lakes_shapefile, str):
-                    lakes_shapefile = {'filename': lakes_shapefile}
-                lakesdata = self.load_features(**lakes_shapefile)
-            if lakesdata is not None:
-                isanylake = intersect(lakesdata, self.modelgrid)
-                isbc[isanylake > 0] = 2
-                isbc[self._lakarr2d > 0] = 1
-            if 'SFR' in self.get_package_list():
-                i, j = self.sfr.reach_data['i'], \
-                          self.sfr.reach_data['j']
-                isbc[i, j][isbc[i, j] != 1] = 3
-            if 'WEL' in self.get_package_list():
-                i, j = self.wel.stress_period_data[0]['i'], \
-                       self.wel.stress_period_data[0]['j']
-                isbc[i, j][isbc[i, j] == 0] = -1
-            self._isbc_2d = isbc
-            self._lake_bathymetry = None
-        return self._isbc_2d
 
     @property
     def ibound(self):
@@ -315,115 +123,6 @@ class MFnwtModel(MFmodelMixin, Modflow):
         #        ibound = deactivate_idomain_above(ibound, self.sfr.reach_data)
         #    self._ibound = ibound
         #return self._ibound
-
-    @property
-    def isbc(self):
-        """3D array indicating which cells have a lake in each layer.
-        -1 : well
-        0 : no lake
-        1 : lak package lake (lakarr > 0)
-        2 : high-k lake
-        3 : sfr
-        """
-        if 'DIS' not in self.get_package_list():
-            return None
-        elif self._isbc is None:
-            isbc = np.zeros((self.nlay, self.nrow, self.ncol))
-            isbc[0] = self._isbc2d
-
-            lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
-            layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
-            # lakes must be at least 10% into a layer to get simulated in that layer
-            below = layer_tops > lake_botm_elevations + 0.1
-            for i, ibelow in enumerate(below[1:]):
-                if np.any(ibelow):
-                    isbc[i+1][ibelow] = self._isbc2d[ibelow]
-            # add other bcs
-            if 'SFR' in self.get_package_list():
-                k, i, j = self.sfr.reach_data['k'], \
-                          self.sfr.reach_data['i'], \
-                          self.sfr.reach_data['j']
-                isbc[k, i, j][isbc[k, i, j] != 1] = 3
-            if 'WEL' in self.get_package_list():
-                k, i, j = self.wel.stress_period_data[0]['k'], \
-                          self.wel.stress_period_data[0]['i'], \
-                          self.wel.stress_period_data[0]['j']
-                isbc[k, i, j][isbc[k, i, j] == 0] = -1
-            self._isbc = isbc
-            self._lakarr = None
-        return self._isbc
-
-    @property
-    def lake_bathymetry(self):
-        """Put lake bathymetry setup logic here instead of DIS package.
-        """
-        default_lake_depth = self.cfg['model'].get('default_lake_depth', 2)
-        if self._lake_bathymetry is None:
-            bathymetry_file = self.cfg['lak']['source_data'].get('bathymetry_raster')
-            lmult = 1.0
-            if isinstance(bathymetry_file, dict):
-                lmult = convert_length_units(bathymetry_file.get('length_units', 0),
-                                             self.length_units)
-                bathymetry_file = bathymetry_file['filename']
-            if bathymetry_file is None:
-                bathy = np.zeros((self.nrow, self.ncol))
-            else:
-                # sample pre-made bathymetry at grid points
-                bathy = get_values_at_points(bathymetry_file,
-                                             x=self.modelgrid.xcellcenters.ravel(),
-                                             y=self.modelgrid.ycellcenters.ravel(),
-                                             out_of_bounds_errors='coerce')
-                bathy = np.reshape(bathy, (self.nrow, self.ncol)) * lmult
-                bathy[(bathy < 0) | np.isnan(bathy)] = 0
-
-                # fill bathymetry grid in remaining lake cells with default lake depth
-                # also ensure that all non lake cells have bathy=0
-                fill = (bathy == 0) & (self._isbc2d > 0) & (self._isbc2d < 3)
-                bathy[fill] = default_lake_depth
-                bathy[(self._isbc2d > 1) & (self._isbc2d > 2)] = 0
-            self._lake_bathymetry = bathy
-        return self._lake_bathymetry
-
-    @property
-    def precipitation(self):
-        """Lake precipitation at each stress period, in model units.
-        """
-        if self._precipitation is None or \
-                len(self._precipitation) != self.nper:
-            precip = self.cfg['lak']['precip']
-            # copy to all stress periods
-            if np.isscalar(precip):
-                precip = [precip] * self.nper
-            elif len(precip) < self.nper:
-                for i in range(self.nper - len(precip)):
-                    precip.append(precip[-1])
-            self._precipitation = np.array(precip)
-        return self._precipitation
-
-    @property
-    def evaporation(self):
-        """Lake evaporation at each stress period, in model units.
-        """
-        if self._evaporation is None or \
-                len(self._evaporation) != self.nper:
-            evap = self.cfg['lak']['evap']
-            # copy to all stress periods
-            if np.isscalar(evap):
-                evap = [evap] * self.nper
-            elif len(evap) < self.nper:
-                for i in range(self.nper - len(evap)):
-                    evap.append(evap[-1])
-            self._evaporation = np.array(evap)
-        return self._evaporation
-
-    @property
-    def lake_recharge(self):
-        """Recharge value to apply to high-K lakes, in model units.
-        """
-        if self._lake_recharge is None:
-            if self.precipitation is not None and self.evaporation is not None:
-                self._lake_recharge = self.precipitation - self.evaporation
-        return self._lake_recharge
 
     def _load_cfg(self, cfg):
         """Load configuration file; update dictionary.
@@ -604,112 +303,6 @@ class MFnwtModel(MFmodelMixin, Modflow):
         self._perioddata = perioddata
         self._nper = None
 
-    def load_array(self, filename):
-        return load_array(filename, shape=(self.nrow, self.ncol))
-
-    def load_features(self, filename, filter=None,
-                      id_column=None, include_ids=None,
-                      cache=True):
-        """Load vector and attribute data from a shapefile;
-        cache it to the _features dictionary.
-        """
-        if filename not in self._features.keys():
-            if os.path.exists(filename):
-                features_proj_str = get_proj4(filename)
-                model_proj_str = "+init=epsg:{}".format(self.cfg['setup_grid']['epsg'])
-                if filter is None:
-                    if self.bbox is not None:
-                        bbox = self.bbox
-                    elif self.parent.modelgrid is not None:
-                        bbox = self.parent.modelgrid.bbox
-                        model_proj_str = self.parent.modelgrid.proj4
-                        assert model_proj_str is not None
-
-                    if features_proj_str.lower() != model_proj_str:
-                        filter = project(bbox, model_proj_str, features_proj_str).bounds
-                    else:
-                        filter = bbox.bounds
-
-                df = shp2df(filename, filter=filter)
-                df.columns = [c.lower() for c in df.columns]
-                if id_column is not None and include_ids is not None:
-                    id_column = id_column.lower()
-                    df = df.loc[df[id_column].isin(include_ids)]
-                if features_proj_str.lower() != model_proj_str:
-                    df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
-                if cache:
-                    print('caching data in {}...'.format(filename))
-                    self._features[filename] = df
-            else:
-                return None
-        else:
-            df = self._features[filename]
-        return df
-
-    def get_boundary_cells(self):
-        """Get the i, j locations of cells along the model perimeter.
-
-        Returns
-        -------
-        k, i, j : 1D numpy arrays of ints
-            zero-based layer, row, column locations of boundary cells
-        """
-        # top row, right side, left side, bottom row
-        i_top = [0] * self.ncol
-        j_top = list(range(self.ncol))
-        i_left = list(range(1, self.nrow - 1))
-        j_left = [0] * (self.nrow - 2)
-        i_right = i_left
-        j_right = [self.ncol - 1] * (self.nrow - 2)
-        i_botm = [self.nrow - 1] * self.ncol
-        j_botm = j_top
-        i = i_top + i_left + i_right + i_botm
-        j = j_top + j_left + j_right + j_botm
-
-        assert len(i) == 2 * self.nrow + 2 * self.ncol - 4
-        nlaycells = len(i)
-        k = sorted(list(range(self.nlay)) * len(i))
-        i = i * self.nlay
-        j = j * self.nlay
-        assert np.sum(k[nlaycells:nlaycells * 2]) == nlaycells
-        return k, i, j
-
-    def regrid_from_parent(self, parent_array,
-                           mask=None,
-                           method='linear'):
-        """Interpolate values in parent array onto
-        the inset model grid, using SpatialReference instances
-        attached to the parent and inset models.
-
-        Parameters
-        ----------
-        parent_array : ndarray
-            Values from parent model to be interpolated to inset grid.
-            1 or 2-D numpy array of same sizes as a
-            layer of the parent model.
-        mask : ndarray (bool)
-            1 or 2-D numpy array of same sizes as a
-            layer of the parent model. True values
-            indicate cells to include in interpolation,
-            False values indicate cells that will be
-            dropped.
-        method : str ('linear', 'nearest')
-            Interpolation method.
-        """
-        if mask is not None:
-            return regrid(parent_array, self.parent.modelgrid, self.modelgrid,
-                          mask1=mask,
-                          method=method)
-        if method == 'linear':
-            parent_values = parent_array.flatten()[self.parent_mask.flatten()]
-            regridded = interpolate(parent_values,
-                                    *self.interp_weights)
-        elif method == 'nearest':
-            regridded = regrid(parent_array, self.parent.modelgrid, self.modelgrid,
-                               method='nearest')
-        regridded = np.reshape(regridded, (self.nrow, self.ncol))
-        return regridded
-
     def setup_grid(self, features=None,
                    features_shapefile=None,
                    id_column='HYDROID', include_ids=[],
@@ -827,45 +420,6 @@ class MFnwtModel(MFmodelMixin, Modflow):
                                      os.path.join(self.cfg['postprocessing']['output_folders']['shapefiles'],
                                                   '{}_bbox.shp'.format(self.name)))
         print("finished in {:.2f}s\n".format(time.time() - t0))
-
-    def setup_external_filepaths(self, package, variable_name,
-                                 filename_format, nfiles=1):
-        """Set up external file paths for a MODFLOW package variable. Sets paths
-        for intermediate files, which are written from the (processed) source data.
-        Intermediate files are supplied to Flopy as external files for a given package
-        variable. Flopy writes external files to a specified location when the MODFLOW
-        package file is written. This method gets the external file paths that
-        will be written by FloPy, and puts them in the configuration dictionary
-        under their respective variables.
-
-        Parameters
-        ----------
-        package : str
-            Three-letter package abreviation (e.g. 'DIS' for discretization)
-        variable_name : str
-            FloPy name of variable represented by external files (e.g. 'top' or 'botm')
-        filename_format : str
-            File path to the external file(s). Can be a string representing a single file
-            (e.g. 'top.dat'), or for variables where a file is written for each layer or
-            stress period, a format string that will be formated with the zero-based layer
-            number (e.g. 'botm{}.dat') for files botm0.dat, botm1.dat, ...
-        nfiles : int
-            Number of external files for the variable (e.g. nlay or nper)
-
-        Returns
-        -------
-        Adds intermediated file paths to model.cfg[<package>]['intermediate_data']
-        Adds external file paths to model.cfg[<package>][<variable_name>]
-        """
-        setup_external_filepaths(self, package, variable_name,
-                                 filename_format, nfiles=nfiles)
-
-    def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
-                      source_model=None, source_package=None,
-                      **kwargs):
-        return setup_array(self, package, var, vmin=vmin, vmax=vmax,
-                           source_model=source_model, source_package=source_package,
-                           **kwargs)
 
     def setup_dis(self):
         """"""
@@ -1699,14 +1253,6 @@ class MFnwtModel(MFmodelMixin, Modflow):
                              )
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return gag
-
-    def load_grid(self, gridfile=None):
-        """Load model grid information from a json or yml file."""
-        if gridfile is None:
-            if os.path.exists(self.cfg['setup_grid']['grid_file']):
-                gridfile = self.cfg['setup_grid']['grid_file']
-        print('Loading model grid information from {}'.format(gridfile))
-        self.cfg['grid'] = load(gridfile)
 
     @staticmethod
     def setup_from_yaml(yamlfile, verbose=False):

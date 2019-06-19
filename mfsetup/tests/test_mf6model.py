@@ -10,17 +10,44 @@ import pandas as pd
 from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
+from ..discretization import get_layer_thicknesses
 from ..fileio import load
 from ..mf6model import MF6model
 
 
 @pytest.fixture(scope="module")
+def cfg(mf6_test_cfg_path):
+    cfg = MF6model.load_cfg(mf6_test_cfg_path)
+    # add some stuff just for the tests
+    cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
+    return cfg
+
+
+@pytest.fixture(scope="module", autouse=True)
+def reset_dirs(cfg):
+    cfg = cfg.copy()
+    folders = [cfg['intermediate_data']['output_folder'],
+               cfg.get('external_path', cfg['model'].get('external_path')),
+               cfg['gisdir']
+               ]
+    for folder in folders:
+        #if not os.path.isdir(folder):
+        #    os.makedirs(folder)
+        #else:
+        #    shutil.rmtree(folder)
+        if os.path.isdir(folder):
+            shutil.rmtree(folder)
+        os.makedirs(folder)
+
+
+@pytest.fixture(scope="function")
 def simulation(cfg):
+    cfg = cfg.copy()
     sim = mf6.MFSimulation(**cfg['simulation'])
     return sim
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def model(cfg, simulation):
     cfg = cfg.copy()
     #simulation = deepcopy(simulation)
@@ -29,7 +56,7 @@ def model(cfg, simulation):
     return m
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def model_with_grid(model):
     #model = deepcopy(model)
     model.setup_grid()
@@ -44,6 +71,15 @@ def model_setup(cfg_path):
     m = MF6model.setup_from_yaml(cfg_path)
     m.write()
     return m
+
+
+def test_load_cfg(cfg, mf6_test_cfg_path):
+    relative_model_ws = '../tmp/shellmound'
+    ws = os.path.normpath(os.path.join(os.path.abspath(os.path.split(mf6_test_cfg_path)[0]),
+                                                                       relative_model_ws))
+    cfg = cfg
+    assert cfg['simulation']['sim_ws'] == ws
+    assert cfg['intermediate_data']['output_folder'] == os.path.join(ws, 'tmp')
 
 
 def test_simulation(simulation):
@@ -61,6 +97,9 @@ def test_model_with_grid(model_with_grid):
 def test_external_file_path_setup(model):
 
     m = model #deepcopy(model)
+
+    assert os.path.exists(os.path.join(m.cfg['simulation']['sim_ws'],
+                                       m.external_path))
     top_filename = m.cfg['dis']['top_filename']
     botm_file_fmt = m.cfg['dis']['botm_filename_fmt']
     m.setup_external_filepaths('dis', 'top',
@@ -75,13 +114,13 @@ def test_external_file_path_setup(model):
            [os.path.normpath(os.path.join(m.tmpdir, botm_file_fmt).format(i))
                                   for i in range(m.nlay)]
     assert m.cfg['dis']['top'] == \
-           [os.path.normpath(os.path.join(m.model_ws,
+           [{'filename': os.path.normpath(os.path.join(m.model_ws,
                         m.external_path,
-                        os.path.split(top_filename)[-1]))]
+                        os.path.split(top_filename)[-1]))}]
     assert m.cfg['dis']['botm'] == \
-           [os.path.normpath(os.path.join(m.model_ws,
+           [{'filename': os.path.normpath(os.path.join(m.model_ws,
                          m.external_path,
-                         botm_file_fmt.format(i))) for i in range(m.nlay)]
+                         botm_file_fmt.format(i)))} for i in range(m.nlay)]
 
 
 def test_perrioddata(model):
@@ -148,30 +187,37 @@ def test_dis_setup(model_with_grid):
 
     m = model_with_grid #deepcopy(model_with_grid)
     # test intermediate array creation
-    m.cfg['dis']['remake_arrays'] = True
-    m.cfg['dis']['regrid_top_from_dem'] = True
+    m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
+    assert 'DIS' in m.get_package_list()
     arrayfiles = m.cfg['intermediate_data']['top'] + \
-                 m.cfg['intermediate_data']['botm']
+                 m.cfg['intermediate_data']['botm'] + \
+                 m.cfg['intermediate_data']['idomain']
     for f in arrayfiles:
         assert os.path.exists(f)
 
-    # test writing of MODFLOW arrays from
-    # intermediate arrays
-    m.cfg['dis']['remake_arrays'] = False
-    m.cfg['dis']['regrid_top_from_dem'] = False
+    # test idomain
+    top = dis.top.array.copy()
+    top[top == m._nodata_value] = np.nan
+    botm = dis.botm.array.copy()
+    botm[botm == m._nodata_value] = np.nan
+    thickness = get_layer_thicknesses(top, botm)
+    invalid_botms = np.ones_like(botm)
+    invalid_botms[np.isnan(botm)] = 0
+    invalid_botms[thickness < 1.0001] = 0
+    assert np.array_equal(m.idomain.sum(axis=(1, 2)),
+                          invalid_botms.sum(axis=(1, 2)))
+
+    # test writing of top array from
+    # intermediate array
+    m.remove_package('dis')
+    m.cfg['dis']['remake_top'] = False
     dis = m.setup_dis()
     dis.write()
-    arrayfiles = m.cfg['dis']['top'] + \
-                 m.cfg['dis']['botm']
+    arrayfiles = m.cfg['dis']['top']
     for f in arrayfiles:
-        assert os.path.exists(f)
+        assert os.path.exists(f['filename'])
     assert os.path.exists(os.path.join(m.model_ws, dis.filename))
-
-    # test shapefile export
-    dis.export('{}/dis.shp'.format(m.cfg['gisdir']))
-    # need to add assertion for shapefile bounds being in right place
-    assert True
 
 
 def test_tdis_setup(model):
@@ -198,7 +244,7 @@ def test_sto_setup(model_with_grid):
     #assert dis.steady.array.tolist() == [True, False, False, True]
 
 
-def test_yaml_setup(model_setup):
+def test_yaml_setup(mf6_test_cfg_path):
     m = model_setup  #deepcopy(model_setup)
     try:
         success, buff = m.run_model(silent=False)

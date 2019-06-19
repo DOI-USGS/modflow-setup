@@ -1,10 +1,11 @@
 import os
+import shutil
 import numbers
 import numpy as np
 import pandas as pd
 from flopy.utils import binaryfile as bf
 from .fileio import save_array
-from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness
+from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_layers
 from .gis import get_values_at_points, shp2df
 from .grid import get_ij
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
@@ -508,7 +509,14 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                 write_fmt='%.6e',
                 **kwargs):
 
-    data = model.cfg[package].get(var)
+    if model.version == 'mf6':
+        data = model.cfg[package].get('griddata', {}).get(var)
+        external_files_key = 'external_files'
+    else:
+        data = model.cfg[package].get(var)
+        external_files_key = 'intermediate_data'
+
+    cfg = model.cfg[package].get('source_data', {})
 
     # for getting data from a different package in the source model
     if source_package is None:
@@ -521,8 +529,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                          **kwargs)
 
     # data specified as source_data
-    else:
-        cfg = model.cfg[package].get('source_data', {})
+    elif var in cfg:
         cfg_data = cfg.get(var, {'from_parent': {}})
         from_model_keys = [k for k in cfg_data.keys() if 'from_' in k]
         from_model = True if len(from_model_keys) > 0 else False
@@ -558,7 +565,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                                              **kwargs)
 
             # data read from Flopy instance of parent model
-            else:
+            elif source_model is not None:
                 # the botm array has to be handled differently
                 # because dest. layers may be interpolated between
                 # model top and first botm
@@ -585,34 +592,50 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
         else:
             raise Exception("No source data found for {} package: {}".format(package, var))
 
+    # default for idomain if no other information provided
+    # rest of the setup is handled by idomain property
+    elif var in ['idomain', 'ibound']:
+        sd = MFArrayData(variable=var, values=0, dest_model=model, **kwargs)
+
     data = sd.get_data()
 
     # special handling of some variables
     # (for lakes)
     if var == 'botm':
         bathy = model.lake_bathymetry
-        top = model.load_array(model.cfg['intermediate_data']['top'][0])
+        top = model.load_array(model.cfg[external_files_key]['top'][0])
         lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
+
+        # fill missing layers if any
+        if len(data) < model.nlay:
+            all_surfaces = np.zeros((model.nlay + 1, model.nrow, model.ncol), dtype=float) * np.nan
+            all_surfaces[0] = top
+            for k, botm in data.items():
+                all_surfaces[k + 1] = botm
+            all_surfaces = fill_layers(all_surfaces)
+            botm = all_surfaces[1:]
+        else:
+            botm = np.stack([data[i] for i in range(len(data))])
 
         # adjust layer botms to lake bathymetry (if any)
         # set layer bottom at lake cells to the botm of the lake in that layer
-        for k, botm in data.items():
-            inlayer = lake_botm_elevations > botm[bathy != 0]
+        for k, kbotm in enumerate(botm):
+            inlayer = lake_botm_elevations > kbotm[bathy != 0]
             if not np.any(inlayer):
                 continue
-            botm[bathy != 0][inlayer] = lake_botm_elevations[inlayer]
+            botm[k][bathy != 0][inlayer] = lake_botm_elevations[inlayer]
 
         # fix any layering conflicts and save out botm files
-        botm = np.stack([data[i] for i in range(len(data))])
-        min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
-        botm = fix_model_layer_conflicts(top, botm,
-                                         minimum_thickness=min_thickness)
-        isvalid = verify_minimum_layer_thickness(top, botm,
-                                                 np.ones(botm.shape, dtype=int),
-                                                 min_thickness)
-        if not isvalid:
-            raise Exception('Model layers less than {} {} thickness'.format(min_thickness,
-                                                                            model.length_units))
+        if model.version == 'mf6' and model._drop_thin_cells:
+            min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
+            botm = fix_model_layer_conflicts(top, botm,
+                                             minimum_thickness=min_thickness)
+            isvalid = verify_minimum_layer_thickness(top, botm,
+                                                     np.ones(botm.shape, dtype=int),
+                                                     min_thickness)
+            if not isvalid:
+                raise Exception('Model layers less than {} {} thickness'.format(min_thickness,
+                                                                                model.length_units))
         data = {i: arr for i, arr in enumerate(botm)}
     elif var == 'rech':
         for i, arr in data.items():
@@ -622,6 +645,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
             # zero-values to lak package lakes
             data[i][model.isbc[0] == 1] = 0.
     elif var == 'ibound':
+        # TODO: what does mf6 require for lakes?
         for i, arr in data.items():
             data[i][model.isbc[i] == 1] = 0.
     elif var in ['hk', 'k']:
@@ -631,17 +655,23 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
         for i, arr in data.items():
             data[i][model.isbc[i] == 2] = 1.
 
-
-
     # intermediate data
     # set paths to intermediate files and external files
-    model.setup_external_filepaths(package, var,
-                                   model.cfg[package]['{}_filename_fmt'.format(var)],
-                                   nfiles=len(data))
+    filepaths = model.setup_external_filepaths(package, var,
+                                               model.cfg[package]['{}_filename_fmt'.format(var)],
+                                               nfiles=len(data))
+
     # write out array data to intermediate files
     # assign lake recharge values (water balance surplus) for any high-K lakes
     for i, arr in data.items():
-        save_array(model.cfg['intermediate_data'][var][i], arr, fmt=write_fmt)
+        save_array(filepaths[i], arr,
+                   nodata=model._nodata_value,
+                   fmt=write_fmt)
+        # still write intermediate files for MODFLOW-6
+        # even though input and output filepaths are same
+        if model.version == 'mf6':
+            shutil.copy(filepaths[i]['filename'],
+                        model.cfg['intermediate_data'][var][i])
 
 
 def weighted_average_between_layers(arr0, arr1, weight0=0.5):

@@ -1,6 +1,7 @@
 """
 Functions related to the Discretization Package.
 """
+import time
 import numpy as np
 
 
@@ -51,6 +52,7 @@ def deactivate_idomain_above(idomain, reach_data):
     new BAS6 package file, model.write() or flopy.model.ModflowBas6.write()
     must be run.
     """
+    idomain = idomain.copy()
     deact_lays = [list(range(i)) for i in reach_data['k']]
     for ks, i, j in zip(deact_lays, reach_data['i'], reach_data['j']):
         for k in ks:
@@ -83,6 +85,7 @@ def fill_layers(array):
             if item < value:
                 return item
 
+    array = array.copy()
     nlay = array.shape[0]
     layers_with_values = [k for k in range(nlay) if not np.all(np.isnan(array[k]), axis=(0, 1))]
     empty_layers = [k for k in range(nlay) if k not in layers_with_values]
@@ -191,3 +194,98 @@ def verify_minimum_layer_thickness(top, botm, isactive, minimum_layer_thickness)
     isvalid = np.nanmax(np.diff(all_layers, axis=0)[isactive]) * -1 + 1e-4 >= \
               minimum_layer_thickness
     return isvalid
+
+
+def make_idomain(top, botm, nodata=-9999,
+                 minimum_layer_thickness=1,
+                 drop_thin_cells=True, tol=1e-4):
+    """Make the idomain array for MODFLOW 6 that specifies
+    cells that will be excluded from the simulation. Cells are
+    excluded based on:
+    1) np.nans or nodata values in the botm array
+    2) np.nans or nodata values in the top array
+       (applies to the highest cells with valid botm elevations;
+       in other words, these cells have no thicknesses)
+    3) layer thicknesses less than the specified minimum thickness
+       plus a tolerance (tol)
+
+    Parameters
+    ----------
+    model : mfsetup.MF6model model instance
+
+    Returns
+    -------
+    idomain : np.ndarray (int)
+
+    """
+    top = top.copy()
+    botm = botm.copy()
+    top[top == nodata] = np.nan
+    botm[botm == nodata] = np.nan
+    criteria = np.isnan(botm)
+
+    # compute layer thicknesses, considering pinched cells (nans)
+    b = get_layer_thicknesses(top, botm)
+    criteria = criteria | np.isnan(b)  # cells without thickness values
+
+    if drop_thin_cells:
+        criteria = criteria | (b < minimum_layer_thickness + tol)
+        #all_layers = np.stack([top] + [b for b in botm])
+        #min_layer_thickness = minimum_layer_thickness
+        #isthin = np.diff(all_layers, axis=0) * -1 < min_layer_thickness + tol
+        #criteria = criteria | isthin
+    idomain = np.abs(~criteria).astype(int)
+    return idomain
+
+
+def get_layer_thicknesses(top, botm, idomain=None):
+    """For each i, j location in the grid, get thicknesses
+    between pairs of subsequent valid elevation values. Make
+    a thickness array of the same shape as the model grid, assign the
+    computed thicknesses for each pair of valid elevations to the
+    position of the elevation representing the cell botm. For example,
+    given the column of cells [nan nan  8. nan nan nan nan nan  2. nan],
+    a thickness of 6 would be assigned to the second to last layer
+    (position -2).
+
+    Parameters
+    ----------
+    top : nrow x ncol array of model top elevations
+    botm : nlay x nrow x ncol array of model botm elevations
+    idomain : nlay x nrow x ncol array indicating cells to be
+        included in the model solution. idomain=0 are converted to np.nans
+        in the example column of cells above. (optional)
+        If idomain is not specified, excluded cells are expected to be
+        designated in the top and botm arrays as np.nans.
+    """
+    print('computing cell thicknesses...')
+    t0 = time.time()
+    top = top.copy()
+    botm = botm.copy()
+    if idomain is not None:
+        idomain = idomain == 1
+        top[~idomain[0]] = np.nan
+        botm[~idomain] = np.nan
+    all_layers = np.stack([top] + [b for b in botm])
+    thicknesses = np.zeros_like(botm) * np.nan
+    nrow, ncol = top.shape
+    for i in range(nrow):
+        for j in range(ncol):
+            if (i, j) == (2, 2):
+                j=2
+            cells = all_layers[:, i, j]
+            valid_b = list(-np.diff(cells[~np.isnan(cells)]))
+            b_ij = np.zeros_like(cells[1:]) * np.nan
+            has_top = False
+            for k, elev in enumerate(cells):
+                if not has_top and not np.isnan(elev):
+                    has_top = True
+                elif has_top and not np.isnan(elev):
+                    b_ij[k-1] = valid_b.pop(0)
+            thicknesses[:, i, j] = b_ij
+    print("finished in {:.2f}s\n".format(time.time() - t0))
+    return thicknesses
+
+
+
+

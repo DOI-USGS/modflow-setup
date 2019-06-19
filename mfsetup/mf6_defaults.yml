@@ -7,14 +7,16 @@ model:
   modelname: 'model'
   version: 'mf6'
 
+parent:
+
 intermediate_data:
   output_folder: 'tmp/'
 
 postprocessing:
   output_folders:
-    pdfs: 'pdfs'
-    rasters: 'rasters'
-    shapefiles: 'shps'
+    pdfs: 'postproc/pdfs'
+    rasters: 'postproc/rasters'
+    shapefiles: 'postproc/shps'
 
 setup_grid:
   grid_file: '{}_grid.yml' # inset grid info will be written to this file
@@ -46,6 +48,7 @@ dis:
   botm_filename_fmt: "botm{:d}.dat"
   idomain_filename_fmt: "idomain{:d}.dat"
   minimum_layer_thickness: 1 # m
+  drop_thin_cells: True
 
 tdis:
   options:
