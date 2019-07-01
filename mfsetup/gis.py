@@ -406,7 +406,7 @@ def get_values_at_points(rasterfile, x=None, y=None,
         if not isinstance(x, np.ndarray):
             x = np.array(x)
         if not isinstance(y, np.ndarray):
-            y = np.ndarray(y)
+            y = np.array(y)
     elif points is not None:
         if not isinstance(points, np.ndarray):
             x, y = np.array(points)
@@ -564,57 +564,6 @@ def zonal_stats(feature, raster, out_shape=None,
         results_dict[stat] = res
     #print("finished in {:.2f}s".format(time.time() - t0))
     return results_dict
-
-
-def get_raster_window_from_bounds():
-    pass
-
-
-def get_lake_polygon_from_lidar(old_polygon, demfile,
-                                max_stage=None, buffer=100):
-    # get transform information for dem
-    with rasterio.open(demfile) as src:
-        meta = src.meta
-    trans = meta['transform']
-    dx = trans.a
-    dy = trans.e
-
-    # get the bounding box for the feature
-    l, b, r, t = old_polygon.buffer(buffer).bounds
-
-    # compute the offset, width and height in raster pixels
-    coff = (l - trans.c) / dx
-    roff = (t - trans.f) / dy
-    h = (t - b) / -dy
-    w = (r - l) / dx
-
-    # make the window for rasterio
-    window = Window(coff, roff, w, h)
-
-    # read the raster pixels for the window
-    with rasterio.open(demfile) as src:
-        lidar_for_lake = src.read(1, window=window)
-        lake_transform = src.window_transform(window)
-        lidar_for_lake[lidar_for_lake < 0] = np.nan  # get rid of any nodata values
-
-    if max_stage is None:
-        zs = zonal_stats([old_polygon],
-                         demfile,
-                         stats=['percentile_20',
-                                'percentile_80'])
-        depth_pad = 2 if np.abs(zs['percentile_20'] - zs['percentile_80']) > 0.01 else 1
-        max_stage = zs['percentile_20'] + depth_pad
-    lake_area = np.ones(lidar_for_lake.shape) * np.nan
-    lake_area[lidar_for_lake < max_stage] = 1.
-
-    # vectorize the raster
-    shapes = features.shapes(lake_area.astype(np.int16), transform=lake_transform)
-    # convert the shapes corresponding to raster values of 1 to shapely objects
-    shapes = [shape(s[0]) for s in list(shapes) if s[1] == 1]
-    # get the shape with the largest area
-    areas = [s.area for s in shapes]
-    the_lake = shapes[np.argmax(areas)]
-    return the_lake
 
 
 def get_proj4(prj):
