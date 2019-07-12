@@ -15,6 +15,8 @@ mf6 = flopy.mf6
 from ..discretization import get_layer_thicknesses
 from ..fileio import load
 from ..mf6model import MF6model
+from .. import testing
+from ..units import convert_length_units
 from ..utils import get_input_arguments
 
 
@@ -381,7 +383,6 @@ def test_oc_setup(model_with_dis):
     assert isinstance(oc, mf6.ModflowGwfoc)
 
 
-@pytest.mark.skip("still working on recharge")
 def test_rch_setup(model_with_dis):
     m = model_with_dis  # deepcopy(model)
     rch = m.setup_rch()
@@ -393,18 +394,18 @@ def test_rch_setup(model_with_dis):
     # get the same data from the source file
     ds = xr.open_dataset(m.cfg['rch']['source_data']['recharge']['filename'])
     x = xr.DataArray(m.modelgrid.xcellcenters.ravel(), dims='z')
-    y = xr.DataArray(m.modelgrid.ycellcenters.ravel()[::-1], dims='z')
+    y = xr.DataArray(m.modelgrid.ycellcenters.ravel(), dims='z')
+
+    unit_conversion = convert_length_units('inches', 'meters')
 
     def get_period_values(start, end):
         period_data = ds['net_infiltration'].loc[start:end].mean(axis=0)
         dsi = period_data.interp(x=x, y=y, method='linear',
                                  kwargs={'fill_value': np.nan,
                                          'bounds_error': True})
-        data = dsi.values * 1 / (12 / .3048)
+        data = dsi.values * unit_conversion
         return np.reshape(data, (m.nrow, m.ncol))
-        #data = dsi.loc[start: end].values.mean(axis=0)
-        #dsi = ds['net_infiltration'].interp(x=x, y=y, method='linear')
-        #return data * 1/(12/.3048)
+
     # test steady-state avg. across all data
     values = get_period_values('2012-01-01', '2017-12-31')
 
@@ -412,7 +413,7 @@ def test_rch_setup(model_with_dis):
     # test period 1 avg. for those times
     values1 = get_period_values(m.perioddata['start_datetime'].values[1],
                                 m.perioddata['end_datetime'].values[1])
-    assert np.allclose(values1, m.rch.recharge.array[1, 0])
+    assert testing.rpd(values1.mean(), m.rch.recharge.array[1, 0].mean()) < 0.01
 
 
 @pytest.mark.skip("still working on wel")

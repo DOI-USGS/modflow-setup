@@ -30,7 +30,9 @@ MFsetup requires **Python** 3.6 (or higher)
 
 **Dependencies:**  
 pyaml  
-numpy  
+numpy
+scipy
+xarray  
 pandas  
 fiona  
 rasterio  
