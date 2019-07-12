@@ -25,7 +25,7 @@ from .obs import read_observation_data
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
 from .tmr import Tmr
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text
-from .wateruse import get_mean_pumping_rates, resample_pumping_rates
+#from .wateruse import get_mean_pumping_rates, resample_pumping_rates
 from sfrmaker import lines
 from sfrmaker.utils import assign_layers
 from .mfmodel import MFsetupMixin
@@ -82,12 +82,14 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """Test for equality to another model object."""
         if not isinstance(other, MFnwtModel):
             return False
-        if other.cfg != self.cfg:
-            return False
         if other.get_package_list() != self.get_package_list():
             return False
-        #if other.sr != self.sr:
-        #    return False
+        if other.modelgrid != self.modelgrid:
+            return False
+        if other.nlay != self.nlay:
+            return False
+        if not np.array_equal(other.perioddata, self.perioddata):
+            return False
         return True
 
     @property
@@ -158,7 +160,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
             kwargs['load_only'] = load_only
             kwargs = get_input_arguments(kwargs, fm.Modflow.load, warn=False)
 
-            print('loading parent model...')
+            print('loading parent model {}...'.format(os.path.join(kwargs['model_ws'],
+                                                                   kwargs['f'])))
             t0 = time.time()
             self._parent = fm.Modflow.load(**kwargs)
             print("finished in {:.2f}s\n".format(time.time() - t0))
@@ -328,6 +331,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print('setting up model grid...')
         t0 = time.time()
 
+        id_column = id_column.lower()
+
         # conversions for inset/parent model units to meters
         inset_lmult = convert_length_units(self.length_units, 'meters')
         parent_lmult = convert_length_units(self.parent.dis.lenuni, 'meters')
@@ -365,7 +370,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                                             id_column=id_column, include_ids=include_ids,
                                             filter=self.parent.modelgrid.bbox.bounds,
                                             cache=False)
-                    rows = df.loc[df[id_column.lower()].isin(include_ids)]
+                    rows = df.loc[df[id_column].isin(include_ids)]
                     features = rows.geometry.tolist()
                 if isinstance(features, list):
                     if len(features) > 1:
@@ -1277,6 +1282,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
         assert m.exe_name != 'mf2005.exe'
 
         kwargs = m.cfg['setup_grid']
+        source_data = m.cfg['setup_grid'].get('source_data', {})
+        if 'features_shapefile' in source_data:
+            kwargs.update(source_data['features_shapefile'])
+            kwargs['features_shapefile'] = kwargs.get('filename')
         rename = kwargs.get('variable_mappings', {})
         for k, v in rename.items():
             if k in kwargs:

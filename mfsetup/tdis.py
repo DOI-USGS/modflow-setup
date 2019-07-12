@@ -1,9 +1,13 @@
 """
 Functions related to temporal discretization
 """
+import calendar
 import numpy as np
 import pandas as pd
 from .units import pandas_units
+
+
+months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 
 
 def convert_freq_to_period_start(freq):

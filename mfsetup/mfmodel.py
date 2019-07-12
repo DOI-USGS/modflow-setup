@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 from .gis import shp2df, get_values_at_points, intersect, project, get_proj4
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
@@ -171,8 +172,10 @@ class MFsetupMixin():
             x, y = np.squeeze(self.bbox.exterior.coords.xy)
             pi, pj = get_ij(self.parent.modelgrid, x, y)
             pad = 2
-            i0, i1 = pi.min() - pad, pi.max() + pad
-            j0, j1 = pj.min() - pad, pj.max() + pad
+            i0 = np.max([pi.min() - pad, 0])
+            i1 = np.min([pi.max() + pad, self.parent.nrow])
+            j0 = np.max([pj.min() - pad, 0])
+            j1 = np.min([pj.max() + pad, self.parent.ncol])
             mask = np.zeros((self.parent.nrow, self.parent.ncol), dtype=bool)
             mask[i0:i1, j0:j1] = True
             self._parent_mask = mask
@@ -330,7 +333,7 @@ class MFsetupMixin():
         """
         if self._precipitation is None or \
                 len(self._precipitation) != self.nper:
-            precip = self.cfg['lak']['precip']
+            precip = self.cfg['lak'].get('precip', 0)
             # copy to all stress periods
             if np.isscalar(precip):
                 precip = [precip] * self.nper
@@ -346,7 +349,7 @@ class MFsetupMixin():
         """
         if self._evaporation is None or \
                 len(self._evaporation) != self.nper:
-            evap = self.cfg['lak']['evap']
+            evap = self.cfg['lak'].get('evap', 0)
             # copy to all stress periods
             if np.isscalar(evap):
                 evap = [evap] * self.nper
@@ -379,37 +382,45 @@ class MFsetupMixin():
         """Load vector and attribute data from a shapefile;
         cache it to the _features dictionary.
         """
-        if filename not in self._features.keys():
-            if os.path.exists(filename):
-                features_proj_str = get_proj4(filename)
-                model_proj_str = "+init=epsg:{}".format(self.cfg['setup_grid']['epsg'])
-                if filter is None:
-                    if self.bbox is not None:
-                        bbox = self.bbox
-                    elif self.parent.modelgrid is not None:
-                        bbox = self.parent.modelgrid.bbox
-                        model_proj_str = self.parent.modelgrid.proj4
-                        assert model_proj_str is not None
+        if isinstance(filename, str):
+            features_file = [filename]
 
+        dfs_list = []
+        for f in features_file:
+            if f not in self._features.keys():
+                if os.path.exists(f):
+                    features_proj_str = get_proj4(f)
+                    model_proj_str = "+init=epsg:{}".format(self.cfg['setup_grid']['epsg'])
+                    if filter is None:
+                        if self.bbox is not None:
+                            bbox = self.bbox
+                        elif self.parent.modelgrid is not None:
+                            bbox = self.parent.modelgrid.bbox
+                            model_proj_str = self.parent.modelgrid.proj_str
+                            assert model_proj_str is not None
+
+                        if features_proj_str.lower() != model_proj_str:
+                            filter = project(bbox, model_proj_str, features_proj_str).bounds
+                        else:
+                            filter = bbox.bounds
+
+                    df = shp2df(f, filter=filter)
+                    df.columns = [c.lower() for c in df.columns]
+                    if id_column is not None and include_ids is not None:
+                        id_column = id_column.lower()
+                        df = df.loc[df[id_column].isin(include_ids)]
                     if features_proj_str.lower() != model_proj_str:
-                        filter = project(bbox, model_proj_str, features_proj_str).bounds
-                    else:
-                        filter = bbox.bounds
-
-                df = shp2df(filename, filter=filter)
-                df.columns = [c.lower() for c in df.columns]
-                if id_column is not None and include_ids is not None:
-                    id_column = id_column.lower()
-                    df = df.loc[df[id_column].isin(include_ids)]
-                if features_proj_str.lower() != model_proj_str:
-                    df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
-                if cache:
-                    print('caching data in {}...'.format(filename))
-                    self._features[filename] = df
+                        df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
+                    if cache:
+                        print('caching data in {}...'.format(f))
+                        self._features[f] = df
+                else:
+                    print('feature input file {} not found'.format(f))
+                    return
             else:
-                return None
-        else:
-            df = self._features[filename]
+                df = self._features[f]
+            dfs_list.append(df)
+        df = pd.concat(dfs_list)
         return df
 
     def get_boundary_cells(self):

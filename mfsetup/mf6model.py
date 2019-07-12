@@ -2,16 +2,16 @@ import sys
 import os
 import time
 import shutil
+from collections import defaultdict
 import numpy as np
 import flopy
 mf6 = flopy.mf6
-from flopy.discretization.structuredgrid import StructuredGrid
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                              fill_layers, make_idomain, deactivate_idomain_above)
 from .fileio import load, dump, check_source_files, load_array, save_array, load_cfg
 from .interpolate import regrid
 from .gis import get_values_at_points
-from .grid import write_bbox_shapefile, get_grid_bounding_box
+from .grid import write_bbox_shapefile, get_grid_bounding_box, get_point_on_national_hydrogeologic_grid
 from .tdis import setup_perioddata
 from .utils import update, get_input_arguments
 from .units import convert_length_units, convert_time_units
@@ -77,6 +77,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             if 'SFR' in self.get_package_list():
                 idomain = deactivate_idomain_above(idomain, self.sfr.reach_data)
             self._idomain = idomain
+            self.dis.idomain = idomain
         return self._idomain
 
     def _load_cfg(self, cfg):
@@ -118,6 +119,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         for folder in output_paths:
             if not os.path.exists(folder):
                 os.makedirs(folder)
+
+        # absolute path to config file
+        self._config_path = os.path.split(os.path.abspath(self.cfg['filename']))[0]
+
+        # set package keys to default dicts
+        for pkg in self._package_setup_order:
+            self.cfg[pkg] = defaultdict(dict, self.cfg.get(pkg, {}))
+
         # other variables
         self.cfg['external_files'] = {}
 
@@ -128,7 +137,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             perioddata['model_time_units'] = self.time_units
         perioddata.update({'nper': self.cfg['tdis']['dimensions']['nper'],
                            'steady': self.cfg['sto']['steady'],
-                           'oc': self.cfg['oc']['period_options']})
+                           'oc': self.cfg['oc']['saverecord']})
         self._perioddata = setup_perioddata(self.cfg['tdis']['options']['start_date_time'],
                                             self.cfg['tdis']['options'].get('end_date_time'),
                                             **perioddata)
@@ -165,6 +174,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def get_package_list(self):
         """Replicate this method in flopy.modflow.Modflow.
         """
+        # TODO: this should reference namfile dict
         return [p.name[0].upper() for p in self.packagelist]
 
     def get_raster_values_at_cell_centers(self, raster, out_of_bounds_errors='coerce'):
@@ -196,8 +206,15 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         for param in ['delr', 'delc']:
             grid.update({param: self.cfg['dis']['griddata'][param]})
 
+        # optionally align grid with national hydrologic grid
+        if grid['snap_to_NHG']:
+            x, y = get_point_on_national_hydrogeologic_grid(grid['xoff'],
+                                                            grid['yoff']
+                                                            )
+            grid['xoff'] = x
+            grid['yoff'] = y
+        dump(grid_file, grid)
         self.cfg['grid'] = grid
-        dump(grid_file, self.cfg['grid'])
         if write_shapefile:
             write_bbox_shapefile(self.modelgrid,
                                  os.path.join(self.cfg['postprocessing']['output_folders']['shapefiles'],
@@ -422,7 +439,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         package = 'ic'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        ic = None
+
+        # make the k array
+        self._setup_array(package, 'strt', by_layer=True, write_fmt='%.2f')
+
+        kwargs = self.cfg[package]['griddata'].copy()
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfic)
+        ic = mf6.ModflowGwfic(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ic
 
@@ -440,7 +463,17 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         package = 'npf'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        npf = None
+
+        # make the k array
+        self._setup_array(package, 'k', by_layer=True, write_fmt='%.6e')
+
+        # make the k33 array (kv)
+        self._setup_array(package, 'k33', by_layer=True, write_fmt='%.6e')
+
+        kwargs = self.cfg[package]['options'].copy()
+        kwargs.update(self.cfg[package]['griddata'].copy())
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfnpf)
+        npf = mf6.ModflowGwfnpf(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return npf
 
@@ -464,14 +497,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
-        # make the botm array
+        # make the sy array
         self._setup_array(package, 'sy', by_layer=True, write_fmt='%.6e')
 
-        # make the idomain array
+        # make the ss array
         self._setup_array(package, 'ss', by_layer=True, write_fmt='%.6e')
 
-        kwargs = self.cfg['sto']['options'].copy()
-        kwargs.update(self.cfg['sto']['griddata'].copy())
+        kwargs = self.cfg[package]['options'].copy()
+        kwargs.update(self.cfg[package]['griddata'].copy())
         kwargs['steady_state'] = {k: v for k, v in self.cfg['sto']['steady'].items() if v}
         kwargs['transient'] = {k: True for k, v in self.cfg['sto']['steady'].items() if not v}
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsto)
@@ -493,7 +526,19 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         package = 'rch'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        rch = None
+
+        # make the irch array
+        # TODO: ich
+        pass
+
+        # make the rech array
+        self._setup_array(package, 'recharge', by_layer=False,
+                          resample_method='linear', write_fmt='%.6e')
+
+        kwargs = self.cfg[package].copy()
+        kwargs.update(self.cfg[package]['options'])
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfrcha)
+        rch = mf6.ModflowGwfrcha(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return rch
 
@@ -530,7 +575,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         package = 'wel'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        wel = None
+
+        kwargs = self.cfg[package].copy()
+        kwargs.update(self.cfg[package]['options'])
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfwel)
+        wel = mf6.ModflowGwfwel(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return wel
 
@@ -548,7 +597,19 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         package = 'oc'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        oc = None
+        kwargs = self.cfg[package]
+        kwargs['budget_filerecord'] = self.cfg[package]['budget_fileout_fmt'].format(self.name)
+        kwargs['head_filerecord'] = self.cfg[package]['head_fileout_fmt'].format(self.name)
+        for rec in ['printrecord', 'saverecord']:
+            if rec in kwargs:
+                data = kwargs[rec]
+                mf6_input = {}
+                for kper, words in data.items():
+                    for var, instruction in words.items():
+                        mf6_input[kper] = [(var, instruction)]
+                kwargs[rec] = mf6_input
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfoc)
+        oc = mf6.ModflowGwfoc(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return oc
 
@@ -574,13 +635,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         sim = flopy.mf6.MFSimulation(**cfg['simulation'])
         cfg['model']['simulation'] = sim
 
-        m = MF6model(cfg=cfg, **cfg['model'])
+        kwargs = get_input_arguments(cfg['model'], MF6model)
+        m = MF6model(cfg=cfg, **kwargs)
 
         if 'grid' not in m.cfg.keys():
             m.setup_grid()
 
         # set up all of the packages specified in the config file
-        package_list = m.cfg['nam']['packages']
+        package_list = ['tdis', 'dis', 'npf', 'oc']  #m.package_list
         for pkg in package_list:
             package_setup = getattr(MF6model, 'setup_{}'.format(pkg.strip('6')))
             package_setup(m)

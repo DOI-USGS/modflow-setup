@@ -28,6 +28,7 @@ setup_grid:
   yoff: 1175835 # lower left y-coordinate
   rotation: 0.
   epsg: 5070
+  snap_to_NHG: True
 
 nam:
   list_filename_fmt: '{}.list'
@@ -47,8 +48,7 @@ nam:
   ]
 
 dis:
-  remake_arrays: True
-  regrid_top_from_dem: True # separate option for top because zonal statistics is slow
+  remake_top: True
   options:
     length_units: 'meters'
   dimensions:
@@ -95,7 +95,6 @@ tdis:
 
 ic:
   strt_filename_fmt: "strt{:d}.dat"
-  griddata:
 
 npf:
   options:
@@ -103,7 +102,38 @@ npf:
   griddata:
     icelltype: 1 # variable sat. thickness in all layers
   source_data:
-
+    k:
+      filenames:
+        0: 'shellmound/rasters/k0.tif' # Vicksburg-Jackson Group
+        1: 'shellmound/rasters/k1.tif' # Upper Claiborne aquifer
+        2: 'shellmound/rasters/k2.tif' # Middle Claiborne confining unit
+        3: 'shellmound/rasters/k3.tif' # Middle Claiborne aquifer
+        4: 'shellmound/rasters/k3.tif' # Middle Claiborne aquifer
+        5: 'shellmound/rasters/k3.tif' # Middle Claiborne aquifer
+        6: 'shellmound/rasters/k4.tif' # Lower Claiborne confining unit
+        7: 'shellmound/rasters/k4.tif' # Lower Claiborne confining unit
+        8: 'shellmound/rasters/k5.tif' # Lower Claiborne aquifer
+        9: 'shellmound/rasters/k6.tif' # Middle Wilcox aquifer
+        10: 'shellmound/rasters/k10.tif' # Lower Wilcox aquifer
+        11: 'shellmound/rasters/k10.tif' # Lower Wilcox aquifer
+        12: 'shellmound/rasters/k12.tif' # Lower Wilcox aquifer
+      length_units: 'feet'
+    k33:
+      filenames:
+        0: 'shellmound/rasters/k330.tif' # Vicksburg-Jackson Group
+        1: 'shellmound/rasters/k331.tif' # Upper Claiborne aquifer
+        2: 'shellmound/rasters/k332.tif' # Middle Claiborne confining unit
+        3: 'shellmound/rasters/k333.tif' # Middle Claiborne aquifer
+        4: 'shellmound/rasters/k333.tif' # Middle Claiborne aquifer
+        5: 'shellmound/rasters/k333.tif' # Middle Claiborne aquifer
+        6: 'shellmound/rasters/k334.tif' # Lower Claiborne confining unit
+        7: 'shellmound/rasters/k334.tif' # Lower Claiborne confining unit
+        8: 'shellmound/rasters/k335.tif' # Lower Claiborne aquifer
+        9: 'shellmound/rasters/k336.tif' # Middle Wilcox aquifer
+        10: 'shellmound/rasters/k3310.tif' # Lower Wilcox aquifer
+        11: 'shellmound/rasters/k3310.tif' # Lower Wilcox aquifer
+        12: 'shellmound/rasters/k3312.tif' # Lower Wilcox aquifer
+      length_units: 'feet'
   k_filename_fmt: "k{:d}.dat"
   k33_filename_fmt: "h33{:d}.dat"
 
@@ -111,7 +141,7 @@ sto:
   options:
     save_flows: True
   griddata:
-    iconvert: 1
+    iconvert: 1  # convertible layers
     sy: 0.25
     ss: 1.e-6
   sy_filename_fmt: "sy{:d}.dat"
@@ -121,10 +151,19 @@ sto:
 rch:
   options:
     print_input: True
-    print_flows: True
+    print_flows: False
     save_flows: True
     readasarrays: True
-  rech_filename_fmt: "rch{:d}.dat"
+  source_data:
+    recharge:
+      filename: 'shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc'
+      variable: 'net_infiltration'
+      length_units: 'inches'
+      time_units: 'days'
+      period_stats:
+        0: ['mean', '2012-01-01', '2017-12-31']
+        1: 'mean'
+  recharge_filename_fmt: "rch{:d}.dat"
 
 sfr:
   options:
@@ -139,13 +178,23 @@ wel:
     print_input: True
     print_flows: True
     save_flows: True
-  lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
+  source_data:
+    flux:
+      filename: 'shellmound/irr_wu_1mi_gs1999_to_gs2017.nc'
+      variable:
+      length_unit_conversion: 0.38610215854244584  # m3/mi2 to m2/km3
+      time_units: ''
+      period_stats:
+        0:
+        1: 'mean'
+  output_files:
+    lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
 
 oc:
   head_fileout_fmt: '{}.hds'
-  budget_fileout_fmt: '{}.hds'
-  period_options: {0: ['save head last',
-                       'save budget last']
+  budget_fileout_fmt: '{}.cbc'
+  saverecord: {0: {head: 'last',
+                   budget: 'last'}
   }
 
 obs:

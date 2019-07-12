@@ -6,7 +6,7 @@ import flopy
 fm = flopy.modflow
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
-from .export import get_surface_bc_flux
+#from .export import get_surface_bc_flux
 from mfsetup.grid import get_ij
 import numpy as np
 

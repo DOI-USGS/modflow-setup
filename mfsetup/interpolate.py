@@ -66,7 +66,7 @@ def interp_weights(xyz, uvw, d=2):
     return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
 
 
-def interpolate(values, vtx, wts):
+def interpolate(values, vtx, wts, fill_value=np.nan):
     """Apply the interpolation weights to a set of values.
 
     Parameters
@@ -74,12 +74,17 @@ def interpolate(values, vtx, wts):
     values : 1D array of length n source points (same as xyz in interp_weights)
     vtx : indices returned by interp_weights
     wts : weights returned by interp_weights
-
+    fill_value : float
+        Value used to fill in for requested points outside of the convex hull
+        of the input points (i.e., those with at least one zero weight).
+        If not provided, then the default is nan.
     Returns
     -------
     interpolated values
     """
-    return np.einsum('nj,nj->n', np.take(values, vtx), wts)
+    result = np.einsum('nj,nj->n', np.take(values, vtx), wts)
+    result[np.any(wts < 0, axis=1)] = fill_value
+    return result
 
 
 def regrid(arr, grid, grid2, mask1=None, mask2=None, method='linear'):

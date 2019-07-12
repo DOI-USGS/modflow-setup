@@ -7,7 +7,7 @@ from shapely.geometry import Polygon
 import flopy
 fm = flopy.modflow
 from flopy.utils.mflistfile import ListBudget
-from .gis import shp2df, df2shp, intersect, get_lake_polygon_from_lidar
+from .gis import shp2df, df2shp, intersect
 
 
 def make_lakarr2d(grid, lakesdata,
@@ -23,6 +23,7 @@ def make_lakarr2d(grid, lakesdata,
     else:
         raise ValueError('unrecognized input for "lakesdata": {}'.format(lakesdata))
     id_column = id_column.lower()
+    lakes.columns = [c.lower() for c in lakes.columns]
     lakes.index = lakes[id_column]
     lakes = lakes.loc[include_ids]
     lakes['lakid'] = np.arange(1, len(lakes) + 1)
@@ -52,6 +53,7 @@ def make_bdlknc_zones(grid, lakesshp, include_ids, id_column='hydroid'):
         raise ValueError('unrecognized input for "lakesshp": {}'.format(lakesshp))
     # Exterior buffer
     id_column = id_column.lower()
+    lakes.columns = [c.lower() for c in lakes.columns]
     exterior_buffer = 30  # m
     lakes.index = lakes[id_column]
     lakes = lakes.loc[include_ids]

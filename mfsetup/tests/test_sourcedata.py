@@ -8,6 +8,7 @@ from ..sourcedata import (SourceData, ArraySourceData, TabularSourceData,
                           weighted_average_between_layers)
 from ..units import convert_length_units, convert_time_units
 from mfsetup import MFnwtModel
+from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +36,8 @@ def inset_with_grid(inset):
     sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
     sd['features_shapefile'] = sd.pop('filename')
     cfg['setup_grid'].update(sd)
-    m.setup_grid(**cfg['setup_grid'])
+    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
+    m.setup_grid(**kwargs)
     return inset
 
 

@@ -5,6 +5,11 @@ from ..mf6model import MF6model
 
 
 @pytest.fixture(scope="session")
+def demfile():
+    return 'mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif'
+
+
+@pytest.fixture(scope="session")
 def mfnwt_inset_test_cfg_path():
     return 'mfsetup/tests/data/mfnwt_inset_test.yml'
 

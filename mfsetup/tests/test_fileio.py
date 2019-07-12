@@ -1,7 +1,24 @@
 import os
 import numpy as np
 import pytest
-from ..fileio import load, load_array, dump_yml, load_yml, load_modelgrid, load_cfg
+import flopy.modflow as fm
+from ..fileio import load, load_array, dump_yml, load_yml, load_modelgrid, load_cfg, setup_external_filepaths
+
+
+@pytest.fixture
+def module_tmpdir(tmpdir):
+    module_tmpdir = os.path.join(tmpdir, os.path.splitext(os.path.split(__file__)[1])[0])
+    if not os.path.isdir(module_tmpdir):
+        os.makedirs(module_tmpdir)
+    return module_tmpdir
+
+
+@pytest.fixture
+def external_files_path(module_tmpdir):
+    external_files_path = os.path.join(module_tmpdir, 'external')
+    if not os.path.isdir(external_files_path):
+        os.makedirs(external_files_path)
+    return external_files_path
 
 
 @pytest.fixture
@@ -63,3 +80,16 @@ def test_load_cfg(mfnwt_inset_test_cfg_path):
     p2 = os.path.normpath(os.path.join(config_file_location, cfg['hyd']['source_data']['filenames'][0]))
     assert p1 == p2
 
+
+def test_whether_flopy_remembers_external_path(module_tmpdir, external_files_path):
+    #m = fm.Modflow('junk', model_ws=module_tmpdir, external_path=external_files_path)
+    #nlay, nrow, ncol = 1, 2, 2
+    #arr = np.ones((nrow, ncol))
+    #layfile = os.path.join(external_files_path, 'junk.dat')
+    #np.savetxt(layfile, arr, fmt='%.2f')
+    #dis = fm.ModflowDis(m, nrow=nrow, ncol=ncol, top=layfile, botm=[layfile])
+    #m.write_input(check=False)
+
+    #m2 = fm.Modflow.load('junk.nam', model_ws=module_tmpdir, external_path=external_files_path)
+    #assert True
+    pass

@@ -36,6 +36,7 @@ postprocessing:
 setup_grid:
   grid_file: '{}_grid.yml' # inset grid info will be written to this file
   rotation: 0
+  snap_to_NHG: False
 
 nam:
   list_filename_fmt: '{}.list'
@@ -75,11 +76,10 @@ tdis:
   perioddata:
     perlen: 1
 
-
-
 ic:
   strt_filename_fmt: "strt{:d}.dat"
   griddata:
+    strt:
 
 npf:
   options:
@@ -104,7 +104,7 @@ rch:
     print_flows: True
     save_flows: True
     readasarrays: True
-  rech_filename_fmt: "rch{:d}.dat"
+  recharge_filename_fmt: "rch{:d}.dat"
 
 sfr:
   options:
@@ -127,8 +127,8 @@ wel:
 oc:
   head_fileout_fmt: '{}.hds'
   budget_fileout_fmt: '{}.cbc'
-  period_options: {0: ['save head last',
-                       'save budget last']
+  saverecord: {0: {head: 'last',
+                   budget: 'last'}
   }
 
 obs:

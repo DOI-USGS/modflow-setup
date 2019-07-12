@@ -32,13 +32,13 @@ class MFsetupGrid(StructuredGrid):
     def __eq__(self, other):
         if not isinstance(other, StructuredGrid):
             return False
-        if not np.allclose(other.xoff, self.xoff):
+        if not np.allclose(other.xoffset, self.xoffset):
             return False
-        if not np.allclose(other.yoff, self.yoff):
+        if not np.allclose(other.yoffset, self.yoffset):
             return False
         if not np.allclose(other.angrot, self.angrot):
             return False
-        if not np.allclose(other.proj4, self.proj4):
+        if not other.proj_str == self.proj_str:
             return False
         if not np.array_equal(other.delr, self.delr):
             return False
@@ -185,6 +185,27 @@ def get_grid_bounding_box(modelgrid):
                     (x2r, y2r),
                     (x3r, y3r),
                     (x0r, y0r)])
+
+
+def get_point_on_national_hydrogeologic_grid(x, y):
+    """Given an x, y location representing the upper left
+    corner of a model grid, return the upper left corner
+    of the cell in the National Hydrogeologic Grid that
+    contains it."""
+    # national grid parameters
+    xul, yul = -2553045.0, 3907285.0 # upper left corner
+    ngrows = 4000
+    ngcols = 4980
+    natCellsize = 1000
+
+    # locations of left and top cell edges
+    ngx = np.arange(ngcols) * natCellsize
+    ngy = np.arange(ngrows) * -natCellsize
+
+    # nearest left and top edge to upper left corner
+    j = int(np.floor((x - xul) / natCellsize))
+    i = int(np.floor((yul - y) / natCellsize))
+    return ngx[j] + xul, ngy[i] + yul
 
 
 def write_bbox_shapefile(sr, outshp):

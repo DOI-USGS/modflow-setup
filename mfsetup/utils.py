@@ -23,7 +23,10 @@ def update(d, u):
         d = {}
     for k, v in u.items():
         if isinstance(v, collections.Mapping):
-            d[k] = update(d.get(k, {}), v)
+            try:
+                d[k] = update(d.get(k, {}), v)
+            except:
+                j=2
         else:
             d[k] = v
     return d

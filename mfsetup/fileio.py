@@ -128,7 +128,8 @@ def load_array(filename, shape=None, nodata=-9999):
             else:
                 raise ValueError("Data in {} have size {}; should be {}"
                                  .format(filename, arr.shape, shape))
-    arr[arr == nodata] = np.nan
+    if isinstance(arr.dtype, float):
+        arr[arr == nodata] = np.nan
     print("took {:.2f}s".format(time.time() - t0))
     return arr
 
@@ -315,8 +316,10 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
     """
     valid_extensions = ['csv', 'shp', 'tif',
                         'ref', 'dat',
+                        'nc',
                         'yml', 'json',
                         'hds', 'cbb', 'cbc']
+    file_keys = ['filename', 'filenames', 'binaryfile']
     keys = []
     if source_data is None:
         return []
@@ -328,13 +331,17 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
         items = source_data.items()
     for k0, v in items:
         if isinstance(v, str):
-            if v[-3:] in valid_extensions or paths:
+            if k0 in file_keys:
+                keys.append(k0)
+            elif v[-3:] in valid_extensions or paths:
                 keys.append(k0)
             elif 'output' in source_data:
                 keys.append(k0)
         elif isinstance(v, list):
             for i, v1 in enumerate(v):
-                if paths or isinstance(v1, str) and v1[-3:] in valid_extensions:
+                if k0 in file_keys:
+                    keys.append('.'.join([str(k0), str(i)]))
+                elif paths or isinstance(v1, str) and v1[-3:] in valid_extensions:
                     keys.append('.'.join([str(k0), str(i)]))
         elif isinstance(v, dict):
             keys += _parse_file_path_keys_from_source_data(v, prefix=k0, paths=paths)
@@ -380,7 +387,9 @@ def setup_external_filepaths(model, package, variable_name,
     package = package.lower()
 
     # in lieu of a way to get these from Flopy somehow
-    transient2D_variables = {'rech',
+    griddata_variables = ['top', 'botm', 'idomain', 'strt',
+                          'k', 'k33', 'sy', 'ss']
+    transient2D_variables = {'rech', 'recharge',
                              'finf', 'pet', 'extdp', 'extwc',
                              }
     transient3D_variables = {'lakarr', 'bdlknc'}
@@ -414,13 +423,19 @@ def setup_external_filepaths(model, package, variable_name,
         model.cfg['external_files'][variable_name] = external_files
 
     if model.version == 'mf6':
-        filepaths = [{'filename': f}
-                     for f in model.cfg['external_files'][variable_name]]
+        # skip these for now (not implemented yet for MF6)
+        if variable_name in transient3D_variables:
+            return
+        filepaths = [{'filename': model.cfg['external_files'][variable_name][i]}
+                     for i in range(len(external_files))]
+        # set package variable input (to Flopy)
+        if variable_name in griddata_variables:
+            model.cfg[package]['griddata'][variable_name] = filepaths
+        else:
+            model.cfg[package][variable_name] = {per: d for per, d in enumerate(filepaths)}
     else:
         filepaths = model.cfg['intermediate_data'][variable_name]
-
-    # set package variable input (to Flopy)
-    model.cfg[package][variable_name] = filepaths
+        model.cfg[package][variable_name] = filepaths
 
     return filepaths
 

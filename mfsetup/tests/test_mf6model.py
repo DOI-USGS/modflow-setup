@@ -7,6 +7,7 @@ import os
 import pytest
 import numpy as np
 import pandas as pd
+import xarray as xr
 import rasterio
 from shapely.geometry import box
 import flopy
@@ -77,12 +78,12 @@ def model_with_dis(model_with_grid):
 
 
 @pytest.fixture(scope="module")
-def model_setup(cfg_path):
+def model_setup(mf6_test_cfg_path):
     for folder in ['shellmound', 'tmp']:
         if os.path.isdir(folder):
             shutil.rmtree(folder)
-    m = MF6model.setup_from_yaml(cfg_path)
-    m.write()
+    m = MF6model.setup_from_yaml(mf6_test_cfg_path)
+    m.simulation.write_simulation()
     return m
 
 
@@ -101,6 +102,33 @@ def test_simulation(simulation):
 
 def test_model(model):
     assert True
+
+
+def test_snap_to_NHG(cfg, simulation):
+    cfg = cfg.copy()
+    #simulation = deepcopy(simulation)
+    cfg['model']['simulation'] = simulation
+    cfg['setup_grid']['snap_to_NHG'] = True
+
+    kwargs = get_input_arguments(cfg['model'], MF6model)
+    m = MF6model(cfg=cfg, **kwargs)
+    m.setup_grid()
+
+    # national grid parameters
+    xul, yul = -2553045.0, 3907285.0  # upper left corner
+    ngrows = 4000
+    ngcols = 4980
+    natCellsize = 1000
+
+    # locations of left and top cell edges
+    ngx = np.arange(ngcols) * natCellsize + xul
+    ngy = np.arange(ngrows) * -natCellsize + yul
+
+    x0, x1, y0, y1 = m.modelgrid.extent
+    assert np.min(np.abs(ngx - x0)) == 0
+    assert np.min(np.abs(ngy - y0)) == 0
+    assert np.min(np.abs(ngx - x1)) == 0
+    assert np.min(np.abs(ngy - y1)) == 0
 
 
 def test_model_with_grid(model_with_grid):
@@ -126,11 +154,11 @@ def test_external_file_path_setup(model):
     assert m.cfg['intermediate_data']['botm'] == \
            [os.path.normpath(os.path.join(m.tmpdir, botm_file_fmt).format(i))
                                   for i in range(m.nlay)]
-    assert m.cfg['dis']['top'] == \
+    assert m.cfg['dis']['griddata']['top'] == \
            [{'filename': os.path.normpath(os.path.join(m.model_ws,
                         m.external_path,
                         os.path.split(top_filename)[-1]))}]
-    assert m.cfg['dis']['botm'] == \
+    assert m.cfg['dis']['griddata']['botm'] == \
            [{'filename': os.path.normpath(os.path.join(m.model_ws,
                          m.external_path,
                          botm_file_fmt.format(i)))} for i in range(m.nlay)]
@@ -226,6 +254,7 @@ def test_dis_setup(model_with_grid):
     # test intermediate array creation
     m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
+    botm = m.dis.botm.array.copy()
     assert isinstance(dis, mf6.ModflowGwfdis)
     assert 'DIS' in m.get_package_list()
     arrayfiles = m.cfg['intermediate_data']['top'] + \
@@ -233,6 +262,15 @@ def test_dis_setup(model_with_grid):
                  m.cfg['intermediate_data']['idomain']
     for f in arrayfiles:
         assert os.path.exists(f)
+        fname = os.path.splitext(os.path.split(f)[1])[0]
+        k = ''.join([s for s in fname if s.isdigit()])
+        var = fname.strip(k)
+        data = np.loadtxt(f)
+        model_array = getattr(m.dis, var).array
+        if len(k) > 0:
+            k = int(k)
+            model_array = model_array[k]
+        assert np.array_equal(model_array, data)
 
     # test idomain
     top = dis.top.array.copy()
@@ -246,16 +284,30 @@ def test_dis_setup(model_with_grid):
     assert np.array_equal(m.idomain.sum(axis=(1, 2)),
                           invalid_botms.sum(axis=(1, 2)))
 
-    # test writing of top array from
-    # intermediate array
+    # test recreating package from external arrays
+    m.remove_package('dis')
+    assert m.cfg['dis']['griddata']['top'] is not None
+    assert m.cfg['dis']['griddata']['botm'] is not None
+    dis = m.setup_dis()
+    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array == 1],
+                          botm[m.dis.idomain.array == 1])
+
+    # test recreating just the top from the external array
     m.remove_package('dis')
     m.cfg['dis']['remake_top'] = False
+    m.cfg['dis']['griddata']['botm'] = None
     dis = m.setup_dis()
     dis.write()
-    arrayfiles = m.cfg['dis']['top']
+    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array == 1],
+                          botm[m.dis.idomain.array == 1])
+    arrayfiles = m.cfg['dis']['griddata']['top']
     for f in arrayfiles:
         assert os.path.exists(f['filename'])
     assert os.path.exists(os.path.join(m.model_ws, dis.filename))
+
+    # dis package idomain should be consistent with model property
+    updated_idomain = m.idomain
+    assert np.array_equal(m.dis.idomain.array, updated_idomain)
 
     # check that units were converted (or not)
     assert np.allclose(dis.top.array.mean(), 126, atol=10)
@@ -267,10 +319,21 @@ def test_dis_setup(model_with_grid):
     assert np.allclose(m.dis.botm.array[3].mean() / .3048, np.nanmean(mcaq_data), atol=5)
 
 
+def test_ic_setup(model_with_dis):
+    m = model_with_dis
+    ic = m.setup_ic()
+    ic.write()
+    assert os.path.exists(os.path.join(m.model_ws, ic.filename))
+    assert isinstance(ic, mf6.ModflowGwfic)
+    assert np.allclose(ic.strt.array.mean(axis=0), m.dis.top.array)
+
+
 def test_tdis_setup(model):
 
     m = model #deepcopy(model)
     tdis = m.setup_tdis()
+    tdis.write()
+    assert os.path.exists(os.path.join(m.model_ws, tdis.filename))
     assert isinstance(tdis, mf6.ModflowTdis)
     period_df = pd.DataFrame(tdis.perioddata.array)
     period_df['perlen'] = period_df['perlen'].astype(float)
@@ -281,12 +344,89 @@ def test_sto_setup(model_with_dis):
 
     m = model_with_dis  #deepcopy(model_with_grid)
     sto = m.setup_sto()
+    sto.write()
+    assert os.path.exists(os.path.join(m.model_ws, sto.filename))
     assert isinstance(sto, mf6.ModflowGwfsto)
-    assert np.allclose(sto.sy.array.mean(), m.cfg['sto']['griddata']['sy'])
-    assert np.allclose(sto.ss.array.mean(), m.cfg['sto']['griddata']['ss'])
+    for var in ['sy', 'ss']:
+        model_array = getattr(sto, var).array
+        for k, item in enumerate(m.cfg['sto']['griddata'][var]):
+            f = item['filename']
+            assert os.path.exists(f)
+            data = np.loadtxt(f)
+            assert np.array_equal(model_array[k], data)
 
 
-def test_yaml_setup(mf6_test_cfg_path):
+def test_npf_setup(model_with_dis):
+    m = model_with_dis
+    npf = m.setup_npf()
+    npf.write()
+    assert os.path.exists(os.path.join(m.model_ws, npf.filename))
+
+    # check that units were converted
+    k3tif = m.cfg['npf']['source_data']['k']['filenames'][3]
+    assert k3tif.endswith('k3.tif')
+    with rasterio.open(k3tif) as src:
+        data = src.read(1)
+        data[data == src.meta['nodata']] = np.nan
+    assert np.allclose(npf.k.array[3].mean() / .3048, np.nanmean(data), atol=5)
+
+    # TODO: add tests that Ks got distributed properly considering input and pinched layers
+
+
+def test_oc_setup(model_with_dis):
+    m = model_with_dis  # deepcopy(model)
+    oc = m.setup_oc()
+    oc.write()
+    assert os.path.exists(os.path.join(m.model_ws, oc.filename))
+    assert isinstance(oc, mf6.ModflowGwfoc)
+
+
+@pytest.mark.skip("still working on recharge")
+def test_rch_setup(model_with_dis):
+    m = model_with_dis  # deepcopy(model)
+    rch = m.setup_rch()
+    rch.write()
+    assert os.path.exists(os.path.join(m.model_ws, rch.filename))
+    assert isinstance(rch, mf6.ModflowGwfrcha)
+    assert rch.recharge is not None
+
+    # get the same data from the source file
+    ds = xr.open_dataset(m.cfg['rch']['source_data']['recharge']['filename'])
+    x = xr.DataArray(m.modelgrid.xcellcenters.ravel(), dims='z')
+    y = xr.DataArray(m.modelgrid.ycellcenters.ravel()[::-1], dims='z')
+
+    def get_period_values(start, end):
+        period_data = ds['net_infiltration'].loc[start:end].mean(axis=0)
+        dsi = period_data.interp(x=x, y=y, method='linear',
+                                 kwargs={'fill_value': np.nan,
+                                         'bounds_error': True})
+        data = dsi.values * 1 / (12 / .3048)
+        return np.reshape(data, (m.nrow, m.ncol))
+        #data = dsi.loc[start: end].values.mean(axis=0)
+        #dsi = ds['net_infiltration'].interp(x=x, y=y, method='linear')
+        #return data * 1/(12/.3048)
+    # test steady-state avg. across all data
+    values = get_period_values('2012-01-01', '2017-12-31')
+
+    #assert np.allclose(values, m.rch.recharge.array[0, 0])
+    # test period 1 avg. for those times
+    values1 = get_period_values(m.perioddata['start_datetime'].values[1],
+                                m.perioddata['end_datetime'].values[1])
+    assert np.allclose(values1, m.rch.recharge.array[1, 0])
+
+
+@pytest.mark.skip("still working on wel")
+def test_wel_setup(model_with_dis):
+    m = model_with_dis  # deepcopy(model)
+    wel = m.setup_wel()
+    wel.write()
+    assert os.path.exists(os.path.join(m.model_ws, wel.filename))
+    assert isinstance(wel, mf6.ModflowGwfwel)
+    assert wel.stress_period_data is not None
+    assert True
+
+
+def test_yaml_setup(model_setup):
     m = model_setup  #deepcopy(model_setup)
     try:
         success, buff = m.run_model(silent=False)

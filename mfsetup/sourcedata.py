@@ -2,13 +2,16 @@ import os
 import shutil
 import numbers
 import numpy as np
+from scipy.interpolate import griddata
 import pandas as pd
+import xarray as xr
 from flopy.utils import binaryfile as bf
 from .fileio import save_array
 from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_layers
 from .gis import get_values_at_points, shp2df
-from .grid import get_ij
+from .grid import get_ij, MFsetupGrid
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
+from .tdis import months
 from .units import convert_length_units, convert_time_units, convert_flux_units
 
 renames = {'mult': 'multiplier',
@@ -87,7 +90,15 @@ class SourceData:
         else:
             raise TypeError("unrecognized input: {}".format(data))
 
-        if type == 'array':
+        try:
+            is_netcdf = np.any([f.endswith('.nc') if isinstance(f, str) else False
+                               for f in data_dict.get('filenames', {}).values()])
+        except:
+            j=2
+        if is_netcdf:
+            kwargs.update(data_dict)
+            return NetCDFSourceData(**kwargs)
+        elif type == 'array':
             return ArraySourceData(**data_dict, **kwargs)
         elif type == 'tabular':
             return TabularSourceData(**data_dict, **kwargs)
@@ -162,17 +173,18 @@ class ArraySourceData(SourceData):
         that encompass the inset model domain. Used to speed up interpolation
         of parent grid values onto inset grid."""
         if self._source_mask is None:
-            if self.dest_model.parent_mask.shape == self.source_modelgrid.xcellcenters.shape:
-                mask = self.dest_model.parent_mask
-            else:
-                x, y = np.squeeze(self.dest_model.bbox.exterior.coords.xy)
-                pi, pj = get_ij(self.source_modelgrid, x, y)
-                pad = 2
-                i0, i1 = pi.min() - pad, pi.max() + pad
-                j0, j1 = pj.min() - pad, pj.max() + pad
-                mask = np.zeros((self.source_modelgrid.nrow,
-                                 self.source_modelgrid.ncol), dtype=bool)
-                mask[i0:i1, j0:j1] = True
+            mask = np.zeros((self.source_modelgrid.nrow,
+                             self.source_modelgrid.ncol), dtype=bool)
+            if self.dest_model.parent is not None:
+                if self.dest_model.parent_mask.shape == self.source_modelgrid.xcellcenters.shape:
+                    mask = self.dest_model.parent_mask
+                else:
+                    x, y = np.squeeze(self.dest_model.bbox.exterior.coords.xy)
+                    pi, pj = get_ij(self.source_modelgrid, x, y)
+                    pad = 2
+                    i0, i1 = pi.min() - pad, pi.max() + pad
+                    j0, j1 = pj.min() - pad, pj.max() + pad
+                    mask[i0:i1, j0:j1] = True
             self._source_mask = mask
         return self._source_mask
 
@@ -300,6 +312,147 @@ class ArraySourceData(SourceData):
     @staticmethod
     def from_config(data, **kwargs):
         return SourceData.from_config(data, type='array', **kwargs)
+
+
+class NetCDFSourceData(ArraySourceData):
+    def __init__(self, filenames, variable, period_stats,
+                 length_units='unknown', time_units='days',
+                 dest_model=None, source_modelgrid=None,
+                 from_source_model_layers=None, by_layer=False,
+                 resample_method='nearest', vmin=-1e30, vmax=1e30
+                 ):
+
+        ArraySourceData.__init__(self, variable=None,
+                                 length_units=length_units, time_units=time_units,
+                                 dest_model=dest_model, source_modelgrid=source_modelgrid,
+                                 from_source_model_layers=from_source_model_layers,
+                                 by_layer=by_layer,
+                                 resample_method=resample_method, vmin=vmin, vmax=vmax)
+
+        if isinstance(filenames, dict):
+            filenames = list(filenames.values())
+        if isinstance(filenames, list):
+            if len(filenames) > 1:
+                raise NotImplementedError("Multiple NetCDF files not supported.")
+            self.filename = filenames[0]
+        else:
+            self.filename = filenames
+        self.variable = variable
+        self.period_stats = period_stats
+        self.resample_method = resample_method
+        self.dest_model = dest_model
+        #x = dest_model.modelgrid.xcellcenters.ravel()
+        #y = dest_model.modelgrid.ycellcenters.ravel()[::-1]
+        #self.x = xr.DataArray(x, dims='z')
+        #self.y = xr.DataArray(y, dims='z')
+        self.time_col = 'time'
+
+        # set xy value arrays for source and dest. grids
+        with xr.open_dataset(self.filename) as ds:
+            x1, y1 = np.meshgrid(ds.x.values, ds.y.values)
+            x1 = x1.ravel()
+            y1 = y1.ravel()
+            self.source_grid_xy = np.array([x1, y1]).transpose()
+        x2 = self.dest_model.modelgrid.xcellcenters.ravel()
+        y2 = self.dest_model.modelgrid.ycellcenters.ravel()
+        self.dest_grid_xy = np.array([x2, y2]).transpose()
+
+    @property
+    def interp_weights(self):
+        """For a given parent, only calculate interpolation weights
+        once to speed up re-gridding of arrays to inset."""
+        if self._interp_weights is None:
+            self._interp_weights = interp_weights(self.source_grid_xy,
+                                                  self.dest_grid_xy)
+        return self._interp_weights
+
+    def regrid_from_source(self, source_array,
+                           method='linear'):
+        """Interpolate values in source array onto
+        the destination model grid, using SpatialReference instances
+        attached to the source and destination models.
+
+        Parameters
+        ----------
+        source_array : ndarray
+            Values from source model to be interpolated to destination grid.
+            1 or 2-D numpy array of same sizes as a
+            layer of the source model.
+        method : str ('linear', 'nearest')
+            Interpolation method.
+        """
+        values = source_array.flatten()
+        if method == 'linear':
+            regridded = interpolate(values,
+                                    *self.interp_weights)
+        elif method == 'nearest':
+            regridded = griddata(self.source_grid_xy, values, self.dest_grid_xy, method=method)
+        regridded = np.reshape(regridded, (self.dest_model.nrow,
+                                           self.dest_model.ncol))
+        return regridded
+
+    def get_data(self):
+
+        # create an xarray dataset instance
+        ds = xr.open_dataset(self.filename)
+        var = ds[self.variable]
+
+        # interpolate values to x and y of model cell centers
+        #dsi = ds['net_infiltration'].interp(x=self.x, y=self.y,
+        #                                    method=self.resample_method)
+
+        # sample values to model stress periods
+        # TODO: make this general for using with lists of files or other input by stress period
+        starttimes = self.dest_model.perioddata['start_datetime']
+        endtimes = self.dest_model.perioddata['end_datetime']
+        results = {}
+        current_stat = None
+        for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
+            period_stat = self.period_stats.get(kper, current_stat)
+
+            # stress period mean
+            if isinstance(period_stat, str):
+                period_stat = [period_stat]
+
+            if isinstance(period_stat, list):
+                stat = period_stat.pop(0)
+                current_stat = stat
+
+                # stat for specified period
+                if len(period_stat) == 2:
+                    start, end = period_stat
+                    data = var.loc[start:end].values
+
+                # stat specified by single item
+                elif len(period_stat) == 1:
+                    # stat for a specified month
+                    if stat in months.keys() or stat in months.values():
+                        data = var.loc[var[self.time_col].dt.month == months.get(stat, stat)].values
+
+                    # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
+                    else:
+                        data = var.loc[stat].values
+
+                # no period specified; use start/end of current period
+                elif len(period_stat) == 0:
+                    data = var.loc[start:end].values
+
+                else:
+                    raise Exception("")
+
+            # compute statistic on data
+            period_mean = getattr(data, 'mean')(axis=0)
+
+            # sample the data onto the model grid
+            period_mean = self.regrid_from_source(period_mean,
+                                                  method=self.resample_method)
+
+            # reshape results to model grid
+            period_mean2d = period_mean.reshape(self.dest_model.nrow,
+                                                self.dest_model.ncol)
+            results[kper] = period_mean2d * self.unit_conversion
+        self.data = results
+        return results
 
 
 class MFBinaryArraySourceData(ArraySourceData):
@@ -431,6 +584,8 @@ class MFArrayData(SourceData):
         elif isinstance(self.values, list):
             self.values = {i: val for i, val in enumerate(self.values)}
         for i, val in self.values.items():
+            if isinstance(val, dict) and 'filename' in val.keys():
+                val = val['filename']
             if isinstance(val, str):
                 abspath = os.path.normpath(os.path.join(self.dest_model._config_path, val))
                 arr = np.loadtxt(abspath)
@@ -510,7 +665,9 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                 **kwargs):
 
     if model.version == 'mf6':
-        data = model.cfg[package].get('griddata', {}).get(var)
+        data = model.cfg[package].get('griddata', {})
+        if isinstance(data, dict):
+            data = data.get(var)
         external_files_key = 'external_files'
     else:
         data = model.cfg[package].get(var)
@@ -597,6 +754,12 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
     elif var in ['idomain', 'ibound']:
         sd = MFArrayData(variable=var, values=0, dest_model=model, **kwargs)
 
+    # default to model top for starting heads
+    elif var == 'strt':
+        sd = MFArrayData(variable=var,
+                         values=[model.dis.top.array] * model.nlay,
+                         dest_model=model, **kwargs)
+
     data = sd.get_data()
 
     # special handling of some variables
@@ -637,7 +800,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                 raise Exception('Model layers less than {} {} thickness'.format(min_thickness,
                                                                                 model.length_units))
         data = {i: arr for i, arr in enumerate(botm)}
-    elif var == 'rech':
+    elif var in ['rech', 'recharge']:
         for i, arr in data.items():
             # assign high-k lake recharge for stress period
             # apply in same units as source recharge array
@@ -660,7 +823,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
     filepaths = model.setup_external_filepaths(package, var,
                                                model.cfg[package]['{}_filename_fmt'.format(var)],
                                                nfiles=len(data))
-
+    assert True
     # write out array data to intermediate files
     # assign lake recharge values (water balance surplus) for any high-K lakes
     for i, arr in data.items():

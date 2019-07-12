@@ -4,11 +4,8 @@ import collections
 import time
 from functools import partial
 import fiona
-import rasterio
-from rasterio.windows import Window
-from rasterio import features
-from shapely.ops import transform, unary_union
-from shapely.geometry import shape, mapping, Polygon
+from shapely.ops import transform
+from shapely.geometry import shape, mapping
 import pyproj
 import numpy as np
 import pandas as pd
@@ -520,8 +517,15 @@ def intersect(feature, grid, id_column=None,
     # create list of GeoJSON features, with unique value for each feature
     if id_column is None:
         numbers = range(1, len(df)+1)
+    # if IDs are strings, get a number for each one
+    # pd.DataFrame.unique() generally preserves order
+    elif isinstance(df[id_column].dtype, np.object):
+        unique_values = df[id_column].unique()
+        values = dict(zip(unique_values, range(1, len(unique_values) + 1)))
+        numbers = [values[n] for n in df[id_column]]
     else:
         numbers = df[id_column].tolist()
+
     geoms = list(zip(df.geometry, numbers))
     result = features.rasterize(geoms,
                                 out_shape=(grid.nrow, grid.ncol),
