@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import pandas as pd
 from .gis import shp2df, get_values_at_points, intersect, project, get_proj4
@@ -11,6 +12,8 @@ from .lakes import make_lakarr2d, make_bdlknc_zones, make_bdlknc2d
 from .utils import update, get_input_arguments
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text
+from sfrmaker import lines
+from sfrmaker.utils import assign_layers
 
 
 class MFsetupMixin():
@@ -536,3 +539,111 @@ class MFsetupMixin():
                 gridfile = self.cfg['setup_grid']['grid_file']
         print('Loading model grid information from {}'.format(gridfile))
         self.cfg['grid'] = load(gridfile)
+
+    def setup_sfr(self):
+
+        package = 'sfr'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+
+        # input
+        nhdplus_paths = self.cfg['sfr'].get('nhdplus_paths')
+        if nhdplus_paths is not None:
+            for f in nhdplus_paths:
+                if not os.path.exists(f):
+                    print('SFR setup: missing input file: {}'.format(f))
+                    nhdplus_paths.remove(f)
+            if len(nhdplus_paths) == 0:
+                return
+
+            # create an sfrmaker.lines instance
+            filter = project(self.bbox, self.modelgrid.proj_str, '+init=epsg:4269').bounds
+            lns = lines.from_NHDPlus_v2(NHDPlus_paths=nhdplus_paths,
+                                        filter=filter)
+
+        elif self.cfg['sfr'].get('flowlines_file') is not None:
+            kwargs = self.cfg['sfr']['flowlines_file']
+            if 'epsg' not in kwargs:
+                kwargs['proj4'] = get_proj4(kwargs['shapefile'])
+            else:
+                kwargs['proj4'] = '+init=epsg:{}'.format(kwargs['epsg'])
+
+            filter = self.bbox.bounds
+            if kwargs['proj4'] != self.modelgrid.proj_str:
+                filter = project(self.bbox, self.modelgrid.proj_str, kwargs['proj4']).bounds
+            kwargs['filter'] = filter
+            # create an sfrmaker.lines instance
+            kwargs = get_input_arguments(kwargs, lines.from_shapefile)
+            lns = lines.from_shapefile(**kwargs)
+
+        else:
+            return
+
+        # output
+        output_path = self.cfg['sfr'].get('output_path')
+        if output_path is not None:
+            if not os.path.isdir(output_path):
+                os.makedirs(output_path)
+        else:
+            output_path = self.cfg['postprocessing']['output_folders']['shps']
+
+        # create isfr array (where SFR cells will be populated)
+        if self.version == 'mf6':
+            active_cells = self.dis.idomain.array[0] == 1
+        else:
+            active_cells = self.bas6.ibound.array[0] == 1
+        isfr = active_cells & (self._isbc2d == 0)
+        #  kludge to get sfrmaker to work with modelgrid
+        self.modelgrid.model_length_units = lenuni_text[self.dis.lenuni]
+
+        # create an sfrmaker.sfrdata instance from the lines instance
+        from flopy.utils.reference import SpatialReference
+        sr = SpatialReference(delr=self.modelgrid.delr, delc=self.modelgrid.delc,
+                              xll=self.modelgrid.xoffset, yll=self.modelgrid.yoffset,
+                              rotation=self.modelgrid.angrot, epsg=self.modelgrid.epsg,
+                              proj4_str=self.modelgrid.proj_str)
+        sfr = lns.to_sfr(sr=sr,
+                         isfr=isfr
+                         )
+        if self.cfg['sfr']['set_streambed_top_elevations_from_dem']:
+            sfr.set_streambed_top_elevations_from_dem(self.cfg['source_data']['dem'],
+                                                      dem_z_units=self.cfg['source_data']['elevation_units'])
+        else:
+            sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')
+
+        # assign layers to the sfr reaches
+        botm = self.dis.botm.array.copy()
+        layers, new_botm = assign_layers(sfr.reach_data, botm_array=botm)
+        sfr.reach_data['k'] = layers
+        if new_botm is not None:
+            if self.cfg['intermediate_data'].get('botm') is None:
+                f = os.path.normpath(os.path.join(self.model_ws,
+                                                  self.external_path,
+                                                  self.cfg['dis']['botm_filename_fmt'].format(self.nlay - 1)
+                                                  ))
+            else:
+                f = self.cfg['intermediate_data']['botm'][-1]
+            save_array(f, new_botm, fmt='%.2f')
+            print('(new model botm after assigning SFR reaches to layers)')
+            botm[-1] = new_botm
+            self.dis.botm = botm
+
+        # write reach and segment data tables
+        sfr.write_tables('{}/{}'.format(output_path, self.name))
+
+        # create the SFR package
+        sfr.create_ModflowSfr2(model=self, istcb2=223)
+        self._isbc_2d = None  # reset BCs arrays
+        self._isbc = None
+
+        if self.version == 'mf6':
+            self._idomain = None  # reset the idomain array
+
+        # export shapefiles of lines, routing, cell polygons, inlets and outlets
+        sfr.export_cells('{}/{}_sfr_cells.shp'.format(output_path, self.name))
+        sfr.export_outlets('{}/{}_sfr_outlets.shp'.format(output_path, self.name))
+        sfr.export_transient_variable('flow', '{}/{}_sfr_inlets.shp'.format(output_path, self.name))
+        sfr.export_lines('{}/{}_sfr_lines.shp'.format(output_path, self.name))
+        sfr.export_routing('{}/{}_sfr_routing.shp'.format(output_path, self.name))
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return self.sfr
