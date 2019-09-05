@@ -14,21 +14,32 @@ def compare_nan_array(func, a, thresh):
     return out
 
 
+def flatten(d):
+    """Recursively flatten a dictionary of varying depth,
+    putting all keys at a single level.
+    """
+    flatd = {}
+    for k, v in d.items():
+        if isinstance(v, dict):
+            flatd.update(flatten(v))
+        else:
+            flatd[k] = v
+    return flatd
+
+
 def update(d, u):
     """Recursively update a dictionary of varying depth
     d with items from u.
     from: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
     """
-    if d is None:
-        d = {}
     for k, v in u.items():
-        if isinstance(v, collections.Mapping):
-            try:
+        if isinstance(d, collections.Mapping):
+            if isinstance(v, collections.Mapping):
                 d[k] = update(d.get(k, {}), v)
-            except:
-                j=2
+            else:
+                d[k] = v
         else:
-            d[k] = v
+            d = {k: v}
     return d
 
 
@@ -74,6 +85,7 @@ def print_item(k, v):
         pprint.pprint(v)
     else:
         print(v)
+
 
 def get_packages(namefile):
     packages = []

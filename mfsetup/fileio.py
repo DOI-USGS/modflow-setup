@@ -209,7 +209,8 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
                         append('.'.join([pckgname, 'source_data', key]))
             for loc in ['output_files',
                         'output_folders',
-                        'output_folder']:
+                        'output_folder',
+                        'output_path']:
                 if loc in pckg.keys():
                     file_keys = _parse_file_path_keys_from_source_data(pckg[loc], paths=True)
                     for key in file_keys:

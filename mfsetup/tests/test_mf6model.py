@@ -427,6 +427,23 @@ def test_wel_setup(model_with_dis):
     assert True
 
 
+def test_sfr_setup(model_with_dis):
+    m = model_with_dis  # deepcopy(model)
+    sfr = m.setup_sfr()
+    sfr.write()
+    assert os.path.exists(os.path.join(m.model_ws, sfr.filename))
+    assert isinstance(sfr, mf6.ModflowGwfsfr)
+    output_path = m.cfg['sfr']['output_path']
+    shapefiles = ['{}/{}_sfr_cells.shp'.format(output_path, m.name),
+                  '{}/{}_sfr_outlets.shp'.format(output_path, m.name),
+                  #'{}/{}_sfr_inlets.shp'.format(output_path, m.name),
+                  '{}/{}_sfr_lines.shp'.format(output_path, m.name),
+                  '{}/{}_sfr_routing.shp'.format(output_path, m.name)
+    ]
+    for f in shapefiles:
+        assert os.path.exists(f)
+
+
 def test_yaml_setup(model_setup):
     m = model_setup  #deepcopy(model_setup)
     try:

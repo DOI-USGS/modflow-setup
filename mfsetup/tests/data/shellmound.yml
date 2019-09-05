@@ -12,8 +12,7 @@ model:
              'npf',
              'rch',
              'sfr',
-             'wel',
-             'maw',
+             #'wel',
              'ims'
   ]
 
@@ -23,7 +22,7 @@ intermediate_data:
   output_folder: 'tmp/'
 
 setup_grid:
-  grid_file: '{}_grid.yml' # inset grid info will be written to this file
+  grid_file: '{}_grid.json' # inset grid info will be written to this file
   xoff: 501405 # lower left x-coordinate
   yoff: 1175835 # lower left y-coordinate
   rotation: 0.
@@ -37,14 +36,14 @@ nam:
     print_flows: True
     save_flows: True
     newton: True
-
-  packages: ['dis6',
-             'ic6',
-             'npf6',
-             'oc6',
-             'sto6',
-             'sfr6',
-             'wel6'
+  packages: ['dis',
+             'ic',
+             'npf',
+             'oc',
+             'sto',
+             'rch',
+             'sfr',
+             #'wel'
   ]
 
 dis:
@@ -168,6 +167,18 @@ rch:
 sfr:
   options:
     save_flows: True
+  source_data:
+    flowlines:
+      filename: 'shellmound/shps/flowlines.shp'
+      id_column: 'COMID'  # arguments to sfrmaker.lines.from_shapefile
+      routing_column: 'tocomid'
+      width1_column: 'width1'
+      width2_column: 'width2'
+      up_elevation_column: 'elevupsmo'
+      dn_elevation_column: 'elevdnsmo'
+      name_column: 'GNIS_NAME'
+      attr_length_units: 'feet'  # units of source data
+      attr_height_units: 'feet'  # units of source data
   budget_fileout: 'sfr_out.bin'
   stage_fileout: 'sfr_stage.bin'
   obs6_filein_fmt: '{}.sfr.obs6'
@@ -206,7 +217,7 @@ ims:
   options:
     print_option: 'all'
     complexity: 'moderate'
-    'csv_output fileout': 'solver_out.csv'
+    csv_output_filerecord: 'solver_out.csv'
   nonlinear:
     outer_hclose: 1.e-3
     outer_maximum: 1000

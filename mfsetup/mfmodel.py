@@ -393,7 +393,7 @@ class MFsetupMixin():
             if f not in self._features.keys():
                 if os.path.exists(f):
                     features_proj_str = get_proj4(f)
-                    model_proj_str = "+init=epsg:{}".format(self.cfg['setup_grid']['epsg'])
+                    model_proj_str = "epsg:{}".format(self.cfg['setup_grid']['epsg'])
                     if filter is None:
                         if self.bbox is not None:
                             bbox = self.bbox
@@ -541,41 +541,45 @@ class MFsetupMixin():
         self.cfg['grid'] = load(gridfile)
 
     def setup_sfr(self):
-
         package = 'sfr'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
         # input
-        nhdplus_paths = self.cfg['sfr'].get('nhdplus_paths')
-        if nhdplus_paths is not None:
-            for f in nhdplus_paths:
-                if not os.path.exists(f):
-                    print('SFR setup: missing input file: {}'.format(f))
-                    nhdplus_paths.remove(f)
-            if len(nhdplus_paths) == 0:
-                return
+        flowlines = self.cfg['sfr'].get('source_data', {}).get('flowlines')
+        if flowlines is not None:
+            if 'nhdplus_paths' in flowlines.keys():
+                nhdplus_paths = flowlines['nhdplus_paths']
+                for f in nhdplus_paths:
+                    if not os.path.exists(f):
+                        print('SFR setup: missing input file: {}'.format(f))
+                        nhdplus_paths.remove(f)
+                if len(nhdplus_paths) == 0:
+                    return
 
-            # create an sfrmaker.lines instance
-            filter = project(self.bbox, self.modelgrid.proj_str, '+init=epsg:4269').bounds
-            lns = lines.from_NHDPlus_v2(NHDPlus_paths=nhdplus_paths,
-                                        filter=filter)
-
-        elif self.cfg['sfr'].get('flowlines_file') is not None:
-            kwargs = self.cfg['sfr']['flowlines_file']
-            if 'epsg' not in kwargs:
-                kwargs['proj4'] = get_proj4(kwargs['shapefile'])
+                # create an sfrmaker.lines instance
+                filter = project(self.bbox, self.modelgrid.proj_str, 'epsg:4269').bounds
+                lns = lines.from_NHDPlus_v2(NHDPlus_paths=nhdplus_paths,
+                                            filter=filter)
             else:
-                kwargs['proj4'] = '+init=epsg:{}'.format(kwargs['epsg'])
+                for key in ['filename', 'filenames']:
+                    if key in flowlines:
+                        kwargs = flowlines.copy()
+                        kwargs['shapefile'] = kwargs.pop(key)
+                        check_source_files(kwargs['shapefile'])
+                        if 'epsg' not in kwargs:
+                            kwargs['proj4'] = get_proj4(kwargs['shapefile'])
+                        else:
+                            kwargs['proj4'] = 'epsg:{}'.format(kwargs['epsg'])
 
-            filter = self.bbox.bounds
-            if kwargs['proj4'] != self.modelgrid.proj_str:
-                filter = project(self.bbox, self.modelgrid.proj_str, kwargs['proj4']).bounds
-            kwargs['filter'] = filter
-            # create an sfrmaker.lines instance
-            kwargs = get_input_arguments(kwargs, lines.from_shapefile)
-            lns = lines.from_shapefile(**kwargs)
-
+                        filter = self.bbox.bounds
+                        if kwargs['proj4'] != self.modelgrid.proj_str:
+                            filter = project(self.bbox, self.modelgrid.proj_str, kwargs['proj4']).bounds
+                        kwargs['filter'] = filter
+                        # create an sfrmaker.lines instance
+                        kwargs = get_input_arguments(kwargs, lines.from_shapefile)
+                        lns = lines.from_shapefile(**kwargs)
+                        break
         else:
             return
 
@@ -586,15 +590,16 @@ class MFsetupMixin():
                 os.makedirs(output_path)
         else:
             output_path = self.cfg['postprocessing']['output_folders']['shps']
+            self.cfg['sfr']['output_path'] = output_path
 
         # create isfr array (where SFR cells will be populated)
         if self.version == 'mf6':
-            active_cells = self.dis.idomain.array[0] == 1
+            active_cells = self.idomain.sum(axis=0) > 0
         else:
-            active_cells = self.bas6.ibound.array[0] == 1
+            active_cells = self.ibound.sum(axis=0) > 0
         isfr = active_cells & (self._isbc2d == 0)
         #  kludge to get sfrmaker to work with modelgrid
-        self.modelgrid.model_length_units = lenuni_text[self.dis.lenuni]
+        self.modelgrid.model_length_units = self.length_units
 
         # create an sfrmaker.sfrdata instance from the lines instance
         from flopy.utils.reference import SpatialReference
@@ -631,19 +636,24 @@ class MFsetupMixin():
         # write reach and segment data tables
         sfr.write_tables('{}/{}'.format(output_path, self.name))
 
-        # create the SFR package
-        sfr.create_ModflowSfr2(model=self, istcb2=223)
-        self._isbc_2d = None  # reset BCs arrays
-        self._isbc = None
-
-        if self.version == 'mf6':
-            self._idomain = None  # reset the idomain array
-
         # export shapefiles of lines, routing, cell polygons, inlets and outlets
         sfr.export_cells('{}/{}_sfr_cells.shp'.format(output_path, self.name))
         sfr.export_outlets('{}/{}_sfr_outlets.shp'.format(output_path, self.name))
         sfr.export_transient_variable('flow', '{}/{}_sfr_inlets.shp'.format(output_path, self.name))
         sfr.export_lines('{}/{}_sfr_lines.shp'.format(output_path, self.name))
         sfr.export_routing('{}/{}_sfr_routing.shp'.format(output_path, self.name))
+
+        # create the flopy SFR package instance
+        if self.version != 'mf6':
+            sfr.create_ModflowSfr2(model=self, istcb2=223)
+            sfr_package = sfr.ModflowSfr2
+        else:
+            sfr_package = sfr.create_mf6sfr(model=self)
+
+        # reset dependent arrays
+        self._isbc_2d = None  # reset BCs arrays
+        self._isbc = None
+        if self.version == 'mf6':
+            self._idomain = None  # reset the idomain array
         print("finished in {:.2f}s\n".format(time.time() - t0))
-        return self.sfr
+        return sfr_package

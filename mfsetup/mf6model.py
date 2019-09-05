@@ -13,7 +13,7 @@ from .interpolate import regrid
 from .gis import get_values_at_points
 from .grid import write_bbox_shapefile, get_grid_bounding_box, get_point_on_national_hydrogeologic_grid
 from .tdis import setup_perioddata
-from .utils import update, get_input_arguments
+from .utils import update, get_input_arguments, flatten
 from .units import convert_length_units, convert_time_units
 from .mfmodel import MFsetupMixin
 
@@ -542,25 +542,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return rch
 
-    def setup_sfr(self):
-        """
-        Sets up the SFR package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
-        """
-        package = 'sfr'
-        print('\nSetting up {} package...'.format(package.upper()))
-        t0 = time.time()
-        sfr = None
-        self._idomain = None
-        print("finished in {:.2f}s\n".format(time.time() - t0))
-        return sfr
-
     def setup_wel(self):
         """
         Sets up the WEL package.
@@ -613,6 +594,27 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return oc
 
+    def setup_ims(self):
+        """
+        Sets up the IMS package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'ims'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        kwargs = flatten(self.cfg[package])
+        kwargs = get_input_arguments(kwargs, mf6.ModflowIms)
+        ims = mf6.ModflowIms(self.simulation, **kwargs)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return ims
+
+
     @staticmethod
     def setup_from_yaml(yamlfile, verbose=False):
         """Make a model from scratch, using information in a yamlfile.
@@ -642,10 +644,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             m.setup_grid()
 
         # set up all of the packages specified in the config file
-        package_list = ['tdis', 'dis', 'npf', 'oc']  #m.package_list
+        package_list = m.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']
         for pkg in package_list:
             package_setup = getattr(MF6model, 'setup_{}'.format(pkg.strip('6')))
+            if not callable(package_setup):
+                package_setup = getattr(MFsetupMixin, 'setup_{}'.format(pkg.strip('6')))
             package_setup(m)
+
 
         print('finished setting up model in {:.2f}s'.format(time.time() - t0))
         print('\n{}'.format(m))

@@ -15,7 +15,7 @@ from mfsetup.utils import get_input_arguments
 
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def cfg(mfnwt_inset_test_cfg_path):
     cfg = MFnwtModel.load_cfg(mfnwt_inset_test_cfg_path)
     # add some stuff just for the tests

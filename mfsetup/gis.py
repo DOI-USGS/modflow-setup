@@ -493,10 +493,12 @@ def intersect(feature, grid, id_column=None,
     if isinstance(feature, str):
         proj4 = get_proj4(feature)
         df = shp2df(feature)
-    elif not isinstance(feature, collections.Iterable):
-        df = pd.DataFrame({'geometry': [feature]})
     elif isinstance(feature, pd.DataFrame):
         df = feature.copy()
+    elif isinstance(feature, collections.Iterable):
+        df = pd.DataFrame({'geometry': feature})
+    elif not isinstance(feature, collections.Iterable):
+        df = pd.DataFrame({'geometry': [feature]})
     else:
         print('unrecognized feature input')
         return
