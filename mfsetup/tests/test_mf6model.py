@@ -164,7 +164,7 @@ def test_external_file_path_setup(model):
 
     assert os.path.exists(os.path.join(m.cfg['simulation']['sim_ws'],
                                        m.external_path))
-    top_filename = m.cfg['dis']['top_filename']
+    top_filename = m.cfg['dis']['top_filename_fmt']
     botm_file_fmt = m.cfg['dis']['botm_filename_fmt']
     m.setup_external_filepaths('dis', 'top',
                                    top_filename,

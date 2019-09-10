@@ -138,7 +138,7 @@ def fix_model_layer_conflicts(top_array, botm_array,
         thicknesses = new_layer_elevs[i - 1] - new_layer_elevs[i]
         with np.errstate(invalid='ignore'):
             too_thin = active & (thicknesses < minimum_thickness)
-        new_layer_elevs[i, too_thin] = new_layer_elevs[i - 1, too_thin] - minimum_thickness
+        new_layer_elevs[i, too_thin] = new_layer_elevs[i - 1, too_thin] - minimum_thickness * 1.001
     assert np.nanmax(np.diff(new_layer_elevs, axis=0)[ibound_array > 0]) * -1 >= minimum_thickness
     return new_layer_elevs[1:]
 

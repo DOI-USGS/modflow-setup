@@ -366,7 +366,7 @@ def projectXY(x, y, projection1, projection2):
 
 
 def get_values_at_points(rasterfile, x=None, y=None,
-                         points=None, out_of_bounds_errors='raise'):
+                         points=None, out_of_bounds_errors='coerce'):
     """Get raster values single point or list of points.
     Points must be in same coordinate system as raster.
 

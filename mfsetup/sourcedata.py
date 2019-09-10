@@ -680,6 +680,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
         source_package = package
 
     # data specified directly
+    sd = None
     if data is not None:
         sd = MFArrayData(variable=var, values=data, dest_model=model,
                          vmin=vmin, vmax=vmax,
@@ -760,6 +761,11 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                          values=[model.dis.top.array] * model.nlay,
                          dest_model=model, **kwargs)
 
+    # no data were specified, or input not recognized
+    elif sd is None:
+        print('No data were specified for {} package, variable {}'.format(package, var))
+        return
+
     data = sd.get_data()
 
     # special handling of some variables
@@ -833,7 +839,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
     filepaths = model.setup_external_filepaths(package, var,
                                                model.cfg[package]['{}_filename_fmt'.format(var)],
                                                nfiles=len(data))
-    assert True
+
     # write out array data to intermediate files
     # assign lake recharge values (water balance surplus) for any high-K lakes
     for i, arr in data.items():
