@@ -8,7 +8,7 @@ import flopy
 mf6 = flopy.mf6
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                              fill_layers, make_idomain, deactivate_idomain_above)
-from .fileio import load, dump, check_source_files, load_array, save_array, load_cfg
+from .fileio import load, dump, check_source_files, load_array, save_array, load_cfg, flopy_mfsimulation_load
 from .interpolate import regrid
 from .gis import get_values_at_points
 from .grid import write_bbox_shapefile, get_grid_bounding_box, get_point_on_national_hydrogeologic_grid
@@ -215,7 +215,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                                             )
             grid['xoff'] = x
             grid['yoff'] = y
-        dump(grid_file, grid)
+        dump(grid_file.format(self.name), grid)
         self.cfg['grid'] = grid
         if write_shapefile:
             write_bbox_shapefile(self.modelgrid,
@@ -616,7 +616,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ims
 
-
     @staticmethod
     def setup_from_yaml(yamlfile, verbose=False):
         """Make a model from scratch, using information in a yamlfile.
@@ -668,3 +667,36 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def load_cfg(yamlfile, verbose=False):
         """Load model configuration info, adjusting paths to model_ws."""
         return load_cfg(yamlfile, default_file='/mf6_defaults.yml')
+
+    @staticmethod
+    def load(yamlfile, load_only=None, verbose=False, forgive=False, check=False):
+        """Load a model from a config file and set of MODFLOW files.
+        """
+        cfg = MF6model.load_cfg(yamlfile, verbose=verbose)
+        print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
+        t0 = time.time()
+
+        # create simulation
+        sim = flopy.mf6.MFSimulation(**cfg['simulation'])
+        cfg['model']['simulation'] = sim
+
+        kwargs = get_input_arguments(cfg['model'], MF6model)
+        m = MF6model(cfg=cfg, **kwargs)
+
+        if 'grid' not in m.cfg.keys():
+            # apply model name if grid_file includes format string
+            grid_file = cfg['setup_grid']['grid_file'].format(m.name)
+            m.cfg['setup_grid']['grid_file'] = grid_file
+            if os.path.exists(grid_file):
+                print('Loading model grid definition from {}'.format(grid_file))
+                m.cfg['grid'] = load(grid_file)
+            else:
+                m.setup_grid()
+
+        # execute the flopy load code on the pre-defined simulation and model instances
+        # (so that the end result is a MFsetup.MF6model instance)
+        # (kludgy)
+        sim = flopy_mfsimulation_load(sim, m)
+        m = sim.get_model(model_name=m.name)
+        print('finished loading model in {:.2f}s'.format(time.time() - t0))
+        return m

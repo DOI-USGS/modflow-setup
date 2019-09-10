@@ -480,6 +480,12 @@ def test_yaml_setup(model_setup):
     #assert success, 'model run did not terminate successfully'
 
 
+def test_load(model_setup, mf6_test_cfg_path):
+    m = model_setup  #deepcopy(inset_setup_from_yaml)
+    m2 = MF6model.load(mf6_test_cfg_path)
+    assert m == m2
+
+
 def test_packagelist(mf6_test_cfg_path):
     cfg = MF6model.load_cfg(mf6_test_cfg_path)
 

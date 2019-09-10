@@ -1,18 +1,17 @@
 import inspect
-#try:
-#    from ruamel import yaml
-#except:
-import yaml
+import sys
 import os
 import json
-try:
-    import yaml
-except:
-    from ruamel import yaml
+import yaml
 import time
 import numpy as np
 import pandas as pd
 from flopy.utils import SpatialReference, mfreadnam, TemporalReference
+from flopy.mf6.mfbase import PackageContainer, MFFileMgmt, ExtFileAction, \
+    PackageContainerType, MFDataException, FlopyException, \
+    VerbosityLevel
+from flopy.mf6.data import mfstructure
+from flopy.mf6.modflow import mfnam, mfims, mftdis, mfgwfgnc, mfgwfmvr
 from .grid import MFsetupGrid
 from .utils import get_input_arguments, update
 
@@ -445,7 +444,8 @@ def setup_external_filepaths(model, package, variable_name,
 
 
 def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
-    """Execute the code in flopy.modflow.Modflow.load"""
+    """Execute the code in flopy.modflow.Modflow.load on an existing
+    flopy.modflow.Modflow instance."""
     version = m.version
     verbose = m.verbose
     model_ws = m.model_ws
@@ -642,3 +642,221 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
 
     # return model object
     return m
+
+
+def flopy_mfsimulation_load(sim, model, strict=True):
+    """Execute the code in flopy.mf6.MFSimulation.load on
+    existing instances of flopy.mf6.MFSimulation and flopy.mf6.MF6model"""
+
+    instance = sim
+    if not isinstance(model, list):
+        model_instances = [model]
+    else:
+        model_instances = model
+    version = sim.version
+    exe_name = sim.exe_name
+    verbosity_level = instance.simulation_data.verbosity_level
+
+    if verbosity_level.value >= VerbosityLevel.normal.value:
+        print('loading simulation...')
+
+    # load simulation name file
+    if verbosity_level.value >= VerbosityLevel.normal.value:
+        print('  loading simulation name file...')
+    instance.name_file.load(strict)
+
+    # load TDIS file
+    tdis_pkg = 'tdis{}'.format(mfstructure.MFStructure().
+                               get_version_string())
+    tdis_attr = getattr(instance.name_file, tdis_pkg)
+    instance._tdis_file = mftdis.ModflowTdis(instance,
+                                             filename=tdis_attr.get_data())
+
+    instance._tdis_file._filename = instance.simulation_data.mfdata[
+        ('nam', 'timing', tdis_pkg)].get_data()
+    if verbosity_level.value >= VerbosityLevel.normal.value:
+        print('  loading tdis package...')
+    instance._tdis_file.load(strict)
+
+    # load models
+    try:
+        model_recarray = instance.simulation_data.mfdata[('nam', 'models',
+                                                          'models')]
+        models = model_recarray.get_data()
+    except MFDataException as mfde:
+        message = 'Error occurred while loading model names from the ' \
+                  'simulation name file.'
+        raise MFDataException(mfdata_except=mfde,
+                              model=instance.name,
+                              package='nam',
+                              message=message)
+    for item in models:
+        # resolve model working folder and name file
+        path, name_file = os.path.split(item[1])
+        model_obj = [m for m in model_instances if m.namefile == name_file]
+        if len(model_obj) == 0:
+            print('model {} attached to {} not found in {}'.format(item, instance, model_instances))
+            return
+        model_obj = model_obj[0]
+        #model_obj = PackageContainer.model_factory(item[0][:-1].lower())
+        # load model
+        if verbosity_level.value >= VerbosityLevel.normal.value:
+            print('  loading model {}...'.format(item[0].lower()))
+        instance._models[item[2]] = flopy_mf6model_load(instance, model_obj, strict=strict, model_rel_path=path)
+        #instance._models[item[2]] = model_obj.load(
+        #    instance,
+        #    instance.structure.model_struct_objs[item[0].lower()], item[2],
+        #    name_file, version, exe_name, strict, path)
+#
+    # load exchange packages and dependent packages
+    try:
+        exchange_recarray = instance.name_file.exchanges
+        has_exch_data = exchange_recarray.has_data()
+    except MFDataException as mfde:
+        message = 'Error occurred while loading exchange names from the ' \
+                  'simulation name file.'
+        raise MFDataException(mfdata_except=mfde,
+                              model=instance.name,
+                              package='nam',
+                              message=message)
+    if has_exch_data:
+        try:
+            exch_data = exchange_recarray.get_data()
+        except MFDataException as mfde:
+            message = 'Error occurred while loading exchange names from the ' \
+                      'simulation name file.'
+            raise MFDataException(mfdata_except=mfde,
+                                  model=instance.name,
+                                  package='nam',
+                                  message=message)
+        for exgfile in exch_data:
+            # get exchange type by removing numbers from exgtype
+            exchange_type = ''.join([char for char in exgfile[0] if
+                                     not char.isdigit()]).upper()
+            # get exchange number for this type
+            if not exchange_type in instance._exg_file_num:
+                exchange_file_num = 0
+                instance._exg_file_num[exchange_type] = 1
+            else:
+                exchange_file_num = instance._exg_file_num[exchange_type]
+                instance._exg_file_num[exchange_type] += 1
+
+            exchange_name = '{}_EXG_{}'.format(exchange_type,
+                                               exchange_file_num)
+            # find package class the corresponds to this exchange type
+            package_obj = instance.package_factory(
+                exchange_type.replace('-', '').lower(), '')
+            if not package_obj:
+                message = 'An error occurred while loading the ' \
+                          'simulation name file.  Invalid exchange type ' \
+                          '"{}" specified.'.format(exchange_type)
+                type_, value_, traceback_ = sys.exc_info()
+                raise MFDataException(instance.name,
+                                      'nam',
+                                      'nam',
+                                      'loading simulation name file',
+                                      exchange_recarray.structure.name,
+                                      inspect.stack()[0][3],
+                                      type_, value_, traceback_, message,
+                                      instance._simulation_data.debug)
+
+            # build and load exchange package object
+            exchange_file = package_obj(instance, exgtype=exgfile[0],
+                                        exgmnamea=exgfile[2],
+                                        exgmnameb=exgfile[3],
+                                        filename=exgfile[1],
+                                        pname=exchange_name,
+                                        loading_package=True)
+            if verbosity_level.value >= VerbosityLevel.normal.value:
+                print('  loading exchange package {}..'
+                      '.'.format(exchange_file._get_pname()))
+            exchange_file.load(strict)
+            instance._exchange_files[exgfile[1]] = exchange_file
+
+    # load simulation packages
+    solution_recarray = instance.simulation_data.mfdata[('nam',
+                                                         'solutiongroup',
+                                                         'solutiongroup'
+                                                         )]
+
+    try:
+        solution_group_dict = solution_recarray.get_data()
+    except MFDataException as mfde:
+        message = 'Error occurred while loading solution groups from ' \
+                  'the simulation name file.'
+        raise MFDataException(mfdata_except=mfde,
+                              model=instance.name,
+                              package='nam',
+                              message=message)
+    for solution_group in solution_group_dict.values():
+        for solution_info in solution_group:
+            ims_file = mfims.ModflowIms(instance, filename=solution_info[1],
+                                        pname=solution_info[2])
+            if verbosity_level.value >= VerbosityLevel.normal.value:
+                print('  loading ims package {}..'
+                      '.'.format(ims_file._get_pname()))
+            ims_file.load(strict)
+
+    instance.simulation_data.mfpath.set_last_accessed_path()
+    return instance
+
+
+def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.'):
+    """Execute the code in flopy.mf6.MFmodel.load_base on an
+        existing instance of MF6model."""
+
+    instance = model
+    modelname = model.name
+    structure = model.structure
+
+    # load name file
+    instance.name_file.load(strict)
+
+    # order packages
+    vnum = mfstructure.MFStructure().get_version_string()
+    # FIX: Transport - Priority packages maybe should not be hard coded
+    priority_packages = {'dis{}'.format(vnum): 1, 'disv{}'.format(vnum): 1,
+                         'disu{}'.format(vnum): 1}
+    packages_ordered = []
+    package_recarray = instance.simulation_data.mfdata[(modelname, 'nam',
+                                                        'packages',
+                                                        'packages')]
+    for item in package_recarray.get_data():
+        if item[0] in priority_packages:
+            packages_ordered.insert(0, (item[0], item[1], item[2]))
+        else:
+            packages_ordered.append((item[0], item[1], item[2]))
+
+    # load packages
+    sim_struct = mfstructure.MFStructure().sim_struct
+    instance._ftype_num_dict = {}
+    for ftype, fname, pname in packages_ordered:
+        ftype = ftype[0:-1].lower()
+        if ftype in structure.package_struct_objs or ftype in \
+                sim_struct.utl_struct_objs:
+            if model_rel_path and model_rel_path != '.':
+                # strip off model relative path from the file path
+                filemgr = simulation.simulation_data.mfpath
+                fname = filemgr.strip_model_relative_path(modelname,
+                                                          fname)
+            if simulation.simulation_data.verbosity_level.value >= \
+                    VerbosityLevel.normal.value:
+                print('    loading package {}...'.format(ftype))
+            # load package
+            instance.load_package(ftype, fname, pname, strict, None)
+
+    # load referenced packages
+    if modelname in instance.simulation_data.referenced_files:
+        for ref_file in \
+                instance.simulation_data.referenced_files[modelname].values():
+            if (ref_file.file_type in structure.package_struct_objs or
+                ref_file.file_type in sim_struct.utl_struct_objs) and \
+                    not ref_file.loaded:
+                instance.load_package(ref_file.file_type,
+                                      ref_file.file_name, None, strict,
+                                      ref_file.reference_path)
+                ref_file.loaded = True
+
+    # TODO: fix jagged lists where appropriate
+
+    return instance

@@ -55,6 +55,40 @@ class MFsetupMixin():
         # cache of interpolation weights to speed up regridding
         self._interp_weights = None
 
+    def __repr__(self):
+        txt = '{} model:\n'.format(self.name)
+        if self.parent is not None:
+            txt += 'Parent model: {}/{}\n'.format(self.parent.model_ws, self.parent.name)
+        if self.modelgrid is not None:
+            txt += 'CRS: {}\n'.format(self.modelgrid.proj4)
+            if self.modelgrid.epsg is not None:
+                txt += '(epsg: {})\n'.format(self.modelgrid.epsg)
+            txt += 'Bounds: {}\n'.format(self.modelgrid.extent)
+            txt += 'Grid spacing: {:.2f} {}\n'.format(self.modelgrid.delr[0],
+                                                      self.modelgrid.units)
+            txt += '{:d} layer(s), {:d} row(s), {:d} column(s), {:d} stress period(s)\n'\
+                .format(self.nlay, self.nrow, self.ncol, self.nper)
+        txt += 'Packages:'
+        for pkg in self.get_package_list():
+            txt += ' {}'.format(pkg.lower())
+        txt += '\n'
+        txt += '{:d} LAKE package lakes'.format(self.nlakes)
+        txt += '\n'
+        return txt
+
+    def __eq__(self, other):
+        """Test for equality to another model object."""
+        if not isinstance(other, self.__class__):
+            return False
+        if other.get_package_list() != self.get_package_list():
+            return False
+        if other.modelgrid != self.modelgrid:
+            return False
+        if other.nlay != self.nlay:
+            return False
+        if not np.array_equal(other.perioddata, self.perioddata):
+            return False
+        return True
 
     @property
     def nper(self):
