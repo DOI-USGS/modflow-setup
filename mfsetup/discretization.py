@@ -60,7 +60,7 @@ def deactivate_idomain_above(idomain, reach_data):
     return idomain
 
 
-def fill_layers(array):
+def fill_empty_layers(array):
     """Fill empty layers in a 3D array by linearly interpolating
     between the values above and below. Layers are defined
     as empty if they contain all nan values. In the example of
@@ -105,6 +105,49 @@ def fill_layers(array):
     return array
 
 
+def fill_cells_vertically(top, botm):
+    """In MODFLOW 6, cells where idomain=0 are excluded from the solution.
+    However, in the botm array, values are needed in overlying cells to
+    compute layer thickness (cells with idomain=0 overlying cells with idomain=0 need
+    values in botm). Given a 3D numpy array with nan values indicating excluded cells,
+    fill in the nans with the overlying values. For example, given the column of cells
+    [10, nan, 8, nan, nan, 5, nan, nan, nan, 1], fill the nan values to make
+    [10, 10, 8, 8, 8, 5, 5, 5, 5], so that layers 2, 5, and 9 (zero-based)
+    all have valid thicknesses (and all other layers have zero thicknesses).
+
+    algorithm:
+    * given a top and botm array (top of the model and layer bottom elevations),
+      get the layer thicknesses (accounting for any nodata values)
+      idomain=0 cells in thickness array must be set to np.nan
+    * set thickness to zero in nan cells
+      take the cumulative sum of the thickness array along the 0th (depth) axis,
+      from the bottom of the array to the top (going backwards in a depth-positive sense)
+    * add the cumulative sum to the array bottom elevations. The backward difference
+      in bottom elevations should be zero in inactive cells, and representative of the
+      desired thickness in the active cells.
+    * append the model bottom elevations (excluded in bottom-up difference)
+
+    Parameters
+    ----------
+    top : 2D numpy array; model top elevations
+    botm : 3D (nlay, nrow, ncol) array; model bottom elevations
+
+    Returns
+    -------
+    top, botm : filled top and botm arrays
+    """
+    thickness = get_layer_thicknesses(top, botm)
+    assert np.all(np.isnan(thickness[np.isnan(thickness)]))
+    thickness[np.isnan(thickness)] = 0
+    # cumulative sum from bottom to top
+    filled = np.cumsum(thickness[::-1], axis=0)[::-1]
+    # add in the model bottom elevations
+    filled += botm[-1]
+    # append the model bottom elevations
+    filled = np.append(filled, botm[-1:], axis=0)
+    return filled[0].copy(), filled[1:].copy()
+
+
 def fix_model_layer_conflicts(top_array, botm_array,
                               ibound_array=None,
                               minimum_thickness=3):
@@ -124,15 +167,15 @@ def fix_model_layer_conflicts(top_array, botm_array,
     -------
     new_botm_array : 3D numpy array of new layer bottom elevations
     """
-    top_array = top_array.copy()
-    botm_array = botm_array.copy()
-    nlay, nrow, ncol = botm_array.shape
+    top = top_array.copy()
+    botm = botm_array.copy()
+    nlay, nrow, ncol = botm.shape
     if ibound_array is None:
-        ibound_array = np.ones(botm_array.shape, dtype=int)
+        ibound_array = np.ones(botm.shape, dtype=int)
     # fix thin layers in the DIS package
     new_layer_elevs = np.empty((nlay + 1, nrow, ncol))
-    new_layer_elevs[1:, :, :] = botm_array
-    new_layer_elevs[0] = top_array
+    new_layer_elevs[1:, :, :] = botm
+    new_layer_elevs[0] = top
     for i in np.arange(1, nlay + 1):
         active = ibound_array[i - 1] > 0.
         thicknesses = new_layer_elevs[i - 1] - new_layer_elevs[i]

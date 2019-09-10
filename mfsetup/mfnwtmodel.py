@@ -11,7 +11,7 @@ import flopy
 fm = flopy.modflow
 from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
-from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_layers
+from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_empty_layers
 from .tdis import setup_perioddata
 from .gis import shp2df, get_values_at_points, intersect, project, get_proj4
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile

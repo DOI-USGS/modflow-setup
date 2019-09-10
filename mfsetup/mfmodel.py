@@ -226,7 +226,10 @@ class MFsetupMixin():
 
     @property
     def nlakes(self):
-        return int(np.max(self.lakarr))
+        if self.lakarr is not None:
+            return int(np.max(self.lakarr))
+        else:
+            return 0
 
     @property
     def _lakarr2d(self):
@@ -416,7 +419,11 @@ class MFsetupMixin():
         if isinstance(filename, list):
             arrays = []
             for f in filename:
-                arrays.append(load_array(f, shape=(self.nrow, self.ncol)))
+                arrays.append(load_array(f,
+                                         shape=(self.nrow, self.ncol),
+                                         nodata=self._nodata_value
+                                         )
+                              )
             return np.array(arrays)
         return load_array(filename, shape=(self.nrow, self.ncol))
 

@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 from ..discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
-                              fill_layers, make_idomain, get_layer_thicknesses,
+                              fill_empty_layers, fill_cells_vertically, make_idomain,
+                              get_layer_thicknesses,
                               deactivate_idomain_above)
 
 
@@ -72,7 +73,7 @@ def test_fill_layers(all_layers):
     nlay, nrow, ncol = all_layers.shape
     ni = len(set(np.where(~np.isnan(all_layers[0]))[0]))
     nj = len(set(np.where(~np.isnan(all_layers[5]))[1]))
-    filled = fill_layers(all_layers)
+    filled = fill_empty_layers(all_layers)
     a = np.array([ni*ni, ni*ni, nrow*ncol,
                   ni*nj, ni*nj, ni*nj, ni*nj, ni*nj, ni*nj,
                   nrow*ncol])
@@ -88,6 +89,20 @@ def test_fill_layers(all_layers):
             if i in [0, 2, 5, 9]:
                 lw = 2
             ax.plot(all_layers[i, 5, :], lw=lw)
+
+
+def test_fill_na(all_layers):
+    top = all_layers[0].copy()
+    botm = all_layers[1:].copy()
+    botm[-2] = 2
+    botm[-2, 2, 2] = np.nan
+
+    top, botm = fill_cells_vertically(top, botm)
+    filled = all_layers.copy()
+    filled[0] = top
+    filled[1:] = botm
+    assert filled[:, 2, 2].tolist() == [10., 10.,  8.,  8.,  8.,  5.,  5.,  5.,  5, 1.]
+    assert filled[:, 0, 0].tolist() == [8] * 8 + [2, 1]
 
 
 def test_make_idomain(all_layers):

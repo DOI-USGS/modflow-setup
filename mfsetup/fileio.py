@@ -127,7 +127,7 @@ def load_array(filename, shape=None, nodata=-9999):
             else:
                 raise ValueError("Data in {} have size {}; should be {}"
                                  .format(filename, arr.shape, shape))
-    if isinstance(arr.dtype, float):
+    if issubclass(arr.dtype.type, np.floating):
         arr[arr == nodata] = np.nan
     print("took {:.2f}s".format(time.time() - t0))
     return arr

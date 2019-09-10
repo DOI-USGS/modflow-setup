@@ -7,7 +7,8 @@ import pandas as pd
 import xarray as xr
 from flopy.utils import binaryfile as bf
 from .fileio import save_array
-from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_layers
+from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
+                             fill_empty_layers, fill_cells_vertically)
 from .gis import get_values_at_points, shp2df
 from .grid import get_ij, MFsetupGrid
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
@@ -781,7 +782,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
             all_surfaces[0] = top
             for k, botm in data.items():
                 all_surfaces[k + 1] = botm
-            all_surfaces = fill_layers(all_surfaces)
+            all_surfaces = fill_empty_layers(all_surfaces)
             botm = all_surfaces[1:]
         else:
             botm = np.stack([data[i] for i in range(len(data))])
@@ -805,6 +806,9 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
             if not isvalid:
                 raise Exception('Model layers less than {} {} thickness'.format(min_thickness,
                                                                                 model.length_units))
+
+        # fill nan values adjacent to active cells to avoid cell thickness errors
+        top, botm = fill_cells_vertically(top, botm)
         data = {i: arr for i, arr in enumerate(botm)}
     elif var in ['rech', 'recharge']:
         for per in range(model.nper):
@@ -848,6 +852,19 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                    fmt=write_fmt)
         # still write intermediate files for MODFLOW-6
         # even though input and output filepaths are same
+        if model.version == 'mf6':
+            shutil.copy(filepaths[i]['filename'],
+                        model.cfg['intermediate_data'][var][i])
+
+    # write the top array again, because top was filled
+    # with botm array above
+    if var == 'botm':
+        top_filepath = model.setup_external_filepaths(package, 'top',
+                                               model.cfg[package]['top_filename_fmt'],
+                                               nfiles=1)[0]
+        save_array(top_filepath, top,
+                   nodata=model._nodata_value,
+                   fmt=write_fmt)
         if model.version == 'mf6':
             shutil.copy(filepaths[i]['filename'],
                         model.cfg['intermediate_data'][var][i])

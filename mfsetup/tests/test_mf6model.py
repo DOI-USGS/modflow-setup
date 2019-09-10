@@ -110,6 +110,12 @@ def test_init(cfg):
     assert isinstance(m, MF6model)
 
 
+def test_repr(model, model_with_grid):
+    txt = model.__repr__()
+    assert isinstance(txt, str)
+    txt = model_with_grid.__repr__()
+    assert isinstance(txt, str)
+
 def test_load_cfg(cfg, mf6_test_cfg_path):
     relative_model_ws = '../tmp/shellmound'
     ws = os.path.normpath(os.path.join(os.path.abspath(os.path.split(mf6_test_cfg_path)[0]),
@@ -346,6 +352,12 @@ def test_dis_setup(model_with_grid):
         mcaq_data = src.read(1)
         mcaq_data[mcaq_data == src.meta['nodata']] = np.nan
     assert np.allclose(m.dis.botm.array[3].mean() / .3048, np.nanmean(mcaq_data), atol=5)
+
+
+def test_idomain(model_with_dis):
+    m = model_with_dis
+    assert issubclass(m.idomain.dtype.type, np.integer)
+    assert m.idomain.sum() == m.dis.idomain.array.sum()
 
 
 def test_ic_setup(model_with_dis):

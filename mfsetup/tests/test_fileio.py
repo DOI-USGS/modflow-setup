@@ -35,6 +35,7 @@ def data():
                   }
             }
 
+
 def test_dump_yml(data, tmpdir):
     outfile = os.path.join(tmpdir, 'junk.yml')
     dump_yml(outfile, data)
@@ -42,13 +43,16 @@ def test_dump_yml(data, tmpdir):
     assert data == data2
 
 
-
 def test_load_array(tmpdir):
+    nodata = -9999
     size = (100, 100)
     a = np.random.randn(*size)
+    a_nodata = a.copy()
+    a[0:2, 0:2] = np.nan
+    a_nodata[0:2, 0:2] = nodata
     f = '{}/junk.txt'.format(tmpdir)
-    np.savetxt(f, a)
-    b = load_array(f)
+    np.savetxt(f, a_nodata)
+    b = load_array(f, nodata=nodata)
     np.testing.assert_allclose(a, b)
 
 

@@ -7,7 +7,7 @@ import numpy as np
 import flopy
 mf6 = flopy.mf6
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
-                             fill_layers, make_idomain, deactivate_idomain_above)
+                             fill_empty_layers, make_idomain, deactivate_idomain_above)
 from .fileio import load, dump, check_source_files, load_array, save_array, load_cfg, flopy_mfsimulation_load
 from .interpolate import regrid
 from .gis import get_values_at_points
@@ -320,7 +320,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
             # for layers without a surface, set bottom elevation
             # so that layer thicknesses between raster surfaces are equal
-            all_surfaces = fill_layers(all_surfaces)
+            all_surfaces = fill_empty_layers(all_surfaces)
 
             # fix any layering conflicts and save out botm files
             botm = np.array(all_surfaces[1:])
