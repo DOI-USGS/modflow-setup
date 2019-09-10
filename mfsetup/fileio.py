@@ -320,7 +320,10 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
                         'nc',
                         'yml', 'json',
                         'hds', 'cbb', 'cbc']
-    file_keys = ['filename', 'filenames', 'binaryfile']
+    file_keys = ['filename',
+                 'filenames',
+                 'binaryfile',
+                 'nhdplus_paths']
     keys = []
     if source_data is None:
         return []

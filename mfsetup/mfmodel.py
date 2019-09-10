@@ -133,8 +133,14 @@ class MFsetupMixin():
 
     @property
     def package_list(self):
+        """Definitive list of packages. Get from namefile input first
+        (as in mf6 input), then look under model input.
+        """
+        packages = self.cfg.get('nam', {}).get('packages', [])
+        if len(packages) == 0:
+            packages = self.cfg['model'].get('packages', [])
         return [p for p in self._package_setup_order
-                if p in self.cfg['model']['packages']]
+                if p in packages]
 
     @property
     def perimeter_bc_type(self):
@@ -186,7 +192,7 @@ class MFsetupMixin():
 
     @property
     def nlakes(self):
-        return np.max(self.lakarr)
+        return int(np.max(self.lakarr))
 
     @property
     def _lakarr2d(self):
@@ -220,7 +226,7 @@ class MFsetupMixin():
                 return None
             else:
                 # assign lakarr values from 3D isbc array
-                lakarr = np.zeros((self.nlay, self.nrow, self.ncol))
+                lakarr = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)
                 for k in range(self.nlay):
                     lakarr[k][self.isbc[k] == 1] = self._lakarr2d[self.isbc[k] == 1]
             for k, ilakarr in enumerate(lakarr):
@@ -244,7 +250,9 @@ class MFsetupMixin():
             if lakes_shapefile is not None:
                 if isinstance(lakes_shapefile, str):
                     lakes_shapefile = {'filename': lakes_shapefile}
-                lakesdata = self.load_features(**lakes_shapefile)
+                kwargs = get_input_arguments(lakes_shapefile, self.load_features)
+                kwargs.pop('include_ids')  # load all lakes in shapefile
+                lakesdata = self.load_features(**kwargs)
             if lakesdata is not None:
                 isanylake = intersect(lakesdata, self.modelgrid)
                 isbc[isanylake > 0] = 2
@@ -366,10 +374,9 @@ class MFsetupMixin():
     def lake_recharge(self):
         """Recharge value to apply to high-K lakes, in model units.
         """
-        if self._lake_recharge is None:
-            if self.precipitation is not None and self.evaporation is not None:
-                self._lake_recharge = self.precipitation - self.evaporation
-        return self._lake_recharge
+        if self.precipitation is not None and self.evaporation is not None:
+            self._lake_recharge = self.precipitation - self.evaporation
+            return self._lake_recharge
 
     def load_array(self, filename):
         if isinstance(filename, list):
@@ -409,9 +416,6 @@ class MFsetupMixin():
 
                     df = shp2df(f, filter=filter)
                     df.columns = [c.lower() for c in df.columns]
-                    if id_column is not None and include_ids is not None:
-                        id_column = id_column.lower()
-                        df = df.loc[df[id_column].isin(include_ids)]
                     if features_proj_str.lower() != model_proj_str:
                         df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
                     if cache:
@@ -422,6 +426,9 @@ class MFsetupMixin():
                     return
             else:
                 df = self._features[f]
+            if id_column is not None and include_ids is not None:
+                id_column = id_column.lower()
+                df = df.loc[df[id_column].isin(include_ids)]
             dfs_list.append(df)
         df = pd.concat(dfs_list)
         return df

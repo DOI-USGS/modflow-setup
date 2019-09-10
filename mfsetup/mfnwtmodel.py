@@ -74,7 +74,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         for pkg in self.get_package_list():
             txt += ' {}'.format(pkg.lower())
         txt += '\n'
-        txt += '{} LAKE package lakes'.format(self.nlakes)
+        txt += '{:d} LAKE package lakes'.format(self.nlakes)
         txt += '\n'
         return txt
 
@@ -136,6 +136,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
             updates['filename'] = cfg
         elif isinstance(cfg, dict):
             updates = cfg.copy()
+        elif cfg is None:
+            return
         else:
             raise TypeError("unrecognized input for cfg")
 
@@ -368,8 +370,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
                     df = self.load_features(features_shapefile,
                                             id_column=id_column, include_ids=include_ids,
-                                            filter=self.parent.modelgrid.bbox.bounds,
-                                            cache=False)
+                                            filter=self.parent.modelgrid.bbox.bounds)
                     rows = df.loc[df[id_column].isin(include_ids)]
                     features = rows.geometry.tolist()
                 if isinstance(features, list):

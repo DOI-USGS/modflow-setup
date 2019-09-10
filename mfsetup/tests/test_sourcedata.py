@@ -83,6 +83,10 @@ def source_data_cases(tmpdir, inset_with_grid):
              {'pdfs': 'postproc/pdfs',
               'rasters': 'postproc/rasters',
               'shapefiles': 'postproc/shps'
+              },
+             {'flowlines':  # case 9
+                  {'nhdplus_paths': ['junk.shp', 'junk2.shp']
+                   }
               }
              ]
 
@@ -154,6 +158,9 @@ def test_parse_source_data(source_data_cases,
                                 type='array')
     assert isinstance(sd.filenames, dict)
     assert sd.unit_conversion == 1. # no dest model
+
+    sd = TabularSourceData.from_config(cases[9]['flowlines']['nhdplus_paths'])
+    assert isinstance(sd.filenames, dict)
 
     # test conversion to model units
     sd = ArraySourceData.from_config(cases[4]['infiltration_arrays'],
@@ -290,9 +297,11 @@ def test_parse_source_data_file_keys(source_data_cases):
                 ['botm.0', 'botm.2', 'top'],
                 ['hk.0', 'hk.2'],
                 ['grid_file'],
-                ['pdfs', 'rasters', 'shapefiles']
+                [], #['pdfs', 'rasters', 'shapefiles']
+                ['flowlines.nhdplus_paths.0',
+                 'flowlines.nhdplus_paths.1']
                 ]
-    for i, case in enumerate(cases[:-1]):
+    for i, case in enumerate(cases):
         keys = _parse_file_path_keys_from_source_data(case)
         assert keys == expected[i]
     keys = _parse_file_path_keys_from_source_data(cases[-1], paths=True)

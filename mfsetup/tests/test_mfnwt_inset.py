@@ -67,6 +67,18 @@ def test_load_cfg(cfg):
     assert True
 
 
+def test_init(cfg):
+    cfg = cfg.copy()
+    cfg['model']['packages'] = []
+    # test initialization with no packages
+    m = MFnwtModel(cfg=cfg, **cfg['model'])
+    assert isinstance(m, MFnwtModel)
+
+    # test initialization with no arguments
+    m = MFnwtModel()
+    assert isinstance(m, MFnwtModel)
+
+
 def test_inset(inset):
     assert isinstance(inset, MFnwtModel)
 
@@ -159,23 +171,24 @@ def test_regrid_nearest(inset_with_grid):
 
 def test_set_lakarr(inset_with_dis):
     m = inset_with_dis
-    if 'lak' in m.package_list:
-        lakes_shapefile = m.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
-        assert lakes_shapefile is not None
-        assert m._lakarr2d.sum() > 0
-        assert m._isbc2d.sum() > 0  # requires
-        assert m.isbc.sum() > 0  # requires DIS package
-        assert m.lakarr.sum() > 0  # requires isbc to be set
-        if m.version == 'mf6':
-            externalfiles = m.cfg['external_files']['lakarr']
-        else:
-            externalfiles = m.cfg['intermediate_data']['lakarr']
-        assert isinstance(externalfiles, dict)
-        assert isinstance(externalfiles[0], list)
-        for f in externalfiles[0]:
-            assert os.path.exists(f)
+    assert 'lak' in m.package_list
+    lakes_shapefile = m.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
+    assert lakes_shapefile is not None
+    assert m._lakarr2d.sum() > 0
+    assert m._isbc2d.sum() > 0  # requires
+    assert m.isbc.sum() > 0  # requires DIS package
+    assert m.lakarr.sum() > 0  # requires isbc to be set
+    if m.version == 'mf6':
+        externalfiles = m.cfg['external_files']['lakarr']
     else:
-        assert m._lakarr2d.sum() == 0
+        externalfiles = m.cfg['intermediate_data']['lakarr']
+    assert isinstance(externalfiles, dict)
+    assert isinstance(externalfiles[0], list)
+    for f in externalfiles[0]:
+        assert os.path.exists(f)
+    m.cfg['model']['packages'].remove('lak')
+    m._lakarr_2d = None
+    assert m._lakarr2d.sum() == 0
 
 
 def test_dis_setup(inset_with_grid):
@@ -286,16 +299,14 @@ def test_rch_setup(inset_with_dis):
     m.cfg['rch']['source_data']['rech']['time_units'] = 'years'
     rch = m.setup_rch()
     arrayfiles = m.cfg['intermediate_data']['rech']
-    assert len(arrayfiles) == 1
     for f in arrayfiles:
         assert os.path.exists(f)
 
     # check that high-K lake recharge was assigned correctly
-    highklake_recharge = m.rch.rech.array[0, 0][m.isbc[0] == 2]
-    assert np.diff(highklake_recharge).sum() == 0
-    for per in range(len(highklake_recharge)):
-        val = (m.cfg['lak']['precip'][per] - m.cfg['lak']['evap'][per])  # this won't pass if these aren't in model units
-        assert np.allclose(highklake_recharge[per], val)
+    highklake_recharge = m.rch.rech.array[:, 0, m.isbc[0] == 2].mean(axis=1)
+    print(highklake_recharge)
+    print(m.lake_recharge)
+    assert np.allclose(highklake_recharge, m.lake_recharge)
 
     # test writing of MODFLOW arrays
     rch.write_file()
@@ -567,3 +578,13 @@ def inset_setup_with_model_run(inset_setup_from_yaml):
         pass
     assert success, 'model run did not terminate successfully'
     return m
+
+
+def test_packagelist(mfnwt_inset_test_cfg_path):
+    cfg = MFnwtModel.load_cfg(mfnwt_inset_test_cfg_path)
+
+    assert len(cfg['model']['packages']) > 0
+    kwargs = get_input_arguments(cfg['model'], MFnwtModel)
+    m = MFnwtModel(cfg=cfg, **kwargs)
+    assert m.package_list == [p for p in m._package_setup_order
+                              if p in cfg['model']['packages']]

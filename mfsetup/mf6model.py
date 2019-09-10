@@ -88,6 +88,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             updates['filename'] = cfg
         elif isinstance(cfg, dict):
             updates = cfg
+        elif cfg is None:
+            return
         else:
             raise TypeError("unrecognized input for cfg")
 
@@ -642,6 +644,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         if 'grid' not in m.cfg.keys():
             m.setup_grid()
+
+        # set up tdis package
+        m.setup_tdis()
 
         # set up all of the packages specified in the config file
         package_list = m.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']

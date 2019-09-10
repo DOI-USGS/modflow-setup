@@ -801,12 +801,22 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
                                                                                 model.length_units))
         data = {i: arr for i, arr in enumerate(botm)}
     elif var in ['rech', 'recharge']:
-        for i, arr in data.items():
-            # assign high-k lake recharge for stress period
-            # apply in same units as source recharge array
-            data[i][model.isbc[0] == 2] = model.lake_recharge[i]
-            # zero-values to lak package lakes
-            data[i][model.isbc[0] == 1] = 0.
+        for per in range(model.nper):
+            if per == 0 and per not in data:
+                raise KeyError("No recharge input specified for first stress period.")
+            if per in data:
+                # assign high-k lake recharge for stress period
+                # apply in same units as source recharge array
+                last_data_array = data[per].copy()
+                data[per][model.isbc[0] == 2] = model.lake_recharge[per]
+                # zero-values to lak package lakes
+                data[per][model.isbc[0] == 1] = 0.
+            else:
+                # start with the last period with recharge data; update the high-k lake recharge
+                last_data_array[model.isbc[0] == 2] = model.lake_recharge[per]
+                # assign to current per
+                data[per] = last_data_array
+
     elif var == 'ibound':
         # TODO: what does mf6 require for lakes?
         for i, arr in data.items():

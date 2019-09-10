@@ -1,7 +1,6 @@
 import os
 import shutil
 import pytest
-from ..mf6model import MF6model
 
 
 @pytest.fixture(scope="session")

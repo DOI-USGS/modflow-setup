@@ -89,6 +89,27 @@ def model_setup(mf6_test_cfg_path):
     return m
 
 
+def test_init(cfg):
+    cfg = cfg.copy()
+    sim = mf6.MFSimulation(**cfg['simulation'])
+    assert isinstance(sim, mf6.MFSimulation)
+
+    sim = mf6.MFSimulation()
+    assert isinstance(sim, mf6.MFSimulation)
+
+    cfg['model']['packages'] = []
+    cfg['nam']['packages'] = []
+    cfg['model']['simulation'] = sim
+    kwargs = get_input_arguments(cfg['model'], MF6model)
+    # test initialization with no packages
+    m = MF6model(cfg=cfg, **kwargs)
+    assert isinstance(m, MF6model)
+
+    # test initialization with no arguments
+    m = MF6model(simulation=sim)
+    assert isinstance(m, MF6model)
+
+
 def test_load_cfg(cfg, mf6_test_cfg_path):
     relative_model_ws = '../tmp/shellmound'
     ws = os.path.normpath(os.path.join(os.path.abspath(os.path.split(mf6_test_cfg_path)[0]),
@@ -228,7 +249,9 @@ def test_perrioddata(model):
 
 def test_set_lakarr(model_with_dis):
     m = model_with_dis
-    if 'lak' in m.package_list:
+    if 'lake' in m.package_list:
+        # lak not implemented yet for mf6
+        #assert 'lak' in m.package_list
         lakes_shapefile = m.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
         assert lakes_shapefile is not None
         assert m._lakarr2d.sum() > 0
@@ -243,7 +266,11 @@ def test_set_lakarr(model_with_dis):
         assert isinstance(externalfiles[0], list)
         for f in externalfiles[0]:
             assert os.path.exists(f)
+        m.cfg['model']['packages'].remove('lak')
+        m._lakarr_2d = None
+        m._isbc_2d = None
     else:
+        assert m._lakarr2d.sum() == 0
         assert m._lakarr2d.sum() == 0
         assert m._isbc2d.sum() == 0
         assert m.isbc.sum() == 0  # requires DIS package
@@ -452,3 +479,21 @@ def test_yaml_setup(model_setup):
         pass
     #assert success, 'model run did not terminate successfully'
 
+
+def test_packagelist(mf6_test_cfg_path):
+    cfg = MF6model.load_cfg(mf6_test_cfg_path)
+
+    assert len(cfg['model']['packages']) == 0
+    packages = cfg['nam']['packages']
+    sim = flopy.mf6.MFSimulation(**cfg['simulation'])
+    cfg['model']['simulation'] = sim
+
+    kwargs = get_input_arguments(cfg['model'], MF6model)
+    # specify packages in namfile input
+    m = MF6model(cfg=cfg, **kwargs)
+    assert m.package_list == [p for p in m._package_setup_order if p in packages]
+
+    # alternatively, specify packages in model input
+    cfg['model']['packages'] = cfg['nam'].pop('packages')
+    m = MF6model(cfg=cfg, **kwargs)
+    assert m.package_list == [p for p in m._package_setup_order if p in packages]
