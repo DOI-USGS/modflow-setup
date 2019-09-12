@@ -88,6 +88,7 @@ class MFsetupMixin():
             return False
         if not np.array_equal(other.perioddata, self.perioddata):
             return False
+        #  TODO: add checks of actual array values and other parameters
         return True
 
     @property
@@ -236,15 +237,7 @@ class MFsetupMixin():
         """2-D array of areal extent of lakes. Non-zero values
         correspond to lak package IDs."""
         if self._lakarr_2d is None:
-            lakarr2d = np.zeros((self.nrow, self.ncol))
-            if 'lak' in self.package_list:
-                lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile', {}).copy()
-                lakesdata = self.load_features(**lakes_shapefile)  # caches loaded features
-                lakes_shapefile['lakesdata'] = lakesdata
-                lakes_shapefile.pop('filename')
-                lakarr2d = make_lakarr2d(self.modelgrid, **lakes_shapefile)
-            self._lakarr_2d = lakarr2d
-            self._isbc_2d = None
+            self._set_lakarr2d()
         return self._lakarr_2d
 
     @property
@@ -262,13 +255,7 @@ class MFsetupMixin():
             if self.isbc is None:
                 return None
             else:
-                # assign lakarr values from 3D isbc array
-                lakarr = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)
-                for k in range(self.nlay):
-                    lakarr[k][self.isbc[k] == 1] = self._lakarr2d[self.isbc[k] == 1]
-            for k, ilakarr in enumerate(lakarr):
-                save_array(self.cfg['intermediate_data']['lakarr'][0][k], ilakarr, fmt='%d')
-            self._lakarr = lakarr
+                self._set_lakarr()
         return self._lakarr
 
     @property
@@ -281,29 +268,7 @@ class MFsetupMixin():
         3 : sfr
         """
         if self._isbc_2d is None:
-            isbc = np.zeros((self.nrow, self.ncol))
-            lakesdata = None
-            lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
-            if lakes_shapefile is not None:
-                if isinstance(lakes_shapefile, str):
-                    lakes_shapefile = {'filename': lakes_shapefile}
-                kwargs = get_input_arguments(lakes_shapefile, self.load_features)
-                kwargs.pop('include_ids')  # load all lakes in shapefile
-                lakesdata = self.load_features(**kwargs)
-            if lakesdata is not None:
-                isanylake = intersect(lakesdata, self.modelgrid)
-                isbc[isanylake > 0] = 2
-                isbc[self._lakarr2d > 0] = 1
-            if 'SFR' in self.get_package_list():
-                i, j = self.sfr.reach_data['i'], \
-                          self.sfr.reach_data['j']
-                isbc[i, j][isbc[i, j] != 1] = 3
-            if 'WEL' in self.get_package_list():
-                i, j = self.wel.stress_period_data[0]['i'], \
-                       self.wel.stress_period_data[0]['j']
-                isbc[i, j][isbc[i, j] == 0] = -1
-            self._isbc_2d = isbc
-            self._lake_bathymetry = None
+            self._set_isbc2d()
         return self._isbc_2d
 
     @property
@@ -318,61 +283,16 @@ class MFsetupMixin():
         if 'DIS' not in self.get_package_list():
             return None
         elif self._isbc is None:
-            isbc = np.zeros((self.nlay, self.nrow, self.ncol))
-            isbc[0] = self._isbc2d
-
-            lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
-            layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
-            # lakes must be at least 10% into a layer to get simulated in that layer
-            below = layer_tops > lake_botm_elevations + 0.1
-            for i, ibelow in enumerate(below[1:]):
-                if np.any(ibelow):
-                    isbc[i+1][ibelow] = self._isbc2d[ibelow]
-            # add other bcs
-            if 'SFR' in self.get_package_list():
-                k, i, j = self.sfr.reach_data['k'], \
-                          self.sfr.reach_data['i'], \
-                          self.sfr.reach_data['j']
-                isbc[k, i, j][isbc[k, i, j] != 1] = 3
-            if 'WEL' in self.get_package_list():
-                k, i, j = self.wel.stress_period_data[0]['k'], \
-                          self.wel.stress_period_data[0]['i'], \
-                          self.wel.stress_period_data[0]['j']
-                isbc[k, i, j][isbc[k, i, j] == 0] = -1
-            self._isbc = isbc
-            self._lakarr = None
+            self._set_isbc()
         return self._isbc
 
     @property
     def lake_bathymetry(self):
         """Put lake bathymetry setup logic here instead of DIS package.
         """
-        default_lake_depth = self.cfg['model'].get('default_lake_depth', 2)
+
         if self._lake_bathymetry is None:
-            bathymetry_file = self.cfg.get('lak', {}).get('source_data', {}).get('bathymetry_raster')
-            if bathymetry_file is not None:
-                lmult = 1.0
-                if isinstance(bathymetry_file, dict):
-                    lmult = convert_length_units(bathymetry_file.get('length_units', 0),
-                                                 self.length_units)
-                    bathymetry_file = bathymetry_file['filename']
-
-                # sample pre-made bathymetry at grid points
-                bathy = get_values_at_points(bathymetry_file,
-                                             x=self.modelgrid.xcellcenters.ravel(),
-                                             y=self.modelgrid.ycellcenters.ravel(),
-                                             out_of_bounds_errors='coerce')
-                bathy = np.reshape(bathy, (self.nrow, self.ncol)) * lmult
-                bathy[(bathy < 0) | np.isnan(bathy)] = 0
-
-                # fill bathymetry grid in remaining lake cells with default lake depth
-                # also ensure that all non lake cells have bathy=0
-                fill = (bathy == 0) & (self._isbc2d > 0) & (self._isbc2d < 3)
-                bathy[fill] = default_lake_depth
-                bathy[(self._isbc2d > 1) & (self._isbc2d > 2)] = 0
-            else:
-                bathy = np.zeros((self.nrow, self.ncol))
-            self._lake_bathymetry = bathy
+            self._set_lake_bathymetry()
         return self._lake_bathymetry
 
     @property
@@ -573,6 +493,117 @@ class MFsetupMixin():
         return setup_external_filepaths(self, package, variable_name,
                                         filename_format, nfiles=nfiles)
 
+    def _reset_bc_arrays(self):
+        """Reset the boundary condition property arrays in order.
+        _lakarr2d
+        _isbc2d  (depends on _lakarr2d)
+        _lake_bathymetry (depends on _isbc2d)
+        _isbc  (depends on _isbc2d)
+        _lakarr  (depends on _isbc and _lakarr2d)
+        """
+        self._set_lakarr2d() # calls self._set_isbc2d(), which calls self._set_lake_bathymetry()
+        self._set_isbc() # calls self._set_lakarr()
+
+    def _set_isbc2d(self):
+            isbc = np.zeros((self.nrow, self.ncol))
+            lakesdata = None
+            lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
+            if lakes_shapefile is not None:
+                if isinstance(lakes_shapefile, str):
+                    lakes_shapefile = {'filename': lakes_shapefile}
+                kwargs = get_input_arguments(lakes_shapefile, self.load_features)
+                kwargs.pop('include_ids')  # load all lakes in shapefile
+                lakesdata = self.load_features(**kwargs)
+            if lakesdata is not None:
+                isanylake = intersect(lakesdata, self.modelgrid)
+                isbc[isanylake > 0] = 2
+                isbc[self._lakarr2d > 0] = 1
+            if 'SFR' in self.get_package_list():
+                i, j = self.sfr.reach_data['i'], \
+                          self.sfr.reach_data['j']
+                isbc[i, j][isbc[i, j] != 1] = 3
+            if 'WEL' in self.get_package_list():
+                i, j = self.wel.stress_period_data[0]['i'], \
+                       self.wel.stress_period_data[0]['j']
+                isbc[i, j][isbc[i, j] == 0] = -1
+            self._isbc_2d = isbc
+            self._set_lake_bathymetry()
+
+    def _set_isbc(self):
+            isbc = np.zeros((self.nlay, self.nrow, self.ncol))
+            isbc[0] = self._isbc2d
+
+            lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
+            layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
+            # lakes must be at least 10% into a layer to get simulated in that layer
+            below = layer_tops > lake_botm_elevations + 0.1
+            for i, ibelow in enumerate(below[1:]):
+                if np.any(ibelow):
+                    isbc[i+1][ibelow] = self._isbc2d[ibelow]
+            # add other bcs
+            if 'SFR' in self.get_package_list():
+                k, i, j = self.sfr.reach_data['k'], \
+                          self.sfr.reach_data['i'], \
+                          self.sfr.reach_data['j']
+                isbc[k, i, j][isbc[k, i, j] != 1] = 3
+            if 'WEL' in self.get_package_list():
+                k, i, j = self.wel.stress_period_data[0]['k'], \
+                          self.wel.stress_period_data[0]['i'], \
+                          self.wel.stress_period_data[0]['j']
+                isbc[k, i, j][isbc[k, i, j] == 0] = -1
+            self._isbc = isbc
+            self._set_lakarr()
+
+    def _set_lakarr2d(self):
+            lakarr2d = np.zeros((self.nrow, self.ncol))
+            if 'lak' in self.package_list:
+                lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile', {}).copy()
+                lakesdata = self.load_features(**lakes_shapefile)  # caches loaded features
+                lakes_shapefile['lakesdata'] = lakesdata
+                lakes_shapefile.pop('filename')
+                lakarr2d = make_lakarr2d(self.modelgrid, **lakes_shapefile)
+            self._lakarr_2d = lakarr2d
+            self._set_isbc2d()
+
+    def _set_lakarr(self):
+        self.setup_external_filepaths('lak', 'lakarr',
+                                      self.cfg['lak']['{}_filename_fmt'.format('lakarr')],
+                                      nfiles=self.nlay)
+        # assign lakarr values from 3D isbc array
+        lakarr = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)
+        for k in range(self.nlay):
+            lakarr[k][self.isbc[k] == 1] = self._lakarr2d[self.isbc[k] == 1]
+        for k, ilakarr in enumerate(lakarr):
+            save_array(self.cfg['intermediate_data']['lakarr'][0][k], ilakarr, fmt='%d')
+        self._lakarr = lakarr
+
+    def _set_lake_bathymetry(self):
+        bathymetry_file = self.cfg.get('lak', {}).get('source_data', {}).get('bathymetry_raster')
+        default_lake_depth = self.cfg['model'].get('default_lake_depth', 2)
+        if bathymetry_file is not None:
+            lmult = 1.0
+            if isinstance(bathymetry_file, dict):
+                lmult = convert_length_units(bathymetry_file.get('length_units', 0),
+                                             self.length_units)
+                bathymetry_file = bathymetry_file['filename']
+
+            # sample pre-made bathymetry at grid points
+            bathy = get_values_at_points(bathymetry_file,
+                                         x=self.modelgrid.xcellcenters.ravel(),
+                                         y=self.modelgrid.ycellcenters.ravel(),
+                                         out_of_bounds_errors='coerce')
+            bathy = np.reshape(bathy, (self.nrow, self.ncol)) * lmult
+            bathy[(bathy < 0) | np.isnan(bathy)] = 0
+
+            # fill bathymetry grid in remaining lake cells with default lake depth
+            # also ensure that all non lake cells have bathy=0
+            fill = (bathy == 0) & (self._isbc2d > 0) & (self._isbc2d < 3)
+            bathy[fill] = default_lake_depth
+            bathy[(self._isbc2d > 1) & (self._isbc2d > 2)] = 0
+        else:
+            bathy = np.zeros((self.nrow, self.ncol))
+        self._lake_bathymetry = bathy
+
     def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
                       source_model=None, source_package=None,
                       **kwargs):
@@ -691,17 +722,21 @@ class MFsetupMixin():
         sfr.export_lines('{}/{}_sfr_lines.shp'.format(output_path, self.name))
         sfr.export_routing('{}/{}_sfr_routing.shp'.format(output_path, self.name))
 
+        # attach the sfrmaker.sfrdata instance as an attribute
+        self.sfrdata = sfr
+
         # create the flopy SFR package instance
         if self.version != 'mf6':
             sfr.create_ModflowSfr2(model=self, istcb2=223)
             sfr_package = sfr.ModflowSfr2
         else:
             sfr_package = sfr.create_mf6sfr(model=self)
+            # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2
+            sfr_package.reach_data = sfr.ModflowSfr2.reach_data
 
         # reset dependent arrays
-        self._isbc_2d = None  # reset BCs arrays
-        self._isbc = None
+        self._reset_bc_arrays()
         if self.version == 'mf6':
-            self._idomain = None  # reset the idomain array
+            self._set_idomain()
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return sfr_package

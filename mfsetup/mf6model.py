@@ -69,15 +69,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         it depends on change.
         """
         if self._idomain is None and 'DIS' in self.get_package_list():
-            idomain = make_idomain(self.dis.top.array, self.dis.botm.array,
-                                   nodata=self._nodata_value,
-                                   minimum_layer_thickness=self.cfg['dis'].get('minimum_layer_thickness', 1),
-                                   drop_thin_cells=True, tol=1e-4)
-            # remove cells that are above stream cells
-            if 'SFR' in self.get_package_list():
-                idomain = deactivate_idomain_above(idomain, self.sfr.reach_data)
-            self._idomain = idomain
-            self.dis.idomain = idomain
+            self._set_idomain()
         return self._idomain
 
     def _load_cfg(self, cfg):
@@ -131,6 +123,31 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # other variables
         self.cfg['external_files'] = {}
+
+    def _set_idomain(self):
+        """Remake the idomain array from the source data,
+        no data values in the top and bottom arrays, and
+        so that cells above SFR reaches are inactive."""
+        idomain_from_layer_elevations = make_idomain(self.dis.top.array,
+                                                     self.dis.botm.array,
+                                                     nodata=self._nodata_value,
+                                                     minimum_layer_thickness=self.cfg['dis'].get('minimum_layer_thickness', 1),
+                                                     drop_thin_cells=True, tol=1e-4)
+        # include cells that are active in the existing idomain array
+        # and cells inactivated on the basis of layer elevations
+        idomain = (self.dis.idomain.array == 1) & (idomain_from_layer_elevations == 1)
+        idomain = idomain.astype(int)
+
+        # remove cells that are above stream cells
+        if 'SFR' in self.get_package_list():
+            idomain = deactivate_idomain_above(idomain, self.sfr.packagedata)
+        self._idomain = idomain
+        self.dis.idomain = idomain
+
+        # re-write the input files
+        self._setup_array('dis', 'idomain',
+                          data={i: arr for i, arr in enumerate(idomain)},
+                          by_layer=True, write_fmt='%d')
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame."""
@@ -235,7 +252,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # make the botm array
         self._setup_array(package, 'botm', by_layer=True, write_fmt='%.2f')
 
-        # make the idomain array
+        # initial idomain input for creating a dis package instance
         self._setup_array(package, 'idomain', by_layer=True, write_fmt='%d')
 
         # put together keyword arguments for dis package
@@ -255,8 +272,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         dis = mf6.ModflowGwfdis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
         self._modelgrid = None  # override DIS package grid setup
-        self._isbc = None  # reset BC property arrays
-        self._idomain = None
+        self._reset_bc_arrays()
+        self._set_idomain()
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return dis
 

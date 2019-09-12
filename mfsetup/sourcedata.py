@@ -660,18 +660,21 @@ class TabularSourceData(SourceData):
         return df
 
 
-def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
+def setup_array(model, package, var, data=None,
+                vmin=-1e30, vmax=1e30,
                 source_model=None, source_package=None,
                 write_fmt='%.6e',
                 **kwargs):
 
     if model.version == 'mf6':
-        data = model.cfg[package].get('griddata', {})
-        if isinstance(data, dict):
-            data = data.get(var)
+        if data is None:
+            data = model.cfg[package].get('griddata', {})
+            if isinstance(data, dict):
+                data = data.get(var)
         external_files_key = 'external_files'
     else:
-        data = model.cfg[package].get(var)
+        if data is None:
+            data = model.cfg[package].get(var)
         external_files_key = 'intermediate_data'
 
     cfg = model.cfg[package].get('source_data', {})
@@ -754,7 +757,7 @@ def setup_array(model, package, var, vmin=-1e30, vmax=1e30,
     # default for idomain if no other information provided
     # rest of the setup is handled by idomain property
     elif var in ['idomain', 'ibound']:
-        sd = MFArrayData(variable=var, values=0, dest_model=model, **kwargs)
+        sd = MFArrayData(variable=var, values=1, dest_model=model, **kwargs)
 
     # default to model top for starting heads
     elif var == 'strt':

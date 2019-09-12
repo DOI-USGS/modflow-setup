@@ -13,7 +13,7 @@ from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
 from ..discretization import get_layer_thicknesses
-from ..fileio import load
+from ..fileio import load_array
 from ..mf6model import MF6model
 from .. import testing
 from ..units import convert_length_units
@@ -79,6 +79,13 @@ def model_with_dis(model_with_grid):
     return m
 
 
+@pytest.fixture(scope="function")
+def model_with_sfr(model_with_dis):
+    m = model_with_dis
+    sfr = m.setup_sfr()
+    return m
+
+
 @pytest.fixture(scope="module")
 def model_setup(mf6_test_cfg_path):
     for folder in ['shellmound', 'tmp']:
@@ -115,6 +122,7 @@ def test_repr(model, model_with_grid):
     assert isinstance(txt, str)
     txt = model_with_grid.__repr__()
     assert isinstance(txt, str)
+
 
 def test_load_cfg(cfg, mf6_test_cfg_path):
     relative_model_ws = '../tmp/shellmound'
@@ -292,6 +300,10 @@ def test_dis_setup(model_with_grid):
     botm = m.dis.botm.array.copy()
     assert isinstance(dis, mf6.ModflowGwfdis)
     assert 'DIS' in m.get_package_list()
+    # verify that units got conveted correctly
+    assert m.dis.top.array.mean() < 100
+
+
     arrayfiles = m.cfg['intermediate_data']['top'] + \
                  m.cfg['intermediate_data']['botm'] + \
                  m.cfg['intermediate_data']['idomain']
@@ -345,7 +357,7 @@ def test_dis_setup(model_with_grid):
     assert np.array_equal(m.dis.idomain.array, updated_idomain)
 
     # check that units were converted (or not)
-    assert np.allclose(dis.top.array.mean(), 126, atol=10)
+    assert np.allclose(dis.top.array.mean(), 40, atol=10)
     mcaq = m.cfg['dis']['source_data']['botm']['filenames'][3]
     assert 'mcaq' in mcaq
     with rasterio.open(mcaq) as src:
@@ -466,12 +478,11 @@ def test_wel_setup(model_with_dis):
     assert True
 
 
-def test_sfr_setup(model_with_dis):
-    m = model_with_dis  # deepcopy(model)
-    sfr = m.setup_sfr()
-    sfr.write()
-    assert os.path.exists(os.path.join(m.model_ws, sfr.filename))
-    assert isinstance(sfr, mf6.ModflowGwfsfr)
+def test_sfr_setup(model_with_sfr):
+    m = model_with_sfr
+    m.sfr.write()
+    assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
+    assert isinstance(m.sfr, mf6.ModflowGwfsfr)
     output_path = m.cfg['sfr']['output_path']
     shapefiles = ['{}/{}_sfr_cells.shp'.format(output_path, m.name),
                   '{}/{}_sfr_outlets.shp'.format(output_path, m.name),
@@ -483,8 +494,45 @@ def test_sfr_setup(model_with_dis):
         assert os.path.exists(f)
 
 
+def test_idomain_above_sfr(model_with_sfr):
+    m = model_with_sfr
+    sfr = m.sfr
+    # get the kij locations of sfr reaches
+    cellids = sfr.packagedata.array['cellid'].tolist()
+    deact_lays = [list(range(cellid[0])) for cellid in cellids]
+    k, i, j = list(zip(*cellids))
+
+    # verify that streambed tops are above layer bottoms
+    assert np.all(sfr.packagedata.array['rtp'] > np.all(m.dis.botm.array[k, i, j]))
+
+    # test that idomain above sfr cells is being set to 0
+    # by setting all botms above streambed tops
+    new_botm = m.dis.botm.array.copy()
+    new_botm[:, i, j] = 9999
+    m.dis.botm = new_botm
+    sfr = m.setup_sfr()
+
+    # test loading a 3d array from a filelist
+    idomain = load_array(m.cfg['dis']['griddata']['idomain'])
+    assert np.array_equal(m.idomain, idomain)
+
+    # idomain should be zero everywhere there's a sfr reach
+    # except for in the botm layer
+    # (verifies that model botm was reset to accomdate SFR reaches)
+    assert idomain[:-1, i, j].sum() == 0
+    assert idomain[-1, i, j].sum() == len(sfr.packagedata.array)
+    assert np.all(m.dis.botm.array[:-1, i, j] == 9999)
+    assert np.all(m.dis.botm.array[-1, i, j] != 9999)
+
+
 def test_yaml_setup(model_setup):
     m = model_setup  #deepcopy(model_setup)
+
+    dis_idomain = m.dis.idomain.array.copy()
+    for i, d in enumerate(m.cfg['dis']['griddata']['idomain']):
+        arr = load_array(d['filename'])
+        assert np.array_equal(m.idomain[i], arr)
+        assert np.array_equal(dis_idomain[i], arr)
     try:
         success, buff = m.run_model(silent=False)
     except:

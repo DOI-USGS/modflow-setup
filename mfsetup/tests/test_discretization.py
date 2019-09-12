@@ -160,9 +160,9 @@ def test_deactivate_idomain_above(all_layers):
                            minimum_layer_thickness=1,
                            drop_thin_cells=True,
                            tol=1e-4)
-    reach_data = {'k': [2, 8],
-                  'i': [2, 3],
-                  'j': [2, 3]}
-    idomain2 = deactivate_idomain_above(idomain, reach_data)
+    packagedata = object()
+    packagedata = {'cellid': [(2, 2, 2),
+                                    (8, 3, 3)]}
+    idomain2 = deactivate_idomain_above(idomain, packagedata)
     assert idomain2[:, 2, 2].sum() == idomain[:, 2, 2].sum() -1
     assert idomain2[:, 3, 3].sum() == 1

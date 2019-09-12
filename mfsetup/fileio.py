@@ -113,24 +113,36 @@ def dump_yml(yml_file, data):
 def load_array(filename, shape=None, nodata=-9999):
     """Load an array, ensuring the correct shape."""
     t0 = time.time()
-    txt = 'loading {}'.format(filename)
-    if shape is not None:
-        txt += ', shape={}'.format(shape)
-    print(txt, end=', ')
-    # arr = np.loadtxt
-    # pd.read_csv is >3x faster than np.load_txt
-    arr = pd.read_csv(filename, delim_whitespace=True, header=None).values
-    if shape is not None:
-        if arr.shape != shape:
-            if arr.size == np.prod(shape):
-                arr = np.reshape(arr, shape)
-            else:
-                raise ValueError("Data in {} have size {}; should be {}"
-                                 .format(filename, arr.shape, shape))
-    if issubclass(arr.dtype.type, np.floating):
-        arr[arr == nodata] = np.nan
+    if not isinstance(filename, list):
+        filename = [filename]
+    shape2d = shape
+    if shape is not None and len(shape) == 3:
+        shape2d = shape[1:]
+
+    arraylist = []
+    for f in filename:
+        if isinstance(f, dict):
+            f = f['filename']
+        txt = 'loading {}'.format(f)
+        if shape2d is not None:
+            txt += ', shape={}'.format(shape2d)
+        print(txt, end=', ')
+        # arr = np.loadtxt
+        # pd.read_csv is >3x faster than np.load_txt
+        arr = pd.read_csv(f, delim_whitespace=True, header=None).values
+        if shape2d is not None:
+            if arr.shape != shape2d:
+                if arr.size == np.prod(shape2d):
+                    arr = np.reshape(arr, shape2d)
+                else:
+                    raise ValueError("Data in {} have size {}; should be {}"
+                                     .format(f, arr.shape, shape2d))
+        arraylist.append(arr)
+    array = np.squeeze(arraylist)
+    if issubclass(array.dtype.type, np.floating):
+        array[array == nodata] = np.nan
     print("took {:.2f}s".format(time.time() - t0))
-    return arr
+    return array
 
 
 def save_array(filename, arr, nodata=-9999,

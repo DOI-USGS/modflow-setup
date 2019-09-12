@@ -3,7 +3,7 @@ Functions related to the Discretization Package.
 """
 import time
 import numpy as np
-
+from flopy.mf6.data.mfdatalist import MFList
 
 def adjust_layers(dis, minimum_thickness=1):
     """
@@ -38,12 +38,12 @@ def adjust_layers(dis, minimum_thickness=1):
     return new_layer_elevs[1:]
 
 
-def deactivate_idomain_above(idomain, reach_data):
+def deactivate_idomain_above(idomain, packagedata):
     """Sets ibound to 0 for all cells above active SFR cells.
 
     Parameters
     ----------
-    reach_data : recarray
+    packagedata : MFList, recarray or DataFrame
         SFR package reach data
 
     Notes
@@ -52,11 +52,15 @@ def deactivate_idomain_above(idomain, reach_data):
     new BAS6 package file, model.write() or flopy.model.ModflowBas6.write()
     must be run.
     """
+    if isinstance(packagedata, MFList):
+        packagedata = packagedata.array
     idomain = idomain.copy()
-    deact_lays = [list(range(i)) for i in reach_data['k']]
-    for ks, i, j in zip(deact_lays, reach_data['i'], reach_data['j']):
-        for k in ks:
-            idomain[k, i, j] = 0
+    cellids = list(packagedata['cellid'])
+    deact_lays = [list(range(cellid[0])) for cellid in cellids]
+    k, i, j = list(zip(*cellids))
+    for ks, ci, cj in zip(deact_lays, i, j):
+        for ck in ks:
+            idomain[ck, ci, cj] = 0
     return idomain
 
 
