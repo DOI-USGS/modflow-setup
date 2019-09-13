@@ -10,8 +10,9 @@ import pandas as pd
 import flopy
 fm = flopy.modflow
 from mfsetup import MFnwtModel
-from mfsetup.units import convert_length_units
-from mfsetup.utils import get_input_arguments
+from ..fileio import exe_exists
+from ..units import convert_length_units
+from ..utils import get_input_arguments
 
 
 
@@ -572,12 +573,14 @@ def inset_with_transient_parent(inset_with_grid):
 @pytest.fixture(scope="session")
 def inset_setup_with_model_run(inset_setup_from_yaml):
     m = inset_setup_from_yaml
-    try:
-        success, buff = m.run_model(silent=False)
-    except:
-        pass
-    assert success, 'model run did not terminate successfully'
-    return m
+    # TODO : Add executables to Travis build
+    if exe_exists('mfnwt'):
+        try:
+            success, buff = m.run_model(silent=False)
+        except:
+            pass
+        assert success, 'model run did not terminate successfully'
+        return m
 
 
 def test_packagelist(mfnwt_inset_test_cfg_path):

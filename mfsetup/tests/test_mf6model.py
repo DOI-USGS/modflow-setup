@@ -13,7 +13,7 @@ from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
 from ..discretization import get_layer_thicknesses
-from ..fileio import load_array
+from ..fileio import load_array, exe_exists
 from ..mf6model import MF6model
 from .. import testing
 from ..units import convert_length_units
@@ -93,6 +93,17 @@ def model_setup(mf6_test_cfg_path):
             shutil.rmtree(folder)
     m = MF6model.setup_from_yaml(mf6_test_cfg_path)
     m.simulation.write_simulation()
+    if hasattr(m, 'sfr'):
+        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+        m.sfrdata.write_package(sfr_package_filename,
+                                    version='mf6',
+                                    options=['save_flows',
+                                             'BUDGET FILEOUT shellmound.sfr.cbc',
+                                             'STAGE FILEOUT shellmound.sfr.stage.bin',
+                                             # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
+                                             # location of obs6 file relative to sfr package file (same folder)
+                                             ]
+                                    )
     return m
 
 
@@ -138,8 +149,8 @@ def test_simulation(simulation):
 
 
 def test_model(model):
-    assert True
-
+    assert model.exe_name == 'mf6'
+    assert model.simulation.exe_name == 'mf6'
 
 def test_snap_to_NHG(cfg, simulation):
     cfg = cfg.copy()
@@ -525,7 +536,8 @@ def test_idomain_above_sfr(model_with_sfr):
     assert np.all(m.dis.botm.array[-1, i, j] != 9999)
 
 
-def test_yaml_setup(model_setup):
+@pytest.fixture(scope="module")
+def model_setup_and_run(model_setup):
     m = model_setup  #deepcopy(model_setup)
 
     dis_idomain = m.dis.idomain.array.copy()
@@ -533,11 +545,17 @@ def test_yaml_setup(model_setup):
         arr = load_array(d['filename'])
         assert np.array_equal(m.idomain[i], arr)
         assert np.array_equal(dis_idomain[i], arr)
-    try:
-        success, buff = m.run_model(silent=False)
-    except:
-        pass
-    #assert success, 'model run did not terminate successfully'
+    # TODO : Add executables to Travis build
+    if exe_exists('mf6'):
+        try:
+            success, buff = m.simulation.run_simulation()
+        except:
+            pass
+        assert success, 'model run did not terminate successfully'
+
+
+def test_model_setup(model_setup_and_run):
+    m = model_setup_and_run
 
 
 def test_load(model_setup, mf6_test_cfg_path):

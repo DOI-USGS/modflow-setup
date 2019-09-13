@@ -2,7 +2,8 @@ import os
 import numpy as np
 import pytest
 import flopy.modflow as fm
-from ..fileio import load, load_array, dump_yml, load_yml, load_modelgrid, load_cfg, setup_external_filepaths
+from ..fileio import (load, load_array, dump_yml, load_yml,
+                      load_modelgrid, load_cfg, which, exe_exists)
 
 
 @pytest.fixture
@@ -97,3 +98,12 @@ def test_whether_flopy_remembers_external_path(module_tmpdir, external_files_pat
     #m2 = fm.Modflow.load('junk.nam', model_ws=module_tmpdir, external_path=external_files_path)
     #assert True
     pass
+
+
+def test_which():
+    badexe = which('junk')
+    assert badexe is None
+
+
+def test_exe_exists():
+    assert not exe_exists('junk')
