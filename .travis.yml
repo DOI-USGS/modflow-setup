@@ -19,9 +19,10 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update conda
   - conda info -a
-
   - conda env create --file="${ENV_FILE}"
   - source activate test
+  - pip install https://github.com/modflowpy/flopy/zipball/develop
+  - pip install https://github.com/aleaf/sfrmaker/zipball/master
   - pip install -e .
   - conda list
 
