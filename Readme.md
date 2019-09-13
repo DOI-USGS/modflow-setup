@@ -1,7 +1,9 @@
 
 MFsetup
 -----------------------------------------------
-Package to facilitate setup of a MODFLOW-6 rgroundwater flow model with the SFR package.
+Package to facilitate automated setup of MODFLOW models, from source data including shapefiles, rasters, and other MODFLOW models that are geo-located. Input data and model construction options are summarized in a single configuration file. Source data are read from their native formats and mapped to a regular finite difference grid specified in the configuration file. An external array-based [flopy](https://github.com/modflowpy/flopy) model instance with the desired packages is created from the sampled source data and default settings. MODFLOW input can then be written from the flopy model instance.
+
+
 ### Version 0.0.0
 [![Build Status](https://travis-ci.org/aleaf/MFsetup.svg?branch=master)](https://travis-ci.org/aleaf/MFsetup)
 [![Coverage Status](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)
@@ -13,7 +15,30 @@ Package to facilitate setup of a MODFLOW-6 rgroundwater flow model with the SFR 
 Getting Started
 -----------------------------------------------
 
-Example notebook
+Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a configuration file similar to the included test files:
+
+* [MODFLOW-NWT example](https://github.com/aleaf/MFsetup/blob/master/mfsetup/tests/data/mfnwt_inset_test.yml)
+* [MODFLOW-6 example](https://github.com/aleaf/MFsetup/blob/master/mfsetup/tests/data/shellmound.yml)
+
+The yaml file summarize source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
+
+```
+from mfsetup import MFnwtModel, MF6model
+
+m = MF6model.setup_from_yaml(<path to configuration file>)
+```
+where `m` is a [flopy](https://github.com/modflowpy/flopy) MODFLOW-6 model instance that is returned. The MODFLOW input files can be written from the model instance:
+
+```
+m.simulation.write_simulation()
+```
+
+MODFLOW-NWT version:
+
+```
+m = MFnwtModel.setup_from_yaml(<path to configuration file>)
+m.write_input()
+```
 
 
 ### Bugs
@@ -30,15 +55,32 @@ MFsetup requires **Python** 3.6 (or higher)
 
 **Dependencies:**  
 pyaml  
-numpy
-scipy
+numpy   
+scipy  
 xarray  
 pandas  
 fiona  
 rasterio  
+rasterstats  
 shapely  
+rtree  
 pyproj  
-flopy  
+flopy   
+sfrmaker
+
+### Install python and dependency packages
+Download and install the [Anaconda python distribution](https://www.anaconda.com/distribution/).
+Open an Anaconda Command Prompt on Windows or a terminal window on OSX.
+From the root folder for the package (that contains `requirements.yml`), install the above packages from `requirements.yml`.
+
+```
+conda env create -f requirements.yml
+```
+activate the environment:
+
+```
+conda activate mfsetup
+```
 
 ### Install to site_packages folder
 ```
