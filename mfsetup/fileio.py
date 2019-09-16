@@ -897,3 +897,22 @@ def exe_exists(exe_name):
     if exe_path is not None:
         return os.path.exists(exe_path) and \
                os.access(which(exe_path), os.X_OK)
+
+
+def read_mf6_block(filename, blockname):
+    blockname = blockname.lower()
+    data = {}
+    read = False
+    with open(filename) as src:
+        for line in src:
+            line = line.lower()
+            if 'begin' in line and blockname in line:
+                read = True
+                continue
+            if blockname == 'options' and read:
+                line = line.strip().split()
+                data[line[0]] = line[1:]
+            if 'end' in line and blockname in line:
+                read = False
+                break
+    return data

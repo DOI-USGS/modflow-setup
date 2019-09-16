@@ -410,7 +410,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # make the rech array
         self._setup_array(package, 'recharge', by_layer=False,
-                          resample_method='linear', write_fmt='%.6e')
+                          resample_method='linear', write_fmt='%.6e',
+                          write_nodata=0.)
 
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])
@@ -492,6 +493,32 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         return ims
 
     @staticmethod
+    def _parse_modflowgwf_kwargs(cfg):
+
+        if isinstance(cfg['simulation'], dict):
+            # create simulation
+            sim = flopy.mf6.MFSimulation(**cfg['simulation'])
+            cfg['model']['simulation'] = sim
+            sim_ws = cfg['simulation']['sim_ws']
+        elif isinstance(cfg['simulation'], mf6.MFSimulation):
+            sim_ws = cfg['simulation'].sim_ws
+        else:
+            raise TypeError('unrecognized configuration input for simulation.')
+
+        # listing file
+        cfg['model']['list'] = os.path.join(sim_ws,
+                                            cfg['model']['list_filename_fmt']
+                                            .format(cfg['model']['modelname']))
+
+        # newton options
+        if not cfg['model']['options'].get('newton', False):
+            cfg['model']['options']['newtonoptions'] = ['']
+        if not cfg['model']['options'].get('newton_under_relaxation', False):
+            cfg['model']['options']['newtonoptions'] = ['under_relaxation']
+        cfg['model'].update(cfg['model']['options'])
+        return cfg
+
+    @staticmethod
     def setup_from_yaml(yamlfile, verbose=False):
         """Make a model from scratch, using information in a yamlfile.
 
@@ -509,11 +536,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
-        # create simulation
-        sim = flopy.mf6.MFSimulation(**cfg['simulation'])
-        cfg['model']['simulation'] = sim
-
-        kwargs = get_input_arguments(cfg['model'], MF6model)
+        cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
         m = MF6model(cfg=cfg, **kwargs)
 
         if 'grid' not in m.cfg.keys():
@@ -551,11 +575,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
-        # create simulation
-        sim = flopy.mf6.MFSimulation(**cfg['simulation'])
-        cfg['model']['simulation'] = sim
-
-        kwargs = get_input_arguments(cfg['model'], MF6model)
+        cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
         m = MF6model(cfg=cfg, **kwargs)
 
         if 'grid' not in m.cfg.keys():
@@ -571,7 +592,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # execute the flopy load code on the pre-defined simulation and model instances
         # (so that the end result is a MFsetup.MF6model instance)
         # (kludgy)
-        sim = flopy_mfsimulation_load(sim, m)
+        sim = flopy_mfsimulation_load(cfg['model']['simulation'], m)
         m = sim.get_model(model_name=m.name)
         print('finished loading model in {:.2f}s'.format(time.time() - t0))
         return m

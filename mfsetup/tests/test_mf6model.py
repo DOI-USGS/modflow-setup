@@ -13,7 +13,7 @@ from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
 from ..discretization import get_layer_thicknesses
-from ..fileio import load_array, exe_exists
+from ..fileio import load_array, exe_exists, read_mf6_block
 from ..mf6model import MF6model
 from .. import testing
 from ..units import convert_length_units
@@ -57,7 +57,8 @@ def model(cfg, simulation):
     cfg = cfg.copy()
     #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = simulation
-    kwargs = get_input_arguments(cfg['model'], MF6model)
+    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
     m = MF6model(cfg=cfg, **kwargs)
     return m
 
@@ -116,9 +117,9 @@ def test_init(cfg):
     assert isinstance(sim, mf6.MFSimulation)
 
     cfg['model']['packages'] = []
-    cfg['nam']['packages'] = []
     cfg['model']['simulation'] = sim
-    kwargs = get_input_arguments(cfg['model'], MF6model)
+    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
     # test initialization with no packages
     m = MF6model(cfg=cfg, **kwargs)
     assert isinstance(m, MF6model)
@@ -126,6 +127,30 @@ def test_init(cfg):
     # test initialization with no arguments
     m = MF6model(simulation=sim)
     assert isinstance(m, MF6model)
+
+
+def test_parse_modflowgwf_kwargs(cfg):
+    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
+    m = MF6model(cfg=cfg, **kwargs)
+    m.write()
+
+    # verify that options were written correctly to namefile
+    nampath = os.path.join(m.model_ws, m.model_nam_file)
+    options = read_mf6_block(nampath, 'options')
+    assert os.path.normpath(options['list'][0]).lower() == \
+           os.path.normpath(cfg['model']['list']).lower()
+    for option in ['print_input', 'print_flows', 'save_flows']:
+        if cfg['model'][option]:
+            assert option in options
+    assert options['newton'] == ['under_relaxation']
+
+    # newton solver, but without underrelaxation
+    kwargs['newtonoptions'] = ['']
+    m = MF6model(cfg=cfg, **kwargs)
+    m.write()
+    options = read_mf6_block(nampath, 'options')
+    assert 'newton' in options
 
 
 def test_repr(model, model_with_grid):
@@ -152,13 +177,15 @@ def test_model(model):
     assert model.exe_name == 'mf6'
     assert model.simulation.exe_name == 'mf6'
 
+
 def test_snap_to_NHG(cfg, simulation):
     cfg = cfg.copy()
     #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = simulation
     cfg['setup_grid']['snap_to_NHG'] = True
 
-    kwargs = get_input_arguments(cfg['model'], MF6model)
+    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
     m = MF6model(cfg=cfg, **kwargs)
     m.setup_grid()
 
@@ -477,6 +504,18 @@ def test_rch_setup(model_with_dis):
                                 m.perioddata['end_datetime'].values[1])
     assert testing.rpd(values1.mean(), m.rch.recharge.array[1, 0].mean()) < 0.01
 
+    # check that nodata are written as 0.
+    tmp = rch.recharge.array[:2].copy()
+    tmp[0, 0, 0, 0] = np.nan
+    tmp = {i: arr[0] for i, arr in enumerate(tmp)}
+    m._setup_array('rch', 'recharge', by_layer=False,
+                   data=tmp, write_fmt='%.6e',
+                   write_nodata=0.)
+    rech0 = load_array(m.cfg['rch']['recharge'][0])
+    assert rech0[0, 0] == 0.
+    assert rech0.min() >= 0.
+    assert np.allclose(m.rch.recharge.array[0, 0].ravel(), rech0.ravel())
+
 
 @pytest.mark.skip("still working on wel")
 def test_wel_setup(model_with_dis):
@@ -572,7 +611,8 @@ def test_packagelist(mf6_test_cfg_path):
     sim = flopy.mf6.MFSimulation(**cfg['simulation'])
     cfg['model']['simulation'] = sim
 
-    kwargs = get_input_arguments(cfg['model'], MF6model)
+    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
     # specify packages in namfile input
     m = MF6model(cfg=cfg, **kwargs)
     assert m.package_list == [p for p in m._package_setup_order if p in packages]

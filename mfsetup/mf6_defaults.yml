@@ -7,11 +7,19 @@ simulation:
 model:
   modelname: 'model'
   version: 'mf6'
+  list_filename_fmt: '{}.list'
+  options:
+    print_input: True
+    print_flows: False
+    save_flows: True
+    newton: True
+    newton_under_relaxation: False
+  packages: []
   hiKlakes_value: 1.e4
   default_lake_depth: 2 # m; default depth to assume when setting up lak package or high-k lakes (layer 1 bottom is adjusted to achieve this thickness)
   start_date_time: '2011-01-01'
   end_date_time:
-  packages: []
+
 
 parent:
 
@@ -29,14 +37,6 @@ setup_grid:
   rotation: 0
   snap_to_NHG: False
 
-nam:
-  list_filename_fmt: '{}.list'
-  options:
-    print_input: True
-    print_flows: True
-    save_flows: True
-    newton: True
-  packages: []
 
 dis:
   options:

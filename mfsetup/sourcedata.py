@@ -663,7 +663,7 @@ class TabularSourceData(SourceData):
 def setup_array(model, package, var, data=None,
                 vmin=-1e30, vmax=1e30,
                 source_model=None, source_package=None,
-                write_fmt='%.6e',
+                write_fmt='%.6e', write_nodata=None,
                 **kwargs):
 
     if model.version == 'mf6':
@@ -849,9 +849,11 @@ def setup_array(model, package, var, data=None,
 
     # write out array data to intermediate files
     # assign lake recharge values (water balance surplus) for any high-K lakes
+    if write_nodata is None:
+        write_nodata = model._nodata_value
     for i, arr in data.items():
         save_array(filepaths[i], arr,
-                   nodata=model._nodata_value,
+                   nodata=write_nodata,
                    fmt=write_fmt)
         # still write intermediate files for MODFLOW-6
         # even though input and output filepaths are same
@@ -866,7 +868,7 @@ def setup_array(model, package, var, data=None,
                                                model.cfg[package]['top_filename_fmt'],
                                                nfiles=1)[0]
         save_array(top_filepath, top,
-                   nodata=model._nodata_value,
+                   nodata=write_nodata,
                    fmt=write_fmt)
         if model.version == 'mf6':
             shutil.copy(filepaths[i]['filename'],

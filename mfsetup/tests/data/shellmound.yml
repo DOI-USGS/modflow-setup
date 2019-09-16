@@ -6,6 +6,21 @@ simulation:
 model:
   simulation: 'shellmound'
   modelname: 'shellmound'
+  options:
+    print_input: True
+    save_flows: True
+    newton: True
+    newton_under_relaxation: False
+  packages: ['dis',
+             'ic',
+             'npf',
+             'oc',
+             'sto',
+             'rch',
+             'sfr',
+    #'wel',
+             'ims'
+  ]
 
 external_path: 'external/'
 
@@ -20,23 +35,6 @@ setup_grid:
   epsg: 5070
   snap_to_NHG: True
 
-nam:
-  list_filename_fmt: '{}.list'
-  options:
-    print_input: True
-    print_flows: True
-    save_flows: True
-    newton: True
-  packages: ['dis',
-             'ic',
-             'npf',
-             'oc',
-             'sto',
-             'rch',
-             'sfr',
-             #'wel',
-             'ims'
-  ]
 
 dis:
   remake_top: True
