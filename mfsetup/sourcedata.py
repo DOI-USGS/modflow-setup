@@ -9,7 +9,7 @@ from flopy.utils import binaryfile as bf
 from .fileio import save_array
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                              fill_empty_layers, fill_cells_vertically)
-from .gis import get_values_at_points, shp2df
+from .gis import get_values_at_points, shp2df, intersect
 from .grid import get_ij, MFsetupGrid
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .tdis import months
@@ -112,7 +112,9 @@ class ArraySourceData(SourceData):
     def __init__(self, variable, filenames=None, length_units='unknown', time_units='unknown',
                  dest_model=None, source_modelgrid=None, source_array=None,
                  from_source_model_layers=None, by_layer=False,
-                 resample_method='nearest', vmin=-1e30, vmax=1e30,
+                 id_column=None, include_ids=None, column_mappings=None,
+                 resample_method='nearest',
+                 vmin=-1e30, vmax=1e30, dtype=float,
                  multiplier=1.):
 
         SourceData.__init__(self, filenames=filenames,
@@ -130,10 +132,14 @@ class ArraySourceData(SourceData):
             self.source_array = np.atleast_3d(source_array)
         self.dest_modelgrid = getattr(self.dest_model, 'modelgrid', None)
         self.by_layer = by_layer
+        self.id_column = id_column
+        self.include_ids = include_ids
+        self.column_mappings = column_mappings
         self.resample_method = resample_method
         self._interp_weights = None
-        self.vmin = vmin,
-        self.vmax = vmax,
+        self.vmin = vmin
+        self.vmax = vmax
+        self.dtype = dtype
         self.mult = multiplier
         self.data = {}
         assert True
@@ -244,7 +250,8 @@ class ArraySourceData(SourceData):
                                                    self.dest_model.modelgrid.ycellcenters.ravel())
                         arr = np.reshape(arr, (self.dest_modelgrid.nrow,
                                                self.dest_modelgrid.ncol))
-
+                    elif f.endswith('.shp'):
+                        arr = intersect(f, self.dest_modelgrid, id_column=self.id_column)
                     # TODO: add code to interpret hds and cbb files
                     # interpolate from source model using source model grid
                     # otherwise assume the grids are the same
@@ -253,9 +260,12 @@ class ArraySourceData(SourceData):
                     # (load_array checks the shape)
                     elif self.source_modelgrid is None:
                         arr = self.dest_model.load_array(f)
+                    else:
+                        raise Exception('variable {}: unrecognized file type for array data input: {}'
+                                        .format(self.variable, f))
 
                     assert arr.shape == self.dest_modelgrid.shape[1:]
-                    data[i] = arr * self.mult * self.unit_conversion
+                    data[i] = (arr * self.mult * self.unit_conversion).astype(self.dtype)
 
             # interpolate any missing arrays from consecutive files based on weights
             for i, arr in data.items():
@@ -270,6 +280,11 @@ class ArraySourceData(SourceData):
                     data[i] = weighted_average_between_layers(data[source_k0],
                                                               data[source_k1],
                                                               weight0=weight0)
+
+            # repeat least layer if length of data is less than number of layers
+            if self.by_layer and i < (self.dest_model.nlay - 1):
+                for j in range(i, self.dest_model.nlay):
+                    data[j] = data[i]
 
         # regrid source data from another model
         elif self.source_array is not None:
@@ -556,7 +571,7 @@ class MFArrayData(SourceData):
     be scalars, lists of scalars, array data or filepath(s) to arrays on
     same model grid."""
     def __init__(self, variable, filenames=None, values=None, length_units='unknown', time_units='unknown',
-                 dest_model=None, vmin=-1e30, vmax=1e30, by_layer=False,
+                 dest_model=None, vmin=-1e30, vmax=1e30, dtype=float, by_layer=False,
                  multiplier=1.):
 
         SourceData.__init__(self, filenames=filenames, length_units=length_units, time_units=time_units,
@@ -568,6 +583,7 @@ class MFArrayData(SourceData):
         self.vmax = vmax
         self.mult = multiplier
         self.dest_modelgrid = getattr(self.dest_model, 'modelgrid', None)
+        self.dtype = dtype
         self.by_layer = by_layer
         self.data = {}
         assert True

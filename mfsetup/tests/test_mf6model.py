@@ -14,6 +14,7 @@ import flopy
 mf6 = flopy.mf6
 from ..discretization import get_layer_thicknesses
 from ..fileio import load_array, exe_exists, read_mf6_block
+from ..gis import intersect
 from ..mf6model import MF6model
 from .. import testing
 from ..units import convert_length_units
@@ -58,7 +59,7 @@ def model(cfg, simulation):
     #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = simulation
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
     return m
 
@@ -119,7 +120,8 @@ def test_init(cfg):
     cfg['model']['packages'] = []
     cfg['model']['simulation'] = sim
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
     # test initialization with no packages
     m = MF6model(cfg=cfg, **kwargs)
     assert isinstance(m, MF6model)
@@ -130,12 +132,15 @@ def test_init(cfg):
 
 
 def test_parse_modflowgwf_kwargs(cfg):
+    cfg = cfg.copy()
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
     m.write()
 
     # verify that options were written correctly to namefile
+    # newton solver, but without underrelaxation
     nampath = os.path.join(m.model_ws, m.model_nam_file)
     options = read_mf6_block(nampath, 'options')
     assert os.path.normpath(options['list'][0]).lower() == \
@@ -143,14 +148,18 @@ def test_parse_modflowgwf_kwargs(cfg):
     for option in ['print_input', 'print_flows', 'save_flows']:
         if cfg['model'][option]:
             assert option in options
-    assert options['newton'] == ['under_relaxation']
+    assert len(options['newton']) == 0
 
-    # newton solver, but without underrelaxation
-    kwargs['newtonoptions'] = ['']
+    # newton solver, with underrelaxation
+    cfg['model']['options']['newton_under_relaxation'] = True
+    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    assert cfg['model']['options']['newtonoptions'] == ['under_relaxation']
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
     m.write()
     options = read_mf6_block(nampath, 'options')
-    assert 'newton' in options
+    assert options['newton'] == ['under_relaxation']
 
 
 def test_repr(model, model_with_grid):
@@ -185,7 +194,8 @@ def test_snap_to_NHG(cfg, simulation):
     cfg['setup_grid']['snap_to_NHG'] = True
 
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
     m.setup_grid()
 
@@ -357,7 +367,16 @@ def test_dis_setup(model_with_grid):
             model_array = model_array[k]
         assert np.array_equal(model_array, data)
 
-    # test idomain
+    # test that written idomain array reflects supplied shapefile of active area
+    active_area = intersect(m.cfg['dis']['source_data']['idomain']['filename'],
+                            m.modelgrid)
+    isactive = active_area == 1
+    written_idomain = load_array(m.cfg['dis']['griddata']['idomain'])
+    assert np.all(written_idomain[:, ~isactive] == 0)
+
+    # test idomain from just layer elevations
+    del m.cfg['dis']['griddata']['idomain']
+    dis = m.setup_dis()
     top = dis.top.array.copy()
     top[top == m._nodata_value] = np.nan
     botm = dis.botm.array.copy()
@@ -366,8 +385,8 @@ def test_dis_setup(model_with_grid):
     invalid_botms = np.ones_like(botm)
     invalid_botms[np.isnan(botm)] = 0
     invalid_botms[thickness < 1.0001] = 0
-    assert np.array_equal(m.idomain.sum(axis=(1, 2)),
-                          invalid_botms.sum(axis=(1, 2)))
+    assert np.array_equal(m.idomain[:, isactive].sum(axis=1),
+                          invalid_botms[:, isactive].sum(axis=1))
 
     # test recreating package from external arrays
     m.remove_package('dis')
@@ -604,20 +623,15 @@ def test_load(model_setup, mf6_test_cfg_path):
 
 
 def test_packagelist(mf6_test_cfg_path):
+
     cfg = MF6model.load_cfg(mf6_test_cfg_path)
 
-    assert len(cfg['model']['packages']) == 0
-    packages = cfg['nam']['packages']
+    packages = cfg['model']['packages']
     sim = flopy.mf6.MFSimulation(**cfg['simulation'])
     cfg['model']['simulation'] = sim
 
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
-    # specify packages in namfile input
-    m = MF6model(cfg=cfg, **kwargs)
-    assert m.package_list == [p for p in m._package_setup_order if p in packages]
-
-    # alternatively, specify packages in model input
-    cfg['model']['packages'] = cfg['nam'].pop('packages')
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
     assert m.package_list == [p for p in m._package_setup_order if p in packages]

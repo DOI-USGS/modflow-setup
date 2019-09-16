@@ -909,10 +909,11 @@ def read_mf6_block(filename, blockname):
             if 'begin' in line and blockname in line:
                 read = True
                 continue
-            if blockname == 'options' and read:
-                line = line.strip().split()
-                data[line[0]] = line[1:]
             if 'end' in line and blockname in line:
                 read = False
                 break
+            if blockname == 'options' and read:
+                line = line.strip().split()
+                data[line[0]] = line[1:]
+
     return data

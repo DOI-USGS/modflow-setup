@@ -43,7 +43,7 @@ def update(d, u):
     return d
 
 
-def get_input_arguments(kwargs, function, warn=True):
+def get_input_arguments(kwargs, function, warn=True, exclude=[]):
     """Return subset of keyword arguments in kwargs dict
     that are valid parameters to a function or method.
 
@@ -62,7 +62,7 @@ def get_input_arguments(kwargs, function, warn=True):
     input_kwargs = {}
     not_arguments = {}
     for k, v in kwargs.items():
-        if k in params.parameters:
+        if k in params.parameters and k not in exclude:
             input_kwargs[k] = v
             print_item(k, v)
         else:

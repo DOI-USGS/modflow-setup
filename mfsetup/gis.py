@@ -454,7 +454,7 @@ def get_values_at_points(rasterfile, x=None, y=None,
 
 def intersect(feature, grid, id_column=None,
               epsg=None,
-              proj4=None):
+              proj4=None, dtype=np.float32):
     """Intersect a feature with the model grid, using
     the rasterio.features.rasterize method. Features are intersected
     if they contain the cell center.
@@ -473,6 +473,8 @@ def intersect(feature, grid, id_column=None,
         isn't a shapefile, and isn't in the same CRS as the model.
     proj4 : str
         Proj4 string for feature CRS (optional)
+    dtype : dtype
+        Datatype for the output array
 
     Returns
     -------
@@ -533,7 +535,7 @@ def intersect(feature, grid, id_column=None,
                                 out_shape=(grid.nrow, grid.ncol),
                                 transform=trans)
     assert result.sum(axis=(0, 1)) != 0, "Nothing was intersected!"
-    return result.astype(np.int32)
+    return result.astype(dtype)
 
 
 def zonal_stats(feature, raster, out_shape=None,

@@ -147,7 +147,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # re-write the input files
         self._setup_array('dis', 'idomain',
                           data={i: arr for i, arr in enumerate(idomain)},
-                          by_layer=True, write_fmt='%d')
+                          by_layer=True, write_fmt='%d', dtype=int)
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame."""
@@ -253,7 +253,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self._setup_array(package, 'botm', by_layer=True, write_fmt='%.2f')
 
         # initial idomain input for creating a dis package instance
-        self._setup_array(package, 'idomain', by_layer=True, write_fmt='%d')
+        self._setup_array(package, 'idomain', by_layer=True, write_fmt='%d',
+                          dtype=int)
 
         # put together keyword arguments for dis package
         kwargs = self.cfg['grid'].copy() # nrow, ncol, delr, delc
@@ -511,9 +512,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                             .format(cfg['model']['modelname']))
 
         # newton options
-        if not cfg['model']['options'].get('newton', False):
+        if cfg['model']['options'].get('newton', False):
             cfg['model']['options']['newtonoptions'] = ['']
-        if not cfg['model']['options'].get('newton_under_relaxation', False):
+        if cfg['model']['options'].get('newton_under_relaxation', False):
             cfg['model']['options']['newtonoptions'] = ['under_relaxation']
         cfg['model'].update(cfg['model']['options'])
         return cfg
@@ -537,7 +538,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
+        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
         m = MF6model(cfg=cfg, **kwargs)
 
         if 'grid' not in m.cfg.keys():
@@ -576,7 +578,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf)
+        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
         m = MF6model(cfg=cfg, **kwargs)
 
         if 'grid' not in m.cfg.keys():
