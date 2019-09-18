@@ -8,7 +8,8 @@ import flopy
 mf6 = flopy.mf6
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                              fill_empty_layers, make_idomain, deactivate_idomain_above)
-from .fileio import load, dump, check_source_files, load_array, save_array, load_cfg, flopy_mfsimulation_load
+from .fileio import (load, dump, check_source_files, load_array, save_array, load_cfg,
+                     flopy_mfsimulation_load)
 from .interpolate import regrid
 from .gis import get_values_at_points
 from .grid import write_bbox_shapefile, get_grid_bounding_box, get_point_on_national_hydrogeologic_grid
@@ -39,6 +40,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self.cfg = load(self.source_path + '/mf6_defaults.yml')
         self.cfg['filename'] = self.source_path + '/mf6_defaults.yml'
         self._load_cfg(cfg)  # update configuration dict with values in cfg
+        self.relative_external_paths = self.cfg['model'].get('relative_external_paths', True)
+        self.model_ws = self._get_model_ws()
 
         # property attributes
         self._idomain = None
@@ -97,19 +100,20 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # setup or load the simulation
         kwargs = self.cfg['simulation'].copy()
         if os.path.exists('{}.nam'.format(kwargs['sim_name'])):
-            kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
-            self._sim = mf6.MFSimulation.load(**kwargs)
-        else:
-            # create simulation
-            kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
-            self._sim = mf6.MFSimulation(**kwargs)
+            try:
+                kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
+                self._sim = mf6.MFSimulation.load(**kwargs)
+            except:
+                # create simulation
+                kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
+                self._sim = mf6.MFSimulation(**kwargs)
 
         # make sure that the output paths exist
-        self.external_path = self.cfg['external_path']
-        output_paths = [self.cfg['intermediate_data']['output_folder'],
-                        self.cfg['simulation']['sim_ws'],
-                        os.path.join(self.cfg['simulation']['sim_ws'], self.external_path)]
-        output_paths += list(self.cfg['postprocessing']['output_folders'].values())
+        #self.external_path = self.cfg['model']['external_path']
+        #output_paths = [self.cfg['intermediate_data']['output_folder'],
+        #                self.cfg['simulation']['sim_ws'],
+        #                ]
+        output_paths = list(self.cfg['postprocessing']['output_folders'].values())
         for folder in output_paths:
             if not os.path.exists(folder):
                 os.makedirs(folder)
@@ -142,12 +146,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         if 'SFR' in self.get_package_list():
             idomain = deactivate_idomain_above(idomain, self.sfr.packagedata)
         self._idomain = idomain
-        self.dis.idomain = idomain
 
         # re-write the input files
         self._setup_array('dis', 'idomain',
                           data={i: arr for i, arr in enumerate(idomain)},
                           by_layer=True, write_fmt='%d', dtype=int)
+        self.dis.idomain = self.cfg['dis']['griddata']['idomain']
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame."""
@@ -177,18 +181,19 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             MODFLOW6 external file input format
             {'filename': <filename>}
         """
-        intermediate_paths = self.cfg['intermediate_data'][var]
-        if isinstance(intermediate_paths, str):
-            intermediate_paths = [intermediate_paths]
-        external_path = os.path.basename(os.path.normpath(self.external_path))
-        input = []
-        for f in intermediate_paths:
-            outf = os.path.join(external_path, os.path.split(f)[1])
-            input.append({'filename': outf})
-            shutil.copy(f, os.path.normpath(self.external_path))
-        if len(input) == 1:
-            input = input[0]
-        return input
+        pass
+        #intermediate_paths = self.cfg['intermediate_data'][var]
+        #if isinstance(intermediate_paths, str):
+        #    intermediate_paths = [intermediate_paths]
+        #external_path = os.path.basename(os.path.normpath(self.external_path))
+        #input = []
+        #for f in intermediate_paths:
+        #    outf = os.path.join(external_path, os.path.split(f)[1])
+        #    input.append({'filename': outf})
+        #    shutil.copy(f, os.path.normpath(self.external_path))
+        #if len(input) == 1:
+        #    input = input[0]
+        #return input
 
     def get_package_list(self):
         """Replicate this method in flopy.modflow.Modflow.
@@ -269,6 +274,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         for k, v in remaps.items():
             kwargs[v] = kwargs.pop(k)
+        kwargs['length_units'] = self.length_units
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
         dis = mf6.ModflowGwfdis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
@@ -465,8 +471,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 data = kwargs[rec]
                 mf6_input = {}
                 for kper, words in data.items():
+                    mf6_input[kper] = []
                     for var, instruction in words.items():
-                        mf6_input[kper] = [(var, instruction)]
+                        mf6_input[kper].append((var, instruction))
                 kwargs[rec] = mf6_input
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfoc)
         oc = mf6.ModflowGwfoc(self, **kwargs)
@@ -492,6 +499,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         ims = mf6.ModflowIms(self.simulation, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ims
+
+    def write_input(self):
+        """Same syntax as MODFLOW-2005 flopy
+        """
+        self.simulation.write_simulation()
 
     @staticmethod
     def _parse_modflowgwf_kwargs(cfg):

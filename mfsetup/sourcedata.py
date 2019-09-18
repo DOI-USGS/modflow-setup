@@ -604,7 +604,8 @@ class MFArrayData(SourceData):
             if isinstance(val, dict) and 'filename' in val.keys():
                 val = val['filename']
             if isinstance(val, str):
-                abspath = os.path.normpath(os.path.join(self.dest_model._config_path, val))
+                #abspath = os.path.normpath(os.path.join(self.dest_model._config_path, val))
+                abspath = os.path.normpath(os.path.join(self.dest_model.model_ws, val))
                 arr = np.loadtxt(abspath)
             elif np.isscalar(val):
                 arr = np.ones(self.dest_modelgrid.shape[1:]) * val
@@ -868,14 +869,22 @@ def setup_array(model, package, var, data=None,
     if write_nodata is None:
         write_nodata = model._nodata_value
     for i, arr in data.items():
-        save_array(filepaths[i], arr,
-                   nodata=write_nodata,
-                   fmt=write_fmt)
+        try:
+            save_array(filepaths[i], arr,
+                       nodata=write_nodata,
+                       fmt=write_fmt)
+        except:
+            j=2
         # still write intermediate files for MODFLOW-6
         # even though input and output filepaths are same
         if model.version == 'mf6':
-            shutil.copy(filepaths[i]['filename'],
-                        model.cfg['intermediate_data'][var][i])
+            src = filepaths[i]['filename']
+            dst = model.cfg['intermediate_data'][var][i]
+            #if not model.relative_external_paths:
+            #    dst = model.cfg['intermediate_data'][var][i]
+            #else:
+            #    dst = model.external_path
+            shutil.copy(src, dst)
 
     # write the top array again, because top was filled
     # with botm array above
@@ -887,8 +896,12 @@ def setup_array(model, package, var, data=None,
                    nodata=write_nodata,
                    fmt=write_fmt)
         if model.version == 'mf6':
-            shutil.copy(filepaths[i]['filename'],
-                        model.cfg['intermediate_data'][var][i])
+            src = filepaths[i]['filename']
+            #if not model.relative_external_paths:
+            dst = model.cfg['intermediate_data'][var][i]
+            #else:
+            #    dst = model.external_path
+            shutil.copy(src, dst)
 
 
 def weighted_average_between_layers(arr0, arr1, weight0=0.5):

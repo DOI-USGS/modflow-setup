@@ -61,6 +61,8 @@ def convert_length_units(lenuni1, lenuni2):
     mult : float
         Multiplier to convert from lenuni1 to lenuni2.
     """
+    if lenuni1 is None or lenuni2 is None:
+        return 1.
     if isinstance(lenuni1, str):
         lenuni1 = lenuni_values.get(lenuni1.lower(), 0)
     if isinstance(lenuni2, str):
@@ -105,6 +107,8 @@ def convert_time_units(itmuni1, itmuni2):
     mult : float
         Multiplier to convert from itmuni1 to itmuni2.
     """
+    if itmuni1 is None or itmuni2 is None:
+        return 1.
     if isinstance(itmuni1, str):
         itmuni1 = itmuni_values.get(itmuni1.lower(), 0)
     if isinstance(itmuni2, str):

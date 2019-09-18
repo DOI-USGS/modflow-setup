@@ -43,6 +43,7 @@ class MFsetupMixin():
         self._evaporation = None
         self._lake_recharge = None
         self._nodata_value = -9999
+        self._model_ws = None
 
         # flopy settings
         self._mg_resync = False
@@ -194,8 +195,42 @@ class MFsetupMixin():
                 return 'flux'
 
     @property
+    def model_ws(self):
+        if self._model_ws is None:
+            self._model_ws = self._get_model_ws()
+        return self._model_ws
+
+    @model_ws.setter
+    def model_ws(self, model_ws):
+        self._model_ws = model_ws
+
+    @property
     def tmpdir(self):
-        return self.cfg['intermediate_data']['output_folder']
+        abspath = os.path.abspath(
+                self.cfg['intermediate_data']['output_folder'])
+        if not os.path.isdir(abspath):
+            os.makedirs(abspath)
+        if self.relative_external_paths:
+            tmpdir = os.path.relpath(abspath)
+        else:
+            tmpdir = os.path.normpath(abspath)
+        return tmpdir
+
+    @property
+    def external_path(self):
+        abspath = os.path.abspath(
+            self.cfg['model']['external_path'])
+        if not os.path.isdir(abspath):
+            os.makedirs(abspath)
+        if self.relative_external_paths:
+            ext_path = os.path.relpath(abspath)
+        else:
+            ext_path = os.path.normpath(abspath)
+        return ext_path
+
+    @external_path.setter
+    def external_path(self, x):
+        pass # bypass any setting in parent class
 
     @property
     def interp_weights(self):
@@ -481,7 +516,9 @@ class MFsetupMixin():
             number (e.g. 'botm{}.dat') for files botm0.dat, botm1.dat, ...
         nfiles : int
             Number of external files for the variable (e.g. nlay or nper)
-
+        relative_external_paths : bool
+            If true, external paths will be specified relative to model_ws,
+            otherwise, they will be absolute paths
         Returns
         -------
         filepaths : list
@@ -491,7 +528,22 @@ class MFsetupMixin():
         Adds external file paths to model.cfg[<package>][<variable_name>]
         """
         return setup_external_filepaths(self, package, variable_name,
-                                        filename_format, nfiles=nfiles)
+                                        filename_format, nfiles=nfiles,
+                                        relative_external_paths=self.relative_external_paths)
+
+    def _get_model_ws(self):
+        if self.version == 'mf6':
+            abspath = os.path.abspath(self.cfg['simulation']['sim_ws'])
+        else:
+            abspath = os.path.abspath(self.cfg['model']['model_ws'])
+        if not os.path.exists(abspath):
+            os.makedirs(abspath)
+        os.chdir(abspath)
+        if self.relative_external_paths:
+            model_ws = os.path.relpath(abspath)
+        else:
+            model_ws = os.path.normpath(abspath)
+        return model_ws
 
     def _reset_bc_arrays(self):
         """Reset the boundary condition property arrays in order.

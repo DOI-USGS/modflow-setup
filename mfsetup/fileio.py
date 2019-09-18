@@ -366,7 +366,8 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
 
 
 def setup_external_filepaths(model, package, variable_name,
-                             filename_format, nfiles=1):
+                             filename_format, nfiles=1,
+                             relative_external_paths=True):
     """Set up external file paths for a MODFLOW package variable. Sets paths
     for intermediate files, which are written from the (processed) source data.
     Intermediate files are supplied to Flopy as external files for a given package
@@ -412,8 +413,12 @@ def setup_external_filepaths(model, package, variable_name,
     model.get_package(package)
     # intermediate data
     filename_format = os.path.split(filename_format)[-1]
-    intermediate_files = [os.path.normpath(os.path.join(model.tmpdir,
-                          filename_format).format(i)) for i in range(nfiles)]
+    if not relative_external_paths:
+        intermediate_files = [os.path.normpath(os.path.join(model.tmpdir,
+                              filename_format).format(i)) for i in range(nfiles)]
+    else:
+        intermediate_files = [os.path.join(model.tmpdir,
+                              filename_format).format(i) for i in range(nfiles)]
 
     if variable_name in transient2D_variables:
         model.cfg['intermediate_data'][variable_name] = {i: f for i, f in
@@ -425,9 +430,14 @@ def setup_external_filepaths(model, package, variable_name,
 
     # external array(s) read by MODFLOW
     # (set to reflect expected locations where flopy will save them)
-    external_files = [os.path.normpath(os.path.join(model.model_ws,
-                                   model.external_path,
-                                   filename_format.format(i))) for i in range(nfiles)]
+    if not relative_external_paths:
+        external_files = [os.path.normpath(os.path.join(model.model_ws,
+                                       model.external_path,
+                                       filename_format.format(i))) for i in range(nfiles)]
+    else:
+        external_files = [os.path.join(model.model_ws,
+                                       model.external_path,
+                                       filename_format.format(i)) for i in range(nfiles)]
 
     if variable_name in transient2D_variables:
         model.cfg['external_files'][variable_name] = {i: f for i, f in
@@ -441,7 +451,11 @@ def setup_external_filepaths(model, package, variable_name,
         # skip these for now (not implemented yet for MF6)
         if variable_name in transient3D_variables:
             return
-        filepaths = [{'filename': model.cfg['external_files'][variable_name][i]}
+        #if not relative_external_paths:
+        ext_files_key = 'external_files'
+        #else:
+        #    ext_files_key = 'intermediate_data'
+        filepaths = [{'filename': model.cfg[ext_files_key][variable_name][i]}
                      for i in range(len(external_files))]
         # set package variable input (to Flopy)
         if variable_name in griddata_variables:
@@ -903,17 +917,28 @@ def read_mf6_block(filename, blockname):
     blockname = blockname.lower()
     data = {}
     read = False
+    per = None
     with open(filename) as src:
         for line in src:
             line = line.lower()
             if 'begin' in line and blockname in line:
-                read = True
+                if blockname == 'period':
+                    per = int(line.strip().split()[-1])
+                    data[per] = []
+                read = blockname
                 continue
             if 'end' in line and blockname in line:
+                per = None
                 read = False
                 break
-            if blockname == 'options' and read:
+            if read == 'options':
                 line = line.strip().split()
                 data[line[0]] = line[1:]
-
+            elif read == 'packages':
+                pckg, fname, ext = line.strip().split()
+                data[pckg] = fname
+            elif read == 'period':
+                data[per].append(' '.join(line.strip().split()))
     return data
+
+

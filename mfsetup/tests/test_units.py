@@ -23,6 +23,7 @@ def test_convert_length_units():
     assert np.allclose(convert_length_units('feet', 'meters'), .3048)
     assert np.allclose(convert_length_units('m', 'ft'), 1/.3048)
     assert np.allclose(convert_length_units('ft', 'm'), .3048)
+    assert np.allclose(convert_length_units(None, 'm'), 1.)
 
 
 def test_convert_time_units():
@@ -30,4 +31,5 @@ def test_convert_time_units():
     assert np.allclose(convert_time_units('days', 'seconds'), 86400)
     assert np.allclose(convert_time_units('d', 's'), 86400)
     assert np.allclose(convert_time_units(1, 4), 1/86400)
+    assert np.allclose(convert_time_units(None, 'd'), 1.)
 

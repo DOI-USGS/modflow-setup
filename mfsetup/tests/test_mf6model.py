@@ -33,7 +33,7 @@ def cfg(mf6_test_cfg_path):
 def reset_dirs(cfg):
     cfg = cfg.copy()
     folders = [cfg['intermediate_data']['output_folder'],
-               cfg.get('external_path', cfg['model'].get('external_path')),
+               cfg['model'].get('external_path'),
                cfg['gisdir']
                ]
     for folder in folders:
@@ -94,7 +94,7 @@ def model_setup(mf6_test_cfg_path):
         if os.path.isdir(folder):
             shutil.rmtree(folder)
     m = MF6model.setup_from_yaml(mf6_test_cfg_path)
-    m.simulation.write_simulation()
+    m.write_input()
     if hasattr(m, 'sfr'):
         sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
         m.sfrdata.write_package(sfr_package_filename,
@@ -186,6 +186,15 @@ def test_model(model):
     assert model.exe_name == 'mf6'
     assert model.simulation.exe_name == 'mf6'
 
+    # verify that cwd has been set to model_ws
+    assert os.path.normpath(os.path.abspath(model.model_ws)) == \
+           os.path.normpath(os.getcwd())
+    # and that external files paths are correct relative to model_ws
+    assert os.path.normpath(os.path.abspath(model.tmpdir)) == \
+           os.path.normpath(os.path.join(os.path.abspath(model.model_ws), model.tmpdir))
+    assert os.path.normpath(os.path.abspath(model.external_path)) == \
+           os.path.normpath(os.path.join(os.path.abspath(model.model_ws), model.external_path))
+
 
 def test_snap_to_NHG(cfg, simulation):
     cfg = cfg.copy()
@@ -220,33 +229,39 @@ def test_model_with_grid(model_with_grid):
     assert True
 
 
-def test_external_file_path_setup(model):
-
-    m = model #deepcopy(model)
-
-    assert os.path.exists(os.path.join(m.cfg['simulation']['sim_ws'],
-                                       m.external_path))
+@pytest.mark.parametrize('relative_external_paths', [True,
+                                                     False])
+def test_package_external_file_path_setup(model_with_grid, relative_external_paths):
+    m = model_with_grid
     top_filename = m.cfg['dis']['top_filename_fmt']
     botm_file_fmt = m.cfg['dis']['botm_filename_fmt']
-    m.setup_external_filepaths('dis', 'top',
-                                   top_filename,
-                                   nfiles=1)
-    m.setup_external_filepaths('dis', 'botm',
-                                   botm_file_fmt,
-                                   nfiles=m.nlay)
+    m.relative_external_paths = relative_external_paths
+    dis = m.setup_dis()
+    dis.write()
+    assert os.path.exists(dis.filename)
+    with open(dis.filename) as src:
+        for line in src:
+            if 'open/close' in line.lower():
+                path = line.strip().split()[1].strip().strip('\'')
+                if not relative_external_paths:
+                    assert os.path.isabs(path)
+                else:
+                    assert not os.path.isabs(path)
+
     assert m.cfg['intermediate_data']['top'] == \
            [os.path.normpath(os.path.join(m.tmpdir, os.path.split(top_filename)[-1]))]
     assert m.cfg['intermediate_data']['botm'] == \
            [os.path.normpath(os.path.join(m.tmpdir, botm_file_fmt).format(i))
                                   for i in range(m.nlay)]
-    assert m.cfg['dis']['griddata']['top'] == \
-           [{'filename': os.path.normpath(os.path.join(m.model_ws,
-                        m.external_path,
-                        os.path.split(top_filename)[-1]))}]
-    assert m.cfg['dis']['griddata']['botm'] == \
-           [{'filename': os.path.normpath(os.path.join(m.model_ws,
-                         m.external_path,
-                         botm_file_fmt.format(i)))} for i in range(m.nlay)]
+    if not relative_external_paths:
+        assert m.cfg['dis']['griddata']['top'] == \
+               [{'filename': os.path.normpath(os.path.join(m.model_ws,
+                            m.external_path,
+                            os.path.split(top_filename)[-1]))}]
+        assert m.cfg['dis']['griddata']['botm'] == \
+               [{'filename': os.path.normpath(os.path.join(m.model_ws,
+                             m.external_path,
+                             botm_file_fmt.format(i)))} for i in range(m.nlay)]
 
 
 def test_perrioddata(model):
@@ -350,7 +365,7 @@ def test_dis_setup(model_with_grid):
     assert 'DIS' in m.get_package_list()
     # verify that units got conveted correctly
     assert m.dis.top.array.mean() < 100
-
+    assert m.dis.length_units.array == 'meters'
 
     arrayfiles = m.cfg['intermediate_data']['top'] + \
                  m.cfg['intermediate_data']['botm'] + \
@@ -487,8 +502,16 @@ def test_oc_setup(model_with_dis):
     m = model_with_dis  # deepcopy(model)
     oc = m.setup_oc()
     oc.write()
-    assert os.path.exists(os.path.join(m.model_ws, oc.filename))
+    ocfile = os.path.join(m.model_ws, oc.filename)
+    assert os.path.exists(ocfile)
     assert isinstance(oc, mf6.ModflowGwfoc)
+    options = read_mf6_block(ocfile, 'options')
+    options = {k: ' '.join(v).lower() for k, v in options.items()}
+    perioddata = read_mf6_block(ocfile, 'period')
+    assert 'fileout' in options['budget'] and '.cbc' in options['budget']
+    assert 'fileout' in options['head'] and '.hds' in options['head']
+    assert 'save head last' in perioddata[1]
+    assert 'save budget last' in perioddata[1]
 
 
 def test_rch_setup(model_with_dis):

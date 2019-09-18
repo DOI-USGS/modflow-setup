@@ -53,6 +53,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self.cfg = load(self.source_path + '/mfnwt_defaults.yml')
         self.cfg['filename'] = self.source_path + '/mfnwt_defaults.yml'
         self._load_cfg(cfg)  # update configuration dict with values in cfg
+        self.relative_external_paths = self.cfg['model'].get('relative_external_paths', True)
+        self.model_ws = self._get_model_ws()
 
         # property arrays
         self._ibound = None
@@ -140,11 +142,11 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._set_parent_modelgrid(mg_kwargs)
 
         # make sure that the output paths exist
-        output_paths = [self.cfg['intermediate_data']['output_folder'],
-                        self.cfg['model']['model_ws'],
-                        os.path.join(self.cfg['model']['model_ws'], self.cfg['model']['external_path'])
-                        ]
-        output_paths += list(self.cfg['postprocessing']['output_folders'].values())
+        #output_paths = [self.cfg['intermediate_data']['output_folder'],
+        #                self.cfg['model']['model_ws'],
+        #                os.path.join(self.cfg['model']['model_ws'], self.cfg['model']['external_path'])
+        #                ]
+        output_paths = list(self.cfg['postprocessing']['output_folders'].values())
         for folder in output_paths:
             if not os.path.exists(folder):
                 os.makedirs(folder)
@@ -877,7 +879,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
             self.cfg['lak']['tab_files'] = tab_files
             # kludge to deal with ugliness of lake package external file handling
             # (need to give path relative to model_ws, not folder that flopy is working in)
-            tab_files_argument = [f.replace(self.model_ws, '').strip('/') for f in tab_files]
+            tab_files_argument = [os.path.relpath(f) for f in tab_files]
 
         self.setup_external_filepaths('lak', 'lakzones',
                                       self.cfg['lak']['{}_filename_fmt'.format('lakzones')],

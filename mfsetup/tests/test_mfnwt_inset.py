@@ -275,7 +275,7 @@ def test_bas_setup(inset_with_dis):
     assert os.path.exists(bas.fn_path)
 
 
-def test_rch_setup(inset_with_dis):
+def test_rch_setup(inset_with_dis, project_root_path):
 
     m = inset_with_dis  #deepcopy(inset_with_dis)
 
@@ -293,6 +293,7 @@ def test_rch_setup(inset_with_dis):
     # (rasters of different shapes)
     inf_array = 'mfsetup/tests/data/plainfieldlakes/source_data/' \
                 'net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif'
+    inf_array = os.path.join(project_root_path, inf_array)
 
     m.cfg['rch']['source_data']['rech']['filename'] = inf_array
     m.cfg['rch']['rech'] = None
@@ -457,7 +458,7 @@ def test_lak_setup(inset_with_dis):
     with open(namfile) as src:
         txt = src.read()
     # kludge to deal with ugliness of lake package external file handling
-    tab_files_argument = [f.replace(m.model_ws, '').strip('/') for f in tabfiles]
+    tab_files_argument = [os.path.relpath(f) for f in tabfiles]
     for f in tab_files_argument:
         assert f in txt
     if os.path.exists(namfile+'.bak'):
@@ -481,10 +482,10 @@ def test_lak_setup(inset_with_dis):
     assert len(ds9_entries) == 6
 
 
-def test_nwt_setup(inset):
+def test_nwt_setup(inset, project_root_path):
 
     m = inset  #deepcopy(inset)
-    m.cfg['nwt']['use_existing_file'] = os.path.abspath('mfsetup/tests/data/RGN_rjh_3_23_18.NWT')
+    m.cfg['nwt']['use_existing_file'] = project_root_path + '/mfsetup/tests/data/RGN_rjh_3_23_18.NWT'
     nwt = m.setup_nwt()
     nwt.write_file()
     m.cfg['nwt']['use_existing_file'] = None

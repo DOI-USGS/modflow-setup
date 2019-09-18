@@ -132,7 +132,7 @@ def source_data_from_model_cases(inset):
 
 def test_parse_source_data(source_data_cases,
                            source_data_from_model_cases,
-                           inset_with_grid):
+                           inset_with_grid, project_root_path):
     model = inset_with_grid
     cases = source_data_cases + source_data_from_model_cases
     results = []
@@ -163,6 +163,8 @@ def test_parse_source_data(source_data_cases,
     assert isinstance(sd.filenames, dict)
 
     # test conversion to model units
+    for i, f in cases[4]['infiltration_arrays']['filenames'].items():
+        cases[4]['infiltration_arrays']['filenames'][i] = os.path.join(project_root_path, f)
     sd = ArraySourceData.from_config(cases[4]['infiltration_arrays'],
                                      variable=var,
                                      dest_model=model)
