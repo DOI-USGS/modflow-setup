@@ -6,16 +6,14 @@ from collections import defaultdict
 import numpy as np
 import flopy
 mf6 = flopy.mf6
-from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
-                             fill_empty_layers, make_idomain, deactivate_idomain_above)
-from .fileio import (load, dump, check_source_files, load_array, save_array, load_cfg,
+from .discretization import (make_idomain, deactivate_idomain_above,
+                             find_remove_isolated_cells)
+from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
-from .interpolate import regrid
 from .gis import get_values_at_points
-from .grid import write_bbox_shapefile, get_grid_bounding_box, get_point_on_national_hydrogeologic_grid
+from .grid import write_bbox_shapefile, get_point_on_national_hydrogeologic_grid
 from .tdis import setup_perioddata
 from .utils import update, get_input_arguments, flatten
-from .units import convert_length_units, convert_time_units
 from .mfmodel import MFsetupMixin
 
 
@@ -145,6 +143,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # remove cells that are above stream cells
         if 'SFR' in self.get_package_list():
             idomain = deactivate_idomain_above(idomain, self.sfr.packagedata)
+
+        # inactivate any isolated cells that could cause problems with the solution
+        idomain = find_remove_isolated_cells(idomain, minimum_cluster_size=10)
+
         self._idomain = idomain
 
         # re-write the input files

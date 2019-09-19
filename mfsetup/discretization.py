@@ -3,6 +3,7 @@ Functions related to the Discretization Package.
 """
 import time
 import numpy as np
+from scipy import ndimage
 from flopy.mf6.data.mfdatalist import MFList
 
 def adjust_layers(dis, minimum_thickness=1):
@@ -62,6 +63,33 @@ def deactivate_idomain_above(idomain, packagedata):
         for ck in ks:
             idomain[ck, ci, cj] = 0
     return idomain
+
+
+def find_remove_isolated_cells(array, minimum_cluster_size=10):
+    """Identify clusters of isolated cells in a binary array.
+    Remove clusters less than a specified minimum cluster size.
+    """
+    if len(array.shape) == 2:
+        arraylist = [array]
+    else:
+        arraylist = array
+
+    # exclude diagonal connections
+    structure = np.zeros((3, 3))
+    structure[1, :] = 1
+    structure[:, 1] = 1
+
+    retained_arraylist = []
+    for arr in arraylist:
+        labeled, ncomponents = ndimage.measurements.label(arr, structure=structure)
+        retain_areas = [c for c in range(1, ncomponents+1)
+                        if (labeled == c).sum() >= minimum_cluster_size]
+        retain = np.in1d(labeled.ravel(), retain_areas)
+        retained = np.reshape(retain, arr.shape).astype(array.dtype)
+        retained_arraylist.append(retained)
+    if len(array.shape) == 3:
+        return np.array(retained_arraylist, dtype=array.dtype)
+    return retained_arraylist[0]
 
 
 def fill_empty_layers(array):

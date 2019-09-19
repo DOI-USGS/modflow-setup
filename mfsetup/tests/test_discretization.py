@@ -3,7 +3,7 @@ import pytest
 from ..discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                               fill_empty_layers, fill_cells_vertically, make_idomain,
                               get_layer_thicknesses,
-                              deactivate_idomain_above)
+                              deactivate_idomain_above, find_remove_isolated_cells)
 
 
 pytest.fixture(scope="function")
@@ -166,3 +166,28 @@ def test_deactivate_idomain_above(all_layers):
     idomain2 = deactivate_idomain_above(idomain, packagedata)
     assert idomain2[:, 2, 2].sum() == idomain[:, 2, 2].sum() -1
     assert idomain2[:, 3, 3].sum() == 1
+
+
+def test_find_remove_isolated_cells():
+    idomain = np.zeros((2, 1000, 1000), dtype=int)
+    idomain[:, 200:-200, 200:-200] = 1
+    idomain[:, 202:203, 202:203] = 0
+    idomain[:, 300:330, 300:300] = 0
+    idomain[:, 305:306, 305:306] = 0
+    idomain[:, 10:13, 10:13] = 1
+    idomain[:, 20:22, 20:22] = 1
+    idomain[:, -20:-18, -20:-18] = 1
+
+    result = find_remove_isolated_cells(idomain, minimum_cluster_size=10)
+    assert result.shape == idomain.shape
+    assert result.sum() == idomain[:, 200:-200, 200:-200].sum()
+    result = find_remove_isolated_cells(idomain, minimum_cluster_size=9)
+    assert result.sum() == idomain[:, 200:-200, 200:-200].sum() + 9*2
+
+    idomain = np.zeros((40, 40), dtype=int)
+    idomain[5:-3, 2:7] = 1
+    idomain[3:5, 7:8] = 1  # 2 pixels
+    idomain[10, 8:11] = 1  # 3 pixels
+    result = find_remove_isolated_cells(idomain, minimum_cluster_size=10)
+    assert result.sum() == idomain.sum() - 5
+

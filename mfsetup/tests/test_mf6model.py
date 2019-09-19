@@ -12,7 +12,7 @@ import rasterio
 from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
-from ..discretization import get_layer_thicknesses
+from ..discretization import get_layer_thicknesses, find_remove_isolated_cells
 from ..fileio import load_array, exe_exists, read_mf6_block
 from ..gis import intersect
 from ..mf6model import MF6model
@@ -382,7 +382,7 @@ def test_dis_setup(model_with_grid):
             model_array = model_array[k]
         assert np.array_equal(model_array, data)
 
-    # test that written idomain array reflects supplied shapefile of active area
+   # test that written idomain array reflects supplied shapefile of active area
     active_area = intersect(m.cfg['dis']['source_data']['idomain']['filename'],
                             m.modelgrid)
     isactive = active_area == 1
@@ -400,6 +400,12 @@ def test_dis_setup(model_with_grid):
     invalid_botms = np.ones_like(botm)
     invalid_botms[np.isnan(botm)] = 0
     invalid_botms[thickness < 1.0001] = 0
+    # these two arrays are not equal
+    # because isolated cells haven't been removed from the second one
+    # this verifies that _set_idomain is removing them
+    assert not np.array_equal(m.idomain[:, isactive].sum(axis=1),
+                          invalid_botms[:, isactive].sum(axis=1))
+    invalid_botms = find_remove_isolated_cells(invalid_botms, minimum_cluster_size=10)
     assert np.array_equal(m.idomain[:, isactive].sum(axis=1),
                           invalid_botms[:, isactive].sum(axis=1))
 
