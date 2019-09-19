@@ -209,17 +209,26 @@ ims:
   options:
     print_option: 'all'
     complexity: 'moderate'
-    csv_output_filerecord: 'solver_out.csv'
+    'csv_output fileout': 'solver_out.csv'
   nonlinear:
-    outer_hclose: 1.e-3
-    outer_maximum: 1000
+    outer_hclose: 1.e-1
+    outer_rclosebnd: 1.e4
+    outer_maximum: 200
     under_relaxation:  'dbd'
-    under_relaxation_theta: 0.9
+    under_relaxation_theta: 0.7
     under_relaxation_kappa: 0.1
-    under_relaxation_gamma: 0.2
-    under_relaxation_momentum: 0.001
+    under_relaxation_gamma: 0.0
+    under_relaxation_momentum: 0.0
+    backtracking_number: 0
   linear:
     inner_maximum: 100
-    inner_hclose: 1.e-3
-    inner_rclose: 0.1
+    inner_hclose: 1.e-2
+    rcloserecord: [0.0001, 'relative_rclose']
+    linear_acceleration: 'bicgstab'
+    scaling_method: None
+    reordering_method: None
+    relaxation_factor: 0.0  # either ILU(0) or ILUT preconditioning
+    number_orthogonalizations: 0
+    preconditioner_levels: 7
+    preconditioner_drop_tolerance: 0.001
     
