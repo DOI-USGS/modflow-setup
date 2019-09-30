@@ -23,11 +23,8 @@ from .lakes import make_lakarr2d, make_bdlknc_zones, make_bdlknc2d
 from .utils import update, get_packages
 from .obs import read_observation_data
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
-from .tmr import Tmr
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text
-#from .wateruse import get_mean_pumping_rates, resample_pumping_rates
-from sfrmaker import lines
-from sfrmaker.utils import assign_layers
+from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
 
 
@@ -268,7 +265,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                                       steady=steady,
                                       nstp=self.cfg['dis']['nstp'],
                                       tsmult=self.cfg['dis']['tsmult'],
-                                      oc=self.cfg['oc']['period_options'],
+                                      oc_saverecord=self.cfg['oc']['period_options'],
                                       )
         perioddata['parent_sp'] = parent_sp
         assert np.array_equal(perioddata['per'].values, np.arange(len(perioddata)))
@@ -616,114 +613,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         print('setting up WEL package...')
         t0 = time.time()
-        # master dataframe for stress period data
-        df = pd.DataFrame(columns=['per', 'k', 'i', 'j', 'flux', 'comments'])
 
-        # Get steady-state pumping rates
-        check_source_files([self.cfg['source_data']['water_use'],
-                            self.cfg['source_data']['water_use_points']])
-
-        # fill out period stats
-        period_stats = self.cfg['wel']['period_stats']
-        if isinstance(period_stats, str):
-            period_stats = {kper: period_stats for kper in range(self.nper)}
-
-        # separate out stress periods with period mean statistics vs.
-        # those to be resampled based on start/end dates
-        resampled_periods = {k:v for k, v in period_stats.items()
-                             if v == 'resample'}
-        periods_with_dataset_means = {k: v for k, v in period_stats.items()
-                                      if k not in resampled_periods}
-
-        if len(periods_with_dataset_means) > 0:
-            wu_means = get_mean_pumping_rates(self.cfg['source_data']['water_use'],
-                                      self.cfg['source_data']['water_use_points'],
-                                      period_stats=periods_with_dataset_means,
-                                      model=self)
-            df = df.append(wu_means)
-        if len(resampled_periods) > 0:
-            wu_resampled = resample_pumping_rates(self.cfg['source_data']['water_use'],
-                                      self.cfg['source_data']['water_use_points'],
-                                      model=self)
-            df = df.append(wu_resampled)
-
-        # boundary fluxes
-        if self.perimeter_bc_type == 'flux':
-            assert self.parent is not None, "need parent model for TMR cut"
-
-            # boundary fluxes
-            kstpkper = [(0, 0)]
-            tmr = Tmr(self.parent, self)
-
-            # parent periods to copy over
-            kstpkper = [(0, per) for per in self.cfg['model']['parent_stress_periods']]
-            bfluxes = tmr.get_inset_boundary_fluxes(kstpkper=kstpkper)
-            bfluxes['comments'] = 'boundary_flux'
-            df = df.append(bfluxes)
-
-        # added wells
-        added_wells = self.cfg['wel'].get('added_wells')
-        if added_wells is not None:
-            if isinstance(added_wells, str):
-                aw = pd.read_csv(added_wells)
-                aw.rename(columns={'name': 'comments'}, inplace=True)
-            elif isinstance(added_wells, dict):
-                added_wells = {k: v for k, v in added_wells.items() if v is not None}
-                if len(added_wells) > 0:
-                    aw = pd.DataFrame(added_wells).T
-                    aw['comments'] = aw.index
-                else:
-                    aw = None
-            elif isinstance(added_wells, pd.DataFrame):
-                aw = added_wells
-                aw['comments'] = aw.index
-            else:
-                raise IOError('unrecognized added_wells input')
-
-            if aw is not None:
-                if 'x' in aw.columns and 'y' in aw.columns:
-                    aw['i'], aw['j'] = self.modelgrid.intersect(aw['x'].values,
-                                                      aw['y'].values)
-
-                aw['per'] = aw['per'].astype(int)
-                aw['k'] = aw['k'].astype(int)
-                df = df.append(aw)
-
-        df['per'] = df['per'].astype(int)
-        df['k'] = df['k'].astype(int)
-        # Copy fluxes to subsequent stress periods as necessary
-        # so that fluxes aren't unintentionally shut off;
-        # for example if water use is only specified for period 0,
-        # but the added well pumps in period 1, copy water use
-        # fluxes to period 1.
-        last_specified_per = int(df.per.max())
-        copied_fluxes = [df]
-        for i in range(last_specified_per):
-            # only copied fluxes of a given stress period once
-            # then evaluate copied fluxes (with new stress periods) and copy those once
-            # after specified per-1, all non-zero fluxes should be propegated
-            # to last stress period
-            # copy non-zero fluxes that are not already in subsequent stress periods
-            if i < len(copied_fluxes):
-                in_subsequent_periods = copied_fluxes[i].comments.duplicated(keep=False)
-                # (copied_fluxes[i].per < last_specified_per) & \
-                tocopy = (copied_fluxes[i].flux != 0) & \
-                         ~in_subsequent_periods
-                if np.any(tocopy):
-                    copied = copied_fluxes[i].loc[tocopy].copy()
-
-                    # make sure that wells to be copied aren't in subsequent stress periods
-                    duplicated = np.array([r.comments in df.loc[df.per > i, 'comments']
-                                           for idx, r in copied.iterrows()])
-                    copied = copied.loc[~duplicated]
-                    copied['per'] += 1
-                    copied_fluxes.append(copied)
-        df = pd.concat(copied_fluxes, axis=0)
-        wel_lookup_file = os.path.join(self.model_ws, os.path.split(self.cfg['wel']['lookup_file'])[1])
-        self.cfg['wel']['lookup_file'] = wel_lookup_file
-
-        # save a lookup file with well site numbers/categories
-        df[['per', 'k', 'i', 'j', 'flux', 'comments']].to_csv(wel_lookup_file, index=False)
+        df = setup_wel_data(self)
 
         # extend spd dtype to include comments
         dtype = fm.ModflowWel.get_default_dtype()

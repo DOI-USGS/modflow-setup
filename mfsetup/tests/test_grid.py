@@ -16,3 +16,20 @@ def modelgrid():
 def test_grid_eq(modelgrid):
     grid2 = copy.deepcopy(modelgrid)
     assert modelgrid == grid2
+
+
+def test_grid_init():
+    ncol = 394
+    nrow = 414
+    kwargs = {
+    "delc": np.ones(nrow) * 5280.0 * .3048,
+    "delr": np.ones(ncol) * 5280.0 * .3048,
+    "epsg": 5070,
+    "proj4": "+init=epsg:5070",
+    "angrot": 0.0,
+    "xul": 178389.0,
+    "yul": 1604780.4160000002,
+    "lenuni": 1
+    }
+    grid = MFsetupGrid(**kwargs)
+    assert np.allclose(grid.yoffset, grid.yul - grid.nrow * 5280 * .3048)

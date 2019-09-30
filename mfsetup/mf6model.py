@@ -4,6 +4,7 @@ import time
 import shutil
 from collections import defaultdict
 import numpy as np
+import pandas as pd
 import flopy
 mf6 = flopy.mf6
 from .discretization import (make_idomain, deactivate_idomain_above,
@@ -12,8 +13,9 @@ from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
 from .gis import get_values_at_points
 from .grid import write_bbox_shapefile, get_point_on_national_hydrogeologic_grid
-from .tdis import setup_perioddata
+from .tdis import setup_perioddata, parse_perioddata_groups, concat_periodata_groups
 from .utils import update, get_input_arguments, flatten
+from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
 
 
@@ -157,15 +159,32 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame."""
-        perioddata = self.cfg['tdis']['perioddata'].copy()
-        if perioddata.get('perlen_units') is None:
-            perioddata['model_time_units'] = self.time_units
-        perioddata.update({'nper': self.cfg['tdis']['dimensions']['nper'],
-                           'steady': self.cfg['sto']['steady'],
-                           'oc': self.cfg['oc']['saverecord']})
-        self._perioddata = setup_perioddata(self.cfg['tdis']['options']['start_date_time'],
-                                            self.cfg['tdis']['options'].get('end_date_time'),
-                                            **perioddata)
+
+        # get period data groups
+        defaults = {'start_date_time': self.cfg['tdis']['options'].get('start_date_time'),
+                    'nper': self.cfg['tdis']['dimensions'].get('nper'),
+                    'steady': self.cfg['sto']['steady'],
+                    'oc_saverecord': self.cfg['oc']['saverecord']
+                    }
+        perioddata_groups = parse_perioddata_groups(self.cfg['tdis']['perioddata'], defaults)
+
+        # update any missing variables in the groups with global variables
+        group_dfs = []
+        for i, group in enumerate(perioddata_groups):
+            #if 'start_date_time' not in group:
+            #    group['start_date_time'] = self.cfg['tdis']['options']['start_date_time']
+            #if 'steady' not in group:
+            #    group['steady'] = self.cfg['sto']['steady']
+            #if 'oc_saverecord' not in group:
+            #    group['oc'] = self.cfg['oc']['saverecord']
+            group.update({'model_time_units': self.time_units,
+                          })
+            df = setup_perioddata(**group)
+            group_dfs.append(df)
+
+        # concatenate groups into single dataframe of perioddata
+        perioddata = concat_periodata_groups(group_dfs)
+        self._perioddata = perioddata
 
     def get_flopy_external_file_input(self, var):
         """Repath intermediate external file input to the
@@ -443,6 +462,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         package = 'wel'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
+
+        # munge well package input
+        # returns dataframe with information to populate stress_period_data
+        df = setup_wel_data(self)
 
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])

@@ -110,11 +110,12 @@ wel:
   added_wells: # name: per, x, y or i, j location; layer (k), flux; or csv file with these columns
     well1: # {per: 1, x: 563343.92, y: 414988.09, k: 0, flux: -2000}
   source_data:
-    water_use: 'plainfieldlakes/source_data/master_wu.csv' # monthly water use rates from WDNR
-    water_use_points: 'plainfieldlakes/source_data/wu_points.shp' # point locations of wells in water_use
-    period_stats: {0: 'mean', # statistic to apply to each stress period 'mean' to average all water use data; <monthname> to average values for a given month across the period (e.g. 'august')
-                   1: 'august', # use August pumping rates during test
-    }
+    wdnr_dataset:
+      water_use: 'plainfieldlakes/source_data/master_wu.csv' # monthly water use rates from WDNR
+      water_use_points: 'plainfieldlakes/source_data/wu_points.shp' # point locations of wells in water_use
+      period_stats: {0: 'mean', # statistic to apply to each stress period 'mean' to average all water use data; <monthname> to average values for a given month across the period (e.g. 'august')
+                     1: 'august', # use August pumping rates during test
+      }
   output_files:
     lookup_file: 'wel_lookup.csv' # mapping of wel package data to site numbers
 

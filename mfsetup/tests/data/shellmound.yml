@@ -74,15 +74,31 @@ dis:
 tdis:
   options:
     time_units: 'days'
-    start_date_time: '2008-10-01'
-    end_date_time: '2016-10-01' # specify end date, and nper or freq to have perlen automatically set
-  dimensions:
-    nper: 16 # Only used if perlen is None, or in combination with freq if an end_date isn't specified.
+    start_date_time: '1998-04-01'
   perioddata:
-    perlen: # Specify perlen as a list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
-    freq: '6MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
-    nstp: 15
-    tsmult: 1.5
+    # time discretization info can be specified directly under the perioddata key
+    # or in groups of stress periods that are discretized in a similar way
+    group 1: # initial steady-state period (steady specified under sto package)
+      #perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
+      nper: 1
+      nstp: 1
+      tsmult: 1
+      steady: True  # "steady" can be entered here; otherwise the global entry specified in the sto package is used as the default
+      # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
+    group 2: # single long period for spin-up of pumping
+      start_date_time: '1998-04-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
+      end_date_time: '2007-04-01'  # end times are specified following pandas slice convention, which includes the specified end date
+      nper: 1
+      nstp: 10
+      tsmult: 1.5
+      steady: False
+    group 3:
+      start_date_time: '2007-04-01'
+      end_date_time: '2015-10-01'  # end times are specified following pandas slice convention, which includes the specified end date
+      freq: '6MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
+      nstp: 5
+      tsmult: 1.5
+      steady: False
 
 ic:
   strt_filename_fmt: "strt{:d}.dat"
@@ -137,7 +153,6 @@ sto:
     ss: 1.e-6
   sy_filename_fmt: "sy{:d}.dat"
   ss_filename_fmt: "ss{:d}.dat"
-  steady: {0: True, 1: False}
 
 rch:
   options:
@@ -182,14 +197,10 @@ wel:
     print_flows: True
     save_flows: True
   source_data:
-    flux:
-      filename: 'shellmound/irr_wu_1mi_gs1999_to_gs2017.nc'
-      variable:
-      length_unit_conversion: 0.38610215854244584  # m3/mi2 to m2/km3
-      time_units: ''
-      period_stats:
-        0:
-        1: 'mean'
+    csvfiles: ['shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv',
+               'iwum_m3.csv',
+               'sp69_pumping_from_meras21_m3.csv'
+    ]
   output_files:
     lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
 

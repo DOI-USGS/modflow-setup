@@ -7,7 +7,7 @@ from rasterio import Affine
 from shapely.geometry import Polygon
 from flopy.discretization import StructuredGrid
 from .gis import df2shp
-from mfsetup.units import lenuni_text
+from .units import convert_length_units
 
 
 class MFsetupGrid(StructuredGrid):
@@ -60,7 +60,6 @@ class MFsetupGrid(StructuredGrid):
         x0r, y0r = self.get_coords(x0, y0)
         return y0r
 
-
     @property
     def bbox(self):
         """Shapely polygon bounding box of the model grid."""
@@ -95,7 +94,9 @@ class MFsetupGrid(StructuredGrid):
     # stuff to conform to sr
     @property
     def length_multiplier(self):
-        return 1.
+        """assume that """
+        return convert_length_units(self.lenuni,
+                                    2)
 
     @property
     def rotation(self):
