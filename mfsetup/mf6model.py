@@ -171,12 +171,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # update any missing variables in the groups with global variables
         group_dfs = []
         for i, group in enumerate(perioddata_groups):
-            #if 'start_date_time' not in group:
-            #    group['start_date_time'] = self.cfg['tdis']['options']['start_date_time']
-            #if 'steady' not in group:
-            #    group['steady'] = self.cfg['sto']['steady']
-            #if 'oc_saverecord' not in group:
-            #    group['oc'] = self.cfg['oc']['saverecord']
             group.update({'model_time_units': self.time_units,
                           })
             df = setup_perioddata(**group)
@@ -467,8 +461,20 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # returns dataframe with information to populate stress_period_data
         df = setup_wel_data(self)
 
+        # set up stress_period_data
+        spd = {}
+        period_groups = df.groupby('per')
+        for kper, group in period_groups:
+            kspd = mf6.ModflowGwfwel.stress_period_data.empty(self,
+                                                              len(group),
+                                                              boundnames=True)[0]
+            kspd['cellid'] = list(zip(group.k, group.i, group.j))
+            kspd['q'] = group['flux']
+            kspd['boundnames'] = group['comments']
+            spd[kper] = kspd
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])
+        kwargs['stress_period_data'] = spd
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfwel)
         wel = mf6.ModflowGwfwel(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))

@@ -15,12 +15,31 @@ lenuni_values = {'unknown': 0,
                  'cm': 3,
                  'mm': 4,
                  'in': 10,
-                 'mi': 11
+                 'mi': 11,
+                 'foot': 1,
+                 'meter': 2
                  }
 
 fullnames = {'unknown', 'feet', 'meters', 'centimeters',
              'seconds', 'minutes', 'hours', 'days', 'years'}
 lenuni_text = {v: k for k, v in lenuni_values.items() if k in fullnames}
+
+
+volumetric_units = {'liters': 13,
+                    'L': 13,
+                    'gallons': 14,
+                    'gallon': 14,
+                    'gal': 14,
+                    'mgal': 15,
+                    'million gallons': 15,
+                    'acre feet': 16,
+                    'acre-feet': 16,
+                    'af': 16,
+                    'acre-ft': 16,
+                    'acre foot': 16,
+                    'acre-foot': 16
+                    }
+
 
 itmuni_values = {"unknown": 0,
                  "seconds": 1,
@@ -68,26 +87,8 @@ def convert_length_units(lenuni1, lenuni2):
     if isinstance(lenuni2, str):
         lenuni2 = lenuni_values.get(lenuni2.lower(), 0)
 
-    mults = {(1, 2): 1 * 0.3048,
-             (1, 3): 100 * 0.3048,
-             (1, 4): 1000 * 0.3048,
-             (1, 10): 1 * 12,
-             (1, 11): 1 / 5280,
-             (2, 3): 100,
-             (2, 4): 1000,
-             (2, 10): 1 * 12 / .3048,
-             (2, 11): 1 / (.3048 * 5280),
-             (3, 4): 100,
-             (3, 10): 1 * 12 / (1000 * .3048),
-             (3, 11): 1 / (.3048 * 5280 * 100),
-             (4, 10): 1 * 12 / (1000 * .3048),
-             (4, 11): 1 / (.3048 * 5280 * 1000),
-             }
-    convert_length_units = np.ones((12, 12), dtype=float)
-    for (u0, u1), mult in mults.items():
-        convert_length_units[u0, u1] = mult
-        convert_length_units[u1, u0] = 1 / mult
-    mult = convert_length_units[lenuni1, lenuni2]
+    length_conversions = get_length_conversions()
+    mult = length_conversions[lenuni1, lenuni2]
     return mult
 
 
@@ -133,6 +134,63 @@ def convert_time_units(itmuni1, itmuni2):
     return mult
 
 
+def get_length_conversions():
+    mults = {(1, 2): 1 * 0.3048,
+             (1, 3): 100 * 0.3048,
+             (1, 4): 1000 * 0.3048,
+             (1, 10): 1 * 12,
+             (1, 11): 1 / 5280,
+             (2, 3): 100,
+             (2, 4): 1000,
+             (2, 10): 1 * 12 / .3048,
+             (2, 11): 1 / (.3048 * 5280),
+             (3, 4): 100,
+             (3, 10): 1 * 12 / (1000 * .3048),
+             (3, 11): 1 / (.3048 * 5280 * 100),
+             (4, 10): 1 * 12 / (1000 * .3048),
+             (4, 11): 1 / (.3048 * 5280 * 1000),
+             }
+    length_conversions = np.ones((12, 12), dtype=float)
+    for (u0, u1), mult in mults.items():
+        length_conversions[u0, u1] = mult
+        length_conversions[u1, u0] = 1 / mult
+    return length_conversions
+
+
+def get_volume_conversions():
+    length_conversions = get_length_conversions()
+    m, n = length_conversions.shape
+    size = np.max(list(volumetric_units.values())) + 1
+    volume_conversions = np.ones((size, size), dtype=float)
+    volume_conversions[:m, :n] = length_conversions **3
+    mults = {(13, 1): (1/.3048**3)/1000,  # liters to ft3
+             (13, 2): 1/1000,
+             (13, 3): 1000,
+             (13, 4): 1e6,
+             (13, 10): (1/.3048**3)/1000/(12**3), # liters to cubic inches
+             (13, 14): 1/3.78541, # liters to gallons
+             (13, 15): 1/(3.78541 * 1e6), # liters to million gallons
+             (13, 16): (1/.3048**3)/1000/43560, # liters to acre feet
+             (14, 1): 1 / 7.48052,  # gallons to ft3
+             (14, 2): (.3048**3) / 7.48052, # gallons to m3
+             (14, 3): 1e6 * (.3048**3) / 7.48052,  # gallons to cm3
+             (14, 4): 1e9 * (.3048**3) / 7.48052,  # gallons to mm3
+             (14, 10): 1/231, # gallons to cubic inches
+             (14, 15): 1/1e6, # gallons to million gallons
+             (14, 16): 1 / 7.48052 / 43560, # gallons to acre feet
+             (15, 1): 1e6 / 7.48052,  # million gallons to ft3
+             (15, 2): 1e6 * (.3048 ** 3) / 7.48052,  # million gallons to m3
+             (15, 10): 1e6 / 231,
+             (15, 16): 1e6 / 7.48052 / 43560, # million gallons to acre feet
+             (16, 1): 1/43560,  # acre feet to ft3
+             (16, 2): 1/43560 * (.3048 ** 3), # acre feet to m3
+             }
+    for (u0, u1), mult in mults.items():
+        volume_conversions[u0, u1] = mult
+        volume_conversions[u1, u0] = 1 / mult
+    return volume_conversions
+
+
 def get_unit_text(length_unit, time_unit, length_unit_exp):
     """Get text abbreviation for common units.
     Needs to be filled out more."""
@@ -148,6 +206,32 @@ def get_unit_text(length_unit, time_unit, length_unit_exp):
     return text.get((length_unit, time_unit, length_unit_exp), 'units')
 
 
+def convert_volume_units(input_volume_units, output_volume_units):
+    if input_volume_units is None or output_volume_units is None:
+        return 1.
+
+    # if both units are expressed as lengths cubed
+    in_units = parse_length_units(input_volume_units, text_output=False)
+    if in_units is not None:
+        if isinstance(in_units, str):
+            in_units = lenuni_values.get(in_units.lower(), 0)
+    else:
+        in_units = volumetric_units.get(input_volume_units.lower(), 0)
+    out_units = parse_length_units(output_volume_units, text_output=False)
+    if out_units is not None:
+        if isinstance(out_units, str):
+            out_units = lenuni_values.get(out_units.lower(), 0)
+    else:
+        out_units = volumetric_units.get(output_volume_units.lower(), 0)
+
+    # get the volume conversions matrix
+    vol_conversions = get_volume_conversions()
+
+    # look up the multiplier
+    mult = vol_conversions[in_units, out_units]
+    return mult
+
+
 def convert_flux_units(input_length_units, input_time_units,
                        output_length_units, output_time_units):
     # TODO: add support for areas and volumes
@@ -156,3 +240,14 @@ def convert_flux_units(input_length_units, input_time_units,
     tmult = convert_time_units(input_time_units, output_time_units)
     return lmult * tmult
 
+
+def parse_length_units(text, text_output=True):
+    for k in volumetric_units.keys():
+        if k in text.lower():
+            return
+    for k, v in lenuni_values.items():
+        if k in text:
+            if text_output:
+                return k
+            else:
+                return v

@@ -583,7 +583,6 @@ def test_rch_setup(model_with_dis):
     assert np.allclose(m.rch.recharge.array[0, 0].ravel(), rech0.ravel())
 
 
-@pytest.mark.skip("still working on wel")
 def test_wel_setup(model_with_dis):
     m = model_with_dis  # deepcopy(model)
     wel = m.setup_wel()
@@ -591,7 +590,6 @@ def test_wel_setup(model_with_dis):
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))
     assert isinstance(wel, mf6.ModflowGwfwel)
     assert wel.stress_period_data is not None
-    assert True
 
 
 def test_sfr_setup(model_with_sfr):

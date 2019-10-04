@@ -167,8 +167,9 @@ rch:
       length_units: 'inches'
       time_units: 'days'
       period_stats:
-        0: ['mean', '2012-01-01', '2017-12-31']
-        1: 'mean'
+        0: ['mean', '2000-01-01', '2017-12-31']
+        1: ['mean', '2000-01-01', '2017-12-31']
+        2: 'mean'
   recharge_filename_fmt: "rch{:d}.dat"
 
 sfr:
@@ -197,10 +198,23 @@ wel:
     print_flows: True
     save_flows: True
   source_data:
-    csvfiles: ['shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv',
-               'iwum_m3.csv',
-               'sp69_pumping_from_meras21_m3.csv'
-    ]
+    csvfiles:
+      filenames: ['shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv',
+                  'shellmound/tables/iwum_m3.csv',
+                  'shellmound/tables/sp69_pumping_from_meras21_m3.csv']
+      volume_units: 'meters'
+      time_units: 'days'
+      data_column: 'flux_m3'
+      datetime_column: 'start_datetime'
+      id_column: 'node'
+      period_stats:  # how fluxes will be distributed across model stress periods
+        0: none
+        1: 'mean'
+      vertical_flux_distribution:
+        across_layers: False  # False to put fluxes in one layer
+        distribute_by: 'thickness'  # thickness or transmissivity
+
+
   output_files:
     lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
 

@@ -3,6 +3,7 @@ import shutil
 import numbers
 import numpy as np
 from scipy.interpolate import griddata
+from shapely.geometry import Point
 import pandas as pd
 import xarray as xr
 from flopy.utils import binaryfile as bf
@@ -13,7 +14,8 @@ from .gis import get_values_at_points, shp2df, intersect
 from .grid import get_ij, MFsetupGrid
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .tdis import months
-from .units import convert_length_units, convert_time_units, convert_flux_units
+from .units import (convert_length_units, convert_time_units, convert_volume_units, parse_length_units)
+from .utils import get_input_arguments
 
 renames = {'mult': 'multiplier',
            'elevation_units': 'length_units',
@@ -31,10 +33,13 @@ class SourceData:
     """
     def __init__(self, filenames=None, length_units='unknown',
                  time_units='unknown',
+                 area_units=None, volume_units=None,
                  dest_model=None):
 
         self.filenames = filenames
         self.length_units = length_units
+        self.area_units = area_units
+        self.volume_units = volume_units
         self.time_units = time_units
         self.dest_model = dest_model
 
@@ -44,13 +49,25 @@ class SourceData:
 
     @property
     def length_unit_conversion(self):
-        return convert_length_units(self.length_units,
+        # data are lengths
+        mult = convert_length_units(self.length_units,
                                     getattr(self.dest_model, 'length_units', 'unknown'))
+
+        # data are areas
+        if self.area_units is not None:
+            raise NotImplemented('Conversion of area units.')
+
+        # data are volumes
+        elif self.volume_units is not None:
+            mult = convert_volume_units(self.volume_units,
+                                 getattr(self.dest_model, 'length_units', 'unknown'))
+        return mult
 
     @property
     def time_unit_conversion(self):
         return convert_time_units(self.time_units,
                                   getattr(self.dest_model, 'time_units', 'unknown'))
+
 
     @staticmethod
     def from_config(data, type, **kwargs):
@@ -100,9 +117,17 @@ class SourceData:
             kwargs.update(data_dict)
             return NetCDFSourceData(**kwargs)
         elif type == 'array':
+            data_dict = get_input_arguments(data_dict, ArraySourceData)
+            kwargs = get_input_arguments(kwargs, ArraySourceData)
             return ArraySourceData(**data_dict, **kwargs)
         elif type == 'tabular':
+            data_dict = get_input_arguments(data_dict, TabularSourceData)
+            kwargs = get_input_arguments(kwargs, TabularSourceData)
             return TabularSourceData(**data_dict, **kwargs)
+        elif type == 'transient tabular':
+            data_dict = get_input_arguments(data_dict, TransientTabularSourceData)
+            kwargs = get_input_arguments(kwargs, TransientTabularSourceData)
+            return TransientTabularSourceData(**data_dict, **kwargs)
         else:
             raise TypeError("need to specify data type (array or tabular)")
 
@@ -426,38 +451,46 @@ class NetCDFSourceData(ArraySourceData):
         for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
             period_stat = self.period_stats.get(kper, current_stat)
 
-            # stress period mean
-            if isinstance(period_stat, str):
-                period_stat = [period_stat]
+            ## stress period mean
+            #if isinstance(period_stat, str):
+            #    period_stat = [period_stat]
+#
+            #if isinstance(period_stat, list):
+            #    stat = period_stat.pop(0)
+            #    current_stat = stat
+#
+            #    # stat for specified period
+            #    if len(period_stat) == 2:
+            #        start, end = period_stat
+            #        data = var.loc[start:end].values
+#
+            #    # stat specified by single item
+            #    elif len(period_stat) == 1:
+            #        # stat for a specified month
+            #        if stat in months.keys() or stat in months.values():
+            #            data = var.loc[var[self.time_col].dt.month == months.get(stat, stat)].values
+#
+            #        # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
+            #        else:
+            #            data = var.loc[stat].values
+#
+            #    # no period specified; use start/end of current period
+            #    elif len(period_stat) == 0:
+            #        data = var.loc[start:end].values
+#
+            #    else:
+            #        raise Exception("")
+#
+            ## compute statistic on data
+            #period_mean = getattr(data, 'mean')(axis=0)
 
-            if isinstance(period_stat, list):
-                stat = period_stat.pop(0)
-                current_stat = stat
-
-                # stat for specified period
-                if len(period_stat) == 2:
-                    start, end = period_stat
-                    data = var.loc[start:end].values
-
-                # stat specified by single item
-                elif len(period_stat) == 1:
-                    # stat for a specified month
-                    if stat in months.keys() or stat in months.values():
-                        data = var.loc[var[self.time_col].dt.month == months.get(stat, stat)].values
-
-                    # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
-                    else:
-                        data = var.loc[stat].values
-
-                # no period specified; use start/end of current period
-                elif len(period_stat) == 0:
-                    data = var.loc[start:end].values
-
-                else:
-                    raise Exception("")
-
-            # compute statistic on data
-            period_mean = getattr(data, 'mean')(axis=0)
+            # take the mean of the source data across the model stress period
+            # (defined by start, end)
+            period_mean = aggregate_xarray_to_stress_period(var,
+                                                     start_datetime=start,
+                                                     end_datetime=end,
+                                                     period_stat=period_stat,
+                                                     datetime_column=self.time_col)
 
             # sample the data onto the model grid
             period_mean = self.regrid_from_source(period_mean,
@@ -630,19 +663,23 @@ class MFArrayData(SourceData):
 
 
 class TabularSourceData(SourceData):
-    """Subclass for handling array-based source data."""
+    """Subclass for handling tabular source data."""
 
     def __init__(self, filenames, id_column=None, include_ids=None,
-                 length_units='unknown', time_units='unknown',
+                 data_column=None, sort_by=None,
+                 length_units='unknown', time_units='unknown', volume_units=None,
                  column_mappings=None,
                  dest_model=None):
-        SourceData.__init__(self, filenames=filenames, length_units=length_units, time_units=time_units,
+        SourceData.__init__(self, filenames=filenames,
+                            length_units=length_units, time_units=time_units,
+                            volume_units=volume_units,
                             dest_model=dest_model)
 
         self.id_column = id_column
         self.include_ids = include_ids
+        self.data_column = data_column
         self.column_mappings = column_mappings
-        assert True
+        self.sort_by = sort_by
 
     @staticmethod
     def from_config(data, **kwargs):
@@ -665,9 +702,14 @@ class TabularSourceData(SourceData):
             df.index = df[self.id_column]
         if self.include_ids is not None:
             df = df.loc[self.include_ids]
+        if self.data_column is not None:
+            df[self.data_column] *= self.unit_conversion
+        if self.sort_by is not None:
+            df.sort_values(by=self.sort_by, inplace=True)
 
         # rename any columns specified in config file to required names
-        df.rename(columns=self.column_mappings, inplace=True)
+        if self.column_mappings is not None:
+            df.rename(columns=self.column_mappings, inplace=True)
         df.columns = [c.lower() for c in df.columns]
 
         # drop any extra unnamed columns from accidental saving of the index on to_csv
@@ -675,6 +717,185 @@ class TabularSourceData(SourceData):
         df.drop(drop_columns, axis=1, inplace=True)
 
         return df
+
+
+class TransientTabularSourceData(SourceData):
+    """Subclass for handling tabular source data that
+    represents a time series."""
+
+    def __init__(self, filenames, data_column, datetime_column, id_column,
+                 x_col='x', y_col='y', period_stats='mean',
+                 length_units='unknown', time_units='unknown', volume_units=None,
+                 column_mappings=None,
+                 dest_model=None):
+        SourceData.__init__(self, filenames=filenames,
+                            length_units=length_units, time_units=time_units,
+                            volume_units=volume_units,
+                            dest_model=dest_model)
+
+        self.data_column = data_column
+        self.datetime_column = datetime_column
+        self.id_column = id_column
+        self.column_mappings = column_mappings
+        self.period_stats = period_stats
+        self.time_col = datetime_column
+        self.x_col = x_col
+        self.y_col = y_col
+
+    @staticmethod
+    def from_config(data, **kwargs):
+        return SourceData.from_config(data, type='transient tabular', **kwargs)
+
+    def get_data(self):
+
+        # aggregate the data from multiple files
+        dfs = []
+        for i, f in self.filenames.items():
+            if f.endswith('.shp') or f.endswith('.dbf'):
+                df = shp2df(f)
+
+            elif f.endswith('.csv'):
+                df = pd.read_csv(f)
+
+            dfs.append(df)
+        df = pd.concat(dfs)
+        df.index = pd.to_datetime(df[self.datetime_column])
+        # rename any columns specified in config file to required names
+        if self.column_mappings is not None:
+            df.rename(columns=self.column_mappings, inplace=True)
+        df.columns = [c.lower() for c in df.columns]
+
+        # cull data to model bounds
+        if 'geometry' not in df.columns:
+            df['geometry'] = [Point(x, y) for x, y in zip(df[self.x_col], df[self.y_col])]
+        within = [g.within(self.dest_model.bbox) for g in df.geometry]
+        df = df.loc[within]
+
+        # sample values to model stress periods
+        starttimes = self.dest_model.perioddata['start_datetime']
+        endtimes = self.dest_model.perioddata['end_datetime']
+        period_means = []
+        current_stat = None
+        for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
+            # missing (period) keys default to 'mean';
+            # 'none' to explicitly skip the stress period
+            period_stat = self.period_stats.get(kper, current_stat)
+            if period_stat is not None and period_stat.lower() == 'none':
+                continue
+            period_mean = aggregate_dataframe_to_stress_period(df,
+                                                     start_datetime=start,
+                                                     end_datetime=end,
+                                                     period_stat=period_stat,
+                                                     id_column=self.id_column)
+            period_mean['per'] = kper
+            period_means.append(period_mean)
+        dfm = pd.concat(period_means)
+
+        if self.data_column is not None:
+            dfm[self.data_column] *= self.unit_conversion
+        dfm.sort_values(by=['per', self.id_column], inplace=True)
+
+        # drop any extra unnamed columns from accidental saving of the index on to_csv
+        drop_columns = [c for c in dfm.columns if 'unnamed' in c]
+        dfm.drop(drop_columns, axis=1, inplace=True)
+
+        # map x, y locations to modelgrid
+        i, j = get_ij(self.dest_model.modelgrid,
+                      dfm[self.x_col].values, dfm[self.y_col].values)
+        dfm['i'] = i
+        dfm['j'] = j
+        return dfm
+
+
+def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
+                               period_stat, id_column):
+
+    if isinstance(start_datetime, pd.Timestamp):
+        start_datetime = start_datetime.strftime('%Y-%m-%d')
+    if isinstance(end_datetime, pd.Timestamp):
+        end_datetime = end_datetime.strftime('%Y-%m-%d')
+    if isinstance(period_stat, str):
+        period_stat = [period_stat]
+    elif period_stat is None:
+        period_stat = ['mean']
+
+    if isinstance(period_stat, list):
+        stat = period_stat.pop(0)
+
+        # stat for specified period
+        if len(period_stat) == 2:
+            start, end = period_stat
+            period_data = data.loc[start:end]
+
+        # stat specified by single item
+        elif len(period_stat) == 1:
+            period = period_stat.pop()
+            # stat for a specified month
+            if period in months.keys() or period in months.values():
+                period_data = data.loc[data.index.dt.month == months.get(period, period)]
+
+            # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
+            else:
+                period_data = data.loc[period]
+
+        # no period specified; use start/end of current period
+        elif len(period_stat) == 0:
+            period_data = data.loc[start_datetime:end_datetime]
+
+        else:
+            raise Exception("")
+
+    # compute statistic on data
+    period_mean = getattr(period_data.groupby(id_column), stat)()
+    period_mean['start_datetime'] = start_datetime # add datetime back in
+    period_mean.index.name = None
+    period_mean[id_column] = period_mean.index
+
+    return period_mean
+
+
+def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
+                               period_stat, datetime_column):
+
+    if isinstance(start_datetime, pd.Timestamp):
+        start_datetime = start_datetime.strftime('%Y-%m-%d')
+    if isinstance(end_datetime, pd.Timestamp):
+        end_datetime = end_datetime.strftime('%Y-%m-%d')
+    if isinstance(period_stat, str):
+        period_stat = [period_stat]
+    elif period_stat is None:
+        period_stat = ['mean']
+
+    if isinstance(period_stat, list):
+        stat = period_stat.pop(0)
+
+        # stat for specified period
+        if len(period_stat) == 2:
+            start, end = period_stat
+            arr = data.loc[start:end].values
+
+        # stat specified by single item
+        elif len(period_stat) == 1:
+            period = period_stat.pop()
+            # stat for a specified month
+            if period in months.keys() or period in months.values():
+                arr = data.loc[data[datetime_column].dt.month == months.get(period, period)].values
+
+            # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
+            else:
+                arr = data.loc[period].values
+
+        # no period specified; use start/end of current period
+        elif len(period_stat) == 0:
+            arr = data.loc[start_datetime:end_datetime].values
+
+        else:
+            raise Exception("")
+
+    # compute statistic on data
+    period_mean = getattr(arr, stat)(axis=0)
+
+    return period_mean
 
 
 def setup_array(model, package, var, data=None,
