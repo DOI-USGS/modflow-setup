@@ -172,7 +172,7 @@ def test_find_remove_isolated_cells():
     idomain = np.zeros((2, 1000, 1000), dtype=int)
     idomain[:, 200:-200, 200:-200] = 1
     idomain[:, 202:203, 202:203] = 0
-    idomain[:, 300:330, 300:300] = 0
+    idomain[:, 300:330, 300:301] = 0
     idomain[:, 305:306, 305:306] = 0
     idomain[:, 10:13, 10:13] = 1
     idomain[:, 20:22, 20:22] = 1
@@ -180,14 +180,17 @@ def test_find_remove_isolated_cells():
 
     result = find_remove_isolated_cells(idomain, minimum_cluster_size=10)
     assert result.shape == idomain.shape
+    # no inactive cells should have been filled
     assert result.sum() == idomain[:, 200:-200, 200:-200].sum()
     result = find_remove_isolated_cells(idomain, minimum_cluster_size=9)
-    assert result.sum() == idomain[:, 200:-200, 200:-200].sum() + 9*2
+    # cluster of 9 active cells was not removed
+    assert result.sum() == idomain[:, 200:-200, 200:-200].sum() + 9 * 2
 
     idomain = np.zeros((40, 40), dtype=int)
     idomain[5:-3, 2:7] = 1
     idomain[3:5, 7:8] = 1  # 2 pixels
     idomain[10, 8:11] = 1  # 3 pixels
+    idomain[20, 7] = 1  # pixel that has only one connection
     result = find_remove_isolated_cells(idomain, minimum_cluster_size=10)
-    assert result.sum() == idomain.sum() - 5
+    assert result.sum() == idomain.sum() - 6
 

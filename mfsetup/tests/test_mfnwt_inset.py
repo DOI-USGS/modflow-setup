@@ -80,6 +80,15 @@ def test_init(cfg):
     assert isinstance(m, MFnwtModel)
 
 
+def test_repr(inset, inset_with_grid):
+    txt = inset.__repr__()
+    assert isinstance(txt, str)
+    # cheesy test that flopy repr isn't returned
+    assert 'CRS:' in txt and 'Bounds:' in txt
+    txt = inset_with_grid.__repr__()
+    assert isinstance(txt, str)
+
+
 def test_inset(inset):
     assert isinstance(inset, MFnwtModel)
 

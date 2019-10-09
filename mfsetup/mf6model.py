@@ -53,6 +53,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # arrays remade during this session
         self.updated_arrays = set()
 
+    def __repr__(self):
+        return MFsetupMixin.__repr__(self)
+
     @property
     def nlay(self):
         return self.cfg['dis']['dimensions'].get('nlay', 1)

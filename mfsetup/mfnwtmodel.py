@@ -56,6 +56,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # property arrays
         self._ibound = None
 
+    def __repr__(self):
+        return MFsetupMixin.__repr__(self)
+
     @property
     def nlay(self):
         return self.cfg['dis'].get('nlay', 1)

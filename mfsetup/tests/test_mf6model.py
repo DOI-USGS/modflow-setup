@@ -165,6 +165,8 @@ def test_parse_modflowgwf_kwargs(cfg):
 def test_repr(model, model_with_grid):
     txt = model.__repr__()
     assert isinstance(txt, str)
+    # cheesy test that flopy repr isn't returned
+    assert 'CRS:' in txt and 'Bounds:' in txt
     txt = model_with_grid.__repr__()
     assert isinstance(txt, str)
 
@@ -606,6 +608,7 @@ def test_sfr_setup(model_with_sfr):
     ]
     for f in shapefiles:
         assert os.path.exists(f)
+    assert m.sfrdata.model == m
 
 
 def test_idomain_above_sfr(model_with_sfr):
@@ -622,21 +625,36 @@ def test_idomain_above_sfr(model_with_sfr):
     # test that idomain above sfr cells is being set to 0
     # by setting all botms above streambed tops
     new_botm = m.dis.botm.array.copy()
+    new_top = m.dis.top.array.copy()
     new_botm[:, i, j] = 9999
+    new_top[i, j] = 9999
+    np.savetxt(m.cfg['dis']['griddata']['top'][0]['filename'], new_top)
     m.dis.botm = new_botm
+    #m.dis.top = new_top
     sfr = m.setup_sfr()
 
     # test loading a 3d array from a filelist
     idomain = load_array(m.cfg['dis']['griddata']['idomain'])
     assert np.array_equal(m.idomain, idomain)
+    # dis package idomain of model instance attached to sfrdata
+    # forms basis for identifying unconnected cells
+    assert np.array_equal(m.idomain, m.sfrdata.model.idomain)
+    assert np.array_equal(m.idomain, m.sfrdata.model.dis.idomain.array)
+
+    # verify that dis package file still references external file
+    m.dis.write()
+    fname = os.path.join(m.model_ws, m.dis.filename)
+    assert os.path.getsize(fname) < 2e3
 
     # idomain should be zero everywhere there's a sfr reach
     # except for in the botm layer
     # (verifies that model botm was reset to accomdate SFR reaches)
+    assert np.array_equal(m.sfr.reach_data.i, i)
+    assert np.array_equal(m.sfr.reach_data.j, j)
     assert idomain[:-1, i, j].sum() == 0
     assert idomain[-1, i, j].sum() == len(sfr.packagedata.array)
-    assert np.all(m.dis.botm.array[:-1, i, j] == 9999)
-    assert np.all(m.dis.botm.array[-1, i, j] != 9999)
+    assert np.all(m.dis.botm.array[:-1, i, j] > 9980)
+    assert np.all(m.dis.botm.array[-1, i, j] < 100)
 
 
 @pytest.fixture(scope="module")

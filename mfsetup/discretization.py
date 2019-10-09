@@ -4,6 +4,7 @@ Functions related to the Discretization Package.
 import time
 import numpy as np
 from scipy import ndimage
+from scipy.signal import convolve2d
 from flopy.mf6.data.mfdatalist import MFList
 
 def adjust_layers(dis, minimum_thickness=1):
@@ -81,7 +82,18 @@ def find_remove_isolated_cells(array, minimum_cluster_size=10):
 
     retained_arraylist = []
     for arr in arraylist:
-        labeled, ncomponents = ndimage.measurements.label(arr, structure=structure)
+
+        # for each cell in the binary array arr (i.e. representing active cells)
+        # take the sum of the cell and 4 immediate neighbors (excluding diagonal connections)
+        # values > 2 in the output array indicate cells with at least two connections
+        convolved = convolve2d(arr, structure, mode='same')
+        # taking union with (arr == 1) prevents inactive cells from being activated
+        atleast_2_connections = (arr == 1) & (convolved > 2)
+
+        # then apply connected component analysis
+        # to identify small clusters of isolated cells to exclude
+        labeled, ncomponents = ndimage.measurements.label(atleast_2_connections,
+                                                          structure=structure)
         retain_areas = [c for c in range(1, ncomponents+1)
                         if (labeled == c).sum() >= minimum_cluster_size]
         retain = np.in1d(labeled.ravel(), retain_areas)

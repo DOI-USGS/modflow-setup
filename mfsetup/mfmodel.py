@@ -90,6 +90,27 @@ class MFsetupMixin():
         if not np.array_equal(other.perioddata, self.perioddata):
             return False
         #  TODO: add checks of actual array values and other parameters
+        for k, v in self.__dict__.items():
+            if k in ['cfg',
+                     'sfrdata',
+                     '_packagelist',
+                     '_package_paths',
+                     'package_key_dict',
+                     'package_type_dict',
+                     'package_name_dict',
+                     '_ftype_num_dict']:
+                continue
+            elif k not in other.__dict__:
+                return False
+            elif type(v) == bool:
+                if not v == other.__dict__[k]:
+                    return False
+            elif k == 'cfg':
+                continue
+            elif type(v) in [str, int, float, dict, list]:
+                if v != other.__dict__[k]:
+                    pass
+                continue
         return True
 
     @property
@@ -739,7 +760,8 @@ class MFsetupMixin():
                               rotation=self.modelgrid.angrot, epsg=self.modelgrid.epsg,
                               proj4_str=self.modelgrid.proj_str)
         sfr = lns.to_sfr(sr=sr,
-                         isfr=isfr
+                         isfr=isfr,
+                         model=self,
                          )
         if self.cfg['sfr']['set_streambed_top_elevations_from_dem']:
             sfr.set_streambed_top_elevations_from_dem(self.cfg['source_data']['dem'],
@@ -762,7 +784,12 @@ class MFsetupMixin():
             save_array(f, new_botm, fmt='%.2f')
             print('(new model botm after assigning SFR reaches to layers)')
             botm[-1] = new_botm
+            # run thru setup_array so that DIS input remains open/close
+            self._setup_array('dis', 'botm',
+                              data={i: arr for i, arr in enumerate(botm)},
+                              by_layer=True, write_fmt='%.2f', dtype=int)
             self.dis.botm = botm
+            self.dis.botm = self.cfg['dis']['griddata']['botm']
 
         # write reach and segment data tables
         sfr.write_tables('{}/{}'.format(output_path, self.name))
@@ -778,8 +805,8 @@ class MFsetupMixin():
         self.sfrdata = sfr
 
         # create the flopy SFR package instance
+        sfr.create_ModflowSfr2(model=self, istcb2=223)
         if self.version != 'mf6':
-            sfr.create_ModflowSfr2(model=self, istcb2=223)
             sfr_package = sfr.ModflowSfr2
         else:
             sfr_package = sfr.create_mf6sfr(model=self)
