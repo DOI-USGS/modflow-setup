@@ -21,17 +21,9 @@ from ..units import convert_length_units
 from ..utils import get_input_arguments
 
 
-@pytest.fixture(scope="module")
-def cfg(mf6_test_cfg_path):
-    cfg = MF6model.load_cfg(mf6_test_cfg_path)
-    # add some stuff just for the tests
-    cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
-    return cfg
-
-
 @pytest.fixture(scope="module", autouse=True)
-def reset_dirs(cfg):
-    cfg = cfg.copy()
+def reset_dirs(shellmound_cfg):
+    cfg = shellmound_cfg.copy()
     folders = [cfg['intermediate_data']['output_folder'],
                cfg['model'].get('external_path'),
                cfg['gisdir']
@@ -47,53 +39,18 @@ def reset_dirs(cfg):
 
 
 @pytest.fixture(scope="function")
-def simulation(cfg):
-    cfg = cfg.copy()
-    sim = mf6.MFSimulation(**cfg['simulation'])
-    return sim
-
-
-@pytest.fixture(scope="function")
-def model(cfg, simulation):
-    cfg = cfg.copy()
-    #simulation = deepcopy(simulation)
-    cfg['model']['simulation'] = simulation
-    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
-    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
-    m = MF6model(cfg=cfg, **kwargs)
-    return m
-
-
-@pytest.fixture(scope="function")
-def model_with_grid(model):
-    #model = deepcopy(model)
-    model.setup_grid()
-    return model
-
-
-@pytest.fixture(scope="function")
-def model_with_dis(model_with_grid):
-    print('pytest fixture model_with_grid')
-    m = model_with_grid  #deepcopy(inset_with_grid)
-    m.setup_tdis()
-    m.cfg['dis']['remake_top'] = True
-    dis = m.setup_dis()
-    return m
-
-
-@pytest.fixture(scope="function")
-def model_with_sfr(model_with_dis):
-    m = model_with_dis
+def model_with_sfr(shellmound_model_with_dis):
+    m = shellmound_model_with_dis
     sfr = m.setup_sfr()
     return m
 
 
 @pytest.fixture(scope="module")
-def model_setup(mf6_test_cfg_path):
+def model_setup(shellmound_cfg_path):
     for folder in ['shellmound', 'tmp']:
         if os.path.isdir(folder):
             shutil.rmtree(folder)
-    m = MF6model.setup_from_yaml(mf6_test_cfg_path)
+    m = MF6model.setup_from_yaml(shellmound_cfg_path)
     m.write_input()
     if hasattr(m, 'sfr'):
         sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
@@ -109,8 +66,8 @@ def model_setup(mf6_test_cfg_path):
     return m
 
 
-def test_init(cfg):
-    cfg = cfg.copy()
+def test_init(shellmound_cfg):
+    cfg = shellmound_cfg.copy()
     sim = mf6.MFSimulation(**cfg['simulation'])
     assert isinstance(sim, mf6.MFSimulation)
 
@@ -131,8 +88,8 @@ def test_init(cfg):
     assert isinstance(m, MF6model)
 
 
-def test_parse_modflowgwf_kwargs(cfg):
-    cfg = cfg.copy()
+def test_parse_modflowgwf_kwargs(shellmound_cfg):
+    cfg = shellmound_cfg.copy()
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
@@ -162,29 +119,30 @@ def test_parse_modflowgwf_kwargs(cfg):
     assert options['newton'] == ['under_relaxation']
 
 
-def test_repr(model, model_with_grid):
-    txt = model.__repr__()
+def test_repr(shellmound_model, shellmound_model_model_with_grid):
+    txt = shellmound_model.__repr__()
     assert isinstance(txt, str)
     # cheesy test that flopy repr isn't returned
     assert 'CRS:' in txt and 'Bounds:' in txt
-    txt = model_with_grid.__repr__()
+    txt = shellmound_model_model_with_grid.__repr__()
     assert isinstance(txt, str)
 
 
-def test_load_cfg(cfg, mf6_test_cfg_path):
+def test_load_cfg(shellmound_cfg, shellmound_cfg_path):
     relative_model_ws = '../tmp/shellmound'
-    ws = os.path.normpath(os.path.join(os.path.abspath(os.path.split(mf6_test_cfg_path)[0]),
+    ws = os.path.normpath(os.path.join(os.path.abspath(os.path.split(shellmound_cfg_path)[0]),
                                                                        relative_model_ws))
-    cfg = cfg
+    cfg = shellmound_cfg
     assert cfg['simulation']['sim_ws'] == ws
     assert cfg['intermediate_data']['output_folder'] == os.path.join(ws, 'tmp')
 
 
-def test_simulation(simulation):
+def test_simulation(shellmound_simulation):
     assert True
 
 
-def test_model(model):
+def test_model(shellmound_model):
+    model = shellmound_model
     assert model.exe_name == 'mf6'
     assert model.simulation.exe_name == 'mf6'
 
@@ -198,10 +156,10 @@ def test_model(model):
            os.path.normpath(os.path.join(os.path.abspath(model.model_ws), model.external_path))
 
 
-def test_snap_to_NHG(cfg, simulation):
-    cfg = cfg.copy()
+def test_snap_to_NHG(shellmound_cfg, shellmound_simulation):
+    cfg = shellmound_cfg.copy()
     #simulation = deepcopy(simulation)
-    cfg['model']['simulation'] = simulation
+    cfg['model']['simulation'] = shellmound_simulation
     cfg['setup_grid']['snap_to_NHG'] = True
 
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
@@ -227,14 +185,15 @@ def test_snap_to_NHG(cfg, simulation):
     assert np.min(np.abs(ngy - y1)) == 0
 
 
-def test_model_with_grid(model_with_grid):
+def test_model_with_grid(shellmound_model_model_with_grid):
     assert True
 
 
 @pytest.mark.parametrize('relative_external_paths', [True,
                                                      False])
-def test_package_external_file_path_setup(model_with_grid, relative_external_paths):
-    m = model_with_grid
+def test_package_external_file_path_setup(shellmound_model_model_with_grid,
+                                          relative_external_paths):
+    m = shellmound_model_model_with_grid
     top_filename = m.cfg['dis']['top_filename_fmt']
     botm_file_fmt = m.cfg['dis']['botm_filename_fmt']
     m.relative_external_paths = relative_external_paths
@@ -266,8 +225,8 @@ def test_package_external_file_path_setup(model_with_grid, relative_external_pat
                              botm_file_fmt.format(i)))} for i in range(m.nlay)]
 
 
-def test_perrioddata(model):
-    m = model #deepcopy(model)
+def test_perrioddata(shellmound_model):
+    m = shellmound_model #deepcopy(model)
     pd0 = m.perioddata.copy()
     assert pd0 is not None
     assert pd0['end_datetime'].iloc[-1] == \
@@ -344,8 +303,8 @@ def test_perrioddata(model):
         np.array_equal(pd6[c].values, pd0_g1_3[c].values)
 
 
-def test_set_lakarr(model_with_dis):
-    m = model_with_dis
+def test_set_lakarr(shellmound_model_with_dis):
+    m = shellmound_model_with_dis
     if 'lake' in m.package_list:
         # lak not implemented yet for mf6
         #assert 'lak' in m.package_list
@@ -374,9 +333,9 @@ def test_set_lakarr(model_with_dis):
         assert m.lakarr.sum() == 0  # requires isbc to be set
 
 
-def test_dis_setup(model_with_grid):
+def test_dis_setup(shellmound_model_model_with_grid):
 
-    m = model_with_grid #deepcopy(model_with_grid)
+    m = shellmound_model_model_with_grid #deepcopy(model_with_grid)
     # test intermediate array creation
     m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
@@ -464,14 +423,14 @@ def test_dis_setup(model_with_grid):
     assert np.allclose(m.dis.botm.array[3].mean() / .3048, np.nanmean(mcaq_data), atol=5)
 
 
-def test_idomain(model_with_dis):
-    m = model_with_dis
+def test_idomain(shellmound_model_with_dis):
+    m = shellmound_model_with_dis
     assert issubclass(m.idomain.dtype.type, np.integer)
     assert m.idomain.sum() == m.dis.idomain.array.sum()
 
 
-def test_ic_setup(model_with_dis):
-    m = model_with_dis
+def test_ic_setup(shellmound_model_with_dis):
+    m = shellmound_model_with_dis
     ic = m.setup_ic()
     ic.write()
     assert os.path.exists(os.path.join(m.model_ws, ic.filename))
@@ -479,9 +438,9 @@ def test_ic_setup(model_with_dis):
     assert np.allclose(ic.strt.array.mean(axis=0), m.dis.top.array)
 
 
-def test_tdis_setup(model):
+def test_tdis_setup(shellmound_model):
 
-    m = model #deepcopy(model)
+    m = shellmound_model #deepcopy(model)
     tdis = m.setup_tdis()
     tdis.write()
     assert os.path.exists(os.path.join(m.model_ws, tdis.filename))
@@ -491,9 +450,9 @@ def test_tdis_setup(model):
     assert period_df.equals(m.perioddata[['perlen', 'nstp', 'tsmult']])
 
 
-def test_sto_setup(model_with_dis):
+def test_sto_setup(shellmound_model_with_dis):
 
-    m = model_with_dis  #deepcopy(model_with_grid)
+    m = shellmound_model_with_dis  #deepcopy(model_with_grid)
     sto = m.setup_sto()
     sto.write()
     assert os.path.exists(os.path.join(m.model_ws, sto.filename))
@@ -507,8 +466,8 @@ def test_sto_setup(model_with_dis):
             assert np.array_equal(model_array[k], data)
 
 
-def test_npf_setup(model_with_dis):
-    m = model_with_dis
+def test_npf_setup(shellmound_model_with_dis):
+    m = shellmound_model_with_dis
     npf = m.setup_npf()
     npf.write()
     assert os.path.exists(os.path.join(m.model_ws, npf.filename))
@@ -524,8 +483,8 @@ def test_npf_setup(model_with_dis):
     # TODO: add tests that Ks got distributed properly considering input and pinched layers
 
 
-def test_oc_setup(model_with_dis):
-    m = model_with_dis  # deepcopy(model)
+def test_oc_setup(shellmound_model_with_dis):
+    m = shellmound_model_with_dis  # deepcopy(model)
     oc = m.setup_oc()
     oc.write()
     ocfile = os.path.join(m.model_ws, oc.filename)
@@ -540,8 +499,8 @@ def test_oc_setup(model_with_dis):
     assert 'save budget last' in perioddata[1]
 
 
-def test_rch_setup(model_with_dis):
-    m = model_with_dis  # deepcopy(model)
+def test_rch_setup(shellmound_model_with_dis):
+    m = shellmound_model_with_dis  # deepcopy(model)
     rch = m.setup_rch()
     rch.write()
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
@@ -585,8 +544,8 @@ def test_rch_setup(model_with_dis):
     assert np.allclose(m.rch.recharge.array[0, 0].ravel(), rech0.ravel())
 
 
-def test_wel_setup(model_with_dis):
-    m = model_with_dis  # deepcopy(model)
+def test_wel_setup(shellmound_model_with_dis):
+    m = shellmound_model_with_dis  # deepcopy(model)
     wel = m.setup_wel()
     wel.write()
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))
@@ -708,15 +667,15 @@ def test_model_setup(model_setup_and_run):
     m = model_setup_and_run
 
 
-def test_load(model_setup, mf6_test_cfg_path):
+def test_load(model_setup, shellmound_cfg_path):
     m = model_setup  #deepcopy(inset_setup_from_yaml)
-    m2 = MF6model.load(mf6_test_cfg_path)
+    m2 = MF6model.load(shellmound_cfg_path)
     assert m == m2
 
 
-def test_packagelist(mf6_test_cfg_path):
+def test_packagelist(shellmound_cfg_path):
 
-    cfg = MF6model.load_cfg(mf6_test_cfg_path)
+    cfg = MF6model.load_cfg(shellmound_cfg_path)
 
     packages = cfg['model']['packages']
     sim = flopy.mf6.MFSimulation(**cfg['simulation'])

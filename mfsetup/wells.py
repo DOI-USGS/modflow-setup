@@ -15,7 +15,8 @@ def setup_wel_data(model):
     vfd_defaults = {'across_layers': False,
                     'distribute_by': 'thickness',
                     'screen_top_col': 'screen_top',
-                    'screen_botm_col': 'screen_botm'
+                    'screen_botm_col': 'screen_botm',
+                    'minimum_layer_thickness': model.cfg['wel'].get('minimum_layer_thickness', 2.)
                     }
 
     # master dataframe for stress period data
@@ -134,10 +135,12 @@ def setup_wel_data(model):
 
 
 def assign_layers_from_screen_top_botm(data, model,
+                                       flux_col='flux',
                                        screen_top_col='screen_top',
                                        screen_botm_col='screen_botm',
                                        across_layers=False,
-                                       distribute_by='thickness'):
+                                       distribute_by='thickness',
+                                       minimum_layer_thickness=2.):
     """Assign model layers to pumping flux data based on
     open interval. Fluxes are applied to each layer proportional
     to the fraction of open interval in that layer.
@@ -148,6 +151,7 @@ def assign_layers_from_screen_top_botm(data, model,
         Must have i, j or x, y locations
     model : mfsetup.MF6model or mfsetup.MFnwtModel instance
         Must have dis, and optionally, attached MFsetupGrid instance
+    flux_col : column in data with well fluxes
     screen_top_col : column in data with screen top elevations
     screen_botm_col : column in data with screen bottom elevations
     across_layers : bool
@@ -179,7 +183,33 @@ def assign_layers_from_screen_top_botm(data, model,
                                                       i=i, j=j, x=x, y=y,
                                                       screen_top=screen_top,
                                                       screen_botm=screen_botm)
+            # for each i, j location with a well,
+            # get the layer with highest thickness in the open interval
             data['k'] = np.argmax(thicknesses, axis=0)
+            # get the thickness for those layers
+            all_layers = np.zeros((model.nlay + 1, model.nrow, model.ncol))
+            all_layers[0] = model.dis.top.array
+            all_layers[1:] = model.dis.botm.array
+            layer_thicknesses = -np.diff(all_layers[:, i, j], axis=0)
+            k_well_thickness = layer_thicknesses[data['k'].values,
+                                                 list(range(layer_thicknesses.shape[1]))]
+            below_minimum = k_well_thickness < minimum_layer_thickness
+            n_below = np.sum(below_minimum)
+            if n_below > 0:
+                outpath = os.path.split(model.cfg['wel']['lookup_file'])[0]
+                outfile = os.path.join(outpath, 'dropped_wells.csv')
+                flux_below = data.loc[below_minimum]
+                pct_flux_below = 100*flux_below[flux_col].sum()/data[flux_col].sum()
+                print('Warning: {} wells in layers less than '
+                      'specified minimum thickness of {} {},'
+                      'representing {:.2f} %% of total flux.\n'
+                      'See {} for details'.format(n_below,
+                                                  minimum_layer_thickness,
+                                                  model.length_units,
+                                                  pct_flux_below,
+                                                  outfile))
+                flux_below.to_csv(outfile, index=False)
+                data = data.loc[~below_minimum].copy()
 
         elif distribute_by == 'tranmissivity':
             raise NotImplemented('Distributing well fluxes by layer transmissivity')
