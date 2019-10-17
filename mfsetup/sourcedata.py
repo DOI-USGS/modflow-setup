@@ -772,9 +772,17 @@ class TransientTabularSourceData(SourceData):
         df = df.loc[within]
 
         # sample values to model stress periods
-        starttimes = self.dest_model.perioddata['start_datetime']
-        endtimes = self.dest_model.perioddata['end_datetime']
-        period_means = []
+        starttimes = self.dest_model.perioddata['start_datetime'].copy()
+        endtimes = self.dest_model.perioddata['end_datetime'].copy()
+
+        # if period ends are specified as the same as the next starttime
+        # need to subtract a day, otherwise
+        # pandas will include the first day of the next period in slices
+        endtimes_equal_startimes = np.all(endtimes[:-1].values == starttimes[1:].values)
+        if endtimes_equal_startimes:
+            endtimes -= pd.Timedelta(1, unit='d')
+
+        period_data = []
         current_stat = None
         for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
             # missing (period) keys default to 'mean';
@@ -782,14 +790,16 @@ class TransientTabularSourceData(SourceData):
             period_stat = self.period_stats.get(kper, current_stat)
             if period_stat is not None and period_stat.lower() == 'none':
                 continue
-            period_mean = aggregate_dataframe_to_stress_period(df,
+            aggregated = aggregate_dataframe_to_stress_period(df,
                                                      start_datetime=start,
                                                      end_datetime=end,
                                                      period_stat=period_stat,
-                                                     id_column=self.id_column)
-            period_mean['per'] = kper
-            period_means.append(period_mean)
-        dfm = pd.concat(period_means)
+                                                     id_column=self.id_column,
+                                                     data_column=self.data_column
+                                                              )
+            aggregated['per'] = kper
+            period_data.append(aggregated)
+        dfm = pd.concat(period_data)
 
         if self.data_column is not None:
             dfm[self.data_column] *= self.unit_conversion
@@ -808,12 +818,39 @@ class TransientTabularSourceData(SourceData):
 
 
 def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
-                               period_stat, id_column):
+                               period_stat, id_column, data_column):
+    """
 
-    if isinstance(start_datetime, pd.Timestamp):
-        start_datetime = start_datetime.strftime('%Y-%m-%d')
-    if isinstance(end_datetime, pd.Timestamp):
-        end_datetime = end_datetime.strftime('%Y-%m-%d')
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Must have 'start_datetime' and 'end_datetime' columns with dates
+        indicating the time bounds associated with each row (e.g. the time
+        period for a specified model stress)
+    start_datetime
+    end_datetime
+    period_stat
+    id_column : column with location identifier (e.g. node or well id)
+    data_column : column with data to aggregate (e.g. fluxes)
+
+    Returns
+    -------
+
+    Notes
+    -----
+    pandas reindex could potentially be used for cases where
+    the source time series needs to be resampled to the model stress periods
+    e.g.
+    def reindex_by_date(df):
+        dates = [start_datetime, end_datetime]
+        return df.reindex(dates, method='nearest')
+    welldata.groupby('node').apply(reindex_by_date).reset_index(0, drop=True)
+    """
+
+    #if isinstance(start_datetime, pd.Timestamp):
+    #    start_datetime = start_datetime.strftime('%Y-%m-%d')
+    #if isinstance(end_datetime, pd.Timestamp):
+    #    end_datetime = end_datetime.strftime('%Y-%m-%d')
     if isinstance(period_stat, str):
         period_stat = [period_stat]
     elif period_stat is None:
@@ -840,18 +877,34 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
 
         # no period specified; use start/end of current period
         elif len(period_stat) == 0:
-            period_data = data.loc[start_datetime:end_datetime]
+            assert 'start_datetime' in data.columns and 'end_datetime' in data.columns, \
+                "start_datetime and end_datetime columns needed for " \
+                "resampling irregular data to model stress periods"
+            for col in ['start_datetime', 'end_datetime']:
+                if data[col].dtype == np.object:
+                    data[col] = pd.to_datetime(data[col])
+            welldata_overlaps_period = (data.start_datetime < end_datetime) & \
+                                       (data.end_datetime > start_datetime)
+            period_data = data.loc[welldata_overlaps_period]
 
         else:
             raise Exception("")
 
     # compute statistic on data
-    period_mean = getattr(period_data.groupby(id_column), stat)()
-    period_mean['start_datetime'] = start_datetime # add datetime back in
-    period_mean.index.name = None
-    period_mean[id_column] = period_mean.index
-
-    return period_mean
+    # ensure that ids are unique in each time period
+    # by summing multiple id instances by period
+    # (only sum the data column)
+    if len(period_data) > 0:
+        period_data.index.name = None
+        by_period = period_data.groupby([id_column, 'start_datetime']).first().reset_index()
+        by_period[data_column] = period_data.groupby([id_column, 'start_datetime']).sum()[data_column].values
+        period_data = by_period
+    aggregated = period_data.groupby(id_column).first().reset_index()
+    aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
+    aggregated['start_datetime'] = start_datetime # add datetime back in
+    #aggregated.index.name = None
+    #aggregated[id_column] = aggregated.index
+    return aggregated
 
 
 def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,

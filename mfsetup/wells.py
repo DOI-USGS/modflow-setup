@@ -29,7 +29,7 @@ def setup_wel_data(model):
         # determine the format
         if 'csvfile' in k.lower():  # generic csv
             sd = TransientTabularSourceData.from_config(v,
-                                               dest_model=model)
+                                                        dest_model=model)
             csvdata = sd.get_data()
             csvdata.rename(columns={v['data_column']: 'flux',
                                     v['id_column']: 'comments'}, inplace=True)
@@ -121,34 +121,10 @@ def setup_wel_data(model):
                                            df.j.values] != 1
     df = df.loc[~inactive].copy()
 
-    # Copy fluxes to subsequent stress periods as necessary
-    # so that fluxes aren't unintentionally shut off;
-    # for example if water use is only specified for period 0,
-    # but the added well pumps in period 1, copy water use
-    # fluxes to period 1.
-    last_specified_per = int(df.per.max())
-    copied_fluxes = [df]
-    for i in range(last_specified_per):
-        # only copied fluxes of a given stress period once
-        # then evaluate copied fluxes (with new stress periods) and copy those once
-        # after specified per-1, all non-zero fluxes should be propegated
-        # to last stress period
-        # copy non-zero fluxes that are not already in subsequent stress periods
-        if i < len(copied_fluxes):
-            in_subsequent_periods = copied_fluxes[i].comments.duplicated(keep=False)
-            # (copied_fluxes[i].per < last_specified_per) & \
-            tocopy = (copied_fluxes[i].flux != 0) & \
-                     ~in_subsequent_periods
-            if np.any(tocopy):
-                copied = copied_fluxes[i].loc[tocopy].copy()
+    copy_fluxes_to_subsequent_periods = False
+    if copy_fluxes_to_subsequent_periods:
+        df = copy_fluxes_to_subsequent_periods(df)
 
-                # make sure that wells to be copied aren't in subsequent stress periods
-                duplicated = np.array([r.comments in df.loc[df.per > i, 'comments']
-                                       for idx, r in copied.iterrows()])
-                copied = copied.loc[~duplicated]
-                copied['per'] += 1
-                copied_fluxes.append(copied)
-    df = pd.concat(copied_fluxes, axis=0)
     wel_lookup_file = os.path.join(model.model_ws, os.path.split(model.cfg['wel']['lookup_file'])[1])
     model.cfg['wel']['lookup_file'] = wel_lookup_file
 
@@ -318,3 +294,38 @@ def get_open_interval_thickness(m,
     thick[thick < 0] = 0
     thick[heads == nodata] = 0  # exclude nodata cells
     return thick
+
+
+def copy_fluxes_to_subsequent_periods(df):
+    """Copy fluxes to subsequent stress periods as necessary
+    so that fluxes aren't unintentionally shut off;
+    for example if water use is only specified for period 0,
+    but the added well pumps in period 1, copy water use
+    fluxes to period 1. This goes against the paradigm of
+    MODFLOW 6, where wells not specified in a subsequent stress period
+    are shut off.
+    """
+    last_specified_per = int(df.per.max())
+    copied_fluxes = [df]
+    for i in range(last_specified_per):
+        # only copied fluxes of a given stress period once
+        # then evaluate copied fluxes (with new stress periods) and copy those once
+        # after specified per-1, all non-zero fluxes should be propegated
+        # to last stress period
+        # copy non-zero fluxes that are not already in subsequent stress periods
+        if i < len(copied_fluxes):
+            in_subsequent_periods = copied_fluxes[i].comments.duplicated(keep=False)
+            # (copied_fluxes[i].per < last_specified_per) & \
+            tocopy = (copied_fluxes[i].flux != 0) & \
+                     ~in_subsequent_periods
+            if np.any(tocopy):
+                copied = copied_fluxes[i].loc[tocopy].copy()
+
+                # make sure that wells to be copied aren't in subsequent stress periods
+                duplicated = np.array([r.comments in df.loc[df.per > i, 'comments']
+                                       for idx, r in copied.iterrows()])
+                copied = copied.loc[~duplicated]
+                copied['per'] += 1
+                copied_fluxes.append(copied)
+    df = pd.concat(copied_fluxes, axis=0)
+    return df

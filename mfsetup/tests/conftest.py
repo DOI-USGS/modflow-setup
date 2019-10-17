@@ -23,6 +23,11 @@ def mf6_test_cfg_path(project_root_path):
     return project_root_path + '/mfsetup/tests/data/shellmound.yml'
 
 
+@pytest.fixture(scope="module")
+def shellmound_datapath(mf6_test_cfg_path):
+    return os.path.join(os.path.split(mf6_test_cfg_path)[0], 'shellmound')
+
+
 @pytest.fixture(scope="module", autouse=True)
 def tmpdir(project_root_path):
     folder = project_root_path + '/mfsetup/tests/tmp'

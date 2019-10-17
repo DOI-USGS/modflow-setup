@@ -56,6 +56,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def __repr__(self):
         return MFsetupMixin.__repr__(self)
 
+    def __str__(self):
+        return MFsetupMixin.__repr__(self)
+
     @property
     def nlay(self):
         return self.cfg['dis']['dimensions'].get('nlay', 1)
@@ -467,14 +470,18 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # set up stress_period_data
         spd = {}
         period_groups = df.groupby('per')
-        for kper, group in period_groups:
-            kspd = mf6.ModflowGwfwel.stress_period_data.empty(self,
-                                                              len(group),
-                                                              boundnames=True)[0]
-            kspd['cellid'] = list(zip(group.k, group.i, group.j))
-            kspd['q'] = group['flux']
-            kspd['boundnames'] = group['comments']
-            spd[kper] = kspd
+        for kper in range(self.nper):
+            if kper in period_groups.groups:
+                group = period_groups.get_group(kper)
+                kspd = mf6.ModflowGwfwel.stress_period_data.empty(self,
+                                                                  len(group),
+                                                                  boundnames=True)[0]
+                kspd['cellid'] = list(zip(group.k, group.i, group.j))
+                kspd['q'] = group['flux']
+                kspd['boundnames'] = group['comments']
+                spd[kper] = kspd
+            else:
+                spd[kper] = None
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])
         kwargs['stress_period_data'] = spd

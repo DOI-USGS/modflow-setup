@@ -592,6 +592,35 @@ def test_wel_setup(model_with_dis):
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))
     assert isinstance(wel, mf6.ModflowGwfwel)
     assert wel.stress_period_data is not None
+    sums = [ra['q'].sum() if ra is not None else 0
+            for ra in wel.stress_period_data.array]
+
+    # sum the rates from the source files
+    dfs = []
+    for f in m.cfg['wel']['source_data']['csvfiles']['filenames']:
+        dfs.append(pd.read_csv(f))
+    df = pd.concat(dfs)
+    df['start_datetime'] = pd.to_datetime(df.start_datetime)
+    df['end_datetime'] = pd.to_datetime(df.end_datetime)
+    from ..grid import get_ij
+    i, j = get_ij(m.modelgrid, df.x.values, df.y.values)
+    idm = m.idomain[:, i, j]
+    invalid = np.zeros(len(df), dtype=bool) #(df.screen_top == -9999.) & (df.screen_botm == -9999.)
+    invalid = invalid | (idm.sum(axis=0) == 0)
+    df = df.loc[~invalid].copy()
+    df.index = df.start_datetime
+    sums2 = []
+    for i, r in m.perioddata.iterrows():
+        end_datetime = r.end_datetime - pd.Timedelta(1, unit='d')
+        welldata_overlaps_period = (df.start_datetime < end_datetime) & \
+                                   (df.end_datetime > r.start_datetime)
+        q = df.loc[welldata_overlaps_period, 'flux_m3'].sum()
+        sums2.append(q)
+    sums = np.array(sums)
+    sums2 = np.array(sums2)
+    # if this doesn't match
+    # may be due to wells with invalid open intervals getting removed
+    assert np.allclose(sums, sums2, rtol=0.001)
 
 
 def test_sfr_setup(model_with_sfr):
