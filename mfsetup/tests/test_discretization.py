@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from ..discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                               fill_empty_layers, fill_cells_vertically, make_idomain,
-                              get_layer_thicknesses,
+                              get_layer_thicknesses, create_vertical_pass_through_cells,
                               deactivate_idomain_above, find_remove_isolated_cells)
 
 
@@ -193,4 +193,21 @@ def test_find_remove_isolated_cells():
     idomain[20, 7] = 1  # pixel that has only one connection
     result = find_remove_isolated_cells(idomain, minimum_cluster_size=10)
     assert result.sum() == idomain.sum() - 6
+
+
+def test_create_vertical_pass_through_cells():
+    idomain = np.zeros((5, 3, 3), dtype=int)
+    idomain[0] = 1
+    idomain[-1] = 1
+    idomain[:, 0, :] = 0
+    idomain[0, 0, -1] = -1  # put in a passthrough cell where there shouldn't be one
+    idomain[1:-1, 1, 1] = -1
+    passthru = create_vertical_pass_through_cells(idomain)
+    assert np.issubdtype(passthru.dtype, np.integer)
+    idomain[0, 0, -1] = 0
+    assert np.array_equal(passthru[[0, -1]], idomain[[0, -1]])
+    assert np.all(passthru[1:-1, 1:, :] == -1)
+    assert not np.any(np.all(passthru <= 0, axis=0) &
+                      (np.sum(passthru, axis=0) < 0))
+
 

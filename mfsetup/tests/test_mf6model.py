@@ -119,12 +119,12 @@ def test_parse_modflowgwf_kwargs(shellmound_cfg):
     assert options['newton'] == ['under_relaxation']
 
 
-def test_repr(shellmound_model, shellmound_model_model_with_grid):
+def test_repr(shellmound_model, shellmound_model_with_grid):
     txt = shellmound_model.__repr__()
     assert isinstance(txt, str)
     # cheesy test that flopy repr isn't returned
     assert 'CRS:' in txt and 'Bounds:' in txt
-    txt = shellmound_model_model_with_grid.__repr__()
+    txt = shellmound_model_with_grid.__repr__()
     assert isinstance(txt, str)
 
 
@@ -185,15 +185,15 @@ def test_snap_to_NHG(shellmound_cfg, shellmound_simulation):
     assert np.min(np.abs(ngy - y1)) == 0
 
 
-def test_model_with_grid(shellmound_model_model_with_grid):
+def test_model_with_grid(shellmound_model_with_grid):
     assert True
 
 
 @pytest.mark.parametrize('relative_external_paths', [True,
                                                      False])
-def test_package_external_file_path_setup(shellmound_model_model_with_grid,
+def test_package_external_file_path_setup(shellmound_model_with_grid,
                                           relative_external_paths):
-    m = shellmound_model_model_with_grid
+    m = shellmound_model_with_grid
     top_filename = m.cfg['dis']['top_filename_fmt']
     botm_file_fmt = m.cfg['dis']['botm_filename_fmt']
     m.relative_external_paths = relative_external_paths
@@ -333,9 +333,9 @@ def test_set_lakarr(shellmound_model_with_dis):
         assert m.lakarr.sum() == 0  # requires isbc to be set
 
 
-def test_dis_setup(shellmound_model_model_with_grid):
+def test_dis_setup(shellmound_model_with_grid):
 
-    m = shellmound_model_model_with_grid #deepcopy(model_with_grid)
+    m = shellmound_model_with_grid #deepcopy(model_with_grid)
     # test intermediate array creation
     m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
@@ -366,7 +366,7 @@ def test_dis_setup(shellmound_model_model_with_grid):
                             m.modelgrid)
     isactive = active_area == 1
     written_idomain = load_array(m.cfg['dis']['griddata']['idomain'])
-    assert np.all(written_idomain[:, ~isactive] == 0)
+    assert np.all(written_idomain[:, ~isactive] <= 0)
 
     # test idomain from just layer elevations
     del m.cfg['dis']['griddata']['idomain']
@@ -385,7 +385,9 @@ def test_dis_setup(shellmound_model_model_with_grid):
     assert not np.array_equal(m.idomain[:, isactive].sum(axis=1),
                           invalid_botms[:, isactive].sum(axis=1))
     invalid_botms = find_remove_isolated_cells(invalid_botms, minimum_cluster_size=10)
-    assert np.array_equal(m.idomain[:, isactive].sum(axis=1),
+    active_cells = m.idomain[:, isactive].copy()
+    active_cells[active_cells < 0] = 0  # need to do this because some idomain cells are -1
+    assert np.array_equal(active_cells.sum(axis=1),
                           invalid_botms[:, isactive].sum(axis=1))
 
     # test recreating package from external arrays
@@ -565,7 +567,7 @@ def test_wel_setup(shellmound_model_with_dis):
     i, j = get_ij(m.modelgrid, df.x.values, df.y.values)
     idm = m.idomain[:, i, j]
     invalid = np.zeros(len(df), dtype=bool) #(df.screen_top == -9999.) & (df.screen_botm == -9999.)
-    invalid = invalid | (idm.sum(axis=0) == 0)
+    invalid = invalid | (idm.sum(axis=0) <= 0)
     df = df.loc[~invalid].copy()
     df.index = df.start_datetime
     sums2 = []

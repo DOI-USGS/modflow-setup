@@ -57,7 +57,8 @@ class MFsetupMixin():
         self._interp_weights = None
 
     def __repr__(self):
-        txt = '{} model:\n'.format(self.name)
+        header = '{} model:\n'.format(self.name)
+        txt = ''
         if self.parent is not None:
             txt += 'Parent model: {}/{}\n'.format(self.parent.model_ws, self.parent.name)
         if self.modelgrid is not None:
@@ -67,14 +68,15 @@ class MFsetupMixin():
             txt += 'Bounds: {}\n'.format(self.modelgrid.extent)
             txt += 'Grid spacing: {:.2f} {}\n'.format(self.modelgrid.delr[0],
                                                       self.modelgrid.units)
-            txt += '{:d} layer(s), {:d} row(s), {:d} column(s), {:d} stress period(s)\n'\
-                .format(self.nlay, self.nrow, self.ncol, self.nper)
+            txt = '{:d} layer(s), {:d} row(s), {:d} column(s), {:d} stress period(s)\n'\
+                .format(self.nlay, self.nrow, self.ncol, self.nper) + txt
         txt += 'Packages:'
         for pkg in self.get_package_list():
             txt += ' {}'.format(pkg.lower())
-        txt += '\n'
-        txt += '{:d} LAKE package lakes'.format(self.nlakes)
-        txt += '\n'
+        #txt += '\n'
+        #txt += '{:d} LAKE package lakes'.format(self.nlakes)
+        #txt += '\n'
+        txt = header + txt
         return txt
 
     def __eq__(self, other):

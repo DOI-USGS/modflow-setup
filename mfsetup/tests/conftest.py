@@ -13,6 +13,7 @@ def project_root_path():
     filepath = os.path.split(os.path.abspath(__file__))[0]
     return os.path.normpath(os.path.join(filepath, '../../'))
 
+
 @pytest.fixture(scope="session")
 def demfile(project_root_path):
     return project_root_path + '/mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif'
@@ -23,12 +24,12 @@ def mfnwt_inset_test_cfg_path(project_root_path):
     return project_root_path + '/mfsetup/tests/data/mfnwt_inset_test.yml'
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def shellmound_cfg_path(project_root_path):
     return project_root_path + '/mfsetup/tests/data/shellmound.yml'
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def shellmound_datapath(shellmound_cfg_path):
     return os.path.join(os.path.split(shellmound_cfg_path)[0], 'shellmound')
 
@@ -51,7 +52,6 @@ def shellmound_simulation(shellmound_cfg):
 @pytest.fixture(scope="function")
 def shellmound_model(shellmound_cfg, shellmound_simulation):
     cfg = shellmound_cfg.copy()
-    #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = shellmound_simulation
     cfg = MF6model._parse_modflowgwf_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
@@ -76,7 +76,7 @@ def shellmound_model_with_dis(shellmound_model_with_grid):
     return m
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def tmpdir(project_root_path):
     folder = project_root_path + '/mfsetup/tests/tmp'
     if os.path.isdir(folder):

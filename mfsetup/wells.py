@@ -208,6 +208,7 @@ def assign_layers_from_screen_top_botm(data, model,
                                                   model.length_units,
                                                   pct_flux_below,
                                                   outfile))
+                flux_below = flux_below.groupby(['k', 'i', 'j']).first().reset_index()[['k', 'i', 'j', flux_col, 'comments']]
                 flux_below.to_csv(outfile, index=False)
                 data = data.loc[~below_minimum].copy()
 

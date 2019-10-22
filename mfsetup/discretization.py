@@ -104,6 +104,38 @@ def find_remove_isolated_cells(array, minimum_cluster_size=10):
     return retained_arraylist[0]
 
 
+def create_vertical_pass_through_cells(idomain):
+    """Create vertical pass-through cells in layers that have an inactive cell
+    above and below by setting these cells to -1.
+
+    Parameters
+    ----------
+    idomain : np.ndarray with 2 or 3 dimensions. 2D arrays are returned as-is.
+
+    Returns
+    -------
+    revised : np.ndarray
+        idomain with -1s added at locations that were previous <= 0
+        that have an active cell (idomain=1) above and below.
+    """
+    if len(idomain.shape) == 2:
+        return idomain
+    revised = idomain.copy()
+    for i in range(1, idomain.shape[0]-1):
+        has_active_above = np.any(idomain[:i] > 0, axis=0)
+        has_active_below = np.any(idomain[i+1:] > 0, axis=0)
+        bounded = has_active_above & has_active_below
+        pass_through = (idomain[i] <= 0) & bounded
+        assert not np.any(revised[i][pass_through] > 0)
+        revised[i][pass_through] = -1
+
+        # scrub any pass through cells that aren't bounded by active cells
+        revised[i][(idomain[i] <= 0) & ~bounded] = 0
+    for i in (0, -1):
+        revised[i][revised[i] < 0] = 0
+    return revised
+
+
 def fill_empty_layers(array):
     """Fill empty layers in a 3D array by linearly interpolating
     between the values above and below. Layers are defined
@@ -150,9 +182,9 @@ def fill_empty_layers(array):
 
 
 def fill_cells_vertically(top, botm):
-    """In MODFLOW 6, cells where idomain=0 are excluded from the solution.
+    """In MODFLOW 6, cells where idomain != 1 are excluded from the solution.
     However, in the botm array, values are needed in overlying cells to
-    compute layer thickness (cells with idomain=0 overlying cells with idomain=0 need
+    compute layer thickness (cells with idomain != 1 overlying cells with idomain != 1 need
     values in botm). Given a 3D numpy array with nan values indicating excluded cells,
     fill in the nans with the overlying values. For example, given the column of cells
     [10, nan, 8, nan, nan, 5, nan, nan, nan, 1], fill the nan values to make
@@ -162,7 +194,7 @@ def fill_cells_vertically(top, botm):
     algorithm:
     * given a top and botm array (top of the model and layer bottom elevations),
       get the layer thicknesses (accounting for any nodata values)
-      idomain=0 cells in thickness array must be set to np.nan
+      idomain != 1 cells in thickness array must be set to np.nan
     * set thickness to zero in nan cells
       take the cumulative sum of the thickness array along the 0th (depth) axis,
       from the bottom of the array to the top (going backwards in a depth-positive sense)

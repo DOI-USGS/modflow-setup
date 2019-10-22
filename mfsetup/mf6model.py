@@ -8,7 +8,8 @@ import pandas as pd
 import flopy
 mf6 = flopy.mf6
 from .discretization import (make_idomain, deactivate_idomain_above,
-                             find_remove_isolated_cells)
+                             find_remove_isolated_cells,
+                             create_vertical_pass_through_cells)
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
 from .gis import get_values_at_points
@@ -153,7 +154,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             idomain = deactivate_idomain_above(idomain, self.sfr.packagedata)
 
         # inactivate any isolated cells that could cause problems with the solution
-        idomain = find_remove_isolated_cells(idomain, minimum_cluster_size=10)
+        idomain = find_remove_isolated_cells(idomain, minimum_cluster_size=20)
+
+        # create pass-through cells in layers that have an inactive cell above and below
+        # by setting these cells to -1
+        idomain = create_vertical_pass_through_cells(idomain)
 
         self._idomain = idomain
 
