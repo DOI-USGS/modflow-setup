@@ -2,18 +2,21 @@ import os
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
+import pyproj
 from ..gis import get_proj4, df2shp, shp2df, shp_properties
 
 
 def test_get_proj4(tmpdir):
     proj4 = '+proj=tmerc +lat_0=0 +lon_0=-90 +k=0.9996 +x_0=520000 +y_0=-4480000 +datum=NAD83 +units=m +no_defs '
+    p1 = pyproj.Proj(proj4)
     f = os.path.join(tmpdir, 'junk.shp')
     df2shp(pd.DataFrame({'id': [0],
                          'geometry': [Point(0, 0)]
                          }),
            f, proj4=proj4)
-    proj42 = get_proj4(f.replace('shp', 'prj'))
-    assert proj42 == proj4
+    proj4_2 = get_proj4(f.replace('shp', 'prj'))
+    p2 = pyproj.Proj(proj4_2)
+    assert p1 == p2
 
 
 def test_shp_properties():
