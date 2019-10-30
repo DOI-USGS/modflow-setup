@@ -59,14 +59,14 @@ def parse_perioddata_groups(perioddata_dict, defaults={}):
     return perioddata_groups
 
 
-def setup_perioddata(start_date_time, end_date_time=None,
-                     nper=1, perlen=None, model_time_units=None, freq=None,
-                     steady={0: True,
+def setup_perioddata_group(start_date_time, end_date_time=None,
+                           nper=1, perlen=None, model_time_units=None, freq=None,
+                           steady={0: True,
                              1: False},
-                     nstp=10, tsmult=1.5,
-                     oc_saverecord={0: ['save head last',
+                           nstp=10, tsmult=1.5,
+                           oc_saverecord={0: ['save head last',
                              'save budget last']},
-                     ):
+                           ):
     """Sets up time discretization for a model; outputs a DataFrame with
     stress period dates/times and properties. Stress periods can be established
     with an established explicitly by specifying perlen as a list of period lengths in
@@ -256,6 +256,29 @@ def setup_perioddata(start_date_time, end_date_time=None,
     # correct nstp and tsmult to be 1 for steady-state periods
     perioddata.loc[perioddata.steady, 'nstp'] = 1
     perioddata.loc[perioddata.steady, 'tsmult'] = 1
+    return perioddata
+
+
+def setup_perioddata(cfg, time_units='days'):
+    # get period data groups
+    defaults = {'start_date_time': cfg['tdis']['options'].get('start_date_time'),
+                'nper': cfg['tdis'].get('dimensions', {}).get('nper'),
+                'steady': cfg['sto']['steady'],
+                'oc_saverecord': cfg['oc'].get('saverecord', {0: ['save head last',
+                                                                  'save budget last']})
+                }
+    perioddata_groups = parse_perioddata_groups(cfg['tdis']['perioddata'], defaults)
+
+    # update any missing variables in the groups with global variables
+    group_dfs = []
+    for i, group in enumerate(perioddata_groups):
+        group.update({'model_time_units': time_units,
+                      })
+        df = setup_perioddata_group(**group)
+        group_dfs.append(df)
+
+    # concatenate groups into single dataframe of perioddata
+    perioddata = concat_periodata_groups(group_dfs)
     return perioddata
 
 

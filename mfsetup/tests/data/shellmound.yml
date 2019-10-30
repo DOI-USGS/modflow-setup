@@ -1,3 +1,35 @@
+# Configuration file for shellmound test case
+#
+# The MF6model.setup_from_yaml reads this in as a python dictionary (via the pyyaml package),
+# and attaches it to a newly created MF6model object instance (MF6model is a subclass of flopy.mf6.ModflowGwf).
+# For example, the simulation block would become
+# cfg['simulation'] = {'sim_name: 'mfsim', 'version': 'mf6': 'sim_ws'}, where cfg is the dictionary
+# made from the yaml file.
+#
+# The blocks below are then used as input to create Flopy object instances or
+# as input to other aspects of the MFsetup workflow that work on top of Flopy.
+# For example, the model block provides the input to flopy.mf6.ModflowGwf, via
+# the __init__ method for MF6model. For clarity, the items in the options block
+# are stored in their own dictionary that represents that block in the MODFLOW-6
+# name file (as opposed to the flopy.mf6.ModflowGwf signature, which includes them
+# as individual default arguments). Some items in the model block do not represent flopy
+# input. The relative_external_filepaths item is a flag for MFSetup that instructs it
+# to reference external files relative to the model workspace, to avoid broken paths
+# when the model is copied to a different location.
+#
+# In general, within blocks or subblocks that correspond to MODFLOW-6 input,
+# variables that correspond to an input variable in flopy.mf6 indicate input
+# that will be passed directly to flopy (numbers, lists, external file paths, etc.).
+#
+# In contrast, 'source_data' subblocks indicate input from general file formats
+# (shapefiles, csvs, rasters, etc.) that needs to be mapped to the model space
+# and time discretization. The source_data blocks are intended to be general across
+# input types. For example- 'filename' indicates a file path (string), regardless
+# of the type of file, and 'filenames' indicates a list or dictionary of files that
+# map to model layers or stress periods. Items with the '_units' suffix indicate
+# the units of the source data, allowing MFSetup to convert the values to model units
+# accordingly. '_column' Items indicate field names in the source data where the input can be found.
+
 simulation:
   sim_name: 'mfsim'
   version: 'mf6'

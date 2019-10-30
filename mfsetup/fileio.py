@@ -4,6 +4,7 @@ import os
 import json
 import yaml
 import time
+from collections import defaultdict
 import numpy as np
 import pandas as pd
 from flopy.utils import SpatialReference, mfreadnam, TemporalReference
@@ -260,7 +261,7 @@ def _set_path(keys, abspath, cfg):
     """
     if isinstance(keys, str):
         keys = keys.split('.')
-    d = cfg[keys[0]]
+    d = cfg.get(keys[0])
     if d is not None:
         for level in range(1, len(keys)):
             if level == len(keys) - 1:

@@ -12,7 +12,7 @@ fm = flopy.modflow
 from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
 from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_empty_layers
-from .tdis import setup_perioddata
+from .tdis import setup_perioddata_group
 from .gis import shp2df, get_values_at_points, intersect, project, get_proj4
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
@@ -259,17 +259,17 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         steady = {kper: issteady for kper, issteady in enumerate(self.cfg['dis']['steady'])}
 
-        perioddata = setup_perioddata(self.cfg['model']['start_date_time'],
-                                      self.cfg['model'].get('end_date_time'),
-                                      nper=nper,
-                                      perlen=self.cfg['dis']['perlen'],
-                                      model_time_units=self.time_units,
-                                      freq=self.cfg['dis'].get('freq'),
-                                      steady=steady,
-                                      nstp=self.cfg['dis']['nstp'],
-                                      tsmult=self.cfg['dis']['tsmult'],
-                                      oc_saverecord=self.cfg['oc']['period_options'],
-                                      )
+        perioddata = setup_perioddata_group(self.cfg['model']['start_date_time'],
+                                            self.cfg['model'].get('end_date_time'),
+                                            nper=nper,
+                                            perlen=self.cfg['dis']['perlen'],
+                                            model_time_units=self.time_units,
+                                            freq=self.cfg['dis'].get('freq'),
+                                            steady=steady,
+                                            nstp=self.cfg['dis']['nstp'],
+                                            tsmult=self.cfg['dis']['tsmult'],
+                                            oc_saverecord=self.cfg['oc']['period_options'],
+                                            )
         perioddata['parent_sp'] = parent_sp
         assert np.array_equal(perioddata['per'].values, np.arange(len(perioddata)))
         self._perioddata = perioddata

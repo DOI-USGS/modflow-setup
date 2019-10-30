@@ -4,6 +4,7 @@ import time
 from copy import deepcopy
 import shutil
 import os
+import io
 import pytest
 import numpy as np
 import pandas as pd
