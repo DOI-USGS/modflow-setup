@@ -293,3 +293,137 @@ def concat_periodata_groups(groups):
     df['per'] = range(len(df))
     df.index = range(len(df))
     return df
+
+
+def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
+                               period_stat, id_column, data_column):
+    """
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Must have 'start_datetime' and 'end_datetime' columns with dates
+        indicating the time bounds associated with each row (e.g. the time
+        period for a specified model stress)
+    start_datetime
+    end_datetime
+    period_stat
+    id_column : column with location identifier (e.g. node or well id)
+    data_column : column with data to aggregate (e.g. fluxes)
+
+    Returns
+    -------
+
+    Notes
+    -----
+    pandas reindex could potentially be used for cases where
+    the source time series needs to be resampled to the model stress periods
+    e.g.
+    def reindex_by_date(df):
+        dates = [start_datetime, end_datetime]
+        return df.reindex(dates, method='nearest')
+    welldata.groupby('node').apply(reindex_by_date).reset_index(0, drop=True)
+    """
+
+    #if isinstance(start_datetime, pd.Timestamp):
+    #    start_datetime = start_datetime.strftime('%Y-%m-%d')
+    #if isinstance(end_datetime, pd.Timestamp):
+    #    end_datetime = end_datetime.strftime('%Y-%m-%d')
+    if isinstance(period_stat, str):
+        period_stat = [period_stat]
+    elif period_stat is None:
+        period_stat = ['mean']
+
+    if isinstance(period_stat, list):
+        stat = period_stat.pop(0)
+
+        # stat for specified period
+        if len(period_stat) == 2:
+            start, end = period_stat
+            period_data = data.loc[start:end]
+
+        # stat specified by single item
+        elif len(period_stat) == 1:
+            period = period_stat.pop()
+            # stat for a specified month
+            if period in months.keys() or period in months.values():
+                period_data = data.loc[data.index.dt.month == months.get(period, period)]
+
+            # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
+            else:
+                period_data = data.loc[period]
+
+        # no period specified; use start/end of current period
+        elif len(period_stat) == 0:
+            assert 'start_datetime' in data.columns and 'end_datetime' in data.columns, \
+                "start_datetime and end_datetime columns needed for " \
+                "resampling irregular data to model stress periods"
+            for col in ['start_datetime', 'end_datetime']:
+                if data[col].dtype == np.object:
+                    data[col] = pd.to_datetime(data[col])
+            welldata_overlaps_period = (data.start_datetime < end_datetime) & \
+                                       (data.end_datetime > start_datetime)
+            period_data = data.loc[welldata_overlaps_period]
+
+        else:
+            raise Exception("")
+
+    # compute statistic on data
+    # ensure that ids are unique in each time period
+    # by summing multiple id instances by period
+    # (only sum the data column)
+    if len(period_data) > 0:
+        period_data.index.name = None
+        by_period = period_data.groupby([id_column, 'start_datetime']).first().reset_index()
+        by_period[data_column] = period_data.groupby([id_column, 'start_datetime']).sum()[data_column].values
+        period_data = by_period
+    aggregated = period_data.groupby(id_column).first().reset_index()
+    aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
+    aggregated['start_datetime'] = start_datetime # add datetime back in
+    #aggregated.index.name = None
+    #aggregated[id_column] = aggregated.index
+    return aggregated
+
+
+def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
+                               period_stat, datetime_column):
+
+    if isinstance(start_datetime, pd.Timestamp):
+        start_datetime = start_datetime.strftime('%Y-%m-%d')
+    if isinstance(end_datetime, pd.Timestamp):
+        end_datetime = end_datetime.strftime('%Y-%m-%d')
+    if isinstance(period_stat, str):
+        period_stat = [period_stat]
+    elif period_stat is None:
+        period_stat = ['mean']
+
+    if isinstance(period_stat, list):
+        stat = period_stat.pop(0)
+
+        # stat for specified period
+        if len(period_stat) == 2:
+            start, end = period_stat
+            arr = data.loc[start:end].values
+
+        # stat specified by single item
+        elif len(period_stat) == 1:
+            period = period_stat.pop()
+            # stat for a specified month
+            if period in months.keys() or period in months.values():
+                arr = data.loc[data[datetime_column].dt.month == months.get(period, period)].values
+
+            # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
+            else:
+                arr = data.loc[period].values
+
+        # no period specified; use start/end of current period
+        elif len(period_stat) == 0:
+            arr = data.loc[start_datetime:end_datetime].values
+
+        else:
+            raise Exception("")
+
+    # compute statistic on data
+    period_mean = getattr(arr, stat)(axis=0)
+
+    return period_mean

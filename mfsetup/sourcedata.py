@@ -7,14 +7,16 @@ from shapely.geometry import Point
 import pandas as pd
 import xarray as xr
 from flopy.utils import binaryfile as bf
+
+from mfsetup.discretization import weighted_average_between_layers
+from mfsetup.tdis import aggregate_dataframe_to_stress_period, aggregate_xarray_to_stress_period
 from .fileio import save_array
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                              fill_empty_layers, fill_cells_vertically)
 from .gis import get_values_at_points, shp2df, intersect
-from .grid import get_ij, MFsetupGrid
+from .grid import get_ij
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
-from .tdis import months
-from .units import (convert_length_units, convert_time_units, convert_volume_units, parse_length_units)
+from .units import (convert_length_units, convert_time_units, convert_volume_units)
 from .utils import get_input_arguments
 
 renames = {'mult': 'multiplier',
@@ -68,9 +70,8 @@ class SourceData:
         return convert_time_units(self.time_units,
                                   getattr(self.dest_model, 'time_units', 'unknown'))
 
-
-    @staticmethod
-    def from_config(data, type, **kwargs):
+    @classmethod
+    def from_config(cls, data, **kwargs):
         """Create a SourceData instance from a source_data
         entry read from an MFsetup configuration file.
 
@@ -108,28 +109,9 @@ class SourceData:
         else:
             raise TypeError("unrecognized input: {}".format(data))
 
-        try:
-            is_netcdf = np.any([f.endswith('.nc') if isinstance(f, str) else False
-                               for f in data_dict.get('filenames', {}).values()])
-        except:
-            j=2
-        if is_netcdf:
-            kwargs.update(data_dict)
-            return NetCDFSourceData(**kwargs)
-        elif type == 'array':
-            data_dict = get_input_arguments(data_dict, ArraySourceData)
-            kwargs = get_input_arguments(kwargs, ArraySourceData)
-            return ArraySourceData(**data_dict, **kwargs)
-        elif type == 'tabular':
-            data_dict = get_input_arguments(data_dict, TabularSourceData)
-            kwargs = get_input_arguments(kwargs, TabularSourceData)
-            return TabularSourceData(**data_dict, **kwargs)
-        elif type == 'transient tabular':
-            data_dict = get_input_arguments(data_dict, TransientTabularSourceData)
-            kwargs = get_input_arguments(kwargs, TransientTabularSourceData)
-            return TransientTabularSourceData(**data_dict, **kwargs)
-        else:
-            raise TypeError("need to specify data type (array or tabular)")
+        data_dict = get_input_arguments(data_dict, cls)
+        kwargs = get_input_arguments(kwargs, cls)
+        return cls(**data_dict, **kwargs)
 
 
 class ArraySourceData(SourceData):
@@ -350,10 +332,6 @@ class ArraySourceData(SourceData):
         self.data = data
         return data
 
-    @staticmethod
-    def from_config(data, **kwargs):
-        return SourceData.from_config(data, type='array', **kwargs)
-
 
 class NetCDFSourceData(ArraySourceData):
     def __init__(self, filenames, variable, period_stats,
@@ -382,10 +360,6 @@ class NetCDFSourceData(ArraySourceData):
         self.period_stats = period_stats
         self.resample_method = resample_method
         self.dest_model = dest_model
-        #x = dest_model.modelgrid.xcellcenters.ravel()
-        #y = dest_model.modelgrid.ycellcenters.ravel()[::-1]
-        #self.x = xr.DataArray(x, dims='z')
-        #self.y = xr.DataArray(y, dims='z')
         self.time_col = 'time'
 
         # set xy value arrays for source and dest. grids
@@ -450,47 +424,11 @@ class NetCDFSourceData(ArraySourceData):
         current_stat = None
         for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
             period_stat = self.period_stats.get(kper, current_stat)
-
-            ## stress period mean
-            #if isinstance(period_stat, str):
-            #    period_stat = [period_stat]
-#
-            #if isinstance(period_stat, list):
-            #    stat = period_stat.pop(0)
-            #    current_stat = stat
-#
-            #    # stat for specified period
-            #    if len(period_stat) == 2:
-            #        start, end = period_stat
-            #        data = var.loc[start:end].values
-#
-            #    # stat specified by single item
-            #    elif len(period_stat) == 1:
-            #        # stat for a specified month
-            #        if stat in months.keys() or stat in months.values():
-            #            data = var.loc[var[self.time_col].dt.month == months.get(stat, stat)].values
-#
-            #        # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
-            #        else:
-            #            data = var.loc[stat].values
-#
-            #    # no period specified; use start/end of current period
-            #    elif len(period_stat) == 0:
-            #        data = var.loc[start:end].values
-#
-            #    else:
-            #        raise Exception("")
-#
-            ## compute statistic on data
-            #period_mean = getattr(data, 'mean')(axis=0)
-
-            # take the mean of the source data across the model stress period
-            # (defined by start, end)
             period_mean = aggregate_xarray_to_stress_period(var,
-                                                     start_datetime=start,
-                                                     end_datetime=end,
-                                                     period_stat=period_stat,
-                                                     datetime_column=self.time_col)
+                                                            start_datetime=start,
+                                                            end_datetime=end,
+                                                            period_stat=period_stat,
+                                                            datetime_column=self.time_col)
 
             # sample the data onto the model grid
             period_mean = self.regrid_from_source(period_mean,
@@ -637,7 +575,6 @@ class MFArrayData(SourceData):
             if isinstance(val, dict) and 'filename' in val.keys():
                 val = val['filename']
             if isinstance(val, str):
-                #abspath = os.path.normpath(os.path.join(self.dest_model._config_path, val))
                 abspath = os.path.normpath(os.path.join(self.dest_model.model_ws, val))
                 arr = np.loadtxt(abspath)
             elif np.isscalar(val):
@@ -656,10 +593,6 @@ class MFArrayData(SourceData):
                                         self.values))
         self.data = data
         return data
-
-    @staticmethod
-    def from_config(data, **kwargs):
-        raise NotImplementedError()
 
 
 class TabularSourceData(SourceData):
@@ -680,10 +613,6 @@ class TabularSourceData(SourceData):
         self.data_column = data_column
         self.column_mappings = column_mappings
         self.sort_by = sort_by
-
-    @staticmethod
-    def from_config(data, **kwargs):
-        return SourceData.from_config(data, type='tabular', **kwargs)
 
     def get_data(self):
 
@@ -742,10 +671,6 @@ class TransientTabularSourceData(SourceData):
         self.x_col = x_col
         self.y_col = y_col
 
-    @staticmethod
-    def from_config(data, **kwargs):
-        return SourceData.from_config(data, type='transient tabular', **kwargs)
-
     def get_data(self):
 
         # aggregate the data from multiple files
@@ -791,11 +716,11 @@ class TransientTabularSourceData(SourceData):
             if period_stat is not None and period_stat.lower() == 'none':
                 continue
             aggregated = aggregate_dataframe_to_stress_period(df,
-                                                     start_datetime=start,
-                                                     end_datetime=end,
-                                                     period_stat=period_stat,
-                                                     id_column=self.id_column,
-                                                     data_column=self.data_column
+                                                              start_datetime=start,
+                                                              end_datetime=end,
+                                                              period_stat=period_stat,
+                                                              id_column=self.id_column,
+                                                              data_column=self.data_column
                                                               )
             aggregated['per'] = kper
             period_data.append(aggregated)
@@ -815,140 +740,6 @@ class TransientTabularSourceData(SourceData):
         dfm['i'] = i
         dfm['j'] = j
         return dfm
-
-
-def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
-                               period_stat, id_column, data_column):
-    """
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        Must have 'start_datetime' and 'end_datetime' columns with dates
-        indicating the time bounds associated with each row (e.g. the time
-        period for a specified model stress)
-    start_datetime
-    end_datetime
-    period_stat
-    id_column : column with location identifier (e.g. node or well id)
-    data_column : column with data to aggregate (e.g. fluxes)
-
-    Returns
-    -------
-
-    Notes
-    -----
-    pandas reindex could potentially be used for cases where
-    the source time series needs to be resampled to the model stress periods
-    e.g.
-    def reindex_by_date(df):
-        dates = [start_datetime, end_datetime]
-        return df.reindex(dates, method='nearest')
-    welldata.groupby('node').apply(reindex_by_date).reset_index(0, drop=True)
-    """
-
-    #if isinstance(start_datetime, pd.Timestamp):
-    #    start_datetime = start_datetime.strftime('%Y-%m-%d')
-    #if isinstance(end_datetime, pd.Timestamp):
-    #    end_datetime = end_datetime.strftime('%Y-%m-%d')
-    if isinstance(period_stat, str):
-        period_stat = [period_stat]
-    elif period_stat is None:
-        period_stat = ['mean']
-
-    if isinstance(period_stat, list):
-        stat = period_stat.pop(0)
-
-        # stat for specified period
-        if len(period_stat) == 2:
-            start, end = period_stat
-            period_data = data.loc[start:end]
-
-        # stat specified by single item
-        elif len(period_stat) == 1:
-            period = period_stat.pop()
-            # stat for a specified month
-            if period in months.keys() or period in months.values():
-                period_data = data.loc[data.index.dt.month == months.get(period, period)]
-
-            # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
-            else:
-                period_data = data.loc[period]
-
-        # no period specified; use start/end of current period
-        elif len(period_stat) == 0:
-            assert 'start_datetime' in data.columns and 'end_datetime' in data.columns, \
-                "start_datetime and end_datetime columns needed for " \
-                "resampling irregular data to model stress periods"
-            for col in ['start_datetime', 'end_datetime']:
-                if data[col].dtype == np.object:
-                    data[col] = pd.to_datetime(data[col])
-            welldata_overlaps_period = (data.start_datetime < end_datetime) & \
-                                       (data.end_datetime > start_datetime)
-            period_data = data.loc[welldata_overlaps_period]
-
-        else:
-            raise Exception("")
-
-    # compute statistic on data
-    # ensure that ids are unique in each time period
-    # by summing multiple id instances by period
-    # (only sum the data column)
-    if len(period_data) > 0:
-        period_data.index.name = None
-        by_period = period_data.groupby([id_column, 'start_datetime']).first().reset_index()
-        by_period[data_column] = period_data.groupby([id_column, 'start_datetime']).sum()[data_column].values
-        period_data = by_period
-    aggregated = period_data.groupby(id_column).first().reset_index()
-    aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
-    aggregated['start_datetime'] = start_datetime # add datetime back in
-    #aggregated.index.name = None
-    #aggregated[id_column] = aggregated.index
-    return aggregated
-
-
-def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
-                               period_stat, datetime_column):
-
-    if isinstance(start_datetime, pd.Timestamp):
-        start_datetime = start_datetime.strftime('%Y-%m-%d')
-    if isinstance(end_datetime, pd.Timestamp):
-        end_datetime = end_datetime.strftime('%Y-%m-%d')
-    if isinstance(period_stat, str):
-        period_stat = [period_stat]
-    elif period_stat is None:
-        period_stat = ['mean']
-
-    if isinstance(period_stat, list):
-        stat = period_stat.pop(0)
-
-        # stat for specified period
-        if len(period_stat) == 2:
-            start, end = period_stat
-            arr = data.loc[start:end].values
-
-        # stat specified by single item
-        elif len(period_stat) == 1:
-            period = period_stat.pop()
-            # stat for a specified month
-            if period in months.keys() or period in months.values():
-                arr = data.loc[data[datetime_column].dt.month == months.get(period, period)].values
-
-            # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
-            else:
-                arr = data.loc[period].values
-
-        # no period specified; use start/end of current period
-        elif len(period_stat) == 0:
-            arr = data.loc[start_datetime:end_datetime].values
-
-        else:
-            raise Exception("")
-
-    # compute statistic on data
-    period_mean = getattr(arr, stat)(axis=0)
-
-    return period_mean
 
 
 def setup_array(model, package, var, data=None,
@@ -988,12 +779,20 @@ def setup_array(model, package, var, data=None,
         from_model = True if len(from_model_keys) > 0 else False
         # data from files
         if var in cfg and not from_model:
-            # TODO: files option doesn't support interpolation between top and botm[0]
-            sd = ArraySourceData.from_config(model.cfg[package]['source_data'][var],
-                                             variable=var,
-                                             dest_model=model,
-                                             vmin=vmin, vmax=vmax,
-                                             **kwargs)
+            ext = get_source_data_file_ext(cfg_data, package, var)
+            if ext == '.nc':
+                sd = NetCDFSourceData.from_config(model.cfg[package]['source_data'][var],
+                                                  dest_model=model,
+                                                  vmin=vmin, vmax=vmax,
+                                                  **kwargs
+                                                  )
+            else:
+                # TODO: files option doesn't support interpolation between top and botm[0]
+                sd = ArraySourceData.from_config(model.cfg[package]['source_data'][var],
+                                                 variable=var,
+                                                 dest_model=model,
+                                                 vmin=vmin, vmax=vmax,
+                                                 **kwargs)
 
         # data regridded from parent model
         elif from_model:
@@ -1143,21 +942,14 @@ def setup_array(model, package, var, data=None,
     if write_nodata is None:
         write_nodata = model._nodata_value
     for i, arr in data.items():
-        try:
-            save_array(filepaths[i], arr,
-                       nodata=write_nodata,
-                       fmt=write_fmt)
-        except:
-            j=2
+        save_array(filepaths[i], arr,
+                   nodata=write_nodata,
+                   fmt=write_fmt)
         # still write intermediate files for MODFLOW-6
         # even though input and output filepaths are same
         if model.version == 'mf6':
             src = filepaths[i]['filename']
             dst = model.cfg['intermediate_data'][var][i]
-            #if not model.relative_external_paths:
-            #    dst = model.cfg['intermediate_data'][var][i]
-            #else:
-            #    dst = model.external_path
             shutil.copy(src, dst)
 
     # write the top array again, because top was filled
@@ -1171,14 +963,21 @@ def setup_array(model, package, var, data=None,
                    fmt=write_fmt)
         if model.version == 'mf6':
             src = filepaths[i]['filename']
-            #if not model.relative_external_paths:
             dst = model.cfg['intermediate_data'][var][i]
-            #else:
-            #    dst = model.external_path
             shutil.copy(src, dst)
 
 
-def weighted_average_between_layers(arr0, arr1, weight0=0.5):
-    """"""
-    weights = [weight0, 1-weight0]
-    return np.average([arr0, arr1], axis=0, weights=weights)
+def get_source_data_file_ext(cfg_data, package, var):
+    if 'filenames' in cfg_data:
+        if isinstance(cfg_data['filenames'], dict):
+            filename = list(cfg_data['filenames'].values())[0]
+        elif isinstance(cfg_data['filenames'], list):
+            filename = cfg_data['filenames'][0]
+    elif 'filename' in cfg_data:
+        filename = cfg_data['filename']
+    else:
+        raise ValueError('Source_data for {}: {} needs one or more filenames!'.format(package, var))
+    _, ext = os.path.splitext(filename)
+    return ext
+
+

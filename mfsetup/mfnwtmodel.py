@@ -1036,8 +1036,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return gag
 
-    @staticmethod
-    def setup_from_yaml(yamlfile, verbose=False):
+    @classmethod
+    def setup_from_yaml(cls, yamlfile, verbose=False):
         """Make a model from scratch, using information in a yamlfile.
 
         Parameters
@@ -1050,12 +1050,12 @@ class MFnwtModel(MFsetupMixin, Modflow):
         m : mfsetup.MFnwtModel model object
         """
 
-        cfg = MFnwtModel.load_cfg(yamlfile, verbose=verbose)
+        cfg = cls.load_cfg(yamlfile, verbose=verbose)
         cfg['filename'] = yamlfile
         print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
-        m = MFnwtModel(cfg=cfg, **cfg['model'])
+        m = cls(cfg=cfg, **cfg['model'])
         assert m.exe_name != 'mf2005.exe'
 
         kwargs = m.cfg['setup_grid']
@@ -1073,7 +1073,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # set up all of the packages specified in the config file
         for pkg in m.package_list:
-            package_setup = getattr(MFnwtModel, 'setup_{}'.format(pkg))
+            package_setup = getattr(cls, 'setup_{}'.format(pkg))
             package_setup(m)
 
         if m.perimeter_bc_type == 'head':
@@ -1092,15 +1092,15 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """Load model configuration info, adjusting paths to model_ws."""
         return load_cfg(yamlfile, default_file='/mfnwt_defaults.yml')
 
-    @staticmethod
-    def load(yamlfile, load_only=None, verbose=False, forgive=False, check=False):
+    @classmethod
+    def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = MFnwtModel.load_cfg(yamlfile, verbose=verbose)
+        cfg = cls.load_cfg(yamlfile, verbose=verbose)
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
-        m = MFnwtModel(cfg=cfg, **cfg['model'])
+        m = cls(cfg=cfg, **cfg['model'])
         if 'grid' not in m.cfg.keys():
             if os.path.exists(cfg['setup_grid']['grid_file']):
                 print('Loading model grid definition from {}'.format(cfg['setup_grid']['grid_file']))

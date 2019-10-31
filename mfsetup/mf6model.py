@@ -558,8 +558,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         cfg['model'].update(cfg['model']['options'])
         return cfg
 
-    @staticmethod
-    def setup_from_yaml(yamlfile, verbose=False):
+    @classmethod
+    def setup_from_yaml(cls, yamlfile, verbose=False):
         """Make a model from scratch, using information in a yamlfile.
 
         Parameters
@@ -572,14 +572,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         m : MF6model.MF6model instance
         """
 
-        cfg = MF6model.load_cfg(yamlfile, verbose=verbose)
+        cfg = cls.load_cfg(yamlfile, verbose=verbose)
         print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
-        cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+        cfg = cls._parse_modflowgwf_kwargs(cfg)
         kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
-        m = MF6model(cfg=cfg, **kwargs)
+        m = cls(cfg=cfg, **kwargs)
 
         if 'grid' not in m.cfg.keys():
             m.setup_grid()
@@ -590,7 +590,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # set up all of the packages specified in the config file
         package_list = m.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']
         for pkg in package_list:
-            package_setup = getattr(MF6model, 'setup_{}'.format(pkg.strip('6')))
+            package_setup = getattr(cls, 'setup_{}'.format(pkg.strip('6')))
             if not callable(package_setup):
                 package_setup = getattr(MFsetupMixin, 'setup_{}'.format(pkg.strip('6')))
             package_setup(m)
@@ -608,18 +608,18 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """Load model configuration info, adjusting paths to model_ws."""
         return load_cfg(yamlfile, default_file='/mf6_defaults.yml')
 
-    @staticmethod
-    def load(yamlfile, load_only=None, verbose=False, forgive=False, check=False):
+    @classmethod
+    def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = MF6model.load_cfg(yamlfile, verbose=verbose)
+        cfg = cls.load_cfg(yamlfile, verbose=verbose)
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
-        cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+        cfg = cls._parse_modflowgwf_kwargs(cfg)
         kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
-        m = MF6model(cfg=cfg, **kwargs)
+        m = cls(cfg=cfg, **kwargs)
 
         if 'grid' not in m.cfg.keys():
             # apply model name if grid_file includes format string

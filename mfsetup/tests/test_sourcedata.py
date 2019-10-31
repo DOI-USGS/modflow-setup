@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 from ..fileio import _parse_file_path_keys_from_source_data
 from ..sourcedata import (SourceData, ArraySourceData, TabularSourceData,
-                          MFArrayData, MFBinaryArraySourceData,
-                          weighted_average_between_layers,
-                          aggregate_dataframe_to_stress_period)
+                          MFArrayData, MFBinaryArraySourceData)
+from mfsetup.tdis import aggregate_dataframe_to_stress_period
+from mfsetup.discretization import weighted_average_between_layers
 from ..units import convert_length_units, convert_time_units
 from mfsetup import MFnwtModel
 from mfsetup.utils import get_input_arguments
@@ -139,23 +139,23 @@ def test_parse_source_data(source_data_cases,
     cases = source_data_cases + source_data_from_model_cases
     results = []
 
-    sd = SourceData.from_config(cases[0], type='tabular')
+    sd = TabularSourceData.from_config(cases[0], type='tabular')
     assert isinstance(sd.filenames, dict)
     assert sd.length_unit_conversion == 1.
     assert sd.time_unit_conversion == 1.
     assert sd.unit_conversion == 1.
 
-    sd = SourceData.from_config(cases[1], type='tabular')
+    sd = TabularSourceData.from_config(cases[1], type='tabular')
     assert isinstance(sd.filenames, dict)
 
-    sd = SourceData.from_config(cases[2], type='tabular')
+    sd = TabularSourceData.from_config(cases[2], type='tabular')
     assert isinstance(sd.filenames, dict)
 
     sd = TabularSourceData.from_config(cases[3]['features_shapefile'])
     assert isinstance(sd.filenames, dict)
 
     var = 'rech'
-    sd = SourceData.from_config(cases[4]['infiltration_arrays'],
+    sd = ArraySourceData.from_config(cases[4]['infiltration_arrays'],
                                 variable=var,
                                 type='array')
     assert isinstance(sd.filenames, dict)

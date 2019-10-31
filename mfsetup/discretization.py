@@ -406,5 +406,7 @@ def get_layer_thicknesses(top, botm, idomain=None):
     return thicknesses
 
 
-
-
+def weighted_average_between_layers(arr0, arr1, weight0=0.5):
+    """"""
+    weights = [weight0, 1-weight0]
+    return np.average([arr0, arr1], axis=0, weights=weights)
