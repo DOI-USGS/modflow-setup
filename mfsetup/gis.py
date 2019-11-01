@@ -308,21 +308,32 @@ def project(geom, projection1, projection2):
     projection2: string
         Proj4 string specifying destination projection
     """
+    # pyproj 2 style
+    # https://pyproj4.github.io/pyproj/dev/gotchas.html
+    transformer = pyproj.Transformer.from_crs(projection1, projection2, always_xy=True)
+
     # check for x, y values instead of shapely objects
     if isinstance(geom, tuple):
-        return np.squeeze([projectXY(geom[0], geom[1], projection1, projection2)])
+        # tuple of scalar values
+        if np.isscalar(geom[0]):
+            return transformer.transform(*geom)
+        elif isinstance(geom[0], collections.Iterable):
+            return transformer.transform(*geom)
+            #return np.squeeze([projectXY(geom[0], geom[1], projection1, projection2)])
 
+    # sequence of tuples or shapely objects
     if isinstance(geom, collections.Iterable):
         geom = list(geom) # in case it's a generator
         geom0 = geom[0]
     else:
         geom0 = geom
 
+    # sequence of tuples
     if isinstance(geom0, tuple):
         a = np.array(geom)
         x = a[:, 0]
         y = a[:, 1]
-        return np.squeeze([projectXY(x, y, projection1, projection2)])
+        return transformer.transform(x, y)
 
     # transform shapely objects
     # enforce strings
@@ -330,39 +341,20 @@ def project(geom, projection1, projection2):
     projection2 = str(projection2)
 
     # define projections
-    pr1 = pyproj.Proj(projection1, errcheck=True, preserve_units=True)
-    pr2 = pyproj.Proj(projection2, errcheck=True, preserve_units=True)
+    #pr1 = pyproj.Proj(projection1, errcheck=True, preserve_units=True)
+    #pr2 = pyproj.Proj(projection2, errcheck=True, preserve_units=True)
+
+
 
     # projection function
     # (see http://toblerity.org/shapely/shapely.html#module-shapely.ops)
-    project = partial(pyproj.transform, pr1, pr2)
+    #project = partial(pyproj.transform, pr1, pr2)
+    project = partial(transformer.transform)
 
     # do the transformation!
     if isinstance(geom, collections.Iterable):
         return [transform(project, g) for g in geom]
     return transform(project, geom)
-
-
-def projectXY(x, y, projection1, projection2):
-    """Project x and y coordinates to different crs
-
-    Parameters
-    ----------
-    x: scalar or 1-D array
-    x: scalar or 1-D array
-    projection1: string
-        Proj4 string specifying source projection
-    projection2: string
-        Proj4 string specifying destination projection
-    """
-    projection1 = str(projection1)
-    projection2 = str(projection2)
-
-    # define projections
-    pr1 = pyproj.Proj(projection1, errcheck=True, preserve_units=True)
-    pr2 = pyproj.Proj(projection2, errcheck=True, preserve_units=True)
-
-    return pyproj.transform(pr1, pr2, x, y)
 
 
 def get_values_at_points(rasterfile, x=None, y=None,

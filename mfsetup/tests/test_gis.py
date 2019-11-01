@@ -1,9 +1,11 @@
 import os
+import collections
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
 import pyproj
-from ..gis import get_proj4, df2shp, shp2df, shp_properties
+import pytest
+from ..gis import (get_proj4, df2shp, shp2df, shp_properties, project)
 
 
 def test_get_proj4(tmpdir):
@@ -49,3 +51,41 @@ def test_boolean_dtypes(tmpdir):
     df2shp(df, f)
     df2 = shp2df(f, true_values='True', false_values='False')
     assert np.all(df == df2)
+
+
+@pytest.mark.parametrize('input', [(177955.0, 939285.0, 'epsg:5070', 'epsg:4269'),
+                                   (-91.87370, 34.93738, 'epsg:4269', 'epsg:5070')]
+)
+def test_project_point(input):
+    x1, y1, proj_str_1, proj_str_2 = input
+    point_1 = (x1, y1)
+
+    # tuple
+    point_2 = project(point_1, proj_str_1, proj_str_2)
+    point_3 = project(point_2, proj_str_2, proj_str_1)
+    assert isinstance(point_2, tuple)
+    assert np.allclose(point_1, point_3)
+
+    # list of tuples
+    points_5070_list = [point_1] * 3
+    point_2 = project(points_5070_list, proj_str_1, proj_str_2)
+    x, y = point_2
+    x2, y2 = project((x, y), proj_str_2, proj_str_1)
+    assert len(x) == len(x2)
+    assert np.allclose(np.array(points_5070_list).transpose(),
+                       np.array([x2, y2]))
+
+    # shapely Point
+    point_2 = project(Point(point_1), proj_str_1, proj_str_2)
+    point_3 = project(Point(point_2), proj_str_2, proj_str_1)
+    assert isinstance(point_2, Point)
+    assert np.allclose(point_1, point_3)
+
+    # list of Points
+    point_2 = project([Point(point_1),
+                          Point(point_1)], proj_str_1, proj_str_2)
+    point_3 = project(point_2, proj_str_2, proj_str_1)
+    assert isinstance(point_2, list)
+    for p in point_3:
+        assert np.allclose(list(p.coords)[0], point_1)
+
