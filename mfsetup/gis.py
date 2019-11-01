@@ -56,15 +56,8 @@ def df2shp(dataframe, shpname, geo_column='geometry', index=False,
     # retain index as attribute field if index=True
     df.reset_index(inplace=True, drop=not index)
 
-    # enforce character limit for names! (otherwise fiona marks it zero)
-    # somewhat kludgey, but should work for duplicates up to 99
-    df.columns = list(map(str, df.columns))  # convert columns to strings in case some are ints
-    overtheline = [(i, '{}{}'.format(c[:8], i)) for i, c in enumerate(df.columns) if len(c) > 10]
-
-    newcolumns = list(df.columns)
-    for i, c in overtheline:
-        newcolumns[i] = c
-    df.columns = newcolumns
+    # enforce 10 character limit
+    df.columns = rename_fields_to_10_characters(df.columns)
 
     properties = shp_properties(df)
     del properties['geometry']
@@ -119,6 +112,25 @@ def df2shp(dataframe, shpname, geo_column='geometry', index=False,
             shutil.copyfile(prj, "{}.prj".format(shpname[:-4]))
         except IOError:
             print('Warning: could not find specified prj file. shp will not be projected.')
+
+
+def rename_fields_to_10_characters(columns, limit=10):
+    fields = list(map(str, columns))  # convert columns to strings in case some are ints
+    newfields = []
+    for s in (fields):
+        if s[:limit] not in newfields:
+            newfields.append(s[:limit])
+        else:
+            for i in range(100):
+                if i < 10:
+                    if '{}{}'.format(s[:limit-1], str(i)) not in newfields:
+                        newfields.append(s[:limit-1] + str(i))
+                        break
+                elif i < 100:
+                    if '{}{}'.format(s[:limit-2], str(i)) not in newfields:
+                        newfields.append(s[:limit-2] + str(i))
+                        break
+    return newfields
 
 
 def shp2df(shplist, index=None, index_dtype=None, clipto=[], filter=None,
