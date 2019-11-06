@@ -1,12 +1,12 @@
 
-MFsetup
+modflow-setup
 -----------------------------------------------
 Package to facilitate automated setup of MODFLOW models, from source data including shapefiles, rasters, and other MODFLOW models that are geo-located. Input data and model construction options are summarized in a single configuration file. Source data are read from their native formats and mapped to a regular finite difference grid specified in the configuration file. An external array-based [flopy](https://github.com/modflowpy/flopy) model instance with the desired packages is created from the sampled source data and default settings. MODFLOW input can then be written from the flopy model instance.
 
 
 ### Version 0.0.0
-[![Build Status](https://travis-ci.org/aleaf/MFsetup.svg?branch=master)](https://travis-ci.org/aleaf/MFsetup)
-[![Coverage Status](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)](https://codecov.io/github/aleaf/MFsetup/coverage.svg?branch=master)
+[![Build Status](https://travis-ci.org/aleaf/modflow-setup.svg?branch=master)](https://travis-ci.org/aleaf/modflow-setup)
+[![Coverage Status](https://codecov.io/github/aleaf/modflow-setup/coverage.svg?branch=master)](https://codecov.io/github/aleaf/modflow-setup/coverage.svg?branch=master)
 
 
 
@@ -17,8 +17,8 @@ Getting Started
 
 Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a configuration file similar to the included test files:
 
-* [MODFLOW-NWT example](https://github.com/aleaf/MFsetup/blob/master/mfsetup/tests/data/mfnwt_inset_test.yml)
-* [MODFLOW-6 example](https://github.com/aleaf/MFsetup/blob/master/mfsetup/tests/data/shellmound.yml)
+* [MODFLOW-NWT example](https://github.com/aleaf/modflow-setup/blob/master/mfsetup/tests/data/mfnwt_inset_test.yml)
+* [MODFLOW-6 example](https://github.com/aleaf/modflow-setup/blob/master/mfsetup/tests/data/shellmound.yml)
 
 The yaml file summarize source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
 
@@ -43,7 +43,7 @@ m.write_input()
 
 ### Bugs
 
-If you think you have discovered a bug in MFsetup in which you feel that the program does not work as intended, then we ask you to submit a [Github issue](https://github.com/aleaf/mfsetup/labels/bug).
+If you think you have discovered a bug in modflow-setup in which you feel that the program does not work as intended, then we ask you to submit a [Github issue](https://github.com/aleaf/modflow-setup/labels/bug).
 
 
 Installation
@@ -51,7 +51,7 @@ Installation
 
 **Python versions:**
 
-MFsetup requires **Python** 3.6 (or higher)
+modflow-setup requires **Python** 3.6 (or higher)
 
 **Dependencies:**  
 pyaml  
