@@ -6,7 +6,7 @@ Package to facilitate automated setup of MODFLOW models, from source data includ
 
 ### Version 0.0.0
 [![Build Status](https://travis-ci.org/aleaf/modflow-setup.svg?branch=master)](https://travis-ci.org/aleaf/modflow-setup)
-[![Coverage Status](https://codecov.io/github/aleaf/modflow-setup/coverage.svg?branch=master)](https://codecov.io/github/aleaf/modflow-setup/coverage.svg?branch=master)
+[![codecov](https://codecov.io/gh/aleaf/modflow-setup/branch/master/graph/badge.svg)](https://codecov.io/gh/aleaf/modflow-setup)
 
 
 
