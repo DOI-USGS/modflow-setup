@@ -12,7 +12,7 @@ from .discretization import (make_idomain, deactivate_idomain_above,
                              create_vertical_pass_through_cells)
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
-from .gis import get_values_at_points
+from gisutils import get_values_at_points
 from .grid import write_bbox_shapefile, get_point_on_national_hydrogeologic_grid
 from .tdis import setup_perioddata
 from .utils import update, get_input_arguments, flatten

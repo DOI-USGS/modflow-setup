@@ -1,12 +1,13 @@
 """
 Grid stuff that flopy.discretization.StructuredGrid doesn't do and other grid-related functions
 """
+import collections
 import numpy as np
 import pandas as pd
 from rasterio import Affine
 from shapely.geometry import Polygon
 from flopy.discretization import StructuredGrid
-from .gis import df2shp
+from gisutils import df2shp, get_proj_str, project, shp2df
 from .units import convert_length_units
 
 
@@ -216,5 +217,89 @@ def write_bbox_shapefile(sr, outshp):
            outshp, epsg=sr.epsg)
 
 
+def rasterize(feature, grid, id_column=None,
+              epsg=None,
+              proj4=None, dtype=np.float32):
+    """Rasterize a feature onto the model grid, using
+    the rasterio.features.rasterize method. Features are intersected
+    if they contain the cell center.
+
+    Parameters
+    ----------
+    feature : str (shapefile path), list of shapely objects,
+              or dataframe with geometry column
+    id_column : str
+        Column with unique integer identifying each feature; values
+        from this column will be assigned to the output raster.
+    grid : grid.StructuredGrid instance
+    epsg : int
+        EPSG code for feature coordinate reference system. Optional,
+        but an epgs code or proj4 string must be supplied if feature
+        isn't a shapefile, and isn't in the same CRS as the model.
+    proj4 : str
+        Proj4 string for feature CRS (optional)
+    dtype : dtype
+        Datatype for the output array
+
+    Returns
+    -------
+    2D numpy array with intersected values
+
+    """
+    try:
+        from rasterio import features
+        from rasterio import Affine
+    except:
+        print('This method requires rasterio.')
+        return
+
+    #trans = Affine(sr.delr[0], 0., sr.xul,
+    #               0., -sr.delc[0], sr.yul) * Affine.rotation(sr.rotation)
+    trans = grid.transform
+
+    if isinstance(feature, str):
+        proj4 = get_proj_str(feature)
+        df = shp2df(feature)
+    elif isinstance(feature, pd.DataFrame):
+        df = feature.copy()
+    elif isinstance(feature, collections.Iterable):
+        df = pd.DataFrame({'geometry': feature})
+    elif not isinstance(feature, collections.Iterable):
+        df = pd.DataFrame({'geometry': [feature]})
+    else:
+        print('unrecognized feature input')
+        return
+
+    # handle shapefiles in different CRS than model grid
+    reproject = False
+    if proj4 is not None:
+        if proj4 != grid.proj_str:
+            reproject = True
+    elif epsg is not None and grid.epsg is not None:
+        if epsg != grid.epsg:
+            reproject = True
+            from fiona.crs import to_string, from_epsg
+            proj4 = to_string(from_epsg(epsg))
+    if reproject:
+        df['geometry'] = project(df.geometry.values, proj4, grid.proj_str)
+
+    # create list of GeoJSON features, with unique value for each feature
+    if id_column is None:
+        numbers = range(1, len(df)+1)
+    # if IDs are strings, get a number for each one
+    # pd.DataFrame.unique() generally preserves order
+    elif isinstance(df[id_column].dtype, np.object):
+        unique_values = df[id_column].unique()
+        values = dict(zip(unique_values, range(1, len(unique_values) + 1)))
+        numbers = [values[n] for n in df[id_column]]
+    else:
+        numbers = df[id_column].tolist()
+
+    geoms = list(zip(df.geometry, numbers))
+    result = features.rasterize(geoms,
+                                out_shape=(grid.nrow, grid.ncol),
+                                transform=trans)
+    assert result.sum(axis=(0, 1)) != 0, "Nothing was intersected!"
+    return result.astype(dtype)
 
 

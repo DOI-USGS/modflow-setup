@@ -13,8 +13,8 @@ from mfsetup.tdis import aggregate_dataframe_to_stress_period, aggregate_xarray_
 from .fileio import save_array
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                              fill_empty_layers, fill_cells_vertically)
-from .gis import get_values_at_points, shp2df, intersect
-from .grid import get_ij
+from gisutils import (get_values_at_points, shp2df)
+from .grid import get_ij, rasterize
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .units import (convert_length_units, convert_time_units, convert_volume_units)
 from .utils import get_input_arguments
@@ -258,7 +258,7 @@ class ArraySourceData(SourceData):
                         arr = np.reshape(arr, (self.dest_modelgrid.nrow,
                                                self.dest_modelgrid.ncol))
                     elif f.endswith('.shp'):
-                        arr = intersect(f, self.dest_modelgrid, id_column=self.id_column)
+                        arr = rasterize(f, self.dest_modelgrid, id_column=self.id_column)
                     # TODO: add code to interpret hds and cbb files
                     # interpolate from source model using source model grid
                     # otherwise assume the grids are the same

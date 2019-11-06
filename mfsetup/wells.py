@@ -55,7 +55,7 @@ def setup_wel_data(model):
             #    aw = None
             #if aw is not None:
             #    if 'x' in aw.columns and 'y' in aw.columns:
-            #        aw['i'], aw['j'] = model.modelgrid.intersect(aw['x'].values,
+            #        aw['i'], aw['j'] = model.modelgrid.rasterize(aw['x'].values,
             #                                                     aw['y'].values)
 #
             #    aw['per'] = aw['per'].astype(int)
@@ -63,7 +63,6 @@ def setup_wel_data(model):
             #    df = df.append(aw)
 
         elif k.lower() == 'wdnr_dataset':
-            #raise NotImplemented("WDNR water use dataset input")
             from .wateruse import get_mean_pumping_rates, resample_pumping_rates
 
             # Get steady-state pumping rates

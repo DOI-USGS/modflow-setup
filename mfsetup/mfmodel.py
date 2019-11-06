@@ -2,8 +2,8 @@ import os
 import time
 import numpy as np
 import pandas as pd
-from .gis import shp2df, get_values_at_points, intersect, project, get_proj4
-from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
+from gisutils import (shp2df, get_values_at_points, project, get_proj_str)
+from .grid import MFsetupGrid, get_ij, write_bbox_shapefile, rasterize
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
 from .utils import update, get_input_arguments
@@ -418,7 +418,7 @@ class MFsetupMixin():
         for f in features_file:
             if f not in self._features.keys():
                 if os.path.exists(f):
-                    features_proj_str = get_proj4(f)
+                    features_proj_str = get_proj_str(f)
                     model_proj_str = "epsg:{}".format(self.cfg['setup_grid']['epsg'])
                     if filter is None:
                         if self.bbox is not None:
@@ -590,7 +590,7 @@ class MFsetupMixin():
                 kwargs.pop('include_ids')  # load all lakes in shapefile
                 lakesdata = self.load_features(**kwargs)
             if lakesdata is not None:
-                isanylake = intersect(lakesdata, self.modelgrid)
+                isanylake = rasterize(lakesdata, self.modelgrid)
                 isbc[isanylake > 0] = 2
                 isbc[self._lakarr2d > 0] = 1
             if 'SFR' in self.get_package_list():
@@ -722,7 +722,7 @@ class MFsetupMixin():
                         kwargs['shapefile'] = kwargs.pop(key)
                         check_source_files(kwargs['shapefile'])
                         if 'epsg' not in kwargs:
-                            kwargs['proj4'] = get_proj4(kwargs['shapefile'])
+                            kwargs['proj4'] = get_proj_str(kwargs['shapefile'])
                         else:
                             kwargs['proj4'] = 'epsg:{}'.format(kwargs['epsg'])
 

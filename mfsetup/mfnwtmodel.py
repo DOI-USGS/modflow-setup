@@ -13,7 +13,6 @@ from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
 from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_empty_layers
 from .tdis import setup_perioddata_group
-from .gis import shp2df, get_values_at_points, intersect, project, get_proj4
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths

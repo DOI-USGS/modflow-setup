@@ -1,11 +1,7 @@
 import collections
 import inspect
-import json
 import pprint
-import pandas as pd
 import numpy as np
-from shapely.geometry import Polygon
-from .gis import df2shp
 
 
 def compare_nan_array(func, a, thresh):

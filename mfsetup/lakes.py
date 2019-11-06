@@ -7,7 +7,8 @@ from shapely.geometry import Polygon
 import flopy
 fm = flopy.modflow
 from flopy.utils.mflistfile import ListBudget
-from .gis import shp2df, df2shp, intersect
+from gisutils import shp2df
+from mfsetup.grid import rasterize
 
 
 def make_lakarr2d(grid, lakesdata,
@@ -28,7 +29,7 @@ def make_lakarr2d(grid, lakesdata,
     lakes = lakes.loc[include_ids]
     lakes['lakid'] = np.arange(1, len(lakes) + 1)
     lakes['geometry'] = [Polygon(g.exterior) for g in lakes.geometry]
-    arr = intersect(lakes, grid=grid, id_column='lakid')
+    arr = rasterize(lakes, grid=grid, id_column='lakid')
 
     # ensure that order of hydroids is unchanged
     # (used to match features to lake IDs in lake package)
@@ -63,12 +64,12 @@ def make_bdlknc_zones(grid, lakesshp, include_ids, id_column='hydroid'):
     # simplifying possibly complex geometries of lakes generated from 2ft lidar
     unbuffered_exteriors = [Polygon(g.exterior).simplify(5) for g in lakes.geometry]
     lakes['geometry'] = [g.buffer(exterior_buffer) for g in unbuffered_exteriors]
-    arr = intersect(lakes, grid=grid, id_column='lakid')
+    arr = rasterize(lakes, grid=grid, id_column='lakid')
 
     # Interior buffer for lower leakance, assumed to be 20 m around the lake
     interior_buffer = -20  # m
     lakes['geometry'] = [g.buffer(interior_buffer) for g in unbuffered_exteriors]
-    arr2 = intersect(lakes, grid=grid, id_column='lakid')
+    arr2 = rasterize(lakes, grid=grid, id_column='lakid')
     arr2 = arr2 * 100  # Create new ids for the interior, as multiples of 10
 
     arr[arr2 > 0] = arr2[arr2 > 0]

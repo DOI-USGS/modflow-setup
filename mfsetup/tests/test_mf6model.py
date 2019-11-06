@@ -15,7 +15,7 @@ import flopy
 mf6 = flopy.mf6
 from ..discretization import get_layer_thicknesses, find_remove_isolated_cells
 from ..fileio import load_array, exe_exists, read_mf6_block
-from ..gis import intersect
+from ..grid import rasterize
 from ..mf6model import MF6model
 from .. import testing
 from ..units import convert_length_units
@@ -363,7 +363,7 @@ def test_dis_setup(shellmound_model_with_grid):
         assert np.array_equal(model_array, data)
 
    # test that written idomain array reflects supplied shapefile of active area
-    active_area = intersect(m.cfg['dis']['source_data']['idomain']['filename'],
+    active_area = rasterize(m.cfg['dis']['source_data']['idomain']['filename'],
                             m.modelgrid)
     isactive = active_area == 1
     written_idomain = load_array(m.cfg['dis']['griddata']['idomain'])
