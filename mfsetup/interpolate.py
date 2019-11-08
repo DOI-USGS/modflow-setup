@@ -3,17 +3,23 @@ import numpy as np
 import scipy.interpolate as spint
 import scipy.spatial.qhull as qhull
 import itertools
+import flopy
 
 
-def get_source_dest_model_xys(source_model, dest_model, source_mask=None):
+def get_source_dest_model_xys(source_model, dest_model,
+                              source_mask=None):
     """Get the xyz and uvw inputs to the interp_weights function.
 
     Parameters
     ----------
-    source_model : flopy.modeflow.Modflow or flopy.mf6.MFModel instance
-    dest_model : mfsetup.MFnwtModel or mfsetup.MF6model instance
+    source_model : flopy.modeflow.Modflow, flopy.mf6.MFModel, or MFsetupGrid instance
+    dest_model : mfsetup.MFnwtModel, mfsetup.MF6model instance
     """
-    source_modelgrid = source_model.modelgrid
+    source_modelgrid = source_model
+    if isinstance(source_model, flopy.mbase.ModelInterface):
+        source_modelgrid = source_model.modelgrid
+    dest_modelgrid = dest_model.modelgrid
+
     if source_mask is None:
         if dest_model.parent_mask.shape == source_modelgrid.xcellcenters.shape:
             source_mask = dest_model.parent_mask
@@ -26,8 +32,8 @@ def get_source_dest_model_xys(source_model, dest_model, source_mask=None):
                                         source_modelgrid.xcellcenters.shape))
     x = source_modelgrid.xcellcenters[source_mask].flatten()
     y = source_modelgrid.ycellcenters[source_mask].flatten()
-    x2, y2 = dest_model.modelgrid.xcellcenters.ravel(), \
-             dest_model.modelgrid.ycellcenters.ravel()
+    x2, y2 = dest_modelgrid.xcellcenters.ravel(), \
+             dest_modelgrid.ycellcenters.ravel()
     source_model_xy = np.array([x, y]).transpose()
     dest_model_xy = np.array([x2, y2]).transpose()
     return source_model_xy, dest_model_xy
@@ -120,8 +126,6 @@ def regrid(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
     x, y = grid.xcellcenters, grid.ycellcenters
     if mask1 is not None:
         mask1 = mask1.astype(bool)
-        #nodataval = arr[~mask1][0]
-        #arr[~mask1] = np.nan
         arr = arr[mask1]
         x = x[mask1]
         y = y[mask1]

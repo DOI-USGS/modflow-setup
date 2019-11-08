@@ -1,7 +1,9 @@
 # TODO: tests for functions in wells.py
 import numpy as np
+import pandas as pd
 import pytest
-from mfsetup.wells import (setup_wel_data, get_open_interval_thickness)
+from mfsetup.wells import (setup_wel_data, get_open_interval_thickness,
+                           get_package_stress_period_data)
 
 
 @pytest.fixture(scope='function')
@@ -41,3 +43,17 @@ def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
                        diffs[layers_from_diffs, list(range(diffs.shape[1]))])
     assert np.allclose(b[:, 0], -np.diff(all_layers[:, i[0], j[0]]))
     # TODO: test with partially penetrating wells
+
+
+def test_get_package_stress_period_data(models_with_dis):
+    wel = models_with_dis.setup_wel()
+    result = get_package_stress_period_data(models_with_dis, package_name='wel')
+    assert isinstance(result, pd.DataFrame)
+    assert len({'k', 'i', 'j'}.intersection(result.columns)) == 3
+    assert 'cellid' not in result.columns
+    if models_with_dis.name == 'shellmound':
+        assert np.array_equal(result.per.unique(),
+                              np.arange(1, models_with_dis.nper))
+    elif models_with_dis.name == 'pfl':
+        assert np.array_equal(result.per.unique(),
+                              np.arange(models_with_dis.nper))

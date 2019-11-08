@@ -4,7 +4,8 @@ import pytest
 import flopy
 fm = flopy.modflow
 mf6 = flopy.mf6
-from ..mf6model import MF6model
+from mfsetup import MF6model, MFnwtModel
+from ..fileio import load_cfg
 from ..utils import get_input_arguments
 
 
@@ -20,8 +21,55 @@ def demfile(project_root_path):
 
 
 @pytest.fixture(scope="session")
-def mfnwt_inset_test_cfg_path(project_root_path):
-    return project_root_path + '/mfsetup/tests/data/mfnwt_inset_test.yml'
+def pfl_nwt_test_cfg_path(project_root_path):
+    return project_root_path + '/mfsetup/tests/data/pfl_nwt_test.yml'
+
+
+@pytest.fixture(scope="function")
+def pfl_nwt_cfg(pfl_nwt_test_cfg_path):
+    cfg = load_cfg(pfl_nwt_test_cfg_path)
+    # add some stuff just for the tests
+    cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
+    return cfg
+
+
+@pytest.fixture(scope="function")
+def pfl_nwt(pfl_nwt_cfg):
+    print('pytest fixture pfl_nwt')
+    cfg = pfl_nwt_cfg.copy()
+    m = MFnwtModel(cfg=cfg, **cfg['model'])
+    return m
+
+
+@pytest.fixture(scope="function")
+def pfl_nwt_with_grid(pfl_nwt):
+    print('pytest fixture pfl_nwt_with_grid')
+    m = pfl_nwt  #deepcopy(pfl_nwt)
+    cfg = pfl_nwt.cfg.copy()
+    cfg['setup_grid']['grid_file'] = pfl_nwt.cfg['setup_grid'].pop('output_files').pop('grid_file')
+    sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
+    sd['features_shapefile'] = sd.pop('filename')
+    cfg['setup_grid'].update(sd)
+    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
+    m.setup_grid(**kwargs)
+    return pfl_nwt
+
+
+@pytest.fixture(scope="function")
+def pfl_nwt_with_dis(pfl_nwt_with_grid):
+    print('pytest fixture pfl_nwt_with_dis')
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
+    m.cfg['dis']['remake_arrays'] = True
+    m.cfg['dis']['regrid_top_from_dem'] = True
+    dis = m.setup_dis()
+    return m
+
+
+@pytest.fixture(scope="function")
+def pfl_nwt_with_dis_bas6(pfl_nwt_with_dis):
+    print('pytest fixture pfl_nwt_with_dis_bas6')
+    bas = pfl_nwt_with_dis.setup_bas6()
+    return pfl_nwt_with_dis
 
 
 @pytest.fixture(scope="session")
@@ -69,7 +117,7 @@ def shellmound_model_with_grid(shellmound_model):
 @pytest.fixture(scope="function")
 def shellmound_model_with_dis(shellmound_model_with_grid):
     print('pytest fixture model_with_grid')
-    m = shellmound_model_with_grid  #deepcopy(inset_with_grid)
+    m = shellmound_model_with_grid  #deepcopy(pfl_nwt_with_grid)
     m.setup_tdis()
     m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
@@ -84,3 +132,13 @@ def tmpdir(project_root_path):
     os.makedirs(folder)
     return folder
 
+
+# fixture to feed multiple model fixtures to a test
+# https://github.com/pytest-dev/pytest/issues/349
+@pytest.fixture(params=['shellmound_model_with_dis',
+                        'pfl_nwt_with_dis_bas6'])
+def models_with_dis(request,
+                    shellmound_model_with_dis,
+                    pfl_nwt_with_dis_bas6):
+    return {'shellmound_model_with_dis': shellmound_model_with_dis,
+            'pfl_nwt_with_dis_bas6': pfl_nwt_with_dis_bas6}[request.param]

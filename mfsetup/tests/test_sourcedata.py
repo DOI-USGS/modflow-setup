@@ -3,9 +3,10 @@ import copy
 import pytest
 import numpy as np
 import pandas as pd
+import xarray as xr
 from ..fileio import _parse_file_path_keys_from_source_data
-from ..sourcedata import (SourceData, ArraySourceData, TabularSourceData,
-                          MFArrayData, MFBinaryArraySourceData)
+from ..sourcedata import (ArraySourceData, TabularSourceData,
+                          MFArrayData, MFBinaryArraySourceData, transient2d_to_xarray)
 from mfsetup.tdis import aggregate_dataframe_to_stress_period
 from mfsetup.discretization import weighted_average_between_layers
 from ..units import convert_length_units, convert_time_units
@@ -13,38 +14,8 @@ from mfsetup import MFnwtModel
 from mfsetup.utils import get_input_arguments
 
 
-@pytest.fixture(scope="session")
-def cfg(mfnwt_inset_test_cfg_path):
-    cfg = MFnwtModel.load_cfg(mfnwt_inset_test_cfg_path)
-    # add some stuff just for the tests
-    cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
-    return cfg
-
-
-@pytest.fixture(scope="function")
-def inset(cfg):
-    print('pytest fixture inset')
-    cfg = cfg.copy()
-    m = MFnwtModel(cfg=cfg, **cfg['model'])
-    return m
-
-
-@pytest.fixture(scope="function")
-def inset_with_grid(inset):
-    print('pytest fixture inset_with_grid')
-    m = inset  #deepcopy(inset)
-    cfg = inset.cfg.copy()
-    cfg['setup_grid']['grid_file'] = inset.cfg['setup_grid'].pop('output_files').pop('grid_file')
-    sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
-    sd['features_shapefile'] = sd.pop('filename')
-    cfg['setup_grid'].update(sd)
-    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
-    m.setup_grid(**kwargs)
-    return inset
-
-
 @pytest.fixture
-def source_data_cases(tmpdir, inset_with_grid):
+def source_data_cases(tmpdir, pfl_nwt_with_grid):
     inf_array = 'mfsetup/tests/data/plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif'
     botm0 = os.path.abspath('{}/junk0.dat'.format(tmpdir))
     botm1 = os.path.abspath('{}/junk1.dat'.format(tmpdir))
@@ -92,40 +63,40 @@ def source_data_cases(tmpdir, inset_with_grid):
               }
              ]
 
-    np.savetxt(botm0, np.ones(inset_with_grid.modelgrid.shape[1:]))
-    np.savetxt(botm1, np.zeros(inset_with_grid.modelgrid.shape[1:]))
+    np.savetxt(botm0, np.ones(pfl_nwt_with_grid.modelgrid.shape[1:]))
+    np.savetxt(botm1, np.zeros(pfl_nwt_with_grid.modelgrid.shape[1:]))
     return cases
 
 
 @pytest.fixture
-def source_data_from_model_cases(inset):
-    nlay, nrow, ncol = inset.parent.dis.botm.array.shape
+def source_data_from_model_cases(pfl_nwt):
+    nlay, nrow, ncol = pfl_nwt.parent.dis.botm.array.shape
     alllayers = np.zeros((nlay+1, nrow, ncol))
-    alllayers[0] = inset.parent.dis.top.array
-    alllayers[1:] = inset.parent.dis.botm.array
+    alllayers[0] = pfl_nwt.parent.dis.top.array
+    alllayers[1:] = pfl_nwt.parent.dis.botm.array
     cases = [{'from_parent': {
-                0: 0.5, # bottom of layer zero in inset is positioned at half the thickness of parent layer 1
-                1: 1, # bottom of layer 1 in inset corresponds to bottom of layer 0 in parent
+                0: 0.5, # bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1
+                1: 1, # bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent
                 2: 2,
                 3: 3,
                 4: 4},
-              'source_modelgrid': inset.parent.modelgrid,
+              'source_modelgrid': pfl_nwt.parent.modelgrid,
               'source_array': alllayers # source array of different shape than model grid
     },
         {'from_parent': {
-            0: 0,  # bottom of layer zero in inset is positioned at half the thickness of parent layer 1
-            1: 0.3,  # bottom of layer 1 in inset corresponds to bottom of layer 0 in parent
+            0: 0,  # bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1
+            1: 0.3,  # bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent
             2: 0.6,
             3: 1,
             4: 1.5,
             5: 1.9,
             6: 2
         },
-            'source_modelgrid': inset.parent.modelgrid,
-            'source_array': inset.parent.dis.botm.array
+            'source_modelgrid': pfl_nwt.parent.modelgrid,
+            'source_array': pfl_nwt.parent.dis.botm.array
         },
         {'from_parent': {
-            'binaryfile': os.path.normpath(os.path.join(inset._config_path, 'plainfieldlakes/pfl.hds'))
+            'binaryfile': os.path.normpath(os.path.join(pfl_nwt._config_path, 'plainfieldlakes/pfl.hds'))
         }
         }
     ]
@@ -134,8 +105,8 @@ def source_data_from_model_cases(inset):
 
 def test_parse_source_data(source_data_cases,
                            source_data_from_model_cases,
-                           inset_with_grid, project_root_path):
-    model = inset_with_grid
+                           pfl_nwt_with_grid, project_root_path):
+    model = pfl_nwt_with_grid
     cases = source_data_cases + source_data_from_model_cases
     results = []
 
@@ -206,9 +177,9 @@ def test_parse_source_data(source_data_cases,
     # test mapping of layers from binary file;
     # based on layer bottom mapping
     filename = source_data_from_model_cases[2]['from_parent']['binaryfile']
-    source_model = inset_with_grid.parent
+    source_model = pfl_nwt_with_grid.parent
     modelname = 'parent'
-    inset_with_grid._parent_layers = {0: -0.5, 1: 0, 2: 1, 3: 2, 4: 3}
+    pfl_nwt_with_grid._parent_layers = {0: -0.5, 1: 0, 2: 1, 3: 2, 4: 3}
     sd = MFBinaryArraySourceData(variable='strt', filename=filename,
                                  dest_model=model,
                                  source_modelgrid=source_model.modelgrid,
@@ -223,7 +194,7 @@ def test_parse_source_data(source_data_cases,
                                        method='linear')
     assert np.array_equal(data[0], data[1])
     assert np.array_equal(arr0, data[0])
-    inset_with_grid._parent_layers = None # reset
+    pfl_nwt_with_grid._parent_layers = None # reset
 
 
 @pytest.mark.parametrize('values, length_units, time_units, mult, expected',
@@ -232,14 +203,14 @@ def test_parse_source_data(source_data_cases,
                           (10, 'inches', 'years', 1, 10/12 * .3048 * 1/365.25)
                           ])
 def test_mfarraydata(values, length_units, time_units, mult, expected,
-                     inset_with_grid, tmpdir):
+                     pfl_nwt_with_grid, tmpdir):
     variable = 'rech'
     mfad = MFArrayData(variable=variable,
                        values=values,
                        multiplier=mult,
                        length_units=length_units,
                        time_units=time_units,
-                       dest_model=inset_with_grid)
+                       dest_model=pfl_nwt_with_grid)
     data = mfad.get_data()
     assert isinstance(data, dict)
     assert np.allclose(data[0].mean(axis=(0, 1)), expected)
@@ -251,7 +222,7 @@ def test_mfarraydata(values, length_units, time_units, mult, expected,
                        multiplier=mult,
                        length_units=length_units,
                        time_units=time_units,
-                       dest_model=inset_with_grid)
+                       dest_model=pfl_nwt_with_grid)
     data = mfad.get_data()
     assert np.allclose(data[1].mean(axis=(0, 1)), expected)
 
@@ -262,7 +233,7 @@ def test_mfarraydata(values, length_units, time_units, mult, expected,
                        multiplier=mult,
                        length_units=length_units,
                        time_units=time_units,
-                       dest_model=inset_with_grid)
+                       dest_model=pfl_nwt_with_grid)
     data = mfad.get_data()
     assert len(data) == 2
     assert np.allclose(data[2].mean(axis=(0, 1)), expected)
@@ -278,7 +249,7 @@ def test_mfarraydata(values, length_units, time_units, mult, expected,
                        multiplier=mult,
                        length_units=length_units,
                        time_units=time_units,
-                       dest_model=inset_with_grid)
+                       dest_model=pfl_nwt_with_grid)
     data = mfad.get_data()
     assert np.allclose(data[2].mean(axis=(0, 1)),
                        origdata[2].mean(axis=(0, 1)) * mult * mfad.unit_conversion)
@@ -386,3 +357,15 @@ def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, d
                 (duplicate_well.end_datetime > start_datetime)
         expected_sum += duplicate_well.loc[dw_overlaps, 'flux_m3'].mean()
     assert np.allclose(result['flux_m3'].sum(), expected_sum)
+
+
+def test_transient2d_to_DataArray():
+    data = np.random.randn(2, 2, 2)
+    times = ['2008-01-01', '2008-02-01']
+    result = transient2d_to_xarray(data, time=times)
+    assert isinstance(result, xr.DataArray)
+    assert result.shape == data.shape
+    assert np.all(result['time'] == times)
+    assert np.array_equal(result['x'], np.arange(2))
+    assert np.array_equal(result['y'], np.arange(2)[::-1])
+    assert np.array_equal(result, data)

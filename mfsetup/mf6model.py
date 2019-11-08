@@ -24,8 +24,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     """Class representing a MODFLOW-6 model.
     """
 
-    source_path = os.path.split(__file__)[0]
-
     def __init__(self, simulation, parent=None, cfg=None,
                  modelname='model', exe_name='mf6',
                  version='mf6', **kwargs):
@@ -40,8 +38,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                      'wel', 'maw', 'gag', 'ims']
         self.cfg = load(self.source_path + '/mf6_defaults.yml')
         self.cfg['filename'] = self.source_path + '/mf6_defaults.yml'
-        self._load_cfg(cfg)  # update configuration dict with values in cfg
-        self.relative_external_paths = self.cfg['model'].get('relative_external_paths', True)
+        self._set_cfg(cfg)   # set up the model configuration dictionary
+        self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
 
         # property attributes
@@ -49,7 +47,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # other attributes
         self._features = {} # dictionary for caching shapefile datasets in memory
-        self._drop_thin_cells = self.cfg['dis'].get('drop_thin_cells', True)
+        self._drop_thin_cells = self.cfg.get('dis', {}).get('drop_thin_cells', True)
 
         # arrays remade during this session
         self.updated_arrays = set()
@@ -82,59 +80,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             self._set_idomain()
         return self._idomain
 
-    def _load_cfg(self, cfg):
-        """Load configuration file; update cfg dictionary."""
-        if isinstance(cfg, str):
-            assert os.path.exists(cfg), "config file {} not found".format(cfg)
-            updates = load(cfg)
-            updates['filename'] = cfg
-        elif isinstance(cfg, dict):
-            updates = cfg
-        elif cfg is None:
-            return
-        else:
-            raise TypeError("unrecognized input for cfg")
-
-        # make sure empty variables get initialized as dicts
-        for k, v in self.cfg.items():
-            if v is None:
-                cfg[k] = {}
-        for k, v in updates.items():
-            if v is None:
-                cfg[k] = {}
-        update(self.cfg, updates)
-
-        # setup or load the simulation
-        kwargs = self.cfg['simulation'].copy()
-        if os.path.exists('{}.nam'.format(kwargs['sim_name'])):
-            try:
-                kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
-                self._sim = mf6.MFSimulation.load(**kwargs)
-            except:
-                # create simulation
-                kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
-                self._sim = mf6.MFSimulation(**kwargs)
-
-        # make sure that the output paths exist
-        #self.external_path = self.cfg['model']['external_path']
-        #output_paths = [self.cfg['intermediate_data']['output_folder'],
-        #                self.cfg['simulation']['sim_ws'],
-        #                ]
-        output_paths = list(self.cfg['postprocessing']['output_folders'].values())
-        for folder in output_paths:
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-
-        # absolute path to config file
-        self._config_path = os.path.split(os.path.abspath(self.cfg['filename']))[0]
-
-        # set package keys to default dicts
-        for pkg in self._package_setup_order:
-            self.cfg[pkg] = defaultdict(dict, self.cfg.get(pkg, {}))
-
-        # other variables
-        self.cfg['external_files'] = {}
-
     def _set_idomain(self):
         """Remake the idomain array from the source data,
         no data values in the top and bottom arrays, and
@@ -165,8 +110,22 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # re-write the input files
         self._setup_array('dis', 'idomain',
                           data={i: arr for i, arr in enumerate(idomain)},
-                          by_layer=True, write_fmt='%d', dtype=int)
+                          datatype='array3d', write_fmt='%d', dtype=int)
         self.dis.idomain = self.cfg['dis']['griddata']['idomain']
+
+    def _set_parent(self):
+        """Set attributes related to a parent or source model
+        if one is specified."""
+
+        kwargs = self.cfg['parent'].copy()
+        if kwargs is not None:
+            raise NotImplementedError("MODFLOW-6 parent models")
+
+    def _set_parent_modelgrid(self, mg_kwargs=None):
+        """Reset the parent model grid from keyword arguments
+        or existing modelgrid, and DIS package.
+        """
+        raise NotImplementedError("MODFLOW-6 parent models")
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame."""
@@ -259,13 +218,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # resample the top from the DEM
         if self.cfg['dis']['remake_top']:
-            self._setup_array(package, 'top', write_fmt='%.2f')
+            self._setup_array(package, 'top', datatype='array2d', write_fmt='%.2f')
 
         # make the botm array
-        self._setup_array(package, 'botm', by_layer=True, write_fmt='%.2f')
+        self._setup_array(package, 'botm', datatype='array3d', write_fmt='%.2f')
 
         # initial idomain input for creating a dis package instance
-        self._setup_array(package, 'idomain', by_layer=True, write_fmt='%d',
+        self._setup_array(package, 'idomain', datatype='array3d', write_fmt='%d',
                           dtype=int)
 
         # put together keyword arguments for dis package
@@ -332,7 +291,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         # make the k array
-        self._setup_array(package, 'strt', by_layer=True, write_fmt='%.2f')
+        self._setup_array(package, 'strt', datatype='array3d', write_fmt='%.2f')
 
         kwargs = self.cfg[package]['griddata'].copy()
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfic)
@@ -354,12 +313,15 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         package = 'npf'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
+        hiKlakes_value = float(self.cfg['parent'].get('hiKlakes_value', 1e4))
 
         # make the k array
-        self._setup_array(package, 'k', by_layer=True, write_fmt='%.6e')
+        self._setup_array(package, 'k', vmin=0, vmax=hiKlakes_value,
+                          datatype='array3d', write_fmt='%.6e')
 
         # make the k33 array (kv)
-        self._setup_array(package, 'k33', by_layer=True, write_fmt='%.6e')
+        self._setup_array(package, 'k33', vmin=0, vmax=hiKlakes_value,
+                          datatype='array3d', write_fmt='%.6e')
 
         kwargs = self.cfg[package]['options'].copy()
         kwargs.update(self.cfg[package]['griddata'].copy())
@@ -389,10 +351,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         # make the sy array
-        self._setup_array(package, 'sy', by_layer=True, write_fmt='%.6e')
+        self._setup_array(package, 'sy', datatype='array3d', write_fmt='%.6e')
 
         # make the ss array
-        self._setup_array(package, 'ss', by_layer=True, write_fmt='%.6e')
+        self._setup_array(package, 'ss', datatype='array3d', write_fmt='%.6e')
 
         kwargs = self.cfg[package]['options'].copy()
         kwargs.update(self.cfg[package]['griddata'].copy())
@@ -423,7 +385,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         pass
 
         # make the rech array
-        self._setup_array(package, 'recharge', by_layer=False,
+        self._setup_array(package, 'recharge', datatype='transient2d',
                           resample_method='linear', write_fmt='%.6e',
                           write_nodata=0.)
 
@@ -565,7 +527,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         Parameters
         ----------
         yamlfile : str (filepath)
-            Configuration file in YAML format with inset setup information.
+            Configuration file in YAML format with pfl_nwt setup information.
 
         Returns
         -------

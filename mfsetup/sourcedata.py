@@ -1,6 +1,7 @@
 import os
 import shutil
 import numbers
+import warnings
 import numpy as np
 from scipy.interpolate import griddata
 from shapely.geometry import Point
@@ -30,19 +31,28 @@ class SourceData:
 
     Parameters
     ----------
-    data : str, list or dict
-        source_data entry read from a configuration file
+    filenames :
+    length_units :
+    time_units :
+    area_units :
+    volume_units :
+    datatype :
+    dest_model :
     """
     def __init__(self, filenames=None, length_units='unknown',
                  time_units='unknown',
                  area_units=None, volume_units=None,
+                 datatype=None,
                  dest_model=None):
+        """
 
+        """
         self.filenames = filenames
         self.length_units = length_units
         self.area_units = area_units
         self.volume_units = volume_units
         self.time_units = time_units
+        self.datatype = datatype
         self.dest_model = dest_model
 
     @property
@@ -115,10 +125,40 @@ class SourceData:
 
 
 class ArraySourceData(SourceData):
-    """Subclass for handling array-based source data."""
+    """Subclass for handling array-based source data.
+
+    Parameters
+    ----------
+    variable : str
+        MODFLOW variable name (e.g. 'hk')
+    filenames : list of file paths
+    length_units : str
+        'meters' or 'feet', etc.
+    time_units : : str
+        e.g. 'days'
+    area_units : str
+        e.g. 'm2', 'ft2', etc.
+    volume_units : str
+        e.g. 'm3', 'ft3', etc.
+    datatype : str
+        Type of array, following terminology used in flopy:
+            array2d : e.g. model top
+            array3d : e.g. model layer bottoms
+            transient2d : e.g. recharge
+            transient3d : e.g. head results
+        (see flopy.datbase.DataType)
+    dest_model : model instance
+        Destination model that source data will be mapped to.
+
+    Methods
+    -------
+    get_data : returns source data mapped to model grid,
+               in a dictionary of 2D arrays
+               (of same shape as destination model grid)
+    """
     def __init__(self, variable, filenames=None, length_units='unknown', time_units='unknown',
                  dest_model=None, source_modelgrid=None, source_array=None,
-                 from_source_model_layers=None, by_layer=False,
+                 from_source_model_layers=None, datatype=None,
                  id_column=None, include_ids=None, column_mappings=None,
                  resample_method='nearest',
                  vmin=-1e30, vmax=1e30, dtype=float,
@@ -126,6 +166,7 @@ class ArraySourceData(SourceData):
 
         SourceData.__init__(self, filenames=filenames,
                             length_units=length_units, time_units=time_units,
+                            datatype=datatype,
                             dest_model=dest_model)
 
         self.variable = variable
@@ -136,9 +177,11 @@ class ArraySourceData(SourceData):
         self.from_source_model_layers = from_source_model_layers
         self.source_array = None
         if source_array is not None:
-            self.source_array = np.atleast_3d(source_array)
+            if len(source_array.shape) == 2:
+                source_array = source_array.reshape(1, *source_array.shape)
+            self.source_array = source_array
         self.dest_modelgrid = getattr(self.dest_model, 'modelgrid', None)
-        self.by_layer = by_layer
+        self.datatype = datatype
         self.id_column = id_column
         self.include_ids = include_ids
         self.column_mappings = column_mappings
@@ -158,14 +201,14 @@ class ArraySourceData(SourceData):
             return self.dest_model.parent_layers
         elif self.from_source_model_layers is not None:
             nspecified = len(self.from_source_model_layers)
-            if self.by_layer and nspecified != nlay:
+            if self.datatype == 'array3d' and nspecified != nlay:
                 raise Exception("Variable should have {} layers "
                                 "but only {} are specified: {}"
                                 .format(nlay, nspecified, self.from_source_model_layers))
             return self.from_source_model_layers
         elif self.filenames is not None:
             nspecified = len(self.filenames)
-            if self.by_layer and nspecified != nlay:
+            if self.datatype == 'array3d' and nspecified != nlay:
                 raise Exception("Variable should have {} layers "
                                 "but only {} are specified: {}"
                                 .format(nlay, nspecified, self.filenames))
@@ -173,10 +216,10 @@ class ArraySourceData(SourceData):
     @property
     def interp_weights(self):
         """For a given parent, only calculate interpolation weights
-        once to speed up re-gridding of arrays to inset."""
+        once to speed up re-gridding of arrays to pfl_nwt."""
         if self._interp_weights is None:
-            source_xy, dest_xy = get_source_dest_model_xys(self.parent,
-                                                           self,
+            source_xy, dest_xy = get_source_dest_model_xys(self.source_modelgrid,
+                                                           self.dest_model,
                                                            source_mask=self._source_grid_mask)
             self._interp_weights = interp_weights(source_xy, dest_xy)
         return self._interp_weights
@@ -184,8 +227,8 @@ class ArraySourceData(SourceData):
     @property
     def _source_grid_mask(self):
         """Boolean array indicating window in parent model grid (subset of cells)
-        that encompass the inset model domain. Used to speed up interpolation
-        of parent grid values onto inset grid."""
+        that encompass the pfl_nwt model domain. Used to speed up interpolation
+        of parent grid values onto pfl_nwt grid."""
         if self._source_mask is None:
             mask = np.zeros((self.source_modelgrid.nrow,
                              self.source_modelgrid.ncol), dtype=bool)
@@ -239,40 +282,46 @@ class ArraySourceData(SourceData):
                                            self.dest_modelgrid.ncol))
         return regridded
 
+    def _read_array_from_file(self, filename):
+        f = filename
+        if isinstance(f, numbers.Number):
+            data = f
+        elif isinstance(f, str):
+            # sample "source_data" that may not be on same grid
+            # TODO: add bilinear and zonal statistics methods
+            if f.endswith(".asc") or f.endswith(".tif"):
+                if self.resample_method != 'nearest':
+                    warnings.warn('{}: resample method {} not implemented; '
+                                  'falling back to nearest'.format(self.variable,
+                                                                   self.resample_method))
+                arr = get_values_at_points(f,
+                                           self.dest_model.modelgrid.xcellcenters.ravel(),
+                                           self.dest_model.modelgrid.ycellcenters.ravel())
+                arr = np.reshape(arr, (self.dest_modelgrid.nrow,
+                                       self.dest_modelgrid.ncol))
+            elif f.endswith('.shp'):
+                arr = rasterize(f, self.dest_modelgrid, id_column=self.id_column)
+            # TODO: add code to interpret hds and cbb files
+            # interpolate from source model using source model grid
+            # otherwise assume the grids are the same
+
+            # read numpy array on same grid
+            # (load_array checks the shape)
+            elif self.source_modelgrid is None:
+                arr = self.dest_model.load_array(f)
+            else:
+                raise Exception('variable {}: unrecognized file type for array data input: {}'
+                                .format(self.variable, f))
+
+            assert arr.shape == self.dest_modelgrid.shape[1:]
+            data = (arr * self.mult * self.unit_conversion).astype(self.dtype)
+        return data
+
     def get_data(self):
         data = {}
         if self.filenames is not None:
             for i, f in self.filenames.items():
-
-                if isinstance(f, numbers.Number):
-                    data[i] = f
-                elif isinstance(f, str):
-                    # sample "source_data" that may not be on same grid
-                    # TODO: add bilinear and zonal statistics methods
-                    if f.endswith(".asc") or f.endswith(".tif"):
-                        if self.resample_method != 'nearest':
-                            raise ValueError('unrecognized resample method: {}'.format(self.resample_method))
-                        arr = get_values_at_points(f,
-                                                   self.dest_model.modelgrid.xcellcenters.ravel(),
-                                                   self.dest_model.modelgrid.ycellcenters.ravel())
-                        arr = np.reshape(arr, (self.dest_modelgrid.nrow,
-                                               self.dest_modelgrid.ncol))
-                    elif f.endswith('.shp'):
-                        arr = rasterize(f, self.dest_modelgrid, id_column=self.id_column)
-                    # TODO: add code to interpret hds and cbb files
-                    # interpolate from source model using source model grid
-                    # otherwise assume the grids are the same
-
-                    # read numpy array on same grid
-                    # (load_array checks the shape)
-                    elif self.source_modelgrid is None:
-                        arr = self.dest_model.load_array(f)
-                    else:
-                        raise Exception('variable {}: unrecognized file type for array data input: {}'
-                                        .format(self.variable, f))
-
-                    assert arr.shape == self.dest_modelgrid.shape[1:]
-                    data[i] = (arr * self.mult * self.unit_conversion).astype(self.dtype)
+                data[i] = self._read_array_from_file(f)
 
             # interpolate any missing arrays from consecutive files based on weights
             for i, arr in data.items():
@@ -288,8 +337,8 @@ class ArraySourceData(SourceData):
                                                               data[source_k1],
                                                               weight0=weight0)
 
-            # repeat least layer if length of data is less than number of layers
-            if self.by_layer and i < (self.dest_model.nlay - 1):
+            # repeat last layer if length of data is less than number of layers
+            if self.datatype == 'array3d' and i < (self.dest_model.nlay - 1):
                 for j in range(i, self.dest_model.nlay):
                     data[j] = data[i]
 
@@ -297,11 +346,15 @@ class ArraySourceData(SourceData):
         elif self.source_array is not None:
 
             for dest_k, source_k in self.dest_source_layer_mapping.items():
-
+                if source_k >= self.source_array.shape[0]:
+                    continue
                 # destination model layers copied from source model layers
-                if source_k <= 0:
-                    arr = self.source_array[0]
-                elif np.round(source_k, 4) in range(self.source_array.shape[0]):
+                # if source_array has an extra layer, assume layer 0 is the model top
+                # (only included for weighted average)
+                # could use a better approach
+                if np.round(source_k, 4) in range(self.source_array.shape[0]):
+                    if self.source_array.shape[0] - self.dest_model.nlay == 1:
+                        source_k +=1
                     source_k = int(np.round(source_k, 4))
                     arr = self.source_array[source_k]
                 # destination model layers that are a weighted average
@@ -319,12 +372,12 @@ class ArraySourceData(SourceData):
                     # exclude invalid values in interpolation from parent model
                     mask = self._source_grid_mask & (arr > self.vmin) & (arr < self.vmax)
 
-                    arr = self.regrid_from_source_model(arr,
+                    regridded = self.regrid_from_source_model(arr,
                                                         mask=mask,
                                                         method='linear')
 
-                assert arr.shape == self.dest_modelgrid.shape[1:]
-                data[dest_k] = arr * self.mult * self.unit_conversion
+                assert regridded.shape == self.dest_modelgrid.shape[1:]
+                data[dest_k] = regridded * self.mult * self.unit_conversion
 
         # no files or source array provided
         else:
@@ -333,11 +386,75 @@ class ArraySourceData(SourceData):
         return data
 
 
+class TransientArraySourceData(ArraySourceData):
+    def __init__(self, filenames, variable, period_stats=None,
+                 length_units='unknown', time_units='days',
+                 dest_model=None, source_modelgrid=None, source_array=None,
+                 from_source_model_layers=None, datatype=None,
+                 resample_method='nearest', vmin=-1e30, vmax=1e30
+                 ):
+
+        ArraySourceData.__init__(self, variable=None, filenames=filenames,
+                                 length_units=length_units, time_units=time_units,
+                                 dest_model=dest_model, source_modelgrid=source_modelgrid,
+                                 source_array=source_array,
+                                 from_source_model_layers=from_source_model_layers,
+                                 datatype=datatype,
+                                 resample_method=resample_method, vmin=vmin, vmax=vmax)
+
+        self.variable = variable
+        self.period_stats = period_stats
+        self.resample_method = resample_method
+        self.dest_model = dest_model
+
+    def get_data(self):
+
+        # get data from list of files; one per stress period
+        # (files are assumed to be sorted)
+        if self.filenames is not None:
+            source_data = []
+            for i, f in self.filenames.items():
+                source_data.append(self._read_array_from_file(f))
+            source_data = np.array(source_data)
+            regrid = False  # data already regridded by _read_array_from_file
+
+        # regrid source data from another model
+        elif self.source_array is not None:
+            source_data = self.source_array
+            regrid = True
+
+        # cast data to an xarray DataArray for time-sliceing
+        # TODO: implement temporal resampling from source model
+        # would follow logic of netcdf files, but trickier because steady-state periods need to be handled
+        #da = transient2d_to_xarray(data, time)
+
+        # for now, just assume one-to-one correspondance
+        # between source and dest model stress periods
+        results = {}
+        for kper in range(self.dest_model.nper):
+            if kper >= len(source_data):
+                data = source_data[-1]
+            else:
+                data = source_data[kper]
+            if regrid:
+                # sample the data onto the model grid
+                resampled = self.regrid_from_source_model(data,
+                                                          method=self.resample_method)
+            else:
+                resampled = data
+            # reshape results to model grid
+            period_mean2d = resampled.reshape(self.dest_model.nrow,
+                                              self.dest_model.ncol)
+            results[kper] = period_mean2d * self.unit_conversion
+        self.data = results
+        return results
+
+
 class NetCDFSourceData(ArraySourceData):
     def __init__(self, filenames, variable, period_stats,
                  length_units='unknown', time_units='days',
                  dest_model=None, source_modelgrid=None,
-                 from_source_model_layers=None, by_layer=False,
+                 from_source_model_layers=None, datatype='transient2d',
                  resample_method='nearest', vmin=-1e30, vmax=1e30
                  ):
 
@@ -345,7 +462,7 @@ class NetCDFSourceData(ArraySourceData):
                                  length_units=length_units, time_units=time_units,
                                  dest_model=dest_model, source_modelgrid=source_modelgrid,
                                  from_source_model_layers=from_source_model_layers,
-                                 by_layer=by_layer,
+                                 datatype=datatype,
                                  resample_method=resample_method, vmin=vmin, vmax=vmax)
 
         if isinstance(filenames, dict):
@@ -375,7 +492,7 @@ class NetCDFSourceData(ArraySourceData):
     @property
     def interp_weights(self):
         """For a given parent, only calculate interpolation weights
-        once to speed up re-gridding of arrays to inset."""
+        once to speed up re-gridding of arrays to pfl_nwt."""
         if self._interp_weights is None:
             self._interp_weights = interp_weights(self.source_grid_xy,
                                                   self.dest_grid_xy)
@@ -410,11 +527,7 @@ class NetCDFSourceData(ArraySourceData):
 
         # create an xarray dataset instance
         ds = xr.open_dataset(self.filename)
-        var = ds[self.variable]
-
-        # interpolate values to x and y of model cell centers
-        #dsi = ds['net_infiltration'].interp(x=self.x, y=self.y,
-        #                                    method=self.resample_method)
+        data = ds[self.variable]
 
         # sample values to model stress periods
         # TODO: make this general for using with lists of files or other input by stress period
@@ -424,19 +537,19 @@ class NetCDFSourceData(ArraySourceData):
         current_stat = None
         for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
             period_stat = self.period_stats.get(kper, current_stat)
-            period_mean = aggregate_xarray_to_stress_period(var,
-                                                            start_datetime=start,
-                                                            end_datetime=end,
-                                                            period_stat=period_stat,
-                                                            datetime_column=self.time_col)
+            aggregated = aggregate_xarray_to_stress_period(data,
+                                                           start_datetime=start,
+                                                           end_datetime=end,
+                                                           period_stat=period_stat,
+                                                           datetime_column=self.time_col)
 
             # sample the data onto the model grid
-            period_mean = self.regrid_from_source(period_mean,
-                                                  method=self.resample_method)
+            resampled = self.regrid_from_source(aggregated,
+                                                method=self.resample_method)
 
             # reshape results to model grid
-            period_mean2d = period_mean.reshape(self.dest_model.nrow,
-                                                self.dest_model.ncol)
+            period_mean2d = resampled.reshape(self.dest_model.nrow,
+                                              self.dest_model.ncol)
             results[kper] = period_mean2d * self.unit_conversion
         self.data = results
         return results
@@ -448,7 +561,7 @@ class MFBinaryArraySourceData(ArraySourceData):
     def __init__(self, variable, filename=None,
                  length_units='unknown', time_units='unknown',
                  dest_model=None, source_modelgrid=None,
-                 from_source_model_layers=None, by_layer=False,
+                 from_source_model_layers=None, datatype='transient3d',
                  resample_method='nearest', vmin=-1e30, vmax=1e30
                  ):
 
@@ -456,7 +569,7 @@ class MFBinaryArraySourceData(ArraySourceData):
                                  length_units=length_units, time_units=time_units,
                                  dest_model=dest_model, source_modelgrid=source_modelgrid,
                                  from_source_model_layers=from_source_model_layers,
-                                 by_layer=by_layer,
+                                 datatype=datatype,
                                  resample_method=resample_method, vmin=vmin, vmax=vmax)
 
         self.filename = filename
@@ -472,7 +585,7 @@ class MFBinaryArraySourceData(ArraySourceData):
             return self.dest_model.parent_layers
         elif self.from_source_model_layers is not None:
             nspecified = len(self.from_source_model_layers)
-            if self.by_layer and nspecified != nlay:
+            if nspecified != nlay:
                 raise Exception("Variable should have {} layers "
                                 "but only {} are specified: {}"
                                 .format(nlay, nspecified, self.from_source_model_layers))
@@ -542,8 +655,8 @@ class MFArrayData(SourceData):
     be scalars, lists of scalars, array data or filepath(s) to arrays on
     same model grid."""
     def __init__(self, variable, filenames=None, values=None, length_units='unknown', time_units='unknown',
-                 dest_model=None, vmin=-1e30, vmax=1e30, dtype=float, by_layer=False,
-                 multiplier=1.):
+                 dest_model=None, vmin=-1e30, vmax=1e30, dtype=float, datatype=None,
+                 multiplier=1., **kwargs):
 
         SourceData.__init__(self, filenames=filenames, length_units=length_units, time_units=time_units,
                             dest_model=dest_model)
@@ -555,7 +668,7 @@ class MFArrayData(SourceData):
         self.mult = multiplier
         self.dest_modelgrid = getattr(self.dest_model, 'modelgrid', None)
         self.dtype = dtype
-        self.by_layer = by_layer
+        self.datatype = datatype
         self.data = {}
         assert True
 
@@ -564,7 +677,7 @@ class MFArrayData(SourceData):
 
         # convert to dict
         if isinstance(self.values, str) or np.isscalar(self.values):
-            if self.by_layer:
+            if self.datatype == 'array3d':
                 nk = self.dest_model.nlay
             else:
                 nk = 1
@@ -584,7 +697,7 @@ class MFArrayData(SourceData):
             assert arr.shape == self.dest_modelgrid.shape[1:]
             data[i] = arr * self.mult * self.unit_conversion
 
-        if self.by_layer:
+        if self.datatype == 'array3d':
             if len(data) != self.dest_model.nlay:
                 raise Exception("Variable should have {} layers "
                                 "but only {} are specified: {}"
@@ -743,11 +856,34 @@ class TransientTabularSourceData(SourceData):
 
 
 def setup_array(model, package, var, data=None,
-                vmin=-1e30, vmax=1e30,
+                vmin=-1e30, vmax=1e30, datatype=None,
                 source_model=None, source_package=None,
                 write_fmt='%.6e', write_nodata=None,
                 **kwargs):
+    """Todo: this method really needs to be cleaned up and maybe refactored
 
+    Parameters
+    ----------
+    model :
+    package :
+    var :
+    data :
+    vmin :
+    vmax :
+    source_model :
+    source_package :
+    write_fmt :
+    write_nodata :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+
+    # based on MODFLOW version
+    # get direct model input if it is specified
+    # configure external file handling
     if model.version == 'mf6':
         if data is None:
             data = model.cfg[package].get('griddata', {})
@@ -759,7 +895,12 @@ def setup_array(model, package, var, data=None,
             data = model.cfg[package].get(var)
         external_files_key = 'intermediate_data'
 
-    cfg = model.cfg[package].get('source_data', {})
+    # get any source_data input
+    # if default_source_data: True in parent model options
+    # default to source_data from parent model
+    cfg = model.cfg[package].get('source_data')
+    if cfg is None and model.cfg['parent'].get('default_source_data'):
+        cfg = {var: 'from_parent'}
 
     # for getting data from a different package in the source model
     if source_package is None:
@@ -769,19 +910,38 @@ def setup_array(model, package, var, data=None,
     sd = None
     if data is not None:
         sd = MFArrayData(variable=var, values=data, dest_model=model,
+                         datatype=datatype,
                          vmin=vmin, vmax=vmax,
                          **kwargs)
 
     # data specified as source_data
-    elif var in cfg:
-        cfg_data = cfg.get(var, {'from_parent': {}})
-        from_model_keys = [k for k in cfg_data.keys() if 'from_' in k]
-        from_model = True if len(from_model_keys) > 0 else False
+    elif cfg is not None and var in cfg:
+
+        # get the source data block
+        # determine if source data is from another model
+        source_data_input = cfg.get(var)
+        if source_data_input == 'from_parent':
+            from_model_keys = [source_data_input]
+            from_model = True
+        elif isinstance(source_data_input, dict):
+            from_model_keys = [k for k in source_data_input.keys() if 'from_' in k]
+            from_model = True if len(from_model_keys) > 0 else False
+
         # data from files
-        if var in cfg and not from_model:
-            ext = get_source_data_file_ext(cfg_data, package, var)
-            if ext == '.nc':
+        if not from_model:
+            ext = get_source_data_file_ext(source_data_input, package, var)
+
+            if datatype == 'transient2d' and ext == '.nc':
                 sd = NetCDFSourceData.from_config(model.cfg[package]['source_data'][var],
+                                                  datatype=datatype,
+                                                  dest_model=model,
+                                                  vmin=vmin, vmax=vmax,
+                                                  **kwargs
+                                                  )
+            elif datatype == 'transient2d':
+                sd = TransientArraySourceData.from_config(model.cfg[package]['source_data'][var],
+                                                          variable=var,
+                                                          datatype=datatype,
                                                   dest_model=model,
                                                   vmin=vmin, vmax=vmax,
                                                   **kwargs
@@ -789,25 +949,41 @@ def setup_array(model, package, var, data=None,
             else:
                 # TODO: files option doesn't support interpolation between top and botm[0]
                 sd = ArraySourceData.from_config(model.cfg[package]['source_data'][var],
+                                                 datatype=datatype,
                                                  variable=var,
                                                  dest_model=model,
                                                  vmin=vmin, vmax=vmax,
                                                  **kwargs)
 
-        # data regridded from parent model
+        # data regridded from a source model
         elif from_model:
-            key = from_model_keys[0]
-            from_source_model_layers = cfg_data[key].copy() #cfg[var][key].copy()
-            modelname = key.split('_')[1]
+
+            # Determine mapping between source model and dest model
+            binary_file = False
             filenames = None
-            # TODO: generalize this to allow for more than one source model
+            # read source model data from specified layers
+            # to specified layers in dest model
+            if isinstance(source_data_input, dict):
+                key = from_model_keys[0]
+                from_source_model_layers = source_data_input[key].copy() #cfg[var][key].copy()
+                # instead of package input arrays, source model data is from a binary file
+                if 'binaryfile' in from_source_model_layers:
+                    binary_file = True
+                    filename = from_source_model_layers.pop('binaryfile')
+            # otherwise, read all source data to corresponding layers in dest model
+            elif source_data_input == 'from_parent':
+                key = source_data_input
+                from_source_model_layers = None
+            modelname = key.split('_')[1]
+
+            # TODO: could generalize this to allow for more than one source model
             if modelname == 'parent':
                 source_model = model.parent
 
             # data from parent model MODFLOW binary output
-            if 'binaryfile' in from_source_model_layers:
-                filename = from_source_model_layers.pop('binaryfile')
+            if binary_file:
                 sd = MFBinaryArraySourceData(variable=var, filename=filename,
+                                             datatype=datatype,
                                              dest_model=model,
                                              source_modelgrid=source_model.modelgrid,
                                              from_source_model_layers=from_source_model_layers,
@@ -826,19 +1002,32 @@ def setup_array(model, package, var, data=None,
                     source_array = np.zeros((nlay+1, nrow, ncol))
                     source_array[0] = source_model.dis.top.array
                     source_array[1:] = source_model.dis.botm.array
-                    from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
+                    if from_source_model_layers is not None:
+                        from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
                 else:
                     source_array = getattr(source_model, source_package).__dict__[var].array
 
-                sd = ArraySourceData(variable=var, filenames=filenames,
-                                     dest_model=model,
-                                     source_modelgrid=source_model.modelgrid,
-                                     source_array=source_array,
-                                     from_source_model_layers=from_source_model_layers,
-                                     length_units=model.cfg[modelname]['length_units'],
-                                     time_units=model.cfg[modelname]['time_units'],
-                                     vmin=vmin, vmax=vmax,
-                                     **kwargs)
+                if datatype == 'transient2d':
+                    sd = TransientArraySourceData(variable=var, filenames=filenames,
+                                                  datatype=datatype,
+                                                  dest_model=model,
+                                                  source_modelgrid=source_model.modelgrid,
+                                                  source_array=source_array,
+                                                  length_units=model.cfg[modelname]['length_units'],
+                                                  time_units=model.cfg[modelname]['time_units'],
+                                                  vmin=vmin, vmax=vmax,
+                                                  **kwargs)
+                else:
+                    sd = ArraySourceData(variable=var, filenames=filenames,
+                                         datatype=datatype,
+                                         dest_model=model,
+                                         source_modelgrid=source_model.modelgrid,
+                                         source_array=source_array,
+                                         from_source_model_layers=from_source_model_layers,
+                                         length_units=model.cfg[modelname]['length_units'],
+                                         time_units=model.cfg[modelname]['time_units'],
+                                         vmin=vmin, vmax=vmax,
+                                         **kwargs)
             if var == 'vka':
                 model.cfg['upw']['layvka'] = getattr(source_model, source_package).layvka.array[0]
         else:
@@ -847,12 +1036,13 @@ def setup_array(model, package, var, data=None,
     # default for idomain if no other information provided
     # rest of the setup is handled by idomain property
     elif var in ['idomain', 'ibound']:
-        sd = MFArrayData(variable=var, values=1, dest_model=model, **kwargs)
+        sd = MFArrayData(variable=var, values=1, datatype=datatype, dest_model=model, **kwargs)
 
     # default to model top for starting heads
     elif var == 'strt':
         sd = MFArrayData(variable=var,
                          values=[model.dis.top.array] * model.nlay,
+                         datatype=datatype,
                          dest_model=model, **kwargs)
 
     # no data were specified, or input not recognized
@@ -980,4 +1170,18 @@ def get_source_data_file_ext(cfg_data, package, var):
     _, ext = os.path.splitext(filename)
     return ext
 
+
+def transient2d_to_xarray(data, x=None, y=None, time=None):
+    if x is None:
+        x = np.arange(data.shape[2])
+    if y is None:
+        y = np.arange(data.shape[1])[::-1]
+    if time is None:
+        time = np.arange(data.shape[0])
+    da = xr.DataArray(data=data,
+                      coords={"x": x,
+                              "y": y,
+                              "time": time},
+                      dims=["x", "y", "time"])
+    return da
 

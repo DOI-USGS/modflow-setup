@@ -1,7 +1,11 @@
 import os
 import time
+from collections import defaultdict
 import numpy as np
 import pandas as pd
+import flopy
+fm = flopy.modflow
+mf6 = flopy.mf6
 from gisutils import (shp2df, get_values_at_points, project, get_proj_str)
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile, rasterize
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
@@ -22,10 +26,12 @@ class MFsetupMixin():
 
     https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-are-they-useful
     """
+    source_path = os.path.split(__file__)[0]
 
     def __init__(self, parent):
 
         # property attributes
+        self._cfg = None
         self._nper = None
         self._perioddata = None
         self._sr = None
@@ -33,6 +39,7 @@ class MFsetupMixin():
         self._bbox = None
         self._parent = parent
         self._parent_layers = None
+        self._parent_default_source_data = False
         self._parent_mask = None
         self._lakarr_2d = None
         self._isbc_2d = None
@@ -182,9 +189,10 @@ class MFsetupMixin():
     def parent_layers(self):
         """Mapping between layers in source model and
         layers in destination model."""
-        self._parent_layers = None
         if self._parent_layers is None:
-            parent_layers = self.cfg['dis'].get('source_data', {}).get('botm', {}).get('from_parent')
+            parent_layers = None
+            if self.cfg['dis']['source_data'] is not None:
+                parent_layers = self.cfg['dis']['source_data'].get('botm', {}).get('from_parent')
             if parent_layers is None:
                 parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
             self._parent_layers = parent_layers
@@ -242,7 +250,7 @@ class MFsetupMixin():
     @property
     def external_path(self):
         abspath = os.path.abspath(
-            self.cfg['model']['external_path'])
+            self.cfg.get('model', {}).get('external_path', 'external'))
         if not os.path.isdir(abspath):
             os.makedirs(abspath)
         if self.relative_external_paths:
@@ -258,7 +266,7 @@ class MFsetupMixin():
     @property
     def interp_weights(self):
         """For a given parent, only calculate interpolation weights
-        once to speed up re-gridding of arrays to inset."""
+        once to speed up re-gridding of arrays to pfl_nwt."""
         if self._interp_weights is None:
             parent_xy, inset_xy = get_source_dest_model_xys(self.parent,
                                                                         self)
@@ -268,8 +276,8 @@ class MFsetupMixin():
     @property
     def parent_mask(self):
         """Boolean array indicating window in parent model grid (subset of cells)
-        that encompass the inset model domain. Used to speed up interpolation
-        of parent grid values onto inset grid."""
+        that encompass the pfl_nwt model domain. Used to speed up interpolation
+        of parent grid values onto pfl_nwt grid."""
         if self._parent_mask is None:
             x, y = np.squeeze(self.bbox.exterior.coords.xy)
             pi, pj = get_ij(self.parent.modelgrid, x, y)
@@ -484,13 +492,13 @@ class MFsetupMixin():
                            mask=None,
                            method='linear'):
         """Interpolate values in parent array onto
-        the inset model grid, using SpatialReference instances
-        attached to the parent and inset models.
+        the pfl_nwt model grid, using SpatialReference instances
+        attached to the parent and pfl_nwt models.
 
         Parameters
         ----------
         parent_array : ndarray
-            Values from parent model to be interpolated to inset grid.
+            Values from parent model to be interpolated to pfl_nwt grid.
             1 or 2-D numpy array of same sizes as a
             layer of the parent model.
         mask : ndarray (bool)
@@ -556,9 +564,9 @@ class MFsetupMixin():
 
     def _get_model_ws(self):
         if self.version == 'mf6':
-            abspath = os.path.abspath(self.cfg['simulation']['sim_ws'])
+            abspath = os.path.abspath(self.cfg.get('simulation', {}).get('sim_ws', '.'))
         else:
-            abspath = os.path.abspath(self.cfg['model']['model_ws'])
+            abspath = os.path.abspath(self.cfg.get('model', {}).get('model_ws', '.'))
         if not os.path.exists(abspath):
             os.makedirs(abspath)
         os.chdir(abspath)
@@ -578,6 +586,60 @@ class MFsetupMixin():
         """
         self._set_lakarr2d() # calls self._set_isbc2d(), which calls self._set_lake_bathymetry()
         self._set_isbc() # calls self._set_lakarr()
+
+    def _set_cfg(self, cfg_updates):
+        """Load configuration file; update dictionary.
+        """
+        self.cfg = defaultdict(None)
+
+        if isinstance(cfg_updates, str):
+            assert os.path.exists(cfg_updates), \
+                "config file {} not found".format(cfg_updates)
+            updates = load(cfg_updates)
+            updates['filename'] = cfg_updates
+        elif isinstance(cfg_updates, dict):
+            updates = cfg_updates.copy()
+        elif cfg_updates is None:
+            return
+        else:
+            raise TypeError("unrecognized input for cfg")
+
+        update(self.cfg, updates)
+        # make sure empty variables get initialized as dicts
+        for k, v in self.cfg.items():
+            if v is None:
+                self.cfg[k] = {}
+
+        # mf6 models: set up or load the simulation
+        if self.version == 'mf6':
+            kwargs = self.cfg['simulation'].copy()
+            if os.path.exists('{}.nam'.format(kwargs['sim_name'])):
+                try:
+                    kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
+                    self._sim = mf6.MFSimulation.load(**kwargs)
+                except:
+                    # create simulation
+                    kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
+                    self._sim = mf6.MFSimulation(**kwargs)
+
+        # load the parent model
+        if 'namefile' in self.cfg.get('parent', {}).keys():
+            self._set_parent()
+
+        output_paths = list(self.cfg['postprocessing']['output_folders'].values())
+        for folder in output_paths:
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+
+        # absolute path to config file
+        self._config_path = os.path.split(os.path.abspath(self.cfg['filename']))[0]
+
+        # set package keys to default dicts
+        for pkg in self._package_setup_order:
+            self.cfg[pkg] = defaultdict(dict, self.cfg.get(pkg, {}))
+
+        # other variables
+        self.cfg['external_files'] = {}
 
     def _set_isbc2d(self):
             isbc = np.zeros((self.nrow, self.ncol))
@@ -789,7 +851,7 @@ class MFsetupMixin():
             # run thru setup_array so that DIS input remains open/close
             self._setup_array('dis', 'botm',
                               data={i: arr for i, arr in enumerate(botm)},
-                              by_layer=True, write_fmt='%.2f', dtype=int)
+                              datatype='array3d', write_fmt='%.2f', dtype=int)
             self.dis.botm = botm
             self.dis.botm = self.cfg['dis']['griddata']['botm']
 

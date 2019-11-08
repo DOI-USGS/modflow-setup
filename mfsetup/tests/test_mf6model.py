@@ -538,7 +538,7 @@ def test_rch_setup(shellmound_model_with_dis):
     tmp = rch.recharge.array[:2].copy()
     tmp[0, 0, 0, 0] = np.nan
     tmp = {i: arr[0] for i, arr in enumerate(tmp)}
-    m._setup_array('rch', 'recharge', by_layer=False,
+    m._setup_array('rch', 'recharge', datatype='transient2d',
                    data=tmp, write_fmt='%.6e',
                    write_nodata=0.)
     rech0 = load_array(m.cfg['rch']['recharge'][0])
@@ -671,7 +671,7 @@ def test_model_setup(model_setup_and_run):
 
 
 def test_load(model_setup, shellmound_cfg_path):
-    m = model_setup  #deepcopy(inset_setup_from_yaml)
+    m = model_setup  #deepcopy(pfl_nwt_setup_from_yaml)
     m2 = MF6model.load(shellmound_cfg_path)
     assert m == m2
 

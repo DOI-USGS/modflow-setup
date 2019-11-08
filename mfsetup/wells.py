@@ -1,9 +1,13 @@
 import os
 import numpy as np
 import pandas as pd
+import flopy
+from shapely.geometry import Point
+from gisutils import project
 from .fileio import check_source_files
 from .grid import get_ij
 from .sourcedata import TransientTabularSourceData
+from .wateruse import get_mean_pumping_rates, resample_pumping_rates
 
 
 def setup_wel_data(model):
@@ -23,75 +27,105 @@ def setup_wel_data(model):
     columns = ['per', 'k', 'i', 'j', 'flux', 'comments']
     df = pd.DataFrame(columns=columns)
 
+    # check for source data
+    datasets = model.cfg['wel'].get('source_data')
+
+    # get well package input from source (parent) model in lieu of source data
+    # todo: fetching correct well package from mf6 parent model
+    if datasets is None and model.cfg['parent'].get('default_source_data') \
+        and 'WEL' in model.parent.get_package_list():
+
+        # get well stress period data from mfnwt or mf6 model
+        renames = {'q': 'flux',
+                   'boundnames': 'comments'
+                   }
+        parent = model.parent
+        spd = get_package_stress_period_data(parent, package_name='wel')
+        parent_well_x = parent.modelgrid.xcellcenters[spd.i, spd.j]
+        parent_well_y = parent.modelgrid.ycellcenters[spd.i, spd.j]
+        coords = project((parent_well_x, parent_well_y),
+                          model.modelgrid.proj_str,
+                          parent.modelgrid.proj_str)
+        geoms = [Point(x, y) for x, y in zip(*coords)]
+        bounds = model.modelgrid.bbox
+        within = [g.within(bounds) for g in geoms]
+        i, j = get_ij(model.modelgrid,
+                      parent_well_x[within],
+                      parent_well_y[within])
+        spd = spd.loc[within].copy()
+        spd['i'] = i
+        spd['j'] = j
+        spd.rename(columns=renames, inplace=True)
+        df = df.append(spd)
+
+
+    # read source data and map onto model space and time discretization
     # multiple types of source data can be submitted
-    datasets = model.cfg['wel']['source_data']
-    for k, v in datasets.items():
+    elif datasets is not None:
+        for k, v in datasets.items():
 
-        # determine the format
-        if 'csvfile' in k.lower():  # generic csv
-            sd = TransientTabularSourceData.from_config(v,
-                                                        dest_model=model)
-            csvdata = sd.get_data()
-            csvdata.rename(columns={v['data_column']: 'flux',
-                                    v['id_column']: 'comments'}, inplace=True)
-            if 'k' not in csvdata.columns:
-                if model.nlay > 1:
-                    vfd = vfd_defaults.copy()
-                    vfd.update(v.get('vertical_flux_distribution', {}))
-                    csvdata = assign_layers_from_screen_top_botm(csvdata,
-                                                                 model,
-                                                                 **vfd)
+            # determine the format
+            if 'csvfile' in k.lower():  # generic csv
+                sd = TransientTabularSourceData.from_config(v,
+                                                            dest_model=model)
+                csvdata = sd.get_data()
+                csvdata.rename(columns={v['data_column']: 'flux',
+                                        v['id_column']: 'comments'}, inplace=True)
+                if 'k' not in csvdata.columns:
+                    if model.nlay > 1:
+                        vfd = vfd_defaults.copy()
+                        vfd.update(v.get('vertical_flux_distribution', {}))
+                        csvdata = assign_layers_from_screen_top_botm(csvdata,
+                                                                     model,
+                                                                     **vfd)
+                    else:
+                        csvdata['k'] = 0
+                df = df.append(csvdata[columns])
+
+            elif k.lower() == 'wells':  # generic dict
+                added_wells = {k: v for k, v in v.items() if v is not None}
+                if len(added_wells) > 0:
+                    aw = pd.DataFrame(added_wells).T
+                    aw['comments'] = aw.index
                 else:
-                    csvdata['k'] = 0
-            df = df.append(csvdata[columns])
+                    aw = None
+                if aw is not None:
+                    if 'x' in aw.columns and 'y' in aw.columns:
+                        aw['i'], aw['j'] = get_ij(model.modelgrid,
+                                                  aw['x'].values,
+                                                  aw['y'].values)
+                    aw['per'] = aw['per'].astype(int)
+                    aw['k'] = aw['k'].astype(int)
+                    df = df.append(aw)
 
-        elif k.lower() == 'wells':  # generic dict
-            raise NotImplemented("Dictionary input for wells")
-            #added_wells = {k: v for k, v in added_wells.items() if v is not None}
-            #if len(added_wells) > 0:
-            #    aw = pd.DataFrame(added_wells).T
-            #    aw['comments'] = aw.index
-            #else:
-            #    aw = None
-            #if aw is not None:
-            #    if 'x' in aw.columns and 'y' in aw.columns:
-            #        aw['i'], aw['j'] = model.modelgrid.rasterize(aw['x'].values,
-            #                                                     aw['y'].values)
-#
-            #    aw['per'] = aw['per'].astype(int)
-            #    aw['k'] = aw['k'].astype(int)
-            #    df = df.append(aw)
+            elif k.lower() == 'wdnr_dataset':  # custom input format for WI DNR
+                # Get steady-state pumping rates
+                check_source_files([v['water_use'],
+                                    v['water_use_points']])
 
-        elif k.lower() == 'wdnr_dataset':
-            from .wateruse import get_mean_pumping_rates, resample_pumping_rates
+                # fill out period stats
+                period_stats = v['period_stats']
+                if isinstance(period_stats, str):
+                    period_stats = {kper: period_stats for kper in range(model.nper)}
 
-            # Get steady-state pumping rates
-            check_source_files([v['water_use'],
-                                v['water_use_points']])
+                # separate out stress periods with period mean statistics vs.
+                # those to be resampled based on start/end dates
+                resampled_periods = {k: v for k, v in period_stats.items()
+                                     if v == 'resample'}
+                periods_with_dataset_means = {k: v for k, v in period_stats.items()
+                                              if k not in resampled_periods}
 
-            # fill out period stats
-            period_stats = v['period_stats']
-            if isinstance(period_stats, str):
-                period_stats = {kper: period_stats for kper in range(model.nper)}
-
-            # separate out stress periods with period mean statistics vs.
-            # those to be resampled based on start/end dates
-            resampled_periods = {k: v for k, v in period_stats.items()
-                                 if v == 'resample'}
-            periods_with_dataset_means = {k: v for k, v in period_stats.items()
-                                          if k not in resampled_periods}
-
-            if len(periods_with_dataset_means) > 0:
-                wu_means = get_mean_pumping_rates(model.cfg['source_data']['water_use'],
-                                                  model.cfg['source_data']['water_use_points'],
-                                                  period_stats=periods_with_dataset_means,
-                                                  model=model)
-                df = df.append(wu_means)
-            if len(resampled_periods) > 0:
-                wu_resampled = resample_pumping_rates(model.cfg['source_data']['water_use'],
-                                                      model.cfg['source_data']['water_use_points'],
+                if len(periods_with_dataset_means) > 0:
+                    wu_means = get_mean_pumping_rates(v['water_use'],
+                                                      v['water_use_points'],
+                                                      period_stats=periods_with_dataset_means,
                                                       model=model)
-                df = df.append(wu_resampled)
+                    df = df.append(wu_means)
+                if len(resampled_periods) > 0:
+                    wu_resampled = resample_pumping_rates(model.cfg['source_data']['water_use'],
+                                                          model.cfg['source_data']['water_use_points'],
+                                                          model=model)
+                    df = df.append(wu_resampled)
 
     # boundary fluxes from parent model
     if model.perimeter_bc_type == 'flux':
@@ -358,4 +392,30 @@ def copy_fluxes_to_subsequent_periods(df):
                 copied['per'] += 1
                 copied_fluxes.append(copied)
     df = pd.concat(copied_fluxes, axis=0)
+    return df
+
+
+def get_package_stress_period_data(model, package_name, skip_packages=None):
+
+    wel_packages = [p for p in model.get_package_list() if package_name in p.lower()]
+    if skip_packages is not None:
+        wel_packages = [p for p in wel_packages if p not in skip_packages]
+
+    dfs = []
+    for packagename in wel_packages:
+        package = model.get_package(packagename)
+        stress_period_data = package.stress_period_data
+        # monkey patch the mf6 version to behave like the mf2005 version
+        if isinstance(stress_period_data, flopy.mf6.data.mfdatalist.MFTransientList):
+            stress_period_data.data = {per: ra for per, ra in enumerate(stress_period_data.array)}
+
+        for kper, spd in stress_period_data.data.items():
+            spd = pd.DataFrame(spd)
+            spd['per'] = kper
+            dfs.append(spd)
+    df = pd.concat(dfs)
+    if model.version == 'mf6':
+        k, i, j = zip(*df['cellid'])
+        df.drop(['cellid'], axis=1, inplace=True)
+        df['k'], df['i'], df['j'] = k, i, j
     return df

@@ -14,16 +14,16 @@ import numpy as np
 class Tmr:
     """
     Class for basic telescopic mesh refinement of a MODFLOW model.
-    Handles the case where the inset grid is a rectangle exactly aligned with
+    Handles the case where the pfl_nwt grid is a rectangle exactly aligned with
     the parent grid.
 
     Parameters
     ----------
     parent_model : flopy.modflow.Modflow instance of parent model
         Must have a valid, attached SpatialReference (sr) attribute.
-    inset_model : flopy.modflow.Modflow instance of inset model
+    inset_model : flopy.modflow.Modflow instance of pfl_nwt model
         Must have a valid, attached SpatialReference (sr) attribute.
-        SpatialReference of inset and parent models is used to determine cell
+        SpatialReference of pfl_nwt and parent models is used to determine cell
         connections.
     parent_head_file : filepath
         MODFLOW binary head output
@@ -33,18 +33,18 @@ class Tmr:
     Notes
     -----
     Assumptions:
-    * Uniform parent and inset grids, with equal delr and delc spacing.
+    * Uniform parent and pfl_nwt grids, with equal delr and delc spacing.
     * Inset model upper right corner coincides with an upper right corner of a cell
       in the parent model
     * Inset cell spacing is a factor of the parent cell spacing
-      (so that each inset cell is only connected horizontally to one parent cell).
+      (so that each pfl_nwt cell is only connected horizontally to one parent cell).
     * Inset model row/col dimensions are multiples of parent model cells
-      (no parent cells that only partially overlap the inset model)
+      (no parent cells that only partially overlap the pfl_nwt model)
     * Horizontally, fluxes are uniformly distributed to child cells within a parent cell. The
     * Vertically, fluxes are distributed based on transmissivity (sat. thickness x Kh) of
-    inset model layers.
-    * The inset model is fully penetrating. Total flux through each column of parent cells
-    is equal to the total flux through the corresponding columns of connected inset model cells.
+    pfl_nwt model layers.
+    * The pfl_nwt model is fully penetrating. Total flux through each column of parent cells
+    is equal to the total flux through the corresponding columns of connected pfl_nwt model cells.
     The get_inset_boundary_flux_side verifies this with an assertion statement.
 
     """
@@ -76,7 +76,7 @@ class Tmr:
         else:
             self.cpth = parent_cell_budget_file
 
-        # get bounding cells in parent model for inset model
+        # get bounding cells in parent model for pfl_nwt model
         self.pi0, self.pj0 = get_ij(self.parent.modelgrid,
                                     self.inset.modelgrid.xcellcenters[0, 0],
                                     self.inset.modelgrid.ycellcenters[0, 0])
@@ -86,32 +86,32 @@ class Tmr:
         self.parent_nrow_in_inset = self.pi1 - self.pi0 + 1
         self.parent_ncol_in_inset = self.pj1 - self.pj0 + 1
 
-        # check for an even number of inset cells per parent cell in x and y directions
+        # check for an even number of pfl_nwt cells per parent cell in x and y directions
         x_refinment = self.parent.modelgrid.delr[0] / self.inset.modelgrid.delr[0]
         y_refinment = self.parent.modelgrid.delc[0] / self.inset.modelgrid.delc[0]
-        assert int(x_refinment) == x_refinment, "inset delr must be factor of parent delr"
-        assert int(y_refinment) == y_refinment, "inset delc must be factor of parent delc"
+        assert int(x_refinment) == x_refinment, "pfl_nwt delr must be factor of parent delr"
+        assert int(y_refinment) == y_refinment, "pfl_nwt delc must be factor of parent delc"
         assert x_refinment == y_refinment, "grid must have same x and y discretization"
         self.refinement = int(x_refinment)
 
     def get_parent_cells(self, side='top'):
         """
-        Get i, j locations in parent model along boundary of inset model.
+        Get i, j locations in parent model along boundary of pfl_nwt model.
 
         Parameters
         ----------
         pi0, pj0 : ints
-            Parent cell coinciding with origin (0, 0) cell of inset model
+            Parent cell coinciding with origin (0, 0) cell of pfl_nwt model
         pi1, pj1 : ints
-            Parent cell coinciding with lower right corner of inset model
+            Parent cell coinciding with lower right corner of pfl_nwt model
             (location nrow, ncol)
         side : str
-            Side of inset model ('left', 'bottom', 'right', or 'top')
+            Side of pfl_nwt model ('left', 'bottom', 'right', or 'top')
 
         Returns
         -------
         i, j : 1D arrays of ints
-            i, j locations of parent cells along inset model boundary
+            i, j locations of parent cells along pfl_nwt model boundary
         """
         pi0, pj0 = self.pi0, self.pj0
         pi1, pj1 = self.pi1 + 1, self.pj1 + 1
@@ -136,23 +136,23 @@ class Tmr:
     def get_inset_cells(self, i, j,
                         side='top'):
         """
-        Get boundary cells in inset model corresponding to parent cells i, j.
+        Get boundary cells in pfl_nwt model corresponding to parent cells i, j.
 
         Parameters
         ----------
         i, j : int
-            Cell in parent model connected to boundary of inset model.
+            Cell in parent model connected to boundary of pfl_nwt model.
         pi0, pj0 : int
-            Parent cell coinciding with origin (0, 0) cell of inset model
+            Parent cell coinciding with origin (0, 0) cell of pfl_nwt model
         refinement : int
-            Refinement level (i.e. 10 if there are 10 inset cells for every parent cell).
+            Refinement level (i.e. 10 if there are 10 pfl_nwt cells for every parent cell).
         side : str
-            Side of inset model ('left', 'bottom', 'right', or 'top')
+            Side of pfl_nwt model ('left', 'bottom', 'right', or 'top')
 
         Returns
         -------
         i, j : 1D arrays of ints
-            Corresponding i, j locations along boundary of inset grid
+            Corresponding i, j locations along boundary of pfl_nwt grid
         """
         pi0, pj0 = self.pi0, self.pj0
         refinement = self.refinement
@@ -190,7 +190,7 @@ class Tmr:
 
     def get_inset_boundary_flux_side(self, side):
         """
-        Compute fluxes between parent and inset models on a side;
+        Compute fluxes between parent and pfl_nwt models on a side;
         assuming that flux to among connecting child cells
         is horizontally uniform within a parent cell, but can vary
         vertically based on transmissivity.
@@ -198,13 +198,13 @@ class Tmr:
         Parameters
         ----------
         side : str
-            Side of inset model (top, bottom, right, left)
+            Side of pfl_nwt model (top, bottom, right, left)
 
         Returns
         -------
         df : DataFrame
             Columns k, i, j, Q; describing locations and boundary flux
-            quantities for the inset model side.
+            quantities for the pfl_nwt model side.
         """
         parent_cells = self.get_parent_cells(side=side)
         nlay_inset = self.inset.nlay
@@ -215,19 +215,19 @@ class Tmr:
         jside = []
         for i, j in zip(*parent_cells):
 
-            # get the inset model cells
+            # get the pfl_nwt model cells
             ii, jj = self.get_inset_cells(i, j, side=side)
 
             # parent model flow and layer bottoms
             Q_parent = self.cbc[self.flow_component[side]][:, i, j] * self.flow_sign[side]
             botm_parent = self.parent.dis.botm.array[:, i, j]
 
-            # inset model bottoms, and K
+            # pfl_nwt model bottoms, and K
             # assume equal transmissivity for child cell to a parent cell, within each layer
             # (use average child cell k and thickness for each layer)
-            # These are the layer bottoms for the inset
+            # These are the layer bottoms for the pfl_nwt
             botm_inset = self.inset.dis.botm.array[:, ii, jj].mean(axis=1, dtype=np.float64)
-            # These are the ks from the inset model
+            # These are the ks from the pfl_nwt model
             kh_inset = self.inset.upw.hk.array[:, ii, jj].mean(axis=1, dtype=np.float64)
 
             # determine aquifer top
@@ -268,7 +268,7 @@ class Tmr:
 
         Returns
         -------
-        df : DataFrame of all inset model boundary fluxes
+        df : DataFrame of all pfl_nwt model boundary fluxes
             With columns k, i, j, flux, and per
         """
         assert 'UPW' in self.inset.get_package_list(), "need UPW package to get boundary fluxes"
@@ -296,7 +296,7 @@ class Tmr:
         df = pd.concat(dfs)
 
         # check that Qnet out of the parent model equals
-        # the derived fluxes on the inset side
+        # the derived fluxes on the pfl_nwt side
         tol = 0.01
         for per, dfp in df.groupby('per'):
 
@@ -318,7 +318,7 @@ class Tmr:
 
     def get_parent_boundary_fluxes_side(self, i, j, side, kstpkper=(0, 0)):
         """Get boundary fluxes at a sequence of i, j locations
-        in the parent model, for a specified side of the inset model,
+        in the parent model, for a specified side of the pfl_nwt model,
         for a given stress period.
 
         Parameters
@@ -333,10 +333,10 @@ class Tmr:
         Returns
         -------
         Qside_parent : 2D array
-            Boundary fluxes through parent cells, along side of inset model.
-            Signed with respect to inset model (i.e., for flow through the
+            Boundary fluxes through parent cells, along side of pfl_nwt model.
+            Signed with respect to pfl_nwt model (i.e., for flow through the
             left face of the parent cells, into the right side of the
-            inset model, the sign is positive (flow into the inset model),
+            pfl_nwt model, the sign is positive (flow into the pfl_nwt model),
             even though MODFLOW fluxes are right-positive.
             Shape: (n parent layers, len(i, j))
         """
@@ -373,10 +373,10 @@ class Tmr:
         kstp, per = kstpkper
         from collections import defaultdict
         components = defaultdict(dict)
-        # get inset boundary fluxes from scratch, or attached wel package
+        # get pfl_nwt boundary fluxes from scratch, or attached wel package
         if 'WEL' not in self.inset.get_package_list():
             df = self.get_inset_boundary_fluxes(kstpkper=(0, kstpkper))
-            components['Boundary flux']['inset'] = df.flux.sum()
+            components['Boundary flux']['pfl_nwt'] = df.flux.sum()
         else:
             spd = self.inset.wel.stress_period_data[per]
             rowsides = (spd['i'] == 0) | (spd['i'] == self.inset.nrow-1)
@@ -385,10 +385,10 @@ class Tmr:
                        (spd['i'] > 0) & \
                        (spd['i'] < self.inset.nrow-1)
             isboundary = rowsides | colsides
-            components['Boundary flux (WEL)']['inset'] = spd[isboundary]['flux'].sum()
+            components['Boundary flux (WEL)']['pfl_nwt'] = spd[isboundary]['flux'].sum()
             components['Boundary flux (WEL)']['parent'] = self.get_parent_boundary_net_flux(kstpkper=kstpkper)
             # (wells besides boundary flux wells)
-            components['Pumping (WEL)']['inset'] = spd[~isboundary]['flux'].sum()
+            components['Pumping (WEL)']['pfl_nwt'] = spd[~isboundary]['flux'].sum()
 
         if 'WEL' in self.parent.get_package_list():
             spd = self.parent.wel.stress_period_data[per]
@@ -408,17 +408,17 @@ class Tmr:
                      self.inset.dis.delr[0]**2
 
         components['Recharge']['parent'] = rsum_parent_in_inset
-        components['Recharge']['inset'] = rsum_inset
+        components['Recharge']['pfl_nwt'] = rsum_inset
 
         for k, v in components.items():
-            components[k]['rpd'] = 100 * v['inset']/v['parent']
+            components[k]['rpd'] = 100 * v['pfl_nwt']/v['parent']
         if outfile is not None:
             with open(outfile, 'w') as dest:
-                dest.write('component parent inset rpd\n')
+                dest.write('component parent pfl_nwt rpd\n')
                 for k, v in components.items():
                     dest.write('{} {parent} {inset} {rpd:.3f}\n'.format(k, **v))
 
-        print('component parent inset rpd')
+        print('component parent pfl_nwt rpd')
         for k, v in components.items():
             print('{} {parent} {inset}'.format(k, **v))
 
@@ -429,7 +429,7 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
                                       phiramp=0.05):
     """Redistributes a vertical column of parent model fluxes at a single
     location i, j in the parent model, to the corresponding layers in the
-    inset model, based on inset model layer transmissivities, accounting for the
+    pfl_nwt model, based on pfl_nwt model layer transmissivities, accounting for the
     position of the water table in the parent model.
 
     Parameters
@@ -444,11 +444,11 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
     top_parent : float
         Top elevation of parent model at location i, j
     botm_inset : 1D array
-        Mean elevation of inset cells along the boundary face, by layer.
-        (Length is n inset layers)
+        Mean elevation of pfl_nwt cells along the boundary face, by layer.
+        (Length is n pfl_nwt layers)
     kh_inset : 1D array
-        Mean hydraulic conductivity of inset cells along the boundary face, by layer.
-        (Length is n inset layers)
+        Mean hydraulic conductivity of pfl_nwt cells along the boundary face, by layer.
+        (Length is n pfl_nwt layers)
     water_table_parent : float
         Water table elevation in parent model.
     phiramp : float
@@ -459,11 +459,11 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
     Returns
     -------
     Q_inset : 1D array
-        Vertical column of horizontal fluxes through each layer of the inset
-        model, for the group of inset model cells corresponding to parent
+        Vertical column of horizontal fluxes through each layer of the pfl_nwt
+        model, for the group of pfl_nwt model cells corresponding to parent
         location i, j (represents the sum of horizontal flux through the
-        boundary face of the inset model cells in each layer).
-        (Length is n inset layers).
+        boundary face of the pfl_nwt model cells in each layer).
+        (Length is n pfl_nwt layers).
 
     """
 
@@ -473,7 +473,7 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
     assert len(Q_parent) == len(botm_parent), \
         txt.format('parent', 'fluxes', len(Q_parent), len(botm_parent))
     assert len(botm_inset) == len(kh_inset), \
-        txt.format('inset', 'kh_inset', len(kh_inset), len(botm_inset))
+        txt.format('pfl_nwt', 'kh_inset', len(kh_inset), len(botm_inset))
 
     # rename variables
     Q1 = Q_parent
@@ -523,13 +523,13 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
         if botm in botm2:
             k2 += 1
 
-    l1 = np.array(l1) # parent cell connections for inset cells
-    l2 = np.array(l2) # inset cell connections for parent cells
+    l1 = np.array(l1) # parent cell connections for pfl_nwt cells
+    l2 = np.array(l2) # pfl_nwt cell connections for parent cells
 
-    # if bottom of inset hangs below bottom of parent;
+    # if bottom of pfl_nwt hangs below bottom of parent;
     # last layer will >= nlay. Assign T=0 to these intervals.
     l2[l2 >= nlay2] = nlay2
-    # include any part of parent model hanging below inset
+    # include any part of parent model hanging below pfl_nwt
     # with the lowest layer in the transmissivity calculation
     l1[l1 >= nlay1] = nlay1 - 1
 
@@ -547,27 +547,27 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
 
     # get transmissivity fractions (weights)
     tfrac = []
-    # for each parent/inset connection
+    # for each parent/pfl_nwt connection
     for i2, i1 in enumerate(l1):
         # compute transmissivity fraction  (of parent cell)
         itfrac = T2[i2] / T1[i1] if T2[i2] > 0 else 0
         tfrac.append(itfrac)
     tfrac = np.array(tfrac)
 
-    # assign incoming flux to each inset/parent connection
+    # assign incoming flux to each pfl_nwt/parent connection
     # multiply by weight
     Qs = Q1[l1] * tfrac
 
     # Where nan, make 0
     Qs[np.isnan(Qs)] = 0
     np.savetxt('../qs.dat', Qs)
-    # sum fluxes by inset model layer
+    # sum fluxes by pfl_nwt model layer
     Q_inset = []
     for k in range(nlay2):
         Q_inset.append(Qs[l2 == k].sum())
 
     # check that total flux through column of cells
-    # matches for inset layers and parent layers
+    # matches for pfl_nwt layers and parent layers
     assert np.abs(np.abs(np.sum(Q_parent)) - np.abs(np.sum(Q_inset))) < 1e-3
     return np.array(Q_inset)
 

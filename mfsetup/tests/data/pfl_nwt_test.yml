@@ -1,13 +1,11 @@
-# Inset model configuration
+# argments to flopy.modflow.Modflow.__init__ or load for pfl_nwt
 
-# argments to flopy.modflow.Modflow.__init__ or load for inset
 model:
   modelname: 'pfl'
   model_ws: '../tmp/pfl_inset/'
   exe_name: 'mfnwt'
   external_path: 'external/'
   perimeter_boundary_type: 'specified head'
-  parent_stress_periods: [0] # zero-based stress periods in parent model to include
   packages: ['dis',
              'bas6',
              'oc',
@@ -21,14 +19,15 @@ model:
              'nwt'
   ]
 
-# argments to flopy.modflow.Modflow.load for inset
+# argments to flopy.modflow.Modflow.load for pfl_nwt
 parent:
   namefile: 'pfl.nam'
   model_ws: 'plainfieldlakes/'
   headfile: 'plainfieldlakes/pfl.hds'
   hiKlakes_value: 1.e4
+  copy_stress_periods: 'all'
 
-# parameters for setting up the inset grid
+# parameters for setting up the pfl_nwt grid
 # using features in features_file
 setup_grid:
   remake: True
@@ -41,7 +40,7 @@ setup_grid:
       id_column: 'HYDROID'
       include_ids: [600054357, 600054319] # plainfield lake; long lake
   output_files:
-    grid_file: 'grid.json' # inset grid info will be written to this file
+    grid_file: 'grid.json' # pfl_nwt grid info will be written to this file
 
 # Inset model settings and
 # arguments to flopy.modflow.ModflowDis
@@ -53,14 +52,16 @@ dis:
   nstp: [1, 25]
   tsmult: [1, 1.5]
   steady: [True, False]
+  length_units: 'meters'  # alternatively, specify lenuni: 2
+  time_units: 'days'  # alternatively, specify itmuni: 4
   source_data:
     top:
       filename: 'plainfieldlakes/source_data/dem10m.tif'
       elevation_units: 'meters'
     botm:
       from_parent:
-        0: -0.5 # bottom of layer zero in inset is positioned at half the thickness of parent layer 1
-        1: 0 # bottom of layer 1 in inset corresponds to bottom of layer 0 in parent
+        0: -0.5 # bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1
+        1: 0 # bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent
         2: 1
         3: 2
         4: 3
@@ -77,15 +78,15 @@ upw:
   source_data:
     hk:
       from_parent:
-        0: 0 # layer zero in inset has values of parent layer zero
-        1: 0 # layer one in inset has values of parent layer zero
+        0: 0 # layer zero in pfl_nwt has values of parent layer zero
+        1: 0 # layer one in pfl_nwt has values of parent layer zero
         2: 1
         3: 2
         4: 3
     vka:
       from_parent:
-        0: 0 # layer zero in inset has values of parent layer zero
-        1: 0 # layer one in inset has values of parent layer zero
+        0: 0 # layer zero in pfl_nwt has values of parent layer zero
+        1: 0 # layer one in pfl_nwt has values of parent layer zero
         2: 1
         3: 2
         4: 3
@@ -107,9 +108,9 @@ rch:
 
 wel:
   options: ['SPECIFY', '0.01']
-  added_wells: # name: per, x, y or i, j location; layer (k), flux; or csv file with these columns
-    well1: # {per: 1, x: 563343.92, y: 414988.09, k: 0, flux: -2000}
   source_data:
+    wells: # name: per, x, y or i, j location; layer (k), flux; or csv file with these columns
+      well1: {per: 1, x: 563343.92, y: 414988.09, k: 0, flux: -2000}
     wdnr_dataset:
       water_use: 'plainfieldlakes/source_data/master_wu.csv' # monthly water use rates from WDNR
       water_use_points: 'plainfieldlakes/source_data/wu_points.shp' # point locations of wells in water_use

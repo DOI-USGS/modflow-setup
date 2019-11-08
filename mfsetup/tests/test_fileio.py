@@ -66,10 +66,10 @@ def test_load_grid():
         pass
 
 
-def test_load_cfg(mfnwt_inset_test_cfg_path):
-    cfg_pathed = load_cfg(mfnwt_inset_test_cfg_path)
-    cfg = load(mfnwt_inset_test_cfg_path)
-    config_file_location = os.path.split(os.path.abspath(mfnwt_inset_test_cfg_path))[0]
+def test_load_cfg(pfl_nwt_test_cfg_path):
+    cfg_pathed = load_cfg(pfl_nwt_test_cfg_path)
+    cfg = load(pfl_nwt_test_cfg_path)
+    config_file_location = os.path.split(os.path.abspath(pfl_nwt_test_cfg_path))[0]
     assert cfg_pathed['nwt']['use_existing_file'] is None
 
     p1 = os.path.normpath(cfg_pathed['model']['model_ws'])

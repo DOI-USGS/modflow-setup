@@ -296,7 +296,7 @@ def concat_periodata_groups(groups):
 
 
 def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
-                               period_stat, id_column, data_column):
+                                         period_stat, id_column, data_column):
     """
 
     Parameters
@@ -386,7 +386,7 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
 
 
 def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
-                               period_stat, datetime_column):
+                                      period_stat, datetime_column):
 
     if isinstance(start_datetime, pd.Timestamp):
         start_datetime = start_datetime.strftime('%Y-%m-%d')
@@ -424,6 +424,6 @@ def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
             raise Exception("")
 
     # compute statistic on data
-    period_mean = getattr(arr, stat)(axis=0)
+    period_stat = getattr(arr, stat)(axis=0)
 
-    return period_mean
+    return period_stat

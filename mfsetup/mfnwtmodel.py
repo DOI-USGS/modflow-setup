@@ -11,26 +11,21 @@ import flopy
 fm = flopy.modflow
 from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
-from .discretization import fix_model_layer_conflicts, verify_minimum_layer_thickness, fill_empty_layers
 from .tdis import setup_perioddata_group
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
-from .utils import update, get_input_arguments
-from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
 from .lakes import make_lakarr2d, make_bdlknc_zones, make_bdlknc2d
-from .utils import update, get_packages
+from .utils import update, get_packages, get_input_arguments
 from .obs import read_observation_data
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
-from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text
+from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text, lenuni_values
 from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
 
 
 class MFnwtModel(MFsetupMixin, Modflow):
     """Class representing a MODFLOW-NWT model"""
-
-    source_path = os.path.split(__file__)[0]
 
     def __init__(self, parent=None, cfg=None,
                  modelname='model', exe_name='mfnwt',
@@ -46,10 +41,11 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
                                      'ghb', 'lak', 'sfr',
                                      'wel', 'mnw2', 'gag', 'hyd', 'nwt']
+        # default configuration (different for nwt vs mf6)
         self.cfg = load(self.source_path + '/mfnwt_defaults.yml')
         self.cfg['filename'] = self.source_path + '/mfnwt_defaults.yml'
-        self._load_cfg(cfg)  # update configuration dict with values in cfg
-        self.relative_external_paths = self.cfg['model'].get('relative_external_paths', True)
+        self._set_cfg(cfg)  # set up the model configuration dictionary
+        self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
 
         # property arrays
@@ -92,33 +88,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
         #    self._ibound = ibound
         #return self._ibound
 
-    def _load_cfg(self, cfg):
-        """Load configuration file; update dictionary.
-        TODO: need to figure out what goes here and what goes in load_cfg static method. Or maybe this should be called set_cfg
-        """
-        if isinstance(cfg, str):
-            assert os.path.exists(cfg), "config file {} not found".format(cfg)
-            updates = load(cfg)
-            updates['filename'] = cfg
-        elif isinstance(cfg, dict):
-            updates = cfg.copy()
-        elif cfg is None:
-            return
-        else:
-            raise TypeError("unrecognized input for cfg")
+    def _set_parent(self):
+        """Set attributes related to a parent or source model
+        if one is specified."""
 
-        # make sure empty variables get initialized as dicts
-        for k, v in self.cfg.items():
-            if v is None:
-                k[v] = {}
-        for k, v in updates.items():
-            if v is None:
-                k[v] = {}
-        update(self.cfg, updates)
-
-        # load the parent model
-        if 'namefile' in self.cfg.get('parent', {}).keys():
-            kwargs = self.cfg['parent'].copy()
+        kwargs = self.cfg.get('parent')
+        if kwargs is not None:
+            kwargs = kwargs.copy()
             kwargs['f'] = kwargs.pop('namefile')
             # load only specified packages that the parent model has
             packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
@@ -134,33 +110,30 @@ class MFnwtModel(MFsetupMixin, Modflow):
             self._parent = fm.Modflow.load(**kwargs)
             print("finished in {:.2f}s\n".format(time.time() - t0))
 
+            # parent model units
+            if 'length_units' not in self.cfg['parent']:
+                self.cfg['parent']['length_units'] = lenuni_text[self.parent.dis.lenuni]
+            if 'time_units' not in self.cfg['parent']:
+                self.cfg['parent']['time_units'] = itmuni_text[self.parent.dis.itmuni]
+
+            # set the parent model grid from mg_kwargs if not None
+            # otherwise, convert parent model grid to MFsetupGrid
             mg_kwargs = self.cfg['parent'].get('SpatialReference',
-                                               self.cfg['parent'].get('modelgrid', None))
-        # set the parent model grid from mg_kwargs if not None
-        # otherwise, convert parent model grid to MFsetupGrid
-        self._set_parent_modelgrid(mg_kwargs)
+                                          self.cfg['parent'].get('modelgrid', None))
+            self._set_parent_modelgrid(mg_kwargs)
 
-        # make sure that the output paths exist
-        #output_paths = [self.cfg['intermediate_data']['output_folder'],
-        #                self.cfg['model']['model_ws'],
-        #                os.path.join(self.cfg['model']['model_ws'], self.cfg['model']['external_path'])
-        #                ]
-        output_paths = list(self.cfg['postprocessing']['output_folders'].values())
-        for folder in output_paths:
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-
-        # absolute path to config file
-        self._config_path = os.path.split(os.path.abspath(self.cfg['filename']))[0]
-
-        # other variables
-        self.cfg['external_files'] = {}
-        # TODO: extend to multiple source models
-        # TODO: allow for mf6 parent
-        if 'length_units' not in self.cfg['parent']:
-            self.cfg['parent']['length_units'] = lenuni_text[self.parent.dis.lenuni]
-        if 'time_units' not in self.cfg['parent']:
-            self.cfg['parent']['time_units'] = itmuni_text[self.parent.dis.itmuni]
+            # default_source_data, where omitted configuration input is
+            # obtained from parent model by default
+            if self.cfg['parent'].get('default_source_data'):
+                self._parent_default_source_data = True
+                self.cfg['dis']['nlay'] = self.parent.dis.nlay
+                if self.cfg['dis'].get('start_date_time') is None:
+                    self.cfg['dis']['start_date_time'] = self.cfg['parent']['start_date_time']
+                if self.cfg['dis'].get('nper') is None:
+                    self.cfg['dis']['nper'] = self.parent.dis.nper
+                for var in ['nper', 'perlen', 'nstp', 'tsmult', 'steady']:
+                    if self.cfg['dis'].get(var) is None:
+                        self.cfg['dis'][var] = self.parent.dis.__dict__[var].array
 
     def _set_parent_modelgrid(self, mg_kwargs=None):
         """Reset the parent model grid from keyword arguments
@@ -179,13 +152,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
         if 'lenuni' in self.cfg['parent']:
             parent_lenuni = self.cfg['parent']['lenuni']
         elif 'length_units' in self.cfg['parent']:
-            parent_lenuni = lenuni_text[self.cfg['parent']['length_units']]
+            parent_lenuni = lenuni_values[self.cfg['parent']['length_units']]
 
         self.parent.dis.lenuni = parent_lenuni
         lmult = convert_length_units(parent_lenuni, 'meters')
         kwargs['delr'] = self.parent.dis.delr.array * lmult
         kwargs['delc'] = self.parent.dis.delc.array * lmult
-        kwargs['lenuni'] = 2  # parent modelgrid in same CRS as inset modelgrid
+        kwargs['lenuni'] = 2  # parent modelgrid in same CRS as pfl_nwt modelgrid
         kwargs = get_input_arguments(kwargs, MFsetupGrid, warn=False)
         self._parent._mg_resync = False
         self._parent._modelgrid = MFsetupGrid(**kwargs)
@@ -195,26 +168,29 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         Needs some work to be more general.
         """
-        parent_sp = self.cfg['model']['parent_stress_periods']
+        parent_sp = self.cfg['parent']['copy_stress_periods']
 
         # use all stress periods from parent model
         if isinstance(parent_sp, str) and parent_sp.lower() == 'all':
             nper = self.cfg['dis'].get('nper')
+            parent_sp = list(range(self.parent.nper))
             if nper is None or nper < self.parent.nper:
                 nper = self.parent.nper
-            parent_sp = list(range(self.parent.nper))
-            self.cfg['dis']['perlen'] = None # set from parent model
-            self.cfg['dis']['steady'] = None
+            elif nper > self.parent.nper:
+                for i in range(nper - self.parent.nper):
+                    parent_sp.append(parent_sp[-1])
+            #self.cfg['dis']['perlen'] = None # set from parent model
+            #self.cfg['dis']['steady'] = None
 
         # use only specified stress periods from parent model
         elif isinstance(parent_sp, list):
             # limit parent stress periods to include
-            # to those in parent model and nper specified for inset
+            # to those in parent model and nper specified for pfl_nwt
             nper = self.cfg['dis'].get('nper', len(parent_sp))
 
             parent_sp = [0]
             perlen = [self.parent.dis.perlen.array[0]]
-            for i, p in enumerate(self.cfg['model']['parent_stress_periods']):
+            for i, p in enumerate(self.cfg['parent']['copy_stress_periods']):
                 if i == nper:
                     break
                 if p == self.parent.nper:
@@ -238,7 +214,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         assert len(parent_sp) == nper
         self.cfg['dis']['nper'] = nper
-        self.cfg['model']['parent_stress_periods'] = parent_sp
+        self.cfg['parent']['copy_stress_periods'] = parent_sp
 
         #if self.cfg['dis'].get('steady') is None:
         #    self.cfg['dis']['steady'] = [True] + [False] * (nper)
@@ -254,7 +230,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
             elif np.isscalar(arg):
                 self.cfg['dis'][var] = [arg] * nper
             else:
-                self.cfg['dis'][var] = getattr(self.parent.dis, var)[self.cfg['model']['parent_stress_periods']]
+                self.cfg['dis'][var] = getattr(self.parent.dis, var)[self.cfg['parent']['copy_stress_periods']]
 
         steady = {kper: issteady for kper, issteady in enumerate(self.cfg['dis']['steady'])}
 
@@ -282,7 +258,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                    epsg=None,
                    remake=True,
                    variable_mappings={},
-                   grid_file='grid.yml',
+                   grid_file='grid.json',
                    write_shapefile=True):
         """
 
@@ -301,10 +277,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         id_column = id_column.lower()
 
-        # conversions for inset/parent model units to meters
+        # conversions for pfl_nwt/parent model units to meters
         inset_lmult = convert_length_units(self.length_units, 'meters')
         parent_lmult = convert_length_units(self.parent.dis.lenuni, 'meters')
-        dxy_m = np.round(dxy * inset_lmult, 4) # dxy is specified in inset model units
+        dxy_m = np.round(dxy * inset_lmult, 4) # dxy is specified in pfl_nwt model units
 
         # set up the parent modelgrid if it isn't
         parent_delr_m = np.round(self.parent.dis.delr.array[0] * parent_lmult, 4)
@@ -401,10 +377,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # resample the top from the DEM
         if self.cfg['dis']['remake_top']:
-            self._setup_array(package, 'top', write_fmt='%.2f')
+            self._setup_array(package, 'top', datatype='array2d', write_fmt='%.2f')
 
         # make the botm array
-        self._setup_array(package, 'botm', by_layer=True, write_fmt='%.2f')
+        self._setup_array(package, 'botm', datatype='array3d', write_fmt='%.2f')
 
         # put together keyword arguments for dis package
         kwargs = self.cfg['grid'].copy() # nrow, ncol, delr, delc
@@ -436,10 +412,11 @@ class MFnwtModel(MFsetupMixin, Modflow):
         t0 = time.time()
 
         # make the strt array
-        self._setup_array(package, 'strt', by_layer=True)
+        self._setup_array(package, 'strt', datatype='array3d', write_fmt='%.2f')
         
         # make the ibound array
-        self._setup_array(package, 'ibound', by_layer=True, write_fmt='%d')
+        self._setup_array(package, 'ibound', datatype='array3d', write_fmt='%d',
+                          dtype=int)
 
         kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
         bas = fm.ModflowBas(model=self, **kwargs)
@@ -448,6 +425,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
     def setup_chd(self):
         """Set up constant head package for perimeter boundary.
+        Todo: create separate perimeter boundary setup method/input block
         """
         print('setting up CHD package...')
         t0 = time.time()
@@ -465,10 +443,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
                 kstpkper.append((kstp, kper))
                 unique_kper.append(kper)
 
-        assert len(unique_kper) == len(set(self.cfg['model']['parent_stress_periods'])), \
+        assert len(unique_kper) == len(set(self.cfg['parent']['copy_stress_periods'])), \
         "read {} from {},\nexpected stress periods: {}".format(kstpkper,
                                                                headfile,
-                                                               sorted(list(set(self.cfg['model']['parent_stress_periods'])))
+                                                               sorted(list(set(self.cfg['parent']['copy_stress_periods'])))
                                                                )
         k, i, j = self.get_boundary_cells()
 
@@ -533,7 +511,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
         t0 = time.time()
 
         # make the rech array
-        self._setup_array(package, 'rech')
+        self._setup_array(package, 'rech', datatype='transient2d',
+                          resample_method='linear',
+                          write_fmt='%.6e',
+                          write_nodata=0.)
 
         # create flopy package instance
         kwargs = self.cfg['rch']
@@ -575,14 +556,16 @@ class MFnwtModel(MFsetupMixin, Modflow):
                     break
 
         self._setup_array(package, 'hk', vmin=0, vmax=hiKlakes_value,
-                           source_package=source_package, by_layer=True)
+                           source_package=source_package, datatype='array3d', write_fmt='%.6e')
         self._setup_array(package, 'vka', vmin=0, vmax=hiKlakes_value,
-                           source_package=source_package, by_layer=True)
+                           source_package=source_package, datatype='array3d', write_fmt='%.6e')
         if np.any(~self.dis.steady.array):
             self._setup_array(package, 'sy', vmin=0, vmax=1,
-                               source_package=source_package, by_layer=True)
+                              source_package=source_package,
+                              datatype='array3d', write_fmt='%.6e')
             self._setup_array(package, 'ss', vmin=0, vmax=1,
-                               source_package=source_package, by_layer=True)
+                              source_package=source_package,
+                              datatype='array3d', write_fmt='%.6e')
             sy = self.cfg['intermediate_data']['sy']
             ss = self.cfg['intermediate_data']['ss']
         else:
@@ -1049,7 +1032,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         m : mfsetup.MFnwtModel model object
         """
 
-        cfg = cls.load_cfg(yamlfile, verbose=verbose)
+        cfg = load_cfg(yamlfile)
         cfg['filename'] = yamlfile
         print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
@@ -1086,16 +1069,11 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print('wrote bounding box shapefile')
         return m
 
-    @staticmethod
-    def load_cfg(yamlfile, verbose=False):
-        """Load model configuration info, adjusting paths to model_ws."""
-        return load_cfg(yamlfile, default_file='/mfnwt_defaults.yml')
-
     @classmethod
     def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = cls.load_cfg(yamlfile, verbose=verbose)
+        cfg = load_cfg(yamlfile, verbose=verbose)
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
@@ -1115,7 +1093,7 @@ class Inset(MFnwtModel):
     """Class representing a MODFLOW-NWT model that is an
     inset of a parent MODFLOW model."""
     def __init__(self, parent=None, cfg=None,
-                 modelname='inset', exe_name='mfnwt',
+                 modelname='pfl_nwt', exe_name='mfnwt',
                  version='mfnwt', model_ws='.',
                  external_path='external/', **kwargs):
 

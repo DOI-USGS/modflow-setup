@@ -7,6 +7,7 @@ from scipy import ndimage
 from scipy.signal import convolve2d
 from flopy.mf6.data.mfdatalist import MFList
 
+
 def adjust_layers(dis, minimum_thickness=1):
     """
     Adjust bottom layer elevations to maintain a minimum thickness.

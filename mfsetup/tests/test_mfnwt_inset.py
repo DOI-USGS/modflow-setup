@@ -10,66 +10,25 @@ import pandas as pd
 import flopy
 fm = flopy.modflow
 from mfsetup import MFnwtModel
-from ..fileio import exe_exists
+from ..fileio import exe_exists, load_cfg
 from ..units import convert_length_units
 from ..utils import get_input_arguments
 
 
-
-@pytest.fixture(scope="function")
-def cfg(mfnwt_inset_test_cfg_path):
-    cfg = MFnwtModel.load_cfg(mfnwt_inset_test_cfg_path)
-    # add some stuff just for the tests
-    cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
-    return cfg
-
-
-@pytest.fixture(scope="function")
-def inset(cfg):
-    print('pytest fixture inset')
-    cfg = cfg.copy()
-    m = MFnwtModel(cfg=cfg, **cfg['model'])
-    return m
-
-
 @pytest.fixture(scope="session")
-def inset_setup_from_yaml(mfnwt_inset_test_cfg_path):
-    m = MFnwtModel.setup_from_yaml(mfnwt_inset_test_cfg_path)
+def pfl_nwt_setup_from_yaml(pfl_nwt_test_cfg_path):
+    m = MFnwtModel.setup_from_yaml(pfl_nwt_test_cfg_path)
     m.write_input()
     return m
 
 
-@pytest.fixture(scope="function")
-def inset_with_grid(inset):
-    print('pytest fixture inset_with_grid')
-    m = inset  #deepcopy(inset)
-    cfg = inset.cfg.copy()
-    cfg['setup_grid']['grid_file'] = inset.cfg['setup_grid'].pop('output_files').pop('grid_file')
-    sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
-    sd['features_shapefile'] = sd.pop('filename')
-    cfg['setup_grid'].update(sd)
-    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
-    m.setup_grid(**kwargs)
-    return inset
-
-
-@pytest.fixture(scope="function")
-def inset_with_dis(inset_with_grid):
-    print('pytest fixture inset_with_dis')
-    m = inset_with_grid  #deepcopy(inset_with_grid)
-    m.cfg['dis']['remake_arrays'] = True
-    m.cfg['dis']['regrid_top_from_dem'] = True
-    dis = m.setup_dis()
-    return m
-
-
-def test_load_cfg(cfg):
-    cfg = cfg
+def test_load_cfg(pfl_nwt_cfg):
+    cfg = pfl_nwt_cfg
     assert True
 
 
-def test_init(cfg):
-    cfg = cfg.copy()
+def test_init(pfl_nwt_cfg):
+    cfg = pfl_nwt_cfg.copy()
     cfg['model']['packages'] = []
     # test initialization with no packages
     m = MFnwtModel(cfg=cfg, **cfg['model'])
@@ -80,24 +39,29 @@ def test_init(cfg):
     assert isinstance(m, MFnwtModel)
 
 
-def test_repr(inset, inset_with_grid):
-    txt = inset.__repr__()
+def test_repr(pfl_nwt, pfl_nwt_with_grid):
+    txt = pfl_nwt.__repr__()
     assert isinstance(txt, str)
     # cheesy test that flopy repr isn't returned
     assert 'CRS:' in txt and 'Bounds:' in txt
-    txt = inset_with_grid.__repr__()
+    txt = pfl_nwt_with_grid.__repr__()
     assert isinstance(txt, str)
 
 
-def test_inset(inset):
-    assert isinstance(inset, MFnwtModel)
+def test_pfl_nwt(pfl_nwt):
+    assert isinstance(pfl_nwt, MFnwtModel)
 
 
-def test_inset_with_grid(inset_with_grid):
-    assert inset_with_grid.modelgrid is not None
+def test_pfl_nwt_with_grid(pfl_nwt_with_grid):
+    assert pfl_nwt_with_grid.modelgrid is not None
 
 
-def test_set_perioddata(inset_with_transient_parent):
+def test_perioddata(pfl_nwt):
+    model = pfl_nwt
+    assert np.array_equal(model.perioddata.steady, [True, False])
+
+
+def test_set_perioddata_tr_parent(inset_with_transient_parent):
     if inset_with_transient_parent is not None:
         m = deepcopy(inset_with_transient_parent)
         perioddata = m.perioddata
@@ -106,18 +70,18 @@ def test_set_perioddata(inset_with_transient_parent):
         assert perioddata['time'].values[-1] == np.sum(m.cfg['dis']['perlen'])
 
 
-def test_load_grid(inset, inset_with_grid):
+def test_load_grid(pfl_nwt, pfl_nwt_with_grid):
 
-    m = inset_with_grid  #deepcopy(inset_with_grid)
-    m2 = inset  #deepcopy(inset)
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
+    m2 = pfl_nwt  #deepcopy(pfl_nwt)
     m2.load_grid(m.cfg['setup_grid']['grid_file'])
     assert m.cfg['grid'] == m2.cfg['grid']
 
 
-def test_regrid_linear(inset_with_grid):
+def test_regrid_linear(pfl_nwt_with_grid):
 
     from mfsetup.interpolate import regrid
-    m = inset_with_grid  #deepcopy(inset_with_grid)
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
     arr = m.parent.dis.top.array
 
     # test basic regrid with no masking
@@ -135,13 +99,13 @@ def test_regrid_linear(inset_with_grid):
     assert np.allclose(rg1.mean(), rg3.mean(), atol=0.01, rtol=1e-4)
 
 
-def test_regrid_linear_with_mask(inset_with_grid):
+def test_regrid_linear_with_mask(pfl_nwt_with_grid):
 
     from mfsetup.interpolate import regrid
-    m = inset_with_grid  #deepcopy(inset_with_grid)
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
     arr = m.parent.dis.top.array
 
-    # pick out some inset cells
+    # pick out some pfl_nwt cells
     # find locations in parent to make mask
     imask_inset = np.arange(50)
     jmask_inset = np.arange(50)
@@ -167,10 +131,10 @@ def test_regrid_linear_with_mask(inset_with_grid):
     assert np.allclose(rg1, rg2)
 
 
-def test_regrid_nearest(inset_with_grid):
+def test_regrid_nearest(pfl_nwt_with_grid):
 
     from mfsetup.interpolate import regrid
-    m = inset_with_grid  #deepcopy(inset_with_grid)
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
     arr = m.parent.dis.top.array
 
     # test basic regrid with no masking
@@ -179,8 +143,8 @@ def test_regrid_nearest(inset_with_grid):
     assert np.allclose(rg1, rg2)
 
 
-def test_set_lakarr(inset_with_dis):
-    m = inset_with_dis
+def test_set_lakarr(pfl_nwt_with_dis):
+    m = pfl_nwt_with_dis
     assert 'lak' in m.package_list
     lakes_shapefile = m.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
     assert lakes_shapefile is not None
@@ -201,9 +165,9 @@ def test_set_lakarr(inset_with_dis):
     assert m._lakarr2d.sum() == 0
 
 
-def test_dis_setup(inset_with_grid):
+def test_dis_setup(pfl_nwt_with_grid):
 
-    m = inset_with_grid  #deepcopy(inset_with_grid)
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
 
     # test intermediate array creation
     m.cfg['dis']['source_data']['top']['elevation_units'] = 'meters'
@@ -256,9 +220,9 @@ def test_dis_setup(inset_with_grid):
     assert np.allclose(dis.botm.array.mean() * convert_length_units(1, 2), botm_m.mean())
 
 
-def test_bas_setup(inset_with_dis):
+def test_bas_setup(pfl_nwt_with_dis):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
 
     # test intermediate array creation
     bas = m.setup_bas6()
@@ -284,9 +248,9 @@ def test_bas_setup(inset_with_dis):
     assert os.path.exists(bas.fn_path)
 
 
-def test_rch_setup(inset_with_dis, project_root_path):
+def test_rch_setup(pfl_nwt_with_dis, project_root_path):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
 
     # test intermediate array creation from rech specified as scalars
     m.cfg['rch']['rech'] = [0.001, 0.002]
@@ -335,9 +299,9 @@ def test_rch_setup(inset_with_dis, project_root_path):
 
 
 @pytest.mark.parametrize('case', [0, 1])
-def test_upw_setup(inset_with_dis, case):
+def test_upw_setup(pfl_nwt_with_dis, case):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
 
     if case == 0:
         # test intermediate array creation
@@ -371,8 +335,8 @@ def test_upw_setup(inset_with_dis, case):
 
 
 @pytest.mark.skip("still need to fix TMR")
-def test_wel_tmr(inset_with_dis):
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+def test_wel_tmr(pfl_nwt_with_dis):
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
     m.setup_upw()
 
     # test with tmr
@@ -385,10 +349,9 @@ def test_wel_tmr(inset_with_dis):
     assert len(bfluxes0) == (m.nrow*2 + m.ncol*2) * m.nlay
 
 
-@pytest.mark.skip("still working wel")
-def test_wel_setup(inset_with_dis):
+def test_wel_setup(pfl_nwt_with_dis_bas6):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
     m.setup_upw()
 
     # test without tmr
@@ -404,14 +367,14 @@ def test_wel_setup(inset_with_dis):
     # verify that water use fluxes are in sp after 0
     # assuming that no wells shut off
     nwells0 = len(wel.stress_period_data[0][wel.stress_period_data[0]['flux'] != 0])
-    n_added_wels = len(m.cfg['wel']['added_wells'])
+    n_added_wels = len(m.cfg['wel']['wells'])
     for k, spd in wel.stress_period_data.data.items():
         if k == 0:
             continue
         assert len(spd) >= nwells0 + n_added_wels
 
     # test adding a wel from a csv file
-    m.cfg['wel']['added_wells'] = 'data/added_wells.csv'
+    m.cfg['wel']['csvfile'] = 'data/added_wells.csv'
     wel = m.setup_wel()
     assert -2000 in wel.stress_period_data[1]['flux']
 
@@ -430,17 +393,17 @@ def test_wel_wu_resampling(inset_with_transient_parent):
     wel = m.setup_wel()
 
 
-def test_mnw_setup(inset_with_dis):
+def test_mnw_setup(pfl_nwt_with_dis):
 
-     m = inset_with_dis  #deepcopy(inset_with_dis)
+     m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
      mnw = m.setup_mnw2()
      mnw.write_file()
      assert True
 
 
-def test_lak_setup(inset_with_dis):
+def test_lak_setup(pfl_nwt_with_dis):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
 
     # fill in stage area volume file
     #df = pd.read_csv(m.cfg['lak']['stage_area_volume'])
@@ -491,9 +454,9 @@ def test_lak_setup(inset_with_dis):
     assert len(ds9_entries) == 6
 
 
-def test_nwt_setup(inset, project_root_path):
+def test_nwt_setup(pfl_nwt, project_root_path):
 
-    m = inset  #deepcopy(inset)
+    m = pfl_nwt  #deepcopy(pfl_nwt)
     m.cfg['nwt']['use_existing_file'] = project_root_path + '/mfsetup/tests/data/RGN_rjh_3_23_18.NWT'
     nwt = m.setup_nwt()
     nwt.write_file()
@@ -502,8 +465,8 @@ def test_nwt_setup(inset, project_root_path):
     nwt.write_file()
 
 
-def test_oc_setup(inset):
-    m = inset
+def test_oc_setup(pfl_nwt):
+    m = pfl_nwt
     oc = m.setup_oc()
     for (kper, kstp), words in oc.stress_period_data.items():
         assert kstp == m.perioddata.loc[kper, 'nstp'] - 1
@@ -512,9 +475,9 @@ def test_oc_setup(inset):
     # TODO: add datetime comments to OC file
 
 
-def test_hyd_setup(inset_with_dis):
+def test_hyd_setup(pfl_nwt_with_dis):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
     hyd = m.setup_hyd()
     hyd.write_file()
     # verify that each head observation is in each layer
@@ -525,9 +488,9 @@ def test_hyd_setup(inset_with_dis):
     #m.cfg['hyd'][]
 
 
-def test_lake_gag_setup(inset_with_dis):
+def test_lake_gag_setup(pfl_nwt_with_dis):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
     lak = m.setup_lak()
     gag = m.setup_gag()
     gag.write_file()
@@ -535,19 +498,19 @@ def test_lake_gag_setup(inset_with_dis):
         assert f in m.output_fnames
 
 
-def test_chd_setup(inset_with_dis):
+def test_chd_setup(pfl_nwt_with_dis):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
     chd = m.setup_chd()
     chd.write_file()
     assert os.path.exists(chd.fn_path)
-    assert len(chd.stress_period_data.data.keys()) == len(set(m.cfg['model']['parent_stress_periods']))
+    assert len(chd.stress_period_data.data.keys()) == len(set(m.cfg['parent']['copy_stress_periods']))
     assert len(chd.stress_period_data[0]) == (m.nrow*2 + m.ncol*2 - 4) * m.nlay
 
 
-def test_sfr_setup(inset_with_dis):
+def test_sfr_setup(pfl_nwt_with_dis):
 
-    m = inset_with_dis  #deepcopy(inset_with_dis)
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
     m.setup_bas6()
     m.setup_sfr()
     assert m.sfr is None
@@ -559,30 +522,30 @@ def test_yaml_setup(inset_setup_with_model_run):
 
 
 @pytest.mark.skip("still working on wel")
-def test_load(inset_setup_from_yaml, mfnwt_inset_test_cfg_path):
-    m = inset_setup_from_yaml  #deepcopy(inset_setup_from_yaml)
-    m2 = MFnwtModel.load(mfnwt_inset_test_cfg_path)
+def test_load(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):
+    m = pfl_nwt_setup_from_yaml  #deepcopy(pfl_nwt_setup_from_yaml)
+    m2 = MFnwtModel.load(pfl_nwt_test_cfg_path)
     assert m == m2
 
 
 @pytest.mark.skip("still working on wel")
-def test_remake_a_package(inset_setup_from_yaml, mfnwt_inset_test_cfg_path):
+def test_remake_a_package(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):
 
-    m = inset_setup_from_yaml  #deepcopy(inset_setup)
-    m2 = MFnwtModel.load(mfnwt_inset_test_cfg_path, load_only=['dis'])
+    m = pfl_nwt_setup_from_yaml  #deepcopy(inset_setup)
+    m2 = MFnwtModel.load(pfl_nwt_test_cfg_path, load_only=['dis'])
     lak = m2.setup_lak()
     lak.write_file()
 
 
 @pytest.fixture(scope="function")
-def inset_with_transient_parent(inset_with_grid):
+def inset_with_transient_parent(pfl_nwt_with_grid):
     # TODO: port LPR test case over from CSLS
     return None
 
 
 @pytest.fixture(scope="session")
-def inset_setup_with_model_run(inset_setup_from_yaml):
-    m = inset_setup_from_yaml
+def inset_setup_with_model_run(pfl_nwt_setup_from_yaml):
+    m = pfl_nwt_setup_from_yaml
     # TODO : Add executables to Travis build
     if exe_exists('mfnwt'):
         try:
@@ -593,8 +556,8 @@ def inset_setup_with_model_run(inset_setup_from_yaml):
         return m
 
 
-def test_packagelist(mfnwt_inset_test_cfg_path):
-    cfg = MFnwtModel.load_cfg(mfnwt_inset_test_cfg_path)
+def test_packagelist(pfl_nwt_test_cfg_path):
+    cfg = load_cfg(pfl_nwt_test_cfg_path)
 
     assert len(cfg['model']['packages']) > 0
     kwargs = get_input_arguments(cfg['model'], MFnwtModel)
