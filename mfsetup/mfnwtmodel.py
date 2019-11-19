@@ -17,7 +17,7 @@ from .fileio import load, dump, load_array, save_array, check_source_files, flop
     load_cfg, setup_external_filepaths
 from .lakes import make_lakarr2d, make_bdlknc_zones, make_bdlknc2d
 from .utils import update, get_packages, get_input_arguments
-from .obs import read_observation_data
+from .obs import read_observation_data, setup_head_observations
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text, lenuni_values
 from .wells import setup_wel_data
@@ -847,92 +847,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
     def setup_hyd(self):
         """TODO: generalize hydmod setup with specific input requirements"""
+        package = 'hyd'
         print('setting up HYDMOD package...')
         t0 = time.time()
-        obs_info_files = self.cfg['hyd'].get('source_data', {}).get('filenames')
-        if obs_info_files is None:
-            print("No observation data for hydmod.")
-            return
 
-        # get obs_info_files into dictionary format
-        # filename: dict of column names mappings
-        if isinstance(obs_info_files, str):
-            obs_info_files = [obs_info_files]
-        if isinstance(obs_info_files, list):
-            obs_info_files = {f: self.cfg['hyd']['default_columns']
-                              for f in obs_info_files}
-        elif isinstance(obs_info_files, dict):
-            for k, v in obs_info_files.items():
-                if v is None:
-                    obs_info_files[k] = self.cfg['hyd']['default_columns']
-
-        check_source_files(obs_info_files.keys())
-        # dictionaries mapping from obstypes to hydmod input
-        pckg = {'LK': 'BAS', # head package for high-K lakes; lake package lakes get dropped
-                 'GW': 'BAS',
-                'head': 'BAS',
-                'lake': 'BAS',
-                 'ST': 'SFR',
-                'flux': 'SFR'
-                 }
-        arr = {'LK': 'HD',  # head package for high-K lakes; lake package lakes get dropped
-               'GW': 'HD',
-               'ST': 'SO',
-               'flux': 'SO'
-               }
-        print('Reading observation files...')
-        dfs = []
-        for f, column_info in obs_info_files.items():
-            print(f)
-            df = read_observation_data(f, column_info,
-                                       column_mappings=self.cfg['hyd'].get('column_mappings'))
-            if 'obs_type' in df.columns and 'pckg' not in df.columns:
-                df['pckg'] = [pckg.get(s, 'BAS') for s in df['obs_type']]
-            elif 'pckg' not in df.columns:
-                df['pckg'] = 'BAS' # default to getting heads
-            if 'obs_type' in df.columns and 'intyp' not in df.columns:
-                df['arr'] = [arr.get(s, 'HD') for s in df['obs_type']]
-            elif 'arr' not in df.columns:
-                df['arr'] = 'HD'
-            df['intyp'] = ['I' if p == 'BAS' else 'C' for p in df['pckg']]
-            df['hydlbl'] = df['hydlbl'].astype(str).str.lower()
-
-            dfs.append(df[['pckg', 'arr', 'intyp', 'x', 'y', 'hydlbl', 'file']])
-        df = pd.concat(dfs, axis=0)
-
-        print('\nCulling observations to model area...')
-        df['geometry'] = [Point(x, y) for x, y in zip(df.x, df.y)]
-        within = [g.within(self.bbox) for g in df.geometry]
-        df = df.loc[within].copy()
-
-        print('Dropping head observations that coincide with Lake Package Lakes...')
-        i, j = get_ij(self.modelgrid, df.x.values, df.y.values)
-        islak = self.lakarr[0, i, j] != 0
-        df = df.loc[~islak].copy()
-
-        drop_obs = self.cfg['hyd'].get('drop_observations', [])
-        if len(drop_obs) > 0:
-            print('Dropping head observations specified in {}...'.format(self.cfg.get('filename', 'config file')))
-            df = df.loc[~df.hydlbl.astype(str).isin(drop_obs)]
-
-        duplicated = df.hydlbl.duplicated(keep=False)
-        if duplicated.sum() > 0:
-            print('Warning- {} duplicate observation names encountered. First instance of each name will be used.'.format(duplicated.sum()))
-            print(df.loc[duplicated, ['hydlbl', 'file']])
-
-        # make sure every head observation is in each layer
-        non_heads = df.loc[df.arr != 'HD'].copy()
-        heads = df.loc[df.arr == 'HD'].copy()
-        heads0 = heads.groupby('hydlbl').first().reset_index()
-        heads0['hydlbl'] = heads0['hydlbl'].astype(str)
-        heads_all_layers = pd.concat([heads0] * self.nlay).sort_values(by='hydlbl')
-        heads_all_layers['klay'] = list(range(self.nlay)) * len(heads0)
-        df = pd.concat([heads_all_layers, non_heads], axis=0)
-
-        # get model locations
-        xl, yl = self.modelgrid.get_local_coords(df.x.values, df.y.values)
-        df['xl'] = xl
-        df['yl'] = yl
+        # munge the head observation data
+        df = setup_head_observations(self, format=package,
+                                     obsname_column='hydlbl')
 
         # create observation data recarray
         obsdata = fm.ModflowHyd.get_empty(len(df))

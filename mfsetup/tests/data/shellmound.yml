@@ -50,6 +50,7 @@ model:
              'sto',
              'rch',
              'sfr',
+             'obs',
              'wel',
              'ims'
   ]
@@ -260,9 +261,12 @@ oc:
   }
 
 obs:
-  default_columns:
-    x_location_col: 'x_5070' # x coordinates in wtm
-    y_location_col: 'y_5070' # y coordinates in wtm
+  source_data:
+    filenames: ['shellmound/tables/head_obs_well_info.csv'
+    ]
+  column_mappings:
+    obsname: ['obsprefix']
+
 
 ims:
   options:

@@ -486,8 +486,56 @@ def test_npf_setup(shellmound_model_with_dis):
     # TODO: add tests that Ks got distributed properly considering input and pinched layers
 
 
-def test_oc_setup(shellmound_model_with_dis):
+@pytest.mark.parametrize('config', [{'source_data':
+                                         {'filenames': ['../../data/shellmound/tables/head_obs_well_info.csv']},
+                                     'column_mappings':
+                                         {'obsname': ['obsprefix']}
+                                     },
+                                    {'source_data':
+                                         {'filename': '../../data/shellmound/tables/head_obs_well_info2.csv'},
+                                     'column_mappings':
+                                         {'obsname': ['obsprefix'],
+                                          'x': 'x_5070',
+                                          'y': 'y_5070'}
+                                     },
+                                    ])
+def test_obs_setup(shellmound_model_with_dis, config):
     m = shellmound_model_with_dis  # deepcopy(model)
+    defaults = {'default_columns':
+                    {'x_location_col': 'x', # x coordinates in wtm
+                     'y_location_col': 'y' # y coordinates in wtm
+                     },
+                'filename_fmt': '{}.head.obs',  # only head obs supported at this point
+                'options':
+                    {'digits': 10,
+                     'print_input': True}
+                }
+    defaults.update(config)
+    m.cfg['obs'] = defaults
+    obs = m.setup_obs()
+    obs.write()
+    obsfile = os.path.join(m.model_ws, obs.filename)
+    assert os.path.exists(obsfile)
+    assert isinstance(obs, mf6.ModflowUtlobs)
+    with open(obsfile) as obsdata:
+        for line in obsdata:
+            if 'fileout' in line.lower():
+                _, _, _, fname = line.strip().split()
+                assert fname == m.cfg['obs']['filename_fmt'].format(m.name)
+                break
+
+
+@pytest.mark.parametrize('options', [{'saverecord': {0: {'head': 'last',
+                                                         'budget': 'last'}}},
+                                     {'period_options': {0: ['save head last',
+                                                             'save budget last']}}
+                                        ])
+def test_oc_setup(shellmound_model_with_dis, options):
+    cfg = {'head_fileout_fmt': '{}.hds',
+           'budget_fileout_fmt': '{}.cbc'}
+    cfg.update(options)
+    m = shellmound_model_with_dis  # deepcopy(model)
+    m.cfg['oc'] = cfg
     oc = m.setup_oc()
     oc.write()
     ocfile = os.path.join(m.model_ws, oc.filename)
