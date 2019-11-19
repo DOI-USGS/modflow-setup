@@ -14,6 +14,7 @@ from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
 from gisutils import get_values_at_points
 from .grid import write_bbox_shapefile, get_point_on_national_hydrogeologic_grid
+from .obs import setup_head_observations
 from .tdis import setup_perioddata
 from .utils import update, get_input_arguments, flatten
 from .wells import setup_wel_data
@@ -35,7 +36,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # default configuration
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
                                      'ghb', 'lak', 'sfr',
-                                     'wel', 'maw', 'gag', 'ims']
+                                     'wel', 'maw', 'obs', 'ims']
         self.cfg = load(self.source_path + '/mf6_defaults.yml')
         self.cfg['filename'] = self.source_path + '/mf6_defaults.yml'
         self._set_cfg(cfg)   # set up the model configuration dictionary
@@ -438,6 +439,39 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return wel
 
+    def setup_obs(self):
+        """
+        Sets up the OBS utility.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'obs'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+
+        # munge the observation data
+        df = setup_head_observations(self,
+                                     format=package,
+                                     obsname_column='obsname')
+
+        # reformat to flopy input format
+        obsdata = df[['obsname', 'obstype', 'id']].to_records(index=False)
+        filename = self.cfg[package]['filename_fmt'].format(self.name)
+        obsdata = {filename: obsdata}
+
+        kwargs = self.cfg[package].copy()
+        kwargs.update(self.cfg[package]['options'])
+        kwargs['continuous'] = obsdata
+        kwargs = get_input_arguments(kwargs, mf6.ModflowUtlobs)
+        obs = mf6.ModflowUtlobs(self,  **kwargs)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return obs
+
     def setup_oc(self):
         """
         Sets up the OC package.
@@ -455,6 +489,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs = self.cfg[package]
         kwargs['budget_filerecord'] = self.cfg[package]['budget_fileout_fmt'].format(self.name)
         kwargs['head_filerecord'] = self.cfg[package]['head_fileout_fmt'].format(self.name)
+        # parse both flopy and mf6-style input into flopy input
         for rec in ['printrecord', 'saverecord']:
             if rec in kwargs:
                 data = kwargs[rec]
@@ -464,6 +499,16 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                     for var, instruction in words.items():
                         mf6_input[kper].append((var, instruction))
                 kwargs[rec] = mf6_input
+            elif 'period_options' in kwargs:
+                mf6_input = defaultdict(list)
+                for kper, options in kwargs['period_options'].items():
+                    for words in options:
+                        type, var, instruction = words.split()
+                        if type == rec.replace('record', ''):
+                            mf6_input[kper].append((var, instruction))
+                if len(mf6_input) > 0:
+                    kwargs[rec] = mf6_input
+
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfoc)
         oc = mf6.ModflowGwfoc(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))

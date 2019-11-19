@@ -475,9 +475,9 @@ def test_oc_setup(pfl_nwt):
     # TODO: add datetime comments to OC file
 
 
-def test_hyd_setup(pfl_nwt_with_dis):
+def test_hyd_setup(pfl_nwt_with_dis_bas6):
 
-    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
+    m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)
     hyd = m.setup_hyd()
     hyd.write_file()
     # verify that each head observation is in each layer
