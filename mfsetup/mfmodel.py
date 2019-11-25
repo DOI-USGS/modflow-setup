@@ -16,7 +16,7 @@ from .lakes import make_lakarr2d, make_bdlknc_zones, make_bdlknc2d
 from .utils import update, get_input_arguments
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text
-from sfrmaker import lines
+from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
 
@@ -775,7 +775,7 @@ class MFsetupMixin():
 
                 # create an sfrmaker.lines instance
                 filter = project(self.bbox, self.modelgrid.proj_str, 'epsg:4269').bounds
-                lns = lines.from_NHDPlus_v2(NHDPlus_paths=nhdplus_paths,
+                lns = Lines.from_nhdplus_v2(NHDPlus_paths=nhdplus_paths,
                                             filter=filter)
             else:
                 for key in ['filename', 'filenames']:
@@ -793,8 +793,8 @@ class MFsetupMixin():
                             filter = project(self.bbox, self.modelgrid.proj_str, kwargs['proj4']).bounds
                         kwargs['filter'] = filter
                         # create an sfrmaker.lines instance
-                        kwargs = get_input_arguments(kwargs, lines.from_shapefile)
-                        lns = lines.from_shapefile(**kwargs)
+                        kwargs = get_input_arguments(kwargs, Lines.from_shapefile)
+                        lns = Lines.from_shapefile(**kwargs)
                         break
         else:
             return
@@ -869,13 +869,13 @@ class MFsetupMixin():
         self.sfrdata = sfr
 
         # create the flopy SFR package instance
-        sfr.create_ModflowSfr2(model=self, istcb2=223)
+        sfr.create_modflow_sfr2(model=self, istcb2=223)
         if self.version != 'mf6':
-            sfr_package = sfr.ModflowSfr2
+            sfr_package = sfr.modflow_sfr2
         else:
             sfr_package = sfr.create_mf6sfr(model=self)
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2
-            sfr_package.reach_data = sfr.ModflowSfr2.reach_data
+            sfr_package.reach_data = sfr.modflow_sfr2.reach_data
 
         # reset dependent arrays
         self._reset_bc_arrays()
