@@ -11,6 +11,8 @@ import flopy
 fm = flopy.modflow
 from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
+from .discretization import (deactivate_idomain_above,
+                             find_remove_isolated_cells)
 from .tdis import setup_perioddata_group
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
@@ -76,17 +78,34 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """3D array indicating which cells will be included in the simulation.
         Made a property so that it can be easily updated when any packages
         it depends on change.
-
-        TODO: move setup code from setup_bas6
         """
-        pass
-        #if self._ibound is None and 'DIS' in self.package_list:
-        #    ibound = np.abs(~np.isnan(self.dis.botm.array).astype(int))
-        #    # remove cells that are above stream cells
-        #    if 'SFR' in self.get_package_list():
-        #        ibound = deactivate_idomain_above(ibound, self.sfr.reach_data)
-        #    self._ibound = ibound
-        #return self._ibound
+        if self._ibound is None and 'BAS6' in self.get_package_list():
+            self._set_ibound()
+        return self._ibound
+
+    def _set_ibound(self):
+        """Remake the idomain array from the source data,
+        no data values in the top and bottom arrays, and
+        so that cells above SFR reaches are inactive."""
+
+        # include cells that are active in the existing idomain array
+        # and cells inactivated on the basis of layer elevations
+        ibound = (self.bas6.ibound.array == 1)
+        ibound = ibound.astype(int)
+
+        # remove cells that are above stream cells
+        if 'SFR' in self.get_package_list():
+            ibound = deactivate_idomain_above(ibound, self.sfr.reach_data)
+
+        # inactivate any isolated cells that could cause problems with the solution
+        ibound = find_remove_isolated_cells(ibound, minimum_cluster_size=20)
+
+        self._ibound = ibound
+        # re-write the input files
+        self._setup_array('bas6', 'ibound',
+                          data={i: arr for i, arr in enumerate(ibound)},
+                          datatype='array3d', write_fmt='%d', dtype=int)
+        self.bas6.ibound = self.cfg['bas6']['ibound']
 
     def _set_parent(self):
         """Set attributes related to a parent or source model
@@ -126,7 +145,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
             # obtained from parent model by default
             if self.cfg['parent'].get('default_source_data'):
                 self._parent_default_source_data = True
-                self.cfg['dis']['nlay'] = self.parent.dis.nlay
+                if self.cfg['dis'].get('nlay') is None:
+                    self.cfg['dis']['nlay'] = self.parent.dis.nlay
                 if self.cfg['dis'].get('start_date_time') is None:
                     self.cfg['dis']['start_date_time'] = self.cfg['parent']['start_date_time']
                 if self.cfg['dis'].get('nper') is None:
@@ -414,7 +434,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # make the strt array
         self._setup_array(package, 'strt', datatype='array3d', write_fmt='%.2f')
         
-        # make the ibound array
+        # initial ibound input for creating a bas6 package instance
         self._setup_array(package, 'ibound', datatype='array3d', write_fmt='%d',
                           dtype=int)
 
@@ -724,6 +744,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         start_tab_units_at = 150  # default starting number for iunittab
 
         # set up the tab files, if any
+        tab_files_argument = None
+        tab_units = None
         if 'stage_area_volume_file' in source_data:
             print('setting up tabfiles...')
             sd = TabularSourceData.from_config(source_data['stage_area_volume_file'])
@@ -830,7 +852,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         print('setting up NWT package...')
         t0 = time.time()
-        use_existing_file = self.cfg['nwt']['use_existing_file']
+        use_existing_file = self.cfg['nwt'].get('use_existing_file')
         kwargs = self.cfg['nwt']
         if use_existing_file is not None:
             #set use_existing_file relative to source path

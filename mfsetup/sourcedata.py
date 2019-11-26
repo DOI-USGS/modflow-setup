@@ -203,7 +203,7 @@ class ArraySourceData(SourceData):
             nspecified = len(self.from_source_model_layers)
             if self.datatype == 'array3d' and nspecified != nlay:
                 raise Exception("Variable should have {} layers "
-                                "but only {} are specified: {}"
+                                "but {} are specified: {}"
                                 .format(nlay, nspecified, self.from_source_model_layers))
             return self.from_source_model_layers
         elif self.filenames is not None:

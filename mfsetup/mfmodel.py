@@ -805,7 +805,7 @@ class MFsetupMixin():
             if not os.path.isdir(output_path):
                 os.makedirs(output_path)
         else:
-            output_path = self.cfg['postprocessing']['output_folders']['shps']
+            output_path = self.cfg['postprocessing']['output_folders']['shapefiles']
             self.cfg['sfr']['output_path'] = output_path
 
         # create isfr array (where SFR cells will be populated)
@@ -828,8 +828,12 @@ class MFsetupMixin():
                          model=self,
                          )
         if self.cfg['sfr']['set_streambed_top_elevations_from_dem']:
-            sfr.set_streambed_top_elevations_from_dem(self.cfg['source_data']['dem'],
-                                                      dem_z_units=self.cfg['source_data']['elevation_units'])
+            error_msg = ("If set_streambed_top_elevations_from_dem=True, "
+                         "need a dem block in source_data for SFR package.")
+            assert 'dem' in self.cfg['sfr'].get('source_data', {}), error_msg
+            elevation_units = self.cfg['sfr']['source_data']['dem'].get('elevation_units')
+            sfr.set_streambed_top_elevations_from_dem(self.cfg['sfr']['source_data']['dem']['filename'],
+                                                      dem_z_units=elevation_units)
         else:
             sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')
 
