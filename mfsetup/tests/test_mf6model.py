@@ -450,7 +450,8 @@ def test_tdis_setup(shellmound_model):
     assert isinstance(tdis, mf6.ModflowTdis)
     period_df = pd.DataFrame(tdis.perioddata.array)
     period_df['perlen'] = period_df['perlen'].astype(float)
-    assert period_df.equals(m.perioddata[['perlen', 'nstp', 'tsmult']])
+    #assert period_df.equals(m.perioddata[['perlen', 'nstp', 'tsmult']])
+    pd.testing.assert_frame_equal(period_df, m.perioddata[['perlen', 'nstp', 'tsmult']])
 
 
 def test_sto_setup(shellmound_model_with_dis):
@@ -697,7 +698,7 @@ def test_idomain_above_sfr(model_with_sfr):
 
 
 @pytest.fixture(scope="module")
-def model_setup_and_run(model_setup):
+def model_setup_and_run(model_setup, mf6_exe):
     m = model_setup  #deepcopy(model_setup)
 
     dis_idomain = m.dis.idomain.array.copy()
@@ -706,7 +707,7 @@ def model_setup_and_run(model_setup):
         assert np.array_equal(m.idomain[i], arr)
         assert np.array_equal(dis_idomain[i], arr)
     # TODO : Add executables to Travis build
-    if exe_exists('mf6'):
+    if exe_exists(mf6_exe):
         try:
             success, buff = m.simulation.run_simulation()
         except:

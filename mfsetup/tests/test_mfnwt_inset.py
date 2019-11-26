@@ -91,12 +91,12 @@ def test_regrid_linear(pfl_nwt_with_grid):
                  method='linear')
     rg3 = regrid(arr, m.parent.modelgrid, m.modelgrid,
                  method='linear')
-    assert np.allclose(rg1, rg2)
+    np.testing.assert_allclose(rg1, rg2)
     # check that the results from regridding using a window
     # are close to regridding from whole parent grid
     # results won't match exactly, presumably because the
     # simplexes created from the parent grid are unlikely to be the same.
-    assert np.allclose(rg1.mean(), rg3.mean(), atol=0.01, rtol=1e-4)
+    np.testing.assert_allclose(rg1.mean(), rg3.mean(), atol=0.01, rtol=1e-4)
 
 
 def test_regrid_linear_with_mask(pfl_nwt_with_grid):
@@ -128,7 +128,7 @@ def test_regrid_linear_with_mask(pfl_nwt_with_grid):
     rg1 = m.regrid_from_parent(arr, mask=mask, method='linear')
     rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid, mask1=mask,
                  method='linear')
-    assert np.allclose(rg1, rg2)
+    np.testing.assert_allclose(rg1, rg2)
 
 
 def test_regrid_nearest(pfl_nwt_with_grid):
@@ -140,7 +140,7 @@ def test_regrid_nearest(pfl_nwt_with_grid):
     # test basic regrid with no masking
     rg1 = m.regrid_from_parent(arr, method='nearest')
     rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid, method='nearest')
-    assert np.allclose(rg1, rg2)
+    np.testing.assert_allclose(rg1, rg2)
 
 
 def test_set_lakarr(pfl_nwt_with_dis):
@@ -516,12 +516,12 @@ def test_sfr_setup(pfl_nwt_with_dis):
     assert m.sfr is None
 
 
-@pytest.mark.skip("still working on wel")
+#@pytest.mark.skip("still working on wel")
 def test_yaml_setup(inset_setup_with_model_run):
     m = inset_setup_with_model_run  #deepcopy(inset_setup_with_model_run)
 
 
-@pytest.mark.skip("still working on wel")
+@pytest.mark.skip("needs some work")
 def test_load(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):
     m = pfl_nwt_setup_from_yaml  #deepcopy(pfl_nwt_setup_from_yaml)
     m2 = MFnwtModel.load(pfl_nwt_test_cfg_path)
@@ -544,10 +544,10 @@ def inset_with_transient_parent(pfl_nwt_with_grid):
 
 
 @pytest.fixture(scope="session")
-def inset_setup_with_model_run(pfl_nwt_setup_from_yaml):
+def inset_setup_with_model_run(pfl_nwt_setup_from_yaml, mfnwt_exe):
     m = pfl_nwt_setup_from_yaml
     # TODO : Add executables to Travis build
-    if exe_exists('mfnwt'):
+    if exe_exists(mfnwt_exe):
         try:
             success, buff = m.run_model(silent=False)
         except:

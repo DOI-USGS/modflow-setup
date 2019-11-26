@@ -158,7 +158,8 @@ def save_array(filename, arr, nodata=-9999,
     print("took {:.2f}s".format(time.time() - t0))
 
 
-def load_cfg(cfgfile, default_file='/mfnwt_defaults.yml'):
+def load_cfg(cfgfile, verbose=False,
+             default_file='/mfnwt_defaults.yml'):
     """
 
     Parameters
@@ -180,7 +181,7 @@ def load_cfg(cfgfile, default_file='/mfnwt_defaults.yml'):
     # recursively update defaults with information from yamlfile
     cfg = default_cfg.copy()
     update(cfg, load(cfgfile))
-    cfg['model'].update({'verbose': cfgfile})
+    cfg['model'].update({'verbose': verbose})
     cfg['filename'] = os.path.abspath(cfgfile)
 
     # convert relative paths in the configuration dictionary

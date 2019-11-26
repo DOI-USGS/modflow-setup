@@ -1,4 +1,5 @@
 import os
+import platform
 import numpy as np
 import pytest
 import flopy.modflow as fm
@@ -105,5 +106,13 @@ def test_which():
     assert badexe is None
 
 
-def test_exe_exists():
+def test_exe_exists(mf6_exe, mfnwt_exe):
     assert not exe_exists('junk')
+    # TODO: get linux binaries
+    if "linux" in platform.platform().lower():
+        pass
+    elif "darwin" in platform.platform().lower():
+        pass
+    else:
+        assert exe_exists(mf6_exe)
+        assert exe_exists(mfnwt_exe)

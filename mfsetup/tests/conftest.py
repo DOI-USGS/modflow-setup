@@ -1,5 +1,6 @@
 import os
 import shutil
+import platform
 import pytest
 import flopy
 fm = flopy.modflow
@@ -13,6 +14,36 @@ from ..utils import get_input_arguments
 def project_root_path():
     filepath = os.path.split(os.path.abspath(__file__))[0]
     return os.path.normpath(os.path.join(filepath, '../../'))
+
+
+@pytest.fixture(scope="session")
+def bin_path(project_root_path):
+    bin_path = os.path.join(project_root_path, "bin")
+    if "linux" in platform.platform().lower():
+        bin_path = os.path.join(bin_path, "linux")
+    elif "darwin" in platform.platform().lower():
+        bin_path = os.path.join(bin_path, "mac")
+    else:
+        bin_path = os.path.join(bin_path, "win")
+    return bin_path
+
+
+@pytest.fixture(scope="session")
+def mf6_exe(bin_path):
+    _, version = os.path.split(bin_path)
+    exe_name = 'mf6'
+    if version == "win":
+        exe_name += '.exe'
+    return os.path.join(bin_path, exe_name)
+
+
+@pytest.fixture(scope="session")
+def mfnwt_exe(bin_path):
+    _, version = os.path.split(bin_path)
+    exe_name = 'mfnwt'
+    if version == "win":
+        exe_name += '.exe'
+    return os.path.join(bin_path, exe_name)
 
 
 @pytest.fixture(scope="session")
