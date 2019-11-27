@@ -1079,16 +1079,16 @@ def setup_array(model, package, var, data=None,
             botm[k][bathy != 0][inlayer] = lake_botm_elevations[inlayer]
 
         # fix any layering conflicts and save out botm files
-        if model.version == 'mf6' and model._drop_thin_cells:
-            min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
-            botm = fix_model_layer_conflicts(top, botm,
-                                             minimum_thickness=min_thickness)
-            isvalid = verify_minimum_layer_thickness(top, botm,
-                                                     np.ones(botm.shape, dtype=int),
-                                                     min_thickness)
-            if not isvalid:
-                raise Exception('Model layers less than {} {} thickness'.format(min_thickness,
-                                                                                model.length_units))
+        #if model.version == 'mf6' and model._drop_thin_cells:
+        min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
+        botm = fix_model_layer_conflicts(top, botm,
+                                         minimum_thickness=min_thickness)
+        isvalid = verify_minimum_layer_thickness(top, botm,
+                                                 np.ones(botm.shape, dtype=int),
+                                                 min_thickness)
+        if not isvalid:
+            raise Exception('Model layers less than {} {} thickness'.format(min_thickness,
+                                                                            model.length_units))
 
         # fill nan values adjacent to active cells to avoid cell thickness errors
         top, botm = fill_cells_vertically(top, botm)

@@ -89,7 +89,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                                      self.dis.botm.array,
                                                      nodata=self._nodata_value,
                                                      minimum_layer_thickness=self.cfg['dis'].get('minimum_layer_thickness', 1),
-                                                     drop_thin_cells=True, tol=1e-4)
+                                                     drop_thin_cells=self._drop_thin_cells,
+                                                     tol=1e-4)
         # include cells that are active in the existing idomain array
         # and cells inactivated on the basis of layer elevations
         idomain = (self.dis.idomain.array == 1) & (idomain_from_layer_elevations == 1)
@@ -102,7 +103,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # inactivate any isolated cells that could cause problems with the solution
         idomain = find_remove_isolated_cells(idomain, minimum_cluster_size=20)
 
-        # create pass-through cells in layers that have an inactive cell above and below
+        # create pass-through cells in inactive cells that have an active cell above and below
         # by setting these cells to -1
         idomain = create_vertical_pass_through_cells(idomain)
 
