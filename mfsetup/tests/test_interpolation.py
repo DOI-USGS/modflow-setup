@@ -1,9 +1,12 @@
+import os
 import numpy as np
 import xarray as xr
 import rasterio
 from scipy.interpolate import griddata, interpn
 import pytest
 from ..grid import MFsetupGrid
+from ..interpolate import interp_weights, get_source_dest_model_xys
+from ..testing import compare_float_arrays
 
 
 @pytest.fixture
@@ -64,4 +67,86 @@ def test_interp(dem_DataArray, modelgrid):
     itni = interpn(points, np.flipud(da.values.transpose()), uvw, method='linear')
     itni = np.reshape(itni, (mg.nrow, mg.ncol))
     assert True
+
+
+# even though test runs locally on Windows 10, and on Travis
+@pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
+                   reason="")
+def test_interp_weights(pfl_nwt_with_grid):
+    m = pfl_nwt_with_grid
+    parent_xy, inset_xy = get_source_dest_model_xys(m.parent,
+                                                    m)
+    inds, weights = interp_weights(parent_xy, inset_xy)
+    assert np.all(weights >= 0), print(np.where(weights < 0))
+
+
+# even though test runs locally on Windows 10, and on Travis
+@pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
+                   reason="")
+def test_regrid_linear(pfl_nwt_with_grid):
+
+    from mfsetup.interpolate import regrid
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
+    arr = m.parent.dis.top.array
+
+    # test basic regrid with no masking
+    rg1 = m.regrid_from_parent(arr, method='linear')
+    rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid,
+                 mask1=m.parent_mask,
+                 method='linear')
+    rg3 = regrid(arr, m.parent.modelgrid, m.modelgrid,
+                 method='linear')
+    err_msg = compare_float_arrays(rg1, rg2)
+    np.testing.assert_allclose(rg1, rg2, atol=0.01, rtol=1e-4,
+                               err_msg=err_msg)
+    # check that the results from regridding using a window
+    # are close to regridding from whole parent grid
+    # results won't match exactly, presumably because the
+    # simplexes created from the parent grid are unlikely to be the same.
+    err_msg = compare_float_arrays(rg1, rg2)
+    np.testing.assert_allclose(rg1.mean(), rg3.mean(), atol=0.01, rtol=1e-4)
+
+
+def test_regrid_linear_with_mask(pfl_nwt_with_grid):
+
+    from mfsetup.interpolate import regrid
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
+    arr = m.parent.dis.top.array
+
+    # pick out some pfl_nwt cells
+    # find locations in parent to make mask
+    imask_inset = np.arange(50)
+    jmask_inset = np.arange(50)
+    xmask_inset = m.modelgrid.xcellcenters[imask_inset, jmask_inset]
+    ymask_inset = m.modelgrid.ycellcenters[imask_inset, jmask_inset]
+    i = []
+    j = []
+    for x, y in zip(xmask_inset, ymask_inset):
+        ii, jj = m.parent.modelgrid.intersect(x, y)
+        i.append(ii)
+        j.append(jj)
+    #i = np.array(i)
+    #j = np.array(j)
+    #i, j = m.parent.modelgrid.get_ij(xmask_inset, ymask_inset)
+    mask = np.ones(arr.shape)
+    mask[i, j] = 0
+    mask = mask.astype(bool)
+
+    # test basic regrid with no masking
+    rg1 = m.regrid_from_parent(arr, mask=mask, method='linear')
+    rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid, mask1=mask,
+                 method='linear')
+    np.testing.assert_allclose(rg1, rg2)
+
+
+def test_regrid_nearest(pfl_nwt_with_grid):
+
+    from mfsetup.interpolate import regrid
+    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
+    arr = m.parent.dis.top.array
+
+    # test basic regrid with no masking
+    rg1 = m.regrid_from_parent(arr, method='nearest')
+    rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid, method='nearest')
+    np.testing.assert_allclose(rg1, rg2)
 

@@ -4,12 +4,14 @@ import time
 from copy import copy, deepcopy
 import shutil
 import os
+import glob
 import pytest
 import numpy as np
 import pandas as pd
 import flopy
 fm = flopy.modflow
 from mfsetup import MFnwtModel
+from ..checks import check_external_files_for_nans
 from ..fileio import exe_exists, load_cfg
 from ..units import convert_length_units
 from ..utils import get_input_arguments
@@ -76,71 +78,6 @@ def test_load_grid(pfl_nwt, pfl_nwt_with_grid):
     m2 = pfl_nwt  #deepcopy(pfl_nwt)
     m2.load_grid(m.cfg['setup_grid']['grid_file'])
     assert m.cfg['grid'] == m2.cfg['grid']
-
-
-def test_regrid_linear(pfl_nwt_with_grid):
-
-    from mfsetup.interpolate import regrid
-    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
-    arr = m.parent.dis.top.array
-
-    # test basic regrid with no masking
-    rg1 = m.regrid_from_parent(arr, method='linear')
-    rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid,
-                 mask1=m.parent_mask,
-                 method='linear')
-    rg3 = regrid(arr, m.parent.modelgrid, m.modelgrid,
-                 method='linear')
-    np.testing.assert_allclose(rg1, rg2)
-    # check that the results from regridding using a window
-    # are close to regridding from whole parent grid
-    # results won't match exactly, presumably because the
-    # simplexes created from the parent grid are unlikely to be the same.
-    np.testing.assert_allclose(rg1.mean(), rg3.mean(), atol=0.01, rtol=1e-4)
-
-
-def test_regrid_linear_with_mask(pfl_nwt_with_grid):
-
-    from mfsetup.interpolate import regrid
-    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
-    arr = m.parent.dis.top.array
-
-    # pick out some pfl_nwt cells
-    # find locations in parent to make mask
-    imask_inset = np.arange(50)
-    jmask_inset = np.arange(50)
-    xmask_inset = m.modelgrid.xcellcenters[imask_inset, jmask_inset]
-    ymask_inset = m.modelgrid.ycellcenters[imask_inset, jmask_inset]
-    i = []
-    j = []
-    for x, y in zip(xmask_inset, ymask_inset):
-        ii, jj = m.parent.modelgrid.intersect(x, y)
-        i.append(ii)
-        j.append(jj)
-    #i = np.array(i)
-    #j = np.array(j)
-    #i, j = m.parent.modelgrid.get_ij(xmask_inset, ymask_inset)
-    mask = np.ones(arr.shape)
-    mask[i, j] = 0
-    mask = mask.astype(bool)
-
-    # test basic regrid with no masking
-    rg1 = m.regrid_from_parent(arr, mask=mask, method='linear')
-    rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid, mask1=mask,
-                 method='linear')
-    np.testing.assert_allclose(rg1, rg2)
-
-
-def test_regrid_nearest(pfl_nwt_with_grid):
-
-    from mfsetup.interpolate import regrid
-    m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
-    arr = m.parent.dis.top.array
-
-    # test basic regrid with no masking
-    rg1 = m.regrid_from_parent(arr, method='nearest')
-    rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid, method='nearest')
-    np.testing.assert_allclose(rg1, rg2)
 
 
 def test_set_lakarr(pfl_nwt_with_dis):
@@ -516,9 +453,37 @@ def test_sfr_setup(pfl_nwt_with_dis):
     assert m.sfr is None
 
 
+def test_model_setup_no_nans(pfl_nwt_setup_from_yaml):
+    m = pfl_nwt_setup_from_yaml
+    external_path = os.path.join(m.model_ws, 'external')
+    external_files = glob.glob(external_path + '/*')
+    has_nans = check_external_files_for_nans(external_files)
+    has_nans = '\n'.join(has_nans)
+    if len(has_nans) > 0:
+        assert False, has_nans
+
+
+def test_model_setup_nans(pfl_nwt_setup_from_yaml):
+    m = pfl_nwt_setup_from_yaml
+    external_path = os.path.join(m.model_ws, 'external')
+    bad_file = os.path.normpath('external/CHD_9999.dat')
+    with open('external/CHD_0000.dat') as src:
+        with open(bad_file, 'w') as dest:
+            for i, line in enumerate(src):
+                if i in [10, 11]:
+                    values = line.strip().split()
+                    values[-1] = 'NaN'
+                    dest.write(' '.join(values) + '\n')
+                dest.write(line)
+    external_files = glob.glob(external_path + '/*')
+    has_nans = check_external_files_for_nans(external_files)
+    has_nans = [os.path.normpath(f) for f in has_nans]
+    assert bad_file in has_nans
+
+
 #@pytest.mark.skip("still working on wel")
-def test_yaml_setup(inset_setup_with_model_run):
-    m = inset_setup_with_model_run  #deepcopy(inset_setup_with_model_run)
+def test_model_setup_and_run(model_setup_and_run):
+    m = model_setup_and_run  #deepcopy(model_setup_and_run)
 
 
 @pytest.mark.skip("needs some work")
@@ -544,15 +509,21 @@ def inset_with_transient_parent(pfl_nwt_with_grid):
 
 
 @pytest.fixture(scope="session")
-def inset_setup_with_model_run(pfl_nwt_setup_from_yaml, mfnwt_exe):
+def model_setup_and_run(pfl_nwt_setup_from_yaml, mfnwt_exe):
     m = pfl_nwt_setup_from_yaml
+    m.exe_name = mfnwt_exe
     # TODO : Add executables to Travis build
+    success = False
     if exe_exists(mfnwt_exe):
         try:
             success, buff = m.run_model(silent=False)
         except:
             pass
-        assert success, 'model run did not terminate successfully'
+        if not success:
+            list_file = m.lst.fn_path
+            with open(list_file) as src:
+                list_output = src.read()
+        assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
         return m
 
 

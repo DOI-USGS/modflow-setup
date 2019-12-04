@@ -4,7 +4,7 @@ import time
 from copy import deepcopy
 import shutil
 import os
-import io
+import glob
 import pytest
 import numpy as np
 import pandas as pd
@@ -13,6 +13,7 @@ import rasterio
 from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
+from ..checks import check_external_files_for_nans
 from ..discretization import get_layer_thicknesses, find_remove_isolated_cells
 from ..fileio import load_array, exe_exists, read_mf6_block
 from ..grid import rasterize
@@ -449,9 +450,10 @@ def test_tdis_setup(shellmound_model):
     assert os.path.exists(os.path.join(m.model_ws, tdis.filename))
     assert isinstance(tdis, mf6.ModflowTdis)
     period_df = pd.DataFrame(tdis.perioddata.array)
-    period_df['perlen'] = period_df['perlen'].astype(float)
-    #assert period_df.equals(m.perioddata[['perlen', 'nstp', 'tsmult']])
-    pd.testing.assert_frame_equal(period_df, m.perioddata[['perlen', 'nstp', 'tsmult']])
+    period_df['perlen'] = period_df['perlen'].astype(np.float64)
+    period_df['nstp'] = period_df['nstp'].astype(np.int64)
+    pd.testing.assert_frame_equal(period_df[['perlen', 'nstp', 'tsmult']],
+                                  m.perioddata[['perlen', 'nstp', 'tsmult']])
 
 
 def test_sto_setup(shellmound_model_with_dis):
@@ -700,6 +702,7 @@ def test_idomain_above_sfr(model_with_sfr):
 @pytest.fixture(scope="module")
 def model_setup_and_run(model_setup, mf6_exe):
     m = model_setup  #deepcopy(model_setup)
+    m.simulation.exe_name = mf6_exe
 
     dis_idomain = m.dis.idomain.array.copy()
     for i, d in enumerate(m.cfg['dis']['griddata']['idomain']):
@@ -707,15 +710,31 @@ def model_setup_and_run(model_setup, mf6_exe):
         assert np.array_equal(m.idomain[i], arr)
         assert np.array_equal(dis_idomain[i], arr)
     # TODO : Add executables to Travis build
+    success = False
     if exe_exists(mf6_exe):
         try:
             success, buff = m.simulation.run_simulation()
         except:
             pass
-        assert success, 'model run did not terminate successfully'
+        if not success:
+            list_file = m.name_file.list.array
+            with open(list_file) as src:
+                list_output = src.read()
+        assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+        return m
 
 
-def test_model_setup(model_setup_and_run):
+def test_model_setup_no_nans(model_setup):
+    m = model_setup
+    external_path = os.path.join(m.model_ws, 'external')
+    external_files = glob.glob(external_path + '/*')
+    has_nans = check_external_files_for_nans(external_files)
+    has_nans = '\n'.join(has_nans)
+    if len(has_nans) > 0:
+        assert False, has_nans
+
+
+def test_model_setup_and_run(model_setup_and_run):
     m = model_setup_and_run
 
 

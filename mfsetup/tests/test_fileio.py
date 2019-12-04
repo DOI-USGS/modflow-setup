@@ -106,13 +106,15 @@ def test_which():
     assert badexe is None
 
 
-def test_exe_exists(mf6_exe, mfnwt_exe):
+def test_exe_exists(modflow_executable):
     assert not exe_exists('junk')
     # TODO: get linux binaries
     if "linux" in platform.platform().lower():
+        print('{} does not exist'.format(modflow_executable))
         pass
     elif "darwin" in platform.platform().lower():
+        print('{} does not exist'.format(modflow_executable))
         pass
     else:
-        assert exe_exists(mf6_exe)
-        assert exe_exists(mfnwt_exe)
+        assert exe_exists(modflow_executable)
+        print('{} exists'.format(modflow_executable))

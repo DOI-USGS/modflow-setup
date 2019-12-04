@@ -2,6 +2,10 @@ import numpy as np
 from ..testing import dtypeisfloat, dtypeisinteger
 
 
+def test_rtree():
+    from rtree import index
+
+
 def test_dtypeisfloat():
 
     assert dtypeisfloat(float)

@@ -1,6 +1,8 @@
 """
 Module with functions to check input data.
 """
+import numpy as np
+from .fileio import load_array
 
 
 def is_valid_perioddata(data):
@@ -24,3 +26,12 @@ def is_valid_perioddata(data):
     else:
         nper = data.get('nper') is not None
         return nper or perlen
+
+
+def check_external_files_for_nans(files_list):
+    has_nans = []
+    for f in files_list:
+        arr = load_array(f)
+        if np.any(np.isnan(arr)):
+            has_nans.append(f)
+    return has_nans

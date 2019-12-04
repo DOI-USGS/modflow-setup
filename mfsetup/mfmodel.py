@@ -281,11 +281,11 @@ class MFsetupMixin():
         if self._parent_mask is None:
             x, y = np.squeeze(self.bbox.exterior.coords.xy)
             pi, pj = get_ij(self.parent.modelgrid, x, y)
-            pad = 2
+            pad = 3
             i0 = np.max([pi.min() - pad, 0])
-            i1 = np.min([pi.max() + pad, self.parent.nrow])
+            i1 = np.min([pi.max() + pad + 1, self.parent.nrow])
             j0 = np.max([pj.min() - pad, 0])
-            j1 = np.min([pj.max() + pad, self.parent.ncol])
+            j1 = np.min([pj.max() + pad + 1, self.parent.ncol])
             mask = np.zeros((self.parent.nrow, self.parent.ncol), dtype=bool)
             mask[i0:i1, j0:j1] = True
             self._parent_mask = mask
@@ -515,7 +515,8 @@ class MFsetupMixin():
                           mask1=mask,
                           method=method)
         if method == 'linear':
-            parent_values = parent_array.flatten()[self.parent_mask.flatten()]
+            #parent_values = parent_array.flatten()[self.parent_mask.flatten()]
+            parent_values = parent_array[self.parent_mask].flatten()
             regridded = interpolate(parent_values,
                                     *self.interp_weights)
         elif method == 'nearest':

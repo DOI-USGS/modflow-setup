@@ -173,3 +173,12 @@ def models_with_dis(request,
                     pfl_nwt_with_dis_bas6):
     return {'shellmound_model_with_dis': shellmound_model_with_dis,
             'pfl_nwt_with_dis_bas6': pfl_nwt_with_dis_bas6}[request.param]
+
+
+# fixture to feed multiple model fixtures to a test
+# https://github.com/pytest-dev/pytest/issues/349
+@pytest.fixture(params=['mfnwt_exe',
+                        'mf6_exe'])
+def modflow_executable(request, mfnwt_exe, mf6_exe):
+    return {'mfnwt_exe': mfnwt_exe,
+            'mf6_exe': mf6_exe}[request.param]

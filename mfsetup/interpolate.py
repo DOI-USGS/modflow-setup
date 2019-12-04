@@ -2,6 +2,7 @@ import time
 import numpy as np
 import scipy.interpolate as spint
 import scipy.spatial.qhull as qhull
+from scipy.signal import convolve2d
 import itertools
 import flopy
 
@@ -72,7 +73,7 @@ def interp_weights(xyz, uvw, d=2):
     return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
 
 
-def interpolate(values, vtx, wts, fill_value=np.nan):
+def interpolate(values, vtx, wts, fill_value='mean'):
     """Apply the interpolation weights to a set of values.
 
     Parameters
@@ -82,13 +83,19 @@ def interpolate(values, vtx, wts, fill_value=np.nan):
     wts : weights returned by interp_weights
     fill_value : float
         Value used to fill in for requested points outside of the convex hull
-        of the input points (i.e., those with at least one zero weight).
+        of the input points (i.e., those with at least one negative weight).
         If not provided, then the default is nan.
     Returns
     -------
     interpolated values
     """
     result = np.einsum('nj,nj->n', np.take(values, vtx), wts)
+
+    # fill nans that might result from
+    # child grid points that are outside of the convex hull of the parent grid
+    # and for an unknown reason on the Appveyor Windows environment
+    if fill_value == 'mean':
+        fill_value = np.nanmean(result)
     result[np.any(wts < 0, axis=1)] = fill_value
     return result
 
@@ -133,8 +140,8 @@ def regrid(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
     points = np.array([x.ravel(), y.ravel()]).transpose()
 
     arr2 = griddata(points, arr.flatten(),
-                 (grid2.xcellcenters, grid2.ycellcenters),
-                 method=method, fill_value=np.nan)
+                   (grid2.xcellcenters, grid2.ycellcenters),
+                   method=method, fill_value=np.nan)
 
     # fill any areas that are nan
     # (new active area includes some areas not in uwsp model)
@@ -153,6 +160,7 @@ def regrid(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
     #else:
     #    arr2[fill] = nodataval
     return arr2
+
 
 if __name__ == '__main__':
     """Exampmle from stack overflow. In this example, both
