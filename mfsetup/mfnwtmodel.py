@@ -909,32 +909,30 @@ class MFnwtModel(MFsetupMixin, Modflow):
         nstream_gages = 0
         if 'SFR' in self.get_package_list():
 
-            obs_info_files = self.cfg['gag']['observation_data']
+            obs_info_files = self.cfg['gag'].get('observation_data')
+            if obs_info_files is not None:
+                # get obs_info_files into dictionary format
+                # filename: dict of column names mappings
+                if isinstance(obs_info_files, str):
+                    obs_info_files = [obs_info_files]
+                if isinstance(obs_info_files, list):
+                    obs_info_files = {f: self.cfg['gag']['default_columns']
+                                      for f in obs_info_files}
+                elif isinstance(obs_info_files, dict):
+                    for k, v in obs_info_files.items():
+                        if v is None:
+                            obs_info_files[k] = self.cfg['gag']['default_columns']
 
-            # get obs_info_files into dictionary format
-            # filename: dict of column names mappings
-            if isinstance(obs_info_files, str):
-                obs_info_files = [obs_info_files]
-            if isinstance(obs_info_files, list):
-                obs_info_files = {f: self.cfg['gag']['default_columns']
-                                  for f in obs_info_files}
-            elif isinstance(obs_info_files, dict):
-                for k, v in obs_info_files.items():
-                    if v is None:
-                        obs_info_files[k] = self.cfg['gag']['default_columns']
-
-            check_source_files(obs_info_files.keys())
-
-            print('Reading observation files...')
-            dfs = []
-            for f, column_info in obs_info_files.items():
-                print(f)
-                df = read_observation_data(f,
-                                           column_info,
-                                           column_mappings=self.cfg['hyd'].get('column_mappings'))
-                dfs.append(df) # cull to cols that are needed
-            df = pd.concat(dfs, axis=0)
-            assert True
+                print('Reading observation files...')
+                check_source_files(obs_info_files.keys())
+                dfs = []
+                for f, column_info in obs_info_files.items():
+                    print(f)
+                    df = read_observation_data(f,
+                                               column_info,
+                                               column_mappings=self.cfg['hyd'].get('column_mappings'))
+                    dfs.append(df) # cull to cols that are needed
+                df = pd.concat(dfs, axis=0)
         ngages += nstream_gages
         stream_gageseg = []
         stream_gagerch = []
@@ -1022,9 +1020,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         m = cls(cfg=cfg, **cfg['model'])
         if 'grid' not in m.cfg.keys():
-            if os.path.exists(cfg['setup_grid']['grid_file']):
-                print('Loading model grid definition from {}'.format(cfg['setup_grid']['grid_file']))
-                m.cfg['grid'] = load(m.cfg['setup_grid']['grid_file'])
+            grid_file = cfg['setup_grid']['output_files']['grid_file']
+            if os.path.exists(grid_file):
+                print('Loading model grid definition from {}'.format(grid_file))
+                m.cfg['grid'] = load(grid_file)
             else:
                 m.setup_grid(**m.cfg['setup_grid'])
         m = flopy_mf2005_load(m, load_only=load_only, forgive=forgive, check=check)
