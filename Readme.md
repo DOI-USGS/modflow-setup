@@ -4,8 +4,9 @@ modflow-setup
 Package to facilitate automated setup of MODFLOW models, from source data including shapefiles, rasters, and other MODFLOW models that are geo-located. Input data and model construction options are summarized in a single configuration file. Source data are read from their native formats and mapped to a regular finite difference grid specified in the configuration file. An external array-based [flopy](https://github.com/modflowpy/flopy) model instance with the desired packages is created from the sampled source data and default settings. MODFLOW input can then be written from the flopy model instance.
 
 
-### Version 0.0.0
+### Version 0.1
 [![Build Status](https://travis-ci.org/aleaf/modflow-setup.svg?branch=master)](https://travis-ci.org/aleaf/modflow-setup)
+[![Build status](https://ci.appveyor.com/api/projects/status/5l11v18na9p28olh/branch/master?svg=true)](https://ci.appveyor.com/project/aleaf/modflow-setup/branch/master)
 [![codecov](https://codecov.io/gh/aleaf/modflow-setup/branch/master/graph/badge.svg)](https://codecov.io/gh/aleaf/modflow-setup)
 
 
