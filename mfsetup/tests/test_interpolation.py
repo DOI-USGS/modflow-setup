@@ -70,7 +70,7 @@ def test_interp(dem_DataArray, modelgrid):
 
 
 # even though test runs locally on Windows 10, and on Travis
-@pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
+@pytest.mark.xfail(os.environ.get('CI', 'False').lower() == 'true',
                    reason="")
 def test_interp_weights(pfl_nwt_with_grid):
     m = pfl_nwt_with_grid
@@ -81,7 +81,7 @@ def test_interp_weights(pfl_nwt_with_grid):
 
 
 # even though test runs locally on Windows 10, and on Travis
-@pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
+@pytest.mark.xfail(os.environ.get('CI', 'False').lower() == 'true',
                    reason="")
 def test_regrid_linear(pfl_nwt_with_grid):
 
