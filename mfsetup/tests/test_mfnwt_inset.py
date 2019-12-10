@@ -24,6 +24,17 @@ def pfl_nwt_setup_from_yaml(pfl_nwt_test_cfg_path):
     return m
 
 
+def write_namefile(model):
+    """Write the namefile,
+    making a backup copy if one already exists."""
+    m = model
+    namfile = os.path.join(m.model_ws, m.namefile)
+    if os.path.exists(namfile):
+        shutil.copy(namfile, namfile + '.bak')
+    m.write_name_file()
+    return namfile
+
+
 def test_load_cfg(pfl_nwt_cfg):
     cfg = pfl_nwt_cfg
     assert True
@@ -360,18 +371,13 @@ def test_lak_setup(pfl_nwt_with_dis):
     tabfiles = m.cfg['lak']['tab_files']
     for f in tabfiles:
         assert os.path.exists(os.path.join(m.model_ws, f))
-    namfile = os.path.join(m.model_ws, m.namefile)
-    if os.path.exists(namfile):
-        shutil.copy(namfile, namfile+'.bak')
-    m.write_name_file()
+    namfile = write_namefile(m)
     with open(namfile) as src:
         txt = src.read()
     # kludge to deal with ugliness of lake package external file handling
     tab_files_argument = [os.path.relpath(f) for f in tabfiles]
     for f in tab_files_argument:
         assert f in txt
-    if os.path.exists(namfile+'.bak'):
-        shutil.copy(namfile+'.bak', namfile)
 
     # test setup of lak package with steady-state stress period > 1
     m.cfg['dis']['nper'] = 4
@@ -389,6 +395,28 @@ def test_lak_setup(pfl_nwt_with_dis):
             if "Stress period 4" in line:
                 ds9_entries = next(src).split('#')[0].strip().split()
     assert len(ds9_entries) == 6
+
+    # check that order in lake lookup file is same as specified in include_ids
+    lookup = pd.read_csv(m.cfg['lak']['output_files']['lookup_file'])
+    include_ids = m.cfg['lak']['source_data']['lakes_shapefile']['include_ids']
+    assert lookup.hydroid.tolist() == include_ids
+
+    # check that tabfiles are in correct order
+    with open(namfile) as src:
+        units = []
+        hydroids = []
+        for line in src:
+            if 'stage_area_volume' in line:
+                _, unit, fname = line.strip().split()
+                hydroid = int(os.path.split(fname)[1].split('_')[0])
+                hydroids.append(hydroid)
+                units.append(int(unit))
+        inds = np.argsort(units)
+        hydroids = np.array(hydroids)[inds]
+    assert hydroids.tolist() == include_ids
+    # restore the namefile to what was there previously
+    if os.path.exists(namfile+'.bak'):
+        shutil.copy(namfile+'.bak', namfile)
 
 
 def test_nwt_setup(pfl_nwt, project_root_path):
@@ -428,11 +456,43 @@ def test_hyd_setup(pfl_nwt_with_dis_bas6):
 def test_lake_gag_setup(pfl_nwt_with_dis):
 
     m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
+    m.cfg['gag']['lak_outtype'] = 1
     lak = m.setup_lak()
     gag = m.setup_gag()
     gag.write_file()
     for f in m.cfg['gag']['ggo_files']:
         assert f in m.output_fnames
+
+    # check that lake numbers and units are negative
+    # and that outtype is specified
+    with open(gag.fn_path) as src:
+        ngage = int(next(src).strip())
+        for i, line in enumerate(src):
+            if i == lak.nlakes:
+                break
+            lake_no, unit, outtype = line.strip().split()
+            assert int(lake_no) < 0
+            assert int(unit) < 0  # for reading outtype
+            assert int(outtype) >= 0
+
+    # check that ggos are in correct order
+    include_ids = m.cfg['lak']['source_data']['lakes_shapefile']['include_ids']
+    namfile = write_namefile(m)
+    with open(namfile) as src:
+        units = []
+        hydroids = []
+        for line in src:
+            if '.ggo' in line:
+                _, unit, fname = line.strip().split()
+                hydroid = int(os.path.splitext(os.path.split(fname)[1].split('_')[1])[0])
+                hydroids.append(hydroid)
+                units.append(int(unit))
+        inds = np.argsort(units)
+        hydroids = np.array(hydroids)[inds]
+    assert hydroids.tolist() == include_ids
+    # restore the namefile to what was there previously
+    if os.path.exists(namfile + '.bak'):
+        shutil.copy(namfile + '.bak', namfile)
 
 
 def test_chd_setup(pfl_nwt_with_dis):

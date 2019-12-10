@@ -894,6 +894,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # setup gage package output for all included lakes
         ngages = 0
         nlak_gages = 0
+        starting_unit_number = self.cfg['gag']['starting_unit_number']
         if 'LAK' in self.get_package_list():
             nlak_gages = self.lak.nlakes
         if nlak_gages > 0:
@@ -901,6 +902,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
             lak_gagelocs = list(np.arange(1, nlak_gages+1) * -1)
             lak_gagerch = [0] * nlak_gages # dummy list to maintain index position
             lak_outtype = [self.cfg['gag']['lak_outtype']] * nlak_gages
+            # need minus sign to tell MF to read outtype
+            lake_unit = list(-np.arange(starting_unit_number,
+                                        starting_unit_number + nlak_gages))
             # TODO: make private attribute to facilitate keeping track of lake IDs
             lak_files = ['lak{}_{}.ggo'.format(i+1, hydroid)
                          for i, hydroid in enumerate(self.cfg['lak']['source_data']['lakes_shapefile']['include_ids'])]
@@ -934,8 +938,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
                     dfs.append(df) # cull to cols that are needed
                 df = pd.concat(dfs, axis=0)
         ngages += nstream_gages
+        # TODO: stream gage setup
         stream_gageseg = []
         stream_gagerch = []
+        stream_unit = []
         stream_outtype = [self.cfg['gag']['sfr_outtype']] * nstream_gages
         stream_files = []
 
@@ -947,8 +953,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         gage_data = fm.ModflowGage.get_empty(ncells=ngages)
         gage_data['gageloc'] = lak_gagelocs + stream_gageseg
         gage_data['gagerch'] = lak_gagerch + stream_gagerch
-        gage_data['unit'] = np.arange(self.cfg['gag']['starting_unit_number'],
-                                      self.cfg['gag']['starting_unit_number'] + ngages)
+        gage_data['unit'] = lake_unit + stream_unit
         gage_data['outtype'] = lak_outtype + stream_outtype
         if self.cfg['gag'].get('ggo_files') is None:
             self.cfg['gag']['ggo_files'] = lak_files + stream_files

@@ -455,7 +455,8 @@ class MFsetupMixin():
                 df = self._features[f]
             if id_column is not None and include_ids is not None:
                 id_column = id_column.lower()
-                df = df.loc[df[id_column].isin(include_ids)]
+                df.index = df[id_column]
+                df = df.loc[include_ids]
             dfs_list.append(df)
         df = pd.concat(dfs_list)
         return df
