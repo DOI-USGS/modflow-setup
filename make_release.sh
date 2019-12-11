@@ -14,7 +14,7 @@ git push origin master
 git push origin $versionLabel
 
 echo "removing kruft..."
-git clean -dfx
+#git clean -dfx
 
 echo "making the wheel..."
 python setup.py sdist
