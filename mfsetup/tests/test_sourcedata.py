@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from ..fileio import _parse_file_path_keys_from_source_data
-from ..sourcedata import (ArraySourceData, TabularSourceData,
+from ..sourcedata import (ArraySourceData, TabularSourceData, TransientTabularSourceData,
                           MFArrayData, MFBinaryArraySourceData, transient2d_to_xarray)
 from mfsetup.tdis import aggregate_dataframe_to_stress_period
 from mfsetup.discretization import weighted_average_between_layers
@@ -289,6 +289,7 @@ def test_weighted_average_between_layers():
     weight0 = 0.7
     result = weighted_average_between_layers(arr0, arr1, weight0=0.7)
     assert np.allclose(result.mean(axis=(0, 1)), weight0)
+
 
 @pytest.mark.parametrize('dates', [('2007-04-01', '2007-03-31'),
                                    ('2008-04-01', '2008-09-30'),

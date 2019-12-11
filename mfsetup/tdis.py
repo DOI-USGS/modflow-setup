@@ -333,6 +333,13 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
         period_stat = [period_stat]
     elif period_stat is None:
         period_stat = ['mean']
+    if isinstance(data_column, str):
+        data_columns = [data_column]
+    else:
+        data_columns = data_column
+
+    if len(data_columns) > 1:
+        pass
 
     if isinstance(period_stat, list):
         stat = period_stat.pop(0)
@@ -353,7 +360,7 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
             else:
                 period_data = data.loc[period]
 
-        # no period specified; use start/end of current period
+        # no time period in source data specified for statistic; use start/end of current model period
         elif len(period_stat) == 0:
             assert 'start_datetime' in data.columns and 'end_datetime' in data.columns, \
                 "start_datetime and end_datetime columns needed for " \
@@ -361,9 +368,9 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
             for col in ['start_datetime', 'end_datetime']:
                 if data[col].dtype == np.object:
                     data[col] = pd.to_datetime(data[col])
-            welldata_overlaps_period = (data.start_datetime < end_datetime) & \
-                                       (data.end_datetime > start_datetime)
-            period_data = data.loc[welldata_overlaps_period]
+            data_overlaps_period = (data.start_datetime < end_datetime) & \
+                                   (data.end_datetime > start_datetime)
+            period_data = data.loc[data_overlaps_period]
 
         else:
             raise Exception("")

@@ -1,6 +1,7 @@
 import os
 import shutil
 import platform
+import copy
 import pytest
 import flopy
 fm = flopy.modflow
@@ -155,6 +156,83 @@ def shellmound_model_with_dis(shellmound_model_with_grid):
     return m
 
 
+@pytest.fixture(scope="session")
+def pleasant_nwt_test_cfg_path(project_root_path):
+    return project_root_path + '/mfsetup/tests/data/pleasant_nwt_test.yml'
+
+
+@pytest.fixture(scope="session")
+def pleasant_nwt_cfg(pleasant_nwt_test_cfg_path):
+    cfg = load_cfg(pleasant_nwt_test_cfg_path)
+    # add some stuff just for the tests
+    cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
+    return cfg
+
+
+@pytest.fixture(scope="session")
+def get_pleasant_nwt(pleasant_nwt_cfg):
+    print('creating Pleasant Lake MFnwtModel instance from cfgfile...')
+    cfg = pleasant_nwt_cfg.copy()
+    m = MFnwtModel(cfg=cfg, **cfg['model'])
+    return m
+
+
+@pytest.fixture(scope="session")
+def get_pleasant_nwt_with_grid(get_pleasant_nwt):
+    print('creating Pleasant Lake MFnwtModel instance with grid...')
+    m = copy.deepcopy(get_pleasant_nwt)
+    cfg = m.cfg.copy()
+    cfg['setup_grid']['grid_file'] = m.cfg['setup_grid'].pop('output_files').pop('grid_file')
+    sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
+    sd['features_shapefile'] = sd.pop('filename')
+    cfg['setup_grid'].update(sd)
+    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
+    m.setup_grid(**kwargs)
+    return m
+
+
+@pytest.fixture(scope="session")
+def get_pleasant_nwt_with_dis(get_pleasant_nwt_with_grid):
+    print('creating Pleasant Lake MFnwtModel instance with dis package...')
+    m = copy.deepcopy(get_pleasant_nwt_with_grid)  #deepcopy(pleasant_nwt_with_grid)
+    m.cfg['dis']['remake_arrays'] = True
+    m.cfg['dis']['regrid_top_from_dem'] = True
+    dis = m.setup_dis()
+    return m
+
+
+@pytest.fixture(scope="session")
+def get_pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis):
+    print('creating Pleasant Lake MFnwtModel instance with dis and bas6 packages...')
+    m = copy.deepcopy(get_pleasant_nwt_with_dis)
+    bas = m.setup_bas6()
+    return m
+
+
+@pytest.fixture(scope="function")
+def pleasant_nwt(get_pleasant_nwt):
+    m = copy.deepcopy(get_pleasant_nwt)
+    return m
+
+
+@pytest.fixture(scope="function")
+def pleasant_nwt_with_grid(get_pleasant_nwt_with_grid):
+    m = copy.deepcopy(get_pleasant_nwt_with_grid)
+    return m
+
+
+@pytest.fixture(scope="function")
+def pleasant_nwt_with_dis(get_pleasant_nwt_with_dis):
+    m = copy.deepcopy(get_pleasant_nwt_with_dis)
+    return m
+
+
+@pytest.fixture(scope="function")
+def pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis_bas6):
+    m = copy.deepcopy(get_pleasant_nwt_with_dis)
+    return m
+
+
 @pytest.fixture(scope="session", autouse=True)
 def tmpdir(project_root_path):
     folder = project_root_path + '/mfsetup/tests/tmp'
@@ -182,3 +260,5 @@ def models_with_dis(request,
 def modflow_executable(request, mfnwt_exe, mf6_exe):
     return {'mfnwt_exe': mfnwt_exe,
             'mf6_exe': mf6_exe}[request.param]
+
+

@@ -9,6 +9,8 @@ fm = flopy.modflow
 from flopy.utils.mflistfile import ListBudget
 from gisutils import shp2df
 from mfsetup.grid import rasterize
+from mfsetup.sourcedata import SourceData, aggregate_dataframe_to_stress_period
+from mfsetup.units import convert_length_units, convert_temperature_units
 
 
 def make_lakarr2d(grid, lakesdata,
@@ -100,6 +102,118 @@ def get_stage_observations(listfile, lake_numbers):
         obs.append(df[['obsname', 'obsval']])
     obs = pd.concat(obs, axis=0)
     return obs
+
+
+class PrismSourceData(SourceData):
+    """Subclass for handling tabular source data that
+    represents a time series."""
+
+    def __init__(self, filenames, period_stats='mean', id_column='lakeid',
+                 dest_temperature_units='celsius',
+                 dest_model=None):
+        SourceData.__init__(self, filenames=filenames,
+                            dest_model=dest_model)
+
+        self.id_column = id_column
+        self.period_stats = period_stats
+        self.data_columns = ['ppt', 'temp']
+        self.datetime_column = 'datetime'
+        self.dest_temperature_units = dest_temperature_units
+
+    def parse_header(self, f):
+        meta = {}
+        with open(f) as src:
+            for i, line in enumerate(src):
+                if 'Location' in line:
+                    _, _, lat, _, lon, _, _ = line.strip().split()
+                if 'Date' in line:
+                    names = line.strip().split(',')
+                    meta['length_units'] = names[1].split()[1].strip('()')
+                    meta['temperature_units'] = names[2].split()[-1].strip('()')
+                    names = [self.datetime_column,
+                             '{}_{}{}'.format(self.data_columns[0],
+                                              self.dest_model.length_units[0].lower(),
+                                              self.dest_model.time_units[0].lower()),
+                             '{}_{}'.format(self.data_columns[1],
+                                              self.dest_temperature_units[0].lower())
+                             ]
+                    break
+        self.data_columns = names[1:]
+        meta['latitude'] = float(lat)
+        meta['longitude'] = float(lon)
+        meta['column_names'] = names
+        meta['skiprows'] = i + 1
+        meta['temp_conversion'] = convert_temperature_units(meta['temperature_units'],
+                                                            self.dest_temperature_units)
+        return meta
+
+    def get_data(self):
+
+        # aggregate the data from multiple files
+        dfs = []
+        for id, f in self.filenames.items():
+            meta = self.parse_header(f)
+            df = pd.read_csv(f, skiprows=meta['skiprows'],
+                             header=None, names=meta['column_names'])
+            df.index = pd.to_datetime(df[self.datetime_column])
+            df['start_datetime'] = df.index
+            # check if data are monthly
+            ndays0 = (df.index[1] - df.index[0]).days
+            ismonthly = ndays0 >=28 & ndays0 <=31
+            if ismonthly:
+                ndays = df.index.days_in_month
+                df['end_datetime'] = df['start_datetime'] + pd.to_timedelta(ndays, unit='D')
+            elif ndays0 == 1:
+                ndays = 1
+                df['end_datetime'] = df['start_datetime']
+            else:
+                raise ValueError("Check {}; only monthly or daily values supported.")
+
+            # convert precip to model units
+            # assumes that precip is monthly values
+            mult = convert_length_units(meta['length_units'],
+                                        self.dest_model.length_units)
+            df[meta['column_names'][1]] = df[meta['column_names'][1]] * mult/ndays
+
+            # convert temperatures to C
+            df[meta['column_names'][2]] = meta['temp_conversion'](df[meta['column_names'][2]])
+
+            # record lake ID
+            df[self.id_column] = id
+            dfs.append(df)
+        df = pd.concat(dfs)
+
+        # sample values to model stress periods
+        starttimes = self.dest_model.perioddata['start_datetime'].copy()
+        endtimes = self.dest_model.perioddata['end_datetime'].copy()
+
+        # if period ends are specified as the same as the next starttime
+        # need to subtract a day, otherwise
+        # pandas will include the first day of the next period in slices
+        endtimes_equal_startimes = np.all(endtimes[:-1].values == starttimes[1:].values)
+        #if endtimes_equal_startimes:
+        #    endtimes -= pd.Timedelta(1, unit='d')
+
+        period_data = []
+        current_stat = None
+        for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
+            # missing (period) keys default to 'mean';
+            # 'none' to explicitly skip the stress period
+            period_stat = self.period_stats.get(kper, current_stat)
+            current_stat = period_stat
+            aggregated = aggregate_dataframe_to_stress_period(df,
+                                                              start_datetime=start,
+                                                              end_datetime=end,
+                                                              period_stat=period_stat,
+                                                              id_column=self.id_column,
+                                                              data_column=self.data_columns
+                                                              )
+            aggregated['per'] = kper
+            period_data.append(aggregated)
+        dfm = pd.concat(period_data)
+        dfm.sort_values(by=['per', self.id_column], inplace=True)
+        return dfm
+
 
 class LakListBudget(ListBudget):
     """

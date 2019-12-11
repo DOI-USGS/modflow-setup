@@ -251,3 +251,28 @@ def parse_length_units(text, text_output=True):
                 return k
             else:
                 return v
+
+
+def convert_temperature_units(input_temp_units, output_temp_units):
+    temp_units = {'celsius': 1,
+                  'c': 1,
+                  'fahrenheit': 2,
+                  'f': 2
+                  }
+
+    input_temp_units = temp_units.get(input_temp_units.lower(), 0)
+    output_temp_units = temp_units.get(output_temp_units.lower(), 0)
+
+    def unknown(temp):
+        return temp
+
+    def c_to_f(temp):
+        return temp * (9/5) + 32
+
+    def f_to_c(temp):
+        return (5/9) * (temp - 32)
+
+    conversions = {(1, 2): c_to_f,
+                   (2, 1): f_to_c}
+    conversion = conversions.get((input_temp_units, output_temp_units), unknown)
+    return conversion

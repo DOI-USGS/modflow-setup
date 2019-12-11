@@ -1,0 +1,158 @@
+intermediate_data:
+  tmpdir: 'tmp/'
+
+# argments to flopy.modflow.Modflow.__init__ or load for pfl_nwt
+model:
+  modelname: 'pleasant'
+  model_ws: '../tmp/pleasant_nwt/'
+  external_path: 'external/'
+  perimeter_boundary_type: 'specified head'
+  start_date_time: '2012-01-01'
+  packages: ['dis',
+             'bas6',
+             'oc',
+             'upw',
+             'rch', # Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model
+             'sfr',
+             'lak',
+             'wel',
+             'hyd',
+             'gag',
+             'nwt'
+  ]
+
+parent:
+  # argments to flopy.modflow.Modflow.load for parent model
+  namefile: 'pleasant.nam'
+  model_ws: 'pleasant/'
+  version: 'mfnwt'
+  # information for modflow-setup
+  # note: parent model is geo-located in namfile header
+  # (only works if length_units='meters')
+  headfile: 'pleasant/pleasant.hds'
+  hiKlakes_value: 1.e4 # unfortunately python yaml currently requires a dot to parse exp notation as float
+  default_source_data: True  # if True, packages and variables that are omitted will be pulled from this model
+  copy_stress_periods: 'all'
+  start_date_time: '2012-01-01'
+  length_units: 'meters'
+  time_units: 'days'
+
+# parameters for setting up the pfl_nwt grid
+# using features in features_file
+setup_grid:
+  remake: True
+  source_data:
+    features_shapefile:
+      filename: 'pleasant/source_data/shps/all_lakes.shp'
+      id_column: 'HYDROID'
+      include_ids: [600059060] # pleasant lake
+  dxy: 20 # m
+  buffer: 2000 # distance from feature(s) if interest to model boundary, in meters
+  grid_file: 'grid.json' # grid info will be written to this file
+  epsg: 3070
+
+# Inset model settings and
+# arguments to flopy.modflow.ModflowDis
+dis:
+  remake_top: True
+  nlay: 5
+  nstp: 3
+  length_units: 'meters'  # alternatively, specify lenuni: 2
+  time_units: 'days'  # alternatively, specify itmuni: 4
+  source_data:
+    top:
+      filename: 'pleasant/source_data/rasters/dem100m.tif'
+      elevation_units: 'meters'
+    botm:
+      from_parent:
+        0: -0.5 # bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1
+        1: 0 # bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent
+        2: 1
+        3: 2
+        4: 3
+
+bas6:
+  source_data:
+    strt:
+      from_parent:
+        binaryfile: 'pleasant/pleasant.hds'
+
+upw:
+  ipakcb: 53 # unit for writing cell budget output
+  hdry: -9999
+
+wel:
+  options: ['SPECIFY', '0.01']
+  #source_data:
+  #  wdnr_dataset:
+  #    water_use: '../webservice_metadata/python_output/master_wu.csv' # monthly water use rates from WDNR
+  #    water_use_points: '../webservice_metadata/python_output/csls_sources_wu_pts.shp' # point locations of wells in water_use
+  #    period_stats: {0: ['mean', '2000-01-01', '2017-12-31'],
+  #                   1: 'mean'
+  #    }
+  #output_files:
+  #  lookup_file: 'wel_lookup.csv' # mapping of wel package data to site numbers
+
+lak:
+  theta: -0.7  # semi-implicit; negative value indicates that surfdep is read
+  nssitr: 800  # number of Newton iterations for solution of lake stage, for each MODFLOW iteration.
+  sscncr: 0.0000001  # lake stage convergence criterion
+  surfdep: 0.1  # undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)
+  precip: [0.002276, # 32.7 in/yr; from LPR report average value
+           #0.003646 # average for August, 2012-2018 (4.45 in for the month)
+           ]
+  evap: [0.001649, # 23.7 in/yr; ballpark value from LPR report
+         #0.00338, # 3.38 mm/day; average August rate for Sparkling Lake from Lenters and others (2005; table 2)
+         ]
+  littoral_leakance: 0.045 # 1/d
+  profundal_leakance: 0.025 # 1/d
+  source_data:
+    lakes_shapefile:
+      filename: 'pleasant/source_data/shps/all_lakes.shp'
+      id_column: 'HYDROID'
+      include_ids: [600059060] # pleasant lake
+    climate:
+      filenames:
+        600059060: 'pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+      format: 'prism'
+      period_stats:
+        0: ['mean', '2012-01-01', '2018-12-31']  # average daily rate for model period for initial steady state
+        1: 'mean'  # average daily rate or value for each month
+    #bathymetry_raster:
+    #  filename: 'pleasant/source_data/rasters/bathymetry.tif'
+    #  length_units: 'meters'
+    #stage_area_volume_file:
+    #  filename: 'plainfieldlakes/source_data/all_lakes_stage_area_volume.csv' #'../../bcs/lakes/area_stage_vol_Long.csv'
+    #  length_units: 'meters'
+    #  column_mappings:
+    #    volume_m3: 'volume'
+  output_files:
+    lookup_file: 'lak_lookup.csv'
+
+sfr:
+  source_data:
+    flowlines:
+      nhdplus_paths: ['pleasant/source_data/shps']
+    dem:
+      filename: 'pleasant/source_data/rasters/dem100m.tif'
+      elevation_units: 'meters'
+  set_streambed_top_elevations_from_dem: True
+  output_path:
+
+nwt:
+  #use_existing_file: 'RGN_rjh_3_23_18.NWT'
+  headtol: 1.e-2 # read remaining parameters from default cfg
+  hclosexmd: 1.e-4
+
+hyd:
+  source_data:
+    filenames: ['pleasant/source_data/tables/nwis_heads_all/nwis_heads_info_file.csv',
+                'pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
+                'pleasant/source_data/tables/wdnr_heads/wdnr_gw_sites.csv',
+                'pleasant/source_data/tables/uwsp_heads.csv',
+                'pleasant/source_data/tables/wgnhs_head_targets.csv'
+                     ]
+    column_mappings:
+      hydlbl: ['obsprefix', 'obsnme', 'common_name']
+  drop_observations: ['10019209_lk'  # pleasant lake; monitored via gage package
+  ]

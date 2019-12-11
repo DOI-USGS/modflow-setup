@@ -54,6 +54,7 @@ class SourceData:
         self.time_units = time_units
         self.datatype = datatype
         self.dest_model = dest_model
+        self.set_filenames(filenames)
 
     @property
     def unit_conversion(self):
@@ -79,6 +80,27 @@ class SourceData:
     def time_unit_conversion(self):
         return convert_time_units(self.time_units,
                                   getattr(self.dest_model, 'time_units', 'unknown'))
+
+    def set_filenames(self, filenames):
+
+        def normpath(f):
+            if self.dest_model is not None and isinstance(f, str):
+                try:
+                    path = os.path.join(self.dest_model._config_path, f)
+                except:
+                    j=2
+                normpath = os.path.normpath(path)
+                return normpath
+            return f
+
+        if isinstance(filenames, str):
+            self.filenames = {0: normpath(filenames)}
+        elif isinstance(filenames, list):
+            self.filenames = {i: normpath(f) for i, f in enumerate(filenames)}
+        elif isinstance(filenames, dict):
+            self.filenames = {i: normpath(f) for i, f in filenames.items()}
+        else:
+            self.filenames = None
 
     @classmethod
     def from_config(cls, data, **kwargs):
@@ -537,6 +559,7 @@ class NetCDFSourceData(ArraySourceData):
         current_stat = None
         for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
             period_stat = self.period_stats.get(kper, current_stat)
+            current_stat = period_stat
             aggregated = aggregate_xarray_to_stress_period(data,
                                                            start_datetime=start,
                                                            end_datetime=end,

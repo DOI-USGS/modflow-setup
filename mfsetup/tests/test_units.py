@@ -6,7 +6,8 @@ import pytest
 from ..units import (convert_flux_units, convert_length_units,
                      convert_volume_units,
                      convert_time_units, parse_length_units,
-                     lenuni_values)
+                     lenuni_values,
+                     convert_temperature_units)
 
 
 def test_convert_flux():
@@ -82,3 +83,16 @@ def test_parse_length_units_exponent(length_units, exp, time_units):
     text = length_units + exp + time_units
     length_units = parse_length_units(text)
     assert length_units in lenuni_values
+
+
+@pytest.mark.parametrize('in_out_units_value_expected', [('Celsius', 'fahrenheit', 0, 32),
+                                                         ('celsius', 'F', -40, -40),
+                                                         ('Fahrenheit', 'celsius', -40, -40),
+                                                         ('Fahrenheit', 'C', 32, 0),
+                                                         ('C', 'F', 100, 212)
+                                         ])
+def test_convert_temp_units(in_out_units_value_expected):
+    inunits, outunits, value, expected = in_out_units_value_expected
+    fn = convert_temperature_units(inunits, outunits)
+    result = fn(value)
+    assert result == expected
