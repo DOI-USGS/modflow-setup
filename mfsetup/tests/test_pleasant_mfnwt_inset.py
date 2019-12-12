@@ -8,12 +8,11 @@ Tests for Pleasant Lake inset case
 from copy import copy, deepcopy
 import os
 import pytest
+import numpy as np
 import pandas as pd
 import flopy
 fm = flopy.modflow
-from mfsetup import MFnwtModel
-from ..fileio import exe_exists, load_cfg
-from ..utils import get_input_arguments
+from .test_lakes import get_prism_data
 
 
 def test_perioddata(pleasant_nwt):
@@ -24,5 +23,11 @@ def test_perioddata(pleasant_nwt):
 
 def test_setup_lak(pleasant_nwt_with_dis_bas6):
     m = pleasant_nwt_with_dis_bas6
-    m.setup_lak()
-    j=2
+    lak = m.setup_lak()
+    lak.write_file()
+    lak = fm.ModflowLak.load(lak.fn_path, m)
+    datafile = '../../data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+    prism = get_prism_data(datafile)
+    precip = [lak.flux_data[per][0][0] for per in range(1, m.nper)]
+    assert np.allclose(lak.flux_data[0][0][0], prism['ppt_md'].mean())
+    assert np.allclose(precip, prism['ppt_md'])

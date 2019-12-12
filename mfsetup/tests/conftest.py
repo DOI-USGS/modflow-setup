@@ -229,7 +229,7 @@ def pleasant_nwt_with_dis(get_pleasant_nwt_with_dis):
 
 @pytest.fixture(scope="function")
 def pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis_bas6):
-    m = copy.deepcopy(get_pleasant_nwt_with_dis)
+    m = copy.deepcopy(get_pleasant_nwt_with_dis_bas6)
     return m
 
 

@@ -780,8 +780,7 @@ class TabularSourceData(SourceData):
         # drop any extra unnamed columns from accidental saving of the index on to_csv
         drop_columns = [c for c in df.columns if 'unnamed' in c]
         df.drop(drop_columns, axis=1, inplace=True)
-
-        return df
+        return df.reset_index(drop=True)
 
 
 class TransientTabularSourceData(SourceData):
@@ -1122,14 +1121,18 @@ def setup_array(model, package, var, data=None,
                 raise KeyError("No recharge input specified for first stress period.")
             if per in data:
                 # assign high-k lake recharge for stress period
-                # apply in same units as source recharge array
+                # only assign if precip and open water evaporation data were read
+                # (otherwise keep original values in recharge array)
                 last_data_array = data[per].copy()
-                data[per][model.isbc[0] == 2] = model.lake_recharge[per]
+                if model.lake_recharge is not None:
+                    data[per][model.isbc[0] == 2] = model.lake_recharge[per]
                 # zero-values to lak package lakes
                 data[per][model.isbc[0] == 1] = 0.
             else:
-                # start with the last period with recharge data; update the high-k lake recharge
-                last_data_array[model.isbc[0] == 2] = model.lake_recharge[per]
+                if model.lake_recharge is not None:
+                    # start with the last period with recharge data; update the high-k lake recharge
+                    last_data_array[model.isbc[0] == 2] = model.lake_recharge[per]
+                last_data_array[model.isbc[0] == 1] = 0.
                 # assign to current per
                 data[per] = last_data_array
 

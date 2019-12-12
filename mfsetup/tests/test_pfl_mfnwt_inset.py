@@ -399,7 +399,7 @@ def test_lak_setup(pfl_nwt_with_dis):
     # check that order in lake lookup file is same as specified in include_ids
     lookup = pd.read_csv(m.cfg['lak']['output_files']['lookup_file'])
     include_ids = m.cfg['lak']['source_data']['lakes_shapefile']['include_ids']
-    assert lookup.hydroid.tolist() == include_ids
+    assert lookup.feat_id.tolist() == include_ids
 
     # check that tabfiles are in correct order
     with open(namfile) as src:

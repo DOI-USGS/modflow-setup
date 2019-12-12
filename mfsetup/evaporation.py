@@ -11,6 +11,7 @@ Army Corps of Engineers data collection and methods, and evaluation of two metho
 from five reservoirs in Texas: U.S. Geological Survey Scientific Investigations Report 2012–5202, 96 p.
 """
 import numpy as np
+from mfsetup.units import convert_length_units
 
 
 def solar_declination(julian_day):
@@ -102,7 +103,8 @@ def saturation_vapor_density(svp,
                       avg_daily_air_temp_kelvin)
 
 
-def hamon_evaporation(day_of_year, tmean_c, latitude_dd):
+def hamon_evaporation(day_of_year, tmean_c, latitude_dd,
+                      dest_length_units='inches'):
     """
 
     Parameters
@@ -113,6 +115,8 @@ def hamon_evaporation(day_of_year, tmean_c, latitude_dd):
         Average daily air temperature, in Celsius
     latitude_dd : float
         Latitude, decimal degrees
+    dest_length_units : str
+        Length units of output (e.g. ft., feet, meters, etc.)
 
     Returns
     -------
@@ -125,4 +129,6 @@ def hamon_evaporation(day_of_year, tmean_c, latitude_dd):
     svp = saturation_vapor_pressure(tmean_c)
     svd = saturation_vapor_density(svp,
                                    tmean_c)
-    return 0.55 * (D/12)**2 * (svd/100)
+    E_inches = 0.55 * (D/12)**2 * (svd/100)
+    mult = convert_length_units('inches', dest_length_units)
+    return E_inches * mult

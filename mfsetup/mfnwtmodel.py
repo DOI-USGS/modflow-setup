@@ -6,7 +6,7 @@ import time
 import numpy as np
 np.warnings.filterwarnings('ignore')
 import pandas as pd
-from shapely.geometry import MultiPolygon, Point
+from shapely.geometry import MultiPolygon
 import flopy
 fm = flopy.modflow
 from flopy.modflow import Modflow
@@ -17,7 +17,7 @@ from .tdis import setup_perioddata_group
 from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
-from .lakes import make_lakarr2d, make_bdlknc_zones, make_bdlknc2d
+from .lakes import make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes, setup_lake_info
 from .utils import update, get_packages, get_input_arguments
 from .obs import read_observation_data, setup_head_observations
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
@@ -736,9 +736,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # source data
         source_data = self.cfg['lak']['source_data']
-        lakesdata = self.load_features(**source_data['lakes_shapefile'])
-        id_column = source_data['lakes_shapefile']['id_column'].lower()
-        nlakes = len(lakesdata)
+        self.lake_info = setup_lake_info(self)
+        nlakes = len(self.lake_info)
 
         # lake package settings
         start_tab_units_at = 150  # default starting number for iunittab
@@ -751,15 +750,15 @@ class MFnwtModel(MFsetupMixin, Modflow):
             sd = TabularSourceData.from_config(source_data['stage_area_volume_file'])
             df = sd.get_data()
 
-            lakes = df.groupby(id_column)
-            n_included_lakes = len(set(lakesdata[id_column]).\
+            lakes = df.groupby(sd.id_column)
+            n_included_lakes = len(set(self.lake_info['feat_id']).\
                                    intersection(set(lakes.groups.keys())))
             assert n_included_lakes == nlakes, "stage_area_volume (tableinput) option" \
                                                " requires info for each lake, " \
-                                               "only these HYDROIDs found:\n{}".format(df[id_column].tolist())
+                                               "only these feature IDs found:\n{}".format(df[sd.id_column].tolist())
             tab_files = []
             tab_units = []
-            for i, id in enumerate(lakesdata[id_column].tolist()):
+            for i, id in enumerate(self.lake_info['feat_id'].tolist()):
                 dfl = lakes.get_group(id)
                 assert len(dfl) == 151, "151 values required for each lake; " \
                                         "only {} for HYDROID {} in {}"\
@@ -787,8 +786,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
                                       nfiles=self.nlay)
 
         # make the arrays or load them
-        lakzones = make_bdlknc_zones(self.modelgrid, lakesdata,
-                                     include_ids=lakesdata[id_column])
+        lakzones = make_bdlknc_zones(self.modelgrid, self.lake_info,
+                                     include_ids=self.lake_info['feat_id'])
         save_array(self.cfg['intermediate_data']['lakzones'][0], lakzones, fmt='%d')
 
         bdlknc = np.zeros((self.nlay, self.nrow, self.ncol))
@@ -802,15 +801,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
                 bdlknc[k][self.isbc[k] == 1] = self.cfg['lak']['profundal_leakance']
             save_array(self.cfg['intermediate_data']['bdlknc'][0][k], bdlknc[k], fmt='%.6e')
 
-        # save a lookup file mapping lake ids to hydroids
-        df = pd.DataFrame({'lakid': np.arange(1, nlakes+1),
-                           'hydroid': lakesdata[id_column].values})
-        df.to_csv(self.cfg['lak']['output_files']['lookup_file'],
-                  index=False)
-
         # get estimates of stage from model top, for specifying ranges
         stages = []
-        for lakid in range(1, nlakes+1):
+        for lakid in self.lake_info['lak_id']:
             loc = self.lakarr[0] == lakid
             est_stage = self.dis.top.array[loc].min()
             stages.append(est_stage)
@@ -822,19 +815,23 @@ class MFnwtModel(MFsetupMixin, Modflow):
         stage_range = list(zip(ssmn, ssmx))
 
         # set up dataset 9
+        # ssmn and ssmx values only required for steady-state periods > 0
+        self.lake_fluxes = setup_lake_fluxes(self)
+        precip = self.lake_fluxes['precipitation'].tolist()
+        evap = self.lake_fluxes['evaporation'].tolist()
         flux_data = {}
         for i, steady in enumerate(self.dis.steady.array):
             if i > 0 and steady:
                 flux_data_i = []
                 for lake_ssmn, lake_ssmx in zip(ssmn, ssmx):
-                    flux_data_i.append([self.precipitation[i], self.evaporation[i], 0, 0, lake_ssmn, lake_ssmx])
+                    flux_data_i.append([precip[i], evap[i], 0, 0, lake_ssmn, lake_ssmx])
             else:
-                flux_data_i = [[self.precipitation[i], self.evaporation[i], 0, 0]] * nlakes
+                flux_data_i = [[precip[i], evap[i], 0, 0]] * nlakes
             flux_data[i] = flux_data_i
         options = ['tableinput'] if tab_files_argument is not None else None
 
         kwargs = self.cfg['lak']
-        kwargs['nlakes'] = len(lakesdata)
+        kwargs['nlakes'] = len(self.lake_info)
         kwargs['stages'] = stages
         kwargs['stage_range'] = stage_range
         kwargs['flux_data'] = flux_data

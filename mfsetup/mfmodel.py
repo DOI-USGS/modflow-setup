@@ -12,7 +12,7 @@ from .fileio import load, dump, load_array, save_array, check_source_files, flop
     load_cfg, setup_external_filepaths
 from .utils import update, get_input_arguments
 from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
-from .lakes import make_lakarr2d, make_bdlknc_zones, make_bdlknc2d
+from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
 from .utils import update, get_input_arguments
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text
@@ -46,11 +46,11 @@ class MFsetupMixin():
         self._lakarr = None
         self._isbc = None
         self._lake_bathymetry = None
-        self._precipitation = None
-        self._evaporation = None
         self._lake_recharge = None
         self._nodata_value = -9999
         self._model_ws = None
+        self.lake_info = None
+        self.lake_fluxes = None
 
         # flopy settings
         self._mg_resync = False
@@ -362,44 +362,16 @@ class MFsetupMixin():
         return self._lake_bathymetry
 
     @property
-    def precipitation(self):
-        """Lake precipitation at each stress period, in model units.
-        """
-        if self._precipitation is None or \
-                len(self._precipitation) != self.nper:
-            precip = self.cfg['lak'].get('precip', 0)
-            # copy to all stress periods
-            if np.isscalar(precip):
-                precip = [precip] * self.nper
-            elif len(precip) < self.nper:
-                for i in range(self.nper - len(precip)):
-                    precip.append(precip[-1])
-            self._precipitation = np.array(precip)
-        return self._precipitation
-
-    @property
-    def evaporation(self):
-        """Lake evaporation at each stress period, in model units.
-        """
-        if self._evaporation is None or \
-                len(self._evaporation) != self.nper:
-            evap = self.cfg['lak'].get('evap', 0)
-            # copy to all stress periods
-            if np.isscalar(evap):
-                evap = [evap] * self.nper
-            elif len(evap) < self.nper:
-                for i in range(self.nper - len(evap)):
-                    evap.append(evap[-1])
-            self._evaporation = np.array(evap)
-        return self._evaporation
-
-    @property
     def lake_recharge(self):
         """Recharge value to apply to high-K lakes, in model units.
         """
-        if self.precipitation is not None and self.evaporation is not None:
-            self._lake_recharge = self.precipitation - self.evaporation
-            return self._lake_recharge
+        if self._lake_recharge is None:
+            if self.lake_info is None:
+                self.lake_info = setup_lake_info(self)
+                if self.lake_info is not None:
+                    self.lake_fluxes = setup_lake_fluxes(self)
+                    self._lake_recharge = self.lake_fluxes.groupby('per').mean()['highk_lake_rech'].sort_index()
+        return self._lake_recharge
 
     def load_array(self, filename):
         if isinstance(filename, list):
@@ -571,7 +543,7 @@ class MFsetupMixin():
             abspath = os.path.abspath(self.cfg.get('model', {}).get('model_ws', '.'))
         if not os.path.exists(abspath):
             os.makedirs(abspath)
-        os.chdir(abspath)
+        os.chdir(abspath)  # within a session, modflow-setup operates in the model_ws
         if self.relative_external_paths:
             model_ws = os.path.relpath(abspath)
         else:

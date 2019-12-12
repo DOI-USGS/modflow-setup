@@ -7,7 +7,8 @@ from shapely.geometry import Polygon
 import flopy
 fm = flopy.modflow
 from flopy.utils.mflistfile import ListBudget
-from gisutils import shp2df
+from gisutils import shp2df, project, get_proj_str
+from mfsetup.evaporation import hamon_evaporation
 from mfsetup.grid import rasterize
 from mfsetup.sourcedata import SourceData, aggregate_dataframe_to_stress_period
 from mfsetup.units import convert_length_units, convert_temperature_units
@@ -39,7 +40,9 @@ def make_lakarr2d(grid, lakesdata,
     return arr
 
 
-def make_bdlknc_zones(grid, lakesshp, include_ids, id_column='hydroid'):
+def make_bdlknc_zones(grid, lakesshp, include_ids,
+                      feat_id_column='feat_id',
+                      lake_package_id_column='lak_id'):
     """
     Make zones for populating with lakebed leakance values. Same as
     lakarr, but with a buffer around each lake so that horizontal
@@ -55,23 +58,24 @@ def make_bdlknc_zones(grid, lakesshp, include_ids, id_column='hydroid'):
     else:
         raise ValueError('unrecognized input for "lakesshp": {}'.format(lakesshp))
     # Exterior buffer
-    id_column = id_column.lower()
+    id_column = feat_id_column.lower()
     lakes.columns = [c.lower() for c in lakes.columns]
     exterior_buffer = 30  # m
     lakes.index = lakes[id_column]
     lakes = lakes.loc[include_ids]
-    lakes['lakid'] = np.arange(1, len(lakes) + 1)
+    if lake_package_id_column not in lakes.columns:
+        lakes[lake_package_id_column] = np.arange(1, len(lakes) + 1)
     # speed up buffer construction by getting exteriors once
     # and probably more importantly,
     # simplifying possibly complex geometries of lakes generated from 2ft lidar
     unbuffered_exteriors = [Polygon(g.exterior).simplify(5) for g in lakes.geometry]
     lakes['geometry'] = [g.buffer(exterior_buffer) for g in unbuffered_exteriors]
-    arr = rasterize(lakes, grid=grid, id_column='lakid')
+    arr = rasterize(lakes, grid=grid, id_column=lake_package_id_column)
 
     # Interior buffer for lower leakance, assumed to be 20 m around the lake
     interior_buffer = -20  # m
     lakes['geometry'] = [g.buffer(interior_buffer) for g in unbuffered_exteriors]
-    arr2 = rasterize(lakes, grid=grid, id_column='lakid')
+    arr2 = rasterize(lakes, grid=grid, id_column=lake_package_id_column)
     arr2 = arr2 * 100  # Create new ids for the interior, as multiples of 10
 
     arr[arr2 > 0] = arr2[arr2 > 0]
@@ -104,11 +108,114 @@ def get_stage_observations(listfile, lake_numbers):
     return obs
 
 
+def get_flux_variable_from_config(variable, model):
+    data = model.cfg['lak'][variable]
+    # copy to all stress periods
+    # single scalar value
+    if np.isscalar(data):
+        data = [data] * model.nper
+    # flat list of global values by stress period
+    elif isinstance(data, list) and np.isscalar(data[0]):
+        if len(data) < model.nper:
+            for i in range(model.nper - len(data)):
+                data.append(data[-1])
+    # dict of lists, or nested dict of values by lake, stress_period
+    else:
+        raise NotImplementedError('Direct input of {} by lake.'.format(variable))
+    assert isinstance(data, list)
+    return data
+
+
+def setup_lake_info(model):
+
+    # lake package must have a source_data block
+    # (e.g. for supplying shapefile delineating lake extents)
+    source_data = model.cfg.get('lak', {}).get('source_data')
+    if source_data is None:
+        return
+    lakesdata = model.load_features(**source_data['lakes_shapefile'])
+    lakesdata_proj_str = get_proj_str(source_data['lakes_shapefile']['filename'])
+    id_column = source_data['lakes_shapefile']['id_column'].lower()
+    name_column = source_data['lakes_shapefile'].get('name_column', 'name').lower()
+    nlakes = len(lakesdata)
+
+    # save a lookup file mapping lake ids to hydroids
+    centroids = project([g.centroid for g in lakesdata.geometry],
+                        lakesdata_proj_str, 'epsg:4269')
+    df = pd.DataFrame({'lak_id': np.arange(1, nlakes + 1),
+                       'feat_id': lakesdata[id_column].values,
+                       'name': lakesdata[name_column].values,
+                       'latitude': [c.y for c in centroids],
+                       'geometry': lakesdata['geometry']
+                       })
+    df.drop('geometry', axis=1).to_csv(model.cfg['lak']['output_files']['lookup_file'],
+              index=False)
+    return df
+
+
+def setup_lake_fluxes(model):
+
+    # setup empty dataframe
+    variables = ['precipitation', 'evaporation', 'runoff', 'withdrawal']
+    columns = ['per', 'lak_id'] + variables
+    nlakes = len(model.lake_info['lak_id'])
+    df = pd.DataFrame(np.zeros((nlakes * model.nper, len(columns)), dtype=float),
+                      columns=columns)
+    df['per'] = list(range(model.nper)) * nlakes
+    df['lak_id'] = sorted(model.lake_info['lak_id'].tolist() * model.nper)
+
+    # option 1; precip and evaporation specified directly
+    # values are assumed to be in model units
+    for variable in variables:
+        if variable in model.cfg['lak']:
+            values = get_flux_variable_from_config(variable, model)
+            # repeat values for each lake
+            df[variable] = values * len(model.lake_info['lak_id'])
+
+    # option 2; precip and temp specified from PRISM output
+    # compute evaporation from temp using Hamon method
+    if 'climate' in model.cfg['lak']['source_data']:
+        cfg = model.cfg['lak']['source_data']['climate']
+        format = cfg.get('format', 'csv').lower()
+        if format == 'prism':
+            sd = PrismSourceData.from_config(cfg, dest_model=model)
+            data = sd.get_data()
+            tmid = data['start_datetime'] + (data['end_datetime'] - data['start_datetime'])/2
+            data['day_of_year'] = tmid.dt.dayofyear
+            id_lookup = {'feat_id': dict(zip(model.lake_info['lak_id'],
+                                             model.lake_info['feat_id']))}
+            id_lookup['lak_id'] = {v:k for k, v in id_lookup['feat_id'].items()}
+            for col in ['lak_id', 'feat_id']:
+                if len(set(data.lake_id).intersection(model.lake_info[col])) > 0:
+                    latitude = dict(zip(model.lake_info[col],
+                                        model.lake_info['latitude']))
+                    other_col = 'lak_id' if col == 'feat_id' else 'feat_id'
+                    data[other_col] = [id_lookup[other_col][id] for id in data['lake_id']]
+            data['latitude'] = [latitude[id] for id in data['lake_id']]
+            data['evaporation'] = hamon_evaporation(data['day_of_year'],
+                                             data['temp'],  # temp in C
+                                             data['latitude'],  # DD
+                                             dest_length_units=model.length_units)
+            # update flux dataframe
+            for c in columns:
+                if c in data:
+                    df[c] = data[c]
+
+        else:
+            # TODO: option 3; general csv input for lake fluxes
+            raise NotImplementedError('General csv input for lake fluxes')
+    # compute a value to use for high-k lake recharge, for each stress period
+    per_means = df.groupby('per').mean()
+    highk_lake_rech = dict(per_means['precipitation'] - per_means['evaporation'])
+    df['highk_lake_rech'] = [highk_lake_rech[per] for per in df.per]
+    return df
+
+
 class PrismSourceData(SourceData):
     """Subclass for handling tabular source data that
     represents a time series."""
 
-    def __init__(self, filenames, period_stats='mean', id_column='lakeid',
+    def __init__(self, filenames, period_stats='mean', id_column='lake_id',
                  dest_temperature_units='celsius',
                  dest_model=None):
         SourceData.__init__(self, filenames=filenames,
@@ -116,7 +223,7 @@ class PrismSourceData(SourceData):
 
         self.id_column = id_column
         self.period_stats = period_stats
-        self.data_columns = ['ppt', 'temp']
+        self.data_columns = ['precipitation', 'temp']
         self.datetime_column = 'datetime'
         self.dest_temperature_units = dest_temperature_units
 
@@ -130,13 +237,7 @@ class PrismSourceData(SourceData):
                     names = line.strip().split(',')
                     meta['length_units'] = names[1].split()[1].strip('()')
                     meta['temperature_units'] = names[2].split()[-1].strip('()')
-                    names = [self.datetime_column,
-                             '{}_{}{}'.format(self.data_columns[0],
-                                              self.dest_model.length_units[0].lower(),
-                                              self.dest_model.time_units[0].lower()),
-                             '{}_{}'.format(self.data_columns[1],
-                                              self.dest_temperature_units[0].lower())
-                             ]
+                    names = [self.datetime_column] + self.data_columns
                     break
         self.data_columns = names[1:]
         meta['latitude'] = float(lat)
@@ -212,7 +313,7 @@ class PrismSourceData(SourceData):
             period_data.append(aggregated)
         dfm = pd.concat(period_data)
         dfm.sort_values(by=['per', self.id_column], inplace=True)
-        return dfm
+        return dfm.reset_index(drop=True)
 
 
 class LakListBudget(ListBudget):
