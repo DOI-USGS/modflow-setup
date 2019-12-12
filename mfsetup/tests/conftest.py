@@ -7,7 +7,7 @@ import flopy
 fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MF6model, MFnwtModel
-from ..fileio import load_cfg
+from ..fileio import exe_exists, load_cfg
 from ..utils import get_input_arguments
 
 
@@ -209,6 +209,28 @@ def get_pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis):
     return m
 
 
+@pytest.fixture(scope="session")
+def pleasant_nwt_setup_from_yaml(pleasant_nwt_test_cfg_path):
+    m = MFnwtModel.setup_from_yaml(pleasant_nwt_test_cfg_path)
+    m.write_input()
+    return m
+
+
+@pytest.fixture(scope="session")
+def pleasant_nwt_model_run(pleasant_nwt_setup_from_yaml, mfnwt_exe):
+    m = copy.deepcopy(pleasant_nwt_setup_from_yaml)
+    m.exe_name = mfnwt_exe
+    success = False
+    if exe_exists(mfnwt_exe):
+        success, buff = m.run_model(silent=False)
+        if not success:
+            list_file = m.lst.fn_path
+            with open(list_file) as src:
+                list_output = src.read()
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+    return m
+
+
 @pytest.fixture(scope="function")
 def pleasant_nwt(get_pleasant_nwt):
     m = copy.deepcopy(get_pleasant_nwt)
@@ -230,6 +252,18 @@ def pleasant_nwt_with_dis(get_pleasant_nwt_with_dis):
 @pytest.fixture(scope="function")
 def pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis_bas6):
     m = copy.deepcopy(get_pleasant_nwt_with_dis_bas6)
+    return m
+
+
+@pytest.fixture(scope="function")
+def full_pleasant_nwt(pleasant_nwt_setup_from_yaml):
+    m = copy.deepcopy(pleasant_nwt_setup_from_yaml)
+    return m
+
+
+@pytest.fixture(scope="function")
+def full_pleasant_nwt_with_model_run(pleasant_nwt_model_run):
+    m = copy.deepcopy(pleasant_nwt_model_run)
     return m
 
 

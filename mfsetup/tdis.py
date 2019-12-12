@@ -333,6 +333,8 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
         period_stat = [period_stat]
     elif period_stat is None:
         period_stat = ['mean']
+    else:
+        period_stat = period_stat.copy()
     if isinstance(data_column, str):
         data_columns = [data_column]
     else:

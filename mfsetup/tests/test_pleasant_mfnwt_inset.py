@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import flopy
 fm = flopy.modflow
+from mfsetup import MFnwtModel
 from .test_lakes import get_prism_data
 
 
@@ -31,3 +32,12 @@ def test_setup_lak(pleasant_nwt_with_dis_bas6):
     precip = [lak.flux_data[per][0][0] for per in range(1, m.nper)]
     assert np.allclose(lak.flux_data[0][0][0], prism['ppt_md'].mean())
     assert np.allclose(precip, prism['ppt_md'])
+
+
+def test_model_setup(full_pleasant_nwt):
+    m = full_pleasant_nwt
+    assert isinstance(m, MFnwtModel)
+
+
+def test_model_setup_and_run(full_pleasant_nwt_with_model_run):
+    m = full_pleasant_nwt_with_model_run
