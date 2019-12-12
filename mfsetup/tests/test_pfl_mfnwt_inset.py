@@ -572,19 +572,15 @@ def inset_with_transient_parent(pfl_nwt_with_grid):
 def model_setup_and_run(pfl_nwt_setup_from_yaml, mfnwt_exe):
     m = pfl_nwt_setup_from_yaml
     m.exe_name = mfnwt_exe
-    # TODO : Add executables to Travis build
     success = False
     if exe_exists(mfnwt_exe):
-        try:
-            success, buff = m.run_model(silent=False)
-        except:
-            pass
+        success, buff = m.run_model(silent=False)
         if not success:
             list_file = m.lst.fn_path
             with open(list_file) as src:
                 list_output = src.read()
-        assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
-        return m
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+    return m
 
 
 def test_packagelist(pfl_nwt_test_cfg_path):

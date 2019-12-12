@@ -108,13 +108,11 @@ def test_which():
 
 def test_exe_exists(modflow_executable):
     assert not exe_exists('junk')
-    # TODO: get linux binaries
     if "linux" in platform.platform().lower():
-        print('{} does not exist'.format(modflow_executable))
-        pass
+        assert exe_exists(modflow_executable)
     elif "darwin" in platform.platform().lower():
-        print('{} does not exist'.format(modflow_executable))
-        pass
+        assert exe_exists(modflow_executable)
+        print('{} exists'.format(modflow_executable))
     else:
         assert exe_exists(modflow_executable)
         print('{} exists'.format(modflow_executable))

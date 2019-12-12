@@ -709,19 +709,15 @@ def model_setup_and_run(model_setup, mf6_exe):
         arr = load_array(d['filename'])
         assert np.array_equal(m.idomain[i], arr)
         assert np.array_equal(dis_idomain[i], arr)
-    # TODO : Add executables to Travis build
     success = False
     if exe_exists(mf6_exe):
-        try:
-            success, buff = m.simulation.run_simulation()
-        except:
-            pass
+        success, buff = m.simulation.run_simulation()
         if not success:
             list_file = m.name_file.list.array
             with open(list_file) as src:
                 list_output = src.read()
-        assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
-        return m
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+    return m
 
 
 def test_model_setup_no_nans(model_setup):
