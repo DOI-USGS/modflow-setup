@@ -1,14 +1,18 @@
 """
 Grid stuff that flopy.discretization.StructuredGrid doesn't do and other grid-related functions
 """
+import os
+import time
 import collections
 import numpy as np
 import pandas as pd
 from rasterio import Affine
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, MultiPolygon
 from flopy.discretization import StructuredGrid
 from gisutils import df2shp, get_proj_str, project, shp2df
+import mfsetup.fileio as fileio
 from .units import convert_length_units
+from .utils import get_input_arguments
 
 
 class MFsetupGrid(StructuredGrid):
@@ -210,11 +214,11 @@ def get_point_on_national_hydrogeologic_grid(x, y):
     return ngx[j] + xul, ngy[i] + yul
 
 
-def write_bbox_shapefile(sr, outshp):
-    outline = get_grid_bounding_box(sr)
+def write_bbox_shapefile(modelgrid, outshp):
+    outline = get_grid_bounding_box(modelgrid)
     df2shp(pd.DataFrame({'desc': ['model bounding box'],
                          'geometry': [outline]}),
-           outshp, epsg=sr.epsg)
+           outshp, epsg=modelgrid.epsg)
 
 
 def rasterize(feature, grid, id_column=None,
@@ -301,5 +305,170 @@ def rasterize(feature, grid, id_column=None,
                                 transform=trans)
     assert result.sum(axis=(0, 1)) != 0, "Nothing was intersected!"
     return result.astype(dtype)
+
+
+def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
+                          nrow=None, ncol=None,
+                          dxy=None, delr=None, delc=None,
+                          rotation=0.,
+                          parent_model=None, snap_to_NHG=False,
+                          features=None, features_shapefile=None,
+                          id_column=None, include_ids=[],
+                          buffer=1000,
+                          epsg=None, model_length_units=None,
+                          grid_file='grid.json',
+                          bbox_shapefile=None):
+    """"""
+    print('setting up model grid...')
+    t0 = time.time()
+
+    # conversions for model/parent model units to meters
+    # set regular flag for handling delc/delr
+    to_meters_inset = convert_length_units(model_length_units, 'meters')
+    regular = True
+    if dxy is not None:
+        delr_m = np.round(dxy * to_meters_inset, 4) # dxy is specified in model units
+        delc_m = delr_m
+    if delr is not None:
+        delr_m = np.round(delr * to_meters_inset, 4)  # delr is specified in model units
+        if not np.isscalar(delr_m):
+            if (set(delr_m)) == 1:
+                delr_m = delr_m[0]
+            else:
+                regular = False
+    if delc is not None:
+        delc_m = np.round(delc * to_meters_inset, 4) # delc is specified in model units
+        if not np.isscalar(delc_m):
+            if (set(delc_m)) == 1:
+                delc_m = delc_m[0]
+            else:
+                regular = False
+    if parent_model is not None:
+        to_meters_parent = convert_length_units(parent_model.dis.lenuni, 'meters')
+        # parent model grid spacing in meters
+        parent_delr_m = np.round(parent_model.dis.delr.array[0] * to_meters_parent, 4)
+        parent_delc_m = np.round(parent_model.dis.delc.array[0] * to_meters_parent, 4)
+
+    if epsg is None and parent_model is not None:
+        epsg = parent_model.modelgrid.epsg
+
+    # option 1: make grid from xoff, yoff and specified dimensions
+    if xoff is not None and yoff is not None:
+        assert nrow is not None and ncol is not None, \
+            "Need to specify nrow and ncol if specifying xoffset and yoffset."
+        if regular:
+            height_m = np.round(delc_m * nrow, 4)
+            width_m = np.round(delr_m * nrow, 4)
+        else:
+            height_m = np.sum(delc_m)
+            width_m = np.sum(delr_m)
+
+        # optionally align grid with national hydrologic grid
+        # grids snapping to NHD must have spacings that are a factor of 1 km
+        if snap_to_NHG:
+            assert regular and np.allclose(1000 % delc_m, 0, atol=1e-4)
+            x, y = get_point_on_national_hydrogeologic_grid(xoff, yoff)
+            xoff = x
+            yoff = y
+            rotation = 0.
+        #xul = xoff
+        #yul = yoff + height_m
+
+    # option 2: make grid using buffered feature bounding box
+    else:
+        if features is None and features_shapefile is not None:
+            # Make sure shapefile and bbox filter are in dest (model) CRS
+            # TODO: CRS wrangling could be added to shp2df as a feature
+            features_proj_str = get_proj_str(features_shapefile)
+            model_proj_str = "epsg:{}".format(epsg)
+            filter = None
+            if parent_model is not None:
+                if features_proj_str.lower() != model_proj_str:
+                    filter = project(parent_model.modelgrid.bbox,
+                                     model_proj_str, features_proj_str).bounds
+                else:
+                    filter = parent_model.modelgrid.bbox.bounds
+            df = shp2df(features_shapefile,
+                        filter=filter)
+            if features_proj_str.lower() != model_proj_str:
+                df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
+
+            # subset shapefile data to specified features
+            rows = df.loc[df[id_column].isin(include_ids)]
+            features = rows.geometry.tolist()
+
+            # convert multiple features to a MultiPolygon
+            if isinstance(features, list):
+                if len(features) > 1:
+                    features = MultiPolygon(features)
+                else:
+                    features = features[0]
+
+            # size the grid based on the bbox for features
+            x1, y1, x2, y2 = features.bounds
+            L = buffer  # distance from area of interest to boundary
+            xul = x1 - L
+            yul = y2 + L
+            height_m = np.round(yul - (y1 - L), 4) # initial model height from buffer distance
+            width_m = np.round((x2 + L) - xul, 4)
+            rotation = 0.  # rotation not supported with this option
+
+    # align model with parent grid if there is a parent model
+    # (and not snapping to national hydrologic grid)
+    if parent_model is not None and not snap_to_NHG:
+
+        # get location of coinciding cell in parent model for upper left
+        pi, pj = parent_model.modelgrid.intersect(xul, yul)
+        verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
+        xul, yul = verts[:, 0].min(), verts[:, 1].max()
+
+        # adjust the dimensions to align remaining corners
+        def roundup(number, increment):
+            return int(np.ceil(number / increment) * increment)
+        height = roundup(height_m, parent_delr_m)
+        width = roundup(width_m, parent_delc_m)
+
+        # update nrow, ncol after snapping to parent grid
+        if regular:
+            nrow = int(height / delc_m) # h is in meters
+            ncol = int(width / delr_m)
+
+    # set the grid configuration dictionary
+    # spacing is in meters (consistent with projected CRS)
+    # (modelgrid object will be updated automatically from this dictionary)
+    #if rotation == 0.:
+    #    xll = xul
+    #    yll = yul - model.height
+    grid_cfg = {'nrow': nrow, 'ncol': ncol,
+                'delr': delr_m, 'delc': delc_m,
+                'xoff': xoff, 'yoff': yoff,
+                'xul': xul, 'yul': yul,
+                'rotation': rotation,
+                'epsg': epsg,
+                'lenuni': 2
+                }
+    if regular:
+        grid_cfg['delr'] = np.ones(grid_cfg['ncol'], dtype=float) * grid_cfg['delr']
+        grid_cfg['delc'] = np.ones(grid_cfg['nrow'], dtype=float) * grid_cfg['delc']
+    grid_cfg['delr'] = grid_cfg['delr'].tolist()  # for serializing to json
+    grid_cfg['delc'] = grid_cfg['delc'].tolist()
+
+    # renames for flopy modelgrid
+    renames = {'rotation': 'angrot'}
+    for k, v in renames.items():
+        if k in grid_cfg:
+            grid_cfg[v] = grid_cfg.pop(k)
+
+    # set up the model grid instance
+    kwargs = get_input_arguments(grid_cfg, MFsetupGrid)
+    modelgrid = MFsetupGrid(**kwargs)
+    modelgrid.cfg = grid_cfg
+
+    # write grid info to json, and shapefile of bbox
+    fileio.dump(grid_file, grid_cfg)
+    if bbox_shapefile is not None:
+        write_bbox_shapefile(modelgrid, bbox_shapefile)
+    print("finished in {:.2f}s\n".format(time.time() - t0))
+    return modelgrid
 
 

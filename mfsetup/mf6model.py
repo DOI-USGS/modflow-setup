@@ -6,17 +6,20 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 import flopy
+fm = flopy.modflow
 mf6 = flopy.mf6
+from gisutils import get_values_at_points
 from .discretization import (make_idomain, deactivate_idomain_above,
                              find_remove_isolated_cells,
                              create_vertical_pass_through_cells)
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
-from gisutils import get_values_at_points
-from .grid import write_bbox_shapefile, get_point_on_national_hydrogeologic_grid
+from .grid import setup_structured_grid
 from .obs import setup_head_observations
 from .tdis import setup_perioddata
-from .utils import update, get_input_arguments, flatten
+from .units import lenuni_text, itmuni_text
+from .utils import update, get_input_arguments, flatten, get_packages
+
 from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
 
@@ -119,19 +122,73 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """Set attributes related to a parent or source model
         if one is specified."""
 
-        kwargs = self.cfg['parent'].copy()
-        if kwargs is not None:
+        if self.cfg['parent']['version'] == 'mf6':
             raise NotImplementedError("MODFLOW-6 parent models")
 
-    def _set_parent_modelgrid(self, mg_kwargs=None):
-        """Reset the parent model grid from keyword arguments
-        or existing modelgrid, and DIS package.
-        """
-        raise NotImplementedError("MODFLOW-6 parent models")
+        kwargs = self.cfg['parent'].copy()
+        if kwargs is not None:
+            kwargs = kwargs.copy()
+            kwargs['f'] = kwargs.pop('namefile')
+            # load only specified packages that the parent model has
+            packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
+                                                                    kwargs['f']))
+            load_only = list(set(packages_in_parent_namefile).intersection(
+                set(self.cfg['model'].get('packages', set()))))
+            kwargs['load_only'] = load_only
+            kwargs = get_input_arguments(kwargs, fm.Modflow.load, warn=False)
+
+            print('loading parent model {}...'.format(os.path.join(kwargs['model_ws'],
+                                                                   kwargs['f'])))
+            t0 = time.time()
+            self._parent = fm.Modflow.load(**kwargs)
+            print("finished in {:.2f}s\n".format(time.time() - t0))
+
+            # parent model units
+            if 'length_units' not in self.cfg['parent']:
+                self.cfg['parent']['length_units'] = lenuni_text[self.parent.dis.lenuni]
+            if 'time_units' not in self.cfg['parent']:
+                self.cfg['parent']['time_units'] = itmuni_text[self.parent.dis.itmuni]
+
+            # set the parent model grid from mg_kwargs if not None
+            # otherwise, convert parent model grid to MFsetupGrid
+            mg_kwargs = self.cfg['parent'].get('SpatialReference',
+                                          self.cfg['parent'].get('modelgrid', None))
+            self._set_parent_modelgrid(mg_kwargs)
+
+            # default_source_data, where omitted configuration input is
+            # obtained from parent model by default
+            if self.cfg['parent'].get('default_source_data'):
+                self._parent_default_source_data = True
+                if self.cfg['dis']['dimensions'].get('nlay') is None:
+                    self.cfg['dis']['dimensions']['nlay'] = self.parent.dis.nlay
+                if self.cfg['tdis'].get('start_date_time') is None:
+                    self.cfg['tdis']['start_date_time'] = self.cfg['parent']['start_date_time']
+                # only get time dis information from parent if
+                # no periodata groups are specified, and nper is not specified under dimensions
+                has_perioddata_groups = any([isinstance(k, dict)
+                                             for k in self.cfg['tdis']['perioddata'].values()])
+                if not has_perioddata_groups:
+                    if self.cfg['tdis']['dimensions'].get('nper') is None:
+                        self.cfg['dis']['nper'] = self.parent.dis.nper
+                    for var in ['perlen', 'nstp', 'tsmult']:
+                        if self.cfg['dis']['perioddata'].get(var) is None:
+                            self.cfg['dis']['perioddata'][var] = self.parent.dis.__dict__[var].array
+                    if self.cfg['sto'].get('steady') is None:
+                        self.cfg['sto']['steady'] = self.parent.dis.steady.array
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame."""
         self._perioddata = setup_perioddata(self.cfg, self.time_units)
+
+    def _update_grid_configuration_with_dis(self):
+        """Update grid configuration with any information supplied to dis package
+        (so that settings specified for DIS package have priority). This method
+        is called by MFsetupMixin.setup_grid.
+        """
+        for param in ['nrow', 'ncol']:
+            self.cfg['setup_grid'].update({param: self.cfg['dis']['dimensions'][param]})
+        for param in ['delr', 'delc']:
+            self.cfg['setup_grid'].update({param: self.cfg['dis']['griddata'][param]})
 
     def get_flopy_external_file_input(self, var):
         """Repath intermediate external file input to the
@@ -186,32 +243,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """
         raise NotImplementedError()
 
-    def setup_grid(self, write_shapefile=True):
-        """set the grid info dict
-        (grid object will be updated automatically)"""
-        grid = self.cfg['setup_grid'].copy()
-        grid_file = grid.pop('grid_file').format(self.name)
-
-        # arguments supplied to DIS have priority over those supplied to setup_grid
-        for param in ['nrow', 'ncol']:
-            grid.update({param: self.cfg['dis']['dimensions'][param]})
-        for param in ['delr', 'delc']:
-            grid.update({param: self.cfg['dis']['griddata'][param]})
-
-        # optionally align grid with national hydrologic grid
-        if grid['snap_to_NHG']:
-            x, y = get_point_on_national_hydrogeologic_grid(grid['xoff'],
-                                                            grid['yoff']
-                                                            )
-            grid['xoff'] = x
-            grid['yoff'] = y
-        dump(grid_file.format(self.name), grid)
-        self.cfg['grid'] = grid
-        if write_shapefile:
-            write_bbox_shapefile(self.modelgrid,
-                                 os.path.join(self.cfg['postprocessing']['output_folders']['shapefiles'],
-                                              '{}_bbox.shp'.format(self.name)))
-
     def setup_dis(self):
         """"""
         package = 'dis'
@@ -241,7 +272,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                   'rotation': 'angrot'}
 
         for k, v in remaps.items():
-            kwargs[v] = kwargs.pop(k)
+            if v not in kwargs:
+                kwargs[v] = kwargs.pop(k)
         kwargs['length_units'] = self.length_units
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
         dis = mf6.ModflowGwfdis(model=self, **kwargs)
@@ -631,8 +663,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         if 'grid' not in m.cfg.keys():
             # apply model name if grid_file includes format string
-            grid_file = cfg['setup_grid']['grid_file'].format(m.name)
-            m.cfg['setup_grid']['grid_file'] = grid_file
+            grid_file = cfg['setup_grid']['output_files']['grid_file'].format(m.name)
+            m.cfg['setup_grid']['output_files']['grid_file'] = grid_file
             if os.path.exists(grid_file):
                 print('Loading model grid definition from {}'.format(grid_file))
                 m.cfg['grid'] = load(grid_file)

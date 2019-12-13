@@ -77,13 +77,7 @@ def pfl_nwt(pfl_nwt_cfg):
 def pfl_nwt_with_grid(pfl_nwt):
     print('pytest fixture pfl_nwt_with_grid')
     m = pfl_nwt  #deepcopy(pfl_nwt)
-    cfg = pfl_nwt.cfg.copy()
-    cfg['setup_grid']['grid_file'] = pfl_nwt.cfg['setup_grid'].pop('output_files').pop('grid_file')
-    sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
-    sd['features_shapefile'] = sd.pop('filename')
-    cfg['setup_grid'].update(sd)
-    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
-    m.setup_grid(**kwargs)
+    m.setup_grid()
     return pfl_nwt
 
 
@@ -181,13 +175,7 @@ def get_pleasant_nwt(pleasant_nwt_cfg):
 def get_pleasant_nwt_with_grid(get_pleasant_nwt):
     print('creating Pleasant Lake MFnwtModel instance with grid...')
     m = copy.deepcopy(get_pleasant_nwt)
-    cfg = m.cfg.copy()
-    cfg['setup_grid']['grid_file'] = m.cfg['setup_grid'].pop('output_files').pop('grid_file')
-    sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
-    sd['features_shapefile'] = sd.pop('filename')
-    cfg['setup_grid'].update(sd)
-    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
-    m.setup_grid(**kwargs)
+    m.setup_grid()
     return m
 
 

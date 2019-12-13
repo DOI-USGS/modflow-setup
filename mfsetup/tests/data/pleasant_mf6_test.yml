@@ -1,0 +1,208 @@
+intermediate_data:
+  tmpdir: 'tmp/'
+
+simulation:
+  sim_name: 'pleasant_mf6'
+  version: 'mf6'
+  sim_ws: '../tmp/pleasant_mf6/'
+
+model:
+  simulation: 'pleasant_mf6'
+  modelname: 'pleasant_mf6'
+  options:
+    print_input: True
+    save_flows: True
+    newton: True
+    newton_under_relaxation: False
+  external_path: 'external/'
+  perimeter_boundary_type: 'specified head'
+  packages: ['dis',
+             'ic',
+             'npf',
+             'oc',
+             'sto',
+             'rch', # Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model
+             'sfr',
+             'lak',
+             'obs',
+             'wel',
+             'ims'
+  ]
+
+parent:
+  # argments to flopy.modflow.Modflow.load for parent model
+  namefile: 'pleasant.nam'
+  model_ws: 'pleasant/'
+  version: 'mfnwt'
+  # information for modflow-setup
+  # note: parent model is geo-located in namfile header
+  # (only works if length_units='meters')
+  headfile: 'pleasant/pleasant.hds'
+  hiKlakes_value: 1.e4 # unfortunately python yaml currently requires a dot to parse exp notation as float
+  default_source_data: True  # if True, packages and variables that are omitted will be pulled from this model
+  copy_stress_periods: 'all'
+  start_date_time: '2012-01-01'
+  length_units: 'meters'
+  time_units: 'days'
+
+# parameters for setting up the pfl_nwt grid
+# using features in features_file
+setup_grid:
+  remake: True
+  source_data:
+    features_shapefile:
+      filename: 'pleasant/source_data/shps/all_lakes.shp'
+      id_column: 'HYDROID'
+      include_ids: [600059060] # pleasant lake
+  dxy: 20 # m
+  buffer: 2000 # distance from feature(s) if interest to model boundary, in meters
+  grid_file: 'grid.json' # grid info will be written to this file
+  epsg: 3070
+
+dis:
+  remake_top: True
+  options:
+    length_units: 'meters'
+  dimensions:
+    nlay: 5
+  source_data:
+    top:
+      filename: 'pleasant/source_data/rasters/dem100m.tif'
+      elevation_units: 'meters'
+    botm:
+      from_parent:
+        0: -0.5 # bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1
+        1: 0 # bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent
+        2: 1
+        3: 2
+        4: 3
+  drop_thin_cells: True
+
+tdis:
+  options:
+    time_units: 'days'
+    start_date_time: '1998-04-01'
+  perioddata:
+    # time discretization info can be specified directly under the perioddata key
+    # or in groups of stress periods that are discretized in a similar way
+    group 1: # initial steady-state period (steady specified under sto package)
+      #perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
+      nper: 1
+      nstp: 1
+      tsmult: 1
+      steady: True  # "steady" can be entered here; otherwise the global entry specified in the sto package is used as the default
+      # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
+    group 2: # monthly stress periods
+      start_date_time: '2012-01-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
+      end_date_time: '2018-12-31'  # end times are specified following pandas slice convention, which includes the specified end date
+      freq: '1MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
+      nstp: 3
+      tsmult: 1.5
+      steady: False
+
+ic:
+  source_data:
+    strt:
+      from_parent:
+        binaryfile: 'pleasant/pleasant.hds'
+
+npf:
+  options:
+    save_flows: True
+  griddata:
+    icelltype: 1 # variable sat. thickness in all layers
+
+sto:
+  options:
+    save_flows: True
+  griddata:
+    iconvert: 1  # convertible layers
+
+wel:
+  options:
+    print_input: True
+    print_flows: True
+    save_flows: True
+
+lak:
+  options:
+    boundnames: True
+    save_flows: True
+    surfdep: 0.1  # undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)
+  source_data:
+    littoral_leakance: 0.045 # 1/d
+    profundal_leakance: 0.025 # 1/d
+    lakes_shapefile:
+      filename: 'pleasant/source_data/shps/all_lakes.shp'
+      id_column: 'HYDROID'
+      include_ids: [600059060] # pleasant lake
+    climate:
+      filenames:
+        600059060: 'pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+      format: 'prism'
+      period_stats:
+        0: ['mean', '2012-01-01', '2018-12-31']  # average daily rate for model period for initial steady state
+        1: 'mean'  # average daily rate or value for each month
+    #bathymetry_raster:
+    #  filename: 'pleasant/source_data/rasters/bathymetry.tif'
+    #  length_units: 'meters'
+    #stage_area_volume_file:
+    #  filename: 'plainfieldlakes/source_data/all_lakes_stage_area_volume.csv' #'../../bcs/lakes/area_stage_vol_Long.csv'
+    #  length_units: 'meters'
+    #  column_mappings:
+    #    volume_m3: 'volume'
+  output_files:
+    lookup_file: 'lak_lookup.csv'
+
+sfr:
+  options:
+    save_flows: True
+  source_data:
+    flowlines:
+      nhdplus_paths: ['pleasant/source_data/shps']
+    dem:
+      filename: 'pleasant/source_data/rasters/dem100m.tif'
+      elevation_units: 'meters'
+  set_streambed_top_elevations_from_dem: True
+  output_path:
+
+
+ims:
+  options:
+    print_option: 'all'
+    complexity: 'moderate'
+    'csv_output fileout': 'solver_out.csv'
+  nonlinear:
+    outer_hclose: 1.e-2
+    outer_rclosebnd: 1.e4
+    outer_maximum: 200
+    under_relaxation:  'dbd'
+    under_relaxation_theta: 0.7
+    under_relaxation_kappa: 0.1
+    under_relaxation_gamma: 0.0
+    under_relaxation_momentum: 0.0
+    backtracking_number: 0
+  linear:
+    inner_maximum: 100
+    inner_hclose: 1.e-4
+    rcloserecord: [0.0001, 'relative_rclose']
+    linear_acceleration: 'bicgstab'
+    scaling_method: None
+    reordering_method: None
+    relaxation_factor: 0.0  # either ILU(0) or ILUT preconditioning
+    number_orthogonalizations: 0
+    preconditioner_levels: 7
+    preconditioner_drop_tolerance: 0.001
+
+obs:
+  source_data:
+    filenames: ['pleasant/source_data/tables/nwis_heads_all/nwis_heads_info_file.csv',
+                'pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
+                'pleasant/source_data/tables/wdnr_heads/wdnr_gw_sites.csv',
+                'pleasant/source_data/tables/uwsp_heads.csv',
+                'pleasant/source_data/tables/wgnhs_head_targets.csv'
+                     ]
+    column_mappings:
+      hydlbl: ['obsprefix', 'obsnme', 'common_name']
+  drop_observations: ['10019209_lk'  # pleasant lake; monitored via gage package
+  ]

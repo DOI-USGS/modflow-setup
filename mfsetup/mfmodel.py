@@ -7,15 +7,16 @@ import flopy
 fm = flopy.modflow
 mf6 = flopy.mf6
 from gisutils import (shp2df, get_values_at_points, project, get_proj_str)
-from .grid import MFsetupGrid, get_ij, write_bbox_shapefile, rasterize
+from .grid import MFsetupGrid, get_ij, setup_structured_grid, rasterize
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
 from .utils import update, get_input_arguments
 from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
 from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
-from .utils import update, get_input_arguments
-from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
-from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text
+from .mf5to6 import set_cfg
+from .utils import update, get_packages, get_input_arguments
+from .sourcedata import setup_array
+from .units import convert_length_units, lenuni_text, itmuni_text, lenuni_values
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
@@ -140,19 +141,7 @@ class MFsetupMixin():
     @property
     def modelgrid(self):
         if self._modelgrid is None:
-            kwargs = self.cfg.get('grid').copy()
-            if kwargs is not None:
-                if np.isscalar(kwargs['delr']):
-                    kwargs['delr'] = np.ones(kwargs['ncol'], dtype=float) * kwargs['delr']
-                if np.isscalar(kwargs['delc']):
-                    kwargs['delc'] = np.ones(kwargs['nrow'], dtype=float) * kwargs['delc']
-                kwargs['lenuni'] = 2 # use units of meters for model grid
-                renames = {'rotation': 'angrot'}
-                for k, v in renames.items():
-                    if k in kwargs:
-                        kwargs[v] = kwargs.pop(k)
-                kwargs = get_input_arguments(kwargs, MFsetupGrid)
-                self._modelgrid = MFsetupGrid(**kwargs)
+            self.setup_grid()
         return self._modelgrid
 
     @property
@@ -552,14 +541,19 @@ class MFsetupMixin():
 
     def _reset_bc_arrays(self):
         """Reset the boundary condition property arrays in order.
-        _lakarr2d
+        _lakarr2d (depends on _lakarr_2d
         _isbc2d  (depends on _lakarr2d)
         _lake_bathymetry (depends on _isbc2d)
         _isbc  (depends on _isbc2d)
         _lakarr  (depends on _isbc and _lakarr2d)
         """
-        self._set_lakarr2d() # calls self._set_isbc2d(), which calls self._set_lake_bathymetry()
-        self._set_isbc() # calls self._set_lakarr()
+        self._lakarr_2d = None
+        self._isbc_2d = None #  (depends on _lakarr2d)
+        self._lake_bathymetry = None # (depends on _isbc2d)
+        self._isbc = None #  (depends on _isbc2d)
+        self._lakarr = None #
+        #self._set_lakarr2d() # calls self._set_isbc2d(), which calls self._set_lake_bathymetry()
+        #self._set_isbc() # calls self._set_lakarr()
 
     def _set_cfg(self, cfg_updates):
         """Load configuration file; update dictionary.
@@ -614,6 +608,9 @@ class MFsetupMixin():
 
         # other variables
         self.cfg['external_files'] = {}
+
+    def _set_cfg_item(self, key, value):
+        set_cfg(self, key, value)
 
     def _set_isbc2d(self):
             isbc = np.zeros((self.nrow, self.ncol))
@@ -715,12 +712,65 @@ class MFsetupMixin():
             bathy = np.zeros((self.nrow, self.ncol))
         self._lake_bathymetry = bathy
 
+    def _set_parent_modelgrid(self, mg_kwargs=None):
+        """Reset the parent model grid from keyword arguments
+        or existing modelgrid, and DIS package.
+        """
+        if self.cfg['parent']['version'] == 'mf6':
+            raise NotImplementedError("MODFLOW-6 parent models")
+
+        if mg_kwargs is not None:
+            kwargs = mg_kwargs.copy()
+        else:
+            kwargs = {'xoff': self.parent.modelgrid.xoffset,
+                      'yoff': self.parent.modelgrid.yoffset,
+                      'angrot': self.parent.modelgrid.angrot,
+                      'epsg': self.parent.modelgrid.epsg,
+                      'proj4': self.parent.modelgrid.proj4,
+                      }
+        parent_lenuni = self.parent.dis.lenuni
+        if 'lenuni' in self.cfg['parent']:
+            parent_lenuni = self.cfg['parent']['lenuni']
+        elif 'length_units' in self.cfg['parent']:
+            parent_lenuni = lenuni_values[self.cfg['parent']['length_units']]
+
+        self.parent.dis.lenuni = parent_lenuni
+        lmult = convert_length_units(parent_lenuni, 'meters')
+        kwargs['delr'] = self.parent.dis.delr.array * lmult
+        kwargs['delc'] = self.parent.dis.delc.array * lmult
+        kwargs['lenuni'] = 2  # parent modelgrid in same CRS as pfl_nwt modelgrid
+        kwargs = get_input_arguments(kwargs, MFsetupGrid, warn=False)
+        self._parent._mg_resync = False
+        self._parent._modelgrid = MFsetupGrid(**kwargs)
+
     def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
                       source_model=None, source_package=None,
                       **kwargs):
         return setup_array(self, package, var, vmin=vmin, vmax=vmax,
                            source_model=source_model, source_package=source_package,
                            **kwargs)
+
+    def setup_grid(self):
+        """Set up the attached modelgrid instance from configuration input
+        """
+        cfg = self.cfg['setup_grid'] #.copy()
+        # update grid configuration with any information supplied to dis package
+        # (so that settings specified for DIS package have priority)
+        self._update_grid_configuration_with_dis()
+        if not cfg['structured']:
+            raise NotImplementedError('Support for unstructured grids')
+        features_shapefile = cfg.get('source_data', {}).get('features_shapefile')
+        if features_shapefile is not None:
+            features_shapefile['features_shapefile'] = features_shapefile['filename']
+            cfg.update(features_shapefile)
+        cfg['parent_model'] = self.parent
+        cfg['model_length_units'] = self.length_units
+        cfg['grid_file'] = cfg['output_files']['grid_file'].format(self.name)
+        cfg['bbox_shapefile'] = cfg['output_files']['bbox_shapefile'].format(self.name)
+        kwargs = get_input_arguments(cfg, setup_structured_grid)
+        self._modelgrid = setup_structured_grid(**kwargs)
+        self.cfg['grid'] = self._modelgrid.cfg
+        self._reset_bc_arrays()
 
     def load_grid(self, gridfile=None):
         """Load model grid information from a json or yml file."""

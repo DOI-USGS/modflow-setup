@@ -1079,7 +1079,10 @@ def setup_array(model, package, var, data=None,
     if var == 'botm':
         bathy = model.lake_bathymetry
         top = model.load_array(model.cfg[external_files_key]['top'][0])
-        lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
+        try:
+            lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
+        except:
+            j=2
 
         # fill missing layers if any
         if len(data) < model.nlay:

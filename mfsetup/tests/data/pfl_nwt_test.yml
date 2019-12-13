@@ -24,6 +24,7 @@ model:
 parent:
   namefile: 'pfl.nam'
   model_ws: 'plainfieldlakes/'
+  version: 'mfnwt'
   headfile: 'plainfieldlakes/pfl.hds'
   hiKlakes_value: 1.e4
   copy_stress_periods: 'all'
@@ -40,8 +41,6 @@ setup_grid:
       filename: 'plainfieldlakes/source_data/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600054357, 600054319] # plainfield lake; long lake
-  output_files:
-    grid_file: 'grid.json' # pfl_nwt grid info will be written to this file
 
 # Inset model settings and
 # arguments to flopy.modflow.ModflowDis

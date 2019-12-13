@@ -188,7 +188,9 @@ def test_snap_to_NHG(shellmound_cfg, shellmound_simulation):
 
 
 def test_model_with_grid(shellmound_model_with_grid):
-    assert True
+    m = shellmound_model_with_grid
+    assert m.modelgrid is not None
+    assert isinstance(m.cfg['grid'], dict)
 
 
 @pytest.mark.parametrize('relative_external_paths', [True,

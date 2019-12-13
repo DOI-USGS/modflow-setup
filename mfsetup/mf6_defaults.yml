@@ -34,10 +34,15 @@ postprocessing:
     shapefiles: 'postproc/shps'
 
 setup_grid:
-  grid_file: '{}_grid.json' # pfl_nwt grid info will be written to this file
+  structured: True
   rotation: 0
+  variable_mappings:
+    xll: "xoff"
+    yll: "Yoff"
+  output_files:
+    grid_file: '{}_grid.json'
+    bbox_shapefile: 'postproc/shps/{}_bbox.shp'
   snap_to_NHG: False
-
 
 dis:
   options:
@@ -55,8 +60,7 @@ tdis:
     time_units: 'days'
     start_date_time: '1870-01-01'
     end_date_time: None
-  dimensions:
-    nper: 1
+  dimensions: {}
   perioddata:
     perlen: 1
 
@@ -80,7 +84,6 @@ sto:
     iconvert: 1
   sy_filename_fmt: "sy{:d}.dat"
   ss_filename_fmt: "ss{:d}.dat"
-  steady: {0: True, 1: False}
 
 rch:
   options:
@@ -99,6 +102,11 @@ sfr:
   output_path: 'sfr'
 
 lak:
+  options:
+    save_flows: True
+    budget_fileout: 'lake_out.bin'
+    stage_fileout: 'lake_stage.bin'
+    obs6_filein_fmt: '{}.sfr.obs6'
   lakarr_filename_fmt: 'lakarr{:d}.dat'
 
 wel:
@@ -106,7 +114,8 @@ wel:
     print_input: True
     print_flows: True
     save_flows: True
-  lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
+  output_files:
+    lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
   minimum_layer_thickness: 2.
 
 oc:

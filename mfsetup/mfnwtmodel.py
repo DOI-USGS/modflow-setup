@@ -14,7 +14,7 @@ from flopy.utils import binaryfile as bf
 from .discretization import (deactivate_idomain_above,
                              find_remove_isolated_cells)
 from .tdis import setup_perioddata_group
-from .grid import MFsetupGrid, get_ij, write_bbox_shapefile
+from .grid import write_bbox_shapefile, setup_structured_grid
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
 from .lakes import make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes, setup_lake_info
@@ -111,7 +111,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """Set attributes related to a parent or source model
         if one is specified."""
 
-        kwargs = self.cfg.get('parent')
+        if self.cfg['parent']['version'] == 'mf6':
+            raise NotImplementedError("MODFLOW-6 parent models")
+
+        kwargs = self.cfg['parent'].copy()
         if kwargs is not None:
             kwargs = kwargs.copy()
             kwargs['f'] = kwargs.pop('namefile')
@@ -154,34 +157,6 @@ class MFnwtModel(MFsetupMixin, Modflow):
                 for var in ['nper', 'perlen', 'nstp', 'tsmult', 'steady']:
                     if self.cfg['dis'].get(var) is None:
                         self.cfg['dis'][var] = self.parent.dis.__dict__[var].array
-
-    def _set_parent_modelgrid(self, mg_kwargs=None):
-        """Reset the parent model grid from keyword arguments
-        or existing modelgrid, and DIS package.
-        """
-        if mg_kwargs is not None:
-            kwargs = mg_kwargs.copy()
-        else:
-            kwargs = {'xoff': self.parent.modelgrid.xoffset,
-                      'yoff': self.parent.modelgrid.yoffset,
-                      'angrot': self.parent.modelgrid.angrot,
-                      'epsg': self.parent.modelgrid.epsg,
-                      'proj4': self.parent.modelgrid.proj4,
-                      }
-        parent_lenuni = self.parent.dis.lenuni
-        if 'lenuni' in self.cfg['parent']:
-            parent_lenuni = self.cfg['parent']['lenuni']
-        elif 'length_units' in self.cfg['parent']:
-            parent_lenuni = lenuni_values[self.cfg['parent']['length_units']]
-
-        self.parent.dis.lenuni = parent_lenuni
-        lmult = convert_length_units(parent_lenuni, 'meters')
-        kwargs['delr'] = self.parent.dis.delr.array * lmult
-        kwargs['delc'] = self.parent.dis.delc.array * lmult
-        kwargs['lenuni'] = 2  # parent modelgrid in same CRS as pfl_nwt modelgrid
-        kwargs = get_input_arguments(kwargs, MFsetupGrid, warn=False)
-        self._parent._mg_resync = False
-        self._parent._modelgrid = MFsetupGrid(**kwargs)
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame.
@@ -270,124 +245,14 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._perioddata = perioddata
         self._nper = None
 
-    def setup_grid(self, features=None,
-                   features_shapefile=None,
-                   id_column='HYDROID', include_ids=[],
-                   buffer=1000, dxy=20,
-                   xoff=None, yoff=None,
-                   epsg=None,
-                   remake=True,
-                   variable_mappings={},
-                   grid_file='grid.json',
-                   write_shapefile=True):
+    def _update_grid_configuration_with_dis(self):
+        """Update grid configuration with any information supplied to dis package
+        (so that settings specified for DIS package have priority). This method
+        is called by MFsetupMixin.setup_grid.
         """
-
-        Parameters
-        ----------
-        parent : flopy.modflow.Modflow instance
-
-        features : list of shapely.geometry objects
-
-        Returns
-        -------
-
-        """
-        print('setting up model grid...')
-        t0 = time.time()
-
-        id_column = id_column.lower()
-
-        # conversions for pfl_nwt/parent model units to meters
-        inset_lmult = convert_length_units(self.length_units, 'meters')
-        parent_lmult = convert_length_units(self.parent.dis.lenuni, 'meters')
-        dxy_m = np.round(dxy * inset_lmult, 4) # dxy is specified in pfl_nwt model units
-
-        # set up the parent modelgrid if it isn't
-        parent_delr_m = np.round(self.parent.dis.delr.array[0] * parent_lmult, 4)
-        parent_delc_m = np.round(self.parent.dis.delc.array[0] * parent_lmult, 4)
-
-        if epsg is None:
-            epsg = self.parent.modelgrid.epsg
-
-        if not remake:
-            try:
-                model_info = load(grid_file)
-            except:
-                remake = True
-
-        if remake:
-            # make grid from xoff, yoff, dxy and nrow, ncol
-            if xoff is not None and yoff is not None:
-
-                assert 'nrow' in self.cfg['dis'] and 'ncol' in self.cfg['dis'], \
-                "Need to specify nrow and ncol if specifying xoffset and yoffset."
-                height_m = np.round(dxy_m * self.cfg['dis']['nrow'], 4)
-                width_m = np.round(dxy_m * self.cfg['dis']['ncol'], 4)
-                xul = xoff
-                yul = yoff + height_m
-                pass
-            # make grid using buffered feature bounding box
-            else:
-                if features is None and features_shapefile is not None:
-
-                    df = self.load_features(features_shapefile,
-                                            id_column=id_column, include_ids=include_ids,
-                                            filter=self.parent.modelgrid.bbox.bounds)
-                    rows = df.loc[df[id_column].isin(include_ids)]
-                    features = rows.geometry.tolist()
-                if isinstance(features, list):
-                    if len(features) > 1:
-                        features = MultiPolygon(features)
-                    else:
-                        features = features[0]
-
-                x1, y1, x2, y2 = features.bounds
-
-                L = buffer  # characteristic length or buffer around chain of lakes, in m
-                xul = x1 - L
-                yul = y2 + L
-                height_m = np.round(yul - (y1 - L), 4) # initial model height from buffer distance
-                width_m = np.round((x2 + L) - xul, 4)
-
-            # get location of coinciding cell in parent model for upper left
-            pi, pj = self.parent.modelgrid.intersect(xul, yul)
-            verts = np.array(self.parent.modelgrid.get_cell_vertices(pi, pj))
-            xul, yul = verts[:, 0].min(), verts[:, 1].max()
-
-            def roundup(number, increment):
-                return int(np.ceil(number / increment) * increment)
-
-
-            self.height = roundup(height_m, parent_delr_m)
-            self.width = roundup(width_m, parent_delc_m)
-
-            # update nrow, ncol after snapping to parent grid
-            nrow = int(self.height / dxy_m) # h is in meters
-            ncol = int(self.width / dxy_m)
-            self.cfg['dis']['nrow'] = nrow
-            self.cfg['dis']['ncol'] = ncol
-            #lenuni = self.cfg['dis'].get('lenuni', 2)
-
-            # set the grid info dict
-            # spacing is in meters (consistent with projected CRS)
-            # (modelgrid object will be updated automatically)
-            xll = xul
-            yll = yul - self.height
-            self.cfg['grid'] = {'nrow': nrow, 'ncol': ncol,
-                                'delr': dxy_m, 'delc': dxy_m,
-                                'xoff': xll, 'yoff': yll,
-                                'xul': xul, 'yul': yul,
-                                'epsg': epsg,
-                                'lenuni': 2
-                                }
-
-            #grid_file = os.path.join(self.cfg['model']['model_ws'], os.path.split(grid_file)[1])
-            dump(grid_file, self.cfg['grid'])
-            if write_shapefile:
-                write_bbox_shapefile(self.modelgrid,
-                                     os.path.join(self.cfg['postprocessing']['output_folders']['shapefiles'],
-                                                  '{}_bbox.shp'.format(self.name)))
-        print("finished in {:.2f}s\n".format(time.time() - t0))
+        for param in ['nrow', 'ncol', 'delr', 'delc']:
+            if param in self.cfg['dis']:
+                self.cfg['setup_grid'].update({param: self.cfg['dis'][param]})
 
     def setup_dis(self):
         """"""
@@ -421,7 +286,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         dis = fm.ModflowDis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
         self._modelgrid = None  # override DIS package grid setup
-        self._isbc = None  # reset BC property arrays
+        self._reset_bc_arrays()
+        #self._isbc = None  # reset BC property arrays
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return dis
 
@@ -761,7 +627,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
             for i, id in enumerate(self.lake_info['feat_id'].tolist()):
                 dfl = lakes.get_group(id)
                 assert len(dfl) == 151, "151 values required for each lake; " \
-                                        "only {} for HYDROID {} in {}"\
+                                        "only {} for feature id {} in {}"\
                     .format(len(dfl), id, source_data['stage_area_volume_file'])
                 tabfilename = '{}/{}/{}_stage_area_volume.dat'.format(self.model_ws,
                                                                       self.external_path,

@@ -159,8 +159,9 @@ def setup_wel_data(model):
     if copy_fluxes_to_subsequent_periods:
         df = copy_fluxes_to_subsequent_periods(df)
 
-    wel_lookup_file = os.path.join(model.model_ws, os.path.split(model.cfg['wel']['lookup_file'])[1])
-    model.cfg['wel']['lookup_file'] = wel_lookup_file
+    wel_lookup_file = model.cfg['wel']['output_files']['lookup_file']
+    wel_lookup_file = os.path.join(model.model_ws, os.path.split(wel_lookup_file)[1])
+    model.cfg['wel']['output_files']['lookup_file'] = wel_lookup_file
 
     # save a lookup file with well site numbers/categories
     df[['per', 'k', 'i', 'j', 'flux', 'comments']].to_csv(wel_lookup_file, index=False)
@@ -229,7 +230,7 @@ def assign_layers_from_screen_top_botm(data, model,
             below_minimum = k_well_thickness < minimum_layer_thickness
             n_below = np.sum(below_minimum)
             if n_below > 0:
-                outpath = os.path.split(model.cfg['wel']['lookup_file'])[0]
+                outpath = os.path.split(model.cfg['wel']['output_files']['lookup_file'])[0]
                 outfile = os.path.join(outpath, 'dropped_wells.csv')
                 flux_below = data.loc[below_minimum]
                 pct_flux_below = 100*flux_below[flux_col].sum()/data[flux_col].sum()

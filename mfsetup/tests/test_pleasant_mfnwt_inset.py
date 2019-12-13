@@ -3,7 +3,7 @@ Tests for Pleasant Lake inset case
 * MODFLOW-NWT
 * SFR + Lake package
 * Lake precip and evap specified with PRISM data; evap computed using evaporation.hamon_evaporation
-* transient parent model with initial steady-state
+* transient parent model with initial steady-state; copy unspecified data from parent
 """
 from copy import copy, deepcopy
 import os

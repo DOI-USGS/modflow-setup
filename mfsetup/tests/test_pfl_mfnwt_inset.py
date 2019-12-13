@@ -87,7 +87,7 @@ def test_load_grid(pfl_nwt, pfl_nwt_with_grid):
 
     m = pfl_nwt_with_grid  #deepcopy(pfl_nwt_with_grid)
     m2 = pfl_nwt  #deepcopy(pfl_nwt)
-    m2.load_grid(m.cfg['setup_grid']['grid_file'])
+    m2.load_grid(m.cfg['setup_grid']['output_files']['grid_file'].format(m.name))
     assert m.cfg['grid'] == m2.cfg['grid']
 
 
@@ -160,6 +160,8 @@ def test_dis_setup(pfl_nwt_with_grid):
     m.cfg['dis']['botm'] = None
     m.cfg['dis']['remake_top'] = True
     m.cfg['dis']['lenuni'] = 1 # feet
+    m.setup_grid()
+    #m._reset_bc_arrays()
     assert m.cfg['parent']['length_units'] == 'meters'
     assert m.cfg['parent']['time_units'] == 'days'
     assert m.length_units == 'feet'
@@ -291,8 +293,8 @@ def test_wel_tmr(pfl_nwt_with_dis):
     m.cfg['model']['perimeter_boundary_type'] = 'specified flux'
     wel = m.setup_wel()
     wel.write_file()
-    assert os.path.exists(m.cfg['wel']['lookup_file'])
-    df = pd.read_csv(m.cfg['wel']['lookup_file'])
+    assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
+    df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
     bfluxes0 = df.loc[(df.comments == 'boundary_flux') & (df.per == 0)]
     assert len(bfluxes0) == (m.nrow*2 + m.ncol*2) * m.nlay
 
@@ -306,8 +308,8 @@ def test_wel_setup(pfl_nwt_with_dis_bas6):
     m.cfg['model']['perimeter_boundary_type'] = 'specified head'
     wel = m.setup_wel()
     wel.write_file()
-    assert os.path.exists(m.cfg['wel']['lookup_file'])
-    df = pd.read_csv(m.cfg['wel']['lookup_file'])
+    assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
+    df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
     bfluxes0 = df.loc[(df.comments == 'boundary_flux') & (df.per == 0)]
     assert len(bfluxes0) == 0
     # verify that water use fluxes are negative
