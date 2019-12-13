@@ -13,7 +13,6 @@ from .fileio import load, dump, load_array, save_array, check_source_files, flop
 from .utils import update, get_input_arguments
 from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
 from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
-from .mf5to6 import set_cfg
 from .utils import update, get_packages, get_input_arguments
 from .sourcedata import setup_array
 from .units import convert_length_units, lenuni_text, itmuni_text, lenuni_values
@@ -558,7 +557,7 @@ class MFsetupMixin():
     def _set_cfg(self, cfg_updates):
         """Load configuration file; update dictionary.
         """
-        self.cfg = defaultdict(None)
+        self.cfg = defaultdict(None, self.cfg)
 
         if isinstance(cfg_updates, str):
             assert os.path.exists(cfg_updates), \
@@ -608,9 +607,6 @@ class MFsetupMixin():
 
         # other variables
         self.cfg['external_files'] = {}
-
-    def _set_cfg_item(self, key, value):
-        set_cfg(self, key, value)
 
     def _set_isbc2d(self):
             isbc = np.zeros((self.nrow, self.ncol))

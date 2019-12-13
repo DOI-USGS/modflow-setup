@@ -6,14 +6,13 @@ Tests for Pleasant Lake inset case, MODFLOW-6 version
 import copy
 import os
 import numpy as np
+import pandas as pd
 import rasterio
-from rasterio.features import rasterize
 import pytest
 import flopy
 mf6 = flopy.mf6
 from mfsetup import MF6model
-from mfsetup.discretization import (get_layer_thicknesses, find_remove_isolated_cells)
-from mfsetup.fileio import load_cfg, load_array
+from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists
 from mfsetup.utils import get_input_arguments
 
 
@@ -24,7 +23,8 @@ def pleasant_mf6_test_cfg_path(project_root_path):
 
 @pytest.fixture(scope="function")
 def pleasant_mf6_cfg(pleasant_mf6_test_cfg_path):
-    cfg = load_cfg(pleasant_mf6_test_cfg_path)
+    cfg = load_cfg(pleasant_mf6_test_cfg_path,
+                   default_file='/mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
@@ -51,14 +51,70 @@ def get_pleasant_mf6(pleasant_mf6_cfg, pleasant_simulation):
 def get_pleasant_mf6_with_grid(get_pleasant_mf6):
     print('creating Pleasant Lake MFnwtModel instance with grid...')
     m = copy.deepcopy(get_pleasant_mf6)
-    cfg = m.cfg.copy()
-    cfg['setup_grid']['grid_file'] = m.cfg['setup_grid'].pop('output_files').pop('grid_file')
-    sd = cfg['setup_grid'].pop('source_data').pop('features_shapefile')
-    sd['features_shapefile'] = sd.pop('filename')
-    cfg['setup_grid'].update(sd)
-    kwargs = get_input_arguments(cfg['setup_grid'], m.setup_grid)
-    m.setup_grid(**kwargs)
+    m.setup_grid()
     return m
+
+
+@pytest.fixture(scope="function")
+def get_pleasant_mf6_with_dis(get_pleasant_mf6_with_grid):
+    print('creating Pleasant Lake MFnwtModel instance with grid...')
+    m = copy.deepcopy(get_pleasant_mf6_with_grid)
+    m.setup_tdis()
+    m.setup_dis()
+    return m
+
+
+@pytest.fixture(scope="function")
+def pleasant_mf6_setup_from_yaml(pleasant_mf6_test_cfg_path):
+    m = MF6model.setup_from_yaml(pleasant_mf6_test_cfg_path)
+    m.write_input()
+    #if hasattr(m, 'sfr'):
+    #    sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+    #    m.sfrdata.write_package(sfr_package_filename,
+    #                                version='mf6',
+    #                                options=['save_flows',
+    #                                         'BUDGET FILEOUT shellmound.sfr.cbc',
+    #                                         'STAGE FILEOUT shellmound.sfr.stage.bin',
+    #                                         # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
+    #                                         # location of obs6 file relative to sfr package file (same folder)
+    #                                         ]
+    #                                )
+    return m
+
+
+@pytest.fixture(scope="function")
+def pleasant_mf6_model_run(pleasant_mf6_setup_from_yaml, mf6_exe):
+    m = copy.deepcopy(pleasant_mf6_setup_from_yaml)
+    m.exe_name = mf6_exe
+    success = False
+    if exe_exists(mf6_exe):
+        success, buff = m.simulation.run_simulation()
+        if not success:
+            list_file = m.name_file.list.array
+            with open(list_file) as src:
+                list_output = src.read()
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+    return m
+
+
+def test_model(get_pleasant_mf6_with_grid):
+    m = get_pleasant_mf6_with_grid
+    assert m.version == 'mf6'
+    assert 'UPW' in m.parent.get_package_list()
+
+
+def test_tdis_setup(get_pleasant_mf6):
+
+    m = get_pleasant_mf6 #deepcopy(model)
+    tdis = m.setup_tdis()
+    tdis.write()
+    assert os.path.exists(os.path.join(m.model_ws, tdis.filename))
+    assert isinstance(tdis, mf6.ModflowTdis)
+    period_df = pd.DataFrame(tdis.perioddata.array)
+    period_df['perlen'] = period_df['perlen'].astype(np.float64)
+    period_df['nstp'] = period_df['nstp'].astype(np.int64)
+    pd.testing.assert_frame_equal(period_df[['perlen', 'nstp', 'tsmult']],
+                                  m.perioddata[['perlen', 'nstp', 'tsmult']])
 
 
 def test_dis_setup(get_pleasant_mf6_with_grid):
@@ -70,8 +126,6 @@ def test_dis_setup(get_pleasant_mf6_with_grid):
     botm = m.dis.botm.array.copy()
     assert isinstance(dis, mf6.ModflowGwfdis)
     assert 'DIS' in m.get_package_list()
-    # verify that units got conveted correctly
-    assert m.dis.top.array.mean() < 100
     assert m.dis.length_units.array == 'meters'
 
     arrayfiles = m.cfg['intermediate_data']['top'] + \
@@ -89,65 +143,118 @@ def test_dis_setup(get_pleasant_mf6_with_grid):
             model_array = model_array[k]
         assert np.array_equal(model_array, data)
 
-   # test that written idomain array reflects supplied shapefile of active area
-    active_area = rasterize(m.cfg['dis']['source_data']['idomain']['filename'],
-                            m.modelgrid)
-    isactive = active_area == 1
-    written_idomain = load_array(m.cfg['dis']['griddata']['idomain'])
-    assert np.all(written_idomain[:, ~isactive] <= 0)
 
-    # test idomain from just layer elevations
-    del m.cfg['dis']['griddata']['idomain']
-    dis = m.setup_dis()
-    top = dis.top.array.copy()
-    top[top == m._nodata_value] = np.nan
-    botm = dis.botm.array.copy()
-    botm[botm == m._nodata_value] = np.nan
-    thickness = get_layer_thicknesses(top, botm)
-    invalid_botms = np.ones_like(botm)
-    invalid_botms[np.isnan(botm)] = 0
-    invalid_botms[thickness < 1.0001] = 0
-    # these two arrays are not equal
-    # because isolated cells haven't been removed from the second one
-    # this verifies that _set_idomain is removing them
-    assert not np.array_equal(m.idomain[:, isactive].sum(axis=1),
-                          invalid_botms[:, isactive].sum(axis=1))
-    invalid_botms = find_remove_isolated_cells(invalid_botms, minimum_cluster_size=10)
-    active_cells = m.idomain[:, isactive].copy()
-    active_cells[active_cells < 0] = 0  # need to do this because some idomain cells are -1
-    assert np.array_equal(active_cells.sum(axis=1),
-                          invalid_botms[:, isactive].sum(axis=1))
+def test_idomain(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis
+    assert issubclass(m.idomain.dtype.type, np.integer)
+    assert m.idomain.sum() == m.dis.idomain.array.sum()
 
-    # test recreating package from external arrays
-    m.remove_package('dis')
-    assert m.cfg['dis']['griddata']['top'] is not None
-    assert m.cfg['dis']['griddata']['botm'] is not None
-    dis = m.setup_dis()
-    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array == 1],
-                          botm[m.dis.idomain.array == 1])
 
-    # test recreating just the top from the external array
-    m.remove_package('dis')
-    m.cfg['dis']['remake_top'] = False
-    m.cfg['dis']['griddata']['botm'] = None
-    dis = m.setup_dis()
-    dis.write()
-    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array == 1],
-                          botm[m.dis.idomain.array == 1])
-    arrayfiles = m.cfg['dis']['griddata']['top']
-    for f in arrayfiles:
-        assert os.path.exists(f['filename'])
-    assert os.path.exists(os.path.join(m.model_ws, dis.filename))
+def test_ic_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis
+    ic = m.setup_ic()
+    ic.write()
+    assert os.path.exists(os.path.join(m.model_ws, ic.filename))
+    assert isinstance(ic, mf6.ModflowGwfic)
+    assert ic.strt.array.shape == m.dis.botm.array.shape
 
-    # dis package idomain should be consistent with model property
-    updated_idomain = m.idomain
-    assert np.array_equal(m.dis.idomain.array, updated_idomain)
 
-    # check that units were converted (or not)
-    assert np.allclose(dis.top.array.mean(), 40, atol=10)
-    mcaq = m.cfg['dis']['source_data']['botm']['filenames'][3]
-    assert 'mcaq' in mcaq
-    with rasterio.open(mcaq) as src:
-        mcaq_data = src.read(1)
-        mcaq_data[mcaq_data == src.meta['nodata']] = np.nan
-    assert np.allclose(m.dis.botm.array[3].mean() / .3048, np.nanmean(mcaq_data), atol=5)
+def test_sto_setup(get_pleasant_mf6_with_dis):
+
+    m = get_pleasant_mf6_with_dis  #deepcopy(model_with_grid)
+    sto = m.setup_sto()
+    sto.write()
+    assert os.path.exists(os.path.join(m.model_ws, sto.filename))
+    assert isinstance(sto, mf6.ModflowGwfsto)
+    for var in ['sy', 'ss']:
+        model_array = getattr(sto, var).array
+        for k, item in enumerate(m.cfg['sto']['griddata'][var]):
+            f = item['filename']
+            assert os.path.exists(f)
+            data = np.loadtxt(f)
+            assert np.array_equal(model_array[k], data)
+
+
+def test_npf_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis
+    npf = m.setup_npf()
+    npf.write()
+    assert isinstance(npf, mf6.ModflowGwfnpf)
+    assert os.path.exists(os.path.join(m.model_ws, npf.filename))
+
+
+def test_obs_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    obs = m.setup_obs()
+    obs.write()
+    obsfile = os.path.join(m.model_ws, obs.filename)
+    assert os.path.exists(obsfile)
+    assert isinstance(obs, mf6.ModflowUtlobs)
+    with open(obsfile) as obsdata:
+        for line in obsdata:
+            if 'fileout' in line.lower():
+                _, _, _, fname = line.strip().split()
+                assert fname == m.cfg['obs']['filename_fmt'].format(m.name)
+                break
+
+
+def test_oc_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    oc = m.setup_oc()
+    oc.write()
+    ocfile = os.path.join(m.model_ws, oc.filename)
+    assert os.path.exists(ocfile)
+    assert isinstance(oc, mf6.ModflowGwfoc)
+    options = read_mf6_block(ocfile, 'options')
+    options = {k: ' '.join(v).lower() for k, v in options.items()}
+    perioddata = read_mf6_block(ocfile, 'period')
+    assert 'fileout' in options['budget'] and '.cbc' in options['budget']
+    assert 'fileout' in options['head'] and '.hds' in options['head']
+    assert 'save head last' in perioddata[1]
+    assert 'save budget last' in perioddata[1]
+
+
+def test_rch_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    rch = m.setup_rch()
+    rch.write()
+    assert os.path.exists(os.path.join(m.model_ws, rch.filename))
+    assert isinstance(rch, mf6.ModflowGwfrcha)
+    assert rch.recharge is not None
+
+
+def test_wel_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    wel = m.setup_wel()
+    wel.write()
+    assert os.path.exists(os.path.join(m.model_ws, wel.filename))
+    assert isinstance(wel, mf6.ModflowGwfwel)
+    assert wel.stress_period_data is not None
+
+
+def test_sfr_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis
+    m.setup_sfr()
+    m.sfr.write()
+    assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
+    assert isinstance(m.sfr, mf6.ModflowGwfsfr)
+    output_path = m.cfg['sfr']['output_path']
+    shapefiles = ['{}/{}_sfr_cells.shp'.format(output_path, m.name),
+                  '{}/{}_sfr_outlets.shp'.format(output_path, m.name),
+                  #'{}/{}_sfr_inlets.shp'.format(output_path, m.name),
+                  '{}/{}_sfr_lines.shp'.format(output_path, m.name),
+                  '{}/{}_sfr_routing.shp'.format(output_path, m.name)
+    ]
+    for f in shapefiles:
+        assert os.path.exists(f)
+    assert m.sfrdata.model == m
+
+
+def test_model_setup(pleasant_mf6_setup_from_yaml):
+    m = pleasant_mf6_setup_from_yaml
+    assert isinstance(m, MF6model)
+
+
+def test_model_setup_and_run(pleasant_mf6_model_run):
+    m = pleasant_mf6_model_run
+

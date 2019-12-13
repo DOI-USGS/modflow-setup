@@ -252,7 +252,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """
         for param in ['nrow', 'ncol', 'delr', 'delc']:
             if param in self.cfg['dis']:
-                self.cfg['setup_grid'].update({param: self.cfg['dis'][param]})
+                self.cfg['setup_grid'][param] = self.cfg['dis'][param]
 
     def setup_dis(self):
         """"""
@@ -841,7 +841,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         m : mfsetup.MFnwtModel model object
         """
 
-        cfg = load_cfg(yamlfile)
+        cfg = load_cfg(yamlfile, default_file='/mfnwt_defaults.yml')
         cfg['filename'] = yamlfile
         print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
@@ -882,7 +882,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
     def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = load_cfg(yamlfile, verbose=verbose)
+        cfg = load_cfg(yamlfile, verbose=verbose, default_file='/mfnwt_defaults.yml')
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 

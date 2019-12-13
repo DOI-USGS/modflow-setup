@@ -47,8 +47,8 @@ setup_grid:
 dis:
   options:
     length_units: 'meters'
-  dimensions:
-  griddata:
+  dimensions: {}
+  griddata: {}
   top_filename_fmt: "top.dat"
   botm_filename_fmt: "botm{:d}.dat"
   idomain_filename_fmt: "idomain{:d}.dat"
@@ -129,6 +129,9 @@ obs:
   options:
     digits: 10
     print_input: True
+  source_data:
+    column_mappings:
+      hydlbl: ['obsprefix', 'obsnme', 'common_name']
   default_columns:
     x_location_col: 'x' # x coordinates in wtm
     y_location_col: 'y' # y coordinates in wtm

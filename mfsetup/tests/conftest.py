@@ -59,7 +59,8 @@ def pfl_nwt_test_cfg_path(project_root_path):
 
 @pytest.fixture(scope="function")
 def pfl_nwt_cfg(pfl_nwt_test_cfg_path):
-    cfg = load_cfg(pfl_nwt_test_cfg_path)
+    cfg = load_cfg(pfl_nwt_test_cfg_path,
+                   default_file='/mfnwt_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
     return cfg
@@ -157,7 +158,7 @@ def pleasant_nwt_test_cfg_path(project_root_path):
 
 @pytest.fixture(scope="session")
 def pleasant_nwt_cfg(pleasant_nwt_test_cfg_path):
-    cfg = load_cfg(pleasant_nwt_test_cfg_path)
+    cfg = load_cfg(pleasant_nwt_test_cfg_path, default_file='/mfnwt_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
     return cfg

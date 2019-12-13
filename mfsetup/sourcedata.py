@@ -17,6 +17,7 @@ from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thi
 from gisutils import (get_values_at_points, shp2df)
 from .grid import get_ij, rasterize
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
+from .mf5to6 import get_variable_package_name, get_variable_name
 from .units import (convert_length_units, convert_time_units, convert_volume_units)
 from .utils import get_input_arguments
 
@@ -924,10 +925,6 @@ def setup_array(model, package, var, data=None,
     if cfg is None and model.cfg['parent'].get('default_source_data'):
         cfg = {var: 'from_parent'}
 
-    # for getting data from a different package in the source model
-    if source_package is None:
-        source_package = package
-
     # data specified directly
     sd = None
     if data is not None:
@@ -1002,9 +999,13 @@ def setup_array(model, package, var, data=None,
             if modelname == 'parent':
                 source_model = model.parent
 
+            # for getting data from a different package in the source model
+            source_variable = get_variable_name(var, source_model.version)
+            source_package = get_variable_package_name(var, source_model.version, package)
+
             # data from parent model MODFLOW binary output
             if binary_file:
-                sd = MFBinaryArraySourceData(variable=var, filename=filename,
+                sd = MFBinaryArraySourceData(variable=source_variable, filename=filename,
                                              datatype=datatype,
                                              dest_model=model,
                                              source_modelgrid=source_model.modelgrid,
@@ -1019,7 +1020,7 @@ def setup_array(model, package, var, data=None,
                 # the botm array has to be handled differently
                 # because dest. layers may be interpolated between
                 # model top and first botm
-                if var == 'botm':
+                if source_variable == 'botm':
                     nlay, nrow, ncol = source_model.dis.botm.array.shape
                     source_array = np.zeros((nlay+1, nrow, ncol))
                     source_array[0] = source_model.dis.top.array
@@ -1027,10 +1028,10 @@ def setup_array(model, package, var, data=None,
                     if from_source_model_layers is not None:
                         from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
                 else:
-                    source_array = getattr(source_model, source_package).__dict__[var].array
+                    source_array = getattr(source_model, source_package).__dict__[source_variable].array
 
                 if datatype == 'transient2d':
-                    sd = TransientArraySourceData(variable=var, filenames=filenames,
+                    sd = TransientArraySourceData(variable=source_variable, filenames=filenames,
                                                   datatype=datatype,
                                                   dest_model=model,
                                                   source_modelgrid=source_model.modelgrid,
@@ -1040,7 +1041,7 @@ def setup_array(model, package, var, data=None,
                                                   vmin=vmin, vmax=vmax,
                                                   **kwargs)
                 else:
-                    sd = ArraySourceData(variable=var, filenames=filenames,
+                    sd = ArraySourceData(variable=source_variable, filenames=filenames,
                                          datatype=datatype,
                                          dest_model=model,
                                          source_modelgrid=source_model.modelgrid,
@@ -1079,10 +1080,7 @@ def setup_array(model, package, var, data=None,
     if var == 'botm':
         bathy = model.lake_bathymetry
         top = model.load_array(model.cfg[external_files_key]['top'][0])
-        try:
-            lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
-        except:
-            j=2
+        lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
 
         # fill missing layers if any
         if len(data) < model.nlay:

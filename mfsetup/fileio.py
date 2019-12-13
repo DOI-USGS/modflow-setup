@@ -158,8 +158,7 @@ def save_array(filename, arr, nodata=-9999,
     print("took {:.2f}s".format(time.time() - t0))
 
 
-def load_cfg(cfgfile, verbose=False,
-             default_file='/mfnwt_defaults.yml'):
+def load_cfg(cfgfile, verbose=False, default_file=None):
     """
 
     Parameters
@@ -175,8 +174,9 @@ def load_cfg(cfgfile, verbose=False,
     print('loading configuration file {}...'.format(cfgfile))
     source_path = os.path.split(__file__)[0]
     # default configuration
-    default_cfg = load(source_path + default_file)
-    default_cfg['filename'] = source_path + default_file
+    if default_file is not None:
+        default_cfg = load(source_path + default_file)
+        default_cfg['filename'] = source_path + default_file
 
     # recursively update defaults with information from yamlfile
     cfg = default_cfg.copy()
@@ -195,6 +195,7 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
     if cfg['model']['version'] == 'mf6':
         file_path_keys_relative_to_config = [
             'simulation.sim_ws',
+            'parent.model_ws',
             'parent.simulation.sim_ws',
             'parent.headfile',
         ]
@@ -204,6 +205,7 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
         file_path_keys_relative_to_config = [
             'model.model_ws',
             'parent.model_ws',
+            'parent.simulation.sim_ws',
             'parent.headfile',
             'nwt.use_existing_file'
         ]
@@ -275,7 +277,9 @@ def _set_path(keys, abspath, cfg):
                     if d[k] is not None:
                         d[k] = os.path.join(abspath, d[k])
             else:
-                d = d[keys[level]]
+                key = keys[level]
+                if key in d:
+                    d = d[keys[level]]
     return cfg
 
 

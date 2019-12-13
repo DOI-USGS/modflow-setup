@@ -91,8 +91,9 @@ def setup_head_observations(model, obs_info_files=None,
     dfs = []
     for f, column_info in obs_info_files.items():
         print(f)
+        column_mappings = self.cfg[package]['source_data'].get('column_mappings')
         df = read_observation_data(f, column_info,
-                                   column_mappings=self.cfg[package].get('column_mappings'))
+                                   column_mappings=column_mappings)
         if 'obs_type' in df.columns and 'pckg' not in df.columns:
             df['pckg'] = [pckg.get(s, 'BAS') for s in df['obs_type']]
         elif 'pckg' not in df.columns:

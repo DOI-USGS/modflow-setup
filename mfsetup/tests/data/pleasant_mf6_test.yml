@@ -23,7 +23,7 @@ model:
              'sto',
              'rch', # Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model
              'sfr',
-             'lak',
+             #'lak',
              'obs',
              'wel',
              'ims'
@@ -54,8 +54,8 @@ setup_grid:
       filename: 'pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
-  dxy: 20 # m
-  buffer: 2000 # distance from feature(s) if interest to model boundary, in meters
+  dxy: 40 # m
+  buffer: 500 # distance from feature(s) if interest to model boundary, in meters
   grid_file: 'grid.json' # grid info will be written to this file
   epsg: 3070
 
@@ -196,13 +196,13 @@ ims:
 
 obs:
   source_data:
-    filenames: ['pleasant/source_data/tables/nwis_heads_all/nwis_heads_info_file.csv',
+    filenames: ['pleasant/source_data/tables/nwis_heads_info_file.csv',
                 'pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
-                'pleasant/source_data/tables/wdnr_heads/wdnr_gw_sites.csv',
+                'pleasant/source_data/tables/wdnr_gw_sites.csv',
                 'pleasant/source_data/tables/uwsp_heads.csv',
                 'pleasant/source_data/tables/wgnhs_head_targets.csv'
                      ]
     column_mappings:
-      hydlbl: ['obsprefix', 'obsnme', 'common_name']
+      obsname: ['obsprefix', 'obsnme', 'common_name']
   drop_observations: ['10019209_lk'  # pleasant lake; monitored via gage package
   ]

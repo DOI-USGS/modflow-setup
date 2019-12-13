@@ -15,6 +15,7 @@ from .discretization import (make_idomain, deactivate_idomain_above,
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
 from .grid import setup_structured_grid
+from .mf5to6 import get_package_name
 from .obs import setup_head_observations
 from .tdis import setup_perioddata
 from .units import lenuni_text, itmuni_text
@@ -129,11 +130,17 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         if kwargs is not None:
             kwargs = kwargs.copy()
             kwargs['f'] = kwargs.pop('namefile')
+
             # load only specified packages that the parent model has
             packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
                                                                     kwargs['f']))
-            load_only = list(set(packages_in_parent_namefile).intersection(
-                set(self.cfg['model'].get('packages', set()))))
+            specified_packages = set(self.cfg['model'].get('packages', set()))
+            # get equivalent packages to load if parent is another MODFLOW version;
+            # then flatten (a package may have more than one equivalent)
+            parent_packages = [get_package_name(p, kwargs['version'])
+                               for p in specified_packages]
+            parent_packages = {item for subset in parent_packages for item in subset}
+            load_only = list(set(packages_in_parent_namefile).intersection(parent_packages))
             kwargs['load_only'] = load_only
             kwargs = get_input_arguments(kwargs, fm.Modflow.load, warn=False)
 
@@ -186,9 +193,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         is called by MFsetupMixin.setup_grid.
         """
         for param in ['nrow', 'ncol']:
-            self.cfg['setup_grid'].update({param: self.cfg['dis']['dimensions'][param]})
+            if param in self.cfg['dis']['dimensions']:
+                self.cfg['setup_grid'][param] = self.cfg['dis']['dimensions'][param]
         for param in ['delr', 'delc']:
-            self.cfg['setup_grid'].update({param: self.cfg['dis']['griddata'][param]})
+            if param in self.cfg['dis']['griddata']:
+                self.cfg['setup_grid'][param] = self.cfg['dis']['griddata'][param]
 
     def get_flopy_external_file_input(self, var):
         """Repath intermediate external file input to the
@@ -646,13 +655,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     @staticmethod
     def load_cfg(yamlfile, verbose=False):
         """Load model configuration info, adjusting paths to model_ws."""
-        return load_cfg(yamlfile, default_file='/mf6_defaults.yml')
+        return load_cfg(yamlfile, verbose=verbose, default_file='/mf6_defaults.yml')
 
     @classmethod
     def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = cls.load_cfg(yamlfile, verbose=verbose)
+        cfg = cls.load_cfg(yamlfile, verbose=verbose, default_file='/mf6_defaults.yml')
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
