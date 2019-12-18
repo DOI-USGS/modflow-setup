@@ -15,7 +15,7 @@ import flopy
 mf6 = flopy.mf6
 from ..checks import check_external_files_for_nans
 from ..discretization import get_layer_thicknesses, find_remove_isolated_cells
-from ..fileio import load_array, exe_exists, read_mf6_block
+from ..fileio import load_array, exe_exists, read_mf6_block, load_cfg
 from ..grid import rasterize
 from ..mf6model import MF6model
 from .. import testing
@@ -78,7 +78,7 @@ def test_init(shellmound_cfg):
 
     cfg['model']['packages'] = []
     cfg['model']['simulation'] = sim
-    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
     # test initialization with no packages
@@ -92,7 +92,7 @@ def test_init(shellmound_cfg):
 
 def test_parse_modflowgwf_kwargs(shellmound_cfg):
     cfg = shellmound_cfg.copy()
-    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
@@ -111,7 +111,7 @@ def test_parse_modflowgwf_kwargs(shellmound_cfg):
 
     # newton solver, with underrelaxation
     cfg['model']['options']['newton_under_relaxation'] = True
-    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    cfg = MF6model._parse_model_kwargs(cfg)
     assert cfg['model']['options']['newtonoptions'] == ['under_relaxation']
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
@@ -164,7 +164,7 @@ def test_snap_to_NHG(shellmound_cfg, shellmound_simulation):
     cfg['model']['simulation'] = shellmound_simulation
     cfg['setup_grid']['snap_to_NHG'] = True
 
-    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
@@ -492,16 +492,18 @@ def test_npf_setup(shellmound_model_with_dis):
 
 
 @pytest.mark.parametrize('config', [{'source_data':
-                                         {'filenames': ['../../data/shellmound/tables/head_obs_well_info.csv']},
-                                     'column_mappings':
-                                         {'obsname': ['obsprefix']}
+                                         {'filenames': ['../../data/shellmound/tables/head_obs_well_info.csv'],
+                                          'column_mappings':
+                                              {'obsname': ['obsprefix']}
+                                          },
                                      },
                                     {'source_data':
-                                         {'filename': '../../data/shellmound/tables/head_obs_well_info2.csv'},
-                                     'column_mappings':
-                                         {'obsname': ['obsprefix'],
-                                          'x': 'x_5070',
-                                          'y': 'y_5070'}
+                                         {'filename': '../../data/shellmound/tables/head_obs_well_info2.csv',
+                                          'column_mappings':
+                                              {'obsname': ['obsprefix'],
+                                               'x': 'x_5070',
+                                               'y': 'y_5070'}
+                                          },
                                      },
                                     ])
 def test_obs_setup(shellmound_model_with_dis, config):
@@ -744,13 +746,13 @@ def test_load(model_setup, shellmound_cfg_path):
 
 def test_packagelist(shellmound_cfg_path):
 
-    cfg = MF6model.load_cfg(shellmound_cfg_path)
+    cfg = load_cfg(shellmound_cfg_path, default_file='/mf6_defaults.yml')
 
     packages = cfg['model']['packages']
     sim = flopy.mf6.MFSimulation(**cfg['simulation'])
     cfg['model']['simulation'] = sim
 
-    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)

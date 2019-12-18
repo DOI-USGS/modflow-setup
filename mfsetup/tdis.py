@@ -5,7 +5,7 @@ import calendar
 import numpy as np
 import pandas as pd
 from .checks import is_valid_perioddata
-from .utils import print_item
+from .utils import print_item, get_input_arguments
 
 months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 
@@ -19,11 +19,68 @@ def convert_freq_to_period_start(freq):
         return freq
 
 
+def get_parent_stress_periods(parent_model, nper=None,
+                              parent_stress_periods='all'):
+
+    parent_sp = parent_stress_periods
+    if parent_model.version == 'mf6':
+        raise NotImplementedError('MODFLOW-6 parent models')
+
+    # use all stress periods from parent model
+    if isinstance(parent_sp, str) and parent_sp.lower() == 'all':
+        parent_sp = list(range(parent_model.nper))
+        if nper is None or nper < parent_model.nper:
+            nper = parent_model.nper
+        elif nper > parent_model.nper:
+            for i in range(nper - parent_model.nper):
+                parent_sp.append(parent_sp[-1])
+        # self.cfg['dis']['perlen'] = None # set from parent model
+        # self.cfg['dis']['steady'] = None
+
+    # use only specified stress periods from parent model
+    elif isinstance(parent_sp, list):
+        # limit parent stress periods to include
+        # to those in parent model and nper specified for pfl_nwt
+        if nper is None:
+            nper = len(parent_sp)
+
+        parent_sp = [0]
+        perlen = [parent_model.dis.perlen.array[0]]
+        for i, p in enumerate(parent_stress_periods):
+            if i == nper:
+                break
+            if p == parent_model.nper:
+                break
+            if p > 0:
+                parent_sp.append(p)
+                perlen.append(parent_model.dis.perlen.array[p])
+        if nper < len(parent_sp):
+            nper = len(parent_sp)
+        else:
+            n_parent_per = len(parent_sp)
+            for i in range(nper - n_parent_per):
+                parent_sp.append(parent_sp[-1])
+
+    # no parent stress periods specified,
+    # default to just using first stress period
+    # (repeating if necessary;
+    # for example if creating transient inset model with steady bc from parent)
+    else:
+        if nper is None:
+            nper = 1
+        parent_sp = [0]
+        for i in range(nper - 1):
+            parent_sp.append(parent_sp[-1])
+
+    assert len(parent_sp) == nper
+    return parent_sp
+
+
 def parse_perioddata_groups(perioddata_dict, defaults={}):
     """Reorganize input in perioddata dict into
-    a list group (dicts).
+    a list of groups (dicts).
     """
-    perioddata = perioddata_dict.copy()
+    #perioddata = perioddata_dict.copy()
     perioddata_groups = []
     group0 = defaults.copy()
 
@@ -31,16 +88,19 @@ def parse_perioddata_groups(perioddata_dict, defaults={}):
                 "end_date_time, nper or freq;\n" \
                 "if steady: nper or perlen specified. Default perlen " \
                 "for steady-state periods is 1."
-    for k, v in perioddata.items():
+    for k, v in perioddata_dict.items():
         if 'group' in k.lower():
             data = defaults.copy()
             data.update(v)
             if is_valid_perioddata(data):
+                data = get_input_arguments(data, setup_perioddata_group)
                 perioddata_groups.append(data)
             else:
                 print_item(k, data)
                 prefix = "perioddata input for {} must have".format(k)
                 raise Exception(prefix + valid_txt)
+        elif 'perioddata' in k.lower():
+            perioddata_groups += parse_perioddata_groups(perioddata_dict, defaults=defaults)
         else:
             group0[k] = v
     if len(perioddata_groups) == 0:
@@ -48,8 +108,8 @@ def parse_perioddata_groups(perioddata_dict, defaults={}):
             print_item('perioddata:', group0)
             prefix = "perioddata input must have"
             raise Exception(prefix + valid_txt)
-
-        perioddata_groups = [group0]
+        data = get_input_arguments(group0, setup_perioddata_group)
+        perioddata_groups = [data]
     for group in perioddata_groups:
         if 'steady' in group:
             if np.isscalar(group['steady']):
@@ -259,15 +319,7 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
     return perioddata
 
 
-def setup_perioddata(cfg, time_units='days'):
-    # get period data groups
-    defaults = {'start_date_time': cfg['tdis']['options'].get('start_date_time'),
-                'nper': cfg['tdis'].get('dimensions', {}).get('nper'),
-                'steady': cfg['sto']['steady'],
-                'oc_saverecord': cfg['oc'].get('saverecord', {0: ['save head last',
-                                                                  'save budget last']})
-                }
-    perioddata_groups = parse_perioddata_groups(cfg['tdis']['perioddata'], defaults)
+def setup_perioddata(perioddata_groups, time_units='days'):
 
     # update any missing variables in the groups with global variables
     group_dfs = []

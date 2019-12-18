@@ -23,7 +23,7 @@ model:
              'sto',
              'rch', # Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model
              'sfr',
-             #'lak',
+             'lak',
              'obs',
              'wel',
              'ims'
@@ -66,9 +66,7 @@ dis:
   dimensions:
     nlay: 5
   source_data:
-    top:
-      filename: 'pleasant/source_data/rasters/dem100m.tif'
-      elevation_units: 'meters'
+    top: from_parent
     botm:
       from_parent:
         0: -0.5 # bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1

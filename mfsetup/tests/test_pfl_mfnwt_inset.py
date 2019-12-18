@@ -3,6 +3,7 @@ sys.path.append('..')
 import time
 from copy import copy, deepcopy
 import shutil
+import filecmp
 import os
 import glob
 import pytest
@@ -497,10 +498,10 @@ def test_lake_gag_setup(pfl_nwt_with_dis):
         shutil.copy(namfile + '.bak', namfile)
 
 
-def test_chd_setup(pfl_nwt_with_dis):
+def test_perimeter_boundary_setup(pfl_nwt_with_dis):
 
     m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
-    chd = m.setup_chd()
+    chd = m.setup_perimeter_boundary()
     chd.write_file()
     assert os.path.exists(chd.fn_path)
     assert len(chd.stress_period_data.data.keys()) == len(set(m.cfg['parent']['copy_stress_periods']))
@@ -513,6 +514,11 @@ def test_sfr_setup(pfl_nwt_with_dis):
     m.setup_bas6()
     m.setup_sfr()
     assert m.sfr is None
+
+
+def test_model_setup(pfl_nwt_setup_from_yaml):
+    m = pfl_nwt_setup_from_yaml
+    assert 'CHD' in m.get_package_list()
 
 
 def test_model_setup_no_nans(pfl_nwt_setup_from_yaml):
@@ -548,20 +554,21 @@ def test_model_setup_and_run(model_setup_and_run):
     m = model_setup_and_run  #deepcopy(model_setup_and_run)
 
 
-@pytest.mark.skip("needs some work")
 def test_load(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):
     m = pfl_nwt_setup_from_yaml  #deepcopy(pfl_nwt_setup_from_yaml)
     m2 = MFnwtModel.load(pfl_nwt_test_cfg_path)
     assert m == m2
 
 
-@pytest.mark.skip("still working on wel")
 def test_remake_a_package(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):
 
-    m = pfl_nwt_setup_from_yaml  #deepcopy(inset_setup)
+    m = pfl_nwt_setup_from_yaml
+    shutil.copy(m.lak.fn_path, 'lakefile1.lak')
     m2 = MFnwtModel.load(pfl_nwt_test_cfg_path, load_only=['dis'])
     lak = m2.setup_lak()
+    lakefile2 = lak.fn_path
     lak.write_file()
+    assert filecmp.cmp('lakefile1.lak', lakefile2)
 
 
 @pytest.fixture(scope="function")

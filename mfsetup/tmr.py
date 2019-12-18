@@ -7,7 +7,11 @@ fm = flopy.modflow
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
 #from .export import get_surface_bc_flux
-from mfsetup.grid import get_ij
+from .fileio import check_source_files
+from .discretization import weighted_average_between_layers
+from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
+from .grid import get_ij
+from .units import convert_length_units
 import numpy as np
 
 
@@ -54,12 +58,23 @@ class Tmr:
                  'left': 1, 'right': -1}
 
     def __init__(self, parent_model, inset_model,
-                 parent_head_file=None, parent_cell_budget_file=None):
+                 parent_head_file=None, parent_cell_budget_file=None,
+                 parent_length_units=None, inset_length_units=None,
+                 inset_parent_layer_mapping=None,
+                 copy_stress_periods=None):
 
         self.inset = inset_model
         self.parent = parent_model
         self.inset._set_parent_modelgrid()
         self.cbc = None
+        self._inset_parent_layer_mapping = inset_parent_layer_mapping
+        self._source_mask = None
+        self.copy_stress_periods = copy_stress_periods
+        if parent_length_units is None:
+            parent_length_units = self.inset.cfg['parent']['length_units']
+        if inset_length_units is None:
+            inset_length_units = self.inset.length_units
+        self.length_unit_conversion = convert_length_units(parent_length_units, inset_length_units)
 
         if parent_head_file is None:
             self.hpth = os.path.join(self.parent.model_ws,
@@ -93,6 +108,92 @@ class Tmr:
         assert int(y_refinment) == y_refinment, "pfl_nwt delc must be factor of parent delc"
         assert x_refinment == y_refinment, "grid must have same x and y discretization"
         self.refinement = int(x_refinment)
+
+    @property
+    def inset_parent_layer_mapping(self):
+        nlay = self.inset.nlay
+        # if mapping between source and dest model layers isn't specified
+        # use property from dest model
+        # this will be the DIS package layer mapping if specified
+        # otherwise same layering is assumed for both models
+        if self._inset_parent_layer_mapping is None:
+            return self.inset.parent_layers
+        elif self._inset_parent_layer_mapping is not None:
+            nspecified = len(self._inset_parent_layer_mapping)
+            if nspecified != nlay:
+                raise Exception("Variable should have {} layers "
+                                "but only {} are specified: {}"
+                                .format(nlay, nspecified, self._inset_parent_layer_mapping))
+            return self._inset_parent_layer_mapping
+
+
+    @property
+    def _source_grid_mask(self):
+        """Boolean array indicating window in parent model grid (subset of cells)
+        that encompass the pfl_nwt model domain. Used to speed up interpolation
+        of parent grid values onto pfl_nwt grid."""
+        if self._source_mask is None:
+            mask = np.zeros((self.parent.modelgrid.nrow,
+                             self.parent.modelgrid.ncol), dtype=bool)
+            if self.inset.parent_mask.shape == self.parent.modelgrid.xcellcenters.shape:
+                mask = self.inset.parent_mask
+            else:
+                x, y = np.squeeze(self.inset.bbox.exterior.coords.xy)
+                pi, pj = get_ij(self.parent.modelgrid, x, y)
+                pad = 3
+                i0, i1 = pi.min() - pad, pi.max() + pad
+                j0, j1 = pj.min() - pad, pj.max() + pad
+                mask[i0:i1, j0:j1] = True
+            self._source_mask = mask
+        return self._source_mask
+
+    @property
+    def interp_weights(self):
+        """For a given parent, only calculate interpolation weights
+        once to speed up re-gridding of arrays to pfl_nwt."""
+        if self._interp_weights is None:
+            source_xy, dest_xy = get_source_dest_model_xys(self.parent.modelgrid,
+                                                           self.inset.modelgrid,
+                                                           source_mask=self._source_grid_mask)
+            self._interp_weights = interp_weights(source_xy, dest_xy)
+        return self._interp_weights
+
+    def regrid_from_parent(self, source_array,
+                                 mask=None,
+                                 method='linear'):
+        """Interpolate values in source array onto
+        the destination model grid, using SpatialReference instances
+        attached to the source and destination models.
+
+        Parameters
+        ----------
+        source_array : ndarray
+            Values from source model to be interpolated to destination grid.
+            1 or 2-D numpy array of same sizes as a
+            layer of the source model.
+        mask : ndarray (bool)
+            1 or 2-D numpy array of same sizes as a
+            layer of the source model. True values
+            indicate cells to include in interpolation,
+            False values indicate cells that will be
+            dropped.
+        method : str ('linear', 'nearest')
+            Interpolation method.
+        """
+        if mask is not None:
+            return regrid(source_array, self.parent.modelgrid, self.inset.modelgrid,
+                          mask1=mask,
+                          method=method)
+        if method == 'linear':
+            parent_values = source_array.flatten()[self._source_grid_mask.flatten()]
+            regridded = interpolate(parent_values,
+                                    *self.interp_weights)
+        elif method == 'nearest':
+            regridded = regrid(source_array, self.parent.modelgrid, self.inset.modelgrid,
+                               method='nearest')
+        regridded = np.reshape(regridded, (self.inset.modelgrid.nrow,
+                                           self.inset.modelgrid.ncol))
+        return regridded
 
     def get_parent_cells(self, side='top'):
         """
@@ -422,6 +523,72 @@ class Tmr:
         for k, v in components.items():
             print('{} {parent} {inset}'.format(k, **v))
 
+    def get_inset_boundary_heads(self):
+
+        # source data
+        headfile = self.hpth
+        vmin, vmax = -1e30, 1e30,
+        check_source_files([headfile])
+        hdsobj = bf.HeadFile(headfile) #, precision='single')
+        all_kstpkper = hdsobj.get_kstpkper()
+
+        # get the last timestep in each stress period if there are more than one
+        kstpkper = []
+        unique_kper = []
+        for (kstp, kper) in all_kstpkper:
+            if kper not in unique_kper:
+                kstpkper.append((kstp, kper))
+                unique_kper.append(kper)
+
+        assert len(unique_kper) == len(set(self.copy_stress_periods)), \
+        "read {} from {},\nexpected stress periods: {}".format(kstpkper,
+                                                               headfile,
+                                                               sorted(list(set(self.cfg['parent']['copy_stress_periods'])))
+                                                               )
+        k, i, j = self.inset.get_boundary_cells()
+        # get heads from parent model
+        dfs = []
+        for inset_per, parent_kstpkper in enumerate(kstpkper):
+            hds = hdsobj.get_data(kstpkper=parent_kstpkper)
+
+            regridded = np.zeros((self.inset.nlay, self.inset.nrow, self.inset.ncol))
+            for dest_k, source_k in self.inset_parent_layer_mapping.items():
+
+                # destination model layers copied from source model layers
+                if source_k <= 0:
+                    arr = hds[0]
+                elif np.round(source_k, 4) in range(hds.shape[0]):
+                    source_k = int(np.round(source_k, 4))
+                    arr = hds[source_k]
+                # destination model layers that are a weighted average
+                # of consecutive source model layers
+                # TODO: add transmissivity-based weighting if upw exists
+                else:
+                    weight0 = source_k - np.floor(source_k)
+                    source_k0 = int(np.floor(source_k))
+                    source_k1 = int(np.ceil(source_k))
+                    arr = weighted_average_between_layers(hds[source_k0],
+                                                          hds[source_k1],
+                                                          weight0=weight0)
+                # interpolate from source model using source model grid
+                # exclude invalid values in interpolation from parent model
+                mask = self._source_grid_mask & (arr > vmin) & (arr < vmax)
+
+                regriddedk = self.regrid_from_parent(arr, mask=mask, method='linear')
+
+                assert regriddedk.shape == self.inset.modelgrid.shape[1:]
+                regridded[dest_k] = regriddedk * self.length_unit_conversion
+
+            # make a DataFrame of regridded heads at perimeter cell locations
+            df = pd.DataFrame({'per': inset_per,
+                               'k': k,
+                               'i': i,
+                               'j': j,
+                               'bhead': regridded[k, i, j]
+                               })
+            dfs.append(df)
+        df = pd.concat(dfs)
+        return df
 
 
 def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
@@ -570,6 +737,7 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
     # matches for pfl_nwt layers and parent layers
     assert np.abs(np.abs(np.sum(Q_parent)) - np.abs(np.sum(Q_inset))) < 1e-3
     return np.array(Q_inset)
+
 
 if __name__ == '__main__':
     parent_head_file = '../csls100_nwt/csls100.hds'

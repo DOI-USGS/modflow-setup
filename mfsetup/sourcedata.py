@@ -261,7 +261,7 @@ class ArraySourceData(SourceData):
                 else:
                     x, y = np.squeeze(self.dest_model.bbox.exterior.coords.xy)
                     pi, pj = get_ij(self.source_modelgrid, x, y)
-                    pad = 2
+                    pad = 3
                     i0, i1 = pi.min() - pad, pi.max() + pad
                     j0, j1 = pj.min() - pad, pj.max() + pad
                     mask[i0:i1, j0:j1] = True
@@ -945,20 +945,22 @@ def setup_array(model, package, var, data=None,
         elif isinstance(source_data_input, dict):
             from_model_keys = [k for k in source_data_input.keys() if 'from_' in k]
             from_model = True if len(from_model_keys) > 0 else False
+            # give source_data_input priority over kwargs, which are assumed to be defaults
+            kwargs = {k: v for k, v in kwargs.items() if k not in source_data_input}
 
         # data from files
         if not from_model:
             ext = get_source_data_file_ext(source_data_input, package, var)
 
             if datatype == 'transient2d' and ext == '.nc':
-                sd = NetCDFSourceData.from_config(model.cfg[package]['source_data'][var],
+                sd = NetCDFSourceData.from_config(source_data_input,
                                                   datatype=datatype,
                                                   dest_model=model,
                                                   vmin=vmin, vmax=vmax,
                                                   **kwargs
                                                   )
             elif datatype == 'transient2d':
-                sd = TransientArraySourceData.from_config(model.cfg[package]['source_data'][var],
+                sd = TransientArraySourceData.from_config(source_data_input,
                                                           variable=var,
                                                           datatype=datatype,
                                                   dest_model=model,
@@ -967,7 +969,7 @@ def setup_array(model, package, var, data=None,
                                                   )
             else:
                 # TODO: files option doesn't support interpolation between top and botm[0]
-                sd = ArraySourceData.from_config(model.cfg[package]['source_data'][var],
+                sd = ArraySourceData.from_config(source_data_input,
                                                  datatype=datatype,
                                                  variable=var,
                                                  dest_model=model,

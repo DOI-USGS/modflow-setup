@@ -5,6 +5,7 @@ Tests for Pleasant Lake inset case, MODFLOW-6 version
 """
 import copy
 import os
+import glob
 import numpy as np
 import pandas as pd
 import rasterio
@@ -12,6 +13,7 @@ import pytest
 import flopy
 mf6 = flopy.mf6
 from mfsetup import MF6model
+from mfsetup.checks import check_external_files_for_nans
 from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists
 from mfsetup.utils import get_input_arguments
 
@@ -101,6 +103,12 @@ def test_model(get_pleasant_mf6_with_grid):
     m = get_pleasant_mf6_with_grid
     assert m.version == 'mf6'
     assert 'UPW' in m.parent.get_package_list()
+
+
+def test_perioddata(get_pleasant_mf6):
+    m = get_pleasant_mf6
+    m._set_perioddata()
+    assert m.perioddata['start_datetime'][0] == pd.Timestamp(m.cfg['tdis']['options']['start_date_time'])
 
 
 def test_tdis_setup(get_pleasant_mf6):
@@ -250,11 +258,31 @@ def test_sfr_setup(get_pleasant_mf6_with_dis):
     assert m.sfrdata.model == m
 
 
+def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
+
+    m = get_pleasant_mf6_with_dis  #deepcopy(pfl_nwt_with_dis)
+    chd = m.setup_perimeter_boundary()
+    chd.write()
+    assert os.path.exists(os.path.join(m.model_ws, chd.filename))
+    assert len(chd.stress_period_data.array) == len(set(m.cfg['parent']['copy_stress_periods']))
+    assert len(chd.stress_period_data.array[0]) == (m.nrow*2 + m.ncol*2 - 4) * m.nlay
+
+
 def test_model_setup(pleasant_mf6_setup_from_yaml):
     m = pleasant_mf6_setup_from_yaml
     assert isinstance(m, MF6model)
+    assert 'tdis' in m.simulation.package_key_dict
+    assert 'ims' in m.simulation.package_key_dict
+    assert m.get_package_list() == ['DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR', 'WEL_0', 'OBS_0', 'CHD_0']
+    external_path = os.path.join(m.model_ws, 'external')
+    external_files = glob.glob(external_path + '/*')
+    has_nans = check_external_files_for_nans(external_files)
+    has_nans = '\n'.join(has_nans)
+    if len(has_nans) > 0:
+        assert False, has_nans
 
 
 def test_model_setup_and_run(pleasant_mf6_model_run):
     m = pleasant_mf6_model_run
+    assert 'CHD' in m.get_package_list()
 

@@ -15,6 +15,8 @@ from .interpolate import interp_weights, interpolate, regrid, get_source_dest_mo
 from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
 from .utils import update, get_packages, get_input_arguments
 from .sourcedata import setup_array
+from .tdis import (setup_perioddata_group, setup_perioddata,
+                   get_parent_stress_periods, parse_perioddata_groups)
 from .units import convert_length_units, lenuni_text, itmuni_text, lenuni_values
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
@@ -739,6 +741,84 @@ class MFsetupMixin():
         self._parent._mg_resync = False
         self._parent._modelgrid = MFsetupGrid(**kwargs)
 
+    def _set_perioddata(self):
+        """Sets up the perioddata DataFrame.
+
+        Needs some work to be more general.
+        """
+
+        if self.version == 'mf6':
+            default_start_datetime = self.cfg['tdis']['options'].get('start_date_time', '1970-01-01')
+            tdis_dimensions_config = self.cfg['tdis']['dimensions']
+            tdis_perioddata_config = self.cfg['tdis']['perioddata']
+            nper = self.cfg['tdis']['dimensions'].get('nper')
+            # steady can be input in either the tdis or sto input blocks
+            steady = self.cfg['tdis'].get('steady')
+            if steady is None:
+                steady = self.cfg['sto'].get('steady')
+        else:
+            default_start_datetime = self.cfg['model'].get('start_date_time', '1970-01-01')
+            tdis_dimensions_config = self.cfg['dis']
+            tdis_perioddata_config = self.cfg['dis']
+            nper = self.cfg['dis'].get('nper')
+            steady = self.cfg['dis'].get('steady')
+
+        # option 1: use some or all of parent discretization
+        parent_stress_periods = self.cfg.get('parent', {}).get('copy_stress_periods')
+        parent_sp = None
+        if self.parent is not None and parent_stress_periods is not None:
+            # parent_sp has parent model stress period corresponding
+            # to each inset model stress period (len=nper)
+            # the same parent stress period can be specified for multiple inset model periods
+            parent_sp = get_parent_stress_periods(self.parent, nper=nper,
+                                                  parent_stress_periods=parent_stress_periods)
+
+            nper = len(parent_sp)
+            tdis_dimensions_config['nper'] = len(parent_sp)
+            self.cfg['parent']['copy_stress_periods'] = parent_sp
+
+        # cast steady array to boolean
+        if steady is not None and not isinstance(steady, dict):
+            tdis_perioddata_config['steady'] = np.array(tdis_perioddata_config['steady']).astype(bool).tolist()
+
+        # reshape tdis variables to len=nper
+        # if parent model periods are specified, populate them from parent model
+        # if nper is None at this point, it is assumed that periods will be generated from groups
+        #for var in ['perlen', 'nstp', 'tsmult', 'steady']:
+        #    if var in tdis_perioddata_config:
+        #        arg = tdis_perioddata_config[var]
+        #        if arg is not None and not np.isscalar(arg) and nper is not None:
+        #            assert len(arg) == nper, \
+        #                "Variable {} must be a scalar or have {} entries (one for each stress period).\n" \
+        #                "Or leave as None to set from parent model".format(var, nper)
+        #        elif np.isscalar(arg) and nper is not None:
+        #            tdis_perioddata_config[var] = [arg] * nper
+        #        elif parent_stress_periods is not None:
+        #            tdis_perioddata_config[var] = getattr(self.parent.dis, var)[parent_stress_periods]
+        #        if var == 'steady':
+        #            steady = {kper: issteady for kper, issteady in enumerate(tdis_perioddata_config['steady'])}
+
+        # get period data groups
+        # if no groups are specified, make a group from general stress period input
+        cfg = self.cfg
+        defaults = {'start_date_time': default_start_datetime,
+                    'nper': nper,
+                    'steady': steady,
+                    'oc_saverecord': cfg['oc'].get('saverecord', {0: ['save head last',
+                                                                      'save budget last']})
+                    }
+        perioddata_groups = parse_perioddata_groups(tdis_perioddata_config, defaults)
+
+        # set up the perioddata table from the groups
+        self._perioddata = setup_perioddata(perioddata_groups, self.time_units)
+
+        # add corresponding stress periods in parent model if there are any
+        if parent_sp is not None and len(parent_sp) == len(self._perioddata):
+            self._perioddata['parent_sp'] = parent_sp
+        assert np.array_equal(self._perioddata['per'].values, np.arange(len(self._perioddata)))
+        # reset nper property so that it will reference perioddata table
+        self._nper = None
+
     def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
                       source_model=None, source_package=None,
                       **kwargs):
@@ -907,3 +987,51 @@ class MFsetupMixin():
             self._set_idomain()
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return sfr_package
+
+    @classmethod
+    def setup_from_yaml(cls, yamlfile, verbose=False):
+        """Make a model from scratch, using information in a yamlfile.
+
+        Parameters
+        ----------
+        yamlfile : str (filepath)
+            Configuration file in YAML format with pfl_nwt setup information.
+
+        Returns
+        -------
+        m : model instance
+        """
+
+        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file)
+        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
+        t0 = time.time()
+
+        cfg = cls._parse_model_kwargs(cfg)
+        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                     exclude='packages')
+        m = cls(cfg=cfg, **kwargs)
+
+        # make a grid if one isn't already specified
+        if 'grid' not in m.cfg.keys():
+            m.setup_grid()
+
+        # establish time discretization, including TDIS setup for MODFLOW-6
+        m.setup_tdis()
+
+        # set up all of the packages specified in the config file
+        package_list = m.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']
+        for pkg in package_list:
+            setup_method_name = 'setup_{}'.format(pkg)
+            package_setup = getattr(cls, setup_method_name, None)
+            if package_setup is None:
+                print('{} package not supported for MODFLOW version={}'.format(pkg.upper(), m.version))
+                continue
+            if not callable(package_setup):
+                package_setup = getattr(MFsetupMixin, 'setup_{}'.format(pkg.strip('6')))
+            package_setup(m)
+
+        if m.perimeter_bc_type == 'head':
+            chd = m.setup_perimeter_boundary()
+        print('finished setting up model in {:.2f}s'.format(time.time() - t0))
+        print('\n{}'.format(m))
+        return m

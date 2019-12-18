@@ -7,8 +7,8 @@ import flopy
 fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MF6model, MFnwtModel
-from ..fileio import exe_exists, load_cfg
-from ..utils import get_input_arguments
+from mfsetup.fileio import exe_exists, load_cfg
+from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture(scope="session")
@@ -111,7 +111,7 @@ def shellmound_datapath(shellmound_cfg_path):
 
 @pytest.fixture(scope="module")
 def shellmound_cfg(shellmound_cfg_path):
-    cfg = MF6model.load_cfg(shellmound_cfg_path)
+    cfg = load_cfg(shellmound_cfg_path, default_file='/mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
@@ -128,7 +128,7 @@ def shellmound_simulation(shellmound_cfg):
 def shellmound_model(shellmound_cfg, shellmound_simulation):
     cfg = shellmound_cfg.copy()
     cfg['model']['simulation'] = shellmound_simulation
-    cfg = MF6model._parse_modflowgwf_kwargs(cfg)
+    cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
     return m

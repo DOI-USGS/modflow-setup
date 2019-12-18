@@ -17,10 +17,10 @@ from .fileio import (load, dump, load_cfg,
 from .grid import setup_structured_grid
 from .mf5to6 import get_package_name
 from .obs import setup_head_observations
-from .tdis import setup_perioddata
+from .tdis import setup_perioddata, parse_perioddata_groups
+from .tmr import Tmr
 from .units import lenuni_text, itmuni_text
 from .utils import update, get_input_arguments, flatten, get_packages
-
 from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
 
@@ -28,6 +28,7 @@ from .mfmodel import MFsetupMixin
 class MF6model(MFsetupMixin, mf6.ModflowGwf):
     """Class representing a MODFLOW-6 model.
     """
+    default_file = '/mf6_defaults.yml'
 
     def __init__(self, simulation, parent=None, cfg=None,
                  modelname='model', exe_name='mf6',
@@ -41,8 +42,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
                                      'ghb', 'lak', 'sfr',
                                      'wel', 'maw', 'obs', 'ims']
-        self.cfg = load(self.source_path + '/mf6_defaults.yml')
-        self.cfg['filename'] = self.source_path + '/mf6_defaults.yml'
+        self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
+        self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
         self._set_cfg(cfg)   # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
@@ -182,10 +183,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                             self.cfg['dis']['perioddata'][var] = self.parent.dis.__dict__[var].array
                     if self.cfg['sto'].get('steady') is None:
                         self.cfg['sto']['steady'] = self.parent.dis.steady.array
-
-    def _set_perioddata(self):
-        """Sets up the perioddata DataFrame."""
-        self._perioddata = setup_perioddata(self.cfg, self.time_units)
 
     def _update_grid_configuration_with_dis(self):
         """Update grid configuration with any information supplied to dis package
@@ -429,7 +426,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # make the rech array
         self._setup_array(package, 'recharge', datatype='transient2d',
-                          resample_method='linear', write_fmt='%.6e',
+                          resample_method='nearest', write_fmt='%.6e',
                           write_nodata=0.)
 
         kwargs = self.cfg[package].copy()
@@ -576,13 +573,42 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ims
 
+    def setup_perimeter_boundary(self):
+        """Set up constant head package for perimeter boundary.
+        TODO: integrate perimeter boundary with wel package setup
+        """
+        print('setting up specified head perimeter boundary with CHD package...')
+        t0 = time.time()
+
+        tmr = Tmr(self.parent, self,
+                  parent_head_file=self.cfg['parent']['headfile'],
+                  inset_parent_layer_mapping=self.parent_layers,
+                  copy_stress_periods=self.cfg['parent']['copy_stress_periods'])
+
+        df = tmr.get_inset_boundary_heads()
+
+        spd = {}
+        by_period = df.groupby('per')
+        tmp = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=len(by_period.get_group(0)))[0]
+        for per, df_per in by_period:
+            spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
+            spd[per]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
+            spd[per]['head'] = df_per['bhead']
+
+        kwargs = flatten(self.cfg['chd'])
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfchd)
+        kwargs['stress_period_data'] = spd
+        chd = mf6.ModflowGwfchd(self, **kwargs)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return chd
+
     def write_input(self):
         """Same syntax as MODFLOW-2005 flopy
         """
         self.simulation.write_simulation()
 
     @staticmethod
-    def _parse_modflowgwf_kwargs(cfg):
+    def _parse_model_kwargs(cfg):
 
         if isinstance(cfg['simulation'], dict):
             # create simulation
@@ -608,64 +634,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         return cfg
 
     @classmethod
-    def setup_from_yaml(cls, yamlfile, verbose=False):
-        """Make a model from scratch, using information in a yamlfile.
-
-        Parameters
-        ----------
-        yamlfile : str (filepath)
-            Configuration file in YAML format with pfl_nwt setup information.
-
-        Returns
-        -------
-        m : MF6model.MF6model instance
-        """
-
-        cfg = cls.load_cfg(yamlfile, verbose=verbose)
-        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
-        t0 = time.time()
-
-        cfg = cls._parse_modflowgwf_kwargs(cfg)
-        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
-                                 exclude='packages')
-        m = cls(cfg=cfg, **kwargs)
-
-        if 'grid' not in m.cfg.keys():
-            m.setup_grid()
-
-        # set up tdis package
-        m.setup_tdis()
-
-        # set up all of the packages specified in the config file
-        package_list = m.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']
-        for pkg in package_list:
-            package_setup = getattr(cls, 'setup_{}'.format(pkg.strip('6')))
-            if not callable(package_setup):
-                package_setup = getattr(MFsetupMixin, 'setup_{}'.format(pkg.strip('6')))
-            package_setup(m)
-
-
-        print('finished setting up model in {:.2f}s'.format(time.time() - t0))
-        print('\n{}'.format(m))
-        # Export a grid outline shapefile.
-        #write_bbox_shapefile(m.sr, '../gis/model_bounds.shp')
-        #print('wrote bounding box shapefile')
-        return m
-
-    @staticmethod
-    def load_cfg(yamlfile, verbose=False):
-        """Load model configuration info, adjusting paths to model_ws."""
-        return load_cfg(yamlfile, verbose=verbose, default_file='/mf6_defaults.yml')
-
-    @classmethod
     def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = cls.load_cfg(yamlfile, verbose=verbose, default_file='/mf6_defaults.yml')
+        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mf6_defaults.yml')
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
-        cfg = cls._parse_modflowgwf_kwargs(cfg)
+        cfg = cls._parse_model_kwargs(cfg)
         kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
         m = cls(cfg=cfg, **kwargs)

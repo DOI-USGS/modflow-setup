@@ -13,7 +13,8 @@ from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
 from .discretization import (deactivate_idomain_above,
                              find_remove_isolated_cells)
-from .tdis import setup_perioddata_group
+from .tdis import (setup_perioddata_group, setup_perioddata,
+                   get_parent_stress_periods, parse_perioddata_groups)
 from .grid import write_bbox_shapefile, setup_structured_grid
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
@@ -21,6 +22,7 @@ from .lakes import make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes, setup_la
 from .utils import update, get_packages, get_input_arguments
 from .obs import read_observation_data, setup_head_observations
 from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
+from .tmr import Tmr
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text, lenuni_values
 from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
@@ -28,6 +30,7 @@ from .mfmodel import MFsetupMixin
 
 class MFnwtModel(MFsetupMixin, Modflow):
     """Class representing a MODFLOW-NWT model"""
+    default_file = '/mfnwt_defaults.yml'
 
     def __init__(self, parent=None, cfg=None,
                  modelname='model', exe_name='mfnwt',
@@ -44,8 +47,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
                                      'ghb', 'lak', 'sfr',
                                      'wel', 'mnw2', 'gag', 'hyd', 'nwt']
         # default configuration (different for nwt vs mf6)
-        self.cfg = load(self.source_path + '/mfnwt_defaults.yml')
-        self.cfg['filename'] = self.source_path + '/mfnwt_defaults.yml'
+        self.cfg = load(self.source_path + self.default_file) # '/mfnwt_defaults.yml')
+        self.cfg['filename'] = self.source_path + self.default_file #'/mfnwt_defaults.yml'
         self._set_cfg(cfg)  # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
@@ -158,93 +161,6 @@ class MFnwtModel(MFsetupMixin, Modflow):
                     if self.cfg['dis'].get(var) is None:
                         self.cfg['dis'][var] = self.parent.dis.__dict__[var].array
 
-    def _set_perioddata(self):
-        """Sets up the perioddata DataFrame.
-
-        Needs some work to be more general.
-        """
-        parent_sp = self.cfg['parent']['copy_stress_periods']
-
-        # use all stress periods from parent model
-        if isinstance(parent_sp, str) and parent_sp.lower() == 'all':
-            nper = self.cfg['dis'].get('nper')
-            parent_sp = list(range(self.parent.nper))
-            if nper is None or nper < self.parent.nper:
-                nper = self.parent.nper
-            elif nper > self.parent.nper:
-                for i in range(nper - self.parent.nper):
-                    parent_sp.append(parent_sp[-1])
-            #self.cfg['dis']['perlen'] = None # set from parent model
-            #self.cfg['dis']['steady'] = None
-
-        # use only specified stress periods from parent model
-        elif isinstance(parent_sp, list):
-            # limit parent stress periods to include
-            # to those in parent model and nper specified for pfl_nwt
-            nper = self.cfg['dis'].get('nper', len(parent_sp))
-
-            parent_sp = [0]
-            perlen = [self.parent.dis.perlen.array[0]]
-            for i, p in enumerate(self.cfg['parent']['copy_stress_periods']):
-                if i == nper:
-                    break
-                if p == self.parent.nper:
-                    break
-                if p > 0:
-                    parent_sp.append(p)
-                    perlen.append(self.parent.dis.perlen.array[p])
-            if nper < len(parent_sp):
-                nper = len(parent_sp)
-            else:
-                n_parent_per = len(parent_sp)
-                for i in range(nper - n_parent_per):
-                    parent_sp.append(parent_sp[-1])
-
-        # no parent stress periods specified, # default to just first stress period
-        else:
-            nper = self.cfg['dis'].get('nper', 1)
-            parent_sp = [0]
-            for i in range(nper - 1):
-                parent_sp.append(parent_sp[-1])
-
-        assert len(parent_sp) == nper
-        self.cfg['dis']['nper'] = nper
-        self.cfg['parent']['copy_stress_periods'] = parent_sp
-
-        #if self.cfg['dis'].get('steady') is None:
-        #    self.cfg['dis']['steady'] = [True] + [False] * (nper)
-        if self.cfg['dis'].get('steady') is not None:
-            self.cfg['dis']['steady'] = np.array(self.cfg['dis']['steady']).astype(bool).tolist()
-
-        for var in ['perlen', 'nstp', 'tsmult', 'steady']:
-            arg = self.cfg['dis'][var]
-            if arg is not None and not np.isscalar(arg):
-                assert len(arg) == nper, \
-                    "Variable {} must be a scalar or have {} entries (one for each stress period).\n" \
-                    "Or leave as None to set from parent model".format(var, nper)
-            elif np.isscalar(arg):
-                self.cfg['dis'][var] = [arg] * nper
-            else:
-                self.cfg['dis'][var] = getattr(self.parent.dis, var)[self.cfg['parent']['copy_stress_periods']]
-
-        steady = {kper: issteady for kper, issteady in enumerate(self.cfg['dis']['steady'])}
-
-        perioddata = setup_perioddata_group(self.cfg['model']['start_date_time'],
-                                            self.cfg['model'].get('end_date_time'),
-                                            nper=nper,
-                                            perlen=self.cfg['dis']['perlen'],
-                                            model_time_units=self.time_units,
-                                            freq=self.cfg['dis'].get('freq'),
-                                            steady=steady,
-                                            nstp=self.cfg['dis']['nstp'],
-                                            tsmult=self.cfg['dis']['tsmult'],
-                                            oc_saverecord=self.cfg['oc']['period_options'],
-                                            )
-        perioddata['parent_sp'] = parent_sp
-        assert np.array_equal(perioddata['per'].values, np.arange(len(perioddata)))
-        self._perioddata = perioddata
-        self._nper = None
-
     def _update_grid_configuration_with_dis(self):
         """Update grid configuration with any information supplied to dis package
         (so that settings specified for DIS package have priority). This method
@@ -291,6 +207,12 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return dis
 
+    def setup_tdis(self):
+        """Calls the _set_perioddata, to establish time discretization. Only purpose
+        is to conform to same syntax as mf6 for MFsetupMixin.setup_from_yaml()
+        """
+        self._set_perioddata()
+
     def setup_bas6(self):
         """"""
         package = 'bas6'
@@ -308,72 +230,6 @@ class MFnwtModel(MFsetupMixin, Modflow):
         bas = fm.ModflowBas(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return bas
-
-    def setup_chd(self):
-        """Set up constant head package for perimeter boundary.
-        Todo: create separate perimeter boundary setup method/input block
-        """
-        print('setting up CHD package...')
-        t0 = time.time()
-        # source data
-        headfile = self.cfg['parent']['headfile']
-        check_source_files([headfile])
-        hdsobj = bf.HeadFile(headfile, precision='single')
-        all_kstpkper = hdsobj.get_kstpkper()
-
-        # get the last timestep in each stress period if there are more than one
-        kstpkper = []
-        unique_kper = []
-        for (kstp, kper) in all_kstpkper:
-            if kper not in unique_kper:
-                kstpkper.append((kstp, kper))
-                unique_kper.append(kper)
-
-        assert len(unique_kper) == len(set(self.cfg['parent']['copy_stress_periods'])), \
-        "read {} from {},\nexpected stress periods: {}".format(kstpkper,
-                                                               headfile,
-                                                               sorted(list(set(self.cfg['parent']['copy_stress_periods'])))
-                                                               )
-        k, i, j = self.get_boundary_cells()
-
-        # get heads from parent model
-        dfs = []
-        for inset_per, parent_kstpkper in enumerate(kstpkper):
-            hds = hdsobj.get_data(kstpkper=parent_kstpkper)
-
-            regridded = np.zeros((self.nlay, self.nrow, self.ncol))
-            for layer, khds in enumerate(hds):
-                if layer > 0 and self.nlay - self.parent.nlay == 1:
-                    layer += 1
-                regridded[layer] = self.regrid_from_parent(khds, method='linear')
-            if self.nlay - self.parent.nlay == 1:
-                regridded[1] = regridded[[0, 2]].mean(axis=0)
-            df = pd.DataFrame({'per': inset_per,
-                               'k': k,
-                               'i': i,
-                               'j': j,
-                               'bhead': regridded[k, i, j]})
-            dfs.append(df)
-        tmp = fm.ModflowChd.get_empty(len(df))
-        spd = {}
-        for per in range(len(dfs)):
-            spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
-            spd[per]['k'] = df['k']
-            spd[per]['i'] = df['i']
-            spd[per]['j'] = df['j']
-            # assign starting and ending head values for each period
-            # starting chd is parent values for previous period
-            # ending chd is parent values for that period
-            if per == 0:
-                spd[per]['shead'] = dfs[per]['bhead']
-                spd[per]['ehead'] = dfs[per]['bhead']
-            else:
-                spd[per]['shead'] = dfs[per - 1]['bhead']
-                spd[per]['ehead'] = dfs[per]['bhead']
-
-        chd = fm.ModflowChd(self, stress_period_data=spd)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
-        return chd
 
     def setup_oc(self):
 
@@ -827,62 +683,51 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return gag
 
-    @classmethod
-    def setup_from_yaml(cls, yamlfile, verbose=False):
-        """Make a model from scratch, using information in a yamlfile.
-
-        Parameters
-        ----------
-        yamlfile : str (filepath)
-            Configuration file in YAML format with model setup information.
-
-        Returns
-        -------
-        m : mfsetup.MFnwtModel model object
+    def setup_perimeter_boundary(self):
+        """Set up constant head package for perimeter boundary.
+        TODO: integrate perimeter boundary with wel package setup
         """
-
-        cfg = load_cfg(yamlfile, default_file='/mfnwt_defaults.yml')
-        cfg['filename'] = yamlfile
-        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
+        print('setting up specified head perimeter boundary with CHD package...')
         t0 = time.time()
 
-        m = cls(cfg=cfg, **cfg['model'])
-        assert m.exe_name != 'mf2005.exe'
+        tmr = Tmr(self.parent, self,
+                  parent_head_file=self.cfg['parent']['headfile'],
+                  inset_parent_layer_mapping=self.parent_layers,
+                  copy_stress_periods=self.cfg['parent']['copy_stress_periods'])
 
-        kwargs = m.cfg['setup_grid']
-        source_data = m.cfg['setup_grid'].get('source_data', {})
-        if 'features_shapefile' in source_data:
-            kwargs.update(source_data['features_shapefile'])
-            kwargs['features_shapefile'] = kwargs.get('filename')
-        rename = kwargs.get('variable_mappings', {})
-        for k, v in rename.items():
-            if k in kwargs:
-                kwargs[v] = kwargs.pop(k)
-        kwargs = get_input_arguments(kwargs, m.setup_grid)
-        if 'grid' not in m.cfg.keys():
-            m.setup_grid(**kwargs)
+        df = tmr.get_inset_boundary_heads()
 
-        # set up all of the packages specified in the config file
-        for pkg in m.package_list:
-            package_setup = getattr(cls, 'setup_{}'.format(pkg))
-            package_setup(m)
+        spd = {}
+        by_period = df.groupby('per')
+        tmp = fm.ModflowChd.get_empty(len(by_period.get_group(0)))
+        for per, df_per in by_period:
+            spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
+            spd[per]['k'] = df_per['k']
+            spd[per]['i'] = df_per['i']
+            spd[per]['j'] = df_per['j']
+            # assign starting and ending head values for each period
+            # starting chd is parent values for previous period
+            # ending chd is parent values for that period
+            if per == 0:
+                spd[per]['shead'] = df_per['bhead']
+                spd[per]['ehead'] = df_per['bhead']
+            else:
+                spd[per]['shead'] = by_period.get_group(per - 1)['bhead']
+                spd[per]['ehead'] = df_per['bhead']
 
-        if m.perimeter_bc_type == 'head':
-            chd = m.setup_chd()
-        print('finished setting up model in {:.2f}s'.format(time.time() - t0))
-        print('\n{}'.format(m))
-        #Export a grid outline shapefile.
-        write_bbox_shapefile(m.modelgrid,
-                             os.path.join(m.cfg['postprocessing']['output_folders']['shapefiles'],
-                                          'model_bounds.shp'))
-        print('wrote bounding box shapefile')
-        return m
+        chd = fm.ModflowChd(self, stress_period_data=spd)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return chd
+
+    @staticmethod
+    def _parse_model_kwargs(cfg):
+        return cfg
 
     @classmethod
     def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = load_cfg(yamlfile, verbose=verbose, default_file='/mfnwt_defaults.yml')
+        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mfnwt_defaults.yml')
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 
@@ -893,7 +738,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
                 print('Loading model grid definition from {}'.format(grid_file))
                 m.cfg['grid'] = load(grid_file)
             else:
-                m.setup_grid(**m.cfg['setup_grid'])
+                m.setup_grid()
+
         m = flopy_mf2005_load(m, load_only=load_only, forgive=forgive, check=check)
         print('finished loading model in {:.2f}s'.format(time.time() - t0))
         return m

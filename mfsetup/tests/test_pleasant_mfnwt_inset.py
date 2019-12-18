@@ -5,9 +5,6 @@ Tests for Pleasant Lake inset case
 * Lake precip and evap specified with PRISM data; evap computed using evaporation.hamon_evaporation
 * transient parent model with initial steady-state; copy unspecified data from parent
 """
-from copy import copy, deepcopy
-import os
-import pytest
 import numpy as np
 import pandas as pd
 import flopy
@@ -16,8 +13,8 @@ from mfsetup import MFnwtModel
 from .test_lakes import get_prism_data
 
 
-def test_perioddata(pleasant_nwt):
-    m = pleasant_nwt
+def test_perioddata(get_pleasant_nwt):
+    m = get_pleasant_nwt
     m._set_perioddata()
     assert m.perioddata['start_datetime'][0] == pd.Timestamp(m.cfg['dis']['start_date_time'])
 
