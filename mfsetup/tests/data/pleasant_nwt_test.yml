@@ -47,7 +47,7 @@ setup_grid:
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
   dxy: 40 # m
-  buffer: 500 # distance from feature(s) if interest to model boundary, in meters
+  buffer: 1000 # distance from feature(s) if interest to model boundary, in meters
   grid_file: 'grid.json' # grid info will be written to this file
   epsg: 3070
 
@@ -81,15 +81,14 @@ upw:
 
 wel:
   options: ['SPECIFY', '0.01']
-  #source_data:
-  #  wdnr_dataset:
-  #    water_use: '../webservice_metadata/python_output/master_wu.csv' # monthly water use rates from WDNR
-  #    water_use_points: '../webservice_metadata/python_output/csls_sources_wu_pts.shp' # point locations of wells in water_use
-  #    period_stats: {0: ['mean', '2000-01-01', '2017-12-31'],
-  #                   1: 'mean'
-  #    }
-  #output_files:
-  #  lookup_file: 'wel_lookup.csv' # mapping of wel package data to site numbers
+  source_data:
+    wdnr_dataset:
+      water_use: 'pleasant/source_data/tables/master_wu.csv' # monthly water use rates from WDNR
+      water_use_points: 'pleasant/source_data/shps/csls_sources_wu_pts.shp' # point locations of wells in water_use
+      period_stats: {0: ['mean', '2012-01-01', '2018-12-31'],
+                     1: 'resample'}
+  output_files:
+    lookup_file: 'wel_lookup.csv' # mapping of wel package data to site numbers
 
 lak:
   theta: -0.7  # semi-implicit; negative value indicates that surfdep is read

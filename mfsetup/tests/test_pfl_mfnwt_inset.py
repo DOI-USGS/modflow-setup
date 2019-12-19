@@ -301,7 +301,6 @@ def test_wel_tmr(pfl_nwt_with_dis):
 
 
 def test_wel_setup(pfl_nwt_with_dis_bas6):
-
     m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
     m.setup_upw()
 
@@ -324,8 +323,14 @@ def test_wel_setup(pfl_nwt_with_dis_bas6):
             continue
         assert len(spd) >= nwells0 + n_added_wels
 
+
+@pytest.mark.skip("not implemented yet")
+def test_wel_setup_csv_by_per(pfl_nwt_with_dis_bas6):
+
+    m = pfl_nwt_with_dis_bas6  # deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
+    m.setup_upw()
     # test adding a wel from a csv file
-    m.cfg['wel']['csvfile'] = 'data/added_wells.csv'
+    m.cfg['wel']['source_data']['csvfile'] = 'plainfieldlakes/source_data/added_wells.csv'
     wel = m.setup_wel()
     assert -2000 in wel.stress_period_data[1]['flux']
 

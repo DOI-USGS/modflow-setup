@@ -46,9 +46,19 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     monthly_data : DataFrame
 
     """
+    col_fmt = '{}_wdrl_gpm_amt'
+    data_renames = {'site_seq_no': 'site_no',
+                    'wdrl_year': 'year'}
     df = pd.read_csv(wu_file)
-    locs = shp2df(wu_points)
+    drop_cols = [c for c in df.columns if 'unnamed' in c.lower()]
+    drop_cols += ['objectid']
+    df.drop(drop_cols, axis=1, inplace=True, errors='ignore')
+    df.rename(columns=data_renames, inplace=True)
 
+    locs = shp2df(wu_points)
+    site_seq_col = [c for c in locs if 'site_se' in c.lower()]
+    locs_renames = {c: 'site_no' for c in site_seq_col}
+    locs.rename(columns=locs_renames, inplace=True)
 
     if active_area is None:
         # cull the data to the model bounds
@@ -69,7 +79,7 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     within = [g.within(features) for g in locs.geometry]
     assert len(within) > 0, txt
     locs = locs.loc[within].copy()
-    df = df.loc[df.site_no.isin(locs.site_seq0)]
+    df = df.loc[df.site_no.isin(locs.site_no)]
     df.sort_values(by=['site_no', 'year'], inplace=True)
 
     # create seperate dataframe with well info
@@ -77,16 +87,16 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
                     'well_radius_mm',
                     'borehole_radius_mm',
                     'well_depth_m',
-                    'depth_open_int_top_m',
-                    'depth_open_int_bot_m',
+                    'elev_open_int_top_m',
+                    'elev_open_int_bot_m',
                     'screen_length_m',
-                    'screen_midpoint_m']].copy()
+                    'screen_midpoint_elev_m']].copy()
     # groupby site number to cull duplicate information
     well_info = well_info.groupby('site_no').first()
     well_info['site_no'] = well_info.index
 
     # add top elevation, screen midpoint elev, row, column and layer
-    points = dict(zip(locs['site_seq0'], locs.geometry))
+    points = dict(zip(locs['site_no'], locs.geometry))
     well_info['x'] = [points[sn].x for sn in well_info.site_no]
     well_info['y'] = [points[sn].y for sn in well_info.site_no]
 
@@ -104,9 +114,9 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     well_info['i'] = i
     well_info['j'] = j
     well_info['elv_m'] = model.dis.top.array[i, j]
-    well_info['elv_top_m'] = well_info.elv_m - well_info.depth_open_int_top_m
-    well_info['elv_botm_m'] = well_info.elv_m - well_info.depth_open_int_top_m
-    well_info['elv_mdpt_m'] = well_info.elv_m - well_info.screen_midpoint_m
+    well_info['elv_top_m'] = well_info.elev_open_int_top_m
+    well_info['elv_botm_m'] = well_info.elev_open_int_top_m
+    well_info['elv_mdpt_m'] = well_info.screen_midpoint_elev_m
     well_info['k'] = model.dis.get_layer(i, j, elev=well_info['elv_mdpt_m'].values)
     well_info['laythick'] = model.dis.thickness.array[well_info.k.values, i, j]
     well_info['ktop'] = model.dis.get_layer(i, j, elev=well_info['elv_top_m'].values)
@@ -134,18 +144,8 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     assert not np.any(isthin)
 
     # make a datetime column
-    monthlyQ_cols = ['Jan_wdrl_total_gallons',
-                     'Feb_wdrl_total_gallons',
-                     'Mar_wdrl_total_gallons',
-                     'Apr_wdrl_total_gallons',
-                     'May_wdrl_total_gallons',
-                     'Jun_wdrl_total_gallons',
-                     'Jul_wdrl_total_gallons',
-                     'Aug_wdrl_total_gallons',
-                     'Sep_wdrl_total_gallons',
-                     'Oct_wdrl_total_gallons',
-                     'Nov_wdrl_total_gallons',
-                     'Dec_wdrl_total_gallons']
+    monthlyQ_cols = [col_fmt.format(calendar.month_abbr[i]).lower()
+                     for i in range(1, 13)]
     monthly_data = df[['site_no', 'year'] + monthlyQ_cols]
     monthly_data.columns = ['site_no', 'year'] + np.arange(1, 13).tolist()
 
@@ -161,7 +161,7 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
 
 
 def get_mean_pumping_rates(wu_file, wu_points, model,
-                           start_date='2011-01-01', end_date='2017-12-31',
+                           start_date='2012-01-01', end_date='2018-12-31',
                            period_stats={0: 'mean'},
                            minimum_layer_thickness=2):
     """Read water use data from a master file generated from
@@ -200,30 +200,36 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
     wu_data : DataFrame
 
     """
-    period_stats = {k: v.lower() for k, v in period_stats.items()}
+    start_date, end_date = pd.Timestamp(start_date), pd.Timestamp(end_date)
     well_info, monthly_data = read_wdnr_monthly_water_use(wu_file, wu_points, model,
                                                           minimum_layer_thickness=minimum_layer_thickness)
-
-    # slice the monthly values to the period of start_date, end_date
-    # aggregate to mean values in m3/d
-    # (this section will need some work for generalized transient run setup)
-    inperiod = (monthly_data.datetime > start_date) & (monthly_data.datetime < end_date)
-    monthly_data = monthly_data.loc[inperiod]
-
-    # compute average daily flux using the sum and number of days for each site
-    # (otherwise each month is weighted equally)
-    # convert units from monthly gallons to daily gallons
-    monthly_data['days'] = monthly_data.datetime.dt.daysinmonth
-
     # determine period for computing average pumping
     # make a dataframe for each stress period listed
     wel_data = []
     for per, stat in period_stats.items():
+
+        if isinstance(stat, str):
+            stat = stat.lower()
+        elif isinstance(stat, list):
+            stat, start_date, end_date = stat
+            start_date, end_date = pd.Timestamp(start_date), pd.Timestamp(end_date)
+            stat = stat.lower()
+        # slice the monthly values to the period of start_date, end_date
+        # aggregate to mean values in m3/d
+        # (this section will need some work for generalized transient run setup)
+        is_inperiod = (monthly_data.datetime > start_date) & (monthly_data.datetime < end_date)
+        inperiod = monthly_data.loc[is_inperiod].copy()
+
+        # compute average daily flux using the sum and number of days for each site
+        # (otherwise each month is weighted equally)
+        # convert units from monthly gallons to daily gallons
+        inperiod['days'] = inperiod.datetime.dt.daysinmonth
+
         if stat == 'mean':
-            period_data = monthly_data.copy()
+            period_data = inperiod.copy()
         # mean for given month (e.g. august mean)
         elif stat in months.keys() or stat in months.values():
-            period_data = monthly_data.loc[monthly_data.month == months.get(stat, stat)].copy()
+            period_data = inperiod.loc[inperiod.month == months.get(stat, stat)].copy()
         else:
             raise ValueError('Unrecognized input for stat: {}'.format(stat))
 
