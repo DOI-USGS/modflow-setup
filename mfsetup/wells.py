@@ -119,13 +119,16 @@ def setup_wel_data(model):
                     wu_means = get_mean_pumping_rates(v['water_use'],
                                                       v['water_use_points'],
                                                       period_stats=periods_with_dataset_means,
+                                                      drop_ids=v.get('drop_ids'),
                                                       model=model)
                     df = df.append(wu_means)
                 if len(resampled_periods) > 0:
                     wu_resampled = resample_pumping_rates(v['water_use'],
                                                           v['water_use_points'],
+                                                          drop_ids=v.get('drop_ids'),
                                                           model=model)
                     df = df.append(wu_resampled)
+
 
     # boundary fluxes from parent model
     if model.perimeter_bc_type == 'flux':

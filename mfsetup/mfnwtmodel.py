@@ -118,7 +118,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """Set attributes related to a parent or source model
         if one is specified."""
 
-        if self.cfg['parent']['version'] == 'mf6':
+        if self.cfg['parent'].get('version') == 'mf6':
             raise NotImplementedError("MODFLOW-6 parent models")
 
         kwargs = self.cfg['parent'].copy()

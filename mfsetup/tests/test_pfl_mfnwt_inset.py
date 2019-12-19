@@ -324,6 +324,17 @@ def test_wel_setup(pfl_nwt_with_dis_bas6):
         assert len(spd) >= nwells0 + n_added_wels
 
 
+def test_wel_setup_drop_ids(pfl_nwt_with_dis_bas6):
+    m = pfl_nwt_with_dis_bas6  # deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
+    m.setup_upw()
+
+    m.cfg['wel']['source_data']['wdnr_dataset']['drop_ids'] = [4026]
+    wel = m.setup_wel()
+    df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
+    assert 'site4026' not in df.comments.tolist()
+    assert len(df) == len(wel.stress_period_data[1])
+
+
 @pytest.mark.skip("not implemented yet")
 def test_wel_setup_csv_by_per(pfl_nwt_with_dis_bas6):
 

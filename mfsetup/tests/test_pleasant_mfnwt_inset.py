@@ -74,7 +74,6 @@ def test_wel_setup(pleasant_nwt_with_dis_bas6):
         if k == 0:
             continue
         assert len(spd) >= nwells0 + n_added_wels
-    j=2
 
 
 def test_model_setup(full_pleasant_nwt):

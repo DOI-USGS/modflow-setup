@@ -16,6 +16,7 @@ months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 
 def read_wdnr_monthly_water_use(wu_file, wu_points, model,
                                 active_area=None,
+                                drop_ids=None,
                                 minimum_layer_thickness=2
                                 ):
     """Read water use data from a master file generated from
@@ -54,11 +55,15 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     drop_cols += ['objectid']
     df.drop(drop_cols, axis=1, inplace=True, errors='ignore')
     df.rename(columns=data_renames, inplace=True)
+    if drop_ids is not None:
+        df = df.loc[~df.site_no.isin(drop_ids)].copy()
 
     locs = shp2df(wu_points)
     site_seq_col = [c for c in locs if 'site_se' in c.lower()]
     locs_renames = {c: 'site_no' for c in site_seq_col}
     locs.rename(columns=locs_renames, inplace=True)
+    if drop_ids is not None:
+        locs = locs.loc[~locs.site_no.isin(drop_ids)].copy()
 
     if active_area is None:
         # cull the data to the model bounds
@@ -79,6 +84,9 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     within = [g.within(features) for g in locs.geometry]
     assert len(within) > 0, txt
     locs = locs.loc[within].copy()
+    if len(locs) == 0:
+        print('No wells within model area:\n{}\n{}'.format(wu_file, wu_points))
+        return None, None
     df = df.loc[df.site_no.isin(locs.site_no)]
     df.sort_values(by=['site_no', 'year'], inplace=True)
 
@@ -163,6 +171,7 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
 def get_mean_pumping_rates(wu_file, wu_points, model,
                            start_date='2012-01-01', end_date='2018-12-31',
                            period_stats={0: 'mean'},
+                           drop_ids=None,
                            minimum_layer_thickness=2):
     """Read water use data from a master file generated from
     WDNR_wu_data.ipynb. Cull data to area of model. Convert
@@ -202,7 +211,10 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
     """
     start_date, end_date = pd.Timestamp(start_date), pd.Timestamp(end_date)
     well_info, monthly_data = read_wdnr_monthly_water_use(wu_file, wu_points, model,
+                                                          drop_ids=drop_ids,
                                                           minimum_layer_thickness=minimum_layer_thickness)
+    if well_info is None:
+        return
     # determine period for computing average pumping
     # make a dataframe for each stress period listed
     wel_data = []
@@ -253,6 +265,7 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
 def resample_pumping_rates(wu_file, wu_points, model,
                            active_area=None,
                            minimum_layer_thickness=2,
+                           drop_ids=None,
                            dropna=False, na_fill_value=0.,
                            verbose=False):
     """Read water use data from a master file generated from
