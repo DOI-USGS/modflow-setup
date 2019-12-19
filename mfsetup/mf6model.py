@@ -589,9 +589,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         spd = {}
         by_period = df.groupby('per')
-        tmp = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=len(by_period.get_group(0)))[0]
         for per, df_per in by_period:
-            spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
+            maxbound = len(df_per)
+            spd[per] = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=maxbound)[0]
             spd[per]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
             spd[per]['head'] = df_per['bhead']
 

@@ -8,7 +8,7 @@ from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
 #from .export import get_surface_bc_flux
 from .fileio import check_source_files
-from .discretization import weighted_average_between_layers
+from .discretization import weighted_average_between_layers, get_layer
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .grid import get_ij
 from .units import convert_length_units
@@ -545,7 +545,10 @@ class Tmr:
                                                                headfile,
                                                                sorted(list(set(self.cfg['parent']['copy_stress_periods'])))
                                                                )
-        k, i, j = self.inset.get_boundary_cells()
+
+        # get active cells along model perimeter
+        k, i, j = self.inset.get_boundary_cells(exclude_inactive=True)
+
         # get heads from parent model
         dfs = []
         for inset_per, parent_kstpkper in enumerate(kstpkper):
@@ -579,12 +582,20 @@ class Tmr:
                 assert regriddedk.shape == self.inset.modelgrid.shape[1:]
                 regridded[dest_k] = regriddedk * self.length_unit_conversion
 
+            # drop heads in dry cells, but only in mf6
+            # too much trouble with interpolated heads in mf2005
+            bhead = regridded[k, i, j]
+            if self.inset.version == 'mf6':
+                wet = bhead > self.inset.dis.botm.array[k, i, j]
+            else:
+                wet = np.ones(len(bhead)).astype(bool)
+
             # make a DataFrame of regridded heads at perimeter cell locations
             df = pd.DataFrame({'per': inset_per,
-                               'k': k,
-                               'i': i,
-                               'j': j,
-                               'bhead': regridded[k, i, j]
+                               'k': k[wet],
+                               'i': i[wet],
+                               'j': j[wet],
+                               'bhead': bhead[wet]
                                })
             dfs.append(df)
         df = pd.concat(dfs)

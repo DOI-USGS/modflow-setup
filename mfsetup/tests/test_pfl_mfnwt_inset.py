@@ -503,14 +503,26 @@ def test_lake_gag_setup(pfl_nwt_with_dis):
         shutil.copy(namfile + '.bak', namfile)
 
 
-def test_perimeter_boundary_setup(pfl_nwt_with_dis):
+def test_perimeter_boundary_setup(pfl_nwt_with_dis_bas6):
 
-    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
+    m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)
     chd = m.setup_perimeter_boundary()
     chd.write_file()
     assert os.path.exists(chd.fn_path)
     assert len(chd.stress_period_data.data.keys()) == len(set(m.cfg['parent']['copy_stress_periods']))
-    assert len(chd.stress_period_data[0]) == (m.nrow*2 + m.ncol*2 - 4) * m.nlay
+    # number of boundary heads;
+    # can be less than number of active boundary cells if the (parent) water table is not always in (inset) layer 1
+    assert len(chd.stress_period_data[0]) <= np.sum(m.ibound[m.get_boundary_cells()] == 1)
+
+    # check for inactive cells
+    spd0 = chd.stress_period_data[0]
+    k, i, j = spd0['k'], spd0['i'], spd0['j']
+    inactive_cells = m.ibound[k, i, j] < 1
+    assert not np.any(inactive_cells)
+
+    # check that heads are above layer botms
+    assert np.all(spd0['shead'] > m.dis.botm.array[k, i, j])
+    assert np.all(spd0['ehead'] > m.dis.botm.array[k, i, j])
 
 
 def test_sfr_setup(pfl_nwt_with_dis):

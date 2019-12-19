@@ -423,7 +423,7 @@ class MFsetupMixin():
         df = pd.concat(dfs_list)
         return df
 
-    def get_boundary_cells(self):
+    def get_boundary_cells(self, exclude_inactive=False):
         """Get the i, j locations of cells along the model perimeter.
 
         Returns
@@ -445,10 +445,19 @@ class MFsetupMixin():
 
         assert len(i) == 2 * self.nrow + 2 * self.ncol - 4
         nlaycells = len(i)
-        k = sorted(list(range(self.nlay)) * len(i))
-        i = i * self.nlay
-        j = j * self.nlay
+        k = np.array(sorted(list(range(self.nlay)) * len(i)))
+        i = np.array(i * self.nlay)
+        j = np.array(j * self.nlay)
         assert np.sum(k[nlaycells:nlaycells * 2]) == nlaycells
+
+        if exclude_inactive:
+            if self.version == 'mf6':
+                active_cells = self.idomain[k, i, j] >= 1
+            else:
+                active_cells = self.ibound[k, i, j] >= 1
+            k = k[active_cells].copy()
+            i = i[active_cells].copy()
+            j = j[active_cells].copy()
         return k, i, j
 
     def regrid_from_parent(self, parent_array,

@@ -265,7 +265,19 @@ def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
     chd.write()
     assert os.path.exists(os.path.join(m.model_ws, chd.filename))
     assert len(chd.stress_period_data.array) == len(set(m.cfg['parent']['copy_stress_periods']))
-    assert len(chd.stress_period_data.array[0]) == (m.nrow*2 + m.ncol*2 - 4) * m.nlay
+    assert len(m.get_boundary_cells()[0]) == (m.nrow*2 + m.ncol*2 - 4) * m.nlay  # total number of boundary cells
+    # number of boundary heads;
+    # can be less than number of active boundary cells if the (parent) water table is not always in (inset) layer 1
+    assert len(chd.stress_period_data.array[0]) <= np.sum(m.idomain[m.get_boundary_cells()] == 1)
+
+    # check for inactive cells
+    spd0 = chd.stress_period_data.array[0]
+    k, i, j = zip(*spd0['cellid'])
+    inactive_cells = m.idomain[k, i, j] < 1
+    assert not np.any(inactive_cells)
+
+    # check that heads are above layer botms
+    assert np.all(spd0['head'] > m.dis.botm.array[k, i, j])
 
 
 def test_model_setup(pleasant_mf6_setup_from_yaml):
@@ -284,5 +296,4 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
 
 def test_model_setup_and_run(pleasant_mf6_model_run):
     m = pleasant_mf6_model_run
-    assert 'CHD' in m.get_package_list()
 
