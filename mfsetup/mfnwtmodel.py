@@ -11,6 +11,7 @@ import flopy
 fm = flopy.modflow
 from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
+from .bcs import setup_ghb_data
 from .discretization import (deactivate_idomain_above,
                              find_remove_isolated_cells)
 from .tdis import (setup_perioddata_group, setup_perioddata,
@@ -99,6 +100,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # remove cells that are above stream cells
         if 'SFR' in self.get_package_list():
             ibound = deactivate_idomain_above(ibound, self.sfr.reach_data)
+        # remove cells that are above ghb cells
+        if 'GHB' in self.get_package_list():
+            ibound = deactivate_idomain_above(ibound, self.ghb.stress_period_data[0])
 
         # inactivate any isolated cells that could cause problems with the solution
         ibound = find_remove_isolated_cells(ibound, minimum_cluster_size=20)
@@ -360,6 +364,35 @@ class MFnwtModel(MFsetupMixin, Modflow):
                             stress_period_data=spd)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return wel
+
+    def setup_ghb(self):
+        """
+        Set up the GHB package
+        """
+
+        print('setting up GHB package...')
+        t0 = time.time()
+
+        df = setup_ghb_data(self)
+
+        # extend spd dtype to include comments
+        dtype = fm.ModflowGhb.get_default_dtype()
+
+        # setup stress period data
+        groups = df.groupby('per')
+        spd = {}
+        for per, perdf in groups:
+            ra = np.recarray(len(perdf), dtype=dtype)
+            for c in ['k', 'i', 'j', 'bhead']:
+                ra[c] = perdf[c]
+            spd[per] = ra
+
+        ghb = fm.ModflowGhb(self, ipakcb=self.ipakcb,
+                            stress_period_data=spd)
+        self._reset_bc_arrays()
+        self._ibound = None
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return ghb
 
     def setup_mnw2(self):
 

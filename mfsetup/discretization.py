@@ -58,9 +58,14 @@ def deactivate_idomain_above(idomain, packagedata):
     if isinstance(packagedata, MFList):
         packagedata = packagedata.array
     idomain = idomain.copy()
-    cellids = list(packagedata['cellid'])
-    deact_lays = [list(range(cellid[0])) for cellid in cellids]
-    k, i, j = list(zip(*cellids))
+    if isinstance(packagedata, np.recarray):
+        packagedata.columns = packagedata.dtype.names
+    if 'cellid' in packagedata.columns:
+        cellids = list(packagedata['cellid'])
+        k, i, j = list(zip(*cellids))
+    else:
+        k, i, j = packagedata['k'], packagedata['i'], packagedata['j']
+    deact_lays = [list(range(ki)) for ki in k]
     for ks, ci, cj in zip(deact_lays, i, j):
         for ck in ks:
             idomain[ck, ci, cj] = 0

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 from ..discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                               fill_empty_layers, fill_cells_vertically, make_idomain,
@@ -160,9 +161,8 @@ def test_deactivate_idomain_above(all_layers):
                            minimum_layer_thickness=1,
                            drop_thin_cells=True,
                            tol=1e-4)
-    packagedata = object()
-    packagedata = {'cellid': [(2, 2, 2),
-                                    (8, 3, 3)]}
+    packagedata = pd.DataFrame({'cellid': [(2, 2, 2),
+                                    (8, 3, 3)]})
     idomain2 = deactivate_idomain_above(idomain, packagedata)
     assert idomain2[:, 2, 2].sum() == idomain[:, 2, 2].sum() -1
     assert idomain2[:, 3, 3].sum() == 1

@@ -335,6 +335,7 @@ class MFsetupMixin():
         1 : lak package lake (lakarr > 0)
         2 : high-k lake
         3 : sfr
+        4 : ghb
         """
         if 'DIS' not in self.get_package_list():
             return None
@@ -633,6 +634,10 @@ class MFsetupMixin():
                 isanylake = rasterize(lakesdata, self.modelgrid)
                 isbc[isanylake > 0] = 2
                 isbc[self._lakarr2d > 0] = 1
+            if 'GHB' in self.get_package_list():
+                i, j = self.ghb.stress_period_data[0]['i'], \
+                       self.ghb.stress_period_data[0]['j']
+                isbc[i, j][isbc[i, j] != 1] = 4
             if 'SFR' in self.get_package_list():
                 i, j = self.sfr.reach_data['i'], \
                           self.sfr.reach_data['j']

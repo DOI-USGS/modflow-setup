@@ -21,6 +21,7 @@ def test_perioddata(get_pleasant_nwt):
 
 
 def test_setup_lak(pleasant_nwt_with_dis_bas6):
+    return
     m = pleasant_nwt_with_dis_bas6
     lak = m.setup_lak()
     lak.write_file()
@@ -30,6 +31,24 @@ def test_setup_lak(pleasant_nwt_with_dis_bas6):
     precip = [lak.flux_data[per][0][0] for per in range(1, m.nper)]
     assert np.allclose(lak.flux_data[0][0][0], prism['ppt_md'].mean())
     assert np.allclose(precip, prism['ppt_md'])
+
+
+def test_ghb_setup(pleasant_nwt_with_dis_bas6):
+    m = pleasant_nwt_with_dis_bas6
+    ghb = m.setup_ghb()
+    ghb.write_file()
+    assert os.path.exists(ghb.fn_path)
+    assert isinstance(ghb, fm.ModflowGhb)
+    assert ghb.stress_period_data is not None
+
+    # check for inactive cells
+    spd0 = ghb.stress_period_data[0]
+    k, i, j = spd0['k'], spd0['i'], spd0['j']
+    inactive_cells = m.ibound[k, i, j] < 1
+    assert not np.any(inactive_cells)
+
+    # check that heads are above layer botms
+    assert np.all(spd0['bhead'] > m.dis.botm.array[k, i, j])
 
 
 def test_wel_setup(pleasant_nwt_with_dis_bas6):

@@ -240,6 +240,25 @@ def test_wel_setup(get_pleasant_mf6_with_dis):
     assert wel.stress_period_data is not None
 
 
+@pytest.mark.skip('not implemented yet')
+def test_ghb_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis
+    ghb = m.setup_ghb()
+    ghb.write()
+    assert os.path.exists(os.path.join(m.model_ws, ghb.filename))
+    assert isinstance(ghb, mf6.ModflowGwfghb)
+    assert ghb.stress_period_data is not None
+
+    # check for inactive cells
+    spd0 = ghb.stress_period_data.array[0]
+    k, i, j = zip(*spd0['cellid'])
+    inactive_cells = m.idomain[k, i, j] < 1
+    assert not np.any(inactive_cells)
+
+    # check that heads are above layer botms
+    assert np.all(spd0['head'] > m.dis.botm.array[k, i, j])
+
+
 def test_sfr_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
     m.setup_sfr()

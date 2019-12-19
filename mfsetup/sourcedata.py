@@ -8,7 +8,6 @@ from shapely.geometry import Point
 import pandas as pd
 import xarray as xr
 from flopy.utils import binaryfile as bf
-
 from mfsetup.discretization import weighted_average_between_layers
 from mfsetup.tdis import aggregate_dataframe_to_stress_period, aggregate_xarray_to_stress_period
 from .fileio import save_array

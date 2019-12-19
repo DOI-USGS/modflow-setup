@@ -222,6 +222,7 @@ def write_bbox_shapefile(modelgrid, outshp):
 
 
 def rasterize(feature, grid, id_column=None,
+              include_ids=None,
               epsg=None,
               proj4=None, dtype=np.float32):
     """Rasterize a feature onto the model grid, using
@@ -267,7 +268,12 @@ def rasterize(feature, grid, id_column=None,
     elif isinstance(feature, pd.DataFrame):
         df = feature.copy()
     elif isinstance(feature, collections.Iterable):
-        df = pd.DataFrame({'geometry': feature})
+        # list of shapefiles
+        if isinstance(feature[0], str):
+            proj4 = get_proj_str(feature[0])
+            df = shp2df(feature)
+        else:
+            df = pd.DataFrame({'geometry': feature})
     elif not isinstance(feature, collections.Iterable):
         df = pd.DataFrame({'geometry': [feature]})
     else:
@@ -286,6 +292,10 @@ def rasterize(feature, grid, id_column=None,
             proj4 = to_string(from_epsg(epsg))
     if reproject:
         df['geometry'] = project(df.geometry.values, proj4, grid.proj_str)
+
+    # subset to include_ids
+    if id_column is not None and include_ids is not None:
+        df = df.loc[df[id_column].isin(include_ids)].copy()
 
     # create list of GeoJSON features, with unique value for each feature
     if id_column is None:

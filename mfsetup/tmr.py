@@ -8,7 +8,7 @@ from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
 #from .export import get_surface_bc_flux
 from .fileio import check_source_files
-from .discretization import weighted_average_between_layers, get_layer
+from .discretization import weighted_average_between_layers
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .grid import get_ij
 from .units import convert_length_units
@@ -565,7 +565,7 @@ class Tmr:
                     arr = hds[source_k]
                 # destination model layers that are a weighted average
                 # of consecutive source model layers
-                # TODO: add transmissivity-based weighting if upw exists
+                # TODO: add transmissivity-based weighting if upw exists; or could just simply use griddata
                 else:
                     weight0 = source_k - np.floor(source_k)
                     source_k0 = int(np.floor(source_k))
