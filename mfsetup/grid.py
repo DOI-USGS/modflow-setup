@@ -368,7 +368,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             "Need to specify nrow and ncol if specifying xoffset and yoffset."
         if regular:
             height_m = np.round(delc_m * nrow, 4)
-            width_m = np.round(delr_m * nrow, 4)
+            width_m = np.round(delr_m * ncol, 4)
         else:
             height_m = np.sum(delc_m)
             width_m = np.sum(delr_m)
@@ -381,8 +381,13 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             xoff = x
             yoff = y
             rotation = 0.
-        #xul = xoff
-        #yul = yoff + height_m
+
+        # need to specify xul, yul in case snapping to parent
+        # todo: allow snapping to parent grid on xoff, yoff
+        if rotation != 0:
+            raise NotImplementedError('Rotated grids not supported.')
+        xul = xoff
+        yul = yoff + height_m
 
     # option 2: make grid using buffered feature bounding box
     else:

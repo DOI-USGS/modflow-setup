@@ -16,7 +16,7 @@ from .discretization import (deactivate_idomain_above,
                              find_remove_isolated_cells)
 from .tdis import (setup_perioddata_group, setup_perioddata,
                    get_parent_stress_periods, parse_perioddata_groups)
-from .grid import write_bbox_shapefile, setup_structured_grid
+from .grid import MFsetupGrid
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
 from .lakes import make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes, setup_lake_info
@@ -205,7 +205,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         dis = fm.ModflowDis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
-        self._modelgrid = None  # override DIS package grid setup
+        if not isinstance(self._modelgrid, MFsetupGrid):
+            self._modelgrid = None  # override DIS package grid setup
         self._reset_bc_arrays()
         #self._isbc = None  # reset BC property arrays
         print("finished in {:.2f}s\n".format(time.time() - t0))

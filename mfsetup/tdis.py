@@ -100,7 +100,7 @@ def parse_perioddata_groups(perioddata_dict, defaults={}):
                 prefix = "perioddata input for {} must have".format(k)
                 raise Exception(prefix + valid_txt)
         elif 'perioddata' in k.lower():
-            perioddata_groups += parse_perioddata_groups(perioddata_dict, defaults=defaults)
+            perioddata_groups += parse_perioddata_groups(perioddata_dict[k], defaults=defaults)
         else:
             group0[k] = v
     if len(perioddata_groups) == 0:

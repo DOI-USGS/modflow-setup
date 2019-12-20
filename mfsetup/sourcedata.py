@@ -1003,6 +1003,21 @@ def setup_array(model, package, var, data=None,
             # for getting data from a different package in the source model
             source_variable = get_variable_name(var, source_model.version)
             source_package = get_variable_package_name(var, source_model.version, package)
+            source_package_instance = getattr(source_model, source_package, None)
+            txt = 'No variable {} in source model {}, {} package. Skipping...'.format(source_variable,
+                                                                                      source_model.name,
+                                                                                      source_package)
+            # traps against variables that might not exist
+            if var in ['ss', 'sy'] and np.all(source_model.dis.steady.array):
+                return
+            if source_package_instance is not None:
+                source_variable_exists = getattr(source_package_instance, source_variable, False)
+                if not source_variable_exists:
+                    print(txt)
+                    return
+            else:
+                print(txt)
+                return
 
             # data from parent model MODFLOW binary output
             if binary_file:

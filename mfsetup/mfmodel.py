@@ -970,8 +970,14 @@ class MFsetupMixin():
             self._setup_array('dis', 'botm',
                               data={i: arr for i, arr in enumerate(botm)},
                               datatype='array3d', write_fmt='%.2f', dtype=int)
+            # reset the bottom array
+            # is this necessary?
             self.dis.botm = botm
-            self.dis.botm = self.cfg['dis']['griddata']['botm']
+            # set bottom array to external files
+            if self.version == 'mf6':
+                self.dis.botm = self.cfg['dis']['griddata']['botm']
+            else:
+                self.dis.botm = self.cfg['dis']['botm']
 
         # write reach and segment data tables
         sfr.write_tables('{}/{}'.format(output_path, self.name))

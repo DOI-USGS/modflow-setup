@@ -14,7 +14,7 @@ from .discretization import (make_idomain, deactivate_idomain_above,
                              create_vertical_pass_through_cells)
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
-from .grid import setup_structured_grid
+from .grid import MFsetupGrid
 from .mf5to6 import get_package_name
 from .obs import setup_head_observations
 from .tdis import setup_perioddata, parse_perioddata_groups
@@ -284,7 +284,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
         dis = mf6.ModflowGwfdis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
-        self._modelgrid = None  # override DIS package grid setup
+        if not isinstance(self._modelgrid, MFsetupGrid):
+            self._modelgrid = None  # override DIS package grid setup
         self._reset_bc_arrays()
         self._set_idomain()
         print("finished in {:.2f}s\n".format(time.time() - t0))
