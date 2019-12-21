@@ -6,6 +6,7 @@ import pandas as pd
 from shapely.geometry import Polygon, MultiPolygon
 from gisutils import shp2df
 from .grid import get_ij
+import mfsetup.wells as wells
 
 # conversions from gallons model length units
 conversions = {1: 7.48052, # gallons per cubic foot
@@ -123,7 +124,7 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     well_info['j'] = j
     well_info['elv_m'] = model.dis.top.array[i, j]
     well_info['elv_top_m'] = well_info.elev_open_int_top_m
-    well_info['elv_botm_m'] = well_info.elev_open_int_top_m
+    well_info['elv_botm_m'] = well_info.elev_open_int_bot_m
     well_info['elv_mdpt_m'] = well_info.screen_midpoint_elev_m
     well_info['k'] = model.dis.get_layer(i, j, elev=well_info['elv_mdpt_m'].values)
     well_info['laythick'] = model.dis.thickness.array[well_info.k.values, i, j]
@@ -133,21 +134,28 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     # for wells in a layer below minimum thickness
     # move to layer with screen top, then screen botm,
     # put remainder in layer 1 and hope for the best
-    isthin = well_info.laythick < minimum_layer_thickness
-    well_info.loc[isthin, 'k'] = well_info.loc[isthin, 'ktop'].values
-    well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
-                                                                  well_info.i[isthin].values,
-                                                                  well_info.j[isthin].values]
-    isthin = well_info.laythick < minimum_layer_thickness
-    well_info.loc[isthin, 'k'] = well_info.loc[isthin, 'kbotm'].values
-    well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
-                                                                  well_info.i[isthin].values,
-                                                                  well_info.j[isthin].values]
-    isthin = well_info.laythick < minimum_layer_thickness
-    well_info.loc[isthin, 'k'] = 1
-    well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
-                                                                  well_info.i[isthin].values,
-                                                                  well_info.j[isthin].values]
+    well_info = wells.assign_layers_from_screen_top_botm(well_info, model,
+                                       flux_col='flux',
+                                       screen_top_col='elv_top_m',
+                                       screen_botm_col='elv_botm_m',
+                                       across_layers=False,
+                                       distribute_by='thickness',
+                                       minimum_layer_thickness=2.)
+    #isthin = well_info.laythick < minimum_layer_thickness
+    #well_info.loc[isthin, 'k'] = well_info.loc[isthin, 'ktop'].values
+    #well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
+    #                                                              well_info.i[isthin].values,
+    #                                                              well_info.j[isthin].values]
+    #isthin = well_info.laythick < minimum_layer_thickness
+    #well_info.loc[isthin, 'k'] = well_info.loc[isthin, 'kbotm'].values
+    #well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
+    #                                                              well_info.i[isthin].values,
+    #                                                              well_info.j[isthin].values]
+    #isthin = well_info.laythick < minimum_layer_thickness
+    #well_info.loc[isthin, 'k'] = 1
+    #well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
+    #                                                              well_info.i[isthin].values,
+    #                                                              well_info.j[isthin].values]
     isthin = well_info.laythick < minimum_layer_thickness
     assert not np.any(isthin)
 
@@ -252,13 +260,14 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
         site_means['flux'] = site_means.gal_d / conversions[model.dis.lenuni]
         site_means['per'] = per
 
-        wel_data.append(well_info[['k', 'i', 'j']].join(site_means[['flux', 'per']]))
+        wel_data.append(well_info[['k', 'i', 'j']].join(site_means[['flux', 'per']], how='inner'))
 
     wel_data = pd.concat(wel_data, axis=0)
     # water use fluxes should be negative
     if not wel_data.flux.max() <= 0:
         wel_data.loc[wel_data.flux.abs() != 0., 'flux'] *= -1
     wel_data['comments'] = ['site{:d}'.format(s) for s in wel_data.index]
+    assert not np.any(wel_data.isna()), "Nans in Well Data"
     return wel_data
 
 
@@ -318,15 +327,17 @@ def resample_pumping_rates(wu_file, wu_points, model,
                                                           model,
                                                           active_area=active_area,
                                                           minimum_layer_thickness=minimum_layer_thickness)
-    print('resampling pumping rates in {} to model stress periods...'.format(wu_file))
+    print('\nResampling pumping rates in {} to model stress periods...'.format(wu_file))
     if dropna:
-        print('wells with no data for a stress period will be dropped from that stress period')
+        print('    wells with no data for a stress period will be dropped from that stress period.')
     else:
-        print('wells with no data for a stress period will be assigned {} pumping rates'.format(na_fill_value))
+        print('    wells with no data for a stress period will be assigned {} pumping rates.'.format(na_fill_value))
     t0 = time.time()
     # reindex the record at each site to the model stress periods
     dfs = []
     for site, sitedata in monthly_data.groupby('site_no'):
+        if site not in well_info.index:
+            continue
         sitedata.index = sitedata.datetime
         assert not sitedata.index.duplicated().any()
 
@@ -366,5 +377,6 @@ def resample_pumping_rates(wu_file, wu_points, model,
     if not wel_data.flux.max() <= 0:
         wel_data.loc[wel_data.flux.abs() != 0., 'flux'] *= -1
     wel_data['comments'] = ['site{:d}'.format(s) for s in wel_data.index]
+    assert not np.any(wel_data.isna()), "Nans in Well Data"
     print("took {:.2f}s\n".format(time.time() - t0))
     return wel_data

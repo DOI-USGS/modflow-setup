@@ -11,6 +11,8 @@ import pandas as pd
 import flopy
 fm = flopy.modflow
 from mfsetup import MFnwtModel
+from mfsetup.discretization import find_remove_isolated_cells
+from mfsetup.fileio import load_array
 from .test_lakes import get_prism_data
 
 
@@ -18,6 +20,25 @@ def test_perioddata(get_pleasant_nwt):
     m = get_pleasant_nwt
     m._set_perioddata()
     assert m.perioddata['start_datetime'][0] == pd.Timestamp(m.cfg['dis']['start_date_time'])
+
+
+def test_ibound(pleasant_nwt_with_dis):
+    m = pleasant_nwt_with_dis
+    # use pleasant lake extent as ibound
+    is_pleasant_lake = m.lakarr[0]
+    # clear out lake info, just for this test function
+    m.cfg['model']['packages'].remove('lak')
+    del m.cfg['lak']['source_data']
+    # specify path relative to cfg file
+    m.cfg['bas6']['source_data']['ibound'] = {'filename': 'pleasant/source_data/shps/all_lakes.shp'}
+    m._reset_bc_arrays()
+    bas6 = m.setup_bas6()
+    bas6.write_file()
+    assert np.array_equal(m.ibound, m.bas6.ibound.array)
+    # find_remove_isolated_cells is run on ibound array but not in Lake setup
+    assert np.array_equal(m.ibound[0], find_remove_isolated_cells(is_pleasant_lake))
+    ibound = load_array(m.cfg['bas6']['ibound'])
+    assert np.array_equal(m.ibound, ibound)
 
 
 def test_setup_lak(pleasant_nwt_with_dis_bas6):

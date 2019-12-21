@@ -7,7 +7,8 @@ from gisutils import project
 from .fileio import check_source_files
 from .grid import get_ij
 from .sourcedata import TransientTabularSourceData
-from .wateruse import get_mean_pumping_rates, resample_pumping_rates
+from .tmr import Tmr
+from mfsetup.wateruse import get_mean_pumping_rates, resample_pumping_rates
 
 
 def setup_wel_data(model):
@@ -145,7 +146,10 @@ def setup_wel_data(model):
         df = df.append(bfluxes)
 
     for col in ['per', 'k', 'i', 'j']:
-        df[col] = df[col].astype(int)
+        try:
+            df[col] = df[col].astype(int)
+        except:
+            j=2
 
     # drop any k, i, j locations that are inactive
     if model.version == 'mf6':
@@ -175,6 +179,7 @@ def assign_layers_from_screen_top_botm(data, model,
                                        flux_col='flux',
                                        screen_top_col='screen_top',
                                        screen_botm_col='screen_botm',
+                                       label_col='site_no',
                                        across_layers=False,
                                        distribute_by='thickness',
                                        minimum_layer_thickness=2.):
@@ -191,6 +196,7 @@ def assign_layers_from_screen_top_botm(data, model,
     flux_col : column in data with well fluxes
     screen_top_col : column in data with screen top elevations
     screen_botm_col : column in data with screen bottom elevations
+    label_col : column with well names (optional; default site_no)
     across_layers : bool
         True to distribute fluxes to multipler layers intersected by open interval
     distribute_by : str ('thickness' or 'transmissivity')
@@ -203,6 +209,9 @@ def assign_layers_from_screen_top_botm(data, model,
         pumping in a single model layer (with fluxes modified proportional
         to the amount of open interval in that layer).
     """
+    # 'comments' column is used by wel setup for identifying wells
+    if label_col in data.columns:
+        data['comments'] = data[label_col]
     if across_layers:
         raise NotImplemented('Distributing fluxes to multiple layers')
     else:
@@ -228,25 +237,53 @@ def assign_layers_from_screen_top_botm(data, model,
             all_layers[0] = model.dis.top.array
             all_layers[1:] = model.dis.botm.array
             layer_thicknesses = -np.diff(all_layers[:, i, j], axis=0)
-            k_well_thickness = layer_thicknesses[data['k'].values,
+            data['laythick'] = layer_thicknesses[data['k'].values,
                                                  list(range(layer_thicknesses.shape[1]))]
-            below_minimum = k_well_thickness < minimum_layer_thickness
+            below_minimum = data['laythick'] < minimum_layer_thickness
+
             n_below = np.sum(below_minimum)
             if n_below > 0:
                 outpath = os.path.split(model.cfg['wel']['output_files']['lookup_file'])[0]
                 outfile = os.path.join(outpath, 'dropped_wells.csv')
-                flux_below = data.loc[below_minimum]
-                pct_flux_below = 100*flux_below[flux_col].sum()/data[flux_col].sum()
-                print('Warning: {} wells in layers less than '
-                      'specified minimum thickness of {} {},'
-                      'representing {:.2f} %% of total flux.\n'
-                      'See {} for details'.format(n_below,
-                                                  minimum_layer_thickness,
-                                                  model.length_units,
-                                                  pct_flux_below,
-                                                  outfile))
-                flux_below = flux_below.groupby(['k', 'i', 'j']).first().reset_index()[['k', 'i', 'j', flux_col, 'comments']]
+
+                # move wells that are still in a thin layer to the thickest layer
+                data['orig_layer'] = data['k']
+                thickest_layer = np.argmax(layer_thicknesses, axis=0)
+                data.loc[below_minimum, 'k'] = thickest_layer[below_minimum]
+                data['laythick'] = layer_thicknesses[data['k'].values,
+                                                     list(range(layer_thicknesses.shape[1]))]
+                still_below_minimum = data['laythick'] < minimum_layer_thickness
+                nmoved = np.sum(data['orig_layer'] != data['k'])
+                msg = ('Warning: {} of {} wells in layers less than '
+                       'specified minimum thickness of {} {}\n'
+                       'were moved to the thicknest layer at their i, j locations.\n'.format(n_below,
+                                                                        len(data),
+                                                                        minimum_layer_thickness,
+                                                                        model.length_units))
+                n_below = np.sum(still_below_minimum)
+                if n_below > 0:
+                    msg += ('Out of these, {} of {} wells remaining in layers less than '
+                            'specified minimum thickness of {} {}'
+                            ''.format(n_below,
+                                      len(data),
+                                      minimum_layer_thickness,
+                                      model.length_units))
+                    if flux_col in data.columns:
+                        pct_flux_below = 100*data.loc[still_below_minimum, flux_col].sum()/data[flux_col].sum()
+                        msg +=  ', \nrepresenting {:.2f} %% of total flux,'.format(pct_flux_below)
+
+                    msg += '\nwere dropped. See {} for details.'.format(outfile)
+                    print(msg)
+
+                # write shapefile and CSV output for wells that were dropped
+                cols = ['k', 'i', 'j', 'comments']
+                if flux_col in data.columns:
+                    cols.insert(3, flux_col)
+                flux_below = data.loc[below_minimum].groupby(['k', 'i', 'j']).first().reset_index()[cols]
                 flux_below.to_csv(outfile, index=False)
+                if 'x' in flux_below.columns and 'y' in flux_below.columns:
+                    flux_below['geometry'] = [Point(xi, yi) for xi, yi in zip(flux_below.x, flux_below.y)]
+                    df2shp(flux_below, outfile[:-4] + '.shp', epsg=model.modelgrid.epsg)
                 data = data.loc[~below_minimum].copy()
 
         elif distribute_by == 'tranmissivity':

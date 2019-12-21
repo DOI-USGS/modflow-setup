@@ -94,7 +94,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # include cells that are active in the existing idomain array
         # and cells inactivated on the basis of layer elevations
-        ibound = (self.bas6.ibound.array == 1)
+        ibound = (self.bas6.ibound.array > 0)
         ibound = ibound.astype(int)
 
         # remove cells that are above stream cells
@@ -234,6 +234,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
         bas = fm.ModflowBas(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
+        self._ibound = None
         return bas
 
     def setup_oc(self):
