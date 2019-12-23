@@ -179,6 +179,7 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
 def get_mean_pumping_rates(wu_file, wu_points, model,
                            start_date='2012-01-01', end_date='2018-12-31',
                            period_stats={0: 'mean'},
+                           active_area=None,
                            drop_ids=None,
                            minimum_layer_thickness=2):
     """Read water use data from a master file generated from
@@ -219,6 +220,7 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
     """
     start_date, end_date = pd.Timestamp(start_date), pd.Timestamp(end_date)
     well_info, monthly_data = read_wdnr_monthly_water_use(wu_file, wu_points, model,
+                                                          active_area=active_area,
                                                           drop_ids=drop_ids,
                                                           minimum_layer_thickness=minimum_layer_thickness)
     if well_info is None:
@@ -275,6 +277,7 @@ def resample_pumping_rates(wu_file, wu_points, model,
                            active_area=None,
                            minimum_layer_thickness=2,
                            drop_ids=None,
+                           exclude_steady_state=True,
                            dropna=False, na_fill_value=0.,
                            verbose=False):
     """Read water use data from a master file generated from
@@ -294,20 +297,13 @@ def resample_pumping_rates(wu_file, wu_points, model,
         Only wells within the bounds of the sr will be retained.
         Sr is also used for row/column lookup.
         Must be in same CRS as wu_points.
-    start_date : str (YYYY-MM-dd)
-        Start date of time period to average.
-    end_date : str (YYYY-MM-dd)
-        End date of time period to average.
-    period_stats : dict
-        Dictionary of stats keyed by stress period. Stats include zero values, unless noted.
-        keys : 0, 1, 2 ...
-        values: str; indicate statistic to apply for each stress period
-            'mean': mean pumping for period
-            '<month>': average for a month of the year (e.g. 'august')
     active_area : str (shapefile path) or shapely.geometry.Polygon
         Polygon denoting active area of the model. If specified,
         wells are culled to this area instead of the model bounding box.
         (default None)
+    exclude_steady_state : bool
+        Exclude steady-state stress periods from resampled output.
+        (default True)
     minimum_layer_thickness : scalar
         Minimum layer thickness to have pumping.
     dropna : bool
@@ -325,6 +321,7 @@ def resample_pumping_rates(wu_file, wu_points, model,
     well_info, monthly_data = read_wdnr_monthly_water_use(wu_file,
                                                           wu_points,
                                                           model,
+                                                          drop_ids=drop_ids,
                                                           active_area=active_area,
                                                           minimum_layer_thickness=minimum_layer_thickness)
     print('\nResampling pumping rates in {} to model stress periods...'.format(wu_file))
@@ -332,6 +329,11 @@ def resample_pumping_rates(wu_file, wu_points, model,
         print('    wells with no data for a stress period will be dropped from that stress period.')
     else:
         print('    wells with no data for a stress period will be assigned {} pumping rates.'.format(na_fill_value))
+    if exclude_steady_state:
+        perioddata = model.perioddata.loc[~model.perioddata.steady].copy()
+    else:
+        perioddata = model.perioddata.copy()
+
     t0 = time.time()
     # reindex the record at each site to the model stress periods
     dfs = []
@@ -342,9 +344,9 @@ def resample_pumping_rates(wu_file, wu_points, model,
         assert not sitedata.index.duplicated().any()
 
         if dropna:
-            site_period_data = sitedata.reindex(model.perioddata.start_datetime).dropna(axis=1)
+            site_period_data = sitedata.reindex(perioddata.start_datetime).dropna(axis=1)
         else:
-            site_period_data = sitedata.reindex(model.perioddata.start_datetime, fill_value=na_fill_value)
+            site_period_data = sitedata.reindex(perioddata.start_datetime, fill_value=na_fill_value)
             isna = site_period_data['site_no'] == 0.
             if np.any(isna):
                 if verbose:
@@ -359,11 +361,11 @@ def resample_pumping_rates(wu_file, wu_points, model,
             site_period_data['month'] = site_period_data.index.month
             site_period_data['datetime'] = site_period_data.index
         assert not site_period_data.isna().any().any()
-        site_period_data.index = model.perioddata.index
+        site_period_data.index = perioddata.index
 
         # copy stress periods and lengths from master stress period table
         for col in ['perlen', 'per']:
-            site_period_data[col] = model.perioddata[col]
+            site_period_data[col] = perioddata[col]
 
         # convert units from monthly gallon totals to daily model length units
         site_period_data['gal_d'] = site_period_data['gallons'] / site_period_data['perlen']

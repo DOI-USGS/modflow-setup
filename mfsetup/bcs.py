@@ -66,8 +66,12 @@ def setup_ghb_data(model):
                        'bhead': min_elevs.flat,
                        'cond': cond})
     df.dropna(axis=0, inplace=True)
+
     # assign layers so that bhead is above botms
     df['k'] = get_layer(model.dis.botm.array, df.i, df.j, df.bhead)
+    # remove GHB cells from places where the specified head is below the model
+    below_bottom_of_model = df.bhead < model.dis.botm.array[-1, df.i, df.j] + 0.01
+    df = df.loc[~below_bottom_of_model].copy()
 
     # exclude inactive cells
     k, i, j = df.k, df.i, df.j

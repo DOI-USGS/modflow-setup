@@ -385,7 +385,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         spd = {}
         for per, perdf in groups:
             ra = np.recarray(len(perdf), dtype=dtype)
-            for c in ['k', 'i', 'j', 'bhead']:
+            for c in ['k', 'i', 'j', 'bhead', 'cond']:
                 ra[c] = perdf[c]
             spd[per] = ra
 

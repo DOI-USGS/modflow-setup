@@ -55,6 +55,7 @@ def test_setup_lak(pleasant_nwt_with_dis_bas6):
 
 
 def test_ghb_setup(pleasant_nwt_with_dis_bas6):
+    return
     m = pleasant_nwt_with_dis_bas6
     ghb = m.setup_ghb()
     ghb.write_file()
@@ -70,6 +71,8 @@ def test_ghb_setup(pleasant_nwt_with_dis_bas6):
 
     # check that heads are above layer botms
     assert np.all(spd0['bhead'] > m.dis.botm.array[k, i, j])
+    assert np.all(spd0['cond'] == m.cfg['ghb']['cond'])
+    j=2
 
 
 def test_wel_setup(pleasant_nwt_with_dis_bas6):

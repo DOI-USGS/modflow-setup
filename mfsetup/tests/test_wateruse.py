@@ -5,20 +5,24 @@ import pytest
 from ..wateruse import read_wdnr_monthly_water_use, resample_pumping_rates, get_mean_pumping_rates
 
 
+conversions = {1: 7.48052, # gallons per cubic foot
+               2: 264.172} # gallons per cubic meter
+
+
 @pytest.fixture
-def wu_data(inset_with_dis):
-    m = inset_with_dis
-    well_info, monthly_data = read_wdnr_monthly_water_use(m.cfg['source_data']['water_use'],
-                                                          m.cfg['source_data']['water_use_points'],
+def wu_data(pfl_nwt_with_dis_bas6):
+    m = pfl_nwt_with_dis_bas6
+    well_info, monthly_data = read_wdnr_monthly_water_use(m.cfg['wel']['source_data']['wdnr_dataset']['water_use'],
+                                                          m.cfg['wel']['source_data']['wdnr_dataset']['water_use_points'],
                                                           model=m,
                                                           minimum_layer_thickness=m.cfg['dis'][
                                                               'minimum_layer_thickness'])
     return well_info, monthly_data
 
 
-def test_get_mean_pumping_rates(inset_with_dis, wu_data):
-    m = inset_with_dis
-    well_info, monthly_data = wu_data
+def test_get_mean_pumping_rates(pfl_nwt_with_dis_bas6):
+    m = pfl_nwt_with_dis_bas6
+    #well_info, monthly_data = wu_data
 
     # WDNR specific formatting
     col_fmt = '{}_wdrl_gpm_amt'
@@ -26,14 +30,16 @@ def test_get_mean_pumping_rates(inset_with_dis, wu_data):
                        'wdrl_year': 'year',
                        'annual_wdrl_amt': 'annual_wdrl_total_gallons'
                        }
-    start_date = '2011-01-01'
-    end_date = '2017-12-31'
+    start_date = '2012-01-01'
+    end_date = '2018-12-31'
     years = range(int(start_date.split('-')[0]), int(end_date.split('-')[0])+1)
 
-    df = get_mean_pumping_rates(well_info, monthly_data,
-                                lenuni=m.dis.lenuni,
+    wu_file = m.cfg['wel']['source_data']['wdnr_dataset']['water_use']
+    wu_points = m.cfg['wel']['source_data']['wdnr_dataset']['water_use_points']
+    df = get_mean_pumping_rates(wu_file, wu_points, m,
+                                period_stats={0: ['mean', '2012-01-01', '2018-12-31']},
                                 start_date=start_date, end_date=end_date)
-    wu = pd.read_csv(m.cfg['source_data']['water_use'])
+    wu = pd.read_csv(wu_file)
     wu.rename(columns=column_mappings, inplace=True)
     wu = wu.loc[wu.year.isin(years)].copy()
     wu['days'] = [365 if not calendar.isleap(y) else 366 for y in wu.year]
@@ -58,30 +64,41 @@ def test_get_mean_pumping_rates(inset_with_dis, wu_data):
     compare.dropna(subset=['rpd'], axis=0, inplace=True)
 
     # verify that fluxes computed by get_ss_pumping_rates are same as those above
-    assert np.allclose(compare.Q1, compare.Q2)
+    assert np.allclose(compare.Q1, compare.Q2, rtol=0.02)
 
 
-def test_resample_pumping_rates(inset_with_transient_parent, wu_data):
+def test_resample_pumping_rates(pleasant_nwt_with_dis_bas6):
 
-    m = inset_with_transient_parent
-    well_info, monthly_data = wu_data
+    m = pleasant_nwt_with_dis_bas6
     assert m.perioddata is not None
+    perioddata = m.perioddata.copy()
+    perioddata.index = perioddata.start_datetime
 
     # test with transient first stress period
-    wu_file = m.cfg['source_data']['water_use']
-    wu_points = m.cfg['source_data']['water_use_points']
-    well_info, monthly_data = read_wdnr_monthly_water_use(wu_file, wu_points, m)
-
-    wu_resampled = resample_pumping_rates(well_info, monthly_data, m.perioddata, m.dis.lenuni)
+    active_area = m.modelgrid.bbox.buffer(10000)
+    wu_file = m.cfg['wel']['source_data']['wdnr_dataset']['water_use']
+    wu_points = m.cfg['wel']['source_data']['wdnr_dataset']['water_use_points']
+    well_info, monthly_data = read_wdnr_monthly_water_use(wu_file, wu_points, m,
+                                                          active_area=active_area
+                                                          )
+    wu_resampled = resample_pumping_rates(wu_file, wu_points, m,
+                                          active_area=active_area
+                                          )
 
     for site in wu_resampled.index.unique():
         loc = (monthly_data.site_no == site) & \
-              (monthly_data.year.isin(m.perioddata['start_datetime'].dt.year.unique()))
+              (monthly_data.year.isin(perioddata.iloc[1:]['start_datetime'].dt.year.unique()))
         site_data = monthly_data.loc[loc].sort_values(by=['year', 'month'])
-        site_data['flux'] = site_data['gallons']/m.perioddata.perlen.values / conversions[m.dis.lenuni]
-        assert np.allclose(-site_data.flux.values, wu_resampled.flux.values)
+        ndays = perioddata.iloc[1:].loc[site_data.datetime, 'perlen']
+        periods = perioddata.iloc[1:].loc[site_data.datetime, 'per'].values
+        site_data['flux'] = site_data['gallons'].values/ndays.values / conversions[m.dis.lenuni]
+        wur_loc = [True if str(site) in r.comments.lower() and r.per in periods
+                   else False for i, r in wu_resampled.iterrows()]
+        assert len(-site_data.flux.values) == len(wu_resampled.loc[wur_loc, 'flux'].values)
+        assert np.allclose(-site_data.flux.values, wu_resampled.loc[wur_loc, 'flux'].values)
 
 
+@pytest.mark.skip("still working on this test")
 def test_resample_ss_first_period(inset_with_transient_parent, wu_data):
     m = inset_with_transient_parent
     well_info, monthly_data = wu_data

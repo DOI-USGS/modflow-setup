@@ -127,6 +127,7 @@ def setup_wel_data(model):
                     wu_resampled = resample_pumping_rates(v['water_use'],
                                                           v['water_use_points'],
                                                           drop_ids=v.get('drop_ids'),
+                                                          exclude_steady_state=True,
                                                           model=model)
                     df = df.append(wu_resampled)
 
@@ -171,6 +172,7 @@ def setup_wel_data(model):
     model.cfg['wel']['output_files']['lookup_file'] = wel_lookup_file
 
     # save a lookup file with well site numbers/categories
+    df.sort_values(by=['comments', 'per'], inplace=True)
     df[['per', 'k', 'i', 'j', 'flux', 'comments']].to_csv(wel_lookup_file, index=False)
     return df
 
