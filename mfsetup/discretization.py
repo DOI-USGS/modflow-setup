@@ -321,6 +321,44 @@ def verify_minimum_layer_thickness(top, botm, isactive, minimum_layer_thickness)
     return isvalid
 
 
+def make_ibound(top, botm, nodata=-9999,
+                 minimum_layer_thickness=1,
+                 drop_thin_cells=True, tol=1e-4):
+    """Make the ibound array that specifies
+    cells that will be excluded from the simulation. Cells are
+    excluded based on:
+
+
+    Parameters
+    ----------
+    model : mfsetup.MFnwtModel model instance
+
+    Returns
+    -------
+    idomain : np.ndarray (int)
+
+    """
+    top = top.copy()
+    botm = botm.copy()
+    top[top == nodata] = np.nan
+    botm[botm == nodata] = np.nan
+    criteria = np.isnan(botm)
+
+    # compute layer thicknesses, considering pinched cells (nans)
+    b = get_layer_thicknesses(top, botm)
+    all_cells_thin = np.all(b < minimum_layer_thickness + tol, axis=0)
+    criteria = criteria | np.isnan(b)  # cells without thickness values
+
+    if drop_thin_cells:
+        criteria = criteria | all_cells_thin
+        #all_layers = np.stack([top] + [b for b in botm])
+        #min_layer_thickness = minimum_layer_thickness
+        #isthin = np.diff(all_layers, axis=0) * -1 < min_layer_thickness + tol
+        #criteria = criteria | isthin
+    idomain = np.abs(~criteria).astype(int)
+    return idomain
+
+
 def make_idomain(top, botm, nodata=-9999,
                  minimum_layer_thickness=1,
                  drop_thin_cells=True, tol=1e-4):

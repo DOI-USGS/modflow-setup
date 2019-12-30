@@ -12,7 +12,7 @@ fm = flopy.modflow
 from flopy.modflow import Modflow
 from flopy.utils import binaryfile as bf
 from .bcs import setup_ghb_data
-from .discretization import (deactivate_idomain_above,
+from .discretization import (deactivate_idomain_above, make_ibound,
                              find_remove_isolated_cells)
 from .tdis import (setup_perioddata_group, setup_perioddata,
                    get_parent_stress_periods, parse_perioddata_groups)
@@ -91,10 +91,17 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """Remake the idomain array from the source data,
         no data values in the top and bottom arrays, and
         so that cells above SFR reaches are inactive."""
+        ibound_from_layer_elevations = make_ibound(self.dis.top.array,
+                                                     self.dis.botm.array,
+                                                     nodata=self._nodata_value,
+                                                     minimum_layer_thickness=self.cfg['dis'].get(
+                                                         'minimum_layer_thickness', 1),
+                                                     #drop_thin_cells=self._drop_thin_cells,
+                                                     tol=1e-4)
 
         # include cells that are active in the existing idomain array
         # and cells inactivated on the basis of layer elevations
-        ibound = (self.bas6.ibound.array > 0)
+        ibound = (self.bas6.ibound.array > 0) & (ibound_from_layer_elevations == 1)
         ibound = ibound.astype(int)
 
         # remove cells that are above stream cells
@@ -234,7 +241,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
         bas = fm.ModflowBas(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
-        self._ibound = None
+        self._set_ibound()
+        #self._ibound = None
         return bas
 
     def setup_oc(self):

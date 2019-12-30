@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 import pytest
 from ..discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
-                              fill_empty_layers, fill_cells_vertically, make_idomain,
+                              fill_empty_layers, fill_cells_vertically, make_idomain, make_ibound,
                               get_layer_thicknesses, create_vertical_pass_through_cells,
                               deactivate_idomain_above, find_remove_isolated_cells)
 
 
-pytest.fixture(scope="function")
+@pytest.fixture(scope="function")
 def idomain(botm):
     nlay, nrow, ncol = botm.shape
     nr = int(np.floor(nrow*.35))
@@ -104,6 +104,43 @@ def test_fill_na(all_layers):
     filled[1:] = botm
     assert filled[:, 2, 2].tolist() == [10., 10.,  8.,  8.,  8.,  5.,  5.,  5.,  5, 1.]
     assert filled[:, 0, 0].tolist() == [8] * 8 + [2, 1]
+
+
+def test_make_ibound(all_layers):
+    top = all_layers[0].copy()
+    botm = all_layers[1:].copy()
+    nodata = -9999
+    botm[-1, 0, 0] = nodata
+    botm[-2] = 2
+    botm[-2, 2, 2] = np.nan
+    botm[:, 3, 3] = np.arange(1, 10)[::-1] # column of cells all eq. to min thickness
+    filled_top, filled_botm = fill_cells_vertically(top, botm)
+    ibound = make_ibound(top, botm, nodata=nodata,
+                           minimum_layer_thickness=1,
+                           drop_thin_cells=True,
+                           tol=1e-4)
+    # test ibound based on nans
+    assert np.array_equal(ibound[:, 2, 2].astype(bool), ~np.isnan(botm[:, 2, 2]))
+    # test ibound based on nodata
+    assert ibound[-1, 0, 0] == 0
+    # test ibound based on layer thickness
+    # unlike for idomain, individual cells < min thickness are not deactivated
+    # (unless all cells at i, j location are < min thickness + tol)
+    assert ibound[-1].sum() == 98
+    assert ibound[-2].sum() == 98
+    # test that nans in the model top result in the highest active botms being excluded
+    # (these cells have valid botms, but no tops)
+    assert ibound[:, 0, 0].sum() == 1
+    # in all_layers, cells with valid tops are idomain=0
+    # because all botms in layer 1 are nans
+    assert ibound[0].sum() == 0
+
+    # test edge case of values that match the layer thickness when tol=0
+    ibound = make_ibound(top, botm, nodata=nodata,
+                           minimum_layer_thickness=1,
+                           drop_thin_cells=True,
+                           tol=0)
+    assert ibound[-1].sum() == 99
 
 
 def test_make_idomain(all_layers):
