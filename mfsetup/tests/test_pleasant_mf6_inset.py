@@ -14,7 +14,8 @@ import flopy
 mf6 = flopy.mf6
 from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
-from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists
+from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists, read_lak_ggo
+from mfsetup.lakes import get_lakeperioddata
 from mfsetup.utils import get_input_arguments
 
 
@@ -59,7 +60,7 @@ def get_pleasant_mf6_with_grid(get_pleasant_mf6):
 
 @pytest.fixture(scope="function")
 def get_pleasant_mf6_with_dis(get_pleasant_mf6_with_grid):
-    print('creating Pleasant Lake MFnwtModel instance with grid...')
+    print('creating Pleasant Lake MFnwtModel instance with DIS package...')
     m = copy.deepcopy(get_pleasant_mf6_with_grid)
     m.setup_tdis()
     m.setup_dis()
@@ -67,20 +68,29 @@ def get_pleasant_mf6_with_dis(get_pleasant_mf6_with_grid):
 
 
 @pytest.fixture(scope="function")
+def get_pleasant_mf6_with_lak(get_pleasant_mf6_with_dis):
+    print('creating Pleasant Lake MFnwtModel instance with LAKE package...')
+    m = copy.deepcopy(get_pleasant_mf6_with_dis)
+    lak = m.setup_lak()
+    lak.write()
+    return m
+
+
+@pytest.fixture(scope="function")
 def pleasant_mf6_setup_from_yaml(pleasant_mf6_test_cfg_path):
     m = MF6model.setup_from_yaml(pleasant_mf6_test_cfg_path)
     m.write_input()
-    #if hasattr(m, 'sfr'):
-    #    sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-    #    m.sfrdata.write_package(sfr_package_filename,
-    #                                version='mf6',
-    #                                options=['save_flows',
-    #                                         'BUDGET FILEOUT shellmound.sfr.cbc',
-    #                                         'STAGE FILEOUT shellmound.sfr.stage.bin',
-    #                                         # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
-    #                                         # location of obs6 file relative to sfr package file (same folder)
-    #                                         ]
-    #                                )
+    if hasattr(m, 'sfr'):
+        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+        m.sfrdata.write_package(sfr_package_filename,
+                                    version='mf6',
+                                    options=['save_flows',
+                                             'BUDGET FILEOUT shellmound.sfr.cbc',
+                                             'STAGE FILEOUT shellmound.sfr.stage.bin',
+                                             # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
+                                             # location of obs6 file relative to sfr package file (same folder)
+                                             ]
+                                    )
     return m
 
 
@@ -105,10 +115,13 @@ def test_model(get_pleasant_mf6_with_grid):
     assert 'UPW' in m.parent.get_package_list()
 
 
-def test_perioddata(get_pleasant_mf6):
+def test_perioddata(get_pleasant_mf6, pleasant_nwt):
+    nwt = pleasant_nwt
+    nwt._set_perioddata()
     m = get_pleasant_mf6
     m._set_perioddata()
     assert m.perioddata['start_datetime'][0] == pd.Timestamp(m.cfg['tdis']['options']['start_date_time'])
+    pd.testing.assert_frame_equal(m.perioddata, nwt.perioddata, check_dtype=False)
 
 
 def test_tdis_setup(get_pleasant_mf6):
@@ -240,6 +253,44 @@ def test_wel_setup(get_pleasant_mf6_with_dis):
     assert wel.stress_period_data is not None
 
 
+def test_lak_setup(get_pleasant_mf6_with_lak):
+    m = get_pleasant_mf6_with_lak  # deepcopy(model)
+    lak = m.setup_lak()
+    lak.write()
+    assert isinstance(lak, mf6.ModflowGwflak)
+    package_filename = os.path.join(m.model_ws, lak.filename)
+    assert os.path.exists(package_filename)
+    for f in lak.tables.array['tab6']:
+        assert os.path.exists(f)
+    options = read_mf6_block(package_filename, 'options')
+    for var in ['boundnames', 'save_flows', 'obs6', 'surfdep',
+                'time_conversion', 'length_conversion']:
+        assert var in options
+    assert float(options['time_conversion'][0]) == 86400. == lak.time_conversion.array
+    assert float(options['length_conversion'][0]) == 1. == lak.length_conversion.array
+    assert lak.nlakes.array == len(lak.tables.array)
+    assert lak.packagedata.array['nlakeconn'][0] == len(lak.connectiondata.array)
+    # verify that there are no connections to inactive cells
+    k, i, j = zip(*lak.connectiondata.array['cellid'])
+    inactive = m.dis.idomain.array[k, i, j] < 1
+    assert not np.any(inactive)
+    assert len(lak.lakeperioddata.array) == m.nper
+    lake_fluxes = m.lake_fluxes.copy()
+    lake_fluxes['rainfall'] = lake_fluxes['precipitation']
+    for per in range(m.nper):
+        for var in ['rainfall', 'evaporation']:
+            loc = m.lak.lakeperioddata.array[0]['laksetting'] == var
+            value = m.lak.lakeperioddata.array[per]['laksetting_data'][loc][0]
+            assert np.allclose(value, lake_fluxes.loc[per, var])
+
+
+def test_lak_obs_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    lak = m.setup_lak()
+    m.write()
+    # todo: add lake obs tests
+
+
 @pytest.mark.skip('not implemented yet')
 def test_ghb_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
@@ -313,6 +364,30 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
         assert False, has_nans
 
 
-def test_model_setup_and_run(pleasant_mf6_model_run):
-    m = pleasant_mf6_model_run
+#def test_model_setup_and_run(pleasant_mf6_model_run):
+#    m = pleasant_mf6_model_run
+
+
+def test_mf6_results(pleasant_mf6_model_run, full_pleasant_nwt_with_model_run):
+    #def test_mf6_results():
+
+    # head results
+    HeadFile = flopy.utils.binaryfile.HeadFile
+    mf6_hds_obj = HeadFile('pleasant_mf6.hds')
+    mfnwt_hds_obj = HeadFile('../pleasant_nwt/pleasant.hds')
+    assert np.allclose(mf6_hds_obj.get_times(), mfnwt_hds_obj.get_times(), rtol=1e-4)
+    last = mf6_hds_obj.get_kstpkper()[-1]
+    mf6_hds = mf6_hds_obj.get_data(kstpkper=last)
+    mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=last)
+    #diff = mf6_hds - mfnwt_hds
+    loc = pleasant_mf6_model_run.idomain == 1
+    rms = np.sqrt(np.mean((mf6_hds[loc] - mfnwt_hds[loc]) ** 2))
+
+    j=2
+
+    # lake results
+    df_mf6 = pd.read_csv('lake1.obs.csv')
+    df_mfnwt = read_lak_ggo('../pleasant_nwt/lak1_600059060.ggo', model=full_pleasant_nwt_with_model_run)
+    lake_stage_rms = np.sqrt(np.mean((df_mfnwt.stage.values - df_mf6.STAGE.values) ** 2))
+    j=2
 

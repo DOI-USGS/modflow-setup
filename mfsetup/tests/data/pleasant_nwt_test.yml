@@ -108,9 +108,9 @@ lak:
   nssitr: 800  # number of Newton iterations for solution of lake stage, for each MODFLOW iteration.
   sscncr: 0.0000001  # lake stage convergence criterion
   surfdep: 0.1  # undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)
-  littoral_leakance: 0.045 # 1/d
-  profundal_leakance: 0.025 # 1/d
   source_data:
+    littoral_leakance: 0.045 # 1/d
+    profundal_leakance: 0.025 # 1/d
     lakes_shapefile:
       filename: 'pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
@@ -122,14 +122,15 @@ lak:
       period_stats:
         0: ['mean', '2012-01-01', '2018-12-31']  # average daily rate for model period for initial steady state
         1: 'mean'  # average daily rate or value for each month
-    #bathymetry_raster:
-    #  filename: 'pleasant/source_data/rasters/bathymetry.tif'
-    #  length_units: 'meters'
-    #stage_area_volume_file:
-    #  filename: 'plainfieldlakes/source_data/all_lakes_stage_area_volume.csv' #'../../bcs/lakes/area_stage_vol_Long.csv'
-    #  length_units: 'meters'
-    #  column_mappings:
-    #    volume_m3: 'volume'
+    bathymetry_raster:
+      filename: 'pleasant/source_data/rasters/pleasant_bathymetry.tif'
+      length_units: 'meters'
+    stage_area_volume_file:
+      filename: 'pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
+      length_units: 'meters'
+      id_column: 'hydroid'
+      column_mappings:
+        volume_m3: 'volume'
   output_files:
     lookup_file: 'lak_lookup.csv'
 

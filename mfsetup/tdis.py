@@ -244,9 +244,11 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
             # get the last (end) time, if it wasn't included in datetimes
             if datetimes[0] == pd.Timestamp(start_date_time):
                 if end_date_time is not None:
+                    # + 1 for consistency with using date_range below
+                    # e.g. to end at 2019-01-01 instead of 2018-12-31
                     last_time = getattr((pd.Timestamp(end_date_time) -
                                          pd.Timestamp(start_date_time)),
-                                        model_time_units)
+                                        model_time_units) + 1
                 else:
                     end_datetimes = pd.date_range(start_date_time,
                                                   periods=len(datetimes) + 1,

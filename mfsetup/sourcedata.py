@@ -1162,10 +1162,10 @@ def setup_array(model, package, var, data=None,
                 # assign to current per
                 data[per] = last_data_array
 
-    elif var == 'ibound':
-        # TODO: what does mf6 require for lakes?
-        for i, arr in data.items():
-            data[i][model.isbc[i] == 1] = 0.
+    elif var in ['ibound', 'idomain']:
+        pass
+        #for i, arr in data.items():
+        #    data[i][model.isbc[i] == 1] = 0.
     elif var in ['hk', 'k']:
         for i, arr in data.items():
             data[i][model.isbc[i] == 2] = model.cfg['model'].get('hiKlakes_value', 1e4)

@@ -55,7 +55,7 @@ setup_grid:
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
   dxy: 40 # m
-  buffer: 500 # distance from feature(s) if interest to model boundary, in meters
+  buffer: 1000 # distance from feature(s) if interest to model boundary, in meters
   grid_file: 'grid.json' # grid info will be written to this file
   epsg: 3070
 
@@ -79,7 +79,7 @@ dis:
 tdis:
   options:
     time_units: 'days'
-    start_date_time: '1998-04-01'
+    start_date_time: '2012-01-01'
   perioddata:
     # time discretization info can be specified directly under the perioddata key
     # or in groups of stress periods that are discretized in a similar way
@@ -141,14 +141,15 @@ lak:
       period_stats:
         0: ['mean', '2012-01-01', '2018-12-31']  # average daily rate for model period for initial steady state
         1: 'mean'  # average daily rate or value for each month
-    #bathymetry_raster:
-    #  filename: 'pleasant/source_data/rasters/bathymetry.tif'
-    #  length_units: 'meters'
-    #stage_area_volume_file:
-    #  filename: 'plainfieldlakes/source_data/all_lakes_stage_area_volume.csv' #'../../bcs/lakes/area_stage_vol_Long.csv'
-    #  length_units: 'meters'
-    #  column_mappings:
-    #    volume_m3: 'volume'
+    bathymetry_raster:
+      filename: 'pleasant/source_data/rasters/pleasant_bathymetry.tif'
+      length_units: 'meters'
+    stage_area_volume_file:
+      filename: 'pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
+      length_units: 'meters'
+      id_column: 'hydroid'
+      column_mappings:
+        volume_m3: 'volume'
   output_files:
     lookup_file: 'lak_lookup.csv'
 

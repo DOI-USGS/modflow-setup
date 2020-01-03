@@ -9,7 +9,8 @@ mf6 = flopy.mf6
 from mfsetup import MF6model, MFnwtModel
 from mfsetup.fileio import exe_exists, load_cfg
 from mfsetup.utils import get_input_arguments
-from .test_pleasant_mf6_inset import (pleasant_mf6_setup_from_yaml,
+from .test_pleasant_mf6_inset import (get_pleasant_mf6_with_dis, get_pleasant_mf6_with_grid,
+                                      get_pleasant_mf6, pleasant_mf6_cfg, pleasant_simulation,
                                       pleasant_mf6_test_cfg_path)
 
 
@@ -34,9 +35,10 @@ def get_model(model):
 @pytest.fixture(scope="session")
 def bin_path(project_root_path):
     bin_path = os.path.join(project_root_path, "bin")
-    if "linux" in platform.platform().lower():
+    platform_info = platform.platform().lower()
+    if "linux" in platform_info:
         bin_path = os.path.join(bin_path, "linux")
-    elif "mac" in platform.platform().lower():
+    elif "mac" in platform_info or "darwin" in platform_info:
         bin_path = os.path.join(bin_path, "mac")
     else:
         bin_path = os.path.join(bin_path, "win")
@@ -264,9 +266,9 @@ def full_pleasant_nwt(pleasant_nwt_setup_from_yaml):
 @pytest.fixture(scope="session", autouse=True)
 def tmpdir(project_root_path):
     folder = project_root_path + '/mfsetup/tests/tmp'
-    if os.path.isdir(folder):
-        shutil.rmtree(folder)
-    os.makedirs(folder)
+    #if os.path.isdir(folder):
+    #    shutil.rmtree(folder)
+    #os.makedirs(folder)
     return folder
 
 

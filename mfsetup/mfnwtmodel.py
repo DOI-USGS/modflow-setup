@@ -14,15 +14,14 @@ from flopy.utils import binaryfile as bf
 from .bcs import setup_ghb_data
 from .discretization import (deactivate_idomain_above, make_ibound,
                              find_remove_isolated_cells)
-from .tdis import (setup_perioddata_group, setup_perioddata,
-                   get_parent_stress_periods, parse_perioddata_groups)
 from .grid import MFsetupGrid
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
-from .lakes import make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes, setup_lake_info
+from .lakes import (make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes,
+                    setup_lake_info, setup_lake_tablefiles)
 from .utils import update, get_packages, get_input_arguments
 from .obs import read_observation_data, setup_head_observations
-from .sourcedata import ArraySourceData, MFArrayData, TabularSourceData, setup_array
+from .sourcedata import TabularSourceData
 from .tmr import Tmr
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text, lenuni_values
 from .wells import setup_wel_data
@@ -103,6 +102,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # and cells inactivated on the basis of layer elevations
         ibound = (self.bas6.ibound.array > 0) & (ibound_from_layer_elevations == 1)
         ibound = ibound.astype(int)
+
+        # remove cells that conincide with lakes
+        ibound[self.isbc == 1] = 0.
 
         # remove cells that are above stream cells
         if 'SFR' in self.get_package_list():
@@ -243,7 +245,6 @@ class MFnwtModel(MFsetupMixin, Modflow):
         bas = fm.ModflowBas(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         self._set_ibound()
-        #self._ibound = None
         return bas
 
     def setup_oc(self):
@@ -507,38 +508,14 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self.lake_info = setup_lake_info(self)
         nlakes = len(self.lake_info)
 
-        # lake package settings
-        start_tab_units_at = 150  # default starting number for iunittab
-
         # set up the tab files, if any
         tab_files_argument = None
         tab_units = None
+        start_tab_units_at = 150  # default starting number for iunittab
         if 'stage_area_volume_file' in source_data:
-            print('setting up tabfiles...')
-            sd = TabularSourceData.from_config(source_data['stage_area_volume_file'])
-            df = sd.get_data()
 
-            lakes = df.groupby(sd.id_column)
-            n_included_lakes = len(set(self.lake_info['feat_id']).\
-                                   intersection(set(lakes.groups.keys())))
-            assert n_included_lakes == nlakes, "stage_area_volume (tableinput) option" \
-                                               " requires info for each lake, " \
-                                               "only these feature IDs found:\n{}".format(df[sd.id_column].tolist())
-            tab_files = []
-            tab_units = []
-            for i, id in enumerate(self.lake_info['feat_id'].tolist()):
-                dfl = lakes.get_group(id)
-                assert len(dfl) == 151, "151 values required for each lake; " \
-                                        "only {} for feature id {} in {}"\
-                    .format(len(dfl), id, source_data['stage_area_volume_file'])
-                tabfilename = '{}/{}/{}_stage_area_volume.dat'.format(self.model_ws,
-                                                                      self.external_path,
-                                                                      id)
-                dfl[['stage', 'volume', 'area']].to_csv(tabfilename, index=False, header=False,
-                                                        sep=' ', float_format='%.5e')
-                print('wrote {}'.format(tabfilename))
-                tab_files.append(tabfilename)
-                tab_units.append(start_tab_units_at + i)
+            tab_files = setup_lake_tablefiles(self, source_data['stage_area_volume_file'])
+            tab_units = list(range(start_tab_units_at, start_tab_units_at + len(tab_files)))
 
             # tabfiles aren't rewritten by flopy on package write
             self.cfg['lak']['tab_files'] = tab_files
@@ -561,12 +538,12 @@ class MFnwtModel(MFsetupMixin, Modflow):
         bdlknc = np.zeros((self.nlay, self.nrow, self.ncol))
         # make the areal footprint of lakebed leakance from the zones (layer 1)
         bdlknc[0] = make_bdlknc2d(lakzones,
-                                  self.cfg['lak']['littoral_leakance'],
-                                  self.cfg['lak']['profundal_leakance'])
+                                  self.cfg['lak']['source_data']['littoral_leakance'],
+                                  self.cfg['lak']['source_data']['profundal_leakance'])
         for k in range(self.nlay):
             if k > 0:
                 # for each underlying layer, assign profundal leakance to cells were isbc == 1
-                bdlknc[k][self.isbc[k] == 1] = self.cfg['lak']['profundal_leakance']
+                bdlknc[k][self.isbc[k] == 1] = self.cfg['lak']['source_data']['profundal_leakance']
             save_array(self.cfg['intermediate_data']['bdlknc'][0][k], bdlknc[k], fmt='%.6e')
 
         # get estimates of stage from model top, for specifying ranges

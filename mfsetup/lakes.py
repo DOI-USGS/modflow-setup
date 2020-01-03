@@ -1,16 +1,19 @@
+import os
 import re
 from collections import OrderedDict
 import time
 import numpy as np
 import pandas as pd
+from scipy.ndimage import sobel
 from shapely.geometry import Polygon
 import flopy
 fm = flopy.modflow
 from flopy.utils.mflistfile import ListBudget
 from gisutils import shp2df, project, get_proj_str
 from mfsetup.evaporation import hamon_evaporation
+from mfsetup.fileio import save_array
 from mfsetup.grid import rasterize
-from mfsetup.sourcedata import SourceData, aggregate_dataframe_to_stress_period
+from mfsetup.sourcedata import SourceData, aggregate_dataframe_to_stress_period, TabularSourceData
 from mfsetup.units import convert_length_units, convert_temperature_units
 
 
@@ -131,7 +134,7 @@ def setup_lake_info(model):
     # lake package must have a source_data block
     # (e.g. for supplying shapefile delineating lake extents)
     source_data = model.cfg.get('lak', {}).get('source_data')
-    if source_data is None:
+    if source_data is None or 'lak' not in model.package_list:
         return
     lakesdata = model.load_features(**source_data['lakes_shapefile'])
     lakesdata_proj_str = get_proj_str(source_data['lakes_shapefile']['filename'])
@@ -139,7 +142,7 @@ def setup_lake_info(model):
     name_column = source_data['lakes_shapefile'].get('name_column', 'name').lower()
     nlakes = len(lakesdata)
 
-    # save a lookup file mapping lake ids to hydroids
+    # make dataframe with lake IDs, names and locations
     centroids = project([g.centroid for g in lakesdata.geometry],
                         lakesdata_proj_str, 'epsg:4269')
     df = pd.DataFrame({'lak_id': np.arange(1, nlakes + 1),
@@ -148,8 +151,21 @@ def setup_lake_info(model):
                        'latitude': [c.y for c in centroids],
                        'geometry': lakesdata['geometry']
                        })
+    # get starting stages from model top, for specifying ranges
+    stages = []
+    for lakid in df['lak_id']:
+        loc = model._lakarr2d == lakid
+        est_stage = model.dis.top.array[loc].min()
+        stages.append(est_stage)
+    df['strt'] = np.array(stages)
+
+    # save a lookup file mapping lake ids to hydroids
     df.drop('geometry', axis=1).to_csv(model.cfg['lak']['output_files']['lookup_file'],
               index=False)
+
+    # clean up names
+    df['name'].replace('nan', '', inplace=True)
+    df['name'].replace(' ', '', inplace=True)
     return df
 
 
@@ -208,6 +224,282 @@ def setup_lake_fluxes(model):
     per_means = df.groupby('per').mean()
     highk_lake_rech = dict(per_means['precipitation'] - per_means['evaporation'])
     df['highk_lake_rech'] = [highk_lake_rech[per] for per in df.per]
+    return df
+
+
+def setup_lake_tablefiles(model, cfg):
+
+    print('setting up tabfiles...')
+    sd = TabularSourceData.from_config(cfg)
+    df = sd.get_data()
+
+    lakes = df.groupby(sd.id_column)
+    n_included_lakes = len(set(model.lake_info['feat_id']). \
+                           intersection(set(lakes.groups.keys())))
+    assert n_included_lakes == model.nlakes, "stage_area_volume (tableinput) option" \
+                                       " requires info for each lake, " \
+                                       "only these feature IDs found:\n{}".format(df[sd.id_column].tolist())
+    tab_files = []
+    for i, id in enumerate(model.lake_info['feat_id'].tolist()):
+        dfl = lakes.get_group(id)
+        tabfilename = '{}/{}/{}_stage_area_volume.dat'.format(model.model_ws,
+                                                              model.external_path,
+                                                              id)
+        if model.version == 'mf6':
+            with open(tabfilename, 'w', newline="") as dest:
+                dest.write('begin dimensions\n')
+                dest.write('nrow {}\n'.format(len(df)))
+                dest.write('ncol {}\n'.format(df.shape[1]))
+                dest.write('end dimensions\n')
+                dest.write('\nbegin table\n')
+                dest.write('#{}\n'.format(' '.join(df.columns)))
+                dfl[['stage', 'volume', 'area']].to_csv(dest, index=False, header=False,
+                                                        sep=' ', float_format='%.5e')
+                dest.write('\nend table\n')
+
+        else:
+            assert len(dfl) == 151, "151 values required for each lake; " \
+                                    "only {} for feature id {} in {}" \
+                .format(len(dfl), id, cfg)
+            dfl[['stage', 'volume', 'area']].to_csv(tabfilename, index=False, header=False,
+                                                    sep=' ', float_format='%.5e')
+        print('wrote {}'.format(tabfilename))
+        tab_files.append(tabfilename)
+    return tab_files
+
+
+def setup_lake_connectiondata(model,
+                              include_horizontal_connections=True):
+
+    cfg = model.cfg['lak']
+
+    # set up littoral and profundal zones
+    if model.lake_info is None:
+        model.lake_info = setup_lake_info(model)
+    lakzones = make_bdlknc_zones(model.modelgrid, model.lake_info,
+                                 include_ids=model.lake_info['feat_id'])
+    model.setup_external_filepaths('lak', 'lakzones',
+                                   cfg['{}_filename_fmt'.format('lakzones')],
+                                   nfiles=1)
+    save_array(model.cfg['intermediate_data']['lakzones'][0], lakzones, fmt='%d')
+
+    # make the (2D) areal footprint of lakebed leakance from the zones
+    bdlknc = make_bdlknc2d(lakzones,
+                           cfg['source_data']['littoral_leakance'],
+                           cfg['source_data']['profundal_leakance'])
+
+    # cell tops and bottoms
+    layer_elevations = np.zeros((model.nlay + 1, model.nrow, model.ncol), dtype=float)
+    layer_elevations[0] = model.dis.top.array
+    layer_elevations[1:] = model.dis.botm.array
+
+    lakeno = []
+    cellid = []
+    bedleak = []
+    for lake_id in range(1, model.nlakes + 1):
+
+        # get the vertical GWF connections for each lake
+        k, i, j = np.where(model.lakarr == lake_id)
+        # assign vertical connections to the highest active layer
+        k = np.argmax(model.idomain[:, i, j], axis=0)
+        cellid += list(zip(k, i, j))
+        lakeno += [lake_id] * len(k)
+        bedleak += list(bdlknc[i, j])
+
+    df = pd.DataFrame({'lakeno': lakeno,
+                       'cellid': cellid,
+                       'claktype': 'vertical',
+                       'bedleak': bedleak,
+                       'belev': 0.,
+                       'telev': 0.,
+                       'connlen': 0.,
+                       'connwidth': 0.
+                       })
+
+    if include_horizontal_connections:
+        for lake_id in range(1, model.nlakes + 1):
+            lake_extent = model.lakarr == lake_id
+            horizontal_connections = get_horizontal_connections(lake_extent,
+                                                                layer_elevations,
+                                                                model.dis.delr.array,
+                                                                model.dis.delc.array,
+                                                                bdlknc)
+            # drop horizontal connections to inactive cells
+            k, i, j = zip(*horizontal_connections['cellid'])
+            inactive = model.idomain[k, i, j] < 1
+            horizontal_connections = horizontal_connections.loc[~inactive].copy()
+            horizontal_connections['lakeno'] = lake_id
+            df = df.append(horizontal_connections)
+    df['iconn'] = list(range(len(df)))
+    df['lakeno'] -= 1  # convert to zero-based for mf6
+    return df
+
+
+def setup_mf6_lake_obs(kwargs):
+
+    packagedata = kwargs['packagedata']
+    types = ['stage',
+             #'ext-inflow',
+             #'outlet-inflow',
+             'inflow',
+             #'from-mvr',
+             'rainfall',
+             'runoff',
+             'lak',
+             'withdrawal',
+             'evaporation',
+             #'ext-outflow',
+             #'to-mvr',
+             'storage',
+             #'constant',
+             #'outlet',
+             'volume',
+             'surface-area',
+             'wetted-area',
+             'conductance'
+             ]
+    obs_input = {}
+    for rec in packagedata:
+        lakeno = rec[0]
+        boundname = rec[3]
+        if boundname == '' or str(boundname) == 'nan':
+            lakename = 'lake' + str(lakeno + 1)
+            boundname = lakeno + 1  # convert to one-based
+        else:
+            lakename = rec[3]
+
+        filename = '{}.obs.csv'.format(lakename)
+        lake_obs = []
+        for obstype in types:
+            obsname = obstype  #'{}_{}'.format(lakename, obstype)
+            entry = (obsname, obstype, boundname)
+            lake_obs.append(entry)
+        obs_input[filename] = lake_obs
+    obs_input['digits'] = 10
+    return obs_input
+
+
+def get_lakeperioddata(lake_fluxes):
+    """Convert lake_fluxes table to MODFLOW-6 lakeperioddata input.
+    """
+    lakeperioddata = {}
+    periods = lake_fluxes.groupby('per')
+    for per, group in periods:
+        group = group.replace('ACTIVE', np.nan)
+        group.rename(columns={'precipitation': 'rainfall'}, inplace=True)
+        group.index = group.lak_id.values
+        datacols = {'rainfall', 'evaporation', 'withdrawal', 'runoff', 'stage'}
+        datacols = datacols.intersection(group.columns)
+        group = group.loc[:, datacols]
+        data = group.stack().reset_index()
+        data.rename(columns={'level_0': 'lakeno',
+                             0: 'value'}, inplace=True)
+        # data['laksetting'] = ['{} {}'.format(variable, value)
+        #                      for variable, value in zip(data['level_1'], data['value'])]
+        data['lakeno'] -= 1
+        data = data[['lakeno', 'level_1', 'value']].values.tolist()
+        lakeperioddata[per] = data
+    return lakeperioddata
+
+
+def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
+                               bdlknc=None):
+    """Get cells along the edge of a lake, using the sobel filter method
+    (for edge detection) in SciPy.
+
+    see:
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.sobel.html
+    https://en.wikipedia.org/wiki/Sobel_operator
+
+    Parameters
+    ----------
+    lake_extent : 2 or 3D array of ones and zeros
+        With ones indicating cells containing the lake
+    layer_elevations : np.ndarray
+        Numpy array of cell top and bottom elevations.
+        (shape = nlay + 1, nrow, ncol)
+    delr : 1D array of cell spacings along a model row
+    delc : 1D array of cell spacings along a model column
+    bdlknc : 2D array
+        Array of lakebed leakance values
+        (optional; default=1)
+
+    Returns
+    -------
+    df : DataFrame
+        Table of horizontal cell connections for the Connectiondata
+        input block in MODFLOW-6.
+        Columns:
+        cellid, claktype, bedleak, belev, telev, connlen, connwidth
+        (see MODFLOW-6 io guide for an explanation)
+
+    """
+    lake_extent = lake_extent.astype(float)
+    if len(lake_extent.shape) != 3:
+        lake_extent = np.expand_dims(lake_extent, axis=0)
+    if bdlknc is None:
+        bdlknc = np.ones_like(lake_extent[0], dtype=float)
+
+    cellid = []
+    bedleak = []
+    belev = []
+    telev = []
+    connlen = []
+    connwidth = []
+    for klay, lake_extent_k in enumerate(lake_extent):
+        sobel_x = sobel(lake_extent_k, axis=1, mode='constant', cval=0.)
+        sobel_x[lake_extent_k == 1] = 10
+        sobel_y = sobel(lake_extent_k, axis=0, mode='constant', cval=0.)
+        sobel_y[lake_extent_k == 1] = 10
+
+        # right face connections
+        i, j = np.where((sobel_x <= -2) & (sobel_x >= -4))
+        k = np.ones(len(i), dtype=int) * klay
+        cellid += list(zip(k, i, j))
+        bedleak += list(bdlknc[i, j])
+        belev += list(layer_elevations[k + 1, i, j])
+        telev += list(layer_elevations[k, i, j])
+        connlen += list(0.5 * delr[j - 1] + 0.5 * delr[j])
+        connwidth += list(delc[i])
+
+        # left face connections
+        i, j = np.where((sobel_x >= 2) & (sobel_x <= 4))
+        k = np.ones(len(i), dtype=int) * klay
+        cellid += list(zip(k, i, j))
+        bedleak += list(bdlknc[i, j])
+        belev += list(layer_elevations[k + 1, i, j])
+        telev += list(layer_elevations[k, i, j])
+        connlen += list(0.5 * delr[j + 1] + 0.5 * delr[j])
+        connwidth += list(delc[i])
+
+        # bottom face connections
+        i, j = np.where((sobel_y <= -2) & (sobel_y >= -4))
+        k = np.ones(len(i), dtype=int) * klay
+        cellid += list(zip(k, i, j))
+        bedleak += list(bdlknc[i, j])
+        belev += list(layer_elevations[k + 1, i, j])
+        telev += list(layer_elevations[k, i, j])
+        connlen += list(0.5 * delc[i-1] + 0.5 * delc[i])
+        connwidth += list(delr[j])
+
+        # top face connections
+        i, j = np.where((sobel_y >= 2) & (sobel_y <= 4))
+        k = np.ones(len(i), dtype=int) * klay
+        cellid += list(zip(k, i, j))
+        bedleak += list(bdlknc[i, j])
+        belev += list(layer_elevations[k + 1, i, j])
+        telev += list(layer_elevations[k, i, j])
+        connlen += list(0.5 * delc[i + 1] + 0.5 * delc[i])
+        connwidth += list(delr[j])
+
+    df = pd.DataFrame({'cellid': cellid,
+                       'claktype': 'horizontal',
+                       'bedleak': bedleak,
+                       'belev': belev,
+                       'telev': telev,
+                       'connlen': connlen,
+                       'connwidth': connwidth
+                       })
     return df
 
 

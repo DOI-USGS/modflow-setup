@@ -15,11 +15,13 @@ from .discretization import (make_idomain, deactivate_idomain_above,
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
 from .grid import MFsetupGrid
+from .lakes import (setup_lake_connectiondata, setup_lake_info,
+                    setup_lake_tablefiles, setup_lake_fluxes,
+                    get_lakeperioddata, setup_mf6_lake_obs)
 from .mf5to6 import get_package_name
 from .obs import setup_head_observations
-from .tdis import setup_perioddata, parse_perioddata_groups
 from .tmr import Tmr
-from .units import lenuni_text, itmuni_text
+from .units import lenuni_text, itmuni_text, convert_length_units, convert_time_units
 from .utils import update, get_input_arguments, flatten, get_packages
 from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
@@ -40,8 +42,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # default configuration
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
-                                     'ghb', 'lak', 'sfr', 'wel', 'maw',
-                                     'obs', 'ims']
+                                     'ghb', 'sfr', 'lak',
+                                     'wel', 'maw', 'obs', 'ims']
         self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
         self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
         self._set_cfg(cfg)   # set up the model configuration dictionary
@@ -100,6 +102,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # and cells inactivated on the basis of layer elevations
         idomain = (self.dis.idomain.array == 1) & (idomain_from_layer_elevations == 1)
         idomain = idomain.astype(int)
+
+        # remove cells that conincide with lakes
+        idomain[self.isbc == 1] = 0.
 
         # remove cells that are above stream cells
         if 'SFR' in self.get_package_list():
@@ -479,6 +484,89 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         wel = mf6.ModflowGwfwel(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return wel
+
+    def setup_lak(self):
+        """
+        Sets up the Lake package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'lak'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        if self.lakarr.sum() == 0:
+            print("lakes_shapefile not specified, or no lakes in model area")
+            return
+
+        # source data
+        source_data = self.cfg['lak']['source_data']
+
+        # munge lake package input
+        # returns dataframe with information for each lake
+        self.lake_info = setup_lake_info(self)
+
+        # returns dataframe with connection information
+        connectiondata = setup_lake_connectiondata(self)
+        nlakeconn = connectiondata.groupby('lakeno').count().iconn.to_dict()
+        self.lake_info['nlakeconn'] = [nlakeconn[id - 1] for id in self.lake_info['lak_id']]
+
+        # set up the tab files
+        if 'stage_area_volume_file' in source_data:
+            tab_files = setup_lake_tablefiles(self, source_data['stage_area_volume_file'])
+
+            # tabfiles aren't rewritten by flopy on package write
+            self.cfg['lak']['tab_files'] = tab_files
+            # kludge to deal with ugliness of lake package external file handling
+            # (need to give path relative to model_ws, not folder that flopy is working in)
+            tab_files_argument = [os.path.relpath(f) for f in tab_files]
+
+        # todo: implement lake outlets with SFR
+
+        # perioddata
+        self.lake_fluxes = setup_lake_fluxes(self)
+        lakeperioddata = get_lakeperioddata(self.lake_fluxes)
+
+        # set up input arguments
+        kwargs = self.cfg[package].copy()
+        options = self.cfg[package]['options'].copy()
+        renames = {'budget_fileout': 'budget_filerecord',
+                   'stage_fileout': 'stage_filerecord'}
+        for k, v in renames.items():
+            if k in options:
+                options[v] = options.pop(k)
+        kwargs.update(self.cfg[package]['options'])
+        kwargs['time_conversion'] = convert_time_units(self.time_units, 'seconds')
+        kwargs['length_conversion'] = convert_time_units(self.length_units, 'meters')
+        kwargs['nlakes'] = len(self.lake_info)
+        kwargs['noutlets'] = 0  # not implemented
+        # [lakeno, strt, nlakeconn, aux, boundname]
+        packagedata_cols = ['lak_id', 'strt', 'nlakeconn']
+        if kwargs.get('boundnames'):
+            packagedata_cols.append('name')
+        packagedata = self.lake_info[packagedata_cols]
+        packagedata['lak_id'] -= 1  # convert to zero-based
+        kwargs['packagedata'] = packagedata.values.tolist()
+        connectiondata_cols = ['lakeno', 'iconn', 'cellid', 'claktype', 'bedleak',
+                               'belev', 'telev', 'connlen', 'connwidth']
+        kwargs['connectiondata'] = connectiondata[connectiondata_cols].values.tolist()
+        kwargs['ntables'] = len(tab_files)
+        kwargs['tables'] = [(i, f) for i, f in enumerate(tab_files)]
+        kwargs['outlets'] = None  # not implemented
+        kwargs['outletperioddata'] = None  # not implemented
+        kwargs['lakeperioddata'] = lakeperioddata
+
+        # observations
+        kwargs['observations'] = setup_mf6_lake_obs(kwargs)
+
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwflak)
+        lak = mf6.ModflowGwflak(self, **kwargs)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return lak
 
     def setup_obs(self):
         """

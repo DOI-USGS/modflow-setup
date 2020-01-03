@@ -355,9 +355,11 @@ class MFsetupMixin():
 
         see also the .bc_numbers attibute
         """
+        # DIS package is needed to set up the isbc array
+        # (to compare lake bottom elevations to layer bottoms)
         if 'DIS' not in self.get_package_list():
             return None
-        elif self._isbc is None:
+        if self._isbc is None:
             self._set_isbc()
         return self._isbc
 

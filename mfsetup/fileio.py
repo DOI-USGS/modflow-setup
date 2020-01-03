@@ -955,3 +955,48 @@ def read_mf6_block(filename, blockname):
     return data
 
 
+def read_lak_ggo(f, model,
+                 start_datetime='1970-01-01',
+                 keep_only_last_timestep=True):
+    lake, hydroid = os.path.splitext(os.path.split(f)[1])[0].split('_')
+    lak_number = int(lake.strip('lak'))
+    df = read_ggofile(f, model=model,
+                      start_datetime=start_datetime,
+                      keep_only_last_timestep=keep_only_last_timestep)
+    df['lake'] = lak_number
+    df['hydroid'] = hydroid
+    return df
+
+
+def read_ggofile(gagefile, model,
+                 start_datetime='1970-01-01',
+                 keep_only_last_timestep=True):
+    with open(gagefile) as src:
+        next(src)
+        next(src)
+        df = pd.read_csv(src, skiprows=0,
+                         header=None,
+                         delim_whitespace=True,
+                         names=['time', 'stage', 'flow']
+                         )
+    kstp = []
+    kper = []
+    for i, nstp in enumerate(model.dis.nstp.array):
+        for j in range(nstp):
+            kstp.append(j)
+            kper.append(i)
+    if len(df) == len(kstp) + 1:
+        df = df.iloc[1:].copy()
+    if df.time.iloc[0] == 1:
+        df['time'] -= 1
+    df['kstp'] = kstp
+    df['kper'] = kper
+    if keep_only_last_timestep:
+        df = df.groupby('kper').last()
+
+    start_ts = pd.Timestamp(start_datetime)
+    df['datetime'] = pd.to_timedelta(df.time, unit='D') + start_ts
+    df.index = df.datetime
+    return df
+
+

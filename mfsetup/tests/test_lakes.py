@@ -4,7 +4,10 @@ Test lake package functionality
 import numpy as np
 import pandas as pd
 import pytest
-from mfsetup.lakes import PrismSourceData, setup_lake_info
+from mfsetup.fileio import load_array
+from mfsetup.lakes import (PrismSourceData, setup_lake_info,
+                           setup_lake_connectiondata,
+                           get_horizontal_connections)
 
 
 @pytest.fixture
@@ -54,11 +57,67 @@ def test_parse_prism_source_data(source_data_from_prism_cases, pleasant_nwt_with
     assert np.allclose(data.loc[1:, 'precipitation'], prism['ppt_md'])
 
 
-def test_setup_lake_info(pleasant_nwt):
+def test_setup_lake_info(get_pleasant_mf6_with_dis):
+
+    m = get_pleasant_mf6_with_dis
+    result = setup_lake_info(m)
+    for id in result.lak_id:
+        loc = m._lakarr_2d == id
+        strt = result.loc[result.lak_id == id, 'strt'].values[0]
+        assert np.allclose(strt, m.dis.top.array[loc].min())
 
     # test setting up lake info without any lake package
-    m = pleasant_nwt
     del m.cfg['lak']
     result = setup_lake_info(m)
     assert result is None
     assert m.lake_recharge is None
+
+
+def test_setup_lake_connectiondata(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis
+    df = setup_lake_connectiondata(m)
+    df['k'] = [c[0] for c in df['cellid']]
+    vertical_connections = df.loc[df.claktype == 'vertical']
+    lakezones = load_array(m.cfg['intermediate_data']['lakzones'][0])
+    litleak = m.cfg['lak']['source_data']['littoral_leakance']
+    profleak = m.cfg['lak']['source_data']['profundal_leakance']
+    for k, lakarr2d in enumerate(m.lakarr):
+        kvc = vertical_connections.loc[vertical_connections.k == k]
+        assert np.sum(lakarr2d > 0) == len(kvc)
+        assert np.sum(kvc.bedleak == profleak) == np.sum(lakezones == 100)
+        assert np.sum(kvc.bedleak == litleak) > 0
+        assert np.sum(kvc.bedleak == litleak) <= np.sum(lakezones == 1)
+
+
+    j=2
+
+
+def test_get_horizontal_connections():
+    nlay, nrow, ncol = 2, 20, 20
+    lakarr = np.zeros((nlay, nrow, ncol))
+    lakarr[0, 4, 7] = 1
+    lakarr[0, 11:15, 9] = 1
+    lakarr[0, 15, 10] = 1
+    lakarr[0, 14, 8] = 1
+    lakarr[0, 11:13, 6] = 1
+    lakarr[0, 3:5, 8] = 1
+    lakarr[0, 6:10, 5:-5] = 1
+    lakarr[0, 5:11, 6:-6] = 1
+    lakarr[1, 7:-7, 7:-7] = 1
+    layer_elevations = np.zeros((nlay + 1, nrow, ncol))
+    layer_elevations[0] = 2
+    layer_elevations[1] = 1
+    delr = np.ones(ncol)
+    delc = np.ones(nrow)
+    connections = get_horizontal_connections(lakarr, layer_elevations, delr, delc)
+    connections['k'] = [c[0] for c in connections['cellid']]
+
+    from scipy.ndimage import sobel
+    for k, lakarr2d in enumerate(lakarr):
+        sobel_x = sobel(lakarr2d, axis=1, mode='constant', cval=0.)
+        sobel_x[lakarr2d == 1] = 0
+        sobel_y = sobel(lakarr2d, axis=0, mode='constant', cval=0.)
+        sobel_y[lakarr2d == 1] = 0
+
+        ncon = np.sum(np.abs(sobel_x) > 1) + np.sum(np.abs(sobel_y) > 1)
+        assert ncon == np.sum(connections['k'] == k)
