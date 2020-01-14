@@ -7,6 +7,7 @@ import flopy
 fm = flopy.modflow
 mf6 = flopy.mf6
 from gisutils import (shp2df, get_values_at_points, project, get_proj_str)
+from .bcs import get_bc_package_cells
 from .grid import MFsetupGrid, get_ij, setup_structured_grid, rasterize
 from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
     load_cfg, setup_external_filepaths
@@ -29,6 +30,19 @@ class MFsetupMixin():
     https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-are-they-useful
     """
     source_path = os.path.split(__file__)[0]
+    """        -1 : well
+        0 : no lake
+        1 : lak package lake (lakarr > 0)
+        2 : high-k lake
+        3 : ghb
+        4 : sfr"""
+    # package variable name: number
+    bc_numbers = {'wel': -1,
+                  'lak': 1,
+                  'high-k lake': 2,
+                  'ghb': 3,
+                  'sfr': 4,
+                  }
 
     def __init__(self, parent):
 
@@ -51,6 +65,7 @@ class MFsetupMixin():
         self._lake_recharge = None
         self._nodata_value = -9999
         self._model_ws = None
+        self._abs_model_ws = None
         self.lake_info = None
         self.lake_fluxes = None
 
@@ -224,6 +239,7 @@ class MFsetupMixin():
     @model_ws.setter
     def model_ws(self, model_ws):
         self._model_ws = model_ws
+        self._abs_model_ws = os.path.normpath(os.path.abspath(model_ws))
 
     @property
     def tmpdir(self):
@@ -334,8 +350,10 @@ class MFsetupMixin():
         0 : no lake
         1 : lak package lake (lakarr > 0)
         2 : high-k lake
-        3 : sfr
-        4 : ghb
+        3 : ghb
+        4 : sfr
+
+        see also the .bc_numbers attibute
         """
         if 'DIS' not in self.get_package_list():
             return None
@@ -543,6 +561,7 @@ class MFsetupMixin():
             abspath = os.path.abspath(self.cfg.get('model', {}).get('model_ws', '.'))
         if not os.path.exists(abspath):
             os.makedirs(abspath)
+        self._abs_model_ws = os.path.normpath(abspath)
         os.chdir(abspath)  # within a session, modflow-setup operates in the model_ws
         if self.relative_external_paths:
             model_ws = os.path.relpath(abspath)
@@ -621,7 +640,7 @@ class MFsetupMixin():
         self.cfg['external_files'] = {}
 
     def _set_isbc2d(self):
-            isbc = np.zeros((self.nrow, self.ncol))
+            isbc = np.zeros((self.nrow, self.ncol), dtype=int)
             lakesdata = None
             lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
             if lakes_shapefile is not None:
@@ -634,23 +653,24 @@ class MFsetupMixin():
                 isanylake = rasterize(lakesdata, self.modelgrid)
                 isbc[isanylake > 0] = 2
                 isbc[self._lakarr2d > 0] = 1
-            if 'GHB' in self.get_package_list():
-                i, j = self.ghb.stress_period_data[0]['i'], \
-                       self.ghb.stress_period_data[0]['j']
-                isbc[i, j][isbc[i, j] != 1] = 4
-            if 'SFR' in self.get_package_list():
-                i, j = self.sfr.reach_data['i'], \
-                          self.sfr.reach_data['j']
-                isbc[i, j][isbc[i, j] != 1] = 3
-            if 'WEL' in self.get_package_list():
-                i, j = self.wel.stress_period_data[0]['i'], \
-                       self.wel.stress_period_data[0]['j']
-                isbc[i, j][isbc[i, j] == 0] = -1
+            # add other bcs
+            for packagename, bcnumber in self.bc_numbers.items():
+                if packagename.upper() in self.get_package_list() and packagename != 'lak':
+                    package = getattr(self, packagename)
+                    try:
+                        k, i, j = get_bc_package_cells(package)
+                        not_a_lake = np.where(isbc[i, j] != 1)
+                        i = i[not_a_lake]
+                        j = j[not_a_lake]
+                        isbc[i, j] = bcnumber
+                        #isbc[i, j][isbc[i, j] != 1] = bcnumber
+                    except:
+                        j=2
             self._isbc_2d = isbc
             self._set_lake_bathymetry()
 
     def _set_isbc(self):
-            isbc = np.zeros((self.nlay, self.nrow, self.ncol))
+            isbc = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)
             isbc[0] = self._isbc2d
 
             lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
@@ -661,21 +681,39 @@ class MFsetupMixin():
                 if np.any(ibelow):
                     isbc[i+1][ibelow] = self._isbc2d[ibelow]
             # add other bcs
-            if 'SFR' in self.get_package_list():
-                k, i, j = self.sfr.reach_data['k'], \
-                          self.sfr.reach_data['i'], \
-                          self.sfr.reach_data['j']
-                isbc[k, i, j][isbc[k, i, j] != 1] = 3
-            if 'WEL' in self.get_package_list():
-                k, i, j = self.wel.stress_period_data[0]['k'], \
-                          self.wel.stress_period_data[0]['i'], \
-                          self.wel.stress_period_data[0]['j']
-                isbc[k, i, j][isbc[k, i, j] == 0] = -1
+            for packagename, bcnumber in self.bc_numbers.items():
+                if packagename.upper() in self.get_package_list() and packagename != 'lak':
+                    package = getattr(self, packagename)
+                    try:
+                        k, i, j = get_bc_package_cells(package)
+                        not_a_lake = np.where(isbc[k, i, j] != 1)
+                        k = k[not_a_lake]
+                        i = i[not_a_lake]
+                        j = j[not_a_lake]
+                        isbc[k, i, j] = bcnumber
+                        #isbc[i, j][isbc[i, j] != 1] = bcnumber
+                    except:
+                        j = 2
+            #if 'GHB' in self.get_package_list():
+            #    k, i, j = self.ghb.stress_period_data[0]['k'], \
+            #              self.ghb.stress_period_data[0]['i'], \
+            #              self.ghb.stress_period_data[0]['j']
+            #    isbc[k, i, j][isbc[k, i, j] != 1] = 4
+            #if 'SFR' in self.get_package_list():
+            #    k, i, j = self.sfr.reach_data['k'], \
+            #              self.sfr.reach_data['i'], \
+            #              self.sfr.reach_data['j']
+            #    isbc[k, i, j][isbc[k, i, j] != 1] = 3
+            #if 'WEL' in self.get_package_list():
+            #    k, i, j = self.wel.stress_period_data[0]['k'], \
+            #              self.wel.stress_period_data[0]['i'], \
+            #              self.wel.stress_period_data[0]['j']
+            #    isbc[k, i, j][isbc[k, i, j] == 0] = -1
             self._isbc = isbc
             self._set_lakarr()
 
     def _set_lakarr2d(self):
-            lakarr2d = np.zeros((self.nrow, self.ncol))
+            lakarr2d = np.zeros((self.nrow, self.ncol), dtype=int)
             if 'lak' in self.package_list:
                 lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile', {}).copy()
                 lakesdata = self.load_features(**lakes_shapefile)  # caches loaded features
@@ -927,7 +965,10 @@ class MFsetupMixin():
             active_cells = self.idomain.sum(axis=0) > 0
         else:
             active_cells = self.ibound.sum(axis=0) > 0
-        isfr = active_cells & (self._isbc2d == 0)
+        # only include active cells that don't have another boundary condition
+        # (besides the wel package)
+        isfr = active_cells & (self._isbc2d <= 0)
+
         #  kludge to get sfrmaker to work with modelgrid
         self.modelgrid.model_length_units = self.length_units
 

@@ -115,7 +115,10 @@ def setup_head_observations(model, obs_info_files=None,
 
     print('Dropping head observations that coincide with Lake Package Lakes...')
     i, j = get_ij(self.modelgrid, df.x.values, df.y.values)
-    islak = self.lakarr[0, i, j] != 0
+    try:
+        islak = self.lakarr[0, i, j] != 0
+    except:
+        j=2
     df['i'], df['j'] = i, j
     df = df.loc[~islak].copy()
 

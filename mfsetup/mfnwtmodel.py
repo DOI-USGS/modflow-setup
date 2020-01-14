@@ -45,8 +45,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # default configuration
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
-                                     'ghb', 'lak', 'sfr',
-                                     'wel', 'mnw2', 'gag', 'hyd', 'nwt']
+                                     'ghb', 'lak', 'sfr', 'wel', 'mnw2',
+                                     'gag', 'hyd', 'nwt']
         # default configuration (different for nwt vs mf6)
         self.cfg = load(self.source_path + self.default_file) # '/mfnwt_defaults.yml')
         self.cfg['filename'] = self.source_path + self.default_file #'/mfnwt_defaults.yml'
@@ -495,6 +495,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         print('setting up LAKE package...')
         t0 = time.time()
+        # if shapefile of lakes was included,
+        # lakarr should be automatically built by property method
         if self.lakarr.sum() == 0:
             print("lakes_shapefile not specified, or no lakes in model area")
             return

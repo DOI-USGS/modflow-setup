@@ -42,7 +42,6 @@ def test_ibound(pleasant_nwt_with_dis):
 
 
 def test_setup_lak(pleasant_nwt_with_dis_bas6):
-    return
     m = pleasant_nwt_with_dis_bas6
     lak = m.setup_lak()
     lak.write_file()
@@ -54,9 +53,8 @@ def test_setup_lak(pleasant_nwt_with_dis_bas6):
     assert np.allclose(precip, prism['ppt_md'])
 
 
-def test_ghb_setup(pleasant_nwt_with_dis_bas6):
-    return
-    m = pleasant_nwt_with_dis_bas6
+def test_ghb_setup(get_pleasant_nwt_with_dis_bas6):
+    m = get_pleasant_nwt_with_dis_bas6
     ghb = m.setup_ghb()
     ghb.write_file()
     assert os.path.exists(ghb.fn_path)
@@ -72,12 +70,11 @@ def test_ghb_setup(pleasant_nwt_with_dis_bas6):
     # check that heads are above layer botms
     assert np.all(spd0['bhead'] > m.dis.botm.array[k, i, j])
     assert np.all(spd0['cond'] == m.cfg['ghb']['cond'])
-    j=2
 
 
-def test_wel_setup(pleasant_nwt_with_dis_bas6):
+def test_wel_setup(get_pleasant_nwt_with_dis_bas6):
 
-    m = pleasant_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
+    m = get_pleasant_nwt_with_dis_bas6
     m.setup_upw()
 
     # test without tmr
@@ -105,5 +102,5 @@ def test_model_setup(full_pleasant_nwt):
     assert isinstance(m, MFnwtModel)
 
 
-def test_model_setup_and_run(full_pleasant_nwt_with_model_run):
-    m = full_pleasant_nwt_with_model_run
+def test_model_setup_and_run(pleasant_nwt_model_run):
+    m = pleasant_nwt_model_run

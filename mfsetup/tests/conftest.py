@@ -9,6 +9,8 @@ mf6 = flopy.mf6
 from mfsetup import MF6model, MFnwtModel
 from mfsetup.fileio import exe_exists, load_cfg
 from mfsetup.utils import get_input_arguments
+from .test_pleasant_mf6_inset import (pleasant_mf6_setup_from_yaml,
+                                      pleasant_mf6_test_cfg_path)
 
 
 @pytest.fixture(scope="session")
@@ -17,12 +19,24 @@ def project_root_path():
     return os.path.normpath(os.path.join(filepath, '../../'))
 
 
+def get_model(model):
+    """Fetch a fresh copy of a model from a fixture;
+    updating the workspace if needed."""
+    m = copy.deepcopy(model)
+    model_ws = m._abs_model_ws
+    cwd = os.path.normpath(os.path.abspath(os.getcwd()))
+    if cwd != model_ws:
+        os.chdir(model_ws)
+        print('changing workspace from {} to {}'.format(cwd, model_ws))
+    return m
+
+
 @pytest.fixture(scope="session")
 def bin_path(project_root_path):
     bin_path = os.path.join(project_root_path, "bin")
     if "linux" in platform.platform().lower():
         bin_path = os.path.join(bin_path, "linux")
-    elif "darwin" in platform.platform().lower():
+    elif "mac" in platform.platform().lower():
         bin_path = os.path.join(bin_path, "mac")
     else:
         bin_path = os.path.join(bin_path, "win")
@@ -190,7 +204,7 @@ def get_pleasant_nwt_with_dis(get_pleasant_nwt_with_grid):
     return m
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def get_pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis):
     print('creating Pleasant Lake MFnwtModel instance with dis and bas6 packages...')
     m = copy.deepcopy(get_pleasant_nwt_with_dis)
@@ -198,16 +212,16 @@ def get_pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis):
     return m
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def pleasant_nwt_setup_from_yaml(pleasant_nwt_test_cfg_path):
     m = MFnwtModel.setup_from_yaml(pleasant_nwt_test_cfg_path)
     m.write_input()
     return m
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def pleasant_nwt_model_run(pleasant_nwt_setup_from_yaml, mfnwt_exe):
-    m = copy.deepcopy(pleasant_nwt_setup_from_yaml)
+    m = pleasant_nwt_setup_from_yaml
     m.exe_name = mfnwt_exe
     success = False
     if exe_exists(mfnwt_exe):
@@ -222,37 +236,28 @@ def pleasant_nwt_model_run(pleasant_nwt_setup_from_yaml, mfnwt_exe):
 
 @pytest.fixture(scope="function")
 def pleasant_nwt(get_pleasant_nwt):
-    m = copy.deepcopy(get_pleasant_nwt)
-    return m
+    return get_model(get_pleasant_nwt)
 
 
 @pytest.fixture(scope="function")
 def pleasant_nwt_with_grid(get_pleasant_nwt_with_grid):
-    m = copy.deepcopy(get_pleasant_nwt_with_grid)
-    return m
+    return get_model(get_pleasant_nwt_with_grid)
 
 
 @pytest.fixture(scope="function")
 def pleasant_nwt_with_dis(get_pleasant_nwt_with_dis):
-    m = copy.deepcopy(get_pleasant_nwt_with_dis)
-    return m
+    return get_model(get_pleasant_nwt_with_dis)
 
 
 @pytest.fixture(scope="function")
 def pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis_bas6):
-    m = copy.deepcopy(get_pleasant_nwt_with_dis_bas6)
-    return m
+    return get_model(get_pleasant_nwt_with_dis_bas6)
 
 
 @pytest.fixture(scope="function")
 def full_pleasant_nwt(pleasant_nwt_setup_from_yaml):
-    m = copy.deepcopy(pleasant_nwt_setup_from_yaml)
-    return m
-
-
-@pytest.fixture(scope="function")
-def full_pleasant_nwt_with_model_run(pleasant_nwt_model_run):
-    m = copy.deepcopy(pleasant_nwt_model_run)
+    m = get_model(pleasant_nwt_setup_from_yaml)
+    m.write_input()
     return m
 
 
@@ -283,5 +288,16 @@ def models_with_dis(request,
 def modflow_executable(request, mfnwt_exe, mf6_exe):
     return {'mfnwt_exe': mfnwt_exe,
             'mf6_exe': mf6_exe}[request.param]
+
+
+# fixture to feed multiple model fixtures to a test
+# https://github.com/pytest-dev/pytest/issues/349
+@pytest.fixture(params=['full_pleasant_nwt',
+                        'pleasant_mf6_setup_from_yaml'])
+def pleasant_model(request,
+                   full_pleasant_nwt,
+                   pleasant_mf6_setup_from_yaml):
+    return {'full_pleasant_nwt': full_pleasant_nwt,
+            'pleasant_mf6_setup_from_yaml': pleasant_mf6_setup_from_yaml}[request.param]
 
 

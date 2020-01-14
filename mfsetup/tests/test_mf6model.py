@@ -657,6 +657,7 @@ def test_sfr_setup(model_with_sfr):
     assert m.sfrdata.model == m
 
 
+@pytest.mark.xfail(reason='flopy remove_package() issue')
 def test_idomain_above_sfr(model_with_sfr):
     m = model_with_sfr
     sfr = m.sfr
@@ -677,6 +678,9 @@ def test_idomain_above_sfr(model_with_sfr):
     np.savetxt(m.cfg['dis']['griddata']['top'][0]['filename'], new_top)
     m.dis.botm = new_botm
     #m.dis.top = new_top
+    m.remove_package(sfr)
+    m._reset_bc_arrays()
+    assert not np.any(m._isbc2d == 4)
     sfr = m.setup_sfr()
 
     # test loading a 3d array from a filelist

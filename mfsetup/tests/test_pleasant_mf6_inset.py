@@ -87,7 +87,7 @@ def pleasant_mf6_setup_from_yaml(pleasant_mf6_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_mf6_model_run(pleasant_mf6_setup_from_yaml, mf6_exe):
     m = copy.deepcopy(pleasant_mf6_setup_from_yaml)
-    m.exe_name = mf6_exe
+    m.simulation.exe_name = mf6_exe
     success = False
     if exe_exists(mf6_exe):
         success, buff = m.simulation.run_simulation()

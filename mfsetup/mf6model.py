@@ -40,8 +40,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # default configuration
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
-                                     'ghb', 'lak', 'sfr',
-                                     'wel', 'maw', 'obs', 'ims']
+                                     'ghb', 'lak', 'sfr', 'wel', 'maw',
+                                     'obs', 'ims']
         self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
         self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
         self._set_cfg(cfg)   # set up the model configuration dictionary
