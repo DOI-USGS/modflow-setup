@@ -320,6 +320,7 @@ def rasterize(feature, grid, id_column=None,
 def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           nrow=None, ncol=None,
                           dxy=None, delr=None, delc=None,
+                          top=None, botm=None,
                           rotation=0.,
                           parent_model=None, snap_to_NHG=False,
                           features=None, features_shapefile=None,
@@ -327,7 +328,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           buffer=1000,
                           epsg=None, model_length_units=None,
                           grid_file='grid.json',
-                          bbox_shapefile=None):
+                          bbox_shapefile=None, **kwargs):
     """"""
     print('setting up model grid...')
     t0 = time.time()
@@ -475,11 +476,18 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             grid_cfg[v] = grid_cfg.pop(k)
 
     # set up the model grid instance
+    grid_cfg['top'] = top
+    grid_cfg['botm'] = botm
+    grid_cfg.update(kwargs)  # update with any kwargs from function call
     kwargs = get_input_arguments(grid_cfg, MFsetupGrid)
     modelgrid = MFsetupGrid(**kwargs)
     modelgrid.cfg = grid_cfg
 
     # write grid info to json, and shapefile of bbox
+    # omit top and botm arrays from json represenation of grid
+    # (just for horizontal disc.)
+    del grid_cfg['top']
+    del grid_cfg['botm']
     fileio.dump(grid_file, grid_cfg)
     if bbox_shapefile is not None:
         write_bbox_shapefile(modelgrid, bbox_shapefile)

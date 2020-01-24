@@ -212,8 +212,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         dis = fm.ModflowDis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
-        if not isinstance(self._modelgrid, MFsetupGrid):
-            self._modelgrid = None  # override DIS package grid setup
+        #if not isinstance(self._modelgrid, MFsetupGrid):
+        #    self._modelgrid = None  # override DIS package grid setup
+        self.setup_grid()  # reset the model grid
         self._reset_bc_arrays()
         #self._isbc = None  # reset BC property arrays
         print("finished in {:.2f}s\n".format(time.time() - t0))

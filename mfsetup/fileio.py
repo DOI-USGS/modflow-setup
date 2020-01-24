@@ -541,6 +541,7 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
     files_successfully_loaded.append(disnamdata.filename)
     if m.verbose:
         print('   {:4s} package load...success'.format(dis.name[0]))
+    m.setup_grid()  # reset model grid now that DIS package is loaded
     assert m.pop_key_list.pop() == dis_key
     ext_unit_dict.pop(dis_key)
     start_datetime = ref_attributes.pop("start_datetime", "01-01-1970")

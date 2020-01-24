@@ -129,6 +129,12 @@ def test_dis_setup(pfl_nwt_with_grid):
     for f in arrayfiles:
         assert os.path.exists(f)
 
+    # verify that modelgrid was reset after building DIS
+    mg = m.modelgrid
+    assert (mg.nlay, mg.nrow, mg.ncol) == m.dis.botm.array.shape
+    assert np.array_equal(mg.top, m.dis.top.array)
+    assert np.array_equal(mg.botm, m.dis.botm.array)
+
     # test using previously made external files as input
     if m.version == 'mf6':
         assert m.cfg['dis']['top'] == m.cfg['external_files']['top']
@@ -159,8 +165,11 @@ def test_dis_setup(pfl_nwt_with_grid):
     botm_m = dis.botm.array.copy()
     m.cfg['dis']['top'] = None  # arrays don't get remade if this has data
     m.cfg['dis']['botm'] = None
+    del m.cfg['setup_grid']['top']
+    del m.cfg['setup_grid']['botm']
     m.cfg['dis']['remake_top'] = True
     m.cfg['dis']['lenuni'] = 1 # feet
+    m.remove_package('DIS')
     m.setup_grid()
     #m._reset_bc_arrays()
     assert m.cfg['parent']['length_units'] == 'meters'

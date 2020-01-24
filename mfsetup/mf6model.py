@@ -284,8 +284,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
         dis = mf6.ModflowGwfdis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
-        if not isinstance(self._modelgrid, MFsetupGrid):
-            self._modelgrid = None  # override DIS package grid setup
+        #if not isinstance(self._modelgrid, MFsetupGrid):
+        #    self._modelgrid = None  # override DIS package grid setup
+        self.setup_grid()  # reset the model grid
         self._reset_bc_arrays()
         self._set_idomain()
         print("finished in {:.2f}s\n".format(time.time() - t0))
@@ -467,7 +468,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                                                   boundnames=True)[0]
                 kspd['cellid'] = list(zip(group.k, group.i, group.j))
                 kspd['q'] = group['flux']
-                kspd['boundnames'] = group['comments']
+                kspd['boundname'] = group['comments']
                 spd[kper] = kspd
             else:
                 spd[kper] = None

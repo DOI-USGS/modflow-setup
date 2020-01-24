@@ -895,6 +895,9 @@ class MFsetupMixin():
         cfg['model_length_units'] = self.length_units
         cfg['grid_file'] = cfg['output_files']['grid_file'].format(self.name)
         cfg['bbox_shapefile'] = cfg['output_files']['bbox_shapefile'].format(self.name)
+        if 'DIS' in self.get_package_list():
+            cfg['top'] = self.dis.top.array
+            cfg['botm'] = self.dis.botm.array
         kwargs = get_input_arguments(cfg, setup_structured_grid)
         self._modelgrid = setup_structured_grid(**kwargs)
         self.cfg['grid'] = self._modelgrid.cfg

@@ -350,6 +350,12 @@ def test_dis_setup(shellmound_model_with_grid):
     assert m.dis.top.array.mean() < 100
     assert m.dis.length_units.array == 'meters'
 
+    # verify that modelgrid was reset after building DIS
+    mg = m.modelgrid
+    assert (mg.nlay, mg.nrow, mg.ncol) == m.dis.botm.array.shape
+    assert np.array_equal(mg.top, m.dis.top.array)
+    assert np.array_equal(mg.botm, m.dis.botm.array)
+
     arrayfiles = m.cfg['intermediate_data']['top'] + \
                  m.cfg['intermediate_data']['botm'] + \
                  m.cfg['intermediate_data']['idomain']
@@ -657,7 +663,7 @@ def test_sfr_setup(model_with_sfr):
     assert m.sfrdata.model == m
 
 
-@pytest.mark.xfail(reason='flopy remove_package() issue')
+#@pytest.mark.xfail(reason='flopy remove_package() issue')
 def test_idomain_above_sfr(model_with_sfr):
     m = model_with_sfr
     sfr = m.sfr

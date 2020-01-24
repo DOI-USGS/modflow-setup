@@ -38,7 +38,7 @@ def setup_wel_data(model):
 
         # get well stress period data from mfnwt or mf6 model
         renames = {'q': 'flux',
-                   'boundnames': 'comments'
+                   'boundname': 'comments'
                    }
         parent = model.parent
         spd = get_package_stress_period_data(parent, package_name='wel')
@@ -449,8 +449,8 @@ def get_package_stress_period_data(model, package_name, skip_packages=None):
         package = model.get_package(packagename)
         stress_period_data = package.stress_period_data
         # monkey patch the mf6 version to behave like the mf2005 version
-        if isinstance(stress_period_data, flopy.mf6.data.mfdatalist.MFTransientList):
-            stress_period_data.data = {per: ra for per, ra in enumerate(stress_period_data.array)}
+        #if isinstance(stress_period_data, flopy.mf6.data.mfdatalist.MFTransientList):
+        #    stress_period_data.data = {per: ra for per, ra in enumerate(stress_period_data.array)}
 
         for kper, spd in stress_period_data.data.items():
             spd = pd.DataFrame(spd)
