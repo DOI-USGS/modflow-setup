@@ -27,6 +27,11 @@ class MFsetupGrid(StructuredGrid):
                                           yoff, angrot)
         # properties
         self._vertices = None
+        self._polygons = None
+
+        # if no epsg, set from proj4 string if possible
+        if epsg is None and proj4 is not None and 'epsg' in proj4.lower():
+            self.epsg = int(proj4.split(':')[1])
 
         # in case the upper left corner is known but the lower left corner is not
         if xul is not None and yul is not None:
@@ -95,6 +100,31 @@ class MFsetupGrid(StructuredGrid):
         if self._vertices is None:
             self._set_vertices()
         return self._vertices
+
+    @property
+    def polygons(self):
+        """Vertices for grid cell polygons."""
+        if self._polygons is None:
+            self._set_polygons()
+        return self._polygons
+
+    def write_shapefile(self, filename='grid.shp'):
+        i, j = np.indices((self.nrow, self.ncol))
+        df = pd.DataFrame({'node': list(range(len(self.polygons))),
+                           'i': i.ravel(),
+                           'j': j.ravel(),
+                           'geometry': self.polygons
+                           })
+        df2shp(df, filename, epsg=self.epsg, proj_str=self.proj_str)
+
+    def _set_polygons(self):
+        """
+        Create shapely polygon for each grid cell
+        """
+        print('creating shapely Polygons of grid cells...')
+        t0 = time.time()
+        self._polygons = [Polygon(verts) for verts in self.vertices]
+        print("finished in {:.2f}s\n".format(time.time() - t0))
 
     # stuff to conform to sr
     @property
@@ -455,7 +485,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     #if rotation == 0.:
     #    xll = xul
     #    yll = yul - model.height
-    grid_cfg = {'nrow': nrow, 'ncol': ncol,
+    grid_cfg = {'nrow': int(nrow), 'ncol': int(ncol),
                 'delr': delr_m, 'delc': delc_m,
                 'xoff': xoff, 'yoff': yoff,
                 'xul': xul, 'yul': yul,

@@ -1,7 +1,9 @@
 import copy
 import os
 import numpy as np
+import fiona
 import pytest
+from gisutils import shp2df
 from ..grid import MFsetupGrid
 
 # TODO: add tests for grid.py
@@ -33,3 +35,18 @@ def test_grid_init():
     }
     grid = MFsetupGrid(**kwargs)
     assert np.allclose(grid.yoffset, grid.yul - grid.nrow * 5280 * .3048)
+
+
+def test_grid_write_shapefile(modelgrid, tmpdir):
+    filename = os.path.join(tmpdir, 'grid.shp')
+    modelgrid.write_shapefile(filename)
+    with fiona.open(filename) as src:
+        assert src.crs['init'] == 'epsg:3070'
+        assert np.allclose(src.bounds, modelgrid.bounds)
+    df = shp2df(filename)
+    i, j = np.indices((modelgrid.nrow, modelgrid.ncol))
+    assert np.array_equal(np.arange(len(df), dtype=int), df.node.values)
+    assert np.array_equal(i.ravel(), df.i.values)
+    assert np.array_equal(j.ravel(), df.j.values)
+
+

@@ -174,6 +174,7 @@ def load_cfg(cfgfile, verbose=False, default_file=None):
     print('loading configuration file {}...'.format(cfgfile))
     source_path = os.path.split(__file__)[0]
     # default configuration
+    default_cfg = {}
     if default_file is not None:
         default_cfg = load(source_path + default_file)
         default_cfg['filename'] = source_path + default_file
@@ -192,7 +193,12 @@ def load_cfg(cfgfile, verbose=False, default_file=None):
 
 
 def set_cfg_paths_to_absolute(cfg, config_file_location):
-    if cfg['model']['version'] == 'mf6':
+    version = None
+    if 'simulation' in cfg:
+        version = 'mf6'
+    else:
+        version = cfg['model'].get('version')
+    if version == 'mf6':
         file_path_keys_relative_to_config = [
             'simulation.sim_ws',
             'parent.model_ws',
