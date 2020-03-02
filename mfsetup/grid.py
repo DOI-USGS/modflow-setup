@@ -150,7 +150,7 @@ class MFsetupGrid(StructuredGrid):
         self._vertices = self._cell_vert_list(ii, jj)
 
 
-def get_ij(grid, x, y, local=False):
+def get_ij(grid, x, y, local=False, chunksize=100):
     """Return the row and column of a point or sequence of points
     in real-world coordinates.
 
@@ -159,12 +159,25 @@ def get_ij(grid, x, y, local=False):
     grid : flopy.discretization.StructuredGrid instance
     x : scalar or sequence of x coordinates
     y : scalar or sequence of y coordinates
+    local : bool
+        Flag for returning real-world or model (local) coordinates.
+        (default False)
+    chunksize : int
+        Because this function compares each x, y location to a vector
+        of model grid cell locations, memory usage can quickly get
+        out of hand, as it increases as the square of the number of locations.
+        This can be avoided by breaking the x, y location vectors into
+        chunks. Experimentation with approx. 5M points suggests
+        that a chunksize of 100 provides close to optimal
+        performance in terms of execution time. (default 100)
 
     Returns
     -------
     i : row or sequence of rows (zero-based)
     j : column or sequence of columns (zero-based)
     """
+    x = np.array(x)
+    y = np.array(y)
     if not local:
         xc, yc = grid.xcellcenters, grid.ycellcenters
     else:
@@ -174,10 +187,20 @@ def get_ij(grid, x, y, local=False):
         j = (np.abs(xc[0] - x)).argmin()
         i = (np.abs(yc[:, 0] - y)).argmin()
     else:
-        xcp = np.array([xc[0]] * (len(x)))
-        ycp = np.array([yc[:, 0]] * (len(x)))
-        j = (np.abs(xcp.transpose() - x)).argmin(axis=0)
-        i = (np.abs(ycp.transpose() - y)).argmin(axis=0)
+        print('getting i, j locations...')
+        t0 = time.time()
+        chunks = list(range(0, len(x), chunksize)) + [None]
+        i = []
+        j = []
+        for c in range(len(chunks))[:-1]:
+            chunk_slice = slice(chunks[c], chunks[c+1])
+            xcp = np.array([xc[0]] * (len(x[chunk_slice])))
+            ycp = np.array([yc[:, 0]] * (len(x[chunk_slice])))
+            j += (np.abs(xcp.transpose() - x[chunk_slice])).argmin(axis=0).tolist()
+            i += (np.abs(ycp.transpose() - y[chunk_slice])).argmin(axis=0).tolist()
+        i = np.array(i)
+        j = np.array(j)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
     return i, j
 
 
