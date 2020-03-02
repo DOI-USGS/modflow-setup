@@ -1,0 +1,293 @@
+# Configuration file for shellmound test case
+#
+# The MF6model.setup_from_yaml reads this in as a python dictionary (via the pyyaml package),
+# and attaches it to a newly created MF6model object instance (MF6model is a subclass of flopy.mf6.ModflowGwf).
+# For example, the simulation block would become
+# cfg['simulation'] = {'sim_name: 'mfsim', 'version': 'mf6': 'sim_ws'}, where cfg is the dictionary
+# made from the yaml file.
+#
+# The blocks below are then used as input to create Flopy object instances or
+# as input to other aspects of the MFsetup workflow that work on top of Flopy.
+# For example, the model block provides the input to flopy.mf6.ModflowGwf, via
+# the __init__ method for MF6model. For clarity, the items in the options block
+# are stored in their own dictionary that represents that block in the MODFLOW-6
+# name file (as opposed to the flopy.mf6.ModflowGwf signature, which includes them
+# as individual default arguments). Some items in the model block do not represent flopy
+# input. The relative_external_filepaths item is a flag for MFSetup that instructs it
+# to reference external files relative to the model workspace, to avoid broken paths
+# when the model is copied to a different location.
+#
+# In general, within blocks or subblocks that correspond to MODFLOW-6 input,
+# variables that correspond to an input variable in flopy.mf6 indicate input
+# that will be passed directly to flopy (numbers, lists, external file paths, etc.).
+#
+# In contrast, 'source_data' subblocks indicate input from general file formats
+# (shapefiles, csvs, rasters, etc.) that needs to be mapped to the model space
+# and time discretization. The source_data blocks are intended to be general across
+# input types. For example- 'filename' indicates a file path (string), regardless
+# of the type of file, and 'filenames' indicates a list or dictionary of files that
+# map to model layers or stress periods. Items with the '_units' suffix indicate
+# the units of the source data, allowing MFSetup to convert the values to model units
+# accordingly. '_column' Items indicate field names in the source data where the input can be found.
+
+simulation:
+  sim_name: 'mfsim'
+  version: 'mf6'
+  sim_ws: '../tmp/shellmound'
+
+model:
+  simulation: 'shellmound'
+  modelname: 'shellmound'
+  options:
+    print_input: True
+    save_flows: True
+    newton: True
+    newton_under_relaxation: False
+  packages: ['dis',
+             'ic',
+             'npf',
+             'oc',
+             'sto',
+             'rch',
+             'sfr',
+             'obs',
+             'wel',
+             'ims'
+  ]
+  external_path: 'external/'
+  relative_external_filepaths: True
+
+intermediate_data:
+  output_folder: 'tmp/'
+
+setup_grid:
+  xoff: 501405 # lower left x-coordinate
+  yoff: 1175835 # lower left y-coordinate
+  rotation: 0.
+  epsg: 5070
+  snap_to_NHG: True
+
+
+dis:
+  remake_top: True
+  options:
+    length_units: 'meters'
+  dimensions:
+    nlay: 17
+    nrow: 30
+    ncol: 35
+  griddata:
+    delr: 1000.
+    delc: 1000.
+  source_data:
+    top:
+      filename: 'shellmound/rasters/meras_100m_dem.tif' # DEM file; path relative to setup script
+      elevation_units: 'feet'
+    botm:
+      filenames:
+        15: 'shellmound/rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
+        16: 'shellmound/rasters/mdwy_surf.tif' # Midway confining unit (top)
+      values:
+        0: 150  # feet
+        14: -130
+      elevation_units: 'feet'
+    idomain:
+      filename: 'shellmound/shps/active_area.shp'
+  top_filename_fmt: "top.dat"
+  botm_filename_fmt: "botm{:d}.dat"
+  idomain_filename_fmt: "idomain{:d}.dat"
+  minimum_layer_thickness: 1 # m
+  drop_thin_cells: True
+
+tdis:
+  options:
+    time_units: 'days'
+    start_date_time: '1998-04-01'
+  perioddata:
+    # time discretization info can be specified directly under the perioddata key
+    # or in groups of stress periods that are discretized in a similar way
+    group 1: # initial steady-state period (steady specified under sto package)
+      #perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
+      nper: 1
+      nstp: 1
+      tsmult: 1
+      steady: True  # "steady" can be entered here; otherwise the global entry specified in the sto package is used as the default
+      # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
+    group 2: # single long period for spin-up of pumping
+      start_date_time: '1998-04-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
+      end_date_time: '2007-04-01'  # end times are specified following pandas slice convention, which includes the specified end date
+      nper: 1
+      nstp: 10
+      tsmult: 1.5
+      steady: False
+    group 3:
+      start_date_time: '2007-04-01'
+      end_date_time: '2015-10-01'  # end times are specified following pandas slice convention, which includes the specified end date
+      freq: '6MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
+      nstp: 5
+      tsmult: 1.5
+      steady: False
+
+ic:
+  strt_filename_fmt: "strt{:d}.dat"
+
+npf:
+  options:
+    save_flows: True
+  griddata:
+    icelltype: 1 # variable sat. thickness in all layers
+  source_data:
+    k:
+      filenames:
+        0: 'shellmound/rasters/k0.tif' # Vicksburg-Jackson Group
+        1: 'shellmound/rasters/k1.tif' # Upper Claiborne aquifer
+        2: 'shellmound/rasters/k2.tif' # Middle Claiborne confining unit
+        3: 'shellmound/rasters/k3.tif' # Middle Claiborne aquifer
+        4: 'shellmound/rasters/k3.tif' # Middle Claiborne aquifer
+        5: 'shellmound/rasters/k3.tif' # Middle Claiborne aquifer
+        6: 'shellmound/rasters/k4.tif' # Lower Claiborne confining unit
+        7: 'shellmound/rasters/k4.tif' # Lower Claiborne confining unit
+        8: 'shellmound/rasters/k5.tif' # Lower Claiborne aquifer
+        9: 'shellmound/rasters/k6.tif' # Middle Wilcox aquifer
+        10: 'shellmound/rasters/k10.tif' # Lower Wilcox aquifer
+        11: 'shellmound/rasters/k10.tif' # Lower Wilcox aquifer
+        12: 'shellmound/rasters/k12.tif' # Lower Wilcox aquifer
+      length_units: 'feet'
+    k33:
+      filenames:
+        0: 'shellmound/rasters/k330.tif' # Vicksburg-Jackson Group
+        1: 'shellmound/rasters/k331.tif' # Upper Claiborne aquifer
+        2: 'shellmound/rasters/k332.tif' # Middle Claiborne confining unit
+        3: 'shellmound/rasters/k333.tif' # Middle Claiborne aquifer
+        4: 'shellmound/rasters/k333.tif' # Middle Claiborne aquifer
+        5: 'shellmound/rasters/k333.tif' # Middle Claiborne aquifer
+        6: 'shellmound/rasters/k334.tif' # Lower Claiborne confining unit
+        7: 'shellmound/rasters/k334.tif' # Lower Claiborne confining unit
+        8: 'shellmound/rasters/k335.tif' # Lower Claiborne aquifer
+        9: 'shellmound/rasters/k336.tif' # Middle Wilcox aquifer
+        10: 'shellmound/rasters/k3310.tif' # Lower Wilcox aquifer
+        11: 'shellmound/rasters/k3310.tif' # Lower Wilcox aquifer
+        12: 'shellmound/rasters/k3312.tif' # Lower Wilcox aquifer
+      length_units: 'feet'
+  k_filename_fmt: "k{:d}.dat"
+  k33_filename_fmt: "k33{:d}.dat"
+
+sto:
+  options:
+    save_flows: True
+  griddata:
+    iconvert: 1  # convertible layers
+    sy: 0.25
+    ss: 1.e-6
+  sy_filename_fmt: "sy{:d}.dat"
+  ss_filename_fmt: "ss{:d}.dat"
+
+rch:
+  options:
+    print_input: True
+    print_flows: False
+    save_flows: True
+    readasarrays: True
+  source_data:
+    recharge:
+      filename: 'shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc'
+      variable: 'net_infiltration'
+      length_units: 'inches'
+      time_units: 'days'
+      resample_method: 'linear'
+      period_stats:
+        0: ['mean', '2000-01-01', '2017-12-31']
+        1: ['mean', '2000-01-01', '2017-12-31']
+        2: 'mean'
+  recharge_filename_fmt: "rch{:d}.dat"
+
+sfr:
+  options:
+    save_flows: True
+  source_data:
+    flowlines:
+      filename: 'shellmound/shps/flowlines.shp'
+      id_column: 'COMID'  # arguments to sfrmaker.Lines.from_shapefile
+      routing_column: 'tocomid'
+      width1_column: 'width1'
+      width2_column: 'width2'
+      up_elevation_column: 'elevupsmo'
+      dn_elevation_column: 'elevdnsmo'
+      name_column: 'GNIS_NAME'
+      attr_length_units: 'feet'  # units of source data
+      attr_height_units: 'feet'  # units of source data
+  budget_fileout: 'sfr_out.bin'
+  stage_fileout: 'sfr_stage.bin'
+  obs6_filein_fmt: '{}.sfr.obs6'
+  output_path: 'sfr'
+
+wel:
+  options:
+    print_input: True
+    print_flows: True
+    save_flows: True
+  source_data:
+    csvfiles:
+      filenames: ['shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv',
+                  'shellmound/tables/iwum_m3_6M.csv',
+                  'shellmound/tables/sp69_pumping_from_meras21_m3.csv']
+      volume_units: 'meters'
+      time_units: 'days'
+      data_column: 'flux_m3'
+      datetime_column: 'start_datetime'
+      id_column: 'node'
+      period_stats:  # how fluxes will be distributed across model stress periods
+        0: none
+        1: 'mean'
+      vertical_flux_distribution:
+        across_layers: False  # False to put fluxes in one layer
+        distribute_by: 'thickness'  # thickness or transmissivity
+        minimum_layer_thickness: 10.
+
+
+
+  output_files:
+    lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
+
+oc:
+  head_fileout_fmt: '{}.hds'
+  budget_fileout_fmt: '{}.cbc'
+  saverecord: {0: {head: 'last',
+                   budget: 'last'}
+  }
+
+obs:
+  source_data:
+    filenames: ['shellmound/tables/head_obs_well_info.csv'
+    ]
+    column_mappings:
+      obsname: ['obsprefix']
+
+
+ims:
+  options:
+    print_option: 'all'
+    complexity: 'moderate'
+    'csv_output fileout': 'solver_out.csv'
+  nonlinear:
+    outer_hclose: 1.e-1
+    outer_rclosebnd: 1.e4
+    outer_maximum: 200
+    under_relaxation:  'dbd'
+    under_relaxation_theta: 0.7
+    under_relaxation_kappa: 0.1
+    under_relaxation_gamma: 0.0
+    under_relaxation_momentum: 0.0
+    backtracking_number: 0
+  linear:
+    inner_maximum: 100
+    inner_hclose: 1.e-2
+    rcloserecord: [0.0001, 'relative_rclose']
+    linear_acceleration: 'bicgstab'
+    scaling_method: None
+    reordering_method: None
+    relaxation_factor: 0.0  # either ILU(0) or ILUT preconditioning
+    number_orthogonalizations: 0
+    preconditioner_levels: 7
+    preconditioner_drop_tolerance: 0.001
+    

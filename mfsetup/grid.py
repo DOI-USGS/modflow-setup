@@ -176,18 +176,18 @@ def get_ij(grid, x, y, local=False, chunksize=100):
     i : row or sequence of rows (zero-based)
     j : column or sequence of columns (zero-based)
     """
-    x = np.array(x)
-    y = np.array(y)
+
     if not local:
         xc, yc = grid.xcellcenters, grid.ycellcenters
     else:
         xc, yc = grid.xyzcellcenters()
-
     if np.isscalar(x):
         j = (np.abs(xc[0] - x)).argmin()
         i = (np.abs(yc[:, 0] - y)).argmin()
     else:
         print('getting i, j locations...')
+        x = np.array(x)
+        y = np.array(y)
         t0 = time.time()
         chunks = list(range(0, len(x), chunksize)) + [None]
         i = []

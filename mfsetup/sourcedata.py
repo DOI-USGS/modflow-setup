@@ -12,7 +12,7 @@ from mfsetup.discretization import weighted_average_between_layers
 from mfsetup.tdis import aggregate_dataframe_to_stress_period, aggregate_xarray_to_stress_period
 from .fileio import save_array
 from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
-                             fill_empty_layers, fill_cells_vertically)
+                             fill_empty_layers, fill_cells_vertically, populate_values)
 from gisutils import (get_values_at_points, shp2df)
 from .grid import get_ij, rasterize
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
@@ -39,7 +39,7 @@ class SourceData:
     datatype :
     dest_model :
     """
-    def __init__(self, filenames=None, length_units='unknown',
+    def __init__(self, filenames=None, values=None, length_units='unknown',
                  time_units='unknown',
                  area_units=None, volume_units=None,
                  datatype=None,
@@ -48,6 +48,7 @@ class SourceData:
 
         """
         self.filenames = filenames
+        self.values = values
         self.length_units = length_units
         self.area_units = area_units
         self.volume_units = volume_units
@@ -178,7 +179,7 @@ class ArraySourceData(SourceData):
                in a dictionary of 2D arrays
                (of same shape as destination model grid)
     """
-    def __init__(self, variable, filenames=None, length_units='unknown', time_units='unknown',
+    def __init__(self, variable, filenames=None, values=None, length_units='unknown', time_units='unknown',
                  dest_model=None, source_modelgrid=None, source_array=None,
                  from_source_model_layers=None, datatype=None,
                  id_column=None, include_ids=None, column_mappings=None,
@@ -186,7 +187,7 @@ class ArraySourceData(SourceData):
                  vmin=-1e30, vmax=1e30, dtype=float,
                  multiplier=1.):
 
-        SourceData.__init__(self, filenames=filenames,
+        SourceData.__init__(self, filenames=filenames, values=values,
                             length_units=length_units, time_units=time_units,
                             datatype=datatype,
                             dest_model=dest_model)
@@ -341,6 +342,13 @@ class ArraySourceData(SourceData):
 
     def get_data(self):
         data = {}
+        # start with any specified values,
+        # interpolated to any layers without values
+        # layers with filenames specified will be overwritten with data from the files
+        if self.values is not None:
+            data = populate_values(self.values, array_shape=(self.dest_modelgrid.nrow,
+                                                             self.dest_modelgrid.ncol))
+
         if self.filenames is not None:
             for i, f in self.filenames.items():
                 data[i] = self._read_array_from_file(f)
@@ -404,6 +412,7 @@ class ArraySourceData(SourceData):
         # no files or source array provided
         else:
             raise ValueError("No files or source model grid provided.")
+
         self.data = data
         return data
 
@@ -1227,4 +1236,7 @@ def transient2d_to_xarray(data, x=None, y=None, time=None):
                               "time": time},
                       dims=["x", "y", "time"])
     return da
+
+
+
 

@@ -111,7 +111,7 @@ def find_remove_isolated_cells(array, minimum_cluster_size=10):
 
 
 def create_vertical_pass_through_cells(idomain):
-    """Create vertical pass-through cells in layers that have an inactive cell
+    """Replaces inactive cells with vertical pass-through cells at locations that have an active cell
     above and below by setting these cells to -1.
 
     Parameters
@@ -224,9 +224,11 @@ def fill_cells_vertically(top, botm):
     # cumulative sum from bottom to top
     filled = np.cumsum(thickness[::-1], axis=0)[::-1]
     # add in the model bottom elevations
-    filled += botm[-1]
+    # use the minimum values instead of the bottom layer,
+    # in case there are nans in the bottom layer
+    filled += np.nanmin(botm, axis=0)  # botm[-1]
     # append the model bottom elevations
-    filled = np.append(filled, botm[-1:], axis=0)
+    filled = np.append(filled, [np.nanmin(botm, axis=0)], axis=0)
     return filled[0].copy(), filled[1:].copy()
 
 
@@ -454,3 +456,100 @@ def weighted_average_between_layers(arr0, arr1, weight0=0.5):
     """"""
     weights = [weight0, 1-weight0]
     return np.average([arr0, arr1], axis=0, weights=weights)
+
+
+def populate_values(values_dict, array_shape=None):
+    """Given an input dictionary with non-consecutive keys,
+    make a second dictionary with consecutive keys, with values
+    that are linearly interpolated from the first dictionary,
+    based on the key values. For example, given {0: 1.0, 2: 2.0},
+    {0: 1.0, 1: 1.5, 2: 2.0} would be returned.
+
+    Examples
+    --------
+    >>> populate_values({0: 1.0, 2: 2.0}, array_shape=None)
+    {0: 1.0, 1: 1.5, 2: 2.0}
+    >>> populate_values({0: 1.0, 2: 2.0}, array_shape=(2, 2))
+    {0: array([[1., 1.],
+               [1., 1.]]),
+     1: array([[1.5, 1.5],
+               [1.5, 1.5]]),
+     2: array([[2., 2.],
+               [2., 2.]])}
+    """
+    sorted_layers = sorted(list(values_dict.keys()))
+    values = {}
+    for i in range(len(sorted_layers[:-1])):
+        l1 = sorted_layers[i]
+        l2 = sorted_layers[i+1]
+        v1 = values_dict[l1]
+        v2 = values_dict[l2]
+        layers = np.arange(l1, l2+1)
+        interp_values = dict(zip(layers, np.linspace(v1, v2, len(layers))))
+
+        # if an array shape is given, fill an array of that shape
+        # or reshape to that shape
+        if array_shape is not None:
+            for k, v in interp_values.items():
+                if np.isscalar(v):
+                    v = np.ones(array_shape, dtype=float) * v
+                else:
+                    v = np.reshape(v, array_shape)
+                interp_values[k] = v
+        values.update(interp_values)
+    return values
+
+
+def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_data_value=0,
+                     extend_top=True, extend_botm=False, tol=0.1):
+    model_top = model_top.copy()
+    model_botm = model_botm.copy()
+    z_values = z_edges[1:]
+    hasdata = voxel_array.astype(float).copy()
+    hasdata[hasdata == no_data_value] = np.nan
+    hasdata[~np.isnan(hasdata)] = 1
+    thicknesses = -np.diff(z_edges)
+    b = (hasdata.transpose(1, 2, 0) * thicknesses).transpose(2, 0, 1)
+    z = (hasdata.transpose(1, 2, 0) * z_values).transpose(2, 0, 1)
+
+    assert np.all(np.isnan(b[np.isnan(b)]))
+    b[np.isnan(b)] = 0
+    # cumulative sum from bottom to top
+    filled = np.cumsum(b[::-1], axis=0)[::-1]
+    # add in the model bottom elevations
+    # use the minimum values instead of the bottom layer,
+    # in case there are nans in the bottom layer
+    filled += np.nanmin(z, axis=0)  # botm[-1]
+    # append the model bottom elevations
+    filled = np.append(filled, [np.nanmin(z, axis=0)], axis=0)
+
+    # set all voxel edges greater than land surface to land surface
+    k, i, j = np.where(filled > model_top)
+    filled[k, i, j] = model_top[i, j]
+
+    # reset model bottom to lowest valid voxels, where they are lower than model bottom
+    lowest_valid_edges = np.nanmin(filled, axis=0)
+    i, j = np.where(lowest_valid_edges < model_botm)
+    model_botm[i, j] = lowest_valid_edges[i, j]
+
+    # option to add another layer on top of voxel sequence,
+    # if any part of the model top is above the highest valid voxel edges
+    if np.any(filled[0] < model_top - tol) and not extend_top:
+        filled = np.vstack([np.reshape(model_top, (1, *model_top.shape)), filled])
+    # otherwise set the top edges of the voxel sequence to be consistent with model top
+    else:
+        filled[0] = model_top
+
+    # option to add another layer below voxel sequence,
+    # if any part of the model botm is below the lowest valid voxel edges
+    if np.any(filled[-1] > model_botm + tol) and not extend_botm:
+        filled = np.vstack([filled, np.reshape(model_botm, (1, *model_botm.shape))])
+    # otherwise just set the lowest voxel edges to the model botm
+    else:
+        filled[-1] = model_botm
+
+    # finally, fill any remaining nans with next layer elevation (going upward)
+    # might still have nans in areas where there are no voxel values, but model top and botm values
+    top, botm = fill_cells_vertically(filled[0], filled[1:])
+    filled = np.vstack([np.reshape(top, (1, *top.shape)), botm])
+    return filled

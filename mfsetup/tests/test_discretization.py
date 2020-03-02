@@ -4,7 +4,8 @@ import pytest
 from ..discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
                               fill_empty_layers, fill_cells_vertically, make_idomain, make_ibound,
                               get_layer_thicknesses, create_vertical_pass_through_cells,
-                              deactivate_idomain_above, find_remove_isolated_cells)
+                              deactivate_idomain_above, find_remove_isolated_cells,
+                              populate_values, voxels_to_layers)
 
 
 @pytest.fixture(scope="function")
@@ -46,6 +47,15 @@ def test_conflicts():
     botm2 = fix_model_layer_conflicts(top, botm, idomain, minimum_thickness)
     isvalid = verify_minimum_layer_thickness(top, botm2, idomain, minimum_thickness)
     assert isvalid
+
+
+def test_conflicts_negative_layers():
+    top = np.ones((2, 2), dtype=float) * 115
+    botm = [130.0, 110.0, 90.0, 70.0, 50.0, 30.0, 10.0, -10.0, -30.0, -50.0, -70.0, -90.0, -110.0, -130.0,
+            -6.611952336182595, -609.1836436464844]
+    botm = np.transpose(np.array(botm) * np.ones((2, 2, len(botm))))
+    result = fix_model_layer_conflicts(top, botm, minimum_thickness=1)
+    j=2
 
 
 @pytest.fixture
@@ -248,3 +258,54 @@ def test_create_vertical_pass_through_cells():
                       (np.sum(passthru, axis=0) < 0))
 
 
+def test_populate_values():
+    v = populate_values({0: 1.0, 2: 2.0})
+    assert v == {0: 1.0, 1: 1.5, 2: 2.0}
+    v = populate_values({0: 1.0, 2: 2.0}, array_shape=(2, 2))
+    assert [v.shape for k, v in v.items()] == [(2, 2)] * 3
+    assert [v.sum() for k, v in v.items()] == [4, 6, 8]
+
+
+def test_voxels_to_layers():
+    data = np.array([[[5, 4, 0],
+                      [5, 4, 3],
+                      [5, 4, 0]],
+                     [[5, 4, 0],
+                      [5, 4, 3],
+                      [5, 4, 3]],
+                     [[5, 4, 0],
+                      [5, 4, 3],
+                      [0, 0, 0]],
+                     [[5, 4, 0],
+                      [0, 0, 0],
+                      [0, 0, 0]],
+                     ])
+    nlay, nrow, ncol = data.shape
+    z_edges = [20, 15, 10, 5, 0]
+    model_top = np.array([[25, 20, 19],
+                          [20, 20, 20],
+                          [20, 20, 16]])
+    model_botm = np.array([[10, -5, 0],
+                           [10, 5, 0],
+                           [9, 5, 0]])
+    result = voxels_to_layers(data, z_edges, model_top=model_top,
+                              model_botm=model_botm, no_data_value=0)
+    assert result.shape == (nlay+2, nrow, ncol)  # voxel top edge + botm layer
+    assert result[-1, 0, 0] == 0  # botm was reset to 0 in this location
+    # at this location, last two layers have no data, so same bottom as second layer
+    # extend_botm=False by default, so another layer is added, extending from lowest voxel edge to botm
+    assert np.allclose(result[:, 2, 0], [20., 15., 10., 10., 10., 9.])
+    # at this location, model botm is at 10, but voxel with botm=5 has data,
+    # so model botm is pushed downward to 5.
+    assert np.allclose(result[:, 1, 0], [20., 15., 10., 5, 5, 5])
+
+    assert result[0, 2, 2] == 16  # consistent with model top
+
+    result = voxels_to_layers(data, z_edges, model_top=model_top,
+                              model_botm=model_botm, extend_top=False, no_data_value=0)
+    assert result.shape == (nlay+3, nrow, ncol)  # voxel top edge + top layer + botm layer
+
+    result = voxels_to_layers(data, z_edges, model_top=model_top,
+                              model_botm=model_botm, extend_botm=True, no_data_value=0)
+    assert result[-1, 0, 1] == -5  # voxel edge was reset to -5 in this location
+    assert np.allclose(result[:, 0, 2], [19., 19., 19., 19.,  0.])
