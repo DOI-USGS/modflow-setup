@@ -943,7 +943,7 @@ def read_mf6_block(filename, blockname):
             if 'end' in line and blockname in line:
                 per = None
                 read = False
-                break
+                #break
             if read == 'options':
                 line = line.strip().split()
                 data[line[0]] = line[1:]
@@ -973,11 +973,15 @@ def read_ggofile(gagefile, model,
                  keep_only_last_timestep=True):
     with open(gagefile) as src:
         next(src)
-        next(src)
+        namesstr = next(src)
+        names = namesstr.replace('DATA:', '').replace('.', '')\
+            .replace('-', '_').replace('(', '').replace(')', '')\
+            .replace('"','').strip().split()
+        names = [n.lower() for n in names]
         df = pd.read_csv(src, skiprows=0,
                          header=None,
                          delim_whitespace=True,
-                         names=['time', 'stage', 'flow']
+                         names=names
                          )
     kstp = []
     kper = []
