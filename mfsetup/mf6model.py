@@ -405,8 +405,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         kwargs = self.cfg[package]['options'].copy()
         kwargs.update(self.cfg[package]['griddata'].copy())
-        kwargs['steady_state'] = {k: v for k, v in self.cfg['sto']['steady'].items() if v}
-        kwargs['transient'] = {k: True for k, v in self.cfg['sto']['steady'].items() if not v}
+        # get steady/transient info from perioddata table
+        # which parses it from either DIS or STO input (to allow consistent input structure with mf2005)
+        kwargs['steady_state'] = {k: v for k, v in zip(self.perioddata['per'], self.perioddata['steady'])}
+        kwargs['transient'] = {k: not v for k, v in zip(self.perioddata['per'], self.perioddata['steady'])}
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsto)
         sto = mf6.ModflowGwfsto(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))

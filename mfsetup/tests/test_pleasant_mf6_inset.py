@@ -12,6 +12,7 @@ import rasterio
 import pytest
 import flopy
 mf6 = flopy.mf6
+fm = flopy.modflow
 from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
 from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists, read_lak_ggo
@@ -194,6 +195,9 @@ def test_sto_setup(get_pleasant_mf6_with_dis):
             assert os.path.exists(f)
             data = np.loadtxt(f)
             assert np.array_equal(model_array[k], data)
+    period_data = read_mf6_block(sto.filename, 'period')
+    assert period_data[1] == ['steady-state']
+    assert period_data[2] == ['transient']
 
 
 def test_npf_setup(get_pleasant_mf6_with_dis):
@@ -291,6 +295,12 @@ def test_lak_obs_setup(get_pleasant_mf6_with_dis):
     # todo: add lake obs tests
 
 
+def test_chd_perimeter(get_pleasant_mf6_with_dis, pleasant_nwt_with_dis_bas6):
+    chd = pleasant_nwt_with_dis_bas6.setup_perimeter_boundary()
+    chd6 = get_pleasant_mf6_with_dis.setup_perimeter_boundary()
+    j=2
+
+
 @pytest.mark.skip('not implemented yet')
 def test_ghb_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
@@ -364,30 +374,87 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
         assert False, has_nans
 
 
-#def test_model_setup_and_run(pleasant_mf6_model_run):
-#    m = pleasant_mf6_model_run
+def test_mf6_results(tmpdir): # pleasant_nwt_model_run):
+    pleasant_mf6_model_run = None
+    pleasant_nwt_model_run = None
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
 
+    if pleasant_mf6_model_run is None:
+        sim = mf6.MFSimulation.load('mfsim',
+                                                       sim_ws='{}/pleasant_mf6'.format(tmpdir))
+        pleasant_mf6_model_run = sim.get_model('pleasant_mf6')
+    if pleasant_nwt_model_run is None:
+        pleasant_nwt_model_run = fm.Modflow.load('pleasant.nam',
+                                                 model_ws='{}/pleasant_nwt'.format(tmpdir))
 
-def test_mf6_results(pleasant_mf6_model_run, full_pleasant_nwt_with_model_run):
-    #def test_mf6_results():
+    # mass bal. results
+    mfl = flopy.utils.MfListBudget('{}/pleasant_nwt/pleasant.list'.format(tmpdir))
+    df_flux, df_vol = mfl.get_dataframes(start_datetime='2012-01-01')
+    mfl6 = flopy.utils.Mf6ListBudget('{}/pleasant_mf6/pleasant_mf6.list'.format(tmpdir))
+    df_flux6, df_vol6 = mfl6.get_dataframes(start_datetime='2012-01-01')
+    mf6_terms = {'STORAGE_IN': ['STO-SS_IN', 'STO-SY_IN'],
+                 'CONSTANT_HEAD_IN': 'CHD_IN',
+                 'WELLS_IN': 'WEL_IN',
+                 'RECHARGE_IN': 'RCH_IN',
+                 'STREAM_LEAKAGE_IN': 'SFR_IN',
+                 'LAKE__SEEPAGE_IN': 'LAK_IN',
+                 'TOTAL_IN': 'TOTAL_IN'
+                 }
+
+    # compare the terms
+    pdf = PdfPages('../modflow-setup-dirty/pleasant_mfnwt_mf6_compare.pdf')
+    for k, v in mf6_terms.items():
+        term = k
+        out_term = term.replace('IN', 'OUT')
+        mf6_term = v
+        fig, ax = plt.subplots(figsize=(11, 8.5))
+        ax = df_flux[term].plot(c='C0')
+        ax = (-df_flux[out_term]).plot(ax=ax, c='C0')
+        if isinstance(mf6_term, list):
+            mf6_series = df_flux6[mf6_term].sum(axis=1)
+            mf6_out_term = [s.replace('IN', 'OUT') for s in mf6_term]
+            mf6_out_series = df_flux6[mf6_out_term].sum(axis=1)
+        else:
+            mf6_out_term = mf6_term.replace('IN', 'OUT')
+            mf6_series = df_flux6[mf6_term]
+            mf6_out_series = df_flux6[mf6_out_term]
+        mf6_series.plot(ax=ax, c='C1')
+        (-mf6_out_series).plot(ax=ax, c='C1')
+        h, l = ax.get_legend_handles_labels()
+        ax.legend(h[::2], ['mfnwt', 'mf6'])
+        ax.set_title(term.split('_')[0])
+        pdf.savefig()
+        plt.close()
+    pdf.close()
 
     # head results
     HeadFile = flopy.utils.binaryfile.HeadFile
-    mf6_hds_obj = HeadFile('pleasant_mf6.hds')
-    mfnwt_hds_obj = HeadFile('../pleasant_nwt/pleasant.hds')
+    mf6_hds_obj = HeadFile('{}/pleasant_mf6/pleasant_mf6.hds'.format(tmpdir))
+    mfnwt_hds_obj = HeadFile('{}/pleasant_nwt/pleasant.hds'.format(tmpdir))
     assert np.allclose(mf6_hds_obj.get_times(), mfnwt_hds_obj.get_times(), rtol=1e-4)
     last = mf6_hds_obj.get_kstpkper()[-1]
     mf6_hds = mf6_hds_obj.get_data(kstpkper=last)
     mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=last)
-    #diff = mf6_hds - mfnwt_hds
-    loc = pleasant_mf6_model_run.idomain == 1
-    rms = np.sqrt(np.mean((mf6_hds[loc] - mfnwt_hds[loc]) ** 2))
+    from flopy.utils.postprocessing import get_water_table
+    mf6_wt = get_water_table(mf6_hds, nodata=1e30)
+    mfnwt_wt = get_water_table(mfnwt_hds, nodata=-9999)
+    loc = pleasant_mf6_model_run.dis.idomain.array == 1
+    rms = np.sqrt(np.mean((mf6_wt - mfnwt_wt) ** 2))
 
     j=2
 
-    # lake results
-    df_mf6 = pd.read_csv('lake1.obs.csv')
-    df_mfnwt = read_lak_ggo('../pleasant_nwt/lak1_600059060.ggo', model=full_pleasant_nwt_with_model_run)
+    # lake budget results
+    #mf6_cb_obj = HeadFile('pleasant_mf6.cbc')
+    #mfnwt_cb_obj = HeadFile('../pleasant_nwt/pleasant.cbc')
+
+    # lake stage results
+    df_mf6 = pd.read_csv('{}/pleasant_mf6/lake1.obs.csv'.format(tmpdir))
+    df_mfnwt = read_lak_ggo('{}/pleasant_nwt/lak1_600059060.ggo'.format(tmpdir),
+                            model=pleasant_nwt_model_run)
+    plt.plot(df_mf6.time, df_mf6.STAGE, label='mf6')
+    plt.plot(df_mfnwt.time, df_mfnwt.stageh, label='mfnwt')
+    plt.legend()
     lake_stage_rms = np.sqrt(np.mean((df_mfnwt.stage.values - df_mf6.STAGE.values) ** 2))
     j=2
 
