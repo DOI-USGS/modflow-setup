@@ -4,7 +4,7 @@ import pandas as pd
 import flopy
 from shapely.geometry import Point
 from gisutils import project
-from .fileio import check_source_files
+from .fileio import check_source_files, append_csv
 from .grid import get_ij
 from .sourcedata import TransientTabularSourceData
 from .tmr import Tmr
@@ -30,6 +30,11 @@ def setup_wel_data(model):
 
     # check for source data
     datasets = model.cfg['wel'].get('source_data')
+
+    # delete the dropped wells file if it exists, to avoid confusion
+    dropped_wells_file = model.cfg['wel']['output_files']['dropped_wells_file'].format(model.name)
+    if os.path.exists(dropped_wells_file):
+        os.remove(dropped_wells_file)
 
     # get well package input from source (parent) model in lieu of source data
     # todo: fetching correct well package from mf6 parent model
@@ -161,13 +166,22 @@ def setup_wel_data(model):
         inactive = model.bas6.ibound.array[df.k.values,
                                            df.i.values,
                                            df.j.values] != 1
+
+    # record dropped wells in csv file
+    # (which might contain wells dropped by other routines)
+    if np.any(inactive):
+        dropped = df.loc[inactive].copy()
+        dropped = dropped.groupby(['k', 'i', 'j']).first().reset_index()
+        dropped['reason'] = 'in inactive cell'
+        dropped['routine'] = __name__ + '.setup_wel_data'
+        append_csv(dropped_wells_file, dropped, index=False)  # append to existing file if it exists
     df = df.loc[~inactive].copy()
 
     copy_fluxes_to_subsequent_periods = False
-    if copy_fluxes_to_subsequent_periods:
+    if copy_fluxes_to_subsequent_periods and len(df) > 0:
         df = copy_fluxes_to_subsequent_periods(df)
 
-    wel_lookup_file = model.cfg['wel']['output_files']['lookup_file']
+    wel_lookup_file = model.cfg['wel']['output_files']['lookup_file'].format(model.name)
     wel_lookup_file = os.path.join(model.model_ws, os.path.split(wel_lookup_file)[1])
     model.cfg['wel']['output_files']['lookup_file'] = wel_lookup_file
 
@@ -245,8 +259,7 @@ def assign_layers_from_screen_top_botm(data, model,
 
             n_below = np.sum(below_minimum)
             if n_below > 0:
-                outpath = os.path.split(model.cfg['wel']['output_files']['lookup_file'])[0]
-                outfile = os.path.join(outpath, 'dropped_wells.csv')
+                outfile = model.cfg['wel']['output_files']['dropped_wells_file'].format(model.name)
 
                 # move wells that are still in a thin layer to the thickest layer
                 data['orig_layer'] = data['k']
@@ -282,7 +295,10 @@ def assign_layers_from_screen_top_botm(data, model,
                 if flux_col in data.columns:
                     cols.insert(3, flux_col)
                 flux_below = data.loc[below_minimum].groupby(['k', 'i', 'j']).first().reset_index()[cols]
-                flux_below.to_csv(outfile, index=False)
+                flux_below['reason'] = 'no layer above minimum thickness of {}'.format(minimum_layer_thickness)
+                flux_below['routine'] = __name__ + '.assign_layers_from_screen_top_botm'
+                #flux_below.to_csv(outfile, mode='a', index=False)
+                append_csv(outfile, flux_below, index=False)
                 if 'x' in flux_below.columns and 'y' in flux_below.columns:
                     flux_below['geometry'] = [Point(xi, yi) for xi, yi in zip(flux_below.x, flux_below.y)]
                     df2shp(flux_below, outfile[:-4] + '.shp', epsg=model.modelgrid.epsg)

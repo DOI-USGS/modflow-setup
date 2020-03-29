@@ -14,7 +14,7 @@ from shapely.geometry import box
 import flopy
 mf6 = flopy.mf6
 from ..checks import check_external_files_for_nans
-from ..discretization import get_layer_thicknesses, find_remove_isolated_cells
+from ..discretization import get_layer_thicknesses, find_remove_isolated_cells, cellids_to_kij
 from ..fileio import load_array, exe_exists, read_mf6_block, load_cfg
 from ..grid import rasterize
 from ..mf6model import MF6model
@@ -228,83 +228,6 @@ def test_package_external_file_path_setup(shellmound_model_with_grid,
                              m.external_path,
                              botm_file_fmt.format(i)))} for i in range(m.nlay)]
 
-
-def test_perrioddata(shellmound_model):
-    m = shellmound_model #deepcopy(model)
-    pd0 = m.perioddata.copy()
-    assert pd0 is not None
-    assert pd0['end_datetime'].iloc[-1] == \
-           pd.Timestamp(m.cfg['tdis']['perioddata']['group 3']['end_date_time'])
-
-
-    m.cfg['sto']['steady'] = {0: True,
-                              1: False}
-
-    # save the group input for later tests
-    pdinput_with_groups = {k: v for k, v in m.cfg['tdis']['perioddata'].items()
-                           if 'group' in k}
-
-    # Explicit stress period setup
-    m.cfg['tdis']['perioddata'] = {k: v for k, v in m.cfg['tdis']['perioddata'].items()
-                                   if 'group' not in k}
-    m.cfg['tdis']['options']['start_date_time'] = '2008-10-01'
-    m.cfg['tdis']['perioddata']['perlen'] = [1] * 11
-    m.cfg['tdis']['perioddata']['nstp'] = [5] * 11
-    m.cfg['tdis']['perioddata']['tsmult'] = 1.5
-    m._perioddata = None
-    pd1 = m.perioddata.copy()
-    assert pd1['start_datetime'][0] == pd1['start_datetime'][1] == pd1['end_datetime'][0]
-    assert pd1['end_datetime'][1] == pd.Timestamp(m.cfg['tdis']['options']['start_date_time']) + \
-           pd.Timedelta(m.cfg['tdis']['perioddata']['perlen'][1], unit=m.time_units)
-    assert pd1['nstp'][0] == 1
-    assert pd1['tsmult'][0] == 1
-
-    # Start date, freq and nper
-    m.cfg['tdis']['options']['end_date_time'] = None
-    m.cfg['tdis']['perioddata']['perlen'] = None
-    m.cfg['tdis']['dimensions']['nper'] = 11
-    m.cfg['tdis']['perioddata']['freq'] = 'D'
-    m.cfg['tdis']['perioddata']['nstp'] = 5
-    m.cfg['tdis']['perioddata']['tsmult'] = 1.5
-    m._perioddata = None
-    pd2 = m.perioddata.copy()
-    # since perlen wasn't explicitly specified,
-    # this dataframe will have the 11 periods at freq 'D' (like pd1)
-    # but with a steady-state first stress period of length 1
-    # in other words, perlen discretization with freq
-    # only applies to transient stress periods
-    assert pd2.iloc[:-1].equals(pd1)
-
-    # Start date, end date, and nper
-    m.cfg['tdis']['perioddata']['end_date_time'] = '2008-10-11'
-    m.cfg['tdis']['perioddata']['freq'] = None
-    m._perioddata = None
-    pd3 = m.perioddata.copy()
-    assert pd3.equals(pd1)
-
-    # Start date, end date, and freq
-    m.cfg['tdis']['perioddata']['freq'] = 'D'
-    m._perioddata = None
-    pd4 = m.perioddata.copy()
-    assert pd4.equals(pd1)
-
-    # end date, freq and nper
-    m.cfg['tdis']['options']['start_date_time'] = None
-    m.cfg['tdis']['perioddata']['end_date_time'] = '2008-10-12'
-    m._perioddata = None
-    pd5 = m.perioddata.copy()
-    assert pd5.iloc[:-1].equals(pd1)
-
-    # month end vs month start freq
-    m.cfg['tdis']['perioddata']['freq'] = '6M'
-    m.cfg['tdis']['options']['start_date_time'] = '2007-04-01'
-    m.cfg['tdis']['perioddata']['end_date_time'] = '2015-10-01'
-    m.cfg['tdis']['perioddata']['nstp'] = 15
-    m._perioddata = None
-    pd6 = m.perioddata.copy()
-    pd0_g1_3 = pd.concat([pd0.iloc[:1], pd0.iloc[2:]])
-    for c in pd0_g1_3[['perlen', 'start_datetime', 'end_datetime']]:
-        np.array_equal(pd6[c].values, pd0_g1_3[c].values)
 
 
 def test_set_lakarr(shellmound_model_with_dis):
@@ -668,9 +591,7 @@ def test_idomain_above_sfr(model_with_sfr):
     m = model_with_sfr
     sfr = m.sfr
     # get the kij locations of sfr reaches
-    cellids = sfr.packagedata.array['cellid'].tolist()
-    deact_lays = [list(range(cellid[0])) for cellid in cellids]
-    k, i, j = list(zip(*cellids))
+    k, i, j = zip(*sfr.reach_data[['k', 'i', 'j']])
 
     # verify that streambed tops are above layer bottoms
     assert np.all(sfr.packagedata.array['rtp'] > np.all(m.dis.botm.array[k, i, j]))
@@ -700,15 +621,17 @@ def test_idomain_above_sfr(model_with_sfr):
     # verify that dis package file still references external file
     m.dis.write()
     fname = os.path.join(m.model_ws, m.dis.filename)
-    assert os.path.getsize(fname) < 2e3
+    assert os.path.getsize(fname) < 3e3
 
     # idomain should be zero everywhere there's a sfr reach
     # except for in the botm layer
     # (verifies that model botm was reset to accomdate SFR reaches)
     assert np.array_equal(m.sfr.reach_data.i, i)
     assert np.array_equal(m.sfr.reach_data.j, j)
+    k, i, j = cellids_to_kij(sfr.packagedata.array['cellid'])
     assert idomain[:-1, i, j].sum() == 0
-    assert idomain[-1, i, j].sum() == len(sfr.packagedata.array)
+    active = np.array([True if c != 'none' else False for c in sfr.packagedata.array['cellid']])
+    assert idomain[-1, i, j].sum() == active.sum()
     assert np.all(m.dis.botm.array[:-1, i, j] > 9980)
     assert np.all(m.dis.botm.array[-1, i, j] < 100)
 

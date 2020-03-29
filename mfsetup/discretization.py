@@ -61,8 +61,7 @@ def deactivate_idomain_above(idomain, packagedata):
     if isinstance(packagedata, np.recarray):
         packagedata.columns = packagedata.dtype.names
     if 'cellid' in packagedata.columns:
-        cellids = list(packagedata['cellid'])
-        k, i, j = list(zip(*cellids))
+        k, i, j = cellids_to_kij(packagedata['cellid'])
     else:
         k, i, j = packagedata['k'], packagedata['i'], packagedata['j']
     deact_lays = [list(range(ki)) for ki in k]
@@ -108,6 +107,32 @@ def find_remove_isolated_cells(array, minimum_cluster_size=10):
     if len(array.shape) == 3:
         return np.array(retained_arraylist, dtype=array.dtype)
     return retained_arraylist[0]
+
+
+def cellids_to_kij(cellids, drop_inactive=True):
+    """Unpack tuples of MODFLOW-6 cellids (k, i, j) to
+    lists of k, i, j values; ignoring instances
+    where cellid is None (unconnected cells).
+
+    Parameters
+    ----------
+    cellids : sequence of (k, i, j) tuples
+    drop_inactive : bool
+        If True, drop cellids == 'none'. If False,
+        distribute these to k, i, j.
+
+    Returns
+    -------
+    k, i, j : 1D numpy arrays of integers
+    """
+    active = np.array(cellids) != 'none'
+    if drop_inactive:
+        k, i, j = map(np.array, zip(*cellids[active]))
+    else:
+        k = np.array([cid[0] if cid != 'none' else None for cid in cellids])
+        i = np.array([cid[1] if cid != 'none' else None for cid in cellids])
+        j = np.array([cid[2] if cid != 'none' else None for cid in cellids])
+    return k, i, j
 
 
 def create_vertical_pass_through_cells(idomain):
@@ -361,6 +386,21 @@ def make_ibound(top, botm, nodata=-9999,
     return idomain
 
 
+def make_lgr_idomain(parent_modelgrid, inset_modelgrid):
+    """Inactivate cells in parent_modelgrid that coincide
+    with area of inset_modelgrid."""
+    if parent_modelgrid.rotation != 0 or inset_modelgrid.rotation != 0:
+        raise NotImplementedError('Rotated grids not supported.')
+    idomain = np.ones(parent_modelgrid.shape, dtype=int)
+    l, b, r, t = inset_modelgrid.bounds
+    isinset = (parent_modelgrid.xcellcenters > l) & \
+              (parent_modelgrid.xcellcenters < r) & \
+              (parent_modelgrid.ycellcenters > b) & \
+              (parent_modelgrid.ycellcenters < t)
+    idomain[:, isinset] = 0
+    return idomain
+
+
 def make_idomain(top, botm, nodata=-9999,
                  minimum_layer_thickness=1,
                  drop_thin_cells=True, tol=1e-4):
@@ -422,6 +462,23 @@ def get_layer_thicknesses(top, botm, idomain=None):
         in the example column of cells above. (optional)
         If idomain is not specified, excluded cells are expected to be
         designated in the top and botm arrays as np.nans.
+
+    Examples
+    --------
+    Make a fake model grid with 7 layers, but only top and two layer bottoms specified:
+    >>> top = np.reshape([[10]]* 4, (2, 2))
+    >>> botm = np.reshape([[np.nan,  8., np.nan, np.nan, np.nan,  2., np.nan]]*4, (2, 2, 7)).transpose(2, 0, 1)
+    >>> result = get_layer_thicknesses(top, botm)
+    >>> result[:, 0, 0]
+    array([nan  2. nan nan nan  6. nan])
+
+    example with all layer elevations specified
+    note: this is the same result that np.diff(... axis=0) would produce;
+    except positive in the direction of the zero axis
+    >>> top = np.reshape([[10]] * 4, (2, 2))
+    >>> botm = np.reshape([[9, 8., 8, 6, 3, 2., -10]] * 4, (2, 2, 7)).transpose(2, 0, 1)
+    >>> result = get_layer_thicknesses(top, botm)
+    array([1.,  1., 0., 2., 3.,  1., 12.])
     """
     print('computing cell thicknesses...')
     t0 = time.time()
@@ -448,6 +505,7 @@ def get_layer_thicknesses(top, botm, idomain=None):
                 elif has_top and not np.isnan(elev):
                     b_ij[k-1] = valid_b.pop(0)
             thicknesses[:, i, j] = b_ij
+    thicknesses[thicknesses == 0] = 0  # get rid of -0.
     print("finished in {:.2f}s\n".format(time.time() - t0))
     return thicknesses
 

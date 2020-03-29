@@ -66,6 +66,9 @@ class MFsetupMixin():
         self._nodata_value = -9999
         self._model_ws = None
         self._abs_model_ws = None
+        self.inset = None  # LGR model(s)
+        self._is_lgr = False
+        self.lgr = None
         self.lake_info = None
         self.lake_fluxes = None
 
@@ -85,7 +88,7 @@ class MFsetupMixin():
         txt = ''
         if self.parent is not None:
             txt += 'Parent model: {}/{}\n'.format(self.parent.model_ws, self.parent.name)
-        if self.modelgrid is not None:
+        if self._modelgrid is not None:
             txt += 'CRS: {}\n'.format(self.modelgrid.proj4)
             if self.modelgrid.epsg is not None:
                 txt += '(epsg: {})\n'.format(self.modelgrid.epsg)
@@ -170,9 +173,9 @@ class MFsetupMixin():
     def perioddata(self):
         """DataFrame summarizing stress period information.
         Columns:
-          start_datetime : pandas datetimes; start date/time of each stress period
+          start_date_time : pandas datetimes; start date/time of each stress period
           (does not include steady-state periods)
-          end_datetime : pandas datetimes; end date/time of each stress period
+          end_date_time : pandas datetimes; end date/time of each stress period
           (does not include steady-state periods)
           time : float; cumulative MODFLOW time (includes steady-state periods)
           per : zero-based stress period
@@ -282,8 +285,8 @@ class MFsetupMixin():
     @property
     def parent_mask(self):
         """Boolean array indicating window in parent model grid (subset of cells)
-        that encompass the pfl_nwt model domain. Used to speed up interpolation
-        of parent grid values onto pfl_nwt grid."""
+        that encompass the inset model domain, with a surrounding buffer.
+        Used to speed up interpolation of parent grid values onto inset model grid."""
         if self._parent_mask is None:
             x, y = np.squeeze(self.bbox.exterior.coords.xy)
             pi, pj = get_ij(self.parent.modelgrid, x, y)
@@ -552,6 +555,9 @@ class MFsetupMixin():
         Adds intermediated file paths to model.cfg[<package>]['intermediate_data']
         Adds external file paths to model.cfg[<package>][<variable_name>]
         """
+        # for lgr models, add the model name to the external filename
+        if self.lgr is not None or getattr(self, '_is_lgr', False):
+            filename_format = '{}_{}'.format(self.name, filename_format)
         return setup_external_filepaths(self, package, variable_name,
                                         filename_format, nfiles=nfiles,
                                         relative_external_paths=self.relative_external_paths)
@@ -622,7 +628,7 @@ class MFsetupMixin():
                     kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
                     self._sim = mf6.MFSimulation(**kwargs)
 
-        # load the parent model
+        # load the parent model (skip if already attached)
         if 'namefile' in self.cfg.get('parent', {}).keys():
             self._set_parent()
 
@@ -659,15 +665,11 @@ class MFsetupMixin():
             for packagename, bcnumber in self.bc_numbers.items():
                 if packagename.upper() in self.get_package_list() and packagename != 'lak':
                     package = getattr(self, packagename)
-                    try:
-                        k, i, j = get_bc_package_cells(package)
-                        not_a_lake = np.where(isbc[i, j] != 1)
-                        i = i[not_a_lake]
-                        j = j[not_a_lake]
-                        isbc[i, j] = bcnumber
-                        #isbc[i, j][isbc[i, j] != 1] = bcnumber
-                    except:
-                        j=2
+                    k, i, j = get_bc_package_cells(package)
+                    not_a_lake = np.where(isbc[i, j] != 1)
+                    i = i[not_a_lake]
+                    j = j[not_a_lake]
+                    isbc[i, j] = bcnumber
             self._isbc_2d = isbc
             self._set_lake_bathymetry()
 
@@ -686,16 +688,16 @@ class MFsetupMixin():
             for packagename, bcnumber in self.bc_numbers.items():
                 if packagename.upper() in self.get_package_list() and packagename != 'lak':
                     package = getattr(self, packagename)
-                    try:
-                        k, i, j = get_bc_package_cells(package)
-                        not_a_lake = np.where(isbc[k, i, j] != 1)
-                        k = k[not_a_lake]
-                        i = i[not_a_lake]
-                        j = j[not_a_lake]
-                        isbc[k, i, j] = bcnumber
-                        #isbc[i, j][isbc[i, j] != 1] = bcnumber
-                    except:
-                        j = 2
+                    #try:
+                    k, i, j = get_bc_package_cells(package)
+                    not_a_lake = np.where(isbc[k, i, j] != 1)
+                    k = k[not_a_lake]
+                    i = i[not_a_lake]
+                    j = j[not_a_lake]
+                    isbc[k, i, j] = bcnumber
+                    #    #isbc[i, j][isbc[i, j] != 1] = bcnumber
+                    #except:
+                    #    j = 2
             #if 'GHB' in self.get_package_list():
             #    k, i, j = self.ghb.stress_period_data[0]['k'], \
             #              self.ghb.stress_period_data[0]['i'], \
@@ -718,10 +720,11 @@ class MFsetupMixin():
             lakarr2d = np.zeros((self.nrow, self.ncol), dtype=int)
             if 'lak' in self.package_list:
                 lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile', {}).copy()
-                lakesdata = self.load_features(**lakes_shapefile)  # caches loaded features
-                lakes_shapefile['lakesdata'] = lakesdata
-                lakes_shapefile.pop('filename')
-                lakarr2d = make_lakarr2d(self.modelgrid, **lakes_shapefile)
+                if lakes_shapefile:
+                    lakesdata = self.load_features(**lakes_shapefile)  # caches loaded features
+                    lakes_shapefile['lakesdata'] = lakesdata
+                    lakes_shapefile.pop('filename')
+                    lakarr2d = make_lakarr2d(self.modelgrid, **lakes_shapefile)
             self._lakarr_2d = lakarr2d
             self._set_isbc2d()
 
@@ -906,6 +909,18 @@ class MFsetupMixin():
         self.cfg['grid'] = self._modelgrid.cfg
         self._reset_bc_arrays()
 
+        # set up local grid refinement
+        if 'lgr' in self.cfg['setup_grid'].keys():
+            if self.version != 'mf6':
+                raise TypeError('LGR only supported for MODFLOW-6 models.')
+            for key, cfg in self.cfg['setup_grid']['lgr'].items():
+                config_file = cfg['filename']
+                existing_inset_config_files = set()
+                if isinstance(self.inset, dict):
+                    existing_inset_config_files = {v.cfg['filename'] for k, v in self.inset.items()}
+                if config_file not in existing_inset_config_files:
+                    self.create_lgr_models()
+
     def load_grid(self, gridfile=None):
         """Load model grid information from a json or yml file."""
         if gridfile is None:
@@ -1055,6 +1070,20 @@ class MFsetupMixin():
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return sfr_package
 
+    def setup_packages(self, reset_existing=True):
+        package_list = self.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']
+        if not reset_existing:
+            package_list = [p for p in package_list if p.upper() not in self.get_package_list()]
+        for pkg in package_list:
+            setup_method_name = 'setup_{}'.format(pkg)
+            package_setup = getattr(self, setup_method_name, None)
+            if package_setup is None:
+                print('{} package not supported for MODFLOW version={}'.format(pkg.upper(), self.version))
+                continue
+            if not callable(package_setup):
+                package_setup = getattr(MFsetupMixin, 'setup_{}'.format(pkg.strip('6')))
+            package_setup()
+
     @classmethod
     def setup_from_yaml(cls, yamlfile, verbose=False):
         """Make a model from scratch, using information in a yamlfile.
@@ -1068,11 +1097,13 @@ class MFsetupMixin():
         -------
         m : model instance
         """
-
         cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file)
-        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
-        t0 = time.time()
+        return cls.setup_from_cfg(cfg, verbose=verbose)
 
+    @classmethod
+    def setup_from_cfg(cls, cfg, verbose=False):
+        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], None))
+        t0 = time.time()
         cfg = cls._parse_model_kwargs(cfg)
         kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                      exclude='packages')
@@ -1086,19 +1117,20 @@ class MFsetupMixin():
         m.setup_tdis()
 
         # set up all of the packages specified in the config file
-        package_list = m.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']
-        for pkg in package_list:
-            setup_method_name = 'setup_{}'.format(pkg)
-            package_setup = getattr(cls, setup_method_name, None)
-            if package_setup is None:
-                print('{} package not supported for MODFLOW version={}'.format(pkg.upper(), m.version))
-                continue
-            if not callable(package_setup):
-                package_setup = getattr(MFsetupMixin, 'setup_{}'.format(pkg.strip('6')))
-            package_setup(m)
+        m.setup_packages(reset_existing=False)
 
+        # perimter boundary for TMR model
         if m.perimeter_bc_type == 'head':
             chd = m.setup_perimeter_boundary()
+
+        # LGR inset model(s)
+        if m.inset is not None:
+            for k, v in m.inset.items():
+                if v._is_lgr:
+                    v.setup_packages()
+            m.setup_lgr_exchanges()
+
         print('finished setting up model in {:.2f}s'.format(time.time() - t0))
         print('\n{}'.format(m))
         return m
+

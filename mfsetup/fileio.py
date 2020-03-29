@@ -158,6 +158,16 @@ def save_array(filename, arr, nodata=-9999,
     print("took {:.2f}s".format(time.time() - t0))
 
 
+def append_csv(filename, df, **kwargs):
+    """Read data from filename,
+    append to dataframe, and write appended dataframe
+    back to filename."""
+    if os.path.exists(filename):
+        written = pd.read_csv(filename)
+        df = df.append(written)
+    df.to_csv(filename, **kwargs)
+
+
 def load_cfg(cfgfile, verbose=False, default_file=None):
     """
 
@@ -173,6 +183,8 @@ def load_cfg(cfgfile, verbose=False, default_file=None):
     """
     print('loading configuration file {}...'.format(cfgfile))
     source_path = os.path.split(__file__)[0]
+    check_source_files([cfgfile, source_path + default_file])
+
     # default configuration
     default_cfg = {}
     if default_file is not None:
@@ -204,6 +216,7 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
             'parent.model_ws',
             'parent.simulation.sim_ws',
             'parent.headfile',
+            #'setup_grid.lgr.config_file'
         ]
         model_ws = os.path.normpath(os.path.join(config_file_location,
                                                  cfg['simulation']['sim_ws']))
@@ -221,26 +234,31 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
         'setup_grid.grid_file'
     ]
     # add additional paths by looking for source_data
+    # within these input blocks, convert file paths to absolute
+    look_for_files_in = ['source_data',
+                         'lgr'
+                         ]
     for pckgname, pckg in cfg.items():
         if isinstance(pckg, dict):
-            if 'source_data' in pckg.keys():
-                file_keys = _parse_file_path_keys_from_source_data(pckg['source_data'])
-                for key in file_keys:
-                    file_path_keys_relative_to_config. \
-                        append('.'.join([pckgname, 'source_data', key]))
-            for loc in ['output_files',
-                        'output_folders',
-                        'output_folder',
-                        'output_path']:
-                if loc in pckg.keys():
-                    file_keys = _parse_file_path_keys_from_source_data(pckg[loc], paths=True)
+            for input_block in look_for_files_in:
+                if input_block in pckg.keys():
+                    file_keys = _parse_file_path_keys_from_source_data(pckg[input_block])
                     for key in file_keys:
-                        file_path_keys_relative_to_model_ws. \
-                            append('.'.join([pckgname, loc, key]).strip('.'))
+                        file_path_keys_relative_to_config. \
+                            append('.'.join([pckgname, input_block, key]))
+                for loc in ['output_files',
+                            'output_folders',
+                            'output_folder',
+                            'output_path']:
+                    if loc in pckg.keys():
+                        file_keys = _parse_file_path_keys_from_source_data(pckg[loc], paths=True)
+                        for key in file_keys:
+                            file_path_keys_relative_to_model_ws. \
+                                append('.'.join([pckgname, loc, key]).strip('.'))
 
     # set locations that are relative to configuration file
     cfg = _set_absolute_paths_to_location(file_path_keys_relative_to_config,
-                                         config_file_location, cfg)
+                                          config_file_location, cfg)
 
     # set locations that are relative to model_ws
     cfg = _set_absolute_paths_to_location(file_path_keys_relative_to_model_ws,

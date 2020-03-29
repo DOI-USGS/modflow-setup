@@ -26,15 +26,16 @@ def rpd(v1, v2):
 
 def dtypeisinteger(dtype):
     try:
-        if dtype == int:
+        if np.issubdtype(dtype, np.integer):
             return True
     except:
         pass
     try:
-        if issubclass(dtype, np.integer):
+        if isinstance(dtype, int):
             return True
     except:
-        return False
+        pass
+    return False
 
 
 def dtypeisfloat(dtype):

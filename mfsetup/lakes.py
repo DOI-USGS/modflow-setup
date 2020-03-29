@@ -160,8 +160,8 @@ def setup_lake_info(model):
     df['strt'] = np.array(stages)
 
     # save a lookup file mapping lake ids to hydroids
-    df.drop('geometry', axis=1).to_csv(model.cfg['lak']['output_files']['lookup_file'],
-              index=False)
+    lookup_file = model.cfg['lak']['output_files']['lookup_file'].format(model.name)
+    df.drop('geometry', axis=1).to_csv(lookup_file, index=False)
 
     # clean up names
     df['name'].replace('nan', '', inplace=True)
@@ -300,6 +300,8 @@ def setup_lake_connectiondata(model,
 
         # get the vertical GWF connections for each lake
         k, i, j = np.where(model.lakarr == lake_id)
+        # get just the unique i, j locations for each lake
+        i, j = zip(*set(zip(i, j)))
         # assign vertical connections to the highest active layer
         k = np.argmax(model.idomain[:, i, j], axis=0)
         cellid += list(zip(k, i, j))

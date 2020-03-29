@@ -2,20 +2,19 @@ intermediate_data:
   tmpdir: 'tmp/'
 
 simulation:
-  sim_name: 'pleasant_mf6'
+  sim_name: 'pleasant_lgr'
   version: 'mf6'
-  sim_ws: '../tmp/pleasant_mf6/'
+  sim_ws: '../tmp/pleasant_lgr/'
 
 model:
-  simulation: 'pleasant_mf6'
-  modelname: 'pleasant_mf6'
+  simulation: 'pleasant_lgr'
+  modelname: 'plsnt_lgr_inset'
   options:
     print_input: True
     save_flows: True
     newton: True
     newton_under_relaxation: True
   external_path: 'external/'
-  perimeter_boundary_type: 'specified head'
   packages: ['dis',
              'ic',
              'npf',
@@ -92,17 +91,15 @@ tdis:
       # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
     group 2: # monthly stress periods
       start_date_time: '2012-01-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
-      end_date_time: '2019-01-01'  # end times are specified following pandas slice convention, which includes the specified end date
+      end_date_time: '2018-12-31'  # end times are specified following pandas slice convention, which includes the specified end date
       freq: '1MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
       nstp: 1
       tsmult: 1.5
       steady: False
 
-ic:
-  source_data:
-    strt:
-      from_parent:
-        binaryfile: 'pleasant/pleasant.hds'
+#ic:
+#  source_data:
+#    strt: 'from_parent'
 
 npf:
   options:
@@ -117,10 +114,12 @@ sto:
     iconvert: 1  # convertible layers
 
 wel:
-  options:
-    print_input: True
-    print_flows: True
-    save_flows: True
+  source_data:
+    wdnr_dataset:
+      water_use: 'pleasant/source_data/tables/master_wu.csv' # monthly water use rates from WDNR
+      water_use_points: 'pleasant/source_data/shps/csls_sources_wu_pts.shp' # point locations of wells in water_use
+      period_stats: {0: ['mean', '2012-01-01', '2018-12-31'],
+                     1: 'resample'}
 
 lak:
   options:
@@ -150,8 +149,6 @@ lak:
       id_column: 'hydroid'
       column_mappings:
         volume_m3: 'volume'
-  output_files:
-    lookup_file: 'lak_lookup.csv'
 
 sfr:
   options:

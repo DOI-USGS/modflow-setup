@@ -109,14 +109,16 @@ lak:
     boundnames: True
   lakarr_filename_fmt: 'lakarr{:d}.dat'
   lakzones_filename_fmt: 'lakzones.dat' # file containing zones for lakebed leakance
-
+  output_files:
+    lookup_file: '{}_lak_lookup.csv'  # output file that maps lake ids to source polygon feature ids
 wel:
   options:
     print_input: True
     print_flows: True
     save_flows: True
   output_files:
-    lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
+    lookup_file: '{}_wel_lookup.csv' # output file that maps wel package data to site numbers
+    dropped_wells_file: '{}_dropped_wells.csv' # output file that records wells that were dropped during model setup
   minimum_layer_thickness: 2.
 
 chd:
@@ -148,7 +150,7 @@ ims:
   options:
     print_option: 'all'
     complexity: 'moderate'
-    'csv_output fileout': 'solver_out.csv'
+    'csv_output fileout': '{}_solver_out.csv'
   nonlinear:
     outer_hclose: 1.e-1
     outer_rclosebnd: 1.e4

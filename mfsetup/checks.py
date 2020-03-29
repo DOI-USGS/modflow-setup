@@ -31,7 +31,13 @@ def is_valid_perioddata(data):
 def check_external_files_for_nans(files_list):
     has_nans = []
     for f in files_list:
-        arr = load_array(f)
-        if np.any(np.isnan(arr)):
-            has_nans.append(f)
+        try:  # array text files
+            arr = load_array(f)
+            if np.any(np.isnan(arr)):
+                has_nans.append(f)
+        except:  # other text files (MODFLOW-6 input with blocks)
+            with open(f) as src:
+                text = src.read()
+                if 'nan' in text:
+                    has_nans.append(f)
     return has_nans

@@ -550,6 +550,8 @@ class Tmr:
         k, i, j = self.inset.get_boundary_cells(exclude_inactive=True)
 
         # get heads from parent model
+        # TODO: generalize head extraction from parent model using 3D interpolation
+
         dfs = []
         for inset_per, parent_kstpkper in enumerate(kstpkper):
             hds = hdsobj.get_data(kstpkper=parent_kstpkper)
@@ -565,7 +567,6 @@ class Tmr:
                     arr = hds[source_k]
                 # destination model layers that are a weighted average
                 # of consecutive source model layers
-                # TODO: add transmissivity-based weighting if upw exists; or could just simply use griddata
                 else:
                     weight0 = source_k - np.floor(source_k)
                     source_k0 = int(np.floor(source_k))

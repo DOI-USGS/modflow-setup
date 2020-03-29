@@ -116,3 +116,4 @@ def test_exe_exists(modflow_executable):
     else:
         assert exe_exists(modflow_executable)
         print('{} exists'.format(modflow_executable))
+

@@ -187,8 +187,11 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
         oc : dict; MODFLOW-6 output control options
 
     """
+    # todo: refactor/simplify setup_perioddata_group
     freq = convert_freq_to_period_start(freq)
     oc = oc_saverecord
+    if not isinstance(steady, dict):
+        steady = {i: v for i, v in enumerate(steady)}
 
     txt = "Specify perlen as a list of lengths in model units, or\nspecify 3 " \
           "of start_date_time, end_date_time, nper and/or freq."
@@ -242,7 +245,7 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
             time = getattr((datetimes - pd.Timestamp(start_date_time)), model_time_units).tolist()
 
             # get the last (end) time, if it wasn't included in datetimes
-            if datetimes[0] == pd.Timestamp(start_date_time):
+            if datetimes[0] == pd.Timestamp(start_date_time) and nper is None:
                 if end_date_time is not None:
                     # + 1 for consistency with using date_range below
                     # e.g. to end at 2019-01-01 instead of 2018-12-31
@@ -258,11 +261,11 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
                                          model_time_units)
                 if last_time != time[-1]:
                     time += [last_time]
-            if time[0] != 0:
-                time = [0] + time
-            perlen = np.diff(time)
-            time = np.array(time[1:])
-            assert len(perlen) == len(time)# == len(datetimes)
+        if time[0] != 0:
+            time = [0] + list(time)
+        perlen = np.diff(time)
+        time = np.array(time[1:])
+        assert len(perlen) == len(time)  # == len(datetimes)
 
         # if first period is steady-state,
         # insert it at the beginning of the generated range

@@ -75,6 +75,14 @@ def test_perioddata(pfl_nwt):
     assert np.array_equal(model.perioddata.steady, [True, False])
 
 
+def test_set_parent_perioddata(pfl_nwt):
+    perioddata = pfl_nwt.perioddata
+    parent_perioddata = pfl_nwt.parent.perioddata
+    cols = set(perioddata).difference({'parent_sp'})
+    for c in cols:
+        assert c in parent_perioddata.columns
+
+
 def test_set_perioddata_tr_parent(inset_with_transient_parent):
     if inset_with_transient_parent is not None:
         m = deepcopy(inset_with_transient_parent)
@@ -169,6 +177,7 @@ def test_dis_setup(pfl_nwt_with_grid):
     del m.cfg['setup_grid']['botm']
     m.cfg['dis']['remake_top'] = True
     m.cfg['dis']['lenuni'] = 1 # feet
+    m.cfg['setup_grid']['dxy'] = 20/.3048
     m.remove_package('DIS')
     m.setup_grid()
     #m._reset_bc_arrays()
@@ -584,6 +593,7 @@ def test_model_setup_nans(pfl_nwt_setup_from_yaml):
     has_nans = check_external_files_for_nans(external_files)
     has_nans = [os.path.normpath(f) for f in has_nans]
     assert bad_file in has_nans
+    os.remove(bad_file)
 
 
 #@pytest.mark.skip("still working on wel")

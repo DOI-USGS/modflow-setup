@@ -187,6 +187,22 @@ def test_make_idomain(all_layers):
 
 
 def test_get_layer_thicknesses(all_layers):
+
+    # docstring examples
+    top = np.reshape([[10]]* 4, (2, 2))
+    botm = np.reshape([[np.nan,  8., np.nan, np.nan, np.nan,  2., np.nan]]*4, (2, 2, 7)).transpose(2, 0, 1)
+    result = get_layer_thicknesses(top, botm)
+    np.testing.assert_almost_equal(result[:, 0, 0], [np.nan,  2., np.nan, np.nan, np.nan,  6., np.nan])
+
+    top = np.reshape([[10]] * 4, (2, 2))
+    botm = np.reshape([[9, 8., 8, 6, 3, 2., -10]] * 4, (2, 2, 7)).transpose(2, 0, 1)
+    result = get_layer_thicknesses(top, botm)
+    assert np.allclose(result[:, 0, 0], [1.,  1., 0., 2., 3.,  1., 12.])
+
+    all_layers2 = np.stack([top] + [b for b in botm])
+    assert np.allclose(np.abs(np.diff(all_layers2, axis=0)), result)
+
+
     top = all_layers[0].copy()
     botm = all_layers[1:].copy()
 

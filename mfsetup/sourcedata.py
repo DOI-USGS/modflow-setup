@@ -1017,7 +1017,7 @@ def setup_array(model, package, var, data=None,
                                                                                       source_model.name,
                                                                                       source_package)
             # traps against variables that might not exist
-            if var in ['ss', 'sy'] and np.all(source_model.dis.steady.array):
+            if var in ['ss', 'sy'] and source_model.perioddata.steady.all():
                 return
             if source_package_instance is not None:
                 source_variable_exists = getattr(source_package_instance, source_variable, False)
@@ -1198,8 +1198,8 @@ def setup_array(model, package, var, data=None,
     # with botm array above
     if var == 'botm':
         top_filepath = model.setup_external_filepaths(package, 'top',
-                                               model.cfg[package]['top_filename_fmt'],
-                                               nfiles=1)[0]
+                                                      model.cfg[package]['top_filename_fmt'],
+                                                      nfiles=1)[0]
         save_array(top_filepath, top,
                    nodata=write_nodata,
                    fmt=write_fmt)

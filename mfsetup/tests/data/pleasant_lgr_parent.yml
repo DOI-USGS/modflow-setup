@@ -2,13 +2,13 @@ intermediate_data:
   tmpdir: 'tmp/'
 
 simulation:
-  sim_name: 'pleasant_mf6'
+  sim_name: 'pleasant_lgr'
   version: 'mf6'
-  sim_ws: '../tmp/pleasant_mf6/'
+  sim_ws: '../tmp/pleasant_lgr/'
 
 model:
-  simulation: 'pleasant_mf6'
-  modelname: 'pleasant_mf6'
+  simulation: 'pleasant_lgr'
+  modelname: 'plsnt_lgr_parent'
   options:
     print_input: True
     save_flows: True
@@ -49,15 +49,18 @@ parent:
 # using features in features_file
 setup_grid:
   remake: True
-  source_data:
-    features_shapefile:
-      filename: 'pleasant/source_data/shps/all_lakes.shp'
-      id_column: 'HYDROID'
-      include_ids: [600059060] # pleasant lake
-  dxy: 40 # m
-  buffer: 1000 # distance from feature(s) if interest to model boundary, in meters
-  grid_file: 'grid.json' # grid info will be written to this file
+  xoff: 553000 # lower left x-coordinate
+  yoff: 388000 # lower left y-coordinate
+  rotation: 0.
+  nrow: 25
+  ncol: 25
+  dxy: 200 # m
+  grid_file: '{}_grid.json' # grid info will be written to this file
   epsg: 3070
+  lgr:
+    pleasant_lgr_inset:
+      filename: 'pleasant_lgr_inset.yml'
+      layer_refinement: 1  # number of lgr model layers per parent model layer
 
 dis:
   remake_top: True
@@ -92,7 +95,7 @@ tdis:
       # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
     group 2: # monthly stress periods
       start_date_time: '2012-01-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
-      end_date_time: '2019-01-01'  # end times are specified following pandas slice convention, which includes the specified end date
+      end_date_time: '2018-12-31'  # end times are specified following pandas slice convention, which includes the specified end date
       freq: '1MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
       nstp: 1
       tsmult: 1.5
@@ -121,37 +124,6 @@ wel:
     print_input: True
     print_flows: True
     save_flows: True
-
-lak:
-  options:
-    boundnames: True
-    save_flows: True
-    surfdep: 0.1  # undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)
-  source_data:
-    littoral_leakance: 0.045 # 1/d
-    profundal_leakance: 0.025 # 1/d
-    lakes_shapefile:
-      filename: 'pleasant/source_data/shps/all_lakes.shp'
-      id_column: 'HYDROID'
-      include_ids: [600059060] # pleasant lake
-    climate:
-      filenames:
-        600059060: 'pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
-      format: 'prism'
-      period_stats:
-        0: ['mean', '2012-01-01', '2018-12-31']  # average daily rate for model period for initial steady state
-        1: 'mean'  # average daily rate or value for each month
-    bathymetry_raster:
-      filename: 'pleasant/source_data/rasters/pleasant_bathymetry.tif'
-      length_units: 'meters'
-    stage_area_volume_file:
-      filename: 'pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
-      length_units: 'meters'
-      id_column: 'hydroid'
-      column_mappings:
-        volume_m3: 'volume'
-  output_files:
-    lookup_file: 'lak_lookup.csv'
 
 sfr:
   options:

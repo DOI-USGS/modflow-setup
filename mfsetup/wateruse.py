@@ -5,12 +5,11 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Polygon, MultiPolygon
 from gisutils import shp2df
+from .discretization import get_layer, get_layer_thicknesses
 from .grid import get_ij
+from mfsetup.units import convert_volume_units, get_length_units
 import mfsetup.wells as wells
 
-# conversions from gallons model length units
-conversions = {1: 7.48052, # gallons per cubic foot
-               2: 264.172} # gallons per cubic meter
 
 months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 
@@ -120,16 +119,19 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     i, j = get_ij(model.modelgrid, well_info.x.values, well_info.y.values)
     print("took {:.2f}s\n".format(time.time() - t0))
 
+    top = model.dis.top.array
+    botm = model.dis.botm.array
+    thickness = get_layer_thicknesses(top, botm)
     well_info['i'] = i
     well_info['j'] = j
-    well_info['elv_m'] = model.dis.top.array[i, j]
+    well_info['elv_m'] = top[i, j]
     well_info['elv_top_m'] = well_info.elev_open_int_top_m
     well_info['elv_botm_m'] = well_info.elev_open_int_bot_m
     well_info['elv_mdpt_m'] = well_info.screen_midpoint_elev_m
-    well_info['k'] = model.dis.get_layer(i, j, elev=well_info['elv_mdpt_m'].values)
-    well_info['laythick'] = model.dis.thickness.array[well_info.k.values, i, j]
-    well_info['ktop'] = model.dis.get_layer(i, j, elev=well_info['elv_top_m'].values)
-    well_info['kbotm'] = model.dis.get_layer(i, j, elev=well_info['elv_botm_m'].values)
+    well_info['k'] = get_layer(botm, i, j, elev=well_info['elv_mdpt_m'].values)
+    well_info['laythick'] = thickness[well_info.k.values, i, j]
+    well_info['ktop'] = get_layer(botm, i, j, elev=well_info['elv_top_m'].values)
+    well_info['kbotm'] = get_layer(botm, i, j, elev=well_info['elv_botm_m'].values)
 
     # for wells in a layer below minimum thickness
     # move to layer with screen top, then screen botm,
@@ -259,7 +261,8 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
         site_sums = period_data.groupby('site_no').sum()
         site_means['gal_d'] = site_sums['gallons'] / site_sums['days']
         # conversion to model units is based on lenuni variable in DIS package
-        site_means['flux'] = site_means.gal_d / conversions[model.dis.lenuni]
+        gal_to_model_units = convert_volume_units('gal', get_length_units(model))
+        site_means['flux'] = site_means.gal_d * gal_to_model_units
         site_means['per'] = per
 
         wel_data.append(well_info[['k', 'i', 'j']].join(site_means[['flux', 'per']], how='inner'))
@@ -369,7 +372,8 @@ def resample_pumping_rates(wu_file, wu_points, model,
 
         # convert units from monthly gallon totals to daily model length units
         site_period_data['gal_d'] = site_period_data['gallons'] / site_period_data['perlen']
-        site_period_data['flux'] = site_period_data.gal_d / conversions[model.dis.lenuni]
+        gal_to_model_units = convert_volume_units('gal', get_length_units(model))#model.dis.lenuni]
+        site_period_data['flux'] = site_period_data.gal_d * gal_to_model_units
         for col in ['i', 'j', 'k']:
             site_period_data[col] = well_info.loc[site, col]
         site_period_data.index = [site] * len(site_period_data)

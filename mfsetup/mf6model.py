@@ -8,8 +8,9 @@ import pandas as pd
 import flopy
 fm = flopy.modflow
 mf6 = flopy.mf6
+from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
-from .discretization import (make_idomain, deactivate_idomain_above,
+from .discretization import (make_idomain, make_lgr_idomain, deactivate_idomain_above,
                              find_remove_isolated_cells,
                              create_vertical_pass_through_cells)
 from .fileio import (load, dump, load_cfg,
@@ -20,6 +21,7 @@ from .lakes import (setup_lake_connectiondata, setup_lake_info,
                     get_lakeperioddata, setup_mf6_lake_obs)
 from .mf5to6 import get_package_name
 from .obs import setup_head_observations
+from .tdis import setup_perioddata_group
 from .tmr import Tmr
 from .units import lenuni_text, itmuni_text, convert_length_units, convert_time_units
 from .utils import update, get_input_arguments, flatten, get_packages
@@ -52,6 +54,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # property attributes
         self._idomain = None
+
 
         # other attributes
         self._features = {} # dictionary for caching shapefile datasets in memory
@@ -92,6 +95,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """Remake the idomain array from the source data,
         no data values in the top and bottom arrays, and
         so that cells above SFR reaches are inactive."""
+        # loop thru LGR models and inactivate area of parent grid for each one
+        lgr_idomain = np.ones(self.dis.idomain.array.shape, dtype=int)
+        if self.lgr is not None:
+            for k, v in self.lgr.items():
+                lgr_idomain[v.idomain == 0] = 0
         idomain_from_layer_elevations = make_idomain(self.dis.top.array,
                                                      self.dis.botm.array,
                                                      nodata=self._nodata_value,
@@ -100,7 +108,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                                      tol=1e-4)
         # include cells that are active in the existing idomain array
         # and cells inactivated on the basis of layer elevations
-        idomain = (self.dis.idomain.array == 1) & (idomain_from_layer_elevations == 1)
+        idomain = (self.dis.idomain.array == 1) & \
+                  (idomain_from_layer_elevations == 1) & \
+                  (lgr_idomain == 1)
         idomain = idomain.astype(int)
 
         # remove cells that conincide with lakes
@@ -124,13 +134,21 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                           data={i: arr for i, arr in enumerate(idomain)},
                           datatype='array3d', write_fmt='%d', dtype=int)
         self.dis.idomain = self.cfg['dis']['griddata']['idomain']
+        self._mg_resync = False
 
     def _set_parent(self):
         """Set attributes related to a parent or source model
-        if one is specified."""
+        if one is specified.
+        todo: move this method to mfmodel mixin class
+        """
 
         if self.cfg['parent']['version'] == 'mf6':
-            raise NotImplementedError("MODFLOW-6 parent models")
+            if 'lgr' in self.parent.cfg['setup_grid'].keys() and isinstance(self.parent, MF6model):
+                if 'DIS' not in self.parent.get_package_list():
+                    dis = self.parent.setup_dis()
+                return
+            else:
+                raise NotImplementedError("TMR from MODFLOW-6 parent models")
 
         kwargs = self.cfg['parent'].copy()
         if kwargs is not None:
@@ -167,6 +185,17 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             mg_kwargs = self.cfg['parent'].get('SpatialReference',
                                           self.cfg['parent'].get('modelgrid', None))
             self._set_parent_modelgrid(mg_kwargs)
+
+            # parent model perioddata
+            if not hasattr(self.parent, 'perioddata'):
+                kwargs = self.cfg['parent'].copy()
+                kwargs['nper'] = self.parent.nper
+                kwargs['model_time_units'] = self.cfg['parent']['time_units']
+                for var in ['perlen', 'steady', 'nstp', 'tsmult']:
+                    kwargs[var] = self.parent.dis.__dict__[var].array
+                kwargs = get_input_arguments(kwargs, setup_perioddata_group)
+                kwargs['oc_saverecord'] = {}
+                self._parent.perioddata = setup_perioddata_group(**kwargs)
 
             # default_source_data, where omitted configuration input is
             # obtained from parent model by default
@@ -254,6 +283,77 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """
         raise NotImplementedError()
 
+    def create_lgr_models(self):
+        for k, v in self.cfg['setup_grid']['lgr'].items():
+            # load the config file for lgr inset model
+            inset_cfg = load_cfg(v['filename'],
+                                 default_file='/mf6_defaults.yml')
+            # lgr inset has already been created
+            if inset_cfg['model']['modelname'] in self.simulation._models:
+                return
+            inset_cfg['model']['simulation'] = self.simulation
+            if 'ims' in inset_cfg['model']['packages']:
+                inset_cfg['model']['packages'].remove('ims')
+            # set parent configuation dictionary here
+            # (even though parent model is explicitly set below)
+            # so that the LGR grid is snapped to the parent grid
+            inset_cfg['parent'] = {'namefile': self.namefile,
+                                   'model_ws': self.model_ws,
+                                   'version': 'mf6',
+                                   'hiKlakes_value': self.cfg['model']['hiKlakes_value'],
+                                   'default_source_data': True,
+                                   'length_units': self.length_units,
+                                   'time_units': self.time_units
+                                   }
+            kwargs = get_input_arguments(inset_cfg['model'], mf6.ModflowGwf, exclude='packages')
+            kwargs['parent'] = self  # otherwise will try to load parent model
+            inset_model = MF6model(cfg=inset_cfg, **kwargs)
+            inset_model.setup_grid()
+            del inset_model.cfg['ims']
+            if self.inset is None:
+                self.inset = {}
+                self.lgr = {}
+            self.inset[inset_model.name] = inset_model
+            self.inset[inset_model.name]._is_lgr = True
+
+            # create idomain indicating area of parent grid that is LGR
+            lgr_idomain = make_lgr_idomain(self.modelgrid, self.inset[inset_model.name].modelgrid)
+
+            ncpp = int(self.modelgrid.delr[0]/self.inset[inset_model.name].modelgrid.delr[0])
+            ncppl = v.get('layer_refinement', 1)
+            self.lgr[inset_model.name] = Lgr(self.nlay, self.nrow, self.ncol,
+                                               self.dis.delr.array, self.dis.delc.array,
+                                               self.dis.top.array, self.dis.botm.array,
+                                               lgr_idomain, ncpp, ncppl)
+            inset_model._perioddata = self.perioddata
+            self._set_idomain()
+
+    def setup_lgr_exchanges(self):
+        for inset_name, inset_model in self.inset.items():
+            # get the exchange data
+            exchangelist = self.lgr[inset_name].get_exchange_data(angldegx=True, cdist=True)
+
+            # make a dataframe for concise unpacking of cellids
+            columns = ['cellidm1', 'cellidm2', 'ihc', 'cl1', 'cl2', 'hwva', 'angldegx', 'cdist']
+            exchangedf = pd.DataFrame(exchangelist, columns=columns)
+
+            # unpack the cellids and get their respective ibound values
+            k1, i1, j1 = zip(*exchangedf['cellidm1'])
+            k2, i2, j2 = zip(*exchangedf['cellidm2'])
+            active1 = self.idomain[k1, i1, j1] == 1
+            active2 = inset_model.idomain[k2, i2, j2] == 1
+
+            # screen out connections involving an inactive cell
+            active_connections = active1 & active2
+            nexg = active_connections.sum()
+            active_exchangelist = [l for i, l in enumerate(exchangelist) if active_connections[i]]
+
+            # set up the exchange package
+            gwfe = mf6.ModflowGwfgwf(self.simulation, exgtype='gwf6-gwf6',
+                                     exgmnamea=self.name, exgmnameb=inset_name,
+                                     nexg=nexg, auxiliary=[('angldegx', 'cdist')],
+                                     exchangedata=active_exchangelist)
+
     def setup_dis(self):
         """"""
         package = 'dis'
@@ -291,6 +391,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self._perioddata = None  # reset perioddata
         #if not isinstance(self._modelgrid, MFsetupGrid):
         #    self._modelgrid = None  # override DIS package grid setup
+        self._mg_resync = False
         self.setup_grid()  # reset the model grid
         self._reset_bc_arrays()
         self._set_idomain()
@@ -463,6 +564,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # munge well package input
         # returns dataframe with information to populate stress_period_data
         df = setup_wel_data(self)
+        if len(df) == 0:
+            print('No wells in active model area')
+            return
 
         # set up stress_period_data
         spd = {}
@@ -662,6 +766,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs = flatten(self.cfg[package])
         kwargs = get_input_arguments(kwargs, mf6.ModflowIms)
         ims = mf6.ModflowIms(self.simulation, **kwargs)
+        #self.simulation.register_ims_package(ims, [self.name])
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ims
 

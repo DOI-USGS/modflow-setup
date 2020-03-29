@@ -11,7 +11,7 @@ from shapely.geometry import Polygon, MultiPolygon
 from flopy.discretization import StructuredGrid
 from gisutils import df2shp, get_proj_str, project, shp2df
 import mfsetup.fileio as fileio
-from .units import convert_length_units
+from .units import convert_length_units, get_length_units
 from .utils import get_input_arguments
 
 
@@ -81,6 +81,12 @@ class MFsetupGrid(StructuredGrid):
         """
         x0, x1, y0, y1 = self.extent
         return x0, y0, x1, y1
+
+    @property
+    def size(self):
+        if self.nlay is None:
+            return self.nrow * self.ncol
+        return self.nlay * self.nrow * self.ncol
 
     @property
     def transform(self):
@@ -408,10 +414,16 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             else:
                 regular = False
     if parent_model is not None:
-        to_meters_parent = convert_length_units(parent_model.dis.lenuni, 'meters')
+        to_meters_parent = convert_length_units(get_length_units(parent_model), 'meters')
         # parent model grid spacing in meters
         parent_delr_m = np.round(parent_model.dis.delr.array[0] * to_meters_parent, 4)
+        if not parent_delr_m % delr_m == 0:
+            raise ValueError('inset delr spacing of {} must be factor of parent spacing of {}'.format(delr_m,
+                                                                                                      parent_delr_m))
         parent_delc_m = np.round(parent_model.dis.delc.array[0] * to_meters_parent, 4)
+        if not parent_delc_m % delc_m == 0:
+            raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_m,
+                                                                                                      parent_delc_m))
 
     if epsg is None and parent_model is not None:
         epsg = parent_model.modelgrid.epsg

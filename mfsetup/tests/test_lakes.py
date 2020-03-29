@@ -76,20 +76,40 @@ def test_setup_lake_info(get_pleasant_mf6_with_dis):
 def test_setup_lake_connectiondata(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
     df = setup_lake_connectiondata(m)
-    df['k'] = [c[0] for c in df['cellid']]
+    df['k'], df['i'], df['j'] = zip(*df['cellid'])
     vertical_connections = df.loc[df.claktype == 'vertical']
     lakezones = load_array(m.cfg['intermediate_data']['lakzones'][0])
     litleak = m.cfg['lak']['source_data']['littoral_leakance']
     profleak = m.cfg['lak']['source_data']['profundal_leakance']
-    for k, lakarr2d in enumerate(m.lakarr):
-        kvc = vertical_connections.loc[vertical_connections.k == k]
-        assert np.sum(lakarr2d > 0) == len(kvc)
-        assert np.sum(kvc.bedleak == profleak) == np.sum(lakezones == 100)
-        assert np.sum(kvc.bedleak == litleak) > 0
-        assert np.sum(kvc.bedleak == litleak) <= np.sum(lakezones == 1)
 
+    # 2D array showing all vertical connections in lake package
+    lakarr2d_6 = np.zeros((m.nrow, m.ncol), dtype=bool)
+    lakarr2d_6[vertical_connections.i.values, vertical_connections.j.values] = True
 
-    j=2
+    # verify that number of vert. connection locations is consistent between lakarr and mf6 list input
+    assert np.sum(m.lakarr.sum(axis=0) > 0) == np.sum(lakarr2d_6)
+
+    # verify that there is only one vertical connection at each location
+    ij_locations = set(zip(vertical_connections.i, vertical_connections.j))
+    assert len(vertical_connections) == len(ij_locations)
+
+    # verify that the connections are in the same place (horizontally)
+    assert not np.any((m.lakarr.sum(axis=0) > 0) != lakarr2d_6)
+
+    # check that the number of vert. connections in each layer is consistent
+    lake_thickness = (m.lakarr > 0).sum(axis=0)
+    for k in range(1, m.nlay+1):
+
+        # lake connections in current layer
+        i, j = np.where(lake_thickness == k)
+        highest_active_layer = np.argmax(m.idomain[:, i, j], axis=0)
+        connection_cellids = list(zip(highest_active_layer, i, j))
+        kvc = vertical_connections.loc[vertical_connections.cellid.isin(connection_cellids)]
+        # by definition, number of vert. connections in kvc is same as # cells with lake_thickness == k
+
+        # verity that specified leakances are consistent with lake zones
+        assert np.sum(kvc.bedleak == profleak) == np.sum(lakezones[lake_thickness == k] == 100)
+        assert np.sum(kvc.bedleak == litleak) == np.sum(lakezones[lake_thickness == k] == 1)
 
 
 def test_get_horizontal_connections():

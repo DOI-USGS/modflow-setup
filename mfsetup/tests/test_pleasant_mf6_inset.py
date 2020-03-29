@@ -156,8 +156,9 @@ def test_dis_setup(get_pleasant_mf6_with_grid):
     for f in arrayfiles:
         assert os.path.exists(f)
         fname = os.path.splitext(os.path.split(f)[1])[0]
-        k = ''.join([s for s in fname if s.isdigit()])
-        var = fname.strip(k)
+        var = fname.split('_')[-1]
+        k = ''.join([s for s in var if s.isdigit()])
+        var = var.strip(k)
         data = np.loadtxt(f)
         model_array = getattr(m.dis, var).array
         if len(k) > 0:
@@ -295,12 +296,6 @@ def test_lak_obs_setup(get_pleasant_mf6_with_dis):
     # todo: add lake obs tests
 
 
-def test_chd_perimeter(get_pleasant_mf6_with_dis, pleasant_nwt_with_dis_bas6):
-    chd = pleasant_nwt_with_dis_bas6.setup_perimeter_boundary()
-    chd6 = get_pleasant_mf6_with_dis.setup_perimeter_boundary()
-    j=2
-
-
 @pytest.mark.skip('not implemented yet')
 def test_ghb_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
@@ -365,7 +360,12 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
     assert isinstance(m, MF6model)
     assert 'tdis' in m.simulation.package_key_dict
     assert 'ims' in m.simulation.package_key_dict
-    assert m.get_package_list() == ['DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR', 'WEL_0', 'OBS_0', 'CHD_0']
+    assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR', 'LAK',
+                                         'WEL_0',
+                                         'OBS_0',  # lak obs todo: specify names of mf6 packages with multiple instances
+                                         'CHD_0',
+                                         'OBS_1'  # head obs
+                                         }
     external_path = os.path.join(m.model_ws, 'external')
     external_files = glob.glob(external_path + '/*')
     has_nans = check_external_files_for_nans(external_files)
@@ -374,9 +374,18 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
         assert False, has_nans
 
 
-def test_mf6_results(tmpdir): # pleasant_nwt_model_run):
-    pleasant_mf6_model_run = None
-    pleasant_nwt_model_run = None
+def test_check_external_files():
+    external_files = glob.glob('mfsetup/tests/tmp/pleasant_mf6/external' + '/*')
+    has_nans = check_external_files_for_nans(external_files)
+    has_nans = '\n'.join(has_nans)
+    if len(has_nans) > 0:
+        assert False, has_nans
+
+
+@pytest.mark.skip("still working on comparing mfnwt and mf6 versions of pleasant test case")
+def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant_nwt_model_run):
+    #pleasant_mf6_model_run = None
+    #pleasant_nwt_model_run = None
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
 
@@ -403,6 +412,7 @@ def test_mf6_results(tmpdir): # pleasant_nwt_model_run):
                  }
 
     # compare the terms
+    os.chdir(project_root_path)
     pdf = PdfPages('../modflow-setup-dirty/pleasant_mfnwt_mf6_compare.pdf')
     for k, v in mf6_terms.items():
         term = k
@@ -426,22 +436,54 @@ def test_mf6_results(tmpdir): # pleasant_nwt_model_run):
         ax.set_title(term.split('_')[0])
         pdf.savefig()
         plt.close()
-    pdf.close()
 
     # head results
     HeadFile = flopy.utils.binaryfile.HeadFile
     mf6_hds_obj = HeadFile('{}/pleasant_mf6/pleasant_mf6.hds'.format(tmpdir))
     mfnwt_hds_obj = HeadFile('{}/pleasant_nwt/pleasant.hds'.format(tmpdir))
     assert np.allclose(mf6_hds_obj.get_times(), mfnwt_hds_obj.get_times(), rtol=1e-4)
-    last = mf6_hds_obj.get_kstpkper()[-1]
-    mf6_hds = mf6_hds_obj.get_data(kstpkper=last)
-    mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=last)
-    from flopy.utils.postprocessing import get_water_table
-    mf6_wt = get_water_table(mf6_hds, nodata=1e30)
-    mfnwt_wt = get_water_table(mfnwt_hds, nodata=-9999)
-    loc = pleasant_mf6_model_run.dis.idomain.array == 1
-    rms = np.sqrt(np.mean((mf6_wt - mfnwt_wt) ** 2))
+    all_kstpkper = mf6_hds_obj.get_kstpkper()
 
+    # compare heads along the boundary
+    k, i, j = pleasant_nwt_model_run.get_boundary_cells(exclude_inactive=True)
+    mf6_bhead_avg = []
+    mfnwt_bhead_avg = []
+    for kstp, kper in all_kstpkper:
+        mf6_hds = mf6_hds_obj.get_data(kstpkper=(kstp, kper))
+        mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=(kstp, kper))
+        mf6_bhead_avg.append(mf6_hds[k, i, j].mean())
+        mfnwt_bhead_avg.append(mfnwt_hds[k, i, j].mean())
+
+        #last = [all_kstpkper-1]
+        #mf6_hds = mf6_hds_obj.get_data(kstpkper=last)
+        #mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=last)
+        #from flopy.utils.postprocessing import get_water_table
+        #mf6_wt = get_water_table(mf6_hds, nodata=1e30)
+        #mfnwt_wt = get_water_table(mfnwt_hds, nodata=-9999)
+        #loc = pleasant_mf6_model_run.dis.idomain.array == 1
+        #rms = np.sqrt(np.mean((mf6_wt - mfnwt_wt) ** 2))
+
+    fig, ax = plt.subplots(figsize=(11, 8.5))
+    plt.plot(mf6_bhead_avg, label='mf6')
+    plt.plot(mfnwt_bhead_avg, label='mfnwt')
+
+    ax = df_flux[term].plot(c='C0')
+    ax = (-df_flux[out_term]).plot(ax=ax, c='C0')
+    if isinstance(mf6_term, list):
+        mf6_series = df_flux6[mf6_term].sum(axis=1)
+        mf6_out_term = [s.replace('IN', 'OUT') for s in mf6_term]
+        mf6_out_series = df_flux6[mf6_out_term].sum(axis=1)
+    else:
+        mf6_out_term = mf6_term.replace('IN', 'OUT')
+        mf6_series = df_flux6[mf6_term]
+        mf6_out_series = df_flux6[mf6_out_term]
+    mf6_series.plot(ax=ax, c='C1')
+    (-mf6_out_series).plot(ax=ax, c='C1')
+    h, l = ax.get_legend_handles_labels()
+    ax.legend(h[::2], ['mfnwt', 'mf6'])
+    ax.set_title(term.split('_')[0])
+    pdf.savefig()
+    plt.close()
     j=2
 
     # lake budget results
@@ -457,4 +499,5 @@ def test_mf6_results(tmpdir): # pleasant_nwt_model_run):
     plt.legend()
     lake_stage_rms = np.sqrt(np.mean((df_mfnwt.stage.values - df_mf6.STAGE.values) ** 2))
     j=2
+    pdf.close()
 

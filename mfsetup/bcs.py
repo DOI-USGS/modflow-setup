@@ -8,7 +8,7 @@ fm = flopy.modflow
 from shapely.geometry import Polygon
 import rasterio
 from rasterstats import zonal_stats
-from mfsetup.discretization import get_layer
+from mfsetup.discretization import get_layer, cellids_to_kij
 from mfsetup.grid import rasterize
 from mfsetup.units import convert_length_units
 
@@ -83,7 +83,7 @@ def setup_ghb_data(model):
     return df
 
 
-def get_bc_package_cells(package):
+def get_bc_package_cells(package, exclude_horizontal=True):
     """
 
     Parameters
@@ -96,13 +96,16 @@ def get_bc_package_cells(package):
     """
     if package.package_type == 'sfr':
         if package.parent.version == 'mf6':
-            k, i, j = map(np.array, zip(*package.packagedata.array['cellid']))
+            k, i, j = cellids_to_kij(package.packagedata.array['cellid'])
         else:
             rd = package.reach_data
             k, i, j = rd['k'], rd['i'], rd['j']
     elif package.package_type == 'lak':
         if package.parent.version == 'mf6':
-            k, i, j = map(np.array, zip(*package.connectiondata.array['cellid']))
+            connectiondata = package.connectiondata.array
+            if exclude_horizontal:
+                connectiondata = connectiondata[connectiondata['claktype'] == 'vertical']
+            k, i, j = map(np.array, zip(*connectiondata['cellid']))
         else:
             try:
                 # todo: figure out why flopy sometimes can't read external files for lakarr

@@ -22,6 +22,7 @@ from .lakes import (make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes,
 from .utils import update, get_packages, get_input_arguments
 from .obs import read_observation_data, setup_head_observations
 from .sourcedata import TabularSourceData
+from .tdis import setup_perioddata_group
 from .tmr import Tmr
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text, lenuni_values
 from .wells import setup_wel_data
@@ -159,6 +160,20 @@ class MFnwtModel(MFsetupMixin, Modflow):
             mg_kwargs = self.cfg['parent'].get('SpatialReference',
                                           self.cfg['parent'].get('modelgrid', None))
             self._set_parent_modelgrid(mg_kwargs)
+
+            # parent model perioddata
+            if not hasattr(self.parent, 'perioddata'):
+                kwargs = {}
+                kwargs['start_date_time'] = self.cfg['parent'].get('start_date_time',
+                                                                   self.cfg['model'].get('start_date_time',
+                                                                                         '1970-01-01'))
+                kwargs['nper'] = self.parent.nper
+                kwargs['model_time_units'] = self.cfg['parent']['time_units']
+                for var in ['perlen', 'steady', 'nstp', 'tsmult']:
+                    kwargs[var] = self.parent.dis.__dict__[var].array
+                kwargs = get_input_arguments(kwargs, setup_perioddata_group)
+                kwargs['oc_saverecord'] = {}
+                self._parent.perioddata = setup_perioddata_group(**kwargs)
 
             # default_source_data, where omitted configuration input is
             # obtained from parent model by default
