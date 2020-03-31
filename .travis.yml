@@ -10,6 +10,11 @@ matrix:
   include:
     - env: ENV_FILE="ci/requirements.yml"
 
+env:
+  global:
+    # Doctr deploy key for aleaf/modflow-setup
+    - secure: "wb4co+5F3ZrBjWEUTJdk5fbP9WYVEsY35R47Jog/dt92PKQP0PBqveovb37YNVHq7D5Rfl4TIe70an2LVqyaXhFqccz687f1UITysR//xp/5xVEWHpTPPFIP26gGHyyEHGwGJ/jpbhXeoK/iiVHsChGbcmlr0qocGKjgfljpJEQJ+zu6LjOz2WNT67hkfvZVU57PNfj5wlMiZh8sIu/LhC0Dvrj2kZ64l4A0d7PjgJ4kELMuFNGkGPyrZNOjMiKA97AW8r9xWnerO0Bqjky3pns40+OQ/9jBnMtuxtSn/xantxdNL9fHyFjsSZojgNXo+rdsqwF4OAki9MRzFRDjw48gZhEG9fxmLFQrE4C2Eo8/KI7cempLS+78lPR/j82sP6XQUzTJTCiLb5m8mX4ecFQDFxdN9nSbJ3NxQhycrDEGI58rbtb4vshqGKnyVHGjYF2Cr1c/IZS7JDLA3Knb1OD2nsVlg6SDv8kkaLGufJejDLOvOqCcByZytUxzxru5U9DR+ugok7yJa2lEQb6khHnU14kUv71lfWYP+SvtXtp/HJg+KGizfM6MI3f1VfOwvD6fV9AH+ykUkJPVIoqT84cqvMeEm0YPJvf35QjW6rY3pkve1NC/Ra92w4IImbOSJSZm6aYWUbF6FRQeIDesJ6R4g+IDxX2NmQXMG35+Zzw="
+
 install:
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -32,6 +37,10 @@ install:
 script:
   - coverage run -m pytest -v  # Run the tests and check for test coverage.
   - coverage report -m  # Generate test coverage report.
+  - set -e
+  - make -C docs html  # Build the documentation.
+  - pip install doctr
+  - doctr deploy --built-docs <path/to/built/html/> <target-directory>
 
 after_success:
   - codecov  # Upload the report to codecov.
