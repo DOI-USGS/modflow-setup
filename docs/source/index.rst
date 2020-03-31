@@ -20,7 +20,7 @@ Modflow-setup is intended to facilitate automated setup of MODFLOW models, from 
 
    
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 2
   :caption: User Guide
   
    Basic program structure and usage <structure>

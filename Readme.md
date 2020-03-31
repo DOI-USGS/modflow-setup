@@ -15,6 +15,7 @@ Package to facilitate automated setup of MODFLOW models, from source data includ
 
 Getting Started
 -----------------------------------------------
+For more details, see the [modflow-setup documentation](https://aleaf.github.io/modflow-setup/)
 
 Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a configuration file similar to the included test files:
 
