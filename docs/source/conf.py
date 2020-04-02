@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# MFsetup documentation build configuration file, created by
+# modflow-setup documentation build configuration file, created by
 # sphinx-quickstart on Thu Jun 28 12:35:56 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -67,7 +67,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'MFsetup'
+project = 'modflow-setup'
 copyright = '2019, USGS MAP Project'
 author = 'USGS MAP Project'
 

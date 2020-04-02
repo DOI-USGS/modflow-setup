@@ -310,6 +310,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             inset_model = MF6model(cfg=inset_cfg, **kwargs)
             inset_model.setup_grid()
             del inset_model.cfg['ims']
+            inset_model.cfg['tdis'] = self.cfg['tdis']
             if self.inset is None:
                 self.inset = {}
                 self.lgr = {}

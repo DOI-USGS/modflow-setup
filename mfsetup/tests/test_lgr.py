@@ -7,7 +7,7 @@ mf6 = flopy.mf6
 fm = flopy.modflow
 from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
-from mfsetup.fileio import load_cfg, load_array, exe_exists
+from mfsetup.fileio import load_cfg, exe_exists, load, dump
 from mfsetup.utils import get_input_arguments
 
 
@@ -28,7 +28,7 @@ def pleasant_lgr_cfg(pleasant_lgr_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_simulation(pleasant_lgr_cfg):
     cfg = pleasant_lgr_cfg.copy()
-    sim = mf6.MFSimulation(**cfg['simulation'])
+
     return sim
 
 
@@ -60,6 +60,36 @@ def pleasant_lgr_setup_from_yaml(pleasant_lgr_cfg):
             model.sfrdata.write_package(sfr_package_filename,
                                         version='mf6'
                                         )
+    return m
+
+
+@pytest.fixture(scope="function")
+def pleasant_lgr_stand_alone_parent(pleasant_lgr_test_cfg_path):
+    """Stand-alone version of lgr parent model for comparing with LGR results.
+    """
+    # Edit the configuration file before the file paths within it are converted to absolute
+    # (model.load_cfg converts the file paths)
+    cfg = load(pleasant_lgr_test_cfg_path)
+    del cfg['setup_grid']['lgr']
+    cfg['simulation']['sim_ws'] = 'pleasant_lgr_just_parent'
+
+    # save out the edited configuration file
+    path, fname = os.path.split(pleasant_lgr_test_cfg_path)
+    new_file = os.path.join(path, 'pleasant_lgr_just_parent.yml')
+    dump(new_file, cfg)
+
+    # load in the edited configuration file, converting the paths to absolute
+    cfg = MF6model.load_cfg(new_file)
+    # add some stuff just for the tests
+    cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
+
+    m = MF6model.setup_from_cfg(cfg)
+    m.write_input()
+    if hasattr(m, 'sfr'):
+        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+        m.sfrdata.write_package(sfr_package_filename,
+                                    version='mf6'
+                                    )
     return m
 
 
@@ -102,6 +132,11 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
     for k, v in m.inset.items():
         assert v.name in m.simulation._models
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
+
+
+def test_stand_alone_parent(pleasant_lgr_stand_alone_parent):
+    # todo: move test_stand_alone_parent test to test_lgr_model_run
+    j=2
 
 
 def test_lgr_model_run(pleasant_lgr_setup_from_yaml, mf6_exe):

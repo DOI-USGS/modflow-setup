@@ -488,7 +488,7 @@ class MFsetupMixin():
                            mask=None,
                            method='linear'):
         """Interpolate values in parent array onto
-        the pfl_nwt model grid, using SpatialReference instances
+        the pfl_nwt model grid, using model grid instances
         attached to the parent and pfl_nwt models.
 
         Parameters
@@ -994,12 +994,12 @@ class MFsetupMixin():
         self.modelgrid.model_length_units = self.length_units
 
         # create an sfrmaker.sfrdata instance from the lines instance
-        from flopy.utils.reference import SpatialReference
-        sr = SpatialReference(delr=self.modelgrid.delr, delc=self.modelgrid.delc,
-                              xll=self.modelgrid.xoffset, yll=self.modelgrid.yoffset,
-                              rotation=self.modelgrid.angrot, epsg=self.modelgrid.epsg,
-                              proj4_str=self.modelgrid.proj_str)
-        sfr = lns.to_sfr(sr=sr,
+        #from flopy.utils.reference import SpatialReference
+        #sr = SpatialReference(delr=self.modelgrid.delr, delc=self.modelgrid.delc,
+        #                      xll=self.modelgrid.xoffset, yll=self.modelgrid.yoffset,
+        #                      rotation=self.modelgrid.angrot, epsg=self.modelgrid.epsg,
+        #                      proj4_str=self.modelgrid.proj_str)
+        sfr = lns.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,
                          )
@@ -1085,6 +1085,23 @@ class MFsetupMixin():
             package_setup()
 
     @classmethod
+    def load_cfg(cls, yamlfile, verbose=False):
+        """Loads a configuration file, with default settings
+        specific to the MFnwtModel or MF6model class.
+
+        Parameters
+        ----------
+        yamlfile : str (filepath)
+            Configuration file in YAML format with pfl_nwt setup information.
+        verbose : bool
+
+        Returns
+        -------
+        cfg : dict (configuration dictionary)
+        """
+        return load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file)
+
+    @classmethod
     def setup_from_yaml(cls, yamlfile, verbose=False):
         """Make a model from scratch, using information in a yamlfile.
 
@@ -1092,16 +1109,29 @@ class MFsetupMixin():
         ----------
         yamlfile : str (filepath)
             Configuration file in YAML format with pfl_nwt setup information.
+        verbose : bool
 
         Returns
         -------
         m : model instance
         """
-        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file)
+        cfg = cls.load_cfg(yamlfile, verbose=verbose)
         return cls.setup_from_cfg(cfg, verbose=verbose)
 
     @classmethod
     def setup_from_cfg(cls, cfg, verbose=False):
+        """Make a model from scratch, using information in a configuration dictionary.
+
+        Parameters
+        ----------
+        cfg : dict
+            Configuration dictionary, as produced by the model.load_cfg method.
+        verbose : bool
+
+        Returns
+        -------
+        m : model instance
+        """
         print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], None))
         t0 = time.time()
         cfg = cls._parse_model_kwargs(cfg)

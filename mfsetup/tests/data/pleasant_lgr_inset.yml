@@ -75,32 +75,6 @@ dis:
         4: 3
   drop_thin_cells: True
 
-tdis:
-  options:
-    time_units: 'days'
-    start_date_time: '2012-01-01'
-  perioddata:
-    # time discretization info can be specified directly under the perioddata key
-    # or in groups of stress periods that are discretized in a similar way
-    group 1: # initial steady-state period (steady specified under sto package)
-      #perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
-      nper: 1
-      nstp: 1
-      tsmult: 1
-      steady: True  # "steady" can be entered here; otherwise the global entry specified in the sto package is used as the default
-      # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
-    group 2: # monthly stress periods
-      start_date_time: '2012-01-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
-      end_date_time: '2018-12-31'  # end times are specified following pandas slice convention, which includes the specified end date
-      freq: '1MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
-      nstp: 1
-      tsmult: 1.5
-      steady: False
-
-#ic:
-#  source_data:
-#    strt: 'from_parent'
-
 npf:
   options:
     save_flows: True
