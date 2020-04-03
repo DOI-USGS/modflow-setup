@@ -288,7 +288,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             # load the config file for lgr inset model
             inset_cfg = load_cfg(v['filename'],
                                  default_file='/mf6_defaults.yml')
-            # lgr inset has already been created
+            # if lgr inset has already been created
             if inset_cfg['model']['modelname'] in self.simulation._models:
                 return
             inset_cfg['model']['simulation'] = self.simulation
@@ -305,7 +305,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                    'length_units': self.length_units,
                                    'time_units': self.time_units
                                    }
-            kwargs = get_input_arguments(inset_cfg['model'], mf6.ModflowGwf, exclude='packages')
+            inset_cfg = MF6model._parse_model_kwargs(inset_cfg)
+            kwargs = get_input_arguments(inset_cfg['model'], mf6.ModflowGwf,
+                                         exclude='packages')
             kwargs['parent'] = self  # otherwise will try to load parent model
             inset_model = MF6model(cfg=inset_cfg, **kwargs)
             inset_model.setup_grid()
@@ -808,13 +810,19 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     @staticmethod
     def _parse_model_kwargs(cfg):
 
-        if isinstance(cfg['simulation'], dict):
-            # create simulation
+        if isinstance(cfg['model']['simulation'], str):
+            # assume that simulation for model
+            # is the one simulation specified in configuration
+            # (regardless of the name specified in model configuration)
+            cfg['model']['simulation'] = cfg['simulation']
+        if isinstance(cfg['model']['simulation'], dict):
+            # create simulation from simulation block in config dict
             sim = flopy.mf6.MFSimulation(**cfg['simulation'])
             cfg['model']['simulation'] = sim
             sim_ws = cfg['simulation']['sim_ws']
-        elif isinstance(cfg['simulation'], mf6.MFSimulation):
-            sim_ws = cfg['simulation'].sim_ws
+        # if a simulation has already been created, get the path from the instance
+        elif isinstance(cfg['model']['simulation'], mf6.MFSimulation):
+            sim_ws = cfg['model']['simulation'].simulation_data.mfpath._sim_path
         else:
             raise TypeError('unrecognized configuration input for simulation.')
 

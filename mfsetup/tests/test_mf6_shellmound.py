@@ -25,7 +25,7 @@ from ..utils import get_input_arguments
 
 @pytest.fixture(scope="module", autouse=True)
 def reset_dirs(shellmound_cfg):
-    cfg = shellmound_cfg.copy()
+    cfg = deepcopy(shellmound_cfg)
     folders = [cfg['intermediate_data']['output_folder'],
                cfg['model'].get('external_path'),
                cfg['gisdir']
@@ -69,11 +69,12 @@ def model_setup(shellmound_cfg_path):
 
 
 def test_init(shellmound_cfg):
-    cfg = shellmound_cfg.copy()
-    sim = mf6.MFSimulation(**cfg['simulation'])
-    assert isinstance(sim, mf6.MFSimulation)
+    cfg = deepcopy(shellmound_cfg)
 
     sim = mf6.MFSimulation()
+    assert isinstance(sim, mf6.MFSimulation)
+
+    sim = mf6.MFSimulation(**cfg['simulation'])
     assert isinstance(sim, mf6.MFSimulation)
 
     cfg['model']['packages'] = []
@@ -91,11 +92,13 @@ def test_init(shellmound_cfg):
 
 
 def test_parse_modflowgwf_kwargs(shellmound_cfg):
-    cfg = shellmound_cfg.copy()
+    cfg = deepcopy(shellmound_cfg)
     cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
                                  exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
+    sim_path = os.path.normpath(m.simulation.simulation_data.mfpath._sim_path).lower()
+    assert sim_path == cfg['simulation']['sim_ws'].lower()
     m.write()
 
     # verify that options were written correctly to namefile
@@ -159,7 +162,7 @@ def test_model(shellmound_model):
 
 
 def test_snap_to_NHG(shellmound_cfg, shellmound_simulation):
-    cfg = shellmound_cfg.copy()
+    cfg = deepcopy(shellmound_cfg)
     #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = shellmound_simulation
     cfg['setup_grid']['snap_to_NHG'] = True
@@ -227,7 +230,6 @@ def test_package_external_file_path_setup(shellmound_model_with_grid,
                [{'filename': os.path.normpath(os.path.join(m.model_ws,
                              m.external_path,
                              botm_file_fmt.format(i)))} for i in range(m.nlay)]
-
 
 
 def test_set_lakarr(shellmound_model_with_dis):

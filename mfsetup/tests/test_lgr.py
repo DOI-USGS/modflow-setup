@@ -7,7 +7,7 @@ mf6 = flopy.mf6
 fm = flopy.modflow
 from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
-from mfsetup.fileio import load_cfg, exe_exists, load, dump
+from mfsetup.fileio import load_cfg, exe_exists, load, dump, read_mf6_block
 from mfsetup.utils import get_input_arguments
 
 
@@ -28,7 +28,7 @@ def pleasant_lgr_cfg(pleasant_lgr_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_simulation(pleasant_lgr_cfg):
     cfg = pleasant_lgr_cfg.copy()
-
+    sim = mf6.MFSimulation(**cfg['simulation'])
     return sim
 
 
@@ -130,7 +130,19 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
     assert isinstance(m.inset, dict)
     assert len(m.simulation._models) > 1
     for k, v in m.inset.items():
+        # verify that the inset model is part of the same simulation
+        # (same memory address)
+        assert v.simulation is m.simulation
         assert v.name in m.simulation._models
+
+        # read the options block in the inset name file
+        # verify that all of the specified options are there
+        name_options = read_mf6_block(v.name_file.filename, 'options')
+        specified_options = {'list', 'print_input', 'save_flows', 'newton'}
+        assert not any(specified_options.difference(name_options.keys()))
+        path, fname = os.path.split(name_options['list'][0])
+        assert os.path.abspath(m.model_ws).lower() == path.lower()
+        assert name_options['newton'][0] == 'under_relaxation'
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
 
