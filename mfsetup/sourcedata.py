@@ -382,6 +382,8 @@ class ArraySourceData(SourceData):
                 # if source_array has an extra layer, assume layer 0 is the model top
                 # (only included for weighted average)
                 # could use a better approach
+                # check source_k is a whole number to 4 decimal places
+                # and if is a layer in source_array
                 if np.round(source_k, 4) in range(self.source_array.shape[0]):
                     if self.source_array.shape[0] - self.dest_model.nlay == 1:
                         source_k +=1
@@ -392,6 +394,8 @@ class ArraySourceData(SourceData):
                 else:
                     weight0 = source_k - np.floor(source_k)
                     source_k0 = int(np.floor(source_k))
+                    # first layer in the average can't be negative
+                    source_k0 = 0 if source_k0 < 0 else source_k0
                     source_k1 = int(np.ceil(source_k))
                     arr = weighted_average_between_layers(self.source_array[source_k0],
                                                           self.source_array[source_k1],
@@ -403,8 +407,8 @@ class ArraySourceData(SourceData):
                     mask = self._source_grid_mask & (arr > self.vmin) & (arr < self.vmax)
 
                     regridded = self.regrid_from_source_model(arr,
-                                                        mask=mask,
-                                                        method='linear')
+                                                              mask=mask,
+                                                              method='linear')
 
                 assert regridded.shape == self.dest_modelgrid.shape[1:]
                 data[dest_k] = regridded * self.mult * self.unit_conversion

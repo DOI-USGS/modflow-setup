@@ -5,10 +5,13 @@ import pytest
 import flopy
 mf6 = flopy.mf6
 fm = flopy.modflow
+from flopy.utils import binaryfile as bf
 from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
-from mfsetup.fileio import load_cfg, exe_exists, load, dump, read_mf6_block
+from mfsetup.fileio import (load_cfg, exe_exists, load, dump,
+                            read_mf6_block, load_modelgrid)
 from mfsetup.utils import get_input_arguments
+from mfsetup.testing import compare_inset_parent_values
 
 
 @pytest.fixture(scope="session")
@@ -64,14 +67,14 @@ def pleasant_lgr_setup_from_yaml(pleasant_lgr_cfg):
 
 
 @pytest.fixture(scope="function")
-def pleasant_lgr_stand_alone_parent(pleasant_lgr_test_cfg_path):
+def pleasant_lgr_stand_alone_parent(pleasant_lgr_test_cfg_path, tmpdir):
     """Stand-alone version of lgr parent model for comparing with LGR results.
     """
     # Edit the configuration file before the file paths within it are converted to absolute
     # (model.load_cfg converts the file paths)
     cfg = load(pleasant_lgr_test_cfg_path)
     del cfg['setup_grid']['lgr']
-    cfg['simulation']['sim_ws'] = 'pleasant_lgr_just_parent'
+    cfg['simulation']['sim_ws'] = os.path.join(tmpdir, 'pleasant_lgr_just_parent')
 
     # save out the edited configuration file
     path, fname = os.path.split(pleasant_lgr_test_cfg_path)
@@ -146,12 +149,14 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
 
-def test_stand_alone_parent(pleasant_lgr_stand_alone_parent):
-    # todo: move test_stand_alone_parent test to test_lgr_model_run
-    j=2
+#def test_stand_alone_parent(pleasant_lgr_stand_alone_parent):
+#    # todo: move test_stand_alone_parent test to test_lgr_model_run
+#    j=2
 
 
-def test_lgr_model_run(pleasant_lgr_setup_from_yaml, mf6_exe):
+@pytest.mark.skip('need to add lake to stand-alone parent model')
+def test_lgr_model_run(pleasant_lgr_stand_alone_parent, pleasant_lgr_setup_from_yaml,
+                       tmpdir, mf6_exe):
     """Build a MODFLOW-6 version of Pleasant test case
     with LGR around the lake.
 
@@ -160,15 +165,32 @@ def test_lgr_model_run(pleasant_lgr_setup_from_yaml, mf6_exe):
     This effectively tests for gwf exchange connections involving inactive
     cells; Pleasant case has many due to layer pinchouts.
     """
-    m = pleasant_lgr_setup_from_yaml
-    m.simulation.exe_name = mf6_exe
+    m1 = pleasant_lgr_stand_alone_parent
+    m1.simulation.exe_name = mf6_exe
 
-    success = False
-    if exe_exists(mf6_exe):
-        success, buff = m.simulation.run_simulation()
-        if not success:
-            list_file = m.name_file.list.array
-            with open(list_file) as src:
-                list_output = src.read()
-    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
-    return m
+    m2 = pleasant_lgr_setup_from_yaml
+    m2.simulation.exe_name = mf6_exe
+
+    # run stand-alone parent and lgr version
+    for model in m1, m2:
+        success = False
+        if exe_exists(mf6_exe):
+            success, buff = model.simulation.run_simulation()
+            if not success:
+                list_file = model.name_file.list.array
+                with open(list_file) as src:
+                    list_output = src.read()
+        assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+
+    # compare heads from lgr model to stand-alone parent
+    kstpkper = (0, 0)
+    parent_hdsobj = bf.HeadFile(os.path.join(tmpdir,  'pleasant_lgr_just_parent',
+                                                   'plsnt_lgr_parent.hds'))
+    parent_heads = parent_hdsobj.get_data(kstpkper=kstpkper)
+    inset_hdsobj = bf.HeadFile(os.path.join(tmpdir, 'pleasant_lgr', 'plsnt_lgr_inset.hds'))
+    inset_heads = inset_hdsobj.get_data(kstpkper=kstpkper)
+    compare_inset_parent_values(inset_heads, parent_heads,
+                                m2.modelgrid, m1.modelgrid,
+                                nodata=1e30,
+                                rtol=0.05
+                                )

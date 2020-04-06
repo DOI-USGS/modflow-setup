@@ -12,10 +12,11 @@ import pandas as pd
 import flopy
 fm = flopy.modflow
 from mfsetup import MFnwtModel
-from ..checks import check_external_files_for_nans
-from ..fileio import exe_exists, load_cfg
-from ..units import convert_length_units
-from ..utils import get_input_arguments
+from mfsetup.checks import check_external_files_for_nans
+from mfsetup.grid import get_ij
+from mfsetup.fileio import exe_exists, load_cfg
+from mfsetup.units import convert_length_units
+from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture(scope="session")
@@ -293,6 +294,22 @@ def test_upw_setup(pfl_nwt_with_dis, case):
                 else:
                     assert np.diff(kvar[m.isbc[k] == 2]).sum() == 0
                     assert kvar[m.isbc[k] == 2][0] == hiKlakes_value[var]
+
+        # compare values to parent model
+        for var in ['hk', 'vka']:
+            ix, iy = m.modelgrid.xcellcenters.ravel(), m.modelgrid.ycellcenters.ravel()
+            pi, pj = get_ij(m.parent.modelgrid, ix, iy)
+            parent_layer = {0: 0, 1: 0, 2: 1, 3: 2, 4: 3}
+            for k, pk in parent_layer.items():
+                parent_vals = m.parent.upw.__dict__[var].array[pk, pi, pj]
+                inset_vals = upw.__dict__[var].array
+                parent_max_val = m.parent.upw.__dict__[var].array.max()
+                valid_parent = parent_vals != hiKlakes_value.get(var, -9999)
+                valid_inset = inset_vals[k].ravel() != hiKlakes_value.get(var, -9999)
+                parent_vals = parent_vals[valid_parent & valid_inset]
+                inset_vals = inset_vals[k].ravel()[valid_parent & valid_inset]
+                assert np.allclose(parent_vals, inset_vals, rtol=0.01)
+
     elif case == 1:
         # test changing vka to anisotropy
         m.cfg['upw']['layvka'] = [1, 1, 1, 1, 1]

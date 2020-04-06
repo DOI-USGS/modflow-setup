@@ -16,7 +16,9 @@ fm = flopy.modflow
 from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
 from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists, read_lak_ggo
+from mfsetup.grid import get_ij
 from mfsetup.lakes import get_lakeperioddata
+from mfsetup.testing import compare_inset_parent_values
 from mfsetup.utils import get_input_arguments
 
 
@@ -201,6 +203,18 @@ def test_sto_setup(get_pleasant_mf6_with_dis):
     assert period_data[1] == ['steady-state']
     assert period_data[2] == ['transient']
 
+    # compare values to parent model
+    inset_parent_layer_mapping = {0: 0, 1: 0, 2: 1, 3: 2, 4: 3}
+    for var in ['ss', 'sy']:
+        parent_array = m.parent.upw.__dict__[var].array
+        inset_array = sto.__dict__[var].array
+        compare_inset_parent_values(inset_array, parent_array,
+                                    m.modelgrid, m.parent.modelgrid,
+                                    inset_parent_layer_mapping,
+                                    nodata=1.0,
+                                    rtol=0.05
+                                    )
+
 
 def test_npf_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
@@ -208,6 +222,22 @@ def test_npf_setup(get_pleasant_mf6_with_dis):
     npf.write()
     assert isinstance(npf, mf6.ModflowGwfnpf)
     assert os.path.exists(os.path.join(m.model_ws, npf.filename))
+
+    # compare values to parent model
+    # mapping of variables and layers between parent and inset
+    variables = {'hk': 'k',
+                 'vka': 'k33',
+                 }
+    inset_parent_layer_mapping = {0: 0, 1: 0, 2: 1, 3: 2, 4: 3}
+    for parent_var, inset_var in variables.items():
+        parent_array = m.parent.upw.__dict__[parent_var].array
+        inset_array = npf.__dict__[inset_var].array
+        compare_inset_parent_values(inset_array, parent_array,
+                                    m.modelgrid, m.parent.modelgrid,
+                                    inset_parent_layer_mapping,
+                                    nodata=float(m.cfg['parent']['hiKlakes_value']),
+                                    rtol=0.05
+                                    )
 
 
 def test_obs_setup(get_pleasant_mf6_with_dis):
@@ -500,5 +530,5 @@ def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant
         plt.legend()
         lake_stage_rms = np.sqrt(np.mean((df_mfnwt.stage.values - df_mf6.STAGE.values) ** 2))
         j=2
-        pdf.close()
+        #pdf.close()
 

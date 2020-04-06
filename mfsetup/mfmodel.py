@@ -200,7 +200,9 @@ class MFsetupMixin():
         if self._parent_layers is None:
             parent_layers = None
             if self.cfg['dis']['source_data'] is not None:
-                parent_layers = self.cfg['dis']['source_data'].get('botm', {}).get('from_parent')
+                botm_info = self.cfg['dis']['source_data'].get('botm', {})
+                if isinstance(botm_info, dict):
+                    parent_layers = botm_info.get('from_parent')
             if parent_layers is None:
                 parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
             self._parent_layers = parent_layers

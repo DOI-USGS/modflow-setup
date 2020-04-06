@@ -1,4 +1,5 @@
 import numpy as np
+from mfsetup.grid import get_ij
 
 
 def compare_float_arrays(a1, a2):
@@ -14,6 +15,49 @@ def compare_float_arrays(a1, a2):
     txt += 'Max relative difference: {}\n'.format(max_rel_diff)
     txt += 'RMSE: {}\n'.format(rms_error(a1, a2))
     return txt
+
+
+def compare_inset_parent_values(inset_array, parent_array,
+                                inset_modelgrid, parent_modelgrid,
+                                inset_parent_layer_mapping=None, nodata=-9999,
+                                **kwargs):
+    """Compare values on different model grids (for example, parent and inset models that overlap),
+    by getting the closes parent cell at each inset cell location.
+
+    todo: compare_inset_parent_values: add interpolation for more precise comparison
+
+    Parameters
+    ----------
+    inset_array : inset model values (ndarray)
+    parent_array : parent model values (ndarray)
+    inset_modelgrid : flopy modelgrid for inset model
+    parent_modelgrid : flopy modelgrid for parent model
+    inset_parent_layer_mapping : dict
+        Mapping between inset and parent model layers
+        {inset model layer: parent model layer}
+    nodata : float
+        Exclude these values from comparison
+    kwargs :
+        kwargs to np.allclose
+
+    Returns
+    -------
+    AssertionError if np.allclose evaluates to False for any layer
+
+    """
+    if len(inset_array.shape) < 3:
+        inset_array = np.array([inset_array])
+    if inset_parent_layer_mapping is None:
+        nlay = inset_array.shape[0]
+        inset_parent_layer_mapping = dict(zip(list(range(nlay)), list(range(nlay))))
+    ix, iy = inset_modelgrid.xcellcenters.ravel(), inset_modelgrid.ycellcenters.ravel()
+    pi, pj = get_ij(parent_modelgrid, ix, iy)
+    for k, pk in inset_parent_layer_mapping.items():
+        parent_vals = parent_array[pk, pi, pj]
+        valid = (parent_vals != nodata) & (inset_array[k].ravel() != nodata)
+        parent_vals = parent_vals[valid]
+        inset_vals = inset_array[k].ravel()[valid]
+        assert np.allclose(parent_vals, inset_vals, **kwargs)
 
 
 def rms_error(array1, array2):
