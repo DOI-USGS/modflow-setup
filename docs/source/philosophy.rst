@@ -15,9 +15,10 @@ Modflow-setup aims to distill common operations for constructing MODFLOW models 
 
 What modflow-setup doesn’t do
 -----------------------------
-While modflow-setup strives to be general, it is focused on producing groundwater flow models at the site to regional scales. Furthermore, current development has been focused around project needs; as opposed to making a comprehensive tool from the ground up. Supported packages and features are summarized in the Release History.
+While modflow-setup strives to be general, it is focused on producing groundwater flow models at the site to regional scales. Furthermore, current development has been focused around project needs; as opposed to making a comprehensive tool from the ground up. Supported packages and features are summarized in the `Release History`_. Examples of valid configuration files used in the test suite can be found in the `Configuration File Gallery`_.
 
 Currently only regular (unrotated) model grids are supported; support for unstructured grids may be added in the future. In contrast to Flopy, which is completely general, modflow-setup limits model construction options somewhat, in the interest of rapidly producing consistent results with a minimum of required input. For example, models are produced with the external files option in flopy, meaning that most array and table input are written to external files in a single folder. This facilitates parameter estimation and allows most of the intensive i/o operations to be performed by pandas and numpy, which are generally faster than parsing MODFLOW package input with base python.
+
 
 
 References
@@ -28,7 +29,8 @@ Haitjema, H.M. (1995). Analytic Element Modeling of Groundwater Flow. Academic P
 
 Hunt, R.J. and Zheng, C. (2012), The Current State of Modeling. Groundwater, 50: 330-333. doi:10.1111/j.1745-6584.2012.00936.x
 
-
+.. _Configuration File Gallery: https://aleaf.github.io/modflow-setup/docs/build/html/examples.html#configuration-file-gallery
+.. _Release History: https://aleaf.github.io/modflow-setup/release-history.html
 .. _hydrosense: https://ngwa.onlinelibrary.wiley.com/doi/abs/10.1111/j.1745-6584.2012.00936.x
 
 .. _step-wise modeling: https://www.haitjema.com/stepwise.html

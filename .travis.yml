@@ -40,7 +40,7 @@ script:
   - set -e
   - make -C docs html  # Build the documentation.
   - pip install doctr
-  - doctr deploy --built-docs <path/to/built/html/> <target-directory>
+  - doctr deploy --built-docs docs/build/html .  # Publish the documentation.
 
 after_success:
   - codecov  # Upload the report to codecov.
