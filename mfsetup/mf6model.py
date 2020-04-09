@@ -675,8 +675,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs['ntables'] = len(tab_files)
         kwargs['tables'] = [(i, f) for i, f in enumerate(tab_files)]
         kwargs['outlets'] = None  # not implemented
-        kwargs['outletperioddata'] = None  # not implemented
-        kwargs['lakeperioddata'] = lakeperioddata
+        #kwargs['outletperioddata'] = None  # not implemented
+        kwargs['perioddata'] = lakeperioddata
 
         # observations
         kwargs['observations'] = setup_mf6_lake_obs(kwargs)

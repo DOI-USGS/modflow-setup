@@ -310,13 +310,13 @@ def test_lak_setup(get_pleasant_mf6_with_lak):
     k, i, j = zip(*lak.connectiondata.array['cellid'])
     inactive = m.dis.idomain.array[k, i, j] < 1
     assert not np.any(inactive)
-    assert len(lak.lakeperioddata.array) == m.nper
+    assert len(lak.perioddata.array) == m.nper
     lake_fluxes = m.lake_fluxes.copy()
     lake_fluxes['rainfall'] = lake_fluxes['precipitation']
     for per in range(m.nper):
         for var in ['rainfall', 'evaporation']:
-            loc = m.lak.lakeperioddata.array[0]['laksetting'] == var
-            value = m.lak.lakeperioddata.array[per]['laksetting_data'][loc][0]
+            loc = m.lak.perioddata.array[0]['laksetting'] == var
+            value = m.lak.perioddata.array[per]['laksetting_data'][loc][0]
             assert np.allclose(value, lake_fluxes.loc[per, var])
 
 
