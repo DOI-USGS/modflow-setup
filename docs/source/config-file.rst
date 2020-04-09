@@ -123,7 +123,25 @@ Alternatively, ``source_data`` subblocks indicate input from general file format
           filename: 'shellmound/shps/active_area.shp'
 
 
-'_column' Items indicate field names in the source data where the input can be found.
+Configuration defaults
+----------------------
+The following two yaml files contain default settings for MODFLOW-6 and MODFLOW-NWT. Settings not specified in the user in their configuration file are populated from these files when they are loaded into the ``MF6model`` or ``MFnwtModel`` model instances.
+
+MODFLOW-6 configuration defaults
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. literalinclude:: ../../mfsetup/mf6_defaults.yml
+    :language: yaml
+    :linenos:
+
+MODFLOW-NWT configuration defaults
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. literalinclude:: ../../mfsetup/mfnwt_defaults.yml
+    :language: yaml
+    :linenos:
+
 
 .. _GeoTIFF: https://en.wikipedia.org/wiki/GeoTIFF
 .. _input structure to MODFLOW-6: https://water.usgs.gov/water-resources/software/MODFLOW-6/mf6io_6.1.0.pdf

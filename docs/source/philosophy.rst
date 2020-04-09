@@ -15,7 +15,7 @@ Modflow-setup aims to distill common operations for constructing MODFLOW models 
 
 What modflow-setup doesn’t do
 -----------------------------
-While modflow-setup strives to be general, it is focused on producing groundwater flow models at the site to regional scales. Furthermore, current development has been focused around project needs; as opposed to making a comprehensive tool from the ground up. Supported packages and features are summarized in the `Release History`_. Examples of valid configuration files used in the test suite can be found in the `Configuration File Gallery`_.
+While modflow-setup strives to be general, it is focused on producing groundwater flow models at the site to regional scales. Streams are represented using the SFR package; Lakes can be represented using the Lake Package or high hydraulic conductivity values (Anderson and others, 2002). Current development has been focused around project needs; as opposed to making a comprehensive tool from the ground up. Currently supported packages and features are summarized in the `Release History`_. Examples of valid configuration files used in the test suite can be found in the `Configuration File Gallery`_.
 
 Currently only regular (unrotated) model grids are supported; support for unstructured grids may be added in the future. In contrast to Flopy, which is completely general, modflow-setup limits model construction options somewhat, in the interest of rapidly producing consistent results with a minimum of required input. For example, models are produced with the external files option in flopy, meaning that most array and table input are written to external files in a single folder. This facilitates parameter estimation and allows most of the intensive i/o operations to be performed by pandas and numpy, which are generally faster than parsing MODFLOW package input with base python.
 
@@ -23,6 +23,8 @@ Currently only regular (unrotated) model grids are supported; support for unstru
 
 References
 ^^^^^^^^^^
+Anderson, M. P., Hunt, R. J., Krohelski, J. T. and Chung, K. (2002), Using High Hydraulic Conductivity Nodes to Simulate Seepage Lakes. Groundwater, 40: 117-122. doi:10.1111/j.1745-6584.2002.tb02496.x
+
 Bakker, M., Post, V., Langevin, C. D., Hughes, J. D., White, J. T., Starn, J. J. and Fienen, M. N., 2016, Scripting MODFLOW Model Development Using Python and FloPy: Groundwater, v. 54, p. 733–739, doi:10.1111/gwat.12413.
 
 Haitjema, H.M. (1995). Analytic Element Modeling of Groundwater Flow. Academic Press, Inc.

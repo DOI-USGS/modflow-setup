@@ -17,12 +17,9 @@ Getting Started
 -----------------------------------------------
 For more details, see the [modflow-setup documentation](https://aleaf.github.io/modflow-setup/)
 
-Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a configuration file similar to the included test files:
+Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/config-file.html) similar to one of the examples in the [Configuration File Gallery](https://aleaf.github.io/modflow-setup/examples.html#configuration-file-gallery).
 
-* [MODFLOW-NWT example](https://github.com/aleaf/modflow-setup/blob/master/mfsetup/tests/data/mfnwt_inset_test.yml)
-* [MODFLOW-6 example](https://github.com/aleaf/modflow-setup/blob/master/mfsetup/tests/data/shellmound.yml)
-
-The yaml file summarize source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
+The yaml file summarizes source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
 
 ```
 from mfsetup import MFnwtModel, MF6model
@@ -50,58 +47,13 @@ If you think you have discovered a bug in modflow-setup in which you feel that t
 
 Installation
 -----------------------------------------------
-
-**Python versions:**
-
-modflow-setup requires **Python** 3.6 (or higher)
-
-**Dependencies:**  
-pyaml  
-numpy   
-scipy  
-xarray  
-pandas  
-fiona  
-rasterio  
-rasterstats  
-shapely  
-rtree  
-pyproj  
-flopy   
-sfrmaker
-
-### Install python and dependency packages
-Download and install the [Anaconda python distribution](https://www.anaconda.com/distribution/).
-Open an Anaconda Command Prompt on Windows or a terminal window on OSX.
-From the root folder for the package (that contains `requirements.yml`), install the above packages from `requirements.yml`.
-
-```
-conda env create -f requirements.yml
-```
-activate the environment:
-
-```
-conda activate mfsetup
-```
-
-### Install to site_packages folder
-```
-python setup.py install
-```
-### Install in current location (to current python path)
-(i.e., for development)  
-
-```  
-pip install -e .
-```
-
-
+See the [Installation Instructions](https://aleaf.github.io/modflow-setup/installation.html) 
 
 MODFLOW Resources
 -----------------------------------------------
 
 + [MODFLOW 6](https://www.usgs.gov/software/modflow-6-usgs-modular-hydrologic-model)
-
++ [Online Guide to MODFLOW-NWT](https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/)
 
 
 Disclaimer
