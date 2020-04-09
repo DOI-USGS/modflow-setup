@@ -86,10 +86,7 @@ class SourceData:
 
         def normpath(f):
             if self.dest_model is not None and isinstance(f, str):
-                try:
-                    path = os.path.join(self.dest_model._config_path, f)
-                except:
-                    j=2
+                path = os.path.join(self.dest_model._config_path, f)
                 normpath = os.path.normpath(path)
                 return normpath
             return f
@@ -466,21 +463,17 @@ class TransientArraySourceData(ArraySourceData):
         # for now, just assume one-to-one correspondance
         # between source and dest model stress periods
         results = {}
-        for kper in range(self.dest_model.nper):
-            if kper >= len(source_data):
-                data = source_data[-1]
-            else:
-                data = source_data[kper]
+        for inset_kper, parent_kper in self.dest_model.parent_stress_periods.items():
+            data = source_data[parent_kper]
             if regrid:
                 # sample the data onto the model grid
-                resampled = self.regrid_from_source_model(data,
-                                                          method=self.resample_method)
+                resampled = self.regrid_from_source_model(data, method=self.resample_method)
             else:
                 resampled = data
             # reshape results to model grid
             period_mean2d = resampled.reshape(self.dest_model.nrow,
                                               self.dest_model.ncol)
-            results[kper] = period_mean2d * self.unit_conversion
+            results[inset_kper] = period_mean2d * self.unit_conversion
         self.data = results
         return results
 
@@ -665,6 +658,8 @@ class MFBinaryArraySourceData(ArraySourceData):
             else:
                 weight0 = source_k - np.floor(source_k)
                 source_k0 = int(np.floor(source_k))
+                # first layer in the average can't be negative
+                source_k0 = 0 if source_k0 < 0 else source_k0
                 source_k1 = int(np.ceil(source_k))
                 arr = weighted_average_between_layers(self.source_array[source_k0],
                                                       self.source_array[source_k1],

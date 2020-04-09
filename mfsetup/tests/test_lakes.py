@@ -18,7 +18,7 @@ def source_data_from_prism_cases():
                         },
                    'format': 'prism',
                    'period_stats':
-                       {0: ['mean', '2012-01-01', '2018-12-31'],  # average daily rate for model period for initial steady state
+                       {0: ['mean', '2012-01-01', '2012-12-31'],  # average daily rate for model period for initial steady state
                         1: 'mean'}
                    }
               }
@@ -26,7 +26,7 @@ def source_data_from_prism_cases():
     return cases
 
 
-def get_prism_data(prism_datafile):
+def get_prism_data(prism_datafile, model_start, model_end):
     """Read data from prism file; subset to model time period
     and convert units."""
     df = pd.read_csv(prism_datafile, header=None,
@@ -34,8 +34,7 @@ def get_prism_data(prism_datafile):
     df.index = pd.to_datetime(df.datetime)
 
     # subset data to the model timeperiod
-    model_start, model_end = '2012-01-01', '2018-12-31'
-    df_model = df.loc[model_start:model_end]
+    df_model = df.loc[model_start:model_end].iloc[:-1]  # drop last day
 
     # compute mean precip in meters/day
     df_model['ppt_m'] = df_model['ppt_inches']*.3048/12
@@ -50,7 +49,9 @@ def test_parse_prism_source_data(source_data_from_prism_cases, pleasant_nwt_with
     sd = PrismSourceData.from_config(cases[0]['climate'], dest_model=m)
     data = sd.get_data()
     assert np.array_equal(data.per, m.perioddata.per)
-    prism = get_prism_data(sd.filenames[600059060])
+    prism = get_prism_data(sd.filenames[600059060],
+                           m.perioddata['start_datetime'][0],
+                           m.perioddata['end_datetime'].values[-1])
     assert np.allclose(data.loc[data.per == 0, 'temp'], prism['tmean_c'].mean())
     assert np.allclose(data.loc[data.per == 0, 'precipitation'], prism['ppt_md'].mean())
     assert np.allclose(data.loc[1:, 'temp'], prism['tmean_c'])

@@ -1,6 +1,7 @@
 """
 Functions related to temporal discretization
 """
+import copy
 import calendar
 import numpy as np
 import pandas as pd
@@ -22,18 +23,21 @@ def convert_freq_to_period_start(freq):
 def get_parent_stress_periods(parent_model, nper=None,
                               parent_stress_periods='all'):
 
-    parent_sp = parent_stress_periods
+    parent_sp = copy.copy(parent_stress_periods)
     if parent_model.version == 'mf6':
         raise NotImplementedError('MODFLOW-6 parent models')
 
     # use all stress periods from parent model
     if isinstance(parent_sp, str) and parent_sp.lower() == 'all':
-        parent_sp = list(range(parent_model.nper))
-        if nper is None or nper < parent_model.nper:
+        if nper is None:  # or nper < parent_model.nper:
             nper = parent_model.nper
+            parent_sp = list(range(nper))
         elif nper > parent_model.nper:
+            parent_sp = list(range(parent_model.nper))
             for i in range(nper - parent_model.nper):
                 parent_sp.append(parent_sp[-1])
+        else:
+            parent_sp = list(range(nper))
         # self.cfg['dis']['perlen'] = None # set from parent model
         # self.cfg['dis']['steady'] = None
 
@@ -44,14 +48,13 @@ def get_parent_stress_periods(parent_model, nper=None,
         if nper is None:
             nper = len(parent_sp)
 
-        parent_sp = [0]
         perlen = [parent_model.dis.perlen.array[0]]
-        for i, p in enumerate(parent_stress_periods):
+        for i, p in enumerate(parent_sp):
             if i == nper:
                 break
             if p == parent_model.nper:
                 break
-            if p > 0:
+            if p > 0 and p >= parent_sp[-1] and len(parent_sp) < nper:
                 parent_sp.append(p)
                 perlen.append(parent_model.dis.perlen.array[p])
         if nper < len(parent_sp):
@@ -71,7 +74,6 @@ def get_parent_stress_periods(parent_model, nper=None,
         parent_sp = [0]
         for i in range(nper - 1):
             parent_sp.append(parent_sp[-1])
-
     assert len(parent_sp) == nper
     return parent_sp
 

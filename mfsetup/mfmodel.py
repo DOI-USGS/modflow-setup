@@ -196,7 +196,13 @@ class MFsetupMixin():
     @property
     def parent_layers(self):
         """Mapping between layers in source model and
-        layers in destination model."""
+        layers in destination model.
+
+        Returns
+        -------
+        parent_layers : dict
+            {inset layer : parent layer}
+        """
         if self._parent_layers is None:
             parent_layers = None
             if self.cfg['dis']['source_data'] is not None:
@@ -207,6 +213,19 @@ class MFsetupMixin():
                 parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
             self._parent_layers = parent_layers
         return self._parent_layers
+
+    @property
+    def parent_stress_periods(self):
+        """Mapping between stress periods in source model and
+        stress periods in destination model.
+
+        Returns
+        -------
+        parent_stress_periods : dict
+            {inset stress period : parent stress period}
+        """
+        return dict(zip(self.perioddata['per'], self.perioddata['parent_sp']))
+
 
     @property
     def package_list(self):
@@ -816,46 +835,20 @@ class MFsetupMixin():
             if steady is None:
                 steady = self.cfg['sto'].get('steady')
         else:
-            default_start_datetime = self.cfg['model'].get('start_date_time', '1970-01-01')
+            default_start_datetime = self.cfg['dis'].get('start_date_time', '1970-01-01')
             tdis_dimensions_config = self.cfg['dis']
             tdis_perioddata_config = self.cfg['dis']
             nper = self.cfg['dis'].get('nper')
             steady = self.cfg['dis'].get('steady')
 
-        # option 1: use some or all of parent discretization
-        parent_stress_periods = self.cfg.get('parent', {}).get('copy_stress_periods')
-        parent_sp = None
-        if self.parent is not None and parent_stress_periods is not None:
-            # parent_sp has parent model stress period corresponding
-            # to each inset model stress period (len=nper)
-            # the same parent stress period can be specified for multiple inset model periods
-            parent_sp = get_parent_stress_periods(self.parent, nper=nper,
-                                                  parent_stress_periods=parent_stress_periods)
-
-            nper = len(parent_sp)
-            tdis_dimensions_config['nper'] = len(parent_sp)
-            self.cfg['parent']['copy_stress_periods'] = parent_sp
+        # get start_date_time from parent if available and start_date_time wasn't specified
+        if tdis_perioddata_config.get('start_date_time', '1970-01-01') == '1970-01-01' and \
+                default_start_datetime != '1970-01-01':
+            tdis_perioddata_config['start_date_time'] = default_start_datetime
 
         # cast steady array to boolean
         if steady is not None and not isinstance(steady, dict):
             tdis_perioddata_config['steady'] = np.array(tdis_perioddata_config['steady']).astype(bool).tolist()
-
-        # reshape tdis variables to len=nper
-        # if parent model periods are specified, populate them from parent model
-        # if nper is None at this point, it is assumed that periods will be generated from groups
-        #for var in ['perlen', 'nstp', 'tsmult', 'steady']:
-        #    if var in tdis_perioddata_config:
-        #        arg = tdis_perioddata_config[var]
-        #        if arg is not None and not np.isscalar(arg) and nper is not None:
-        #            assert len(arg) == nper, \
-        #                "Variable {} must be a scalar or have {} entries (one for each stress period).\n" \
-        #                "Or leave as None to set from parent model".format(var, nper)
-        #        elif np.isscalar(arg) and nper is not None:
-        #            tdis_perioddata_config[var] = [arg] * nper
-        #        elif parent_stress_periods is not None:
-        #            tdis_perioddata_config[var] = getattr(self.parent.dis, var)[parent_stress_periods]
-        #        if var == 'steady':
-        #            steady = {kper: issteady for kper, issteady in enumerate(tdis_perioddata_config['steady'])}
 
         # get period data groups
         # if no groups are specified, make a group from general stress period input
@@ -871,9 +864,22 @@ class MFsetupMixin():
         # set up the perioddata table from the groups
         self._perioddata = setup_perioddata(perioddata_groups, self.time_units)
 
+        # assign parent model stress periods to each inset model stress period
+        parent_stress_periods = self.cfg.get('parent', {}).get('copy_stress_periods')
+        parent_sp = None
+        if self.parent is not None:
+            if parent_stress_periods is not None:
+                # parent_sp has parent model stress period corresponding
+                # to each inset model stress period (len=nper)
+                # the same parent stress period can be specified for multiple inset model periods
+                parent_sp = get_parent_stress_periods(self.parent, nper=self.nper,
+                                                      parent_stress_periods=parent_stress_periods)
+                self.cfg['parent']['copy_stress_periods'] = parent_sp
+            elif self._is_lgr:
+                parent_sp = self._perioddata['per'].values
+
         # add corresponding stress periods in parent model if there are any
-        if parent_sp is not None and len(parent_sp) == len(self._perioddata):
-            self._perioddata['parent_sp'] = parent_sp
+        self._perioddata['parent_sp'] = parent_sp
         assert np.array_equal(self._perioddata['per'].values, np.arange(len(self._perioddata)))
         # reset nper property so that it will reference perioddata table
         self._nper = None

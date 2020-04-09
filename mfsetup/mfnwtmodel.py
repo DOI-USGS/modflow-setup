@@ -22,7 +22,7 @@ from .lakes import (make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes,
 from .utils import update, get_packages, get_input_arguments
 from .obs import read_observation_data, setup_head_observations
 from .sourcedata import TabularSourceData
-from .tdis import setup_perioddata_group
+from .tdis import setup_perioddata_group, get_parent_stress_periods
 from .tmr import Tmr
 from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text, lenuni_values
 from .wells import setup_wel_data
@@ -177,17 +177,23 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
             # default_source_data, where omitted configuration input is
             # obtained from parent model by default
+            # Set default_source_data to True by default if it isn't specified
+            if self.cfg['parent'].get('default_source_data') is None:
+                self.cfg['parent']['default_source_data'] = True
             if self.cfg['parent'].get('default_source_data'):
                 self._parent_default_source_data = True
                 if self.cfg['dis'].get('nlay') is None:
                     self.cfg['dis']['nlay'] = self.parent.dis.nlay
-                if self.cfg['dis'].get('start_date_time') is None:
+                parent_start_date_time = self.cfg.get('parent', {}).get('start_date_time')
+                if self.cfg['dis'].get('start_date_time', '1970-01-01') == '1970-01-01' and parent_start_date_time is not None:
                     self.cfg['dis']['start_date_time'] = self.cfg['parent']['start_date_time']
                 if self.cfg['dis'].get('nper') is None:
                     self.cfg['dis']['nper'] = self.parent.dis.nper
-                for var in ['nper', 'perlen', 'nstp', 'tsmult', 'steady']:
+                parent_periods = get_parent_stress_periods(self.parent, nper=self.cfg['dis']['nper'],
+                                                           parent_stress_periods=self.cfg['parent']['copy_stress_periods'])
+                for var in ['perlen', 'nstp', 'tsmult', 'steady']:
                     if self.cfg['dis'].get(var) is None:
-                        self.cfg['dis'][var] = self.parent.dis.__dict__[var].array
+                        self.cfg['dis'][var] = self.parent.dis.__dict__[var].array[parent_periods]
 
     def _update_grid_configuration_with_dis(self):
         """Update grid configuration with any information supplied to dis package
@@ -731,7 +737,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         tmr = Tmr(self.parent, self,
                   parent_head_file=self.cfg['parent']['headfile'],
                   inset_parent_layer_mapping=self.parent_layers,
-                  copy_stress_periods=self.cfg['parent']['copy_stress_periods'])
+                  inset_parent_period_mapping=self.parent_stress_periods)
 
         df = tmr.get_inset_boundary_heads()
 

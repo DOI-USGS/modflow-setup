@@ -18,7 +18,8 @@ Shellmound test case
 
 
 .. literalinclude:: ../../mfsetup/tests/data/shellmound.yml
-  :language: yaml
+    :language: yaml
+    :linenos:
 
 Pleasant Lake test case
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -36,10 +37,12 @@ Pleasant Lake test case
 * Lake package observations set up automatically (output file for each lake)
 
 .. literalinclude:: ../../mfsetup/tests/data/pleasant_lgr_parent.yml
-  :language: yaml
+    :language: yaml
+    :linenos:
 
 .. literalinclude:: ../../mfsetup/tests/data/pleasant_lgr_inset.yml
-  :language: yaml
+    :language: yaml
+    :linenos:
 
 .. _downloads from the NHDPlus website: https://nhdplus.com/NHDPlus/NHDPlusV2_data.php
 .. _vertical pass-through cells: https://water.usgs.gov/water-resources/software/MODFLOW-6/mf6io_6.1.0.pdf

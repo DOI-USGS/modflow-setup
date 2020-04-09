@@ -11,6 +11,8 @@ import copy
 import numpy as np
 import pandas as pd
 import pytest
+from mfsetup.tdis import get_parent_stress_periods
+from .test_pleasant_mf6_inset import get_pleasant_mf6
 
 
 @pytest.fixture(scope='function')
@@ -171,3 +173,49 @@ def test_pd_date_range():
     dates = pd.date_range('2007-04-01', '2015-10-01', periods=None, freq='6MS')
     assert len(dates) == 18
     assert dates[-1] == pd.Timestamp('2015-10-01')
+
+
+@pytest.mark.parametrize('copy_periods, nper', (('all', 'm.nper'),  # copy all stress periods
+                                                ('all', 13),  # copy all stress periods up to 13
+                                                ([0], 'm.nper'),  # repeat parent stress period 0
+                                                ([2], 'm.nper'),  # repeat parent stress period 2
+                                                ([1, 2], 'm.nper')  # include parent stress periods 1 and 2, repeating 2
+                                                ))
+def test_get_parent_stress_periods(copy_periods, nper, basic_model_instance, request):
+    m = basic_model_instance
+    if nper == 'm.nper':
+        nper = m.nper
+    test_name = request.node.name.split('[')[1].strip(']')
+    if m.name == 'pfl' and copy_periods not in ('all', [0]):
+        return
+    expected = {'pfl_nwt-all-m.nper': [0, 0],  # one parent model stress period, 'all' input
+                'pfl_nwt-all-13': [0] * nper,  # one parent model stress period, 'all' input
+                'pfl_nwt-copy_periods2-m.nper': [0, 0],  # one parent model stress period, input=[0]
+                'pleasant_nwt-all-m.nper': list(range(nper)),  # many parent model stress periods, input='all'
+                'pleasant_nwt-all-13': list(range(nper)),  # many parent model stress periods, input='all'
+                'pleasant_nwt-copy_periods2-m.nper': [0]*nper,  # many parent model stress periods, input=[0]
+                'pleasant_nwt-copy_periods3-m.nper': [2] * nper,   # many parent model stress periods, input=[2]
+                'pleasant_nwt-copy_periods4-m.nper': [1] + [2] * (nper-1),    # many parent model stress periods, input=[1, 2]
+                'get_pleasant_mf6-all-m.nper': list(range(nper)),
+                'get_pleasant_mf6-all-13': list(range(nper)),
+                'get_pleasant_mf6-copy_periods2-m.nper': [0]*nper,
+                'get_pleasant_mf6-copy_periods3-m.nper': [2] * nper,
+                'get_pleasant_mf6-copy_periods4-m.nper': [1] + [2] * (nper-1),
+                }
+
+    # test getting list of parent stress periods corresponding to inset stress periods
+    result = get_parent_stress_periods(m.parent, nper=nper,
+                                       parent_stress_periods=copy_periods)
+    assert result == expected[test_name]
+    assert len(result) == nper
+    assert not any(set(result).difference(set(range(m.parent.nper))))
+
+    # test adding parent stress periods to perioddata table
+    m.cfg['parent']['copy_stress_periods'] = copy_periods
+    if m.version != 'mf6':
+        m.cfg['dis']['nper'] = nper
+        for var in ['perlen', 'nstp', 'tsmult', 'steady']:
+            del m.cfg['dis'][var]
+    m._set_parent()
+    m._set_perioddata()
+    assert np.array_equal(m.perioddata['parent_sp'], np.array(expected[test_name]))

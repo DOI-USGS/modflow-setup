@@ -23,7 +23,7 @@ def tmr(pleasant_model):
     tmr = Tmr(m.parent, m,
               parent_head_file=m.cfg['parent']['headfile'],
               inset_parent_layer_mapping=m.parent_layers,
-              copy_stress_periods=m.cfg['parent']['copy_stress_periods'])
+              inset_parent_period_mapping=m.parent_stress_periods)
     return tmr
 
 

@@ -47,6 +47,17 @@ def setup_wel_data(model):
                    }
         parent = model.parent
         spd = get_package_stress_period_data(parent, package_name='wel')
+        # map the parent stress period data to inset stress periods
+        periods = spd.groupby('per')
+        dfs = []
+        for inset_per, parent_per in model.parent_stress_periods.items():
+            period = periods.get_group(parent_per)
+            if len(dfs) > 0 and period.drop('per', axis=1).equals(dfs[-1].drop('per', axis=1)):
+                continue
+            else:
+                dfs.append(period)
+        spd = pd.concat(dfs)
+
         parent_well_x = parent.modelgrid.xcellcenters[spd.i, spd.j]
         parent_well_y = parent.modelgrid.ycellcenters[spd.i, spd.j]
         coords = project((parent_well_x, parent_well_y),
@@ -152,10 +163,7 @@ def setup_wel_data(model):
         df = df.append(bfluxes)
 
     for col in ['per', 'k', 'i', 'j']:
-        try:
-            df[col] = df[col].astype(int)
-        except:
-            j=2
+        df[col] = df[col].astype(int)
 
     # drop any k, i, j locations that are inactive
     if model.version == 'mf6':
@@ -464,10 +472,6 @@ def get_package_stress_period_data(model, package_name, skip_packages=None):
     for packagename in wel_packages:
         package = model.get_package(packagename)
         stress_period_data = package.stress_period_data
-        # monkey patch the mf6 version to behave like the mf2005 version
-        #if isinstance(stress_period_data, flopy.mf6.data.mfdatalist.MFTransientList):
-        #    stress_period_data.data = {per: ra for per, ra in enumerate(stress_period_data.array)}
-
         for kper, spd in stress_period_data.data.items():
             spd = pd.DataFrame(spd)
             spd['per'] = kper

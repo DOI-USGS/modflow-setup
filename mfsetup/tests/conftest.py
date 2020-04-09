@@ -301,7 +301,24 @@ def modflow_executable(request, mfnwt_exe, mf6_exe):
 def pleasant_model(request,
                    full_pleasant_nwt,
                    pleasant_mf6_setup_from_yaml):
+    """MODFLOW-NWT and MODFLOW-6 versions of Pleasant Lake
+    test case with all of the packages"""
     return {'full_pleasant_nwt': full_pleasant_nwt,
             'pleasant_mf6_setup_from_yaml': pleasant_mf6_setup_from_yaml}[request.param]
 
 
+@pytest.fixture(params=['pfl_nwt',
+                        'pleasant_nwt',
+                        'get_pleasant_mf6'
+                        ])
+def basic_model_instance(request,
+                   pfl_nwt,
+                   pleasant_nwt,
+                   get_pleasant_mf6
+                   ):
+    """Just some model instances with no packages.
+    """
+    return {'pfl_nwt': pfl_nwt,
+            'pleasant_nwt': pleasant_nwt,
+            'get_pleasant_mf6': get_pleasant_mf6
+            }[request.param]

@@ -163,7 +163,7 @@ def get_length_units(model):
     units = getattr(model, 'length_units', None)
     if units is None:
         if model.version == 'mf6':
-            j=2
+            pass
         else:
             units = lenuni_text[model.dis.lenuni]
     return units

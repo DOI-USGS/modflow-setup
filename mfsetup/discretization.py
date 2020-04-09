@@ -493,8 +493,6 @@ def get_layer_thicknesses(top, botm, idomain=None):
     nrow, ncol = top.shape
     for i in range(nrow):
         for j in range(ncol):
-            if (i, j) == (2, 2):
-                j=2
             cells = all_layers[:, i, j]
             valid_b = list(-np.diff(cells[~np.isnan(cells)]))
             b_ij = np.zeros_like(cells[1:]) * np.nan

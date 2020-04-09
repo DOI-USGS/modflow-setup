@@ -38,7 +38,7 @@ def pleasant_mf6_cfg(pleasant_mf6_test_cfg_path):
 
 @pytest.fixture(scope="function")
 def pleasant_simulation(pleasant_mf6_cfg):
-    cfg = pleasant_mf6_cfg.copy()
+    cfg = pleasant_mf6_cfg
     sim = mf6.MFSimulation(**cfg['simulation'])
     return sim
 
@@ -46,7 +46,7 @@ def pleasant_simulation(pleasant_mf6_cfg):
 @pytest.fixture(scope="function")
 def get_pleasant_mf6(pleasant_mf6_cfg, pleasant_simulation):
     print('creating Pleasant Lake MF6model instance from cfgfile...')
-    cfg = pleasant_mf6_cfg.copy()
+    cfg = copy.deepcopy(pleasant_mf6_cfg)
     cfg['model']['simulation'] = pleasant_simulation
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
@@ -236,7 +236,7 @@ def test_npf_setup(get_pleasant_mf6_with_dis):
                                     m.modelgrid, m.parent.modelgrid,
                                     inset_parent_layer_mapping,
                                     nodata=float(m.cfg['parent']['hiKlakes_value']),
-                                    rtol=0.05
+                                    rtol=0.1
                                     )
 
 

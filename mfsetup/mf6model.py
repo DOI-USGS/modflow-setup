@@ -21,7 +21,7 @@ from .lakes import (setup_lake_connectiondata, setup_lake_info,
                     get_lakeperioddata, setup_mf6_lake_obs)
 from .mf5to6 import get_package_name
 from .obs import setup_head_observations
-from .tdis import setup_perioddata_group
+from .tdis import setup_perioddata_group, get_parent_stress_periods
 from .tmr import Tmr
 from .units import lenuni_text, itmuni_text, convert_length_units, convert_time_units
 from .utils import update, get_input_arguments, flatten, get_packages
@@ -199,12 +199,18 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
             # default_source_data, where omitted configuration input is
             # obtained from parent model by default
+            # Set default_source_data to True by default if it isn't specified
+            if self.cfg['parent'].get('default_source_data') is None:
+                self.cfg['parent']['default_source_data'] = True
             if self.cfg['parent'].get('default_source_data'):
                 self._parent_default_source_data = True
                 if self.cfg['dis']['dimensions'].get('nlay') is None:
                     self.cfg['dis']['dimensions']['nlay'] = self.parent.dis.nlay
-                if self.cfg['tdis'].get('start_date_time') is None:
+                parent_start_date_time = self.cfg.get('parent', {}).get('start_date_time')
+                if self.cfg['tdis'].get('start_date_time', '1970-01-01') == '1970-01-01' \
+                        and parent_start_date_time is not None:
                     self.cfg['tdis']['start_date_time'] = self.cfg['parent']['start_date_time']
+
                 # only get time dis information from parent if
                 # no periodata groups are specified, and nper is not specified under dimensions
                 has_perioddata_groups = any([isinstance(k, dict)
@@ -212,11 +218,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 if not has_perioddata_groups:
                     if self.cfg['tdis']['dimensions'].get('nper') is None:
                         self.cfg['dis']['nper'] = self.parent.dis.nper
+                    parent_periods = get_parent_stress_periods(self.parent, nper=self.cfg['dis']['nper'],
+                                                               parent_stress_periods=self.cfg['parent'][
+                                                                   'copy_stress_periods'])
                     for var in ['perlen', 'nstp', 'tsmult']:
                         if self.cfg['dis']['perioddata'].get(var) is None:
-                            self.cfg['dis']['perioddata'][var] = self.parent.dis.__dict__[var].array
+                            self.cfg['dis']['perioddata'][var] = self.parent.dis.__dict__[var].array[parent_periods]
                     if self.cfg['sto'].get('steady') is None:
-                        self.cfg['sto']['steady'] = self.parent.dis.steady.array
+                        self.cfg['sto']['steady'] = self.parent.dis.steady.array[parent_periods]
 
     def _update_grid_configuration_with_dis(self):
         """Update grid configuration with any information supplied to dis package
@@ -783,7 +792,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         tmr = Tmr(self.parent, self,
                   parent_head_file=self.cfg['parent']['headfile'],
                   inset_parent_layer_mapping=self.parent_layers,
-                  copy_stress_periods=self.cfg['parent']['copy_stress_periods'])
+                  inset_parent_period_mapping=self.parent_stress_periods)
 
         df = tmr.get_inset_boundary_heads()
 

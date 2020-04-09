@@ -61,7 +61,7 @@ class Tmr:
                  parent_head_file=None, parent_cell_budget_file=None,
                  parent_length_units=None, inset_length_units=None,
                  inset_parent_layer_mapping=None,
-                 copy_stress_periods=None):
+                 inset_parent_period_mapping=None):
 
         self.inset = inset_model
         self.parent = parent_model
@@ -69,7 +69,7 @@ class Tmr:
         self.cbc = None
         self._inset_parent_layer_mapping = inset_parent_layer_mapping
         self._source_mask = None
-        self.copy_stress_periods = copy_stress_periods
+        self._inset_parent_period_mapping = inset_parent_period_mapping
         if parent_length_units is None:
             parent_length_units = self.inset.cfg['parent']['length_units']
         if inset_length_units is None:
@@ -126,6 +126,21 @@ class Tmr:
                                 .format(nlay, nspecified, self._inset_parent_layer_mapping))
             return self._inset_parent_layer_mapping
 
+    @property
+    def inset_parent_period_mapping(self):
+        nper = self.inset.nper
+        # if mapping between source and dest model periods isn't specified
+        # assume one to one mapping of stress periods between models
+        if self._inset_parent_period_mapping is None:
+            parent_periods = list(range(self.parent.nper))
+            self._inset_parent_period_mapping = {i: parent_periods[i]
+            if i < self.parent.nper else parent_periods[-1] for i in range(nper)}
+        else:
+            return self._inset_parent_period_mapping
+
+    @inset_parent_period_mapping.setter
+    def inset_parent_period_mapping(self, inset_parent_period_mapping):
+        self._inset_parent_period_mapping = inset_parent_period_mapping
 
     @property
     def _source_grid_mask(self):
@@ -533,18 +548,19 @@ class Tmr:
         all_kstpkper = hdsobj.get_kstpkper()
 
         # get the last timestep in each stress period if there are more than one
-        kstpkper = []
-        unique_kper = []
-        for (kstp, kper) in all_kstpkper:
-            if kper not in unique_kper:
-                kstpkper.append((kstp, kper))
-                unique_kper.append(kper)
+        #kstpkper = []
+        #unique_kper = []
+        #for (kstp, kper) in all_kstpkper:
+        #    if kper not in unique_kper:
+        #        kstpkper.append((kstp, kper))
+        #        unique_kper.append(kper)
+        last_steps = {kper: kstp for kstp, kper in all_kstpkper}
 
-        assert len(unique_kper) == len(set(self.copy_stress_periods)), \
-        "read {} from {},\nexpected stress periods: {}".format(kstpkper,
-                                                               headfile,
-                                                               sorted(list(set(self.cfg['parent']['copy_stress_periods'])))
-                                                               )
+        #assert len(unique_kper) == len(set(self.copy_stress_periods)), \
+        #"read {} from {},\nexpected stress periods: {}".format(kstpkper,
+        #                                                       headfile,
+        #                                                       sorted(list(set(self.copy_stress_periods)))
+        #                                                       )
 
         # get active cells along model perimeter
         k, i, j = self.inset.get_boundary_cells(exclude_inactive=True)
@@ -553,7 +569,15 @@ class Tmr:
         # TODO: generalize head extraction from parent model using 3D interpolation
 
         dfs = []
-        for inset_per, parent_kstpkper in enumerate(kstpkper):
+        parent_periods = []
+        for inset_per, parent_per in self.inset_parent_period_mapping.items():
+            # skip getting data if parent period is already represented
+            # (heads will be reused)
+            if parent_per in parent_periods:
+                continue
+            else:
+                parent_periods.append(parent_per)
+            parent_kstpkper = last_steps[parent_per], parent_per
             hds = hdsobj.get_data(kstpkper=parent_kstpkper)
 
             regridded = np.zeros((self.inset.nlay, self.inset.nrow, self.inset.ncol))
@@ -570,6 +594,8 @@ class Tmr:
                 else:
                     weight0 = source_k - np.floor(source_k)
                     source_k0 = int(np.floor(source_k))
+                    # first layer in the average can't be negative
+                    source_k0 = 0 if source_k0 < 0 else source_k0
                     source_k1 = int(np.ceil(source_k))
                     arr = weighted_average_between_layers(hds[source_k0],
                                                           hds[source_k1],
