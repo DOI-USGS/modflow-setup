@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; modflow-setup 0.post51+g9f09c82 documentation</title>
+  <title>Examples &mdash; modflow-setup 0.post50+gc87376c documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g9f09c82
+                0.post50+gc87376c
               </div>
             
           
@@ -94,7 +94,12 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#configuration-file-gallery">Configuration File Gallery</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#shellmound-test-case">Shellmound test case</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pleasant-lake-test-case">Pleasant Lake test case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pleasant-lake-test-case">Pleasant Lake test case</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lgr-parent-model-configuration">LGR parent model configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pleasant-lgr-inset-yml">pleasant_lgr_inset.yml</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pleasant-lake-modflow-nwt-test-case">Pleasant Lake MODFLOW-NWT test case</a></li>
 </ul>
 </li>
 </ul>
@@ -193,7 +198,303 @@
 <li><p>SFR network created from custom hydrography</p></li>
 <li><p>WEL package created from CSV input</p></li>
 </ul>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
+<div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
 <span class="c1">#</span>
 <span class="c1"># The MF6model.setup_from_yaml reads this in as a python dictionary (via the pyyaml package),</span>
 <span class="c1"># and attaches it to a newly created MF6model object instance (MF6model is a subclass of flopy.mf6.ModflowGwf).</span>
@@ -491,7 +792,7 @@
     <span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
     
 </pre></div>
-</div>
+</td></tr></table></div>
 </div>
 <div class="section" id="pleasant-lake-test-case">
 <h3>Pleasant Lake test case<a class="headerlink" href="#pleasant-lake-test-case" title="Permalink to this headline">¶</a></h3>
@@ -499,7 +800,7 @@
 <li><p>MODFLOW-6 model with local grid refinement (LGR)</p></li>
 <li><p>LGR parent model is itself a Telescopic Mesh Refinment (TMR) inset from a MODFLOW-NWT model</p></li>
 <li><p>Layer 1 in TMR parent model is subdivided evenly into two layers in LGR model (<code class="docutils literal notranslate"><span class="pre">botm:</span> <span class="pre">from_parent:</span> <span class="pre">0:</span> <span class="pre">-0.5</span></code>). Other layers mapped explicitly between TMR parent and LGR model.</p></li>
-<li><p>starting heads from LGR parent model resample from binary output from the TMR parent</p></li>
+<li><p>starting heads from LGR parent model resampled from binary output from the TMR parent</p></li>
 <li><p>rch, npf, sto, and wel input copied from parent model</p></li>
 <li><p>SFR package constructed from an NHDPlus v2 dataset (path to NHDPlus files in the same structure as the <a class="reference external" href="https://nhdplus.com/NHDPlus/NHDPlusV2_data.php">downloads from the NHDPlus website</a>)</p></li>
 <li><p>head observations from csv files with different column names</p></li>
@@ -509,7 +810,187 @@
 <li><p>Lake package created from polygon features, bathymetry raster, stage-area-volume file and climate data from <a class="reference external" href="http://www.prism.oregonstate.edu/">PRISM</a>.</p></li>
 <li><p>Lake package observations set up automatically (output file for each lake)</p></li>
 </ul>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
+<div class="section" id="lgr-parent-model-configuration">
+<h4>LGR parent model configuration<a class="headerlink" href="#lgr-parent-model-configuration" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
   <span class="nt">tmpdir</span><span class="p">:</span> <span class="s">&#39;tmp/&#39;</span>
 
 <span class="nt">simulation</span><span class="p">:</span>
@@ -689,8 +1170,182 @@
   <span class="nt">drop_observations</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span>  <span class="c1"># pleasant lake; monitored via gage package</span>
   <span class="p p-Indicator">]</span>
 </pre></div>
+</td></tr></table></div>
 </div>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
+<div class="section" id="pleasant-lgr-inset-yml">
+<h4>pleasant_lgr_inset.yml<a class="headerlink" href="#pleasant-lgr-inset-yml" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
   <span class="nt">tmpdir</span><span class="p">:</span> <span class="s">&#39;tmp/&#39;</span>
 
 <span class="nt">simulation</span><span class="p">:</span>
@@ -863,7 +1518,348 @@
   <span class="nt">drop_observations</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span>  <span class="c1"># pleasant lake; monitored via gage package</span>
   <span class="p p-Indicator">]</span>
 </pre></div>
+</td></tr></table></div>
 </div>
+</div>
+<div class="section" id="pleasant-lake-modflow-nwt-test-case">
+<h3>Pleasant Lake MODFLOW-NWT test case<a class="headerlink" href="#pleasant-lake-modflow-nwt-test-case" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>MODFLOW-NWT TMR inset from a MODFLOW-NWT model</p></li>
+<li><p>Layer 1 in parent model is subdivided evenly into two layers in the inset model (<code class="docutils literal notranslate"><span class="pre">botm:</span> <span class="pre">from_parent:</span> <span class="pre">0:</span> <span class="pre">-0.5</span></code>). Other layers mapped explicitly between TMR parent and LGR model.</p></li>
+<li><p>starting heads resampled from binary output from the TMR parent</p></li>
+<li><p>rch, npf, sto, and wel input copied from parent model</p></li>
+<li><p>SFR package constructed from an NHDPlus v2 dataset (path to NHDPlus files in the same structure as the <a class="reference external" href="https://nhdplus.com/NHDPlus/NHDPlusV2_data.php">downloads from the NHDPlus website</a>)</p></li>
+<li><p>HYDMOD package for head observations from csv files with different column names</p></li>
+<li><p>LGR inset extent based on a buffer distance around a feature of interest</p></li>
+<li><p>LGR inset dis, ic, npf, sto and rch packages copied from LGR parent</p></li>
+<li><p>WEL package created from custom format</p></li>
+<li><p>Lake package created from polygon features, bathymetry raster, stage-area-volume file and climate data from <a class="reference external" href="http://www.prism.oregonstate.edu/">PRISM</a>.</p></li>
+<li><p>Lake package observations set up automatically (output file for each lake)</p></li>
+<li><p>GHB package created from polygon feature and DEM raster</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
+  <span class="nt">tmpdir</span><span class="p">:</span> <span class="s">&#39;tmp/&#39;</span>
+
+<span class="c1"># argments to flopy.modflow.Modflow.__init__ or load for pfl_nwt</span>
+<span class="nt">model</span><span class="p">:</span>
+  <span class="nt">modelname</span><span class="p">:</span> <span class="s">&#39;pleasant&#39;</span>
+  <span class="nt">model_ws</span><span class="p">:</span> <span class="s">&#39;../tmp/pleasant_nwt/&#39;</span>
+  <span class="nt">external_path</span><span class="p">:</span> <span class="s">&#39;external/&#39;</span>
+  <span class="nt">perimeter_boundary_type</span><span class="p">:</span> <span class="s">&#39;specified</span><span class="nv"> </span><span class="s">head&#39;</span>
+  <span class="nt">packages</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;bas6&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;oc&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;upw&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;rch&#39;</span><span class="p p-Indicator">,</span> <span class="c1"># Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model</span>
+             <span class="s">&#39;sfr&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;lak&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;wel&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;hyd&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;gag&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;nwt&#39;</span>
+  <span class="p p-Indicator">]</span>
+
+<span class="nt">parent</span><span class="p">:</span>
+  <span class="c1"># argments to flopy.modflow.Modflow.load for parent model</span>
+  <span class="nt">namefile</span><span class="p">:</span> <span class="s">&#39;pleasant.nam&#39;</span>
+  <span class="nt">model_ws</span><span class="p">:</span> <span class="s">&#39;pleasant/&#39;</span>
+  <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mfnwt&#39;</span>
+  <span class="c1"># information for modflow-setup</span>
+  <span class="c1"># note: parent model is geo-located in namfile header</span>
+  <span class="c1"># (only works if length_units=&#39;meters&#39;)</span>
+  <span class="nt">headfile</span><span class="p">:</span> <span class="s">&#39;pleasant/pleasant.hds&#39;</span>
+  <span class="nt">hiKlakes_value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e4</span> <span class="c1"># unfortunately python yaml currently requires a dot to parse exp notation as float</span>
+  <span class="nt">default_source_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>  <span class="c1"># if True, packages and variables that are omitted will be pulled from this model</span>
+  <span class="nt">copy_stress_periods</span><span class="p">:</span> <span class="s">&#39;all&#39;</span>
+  <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;2012-01-01&#39;</span>
+  <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+  <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
+
+<span class="c1"># parameters for setting up the pfl_nwt grid</span>
+<span class="c1"># using features in features_file</span>
+<span class="nt">setup_grid</span><span class="p">:</span>
+  <span class="nt">remake</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">features_shapefile</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/shps/all_lakes.shp&#39;</span>
+      <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;HYDROID&#39;</span>
+      <span class="nt">include_ids</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span> <span class="c1"># pleasant lake</span>
+  <span class="nt">dxy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span> <span class="c1"># m</span>
+  <span class="nt">buffer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span> <span class="c1"># distance from feature(s) if interest to model boundary, in meters</span>
+  <span class="nt">grid_file</span><span class="p">:</span> <span class="s">&#39;grid.json&#39;</span> <span class="c1"># grid info will be written to this file</span>
+  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3070</span>
+
+<span class="c1"># Inset model settings and</span>
+<span class="c1"># arguments to flopy.modflow.ModflowDis</span>
+<span class="nt">dis</span><span class="p">:</span>
+  <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+  <span class="nt">nstp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>  <span class="c1"># alternatively, specify lenuni: 2</span>
+  <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;2012-01-01&#39;</span>
+  <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>  <span class="c1"># alternatively, specify itmuni: 4</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">from_parent</span>
+    <span class="nt">botm</span><span class="p">:</span>
+      <span class="nt">from_parent</span><span class="p">:</span>
+        <span class="nt">0</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-0.5</span> <span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span>
+        <span class="nt">1</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span> <span class="c1"># bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent</span>
+        <span class="nt">2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+        <span class="nt">3</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+        <span class="nt">4</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="nt">bas6</span><span class="p">:</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">strt</span><span class="p">:</span>
+      <span class="nt">from_parent</span><span class="p">:</span>
+        <span class="nt">binaryfile</span><span class="p">:</span> <span class="s">&#39;pleasant/pleasant.hds&#39;</span>
+
+<span class="nt">upw</span><span class="p">:</span>
+  <span class="nt">ipakcb</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">53</span> <span class="c1"># unit for writing cell budget output</span>
+  <span class="nt">hdry</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-9999</span>
+
+<span class="nt">wel</span><span class="p">:</span>
+  <span class="nt">options</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">wdnr_dataset</span><span class="p">:</span>
+      <span class="nt">water_use</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/tables/master_wu.csv&#39;</span> <span class="c1"># monthly water use rates from WDNR</span>
+      <span class="nt">water_use_points</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/shps/csls_sources_wu_pts.shp&#39;</span> <span class="c1"># point locations of wells in water_use</span>
+      <span class="nt">period_stats</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2012-12-31&#39;</span><span class="p p-Indicator">],</span>
+<span class="nt">                     1</span><span class="p">:</span> <span class="s">&#39;resample&#39;</span><span class="p p-Indicator">}</span>
+
+<span class="nt">ghb</span><span class="p">:</span>
+  <span class="nt">options</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span>
+  <span class="nt">cond</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9</span>  <span class="c1"># m2/d</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">shapefile</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/shps/all_lakes.shp&#39;</span>
+      <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;HYDROID&#39;</span>
+      <span class="nt">include_ids</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">600059161</span><span class="p p-Indicator">]</span> <span class="c1"># pond near pleasant lake</span>
+    <span class="nt">dem</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/rasters/dem100m.tif&#39;</span>
+      <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+  <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">lak</span><span class="p">:</span>
+  <span class="nt">theta</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-0.7</span>  <span class="c1"># semi-implicit; negative value indicates that surfdep is read</span>
+  <span class="nt">nssitr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">800</span>  <span class="c1"># number of Newton iterations for solution of lake stage, for each MODFLOW iteration.</span>
+  <span class="nt">sscncr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0000001</span>  <span class="c1"># lake stage convergence criterion</span>
+  <span class="nt">surfdep</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>  <span class="c1"># undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">littoral_leakance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.045</span> <span class="c1"># 1/d</span>
+    <span class="nt">profundal_leakance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.025</span> <span class="c1"># 1/d</span>
+    <span class="nt">lakes_shapefile</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/shps/all_lakes.shp&#39;</span>
+      <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;HYDROID&#39;</span>
+      <span class="nt">include_ids</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span> <span class="c1"># pleasant lake</span>
+    <span class="nt">climate</span><span class="p">:</span>
+      <span class="nt">filenames</span><span class="p">:</span>
+        <span class="nt">600059060</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv&#39;</span>
+      <span class="nt">format</span><span class="p">:</span> <span class="s">&#39;prism&#39;</span>
+      <span class="nt">period_stats</span><span class="p">:</span>
+        <span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2012-12-31&#39;</span><span class="p p-Indicator">]</span>  <span class="c1"># average daily rate for model period for initial steady state</span>
+        <span class="nt">1</span><span class="p">:</span> <span class="s">&#39;mean&#39;</span>  <span class="c1"># average daily rate or value for each month</span>
+    <span class="nt">bathymetry_raster</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/rasters/pleasant_bathymetry.tif&#39;</span>
+      <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+    <span class="nt">stage_area_volume_file</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/tables/area_stage_vol_Pleasant.csv&#39;</span>
+      <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+      <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;hydroid&#39;</span>
+      <span class="nt">column_mappings</span><span class="p">:</span>
+        <span class="nt">volume_m3</span><span class="p">:</span> <span class="s">&#39;volume&#39;</span>
+  <span class="nt">output_files</span><span class="p">:</span>
+    <span class="nt">lookup_file</span><span class="p">:</span> <span class="s">&#39;lak_lookup.csv&#39;</span>
+
+<span class="nt">sfr</span><span class="p">:</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">flowlines</span><span class="p">:</span>
+      <span class="nt">nhdplus_paths</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;pleasant/source_data/shps&#39;</span><span class="p p-Indicator">]</span>
+    <span class="nt">dem</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant/source_data/rasters/dem100m.tif&#39;</span>
+      <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+  <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="nt">output_path</span><span class="p">:</span>
+
+<span class="nt">nwt</span><span class="p">:</span>
+  <span class="c1">#use_existing_file: &#39;RGN_rjh_3_23_18.NWT&#39;</span>
+  <span class="nt">headtol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span> <span class="c1"># read remaining parameters from default cfg</span>
+  <span class="nt">hclosexmd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-4</span>
+
+<span class="nt">hyd</span><span class="p">:</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;pleasant/source_data/tables/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
+                <span class="s">&#39;pleasant/source_data/tables/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span>  <span class="c1"># some lakes are high-k; obs need to be in hydmod</span>
+                <span class="s">&#39;pleasant/source_data/tables/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
+                <span class="s">&#39;pleasant/source_data/tables/uwsp_heads.csv&#39;</span><span class="p p-Indicator">,</span>
+                <span class="s">&#39;pleasant/source_data/tables/wgnhs_head_targets.csv&#39;</span>
+                     <span class="p p-Indicator">]</span>
+    <span class="nt">column_mappings</span><span class="p">:</span>
+      <span class="nt">hydlbl</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span>
+  <span class="nt">drop_observations</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span>  <span class="c1"># pleasant lake; monitored via gage package</span>
+  <span class="p p-Indicator">]</span>
+</pre></div>
+</td></tr></table></div>
 </div>
 </div>
 </div>

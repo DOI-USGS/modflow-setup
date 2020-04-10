@@ -4,17 +4,14 @@ Installation
 
 ``modflow-setup`` depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with `conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
 
-
-See the instructions in `Readme file`_.
-
 Installing python dependencies with Conda
 -----------------------------------------
 * Download and install the `Anaconda python distribution`_.
 * Download an environment file:
 
   * `environment.yml`_ for a `conda environment`_ with the minimum packages required to run modflow-setup, or
-  * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed testing, documentation and packaging. Note that the environment described by ``environment.yml`` is called `mfsetup`, while environment in ``gis.yml`` is called `gis`.
-  * Alternatively, clone (`using git`_) or `download`_ the ``modflow-setup`` repository, which includes the two environmental files are included at the root level.
+  * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by ``environment.yml`` is called `mfsetup`, while environment in ``gis.yml`` is called `gis`.
+  * Alternatively, clone (`using git`_) or `download`_ the ``modflow-setup`` repository, which includes the two environmental files at the root level.
   * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
 
 Creating a `conda environment`_
