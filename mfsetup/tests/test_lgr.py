@@ -1,5 +1,6 @@
 import copy
 import os
+import glob
 import numpy as np
 import pytest
 import flopy
@@ -146,6 +147,13 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
         path, fname = os.path.split(name_options['list'][0])
         assert os.path.abspath(m.model_ws).lower() == path.lower()
         assert name_options['newton'][0] == 'under_relaxation'
+
+    # check that the model names were included in the external files
+    external_files = glob.glob(os.path.join(m.model_ws, m.external_path, '*'))
+    for f in external_files:
+        if 'stage_area_volume' in f:
+            continue
+        assert m.name in f or 'plsnt_lgr_inset' in f
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
 

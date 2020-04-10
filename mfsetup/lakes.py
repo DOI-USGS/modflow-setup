@@ -248,14 +248,15 @@ def setup_lake_tablefiles(model, cfg):
         if model.version == 'mf6':
             with open(tabfilename, 'w', newline="") as dest:
                 dest.write('begin dimensions\n')
-                dest.write('nrow {}\n'.format(len(df)))
+                dest.write('nrow {}\n'.format(len(dfl)))
                 dest.write('ncol {}\n'.format(df.shape[1]))
                 dest.write('end dimensions\n')
                 dest.write('\nbegin table\n')
-                dest.write('#{}\n'.format(' '.join(df.columns)))
-                dfl[['stage', 'volume', 'area']].to_csv(dest, index=False, header=False,
+                cols = ['stage', 'volume', 'area']
+                dest.write('#{}\n'.format(' '.join(cols)))
+                dfl[cols].to_csv(dest, index=False, header=False,
                                                         sep=' ', float_format='%.5e')
-                dest.write('\nend table\n')
+                dest.write('end table\n')
 
         else:
             assert len(dfl) == 151, "151 values required for each lake; " \
@@ -332,7 +333,13 @@ def setup_lake_connectiondata(model,
             horizontal_connections = horizontal_connections.loc[~inactive].copy()
             horizontal_connections['lakeno'] = lake_id
             df = df.append(horizontal_connections)
-    df['iconn'] = list(range(len(df)))
+    # assign iconn (connection number) values for each lake
+    dfs = []
+    for lakeno, group in df.groupby('lakeno'):
+        group = group.copy()
+        group['iconn'] = list(range(len(group)))
+        dfs.append(group)
+    df = pd.concat(dfs)
     df['lakeno'] -= 1  # convert to zero-based for mf6
     return df
 

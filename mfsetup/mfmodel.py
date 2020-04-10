@@ -577,7 +577,8 @@ class MFsetupMixin():
         Adds external file paths to model.cfg[<package>][<variable_name>]
         """
         # for lgr models, add the model name to the external filename
-        if self.lgr is not None or getattr(self, '_is_lgr', False):
+        # if lgr parent or lgr inset
+        if self.lgr or self._is_lgr:
             filename_format = '{}_{}'.format(self.name, filename_format)
         return setup_external_filepaths(self, package, variable_name,
                                         filename_format, nfiles=nfiles,
@@ -921,6 +922,8 @@ class MFsetupMixin():
         if 'lgr' in self.cfg['setup_grid'].keys():
             if self.version != 'mf6':
                 raise TypeError('LGR only supported for MODFLOW-6 models.')
+            if not self.lgr:
+                self.lgr = True
             for key, cfg in self.cfg['setup_grid']['lgr'].items():
                 config_file = cfg['filename']
                 existing_inset_config_files = set()

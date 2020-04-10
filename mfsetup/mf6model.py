@@ -97,7 +97,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         so that cells above SFR reaches are inactive."""
         # loop thru LGR models and inactivate area of parent grid for each one
         lgr_idomain = np.ones(self.dis.idomain.array.shape, dtype=int)
-        if self.lgr is not None:
+        if isinstance(self.lgr, dict):
             for k, v in self.lgr.items():
                 lgr_idomain[v.idomain == 0] = 0
         idomain_from_layer_elevations = make_idomain(self.dis.top.array,

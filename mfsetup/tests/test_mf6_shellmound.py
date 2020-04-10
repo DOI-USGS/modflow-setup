@@ -139,7 +139,7 @@ def test_load_cfg(shellmound_cfg, shellmound_cfg_path):
                                                                        relative_model_ws))
     cfg = shellmound_cfg
     assert cfg['simulation']['sim_ws'] == ws
-    assert cfg['intermediate_data']['output_folder'] == os.path.join(ws, 'tmp')
+    assert cfg['intermediate_data']['output_folder'] == os.path.join(ws, 'original')
 
 
 def test_simulation(shellmound_simulation):
