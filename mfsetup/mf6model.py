@@ -132,7 +132,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # re-write the input files
         self._setup_array('dis', 'idomain',
                           data={i: arr for i, arr in enumerate(idomain)},
-                          datatype='array3d', write_fmt='%d', dtype=int)
+                          datatype='array3d', resample_method='nearest',
+                          write_fmt='%d', dtype=int)
         self.dis.idomain = self.cfg['dis']['griddata']['idomain']
         self._mg_resync = False
 
@@ -374,13 +375,18 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # resample the top from the DEM
         if self.cfg['dis']['remake_top']:
-            self._setup_array(package, 'top', datatype='array2d', write_fmt='%.2f')
+            self._setup_array(package, 'top', datatype='array2d',
+                              resample_method='linear',
+                              write_fmt='%.2f')
 
         # make the botm array
-        self._setup_array(package, 'botm', datatype='array3d', write_fmt='%.2f')
+        self._setup_array(package, 'botm', datatype='array3d',
+                          resample_method='linear',
+                          write_fmt='%.2f')
 
         # initial idomain input for creating a dis package instance
         self._setup_array(package, 'idomain', datatype='array3d', write_fmt='%d',
+                          resample_method='nearest',
                           dtype=int)
 
         # put together keyword arguments for dis package
@@ -450,8 +456,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
-        # make the k array
-        self._setup_array(package, 'strt', datatype='array3d', write_fmt='%.2f')
+        # make the starting heads array
+        self._setup_array(package, 'strt', datatype='array3d',
+                          resample_method='linear',
+                          write_fmt='%.2f')
 
         kwargs = self.cfg[package]['griddata'].copy()
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfic)
@@ -477,10 +485,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # make the k array
         self._setup_array(package, 'k', vmin=0, vmax=hiKlakes_value,
+                          resample_method='linear',
                           datatype='array3d', write_fmt='%.6e')
 
         # make the k33 array (kv)
         self._setup_array(package, 'k33', vmin=0, vmax=hiKlakes_value,
+                          resample_method='linear',
                           datatype='array3d', write_fmt='%.6e')
 
         kwargs = self.cfg[package]['options'].copy()
@@ -511,10 +521,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         # make the sy array
-        self._setup_array(package, 'sy', datatype='array3d', write_fmt='%.6e')
+        self._setup_array(package, 'sy', datatype='array3d', resample_method='linear',
+                          write_fmt='%.6e')
 
         # make the ss array
-        self._setup_array(package, 'ss', datatype='array3d', write_fmt='%.6e')
+        self._setup_array(package, 'ss', datatype='array3d', resample_method='linear',
+                          write_fmt='%.6e')
 
         kwargs = self.cfg[package]['options'].copy()
         kwargs.update(self.cfg[package]['griddata'].copy())

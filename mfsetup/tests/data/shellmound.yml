@@ -97,10 +97,7 @@ dis:
       elevation_units: 'feet'
     idomain:
       filename: 'shellmound/shps/active_area.shp'
-  top_filename_fmt: "top.dat"
-  botm_filename_fmt: "botm{:d}.dat"
-  idomain_filename_fmt: "idomain{:d}.dat"
-  minimum_layer_thickness: 1 # m
+  minimum_layer_thickness: 1 # layers less than this thickness are converted to vertical pass-through cells
   drop_thin_cells: True
 
 tdis:
@@ -183,8 +180,6 @@ sto:
     iconvert: 1  # convertible layers
     sy: 0.25
     ss: 1.e-6
-  sy_filename_fmt: "sy{:d}.dat"
-  ss_filename_fmt: "ss{:d}.dat"
 
 rch:
   options:
@@ -200,10 +195,9 @@ rch:
       time_units: 'days'
       resample_method: 'linear'
       period_stats:
-        0: ['mean', '2000-01-01', '2017-12-31']
+        0: ['mean', '2000-01-01', '2017-12-31']  # for periods 0 and 1, use the mean recharge from 2000 through 2017
         1: ['mean', '2000-01-01', '2017-12-31']
-        2: 'mean'
-  recharge_filename_fmt: "rch{:d}.dat"
+        2: 'mean'  # for periods 2 on, use the mean recharge for that period
 
 sfr:
   options:
@@ -220,10 +214,6 @@ sfr:
       name_column: 'GNIS_NAME'
       attr_length_units: 'feet'  # units of source data
       attr_height_units: 'feet'  # units of source data
-  budget_fileout: 'sfr_out.bin'
-  stage_fileout: 'sfr_stage.bin'
-  obs6_filein_fmt: '{}.sfr.obs6'
-  output_path: 'sfr'
 
 wel:
   options:
@@ -241,17 +231,14 @@ wel:
       datetime_column: 'start_datetime'
       id_column: 'node'
       period_stats:  # how fluxes will be distributed across model stress periods
-        0: none
-        1: 'mean'
+        0: none  # no wells simulated in initial period
+        1: 'mean'  # mean pumping rate for period 1 and subsequent periods
       vertical_flux_distribution:
         across_layers: False  # False to put fluxes in one layer
+        # put wells in layer with thickest or most transmissive intersection with well open interval
         distribute_by: 'thickness'  # thickness or transmissivity
-        minimum_layer_thickness: 10.
-
-
-
-  output_files:
-    lookup_file: 'wel_lookup.csv' # output file that maps wel package data to site numbers
+        minimum_layer_thickness: 10.  # layers must be at 10 length units thick to have a well;
+        # (any dropped wells would be recorded in shellmound_dropped_wells.csv)
 
 oc:
   head_fileout_fmt: '{}.hds'

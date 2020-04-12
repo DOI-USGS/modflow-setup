@@ -310,13 +310,10 @@ class ArraySourceData(SourceData):
             # sample "source_data" that may not be on same grid
             # TODO: add bilinear and zonal statistics methods
             if f.endswith(".asc") or f.endswith(".tif"):
-                if self.resample_method != 'nearest':
-                    warnings.warn('{}: resample method {} not implemented; '
-                                  'falling back to nearest'.format(self.variable,
-                                                                   self.resample_method))
                 arr = get_values_at_points(f,
                                            self.dest_model.modelgrid.xcellcenters.ravel(),
-                                           self.dest_model.modelgrid.ycellcenters.ravel())
+                                           self.dest_model.modelgrid.ycellcenters.ravel(),
+                                           method=self.resample_method)
                 arr = np.reshape(arr, (self.dest_modelgrid.nrow,
                                        self.dest_modelgrid.ncol))
             elif f.endswith('.shp'):

@@ -119,7 +119,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         self._ibound = ibound
         # re-write the input files
-        self._setup_array('bas6', 'ibound',
+        self._setup_array('bas6', 'ibound', resample_method='nearest',
                           data={i: arr for i, arr in enumerate(ibound)},
                           datatype='array3d', write_fmt='%d', dtype=int)
         self.bas6.ibound = self.cfg['bas6']['ibound']
@@ -212,10 +212,14 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # resample the top from the DEM
         if self.cfg['dis']['remake_top']:
-            self._setup_array(package, 'top', datatype='array2d', write_fmt='%.2f')
+            self._setup_array(package, 'top', datatype='array2d',
+                              resample_method='linear',
+                              write_fmt='%.2f')
 
         # make the botm array
-        self._setup_array(package, 'botm', datatype='array3d', write_fmt='%.2f')
+        self._setup_array(package, 'botm', datatype='array3d',
+                          resample_method='linear',
+                          write_fmt='%.2f')
 
         # put together keyword arguments for dis package
         kwargs = self.cfg['grid'].copy() # nrow, ncol, delr, delc
@@ -256,10 +260,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
         t0 = time.time()
 
         # make the strt array
-        self._setup_array(package, 'strt', datatype='array3d', write_fmt='%.2f')
+        self._setup_array(package, 'strt', datatype='array3d',
+                          resample_method='linear',
+                          write_fmt='%.2f')
         
         # initial ibound input for creating a bas6 package instance
         self._setup_array(package, 'ibound', datatype='array3d', write_fmt='%d',
+                          resample_method='nearest',
                           dtype=int)
 
         kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
@@ -334,15 +341,15 @@ class MFnwtModel(MFsetupMixin, Modflow):
                     source_package = ext
                     break
 
-        self._setup_array(package, 'hk', vmin=0, vmax=hiKlakes_value,
+        self._setup_array(package, 'hk', vmin=0, vmax=hiKlakes_value, resample_method='linear',
                            source_package=source_package, datatype='array3d', write_fmt='%.6e')
-        self._setup_array(package, 'vka', vmin=0, vmax=hiKlakes_value,
+        self._setup_array(package, 'vka', vmin=0, vmax=hiKlakes_value, resample_method='linear',
                            source_package=source_package, datatype='array3d', write_fmt='%.6e')
         if np.any(~self.dis.steady.array):
-            self._setup_array(package, 'sy', vmin=0, vmax=1,
+            self._setup_array(package, 'sy', vmin=0, vmax=1, resample_method='linear',
                               source_package=source_package,
                               datatype='array3d', write_fmt='%.6e')
-            self._setup_array(package, 'ss', vmin=0, vmax=1,
+            self._setup_array(package, 'ss', vmin=0, vmax=1, resample_method='linear',
                               source_package=source_package,
                               datatype='array3d', write_fmt='%.6e')
             sy = self.cfg['intermediate_data']['sy']

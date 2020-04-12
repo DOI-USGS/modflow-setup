@@ -267,6 +267,8 @@ def test_dis_setup(shellmound_model_with_grid):
     m = shellmound_model_with_grid #deepcopy(model_with_grid)
     # test intermediate array creation
     m.cfg['dis']['remake_top'] = True
+    m.cfg['dis']['source_data']['top']['resample_method'] = 'nearest'
+    m.cfg['dis']['source_data']['botm']['resample_method'] = 'nearest'
     dis = m.setup_dis()
     botm = m.dis.botm.array.copy()
     assert isinstance(dis, mf6.ModflowGwfdis)
@@ -319,7 +321,7 @@ def test_dis_setup(shellmound_model_with_grid):
     # this verifies that _set_idomain is removing them
     assert not np.array_equal(m.idomain[:, isactive].sum(axis=1),
                           invalid_botms[:, isactive].sum(axis=1))
-    invalid_botms = find_remove_isolated_cells(invalid_botms, minimum_cluster_size=10)
+    invalid_botms = find_remove_isolated_cells(invalid_botms, minimum_cluster_size=20)
     active_cells = m.idomain[:, isactive].copy()
     active_cells[active_cells < 0] = 0  # need to do this because some idomain cells are -1
     assert np.array_equal(active_cells.sum(axis=1),
@@ -568,7 +570,7 @@ def test_wel_setup(shellmound_model_with_dis):
     sums2 = np.array(sums2)
     # if this doesn't match
     # may be due to wells with invalid open intervals getting removed
-    assert np.allclose(sums, sums2, rtol=0.001)
+    assert np.allclose(sums, sums2, rtol=0.01)
 
 
 def test_sfr_setup(model_with_sfr):
