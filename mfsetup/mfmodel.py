@@ -205,11 +205,12 @@ class MFsetupMixin():
         """
         if self._parent_layers is None:
             parent_layers = None
-            if self.cfg['dis']['source_data'] is not None:
-                botm_info = self.cfg['dis']['source_data'].get('botm', {})
-                if isinstance(botm_info, dict):
-                    parent_layers = botm_info.get('from_parent')
-            if parent_layers is None:
+            botm_source_data = self.cfg['dis'].get('source_data', {}).get('botm', {})
+            if self.cfg['parent'].get('inset_layer_mapping') is not None:
+                parent_layers = self.cfg['parent'].get('inset_layer_mapping')
+            elif isinstance(botm_source_data, dict) and 'from_parent' in botm_source_data:
+                parent_layers = botm_source_data.get('from_parent')
+            else:
                 parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
             self._parent_layers = parent_layers
         return self._parent_layers

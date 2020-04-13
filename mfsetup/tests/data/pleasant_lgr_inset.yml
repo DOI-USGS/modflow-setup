@@ -65,8 +65,15 @@ dis:
   dimensions:
     nlay: 5
   source_data:
-    top: from_parent
-    botm: from_parent
+    top:
+      filename: 'pleasant/source_data/rasters/dem100m.tif' # DEM file; path relative to setup script
+      elevation_units: 'meters'
+    botm:
+      filenames:
+        1: 'pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
+        2: 'pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
+        3: 'pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
+        4: 'pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
   drop_thin_cells: True
 
 npf:
