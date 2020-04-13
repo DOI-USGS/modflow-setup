@@ -1,10 +1,10 @@
 intermediate_data:
-  tmpdir: 'tmp/'
+  tmpdir: 'original/'
 
 simulation:
   sim_name: 'pleasant_lgr'
   version: 'mf6'
-  sim_ws: '../tmp/pleasant_lgr/'
+  sim_ws: 'pleasant_lgr/'
 
 model:
   simulation: 'pleasant_lgr'
@@ -28,21 +28,7 @@ model:
              'ims'
   ]
 
-parent:
-  # argments to flopy.modflow.Modflow.load for parent model
-  namefile: 'pleasant.nam'
-  model_ws: 'pleasant/'
-  version: 'mfnwt'
-  # information for modflow-setup
-  # note: parent model is geo-located in namfile header
-  # (only works if length_units='meters')
-  headfile: 'pleasant/pleasant.hds'
-  hiKlakes_value: 1.e4 # unfortunately python yaml currently requires a dot to parse exp notation as float
-  default_source_data: True  # if True, packages and variables that are omitted will be pulled from this model
-  copy_stress_periods: 'all'
-  start_date_time: '2012-01-01'
-  length_units: 'meters'
-  time_units: 'days'
+# parent model block
 
 # parameters for setting up the pfl_nwt grid
 # using features in features_file
@@ -50,7 +36,7 @@ setup_grid:
   remake: True
   source_data:
     features_shapefile:
-      filename: 'pleasant/source_data/shps/all_lakes.shp'
+      filename: 'data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
   dxy: 40 # m
@@ -66,14 +52,14 @@ dis:
     nlay: 5
   source_data:
     top:
-      filename: 'pleasant/source_data/rasters/dem100m.tif' # DEM file; path relative to setup script
+      filename: 'data/pleasant/source_data/rasters/dem40m.tif' # DEM file; path relative to setup script
       elevation_units: 'meters'
     botm:
       filenames:
-        1: 'pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
-        2: 'pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
-        3: 'pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
-        4: 'pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
+        1: 'data/pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
+        2: 'data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
+        3: 'data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
+        4: 'data/pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
   drop_thin_cells: True
 
 npf:
@@ -91,8 +77,8 @@ sto:
 wel:
   source_data:
     wdnr_dataset:
-      water_use: 'pleasant/source_data/tables/master_wu.csv' # monthly water use rates from WDNR
-      water_use_points: 'pleasant/source_data/shps/csls_sources_wu_pts.shp' # point locations of wells in water_use
+      water_use: 'data/pleasant/source_data/tables/master_wu.csv' # monthly water use rates from WDNR
+      water_use_points: 'data/pleasant/source_data/shps/csls_sources_wu_pts.shp' # point locations of wells in water_use
       period_stats: {0: ['mean', '2012-01-01', '2018-12-31'],
                      1: 'resample'}
 
@@ -105,21 +91,21 @@ lak:
     littoral_leakance: 0.045 # 1/d
     profundal_leakance: 0.025 # 1/d
     lakes_shapefile:
-      filename: 'pleasant/source_data/shps/all_lakes.shp'
+      filename: 'data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
     climate:
       filenames:
-        600059060: 'pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+        600059060: 'data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
       format: 'prism'
       period_stats:
         0: ['mean', '2012-01-01', '2018-12-31']  # average daily rate for model period for initial steady state
         1: 'mean'  # average daily rate or value for each month
     bathymetry_raster:
-      filename: 'pleasant/source_data/rasters/pleasant_bathymetry.tif'
+      filename: 'data/pleasant/source_data/rasters/pleasant_bathymetry.tif'
       length_units: 'meters'
     stage_area_volume_file:
-      filename: 'pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
+      filename: 'data/pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
       length_units: 'meters'
       id_column: 'hydroid'
       column_mappings:
@@ -130,9 +116,9 @@ sfr:
     save_flows: True
   source_data:
     flowlines:
-      nhdplus_paths: ['pleasant/source_data/shps']
+      nhdplus_paths: ['data/pleasant/source_data/shps']
     dem:
-      filename: 'pleasant/source_data/rasters/dem100m.tif'
+      filename: 'data/pleasant/source_data/rasters/dem40m.tif'
       elevation_units: 'meters'
   set_streambed_top_elevations_from_dem: True
   output_path:
@@ -167,11 +153,11 @@ ims:
 
 obs:
   source_data:
-    filenames: ['pleasant/source_data/tables/nwis_heads_info_file.csv',
-                'pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
-                'pleasant/source_data/tables/wdnr_gw_sites.csv',
-                'pleasant/source_data/tables/uwsp_heads.csv',
-                'pleasant/source_data/tables/wgnhs_head_targets.csv'
+    filenames: ['data/pleasant/source_data/tables/nwis_heads_info_file.csv',
+                'data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
+                'data/pleasant/source_data/tables/wdnr_gw_sites.csv',
+                'data/pleasant/source_data/tables/uwsp_heads.csv',
+                'data/pleasant/source_data/tables/wgnhs_head_targets.csv'
                      ]
     column_mappings:
       obsname: ['obsprefix', 'obsnme', 'common_name']

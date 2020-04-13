@@ -1,10 +1,10 @@
 intermediate_data:
-  tmpdir: 'tmp/'
+  tmpdir: 'original/'
 
 simulation:
   sim_name: 'pleasant_lgr'
   version: 'mf6'
-  sim_ws: '../tmp/pleasant_lgr/'
+  sim_ws: 'pleasant_lgr/'
 
 model:
   simulation: 'pleasant_lgr'
@@ -32,12 +32,12 @@ model:
 parent:
   # argments to flopy.modflow.Modflow.load for parent model
   namefile: 'pleasant.nam'
-  model_ws: 'pleasant/'
+  model_ws: 'data/pleasant/'
   version: 'mfnwt'
   # information for modflow-setup
   # note: parent model is geo-located in namfile header
   # (only works if length_units='meters')
-  headfile: 'pleasant/pleasant.hds'
+  headfile: 'data/pleasant/pleasant.hds'
   hiKlakes_value: 1.e4 # unfortunately python yaml currently requires a dot to parse exp notation as float
   default_source_data: True  # if True, packages and variables that are omitted will be pulled from this model
   copy_stress_periods: 'all'
@@ -76,14 +76,14 @@ dis:
     nlay: 5
   source_data:
     top:
-      filename: 'pleasant/source_data/rasters/dem100m.tif' # DEM file; path relative to setup script
+      filename: 'data/pleasant/source_data/rasters/dem40m.tif' # DEM file; path relative to setup script
       elevation_units: 'meters'
     botm:
       filenames:
-        1: 'pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
-        2: 'pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
-        3: 'pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
-        4: 'pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
+        1: 'data/pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
+        2: 'data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
+        3: 'data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
+        4: 'data/pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
   drop_thin_cells: True
 
 tdis:
@@ -102,7 +102,7 @@ tdis:
       # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
     group 2: # monthly stress periods
       start_date_time: '2012-01-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
-      end_date_time: '2018-12-31'  # end times are specified following pandas slice convention, which includes the specified end date
+      end_date_time: '2012-12-31'  # end times are specified following pandas slice convention, which includes the specified end date
       freq: '1MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
       nstp: 1
       tsmult: 1.5
@@ -112,7 +112,7 @@ ic:
   source_data:
     strt:
       from_parent:
-        binaryfile: 'pleasant/pleasant.hds'
+        binaryfile: 'data/pleasant/pleasant.hds'
 
 npf:
   options:
@@ -137,9 +137,9 @@ sfr:
     save_flows: True
   source_data:
     flowlines:
-      nhdplus_paths: ['pleasant/source_data/shps']
+      nhdplus_paths: ['data/pleasant/source_data/shps']
     dem:
-      filename: 'pleasant/source_data/rasters/dem100m.tif'
+      filename: 'data/pleasant/source_data/rasters/dem40m.tif'
       elevation_units: 'meters'
   set_streambed_top_elevations_from_dem: True
   output_path:
@@ -174,11 +174,11 @@ ims:
 
 obs:
   source_data:
-    filenames: ['pleasant/source_data/tables/nwis_heads_info_file.csv',
-                'pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
-                'pleasant/source_data/tables/wdnr_gw_sites.csv',
-                'pleasant/source_data/tables/uwsp_heads.csv',
-                'pleasant/source_data/tables/wgnhs_head_targets.csv'
+    filenames: ['data/pleasant/source_data/tables/nwis_heads_info_file.csv',
+                'data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
+                'data/pleasant/source_data/tables/wdnr_gw_sites.csv',
+                'data/pleasant/source_data/tables/uwsp_heads.csv',
+                'data/pleasant/source_data/tables/wgnhs_head_targets.csv'
                      ]
     column_mappings:
       obsname: ['obsprefix', 'obsnme', 'common_name']

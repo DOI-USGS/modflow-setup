@@ -31,7 +31,7 @@ def test_ibound(pleasant_nwt_with_dis):
     m.cfg['model']['packages'].remove('lak')
     del m.cfg['lak']['source_data']
     # specify path relative to cfg file
-    m.cfg['bas6']['source_data']['ibound'] = {'filename': 'pleasant/source_data/shps/all_lakes.shp'}
+    m.cfg['bas6']['source_data']['ibound'] = {'filename': '../../../examples/data/pleasant/source_data/shps/all_lakes.shp'}
     m._reset_bc_arrays()
     bas6 = m.setup_bas6()
     bas6.write_file()
@@ -49,7 +49,7 @@ def test_setup_lak(pleasant_nwt_with_dis_bas6):
     lak.write_file()
     assert os.path.exists(lak.fn_path)
     lak = fm.ModflowLak.load(lak.fn_path, m)
-    datafile = '../../data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+    datafile = '../../../examples/data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
     prism = get_prism_data(datafile)
     precip = [lak.flux_data[per][0][0] for per in range(1, m.nper)]
     assert np.allclose(lak.flux_data[0][0][0], prism['ppt_md'].mean())

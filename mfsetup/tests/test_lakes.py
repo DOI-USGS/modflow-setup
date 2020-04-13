@@ -1,6 +1,7 @@
 """
 Test lake package functionality
 """
+import os
 import numpy as np
 import pandas as pd
 import pytest
@@ -11,10 +12,10 @@ from mfsetup.lakes import (PrismSourceData, setup_lake_info,
 
 
 @pytest.fixture
-def source_data_from_prism_cases():
+def source_data_from_prism_cases(project_root_path):
     cases = [{'climate':
                   {'filenames':
-                       {600059060: 'pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+                       {600059060: os.path.join(project_root_path, 'examples/data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv')
                         },
                    'format': 'prism',
                    'period_stats':
