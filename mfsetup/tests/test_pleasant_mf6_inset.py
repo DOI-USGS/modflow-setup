@@ -325,6 +325,25 @@ def test_lak_obs_setup(get_pleasant_mf6_with_dis):
     lak = m.setup_lak()
     m.write()
     # todo: add lake obs tests
+    obsinput = read_mf6_block('{}.lak.obs'.format(m.name), 'continuous')
+    boundnames = set()
+    for k, v in obsinput.items():
+        for line in v:
+            line = line.strip().split()
+            variable = line[0]
+            # these variables require a boundname to be specified
+            # to get the value for the whole lake
+            # otherwise, specific connection is monitored
+            # (if ID2 is entered, otherwise the output is 0.)
+            # verify that boundname is not an integer (mf6 requirement)
+            if variable in ['lak', 'wetted-area', 'conductance']:
+                assert not line[-1].isdigit()
+                boundnames.add(line[-1])
+    # check that the boundnames exist
+    packagedata = read_mf6_block(lak.filename, 'packagedata')
+    for line in packagedata['packagedata']:
+        line = line.strip().split()
+        assert line[-1] in boundnames
 
 
 @pytest.mark.skip('not implemented yet')

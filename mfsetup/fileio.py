@@ -956,6 +956,11 @@ def read_mf6_block(filename, blockname):
                 if blockname == 'period':
                     per = int(line.strip().split()[-1])
                     data[per] = []
+                elif blockname == 'continuous':
+                    fname = line.strip().split()[-1]
+                    data[fname] = []
+                elif blockname == 'packagedata':
+                    data['packagedata'] = []
                 read = blockname
                 continue
             if 'end' in line and blockname in line:
@@ -970,6 +975,10 @@ def read_mf6_block(filename, blockname):
                 data[pckg] = fname
             elif read == 'period':
                 data[per].append(' '.join(line.strip().split()))
+            elif read == 'continuous':
+                data[fname].append(' '.join(line.strip().split()))
+            elif read == 'packagedata':
+                data['packagedata'].append(' '.join(line.strip().split()))
     return data
 
 

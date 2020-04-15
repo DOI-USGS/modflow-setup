@@ -145,12 +145,27 @@ def setup_lake_info(model):
     # make dataframe with lake IDs, names and locations
     centroids = project([g.centroid for g in lakesdata.geometry],
                         lakesdata_proj_str, 'epsg:4269')
-    df = pd.DataFrame({'lak_id': np.arange(1, nlakes + 1),
+    # boundnames for lakes
+    # from source shapefile
+    lak_ids = np.arange(1, nlakes + 1)
+    names = None
+    if name_column in lakesdata.columns:
+        names = lakesdata[name_column].values
+        if len(set(names)) < len(names) or 'nan' in names:
+            names = None
+    # from configuration file (by feature id)
+    elif 'boundnames' in source_data['lakes_shapefile']:
+        names = [source_data['lakes_shapefile']['boundnames'][feat_id]
+                 for feat_id in lakesdata[id_column].values]
+    if names is None:  # default to names based on lake ID
+        names = names = ['lake{}'.format(i) for i in lak_ids]
+    df = pd.DataFrame({'lak_id': lak_ids,
                        'feat_id': lakesdata[id_column].values,
-                       'name': lakesdata[name_column].values,
+                       'name': names,
                        'latitude': [c.y for c in centroids],
                        'geometry': lakesdata['geometry']
                        })
+
     # get starting stages from model top, for specifying ranges
     stages = []
     for lakid in df['lak_id']:
@@ -164,7 +179,7 @@ def setup_lake_info(model):
     df.drop('geometry', axis=1).to_csv(lookup_file, index=False)
 
     # clean up names
-    df['name'].replace('nan', '', inplace=True)
+    #df['name'].replace('nan', '', inplace=True)
     df['name'].replace(' ', '', inplace=True)
     return df
 
