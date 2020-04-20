@@ -542,6 +542,13 @@ def test_wel_setup(shellmound_model_with_dis):
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))
     assert isinstance(wel, mf6.ModflowGwfwel)
     assert wel.stress_period_data is not None
+
+    # verify that periodata blocks were written
+    output = read_mf6_block(wel.filename, 'period')
+    for per, ra in wel.stress_period_data.data.items():
+        assert len(output[per + 1]) == len(ra)
+
+    # check the stress_period_data against source data
     sums = [ra['q'].sum() if ra is not None else 0
             for ra in wel.stress_period_data.array]
 

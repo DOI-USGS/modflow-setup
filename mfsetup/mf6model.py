@@ -606,7 +606,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 kspd['boundname'] = group['comments']
                 spd[kper] = kspd
             else:
-                spd[kper] = None
+                pass  # spd[kper] = None
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])
         kwargs['stress_period_data'] = spd

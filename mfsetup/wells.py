@@ -58,8 +58,17 @@ def setup_wel_data(model):
                 dfs.append(period)
         spd = pd.concat(dfs)
 
-        parent_well_x = parent.modelgrid.xcellcenters[spd.i, spd.j]
-        parent_well_y = parent.modelgrid.ycellcenters[spd.i, spd.j]
+        parent_well_i = spd.i.copy()
+        parent_well_j = spd.j.copy()
+        parent_well_k = spd.k.copy()
+
+        # set boundnames based on well locations in parent model
+        parent_name = parent.name
+        spd['comments'] = ['{}_({},{},{})'.format(parent_name, pk, pi, pj)
+                           for pk, pi, pj in zip(parent_well_k, parent_well_i, parent_well_j)]
+
+        parent_well_x = parent.modelgrid.xcellcenters[parent_well_i, parent_well_j]
+        parent_well_y = parent.modelgrid.ycellcenters[parent_well_i, parent_well_j]
         coords = project((parent_well_x, parent_well_y),
                           model.modelgrid.proj_str,
                           parent.modelgrid.proj_str)
@@ -192,6 +201,14 @@ def setup_wel_data(model):
     wel_lookup_file = model.cfg['wel']['output_files']['lookup_file'].format(model.name)
     wel_lookup_file = os.path.join(model.model_ws, os.path.split(wel_lookup_file)[1])
     model.cfg['wel']['output_files']['lookup_file'] = wel_lookup_file
+
+    # verify that all wells have a boundname
+    if df.comments.isna().any():
+        no_name = df.comments.isna().any()
+        k, i, j = df.loc[no_name, ['k', 'i', 'j']].T.values
+        names = ['({},{},{})'.format(k, i, j) for k, i, j in zip(k, i, j)]
+        df.loc[no_name, ['k', 'i', 'j']] = names
+    assert not df.comments.isna().any()
 
     # save a lookup file with well site numbers/categories
     df.sort_values(by=['comments', 'per'], inplace=True)

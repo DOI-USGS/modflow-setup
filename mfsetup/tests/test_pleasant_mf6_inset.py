@@ -288,6 +288,11 @@ def test_wel_setup(get_pleasant_mf6_with_dis):
     assert isinstance(wel, mf6.ModflowGwfwel)
     assert wel.stress_period_data is not None
 
+    # verify that periodata blocks were written
+    output = read_mf6_block(wel.filename, 'period')
+    for per, ra in wel.stress_period_data.data.items():
+        assert len(output[per + 1]) == len(ra)
+
 
 def test_lak_setup(get_pleasant_mf6_with_lak):
     m = get_pleasant_mf6_with_lak  # deepcopy(model)
