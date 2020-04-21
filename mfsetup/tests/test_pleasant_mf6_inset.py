@@ -387,6 +387,17 @@ def test_sfr_setup(get_pleasant_mf6_with_dis):
         assert os.path.exists(f)
     assert m.sfrdata.model == m
 
+    # verify that observation data were added and written
+    sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+    m.sfrdata.write_package(sfr_package_filename, version='mf6')
+    obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])
+    assert len(m.sfrdata.observations) == len(obs)
+    expected = obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist()
+    assert m.sfrdata.observations['obsname'].tolist() == expected
+    sfr_obs_filename = os.path.join(m.model_ws, m.sfrdata.observations_file)
+    assert os.path.exists(sfr_obs_filename)
+
+
 
 def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
 

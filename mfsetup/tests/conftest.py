@@ -218,6 +218,9 @@ def get_pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis):
 def pleasant_nwt_setup_from_yaml(pleasant_nwt_test_cfg_path):
     m = MFnwtModel.setup_from_yaml(pleasant_nwt_test_cfg_path)
     m.write_input()
+    # verify that observation data were added and written
+    sfr_package_filename = os.path.join(m.model_ws, m.sfr.file_name[0])
+    m.sfrdata.write_package(sfr_package_filename)
     return m
 
 

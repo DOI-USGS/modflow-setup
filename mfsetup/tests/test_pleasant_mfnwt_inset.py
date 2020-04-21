@@ -104,6 +104,19 @@ def test_model_setup(full_pleasant_nwt):
     m = full_pleasant_nwt
     assert isinstance(m, MFnwtModel)
 
+    # verify that gage package was written
+    # verify that observation data were added and written
+    obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])
+    assert len(m.sfrdata.observations) == len(obs)
+    expected = obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist()
+    assert m.sfrdata.observations['obsname'].tolist() == expected
+    sfr_obs_filename = os.path.join(m.model_ws, m.sfrdata.observations_file)
+    assert 'GAGE' in m.get_package_list()
+    assert os.path.exists(sfr_obs_filename)
+    with open(sfr_obs_filename) as src:
+        gagedata = src.readlines()
+    assert len(gagedata) == len(obs) +1
+
 
 def test_model_setup_and_run(pleasant_nwt_model_run):
     m = pleasant_nwt_model_run

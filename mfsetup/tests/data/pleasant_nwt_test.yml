@@ -139,6 +139,12 @@ sfr:
     dem:
       filename: '../../../examples/data/pleasant/source_data/rasters/dem40m.tif'
       elevation_units: 'meters'
+    observations:  # see sfrmaker.observations.add_observations for arguments
+      filename: '../../../examples/data/pleasant/source_data/tables/gages.csv'
+      obstype: 'downstream-flow'  # modflow-6 observation type
+      x_location_column: 'x'
+      y_location_column: 'y'
+      obsname_column: 'site_no'
   set_streambed_top_elevations_from_dem: True
   output_path:
 

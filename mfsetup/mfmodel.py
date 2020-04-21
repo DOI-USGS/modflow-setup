@@ -1075,6 +1075,17 @@ class MFsetupMixin():
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2
             sfr_package.reach_data = sfr.modflow_sfr2.reach_data
 
+        # add observations
+        observations_input = self.cfg['sfr'].get('source_data', {}).get('observations')
+        if observations_input is not None:
+            key = 'filename' if 'filename' in observations_input else 'filenames'
+            observations_input['data'] = observations_input[key]
+            kwargs = get_input_arguments(observations_input.copy(), sfr.add_observations)
+            sfr.add_observations(**kwargs)
+
+            # make a shapefile of the observation locations
+            sfr.export_observations('{}/{}_sfr_observations.shp'.format(output_path, self.name))
+
         # reset dependent arrays
         self._reset_bc_arrays()
         if self.version == 'mf6':
