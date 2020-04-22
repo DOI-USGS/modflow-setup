@@ -701,7 +701,8 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
     return m
 
 
-def flopy_mfsimulation_load(sim, model, strict=True):
+def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
+             verify_data=False):
     """Execute the code in flopy.mf6.MFSimulation.load on
     existing instances of flopy.mf6.MFSimulation and flopy.mf6.MF6model"""
 
@@ -716,6 +717,9 @@ def flopy_mfsimulation_load(sim, model, strict=True):
 
     if verbosity_level.value >= VerbosityLevel.normal.value:
         print('loading simulation...')
+
+    # build case consistent load_only dictionary for quick lookups
+    load_only = instance._load_only_dict(load_only)
 
     # load simulation name file
     if verbosity_level.value >= VerbosityLevel.normal.value:
@@ -750,21 +754,29 @@ def flopy_mfsimulation_load(sim, model, strict=True):
     for item in models:
         # resolve model working folder and name file
         path, name_file = os.path.split(item[1])
+
+        # get the existing model instance
+        # corresponding to its entry in the simulation name file
+        # (in flopy the model instance is obtained from PackageContainer.model_factory below)
         model_obj = [m for m in model_instances if m.namefile == name_file]
         if len(model_obj) == 0:
             print('model {} attached to {} not found in {}'.format(item, instance, model_instances))
             return
         model_obj = model_obj[0]
         #model_obj = PackageContainer.model_factory(item[0][:-1].lower())
+
         # load model
         if verbosity_level.value >= VerbosityLevel.normal.value:
             print('  loading model {}...'.format(item[0].lower()))
+
         instance._models[item[2]] = flopy_mf6model_load(instance, model_obj, strict=strict, model_rel_path=path)
+
+        # original flopy code to load model
         #instance._models[item[2]] = model_obj.load(
         #    instance,
         #    instance.structure.model_struct_objs[item[0].lower()], item[2],
-        #    name_file, version, exe_name, strict, path)
-#
+        #    name_file, version, exe_name, strict, path, load_only)
+
     # load exchange packages and dependent packages
     try:
         exchange_recarray = instance.name_file.exchanges
@@ -780,18 +792,26 @@ def flopy_mfsimulation_load(sim, model, strict=True):
         try:
             exch_data = exchange_recarray.get_data()
         except MFDataException as mfde:
-            message = 'Error occurred while loading exchange names from the ' \
-                      'simulation name file.'
+            message = 'Error occurred while loading exchange names from ' \
+                      'the simulation name file.'
             raise MFDataException(mfdata_except=mfde,
                                   model=instance.name,
                                   package='nam',
                                   message=message)
         for exgfile in exch_data:
+            if load_only is not None and not \
+                    instance._in_pkg_list(load_only, exgfile[0],
+                                          exgfile[2]):
+                if instance.simulation_data.verbosity_level.value >= \
+                        VerbosityLevel.normal.value:
+                    print('    skipping package {}..'
+                          '.'.format(exgfile[0].lower()))
+                continue
             # get exchange type by removing numbers from exgtype
             exchange_type = ''.join([char for char in exgfile[0] if
                                      not char.isdigit()]).upper()
             # get exchange number for this type
-            if not exchange_type in instance._exg_file_num:
+            if exchange_type not in instance._exg_file_num:
                 exchange_file_num = 0
                 instance._exg_file_num[exchange_type] = 1
             else:
@@ -847,6 +867,15 @@ def flopy_mfsimulation_load(sim, model, strict=True):
                               message=message)
     for solution_group in solution_group_dict.values():
         for solution_info in solution_group:
+            if load_only is not None and \
+                    not instance._in_pkg_list(load_only,
+                                              solution_info[0],
+                                              solution_info[2]):
+                if instance.simulation_data.verbosity_level.value >= \
+                        VerbosityLevel.normal.value:
+                    print('    skipping package {}..'
+                          '.'.format(solution_info[0].lower()))
+                continue
             ims_file = mfims.ModflowIms(instance, filename=solution_info[1],
                                         pname=solution_info[2])
             if verbosity_level.value >= VerbosityLevel.normal.value:
@@ -855,6 +884,8 @@ def flopy_mfsimulation_load(sim, model, strict=True):
             ims_file.load(strict)
 
     instance.simulation_data.mfpath.set_last_accessed_path()
+    if verify_data:
+        instance.check()
     return instance
 
 

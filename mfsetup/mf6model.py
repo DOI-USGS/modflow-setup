@@ -20,6 +20,7 @@ from .lakes import (setup_lake_connectiondata, setup_lake_info,
                     setup_lake_tablefiles, setup_lake_fluxes,
                     get_lakeperioddata, setup_mf6_lake_obs)
 from .mf5to6 import get_package_name
+from .mover import get_mover_sfr_package_input
 from .obs import setup_head_observations
 from .tdis import setup_perioddata_group, get_parent_stress_periods
 from .tmr import Tmr
@@ -233,7 +234,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         (so that settings specified for DIS package have priority). This method
         is called by MFsetupMixin.setup_grid.
         """
-        for param in ['nrow', 'ncol']:
+        for param in ['nlay', 'nrow', 'ncol']:
             if param in self.cfg['dis']['dimensions']:
                 self.cfg['setup_grid'][param] = self.cfg['dis']['dimensions'][param]
         for param in ['delr', 'delc']:
@@ -320,24 +321,26 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                          exclude='packages')
             kwargs['parent'] = self  # otherwise will try to load parent model
             inset_model = MF6model(cfg=inset_cfg, **kwargs)
+            inset_model._load = self._load  # whether model is being made or loaded from existing files
             inset_model.setup_grid()
             del inset_model.cfg['ims']
             inset_model.cfg['tdis'] = self.cfg['tdis']
             if self.inset is None:
                 self.inset = {}
                 self.lgr = {}
+
             self.inset[inset_model.name] = inset_model
             self.inset[inset_model.name]._is_lgr = True
 
             # create idomain indicating area of parent grid that is LGR
             lgr_idomain = make_lgr_idomain(self.modelgrid, self.inset[inset_model.name].modelgrid)
 
-            ncpp = int(self.modelgrid.delr[0]/self.inset[inset_model.name].modelgrid.delr[0])
+            ncpp = int(self.modelgrid.delr[0] / self.inset[inset_model.name].modelgrid.delr[0])
             ncppl = v.get('layer_refinement', 1)
             self.lgr[inset_model.name] = Lgr(self.nlay, self.nrow, self.ncol,
-                                               self.dis.delr.array, self.dis.delc.array,
-                                               self.dis.top.array, self.dis.botm.array,
-                                               lgr_idomain, ncpp, ncppl)
+                                             self.dis.delr.array, self.dis.delc.array,
+                                             self.dis.top.array, self.dis.botm.array,
+                                             lgr_idomain, ncpp, ncppl)
             inset_model._perioddata = self.perioddata
             self._set_idomain()
 
@@ -361,11 +364,25 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             nexg = active_connections.sum()
             active_exchangelist = [l for i, l in enumerate(exchangelist) if active_connections[i]]
 
+            # arguments to ModflowGwfgwf
+            kwargs = {'exgtype': 'gwf6-gwf6',
+                      'exgmnamea': self.name,
+                      'exgmnameb': inset_name,
+                      'nexg': nexg,
+                      'auxiliary': [('angldegx', 'cdist')],
+                      'exchangedata': active_exchangelist
+                      }
+            # add water mover files if there's a mover package
+            # not sure if one mover file can be used for multiple exchange files or not
+            # if separate (simulation) water mover files are needed,
+            # than this would have to be restructured
+            if 'mvr' in self.simulation.package_key_dict:
+                if inset_name in self.simulation.mvr.packages.array['mname']:
+                    kwargs['mvr_filerecord'] = self.simulation.mvr.filename
+
             # set up the exchange package
-            gwfe = mf6.ModflowGwfgwf(self.simulation, exgtype='gwf6-gwf6',
-                                     exgmnamea=self.name, exgmnameb=inset_name,
-                                     nexg=nexg, auxiliary=[('angldegx', 'cdist')],
-                                     exchangedata=active_exchangelist)
+            kwargs = get_input_arguments(kwargs, mf6.ModflowGwfgwf)
+            gwfe = mf6.ModflowGwfgwf(self.simulation, **kwargs)
 
     def setup_dis(self):
         """"""
@@ -794,6 +811,49 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ims
 
+    def setup_simulation_mover(self):
+        """Set up the MODFLOW-6 water mover package at the simulation level.
+        Automate set-up of the mover between SFR packages in LGR parent and inset models.
+        todo: automate set-up of mover between SFR and lakes (within a model).
+
+        Other uses of the water mover need to be configured manually using flopy.
+        """
+        package = 'mvr'
+        print('\nSetting up the simulation water mover package...')
+        t0 = time.time()
+
+        perioddata_dfs = []
+        if 'SFR' in self.get_package_list():
+            if self.inset is not None:
+                for inset_name, inset in self.inset.items():
+                    if 'SFR' in inset.get_package_list():
+                        inset_perioddata = get_mover_sfr_package_input(self, inset)
+                        perioddata_dfs.append(inset_perioddata)
+
+        perioddata = pd.concat(perioddata_dfs)
+        if len(perioddata) > 0:
+            kwargs = flatten(self.cfg[package])
+            # modelnames (boolean) keyword to indicate that all package names will
+            # be preceded by the model name for the package. Model names are
+            # required when the Mover Package is used with a GWF-GWF Exchange. The
+            # MODELNAME keyword should not be used for a Mover Package that is for
+            # a single GWF Model.
+            # this argument will need to be adapted for implementing a mover package within a model
+            # (between lakes and sfr)
+            kwargs['modelnames'] = True
+            kwargs['maxmvr'] = len(perioddata)  # assumes that input for period 0 applies to all periods
+            packages = set(list(zip(perioddata.mname1, perioddata.pname1)) +
+                           list(zip(perioddata.mname2, perioddata.pname2)))
+            kwargs['maxpackages'] = len(packages)
+            kwargs['packages'] = list(packages)
+            kwargs['perioddata'] = {0: perioddata.values.tolist()}  # assumes that input for period 0 applies to all periods
+            kwargs = get_input_arguments(kwargs, mf6.ModflowGwfmvr)
+            mvr = mf6.ModflowMvr(self.simulation, **kwargs)
+            print("finished in {:.2f}s\n".format(time.time() - t0))
+            return mvr
+        else:
+            print("no packages with mover information\n")
+
     def setup_perimeter_boundary(self):
         """Set up constant head package for perimeter boundary.
         TODO: integrate perimeter boundary with wel package setup
@@ -864,31 +924,30 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mf6_defaults.yml')
-        print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
+        print('\nLoading simulation in {}\n'.format(yamlfile))
         t0 = time.time()
 
+        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mf6_defaults.yml')
         cfg = cls._parse_model_kwargs(cfg)
         kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
-                                 exclude='packages')
-        m = cls(cfg=cfg, **kwargs)
-
-        if 'grid' not in m.cfg.keys():
-            # apply model name if grid_file includes format string
-            grid_file = cfg['setup_grid']['output_files']['grid_file'].format(m.name)
-            m.cfg['setup_grid']['output_files']['grid_file'] = grid_file
-            if os.path.exists(grid_file):
-                print('Loading model grid definition from {}'.format(grid_file))
-                m.cfg['grid'] = load(grid_file)
-            else:
-                m.setup_grid()
+                                     exclude='packages')
+        model = cls(cfg=cfg, **kwargs)
+        model._load = True
+        if 'grid' not in model.cfg.keys():
+            model.setup_grid()
+        sim = model.cfg['model']['simulation']  # should be a flopy.mf6.MFSimulation instance
+        models = [model]
+        if isinstance(model.inset, dict):
+            for inset_name, inset in model.inset.items():
+                models.append(inset)
 
         # execute the flopy load code on the pre-defined simulation and model instances
         # (so that the end result is a MFsetup.MF6model instance)
         # (kludgy)
-        sim = cfg['model']['simulation']
-        if not isinstance(sim, flopy.mf6.MFSimulation):
-            sim = flopy_mfsimulation_load(cfg['model']['simulation'], m)
-        m = sim.get_model(model_name=m.name)
+        sim = flopy_mfsimulation_load(sim, models)
+
+        # just return the parent model (inset models should be attached through the inset attribute,
+        # in addition to through the .simulation flopy attribute)
+        m = sim.get_model(model_name=model.name)
         print('finished loading model in {:.2f}s'.format(time.time() - t0))
         return m

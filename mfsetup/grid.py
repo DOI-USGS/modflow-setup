@@ -377,7 +377,7 @@ def rasterize(feature, grid, id_column=None,
 
 
 def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
-                          nrow=None, ncol=None,
+                          nrow=None, ncol=None, nlay=None,
                           dxy=None, delr=None, delc=None,
                           top=None, botm=None,
                           rotation=0.,
@@ -521,6 +521,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     #    xll = xul
     #    yll = yul - model.height
     grid_cfg = {'nrow': int(nrow), 'ncol': int(ncol),
+                'nlay': nlay,
                 'delr': delr_m, 'delc': delc_m,
                 'xoff': xoff, 'yoff': yoff,
                 'xul': xul, 'yul': yul,

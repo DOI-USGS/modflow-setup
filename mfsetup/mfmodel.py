@@ -14,7 +14,7 @@ from .fileio import load, dump, load_array, save_array, check_source_files, flop
 from .utils import update, get_input_arguments
 from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
 from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
-from .utils import update, get_packages, get_input_arguments
+from .utils import update, flatten, get_input_arguments
 from .sourcedata import setup_array
 from .tdis import (setup_perioddata_group, setup_perioddata,
                    get_parent_stress_periods, parse_perioddata_groups)
@@ -66,9 +66,10 @@ class MFsetupMixin():
         self._nodata_value = -9999
         self._model_ws = None
         self._abs_model_ws = None
-        self.inset = None  # LGR model(s)
-        self._is_lgr = False
-        self.lgr = None
+        self.inset = None  # dictionary of inset models attached to LGR parent
+        self._is_lgr = False  # flag for lgr inset models
+        self.lgr = None  # holds flopy Lgr utility object
+        self._load = False  # whether model is being made or loaded from existing files
         self.lake_info = None
         self.lake_fluxes = None
 
@@ -122,6 +123,7 @@ class MFsetupMixin():
         for k, v in self.__dict__.items():
             if k in ['cfg',
                      'sfrdata',
+                     '_load',
                      '_packagelist',
                      '_package_paths',
                      'package_key_dict',
@@ -904,8 +906,9 @@ class MFsetupMixin():
         if not cfg['structured']:
             raise NotImplementedError('Support for unstructured grids')
         features_shapefile = cfg.get('source_data', {}).get('features_shapefile')
-        if features_shapefile is not None:
+        if features_shapefile is not None and 'features_shapefile' not in cfg:
             features_shapefile['features_shapefile'] = features_shapefile['filename']
+            del features_shapefile['filename']
             cfg.update(features_shapefile)
         cfg['parent_model'] = self.parent
         cfg['model_length_units'] = self.length_units
@@ -914,9 +917,18 @@ class MFsetupMixin():
         if 'DIS' in self.get_package_list():
             cfg['top'] = self.dis.top.array
             cfg['botm'] = self.dis.botm.array
-        kwargs = get_input_arguments(cfg, setup_structured_grid)
-        self._modelgrid = setup_structured_grid(**kwargs)
-        self.cfg['grid'] = self._modelgrid.cfg
+
+        if os.path.exists(cfg['grid_file']) and self._load:
+            print('Loading model grid definition from {}'.format(cfg['grid_file']))
+            cfg.update(load(cfg['grid_file']))
+            self.cfg['grid'] = cfg
+            kwargs = get_input_arguments(self.cfg['grid'], MFsetupGrid)
+            self._modelgrid = MFsetupGrid(**kwargs)
+            self._modelgrid.cfg = self.cfg['grid']
+        else:
+            kwargs = get_input_arguments(cfg, setup_structured_grid)
+            self._modelgrid = setup_structured_grid(**kwargs)
+            self.cfg['grid'] = self._modelgrid.cfg
         self._reset_bc_arrays()
 
         # set up local grid refinement
@@ -1071,7 +1083,10 @@ class MFsetupMixin():
         if self.version != 'mf6':
             sfr_package = sfr.modflow_sfr2
         else:
-            sfr_package = sfr.create_mf6sfr(model=self)
+            # pass options kwargs through to mf6 constructor
+            kwargs = flatten({k:v for k, v in self.cfg[package].items() if k != 'source_data'})
+            kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsfr)
+            sfr_package = sfr.create_mf6sfr(model=self, **kwargs)
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2
             sfr_package.reach_data = sfr.modflow_sfr2.reach_data
 
@@ -1181,6 +1196,7 @@ class MFsetupMixin():
             for k, v in m.inset.items():
                 if v._is_lgr:
                     v.setup_packages()
+            m.setup_simulation_mover()
             m.setup_lgr_exchanges()
 
         print('finished setting up model in {:.2f}s'.format(time.time() - t0))

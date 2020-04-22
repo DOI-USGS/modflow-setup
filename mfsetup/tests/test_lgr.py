@@ -11,6 +11,7 @@ from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
 from mfsetup.fileio import (load_cfg, exe_exists, load, dump,
                             read_mf6_block, load_modelgrid)
+from mfsetup.mover import get_sfr_package_connections
 from mfsetup.utils import get_input_arguments
 from mfsetup.testing import compare_inset_parent_values
 
@@ -62,7 +63,12 @@ def pleasant_lgr_setup_from_yaml(pleasant_lgr_cfg):
         if hasattr(model, 'sfr'):
             sfr_package_filename = os.path.join(model.model_ws, model.sfr.filename)
             model.sfrdata.write_package(sfr_package_filename,
-                                        version='mf6'
+                                        version='mf6',
+                                        options=['save_flows',
+                                                 'BUDGET FILEOUT {}.sfr.cbc'.format(model.name),
+                                                 'STAGE FILEOUT {}.sfr.stage.bin'.format(model.name),
+                                                 'mover'
+                                               ]
                                         )
     return m
 
@@ -127,6 +133,35 @@ def test_lgr_grid_setup(get_pleasant_lgr_parent_with_grid):
     assert idomain[lgr_idomain == 0].sum() == 0
 
     # todo: add test that grids are aligned
+
+
+def test_setup_mover(pleasant_lgr_setup_from_yaml):
+    m = pleasant_lgr_setup_from_yaml
+    assert isinstance(m.simulation.mvr, mf6.ModflowMvr)
+    assert os.path.exists(m.simulation.mvr.filename)
+    perioddata = read_mf6_block(m.simulation.mvr.filename, 'period')
+    assert len(perioddata[1]) == 2
+    for model in m, m.inset['plsnt_lgr_inset']:
+        options = read_mf6_block(model.sfr.filename, 'options')
+        assert 'mover' in options
+
+
+def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
+    m = pleasant_lgr_setup_from_yaml
+    parent_reach_data = m.sfrdata.reach_data
+    inset_reach_data = m.inset['plsnt_lgr_inset'].sfrdata.reach_data
+    to_inset, to_parent = get_sfr_package_connections(parent_reach_data, inset_reach_data,
+                                                      distance_threshold=200)
+    assert len(to_inset) == 0
+    # verify that the last reaches in the two segments are keys
+    last_reaches = m.inset['plsnt_lgr_inset'].sfrdata.reach_data.groupby('iseg').last().rno
+    assert not any(set(to_parent.keys()).difference(last_reaches))
+    # verify that the first reaches are headwaters
+    outreaches = set(m.sfrdata.reach_data.outreach)
+    assert not any(set(to_parent.values()).intersection(outreaches))
+    # this is overly specific,
+    # and will break if the sfr package (inset extent, grid spacing, etc.) changes
+    assert to_parent == {23: 8, 25: 1}
 
 
 def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
@@ -202,3 +237,15 @@ def test_lgr_model_run(pleasant_lgr_stand_alone_parent, pleasant_lgr_setup_from_
                                 nodata=1e30,
                                 rtol=0.05
                                 )
+
+
+def test_lgr_load(pleasant_lgr_setup_from_yaml,
+                  pleasant_lgr_test_cfg_path):
+    m = pleasant_lgr_setup_from_yaml  #deepcopy(pfl_nwt_setup_from_yaml)
+    m2 = MF6model.load(pleasant_lgr_test_cfg_path)
+    assert m2.inset['plsnt_lgr_inset'].simulation is m2.simulation
+
+    assert set(m2.get_package_list()).difference(m.get_package_list()) == {'SFR_OBS'}
+    # can't compare equality if sfr obs was added by SFRmaker, because it won't be listed in m.get_package_list()
+    # but will be listed in m2.get_package_list()
+    #assert m == m2

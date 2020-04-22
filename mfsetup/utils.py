@@ -39,7 +39,7 @@ def update(d, u):
     return d
 
 
-def get_input_arguments(kwargs, function, warn=True, exclude=[]):
+def get_input_arguments(kwargs, function, warn=True, exclude=None):
     """Return subset of keyword arguments in kwargs dict
     that are valid parameters to a function or method.
 
@@ -47,6 +47,10 @@ def get_input_arguments(kwargs, function, warn=True, exclude=[]):
     ----------
     kwargs : dict (parameter names, values)
     function : function of class method
+    warn : bool;
+        If true, print supplied argument that are not in the function's signature
+    exclude : sequence
+
 
     Returns
     -------
@@ -57,6 +61,8 @@ def get_input_arguments(kwargs, function, warn=True, exclude=[]):
     params = inspect.signature(function)
     input_kwargs = {}
     not_arguments = {}
+    if exclude is None:
+        exclude = []
     for k, v in kwargs.items():
         if k in params.parameters and k not in exclude:
             input_kwargs[k] = v
