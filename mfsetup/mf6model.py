@@ -886,7 +886,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # execute the flopy load code on the pre-defined simulation and model instances
         # (so that the end result is a MFsetup.MF6model instance)
         # (kludgy)
-        sim = flopy_mfsimulation_load(cfg['model']['simulation'], m)
+        sim = cfg['model']['simulation']
+        if not isinstance(sim, flopy.mf6.MFSimulation):
+            sim = flopy_mfsimulation_load(cfg['model']['simulation'], m)
         m = sim.get_model(model_name=m.name)
         print('finished loading model in {:.2f}s'.format(time.time() - t0))
         return m
