@@ -136,7 +136,8 @@ def shellmound_cfg(shellmound_cfg_path):
 @pytest.fixture(scope="function")
 def shellmound_simulation(shellmound_cfg):
     cfg = shellmound_cfg.copy()
-    sim = mf6.MFSimulation(**cfg['simulation'])
+    kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation)
+    sim = mf6.MFSimulation(**kwargs)
     return sim
 
 

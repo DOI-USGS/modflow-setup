@@ -93,3 +93,11 @@ def dtypeisfloat(dtype):
             return True
     except:
         return False
+
+
+def issequence(object):
+    try:
+        iter(object)
+    except TypeError as te:
+        pass
+    return True

@@ -74,7 +74,8 @@ def test_init(shellmound_cfg):
     sim = mf6.MFSimulation()
     assert isinstance(sim, mf6.MFSimulation)
 
-    sim = mf6.MFSimulation(**cfg['simulation'])
+    kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation, warn=False)
+    sim = mf6.MFSimulation(**kwargs)
     assert isinstance(sim, mf6.MFSimulation)
 
     cfg['model']['packages'] = []
@@ -693,7 +694,8 @@ def test_packagelist(shellmound_cfg_path):
     cfg = load_cfg(shellmound_cfg_path, default_file='/mf6_defaults.yml')
 
     packages = cfg['model']['packages']
-    sim = flopy.mf6.MFSimulation(**cfg['simulation'])
+    kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation)
+    sim = mf6.MFSimulation(**kwargs)
     cfg['model']['simulation'] = sim
 
     cfg = MF6model._parse_model_kwargs(cfg)

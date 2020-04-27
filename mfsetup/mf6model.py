@@ -118,7 +118,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         idomain[self.isbc == 1] = 0.
 
         # remove cells that are above stream cells
-        if 'SFR' in self.get_package_list():
+        if self.get_package('sfr') is not None:
             idomain = deactivate_idomain_above(idomain, self.sfr.packagedata)
 
         # inactivate any isolated cells that could cause problems with the solution
@@ -823,34 +823,34 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         perioddata_dfs = []
-        if 'SFR' in self.get_package_list():
+        if self.get_package('sfr') is not None:
             if self.inset is not None:
                 for inset_name, inset in self.inset.items():
-                    if 'SFR' in inset.get_package_list():
+                    if inset.get_package('sfr'):
                         inset_perioddata = get_mover_sfr_package_input(self, inset)
                         perioddata_dfs.append(inset_perioddata)
-
-        perioddata = pd.concat(perioddata_dfs)
-        if len(perioddata) > 0:
-            kwargs = flatten(self.cfg[package])
-            # modelnames (boolean) keyword to indicate that all package names will
-            # be preceded by the model name for the package. Model names are
-            # required when the Mover Package is used with a GWF-GWF Exchange. The
-            # MODELNAME keyword should not be used for a Mover Package that is for
-            # a single GWF Model.
-            # this argument will need to be adapted for implementing a mover package within a model
-            # (between lakes and sfr)
-            kwargs['modelnames'] = True
-            kwargs['maxmvr'] = len(perioddata)  # assumes that input for period 0 applies to all periods
-            packages = set(list(zip(perioddata.mname1, perioddata.pname1)) +
-                           list(zip(perioddata.mname2, perioddata.pname2)))
-            kwargs['maxpackages'] = len(packages)
-            kwargs['packages'] = list(packages)
-            kwargs['perioddata'] = {0: perioddata.values.tolist()}  # assumes that input for period 0 applies to all periods
-            kwargs = get_input_arguments(kwargs, mf6.ModflowGwfmvr)
-            mvr = mf6.ModflowMvr(self.simulation, **kwargs)
-            print("finished in {:.2f}s\n".format(time.time() - t0))
-            return mvr
+        if len(perioddata_dfs) > 0:
+            perioddata = pd.concat(perioddata_dfs)
+            if len(perioddata) > 0:
+                kwargs = flatten(self.cfg[package])
+                # modelnames (boolean) keyword to indicate that all package names will
+                # be preceded by the model name for the package. Model names are
+                # required when the Mover Package is used with a GWF-GWF Exchange. The
+                # MODELNAME keyword should not be used for a Mover Package that is for
+                # a single GWF Model.
+                # this argument will need to be adapted for implementing a mover package within a model
+                # (between lakes and sfr)
+                kwargs['modelnames'] = True
+                kwargs['maxmvr'] = len(perioddata)  # assumes that input for period 0 applies to all periods
+                packages = set(list(zip(perioddata.mname1, perioddata.pname1)) +
+                               list(zip(perioddata.mname2, perioddata.pname2)))
+                kwargs['maxpackages'] = len(packages)
+                kwargs['packages'] = list(packages)
+                kwargs['perioddata'] = {0: perioddata.values.tolist()}  # assumes that input for period 0 applies to all periods
+                kwargs = get_input_arguments(kwargs, mf6.ModflowGwfmvr)
+                mvr = mf6.ModflowMvr(self.simulation, **kwargs)
+                print("finished in {:.2f}s\n".format(time.time() - t0))
+                return mvr
         else:
             print("no packages with mover information\n")
 
@@ -898,7 +898,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             cfg['model']['simulation'] = cfg['simulation']
         if isinstance(cfg['model']['simulation'], dict):
             # create simulation from simulation block in config dict
-            sim = flopy.mf6.MFSimulation(**cfg['simulation'])
+            kwargs = cfg['simulation'].copy()
+            kwargs.update(cfg['simulation']['options'])
+            kwargs = get_input_arguments(kwargs, mf6.MFSimulation)
+            sim = flopy.mf6.MFSimulation(**kwargs)
             cfg['model']['simulation'] = sim
             sim_ws = cfg['simulation']['sim_ws']
         # if a simulation has already been created, get the path from the instance

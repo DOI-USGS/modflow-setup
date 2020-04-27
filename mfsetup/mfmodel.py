@@ -18,6 +18,7 @@ from .utils import update, flatten, get_input_arguments
 from .sourcedata import setup_array
 from .tdis import (setup_perioddata_group, setup_perioddata,
                    get_parent_stress_periods, parse_perioddata_groups)
+from .testing import issequence
 from .units import convert_length_units, lenuni_text, itmuni_text, lenuni_values
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
@@ -384,7 +385,7 @@ class MFsetupMixin():
         """
         # DIS package is needed to set up the isbc array
         # (to compare lake bottom elevations to layer bottoms)
-        if 'DIS' not in self.get_package_list():
+        if self.get_package('dis') is None:
             return None
         if self._isbc is None:
             self._set_isbc()
@@ -644,6 +645,7 @@ class MFsetupMixin():
         # mf6 models: set up or load the simulation
         if self.version == 'mf6':
             kwargs = self.cfg['simulation'].copy()
+            kwargs.update(self.cfg['simulation']['options'])
             if os.path.exists('{}.nam'.format(kwargs['sim_name'])):
                 try:
                     kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
@@ -688,13 +690,21 @@ class MFsetupMixin():
                 isbc[self._lakarr2d > 0] = 1
             # add other bcs
             for packagename, bcnumber in self.bc_numbers.items():
-                if packagename.upper() in self.get_package_list() and packagename != 'lak':
-                    package = getattr(self, packagename)
-                    k, i, j = get_bc_package_cells(package)
-                    not_a_lake = np.where(isbc[i, j] != 1)
-                    i = i[not_a_lake]
-                    j = j[not_a_lake]
-                    isbc[i, j] = bcnumber
+                if 'lak' not in packagename:
+                    package = self.get_package(packagename)
+                    if package is not None:
+                        # handle multiple instances of package
+                        # (in MODFLOW-6)
+                        if isinstance(package, flopy.pakbase.PackageInterface):
+                            packages = [package]
+                        else:
+                            packages = package
+                        for package in packages:
+                            k, i, j = get_bc_package_cells(package)
+                            not_a_lake = np.where(isbc[i, j] != 1)
+                            i = i[not_a_lake]
+                            j = j[not_a_lake]
+                            isbc[i, j] = bcnumber
             self._isbc_2d = isbc
             self._set_lake_bathymetry()
 
@@ -711,33 +721,22 @@ class MFsetupMixin():
                     isbc[i+1][ibelow] = self._isbc2d[ibelow]
             # add other bcs
             for packagename, bcnumber in self.bc_numbers.items():
-                if packagename.upper() in self.get_package_list() and packagename != 'lak':
-                    package = getattr(self, packagename)
-                    #try:
-                    k, i, j = get_bc_package_cells(package)
-                    not_a_lake = np.where(isbc[k, i, j] != 1)
-                    k = k[not_a_lake]
-                    i = i[not_a_lake]
-                    j = j[not_a_lake]
-                    isbc[k, i, j] = bcnumber
-                    #    #isbc[i, j][isbc[i, j] != 1] = bcnumber
-                    #except:
-                    #    j = 2
-            #if 'GHB' in self.get_package_list():
-            #    k, i, j = self.ghb.stress_period_data[0]['k'], \
-            #              self.ghb.stress_period_data[0]['i'], \
-            #              self.ghb.stress_period_data[0]['j']
-            #    isbc[k, i, j][isbc[k, i, j] != 1] = 4
-            #if 'SFR' in self.get_package_list():
-            #    k, i, j = self.sfr.reach_data['k'], \
-            #              self.sfr.reach_data['i'], \
-            #              self.sfr.reach_data['j']
-            #    isbc[k, i, j][isbc[k, i, j] != 1] = 3
-            #if 'WEL' in self.get_package_list():
-            #    k, i, j = self.wel.stress_period_data[0]['k'], \
-            #              self.wel.stress_period_data[0]['i'], \
-            #              self.wel.stress_period_data[0]['j']
-            #    isbc[k, i, j][isbc[k, i, j] == 0] = -1
+                if 'lak' not in packagename:
+                    package = self.get_package(packagename)
+                    if package is not None:
+                        # handle multiple instances of package
+                        # (in MODFLOW-6)
+                        if isinstance(package, flopy.pakbase.PackageInterface):
+                            packages = [package]
+                        else:
+                            packages = package
+                        for package in packages:
+                            k, i, j = get_bc_package_cells(package)
+                            not_a_lake = np.where(isbc[k, i, j] != 1)
+                            k = k[not_a_lake]
+                            i = i[not_a_lake]
+                            j = j[not_a_lake]
+                            isbc[k, i, j] = bcnumber
             self._isbc = isbc
             self._set_lakarr()
 

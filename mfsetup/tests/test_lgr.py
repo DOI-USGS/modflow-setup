@@ -33,7 +33,8 @@ def pleasant_lgr_cfg(pleasant_lgr_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_simulation(pleasant_lgr_cfg):
     cfg = pleasant_lgr_cfg.copy()
-    sim = mf6.MFSimulation(**cfg['simulation'])
+    kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation)
+    sim = mf6.MFSimulation(**kwargs)
     return sim
 
 

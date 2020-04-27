@@ -108,10 +108,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
         ibound[self.isbc == 1] = 0.
 
         # remove cells that are above stream cells
-        if 'SFR' in self.get_package_list():
+        if self.get_package('sfr') is not None:
             ibound = deactivate_idomain_above(ibound, self.sfr.reach_data)
         # remove cells that are above ghb cells
-        if 'GHB' in self.get_package_list():
+        if self.get_package('ghb') is not None:
             ibound = deactivate_idomain_above(ibound, self.ghb.stress_period_data[0])
 
         # inactivate any isolated cells that could cause problems with the solution
@@ -665,7 +665,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         ngages = 0
         nlak_gages = 0
         starting_unit_number = self.cfg['gag']['starting_unit_number']
-        if 'LAK' in self.get_package_list():
+        if self.get_package('lak') is not None:
             nlak_gages = self.lak.nlakes
         if nlak_gages > 0:
             ngages += nlak_gages
@@ -681,7 +681,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # need to add streams at some point
         nstream_gages = 0
-        if 'SFR' in self.get_package_list():
+        if self.get_package('sfr') is not None:
 
             obs_info_files = self.cfg['gag'].get('observation_data')
             if obs_info_files is not None:

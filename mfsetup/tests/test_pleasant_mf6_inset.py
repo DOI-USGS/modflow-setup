@@ -39,7 +39,8 @@ def pleasant_mf6_cfg(pleasant_mf6_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_simulation(pleasant_mf6_cfg):
     cfg = pleasant_mf6_cfg
-    sim = mf6.MFSimulation(**cfg['simulation'])
+    kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation)
+    sim = mf6.MFSimulation(**kwargs)
     return sim
 
 
@@ -294,8 +295,8 @@ def test_wel_setup(get_pleasant_mf6_with_dis):
         assert len(output[per + 1]) == len(ra)
 
 
-def test_lak_setup(get_pleasant_mf6_with_lak):
-    m = get_pleasant_mf6_with_lak  # deepcopy(model)
+def test_lak_setup(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis  # deepcopy(model)
     lak = m.setup_lak()
     lak.write()
     assert isinstance(lak, mf6.ModflowGwflak)
@@ -426,7 +427,7 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
     assert isinstance(m, MF6model)
     assert 'tdis' in m.simulation.package_key_dict
     assert 'ims' in m.simulation.package_key_dict
-    assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR', 'LAK',
+    assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR_0', 'LAK_0',
                                          'WEL_0',
                                          'OBS_0',  # lak obs todo: specify names of mf6 packages with multiple instances
                                          'CHD_0',
