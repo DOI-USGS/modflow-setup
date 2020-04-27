@@ -3,10 +3,21 @@
 environment:
 
   matrix:
-    - PYTHON_VERSION: "3.7"
-      MINICONDA: C:\Miniconda37-x64
-      ENV_FILE: "ci/requirements.yml"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON_VERSION: "3.8"
+      MINICONDA: C:\Miniconda38-x64
+      ENV_FILE: "ci/latest-python-flopy-develop.yml"
 
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PYTHON_VERSION: "3.7"
+      MINICONDA: C:\Miniconda37-x64
+      ENV_FILE: "ci/37-conda-flopy.yml"
+
+matrix:
+  allow_failures:
+    - ENV_FILE: "ci/37-conda-flopy.yml"
+
+  fast_finish: true  # terminate build on first error
 
 platform:
     - x64
@@ -41,9 +52,8 @@ install:
 test_script:
   - conda activate test
   - pip install -e .
+  - python -m ipykernel install --user --name test --display-name "test"
   - pytest -v
 
 after_test:
  - echo "done"
-matrix:
-  fast_finish: true
