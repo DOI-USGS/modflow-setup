@@ -552,20 +552,40 @@ def test_wel_setup(shellmound_model_with_dis):
     # check the stress_period_data against source data
     sums = [ra['q'].sum() if ra is not None else 0
             for ra in wel.stress_period_data.array]
+    cellids = set()
+    cellids2d = set()
+    for per, ra in wel.stress_period_data.data.items():
+        cellids.update(set(ra['cellid']))
+        cellids2d.update(set([c[1:] for c in ra['cellid']]))
 
     # sum the rates from the source files
+    min_thickness = m.cfg['wel']['source_data']['csvfiles']['vertical_flux_distribution']['minimum_layer_thickness']
     dfs = []
     for f in m.cfg['wel']['source_data']['csvfiles']['filenames']:
         dfs.append(pd.read_csv(f))
     df = pd.concat(dfs)
+
+    # cull wells to within model area
+    l, b, r, t = m.modelgrid.bounds
+    outside = (df.x.values > r) | (df.x.values < l) | (df.y.values < b) | (df.y.values > t)
+    df['outside'] = outside
+    df = df.loc[~outside]
     df['start_datetime'] = pd.to_datetime(df.start_datetime)
     df['end_datetime'] = pd.to_datetime(df.end_datetime)
     from ..grid import get_ij
     i, j = get_ij(m.modelgrid, df.x.values, df.y.values)
-    idm = m.idomain[:, i, j]
-    invalid = np.zeros(len(df), dtype=bool) #(df.screen_top == -9999.) & (df.screen_botm == -9999.)
-    invalid = invalid | (idm.sum(axis=0) <= 0)
-    df = df.loc[~invalid].copy()
+    df['i'] = i
+    df['j'] = j
+    thicknesses = get_layer_thicknesses(m.dis.top.array, m.dis.botm.array, m.idomain)
+    b = thicknesses[:, i, j]
+    b[np.isnan(b)] = 0
+    df['k'] = np.argmax(b, axis=0)
+    df['laythick'] = b[df['k'].values, range(b.shape[1])]
+    df['idomain'] = m.idomain[df['k'], i, j]
+    valid_ij = (df['idomain'] == 1) & (df['laythick'] > min_thickness)  # nwell array of valid i, j locations (with at least one valid layer)
+    culled = df.loc[~valid_ij].copy()  # wells in invalid i, j locations
+    df = df.loc[valid_ij].copy()  # remaining wells
+    cellids_2d_2 = set(list(zip(df['i'], df['j'])))
     df.index = df.start_datetime
     sums2 = []
     for i, r in m.perioddata.iterrows():

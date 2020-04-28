@@ -4,7 +4,9 @@ import numpy as np
 import fiona
 import pytest
 from gisutils import shp2df
-from ..grid import MFsetupGrid
+from ..grid import (MFsetupGrid, get_ij, get_nearest_point_on_grid,
+                    get_point_on_national_hydrogeologic_grid)
+from ..testing import point_is_on_nhg
 
 # TODO: add tests for grid.py
 
@@ -50,3 +52,27 @@ def test_grid_write_shapefile(modelgrid, tmpdir):
     assert np.array_equal(j.ravel(), df.j.values)
 
 
+@pytest.mark.parametrize('xul,yul,height,width,dx,dy,rotation,input,expected', ((0, 0, 3, 2, 1, -1, 45,
+                                                                                 (0, -0.7),
+                                                                                 (0, -np.sqrt(2)/2)),
+                                                                                (0, 0, 2, 2, 5, -10, 0,
+                                                                                 (4.9, -9),
+                                                                                 (2.5, -5)),
+                                                                                (0, 0, 3, 2, 5, -10, 0,
+                                                                                 (5.1, -21),
+                                                                                 (7.5, -25)))
+                         )
+def test_get_nearest_point_on_grid(xul, yul, height, width, dx, dy, rotation, input, expected):
+    x, y = input
+    result = get_nearest_point_on_grid(x, y, transform=None,
+                                       xul=xul, yul=yul,
+                                       dx=dx, dy=dy, rotation=rotation,
+                                       offset='center')
+    assert np.allclose(result, expected)
+
+
+@pytest.mark.parametrize('offset', ('center', 'edge'))
+def test_get_point_on_national_hydrogeologic_grid(offset):
+    x, y = 178389, 938512
+    x_nhg, y_nhg = get_point_on_national_hydrogeologic_grid(x, y, offset=offset)
+    assert point_is_on_nhg(x_nhg, y_nhg, offset=offset)

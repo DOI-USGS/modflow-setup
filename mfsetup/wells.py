@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import flopy
 from shapely.geometry import Point
-from gisutils import project
+from gisutils import project, df2shp
 from .fileio import check_source_files, append_csv
 from .grid import get_ij
 from .sourcedata import TransientTabularSourceData
@@ -187,11 +187,12 @@ def setup_wel_data(model):
     # record dropped wells in csv file
     # (which might contain wells dropped by other routines)
     if np.any(inactive):
+        #inactive_i, inactive_j = df.loc[inactive, 'i'].values, df.loc[inactive, 'j'].values
         dropped = df.loc[inactive].copy()
         dropped = dropped.groupby(['k', 'i', 'j']).first().reset_index()
         dropped['reason'] = 'in inactive cell'
         dropped['routine'] = __name__ + '.setup_wel_data'
-        append_csv(dropped_wells_file, dropped, index=False)  # append to existing file if it exists
+        append_csv(dropped_wells_file, dropped, index=False, float_format='%g')  # append to existing file if it exists
     df = df.loc[~inactive].copy()
 
     copy_fluxes_to_subsequent_periods = False
@@ -250,6 +251,12 @@ def assign_layers_from_screen_top_botm(data, model,
         pumping in a single model layer (with fluxes modified proportional
         to the amount of open interval in that layer).
     """
+    # inactive cells in either MODFLOW version
+    if model.version == 'mf6':
+        idomain = model.idomain
+    else:
+        idomain = model.bas6.ibound.array
+
     # 'comments' column is used by wel setup for identifying wells
     if label_col in data.columns:
         data['comments'] = data[label_col]
@@ -278,56 +285,72 @@ def assign_layers_from_screen_top_botm(data, model,
             all_layers[0] = model.dis.top.array
             all_layers[1:] = model.dis.botm.array
             layer_thicknesses = -np.diff(all_layers[:, i, j], axis=0)
+
+            # only include thicknesses for valid layers
+            # set inactive cells to 0 thickness for the purpose or relocating wells
+            layer_thicknesses[idomain[:, i, j] != 1] = 0
+            data['idomain'] = idomain[data['k'], i, j]
             data['laythick'] = layer_thicknesses[data['k'].values,
                                                  list(range(layer_thicknesses.shape[1]))]
-            below_minimum = data['laythick'] < minimum_layer_thickness
+            # flag layers that are too thin or inactive
+            inactive = idomain[data.k, data.i, data.j] != 1
+            invalid_open_interval = (data['laythick'] < minimum_layer_thickness) | inactive
 
-            n_below = np.sum(below_minimum)
-            if n_below > 0:
+            if any(invalid_open_interval):
                 outfile = model.cfg['wel']['output_files']['dropped_wells_file'].format(model.name)
 
-                # move wells that are still in a thin layer to the thickest layer
+                # move wells that are still in a thin layer to the thickest active layer
                 data['orig_layer'] = data['k']
                 thickest_layer = np.argmax(layer_thicknesses, axis=0)
-                data.loc[below_minimum, 'k'] = thickest_layer[below_minimum]
+                data.loc[invalid_open_interval, 'k'] = thickest_layer[invalid_open_interval]
                 data['laythick'] = layer_thicknesses[data['k'].values,
                                                      list(range(layer_thicknesses.shape[1]))]
-                still_below_minimum = data['laythick'] < minimum_layer_thickness
-                nmoved = np.sum(data['orig_layer'] != data['k'])
+                data['idomain'] = idomain[data['k'], i, j]
+
+                # record which wells were moved or dropped, and why
+                bad_wells = data.loc[invalid_open_interval].copy()
+                bad_wells['category'] = 'moved'
+                bad_wells['reason'] = 'longest open interval thickness < {} {} minimum'.format(minimum_layer_thickness,
+                                                                                               model.length_units)
+                bad_wells['routine'] = __name__ + '.assign_layers_from_screen_top_botm'
                 msg = ('Warning: {} of {} wells in layers less than '
                        'specified minimum thickness of {} {}\n'
-                       'were moved to the thicknest layer at their i, j locations.\n'.format(n_below,
+                       'were moved to the thickest layer at their i, j locations.\n'.format(invalid_open_interval.sum(),
                                                                         len(data),
                                                                         minimum_layer_thickness,
                                                                         model.length_units))
+                still_below_minimum = bad_wells['laythick'] < minimum_layer_thickness
+                bad_wells.loc[still_below_minimum, 'category'] = 'dropped'
+                bad_wells.loc[still_below_minimum, 'reason'] = 'no layer above minimum thickness of {} {}'.format(minimum_layer_thickness,
+                                                                                          model.length_units)
                 n_below = np.sum(still_below_minimum)
                 if n_below > 0:
-                    msg += ('Out of these, {} of {} wells remaining in layers less than '
+                    msg += ('Out of these, {} of {} total wells remaining in layers less than '
                             'specified minimum thickness of {} {}'
                             ''.format(n_below,
                                       len(data),
                                       minimum_layer_thickness,
                                       model.length_units))
                     if flux_col in data.columns:
-                        pct_flux_below = 100*data.loc[still_below_minimum, flux_col].sum()/data[flux_col].sum()
+                        pct_flux_below = 100 * bad_wells.loc[still_below_minimum, flux_col].sum()/data[flux_col].sum()
                         msg +=  ', \nrepresenting {:.2f} %% of total flux,'.format(pct_flux_below)
 
                     msg += '\nwere dropped. See {} for details.'.format(outfile)
                     print(msg)
 
                 # write shapefile and CSV output for wells that were dropped
-                cols = ['k', 'i', 'j', 'comments']
+                cols = ['k', 'i', 'j', 'comments',
+                        'category', 'laythick', 'idomain', 'reason', 'routine', 'x', 'y']
                 if flux_col in data.columns:
                     cols.insert(3, flux_col)
-                flux_below = data.loc[below_minimum].groupby(['k', 'i', 'j']).first().reset_index()[cols]
-                flux_below['reason'] = 'no layer above minimum thickness of {}'.format(minimum_layer_thickness)
-                flux_below['routine'] = __name__ + '.assign_layers_from_screen_top_botm'
-                #flux_below.to_csv(outfile, mode='a', index=False)
-                append_csv(outfile, flux_below, index=False)
+                flux_below = bad_wells.groupby(['k', 'i', 'j']).first().reset_index()[cols]
+                append_csv(outfile, flux_below, index=False, float_format='%g')
                 if 'x' in flux_below.columns and 'y' in flux_below.columns:
                     flux_below['geometry'] = [Point(xi, yi) for xi, yi in zip(flux_below.x, flux_below.y)]
                     df2shp(flux_below, outfile[:-4] + '.shp', epsg=model.modelgrid.epsg)
-                data = data.loc[~below_minimum].copy()
+
+                # cull the wells that are still below the min. layer thickness
+                data = data.loc[data['laythick'] > minimum_layer_thickness].copy()
 
         elif distribute_by == 'tranmissivity':
             raise NotImplemented('Distributing well fluxes by layer transmissivity')

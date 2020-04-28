@@ -1,5 +1,5 @@
 import numpy as np
-from mfsetup.grid import get_ij
+from mfsetup.grid import get_ij, national_hydrogeologic_grid_parameters
 
 
 def compare_float_arrays(a1, a2):
@@ -100,4 +100,30 @@ def issequence(object):
         iter(object)
     except TypeError as te:
         pass
+    return True
+
+
+def point_is_on_nhg(x, y, offset='edge'):
+    """Check if a point is aligend with the National Hydrogeologic Grid
+    (https://doi.org/10.5066/F7P84B24).
+
+    Parameters
+    ----------
+    x : float
+        x-coordinate of point
+    y : float
+        y-coordinate of point
+    offset : {'edge', 'center'}
+        Check if the point is aligned with an NHG cell edge (corner)
+        or center.
+
+    """
+    xul = national_hydrogeologic_grid_parameters['xul']
+    yul = national_hydrogeologic_grid_parameters['yul']
+    dxy = national_hydrogeologic_grid_parameters['dx']
+    if offset == 'center':
+        xul += dxy/2
+        yul -= dxy/2
+    if not np.allclose((x - xul) % dxy, 0.) & np.allclose((y - yul) % dxy, 0.):
+        return False
     return True

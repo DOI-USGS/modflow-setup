@@ -156,6 +156,18 @@ class MFsetupGrid(StructuredGrid):
         self._vertices = self._cell_vert_list(ii, jj)
 
 
+# definition of national hydrogeologic grid
+national_hydrogeologic_grid_parameters = {
+    'xul': -2553045.0,  # upper left corner
+    'yul': 3907285.0,
+    'height': 4000,
+    'width': 4980,
+    'dx': 1000,
+    'dy': 1000,
+    'rotation': 0.
+}
+
+
 def get_ij(grid, x, y, local=False, chunksize=100):
     """Return the row and column of a point or sequence of points
     in real-world coordinates.
@@ -252,25 +264,77 @@ def get_grid_bounding_box(modelgrid):
                     (x0r, y0r)])
 
 
-def get_point_on_national_hydrogeologic_grid(x, y):
+def get_nearest_point_on_grid(x, y, transform=None,
+                              xul=None, yul=None,
+                              dx=None, dy=None, rotation=0.,
+                              offset='center', op=None):
+    """
+
+    Parameters
+    ----------
+    x : float
+        x-coordinate of point
+    y : float
+        y-coordinate of point
+    transform : Affine instance, optional
+        Affine object instance describing grid
+    xul : float
+        x-coordinate of upper left corner of the grid
+    yul : float
+        y-coordinate of upper left corner of the grid
+    dx : float
+        grid spacing in the x-direction (along rows)
+    dy : float
+        grid spacing in the y-direction (along columns)
+    rotation : float
+        grid rotation about the upper left corner, in degrees clockwise from the x-axis
+    offset : str, {'center', 'edge'}
+        Whether the point on the grid represents a cell center or corner (edge). This
+        argument is only used if xul, yul, dx, dy and rotation are supplied. If
+        an Affine transform instance is supplied, it is assumed to already incorporate
+        the offset.
+    op : function, optional
+        Function to convert fractional pixels to whole numbers (np.round, np.floor, np.ceiling).
+        Defaults to np.round if offset == 'center'; otherwise defaults to np.floor.
+
+
+
+    Returns
+    -------
+    x_nearest, y_nearest : float
+        Coordinates of nearest grid cell center.
+
+    """
+    # get the closet (fractional) grid cell location
+    # (in case the grid is rotated)
+    if transform is None:
+        transform = Affine(dx, 0., xul,
+                           0., dy, yul) * \
+                    Affine.rotation(rotation)
+        if offset == 'center':
+            transform *= Affine.translation(0.5, 0.5)
+    x_raster, y_raster = ~transform * (x, y)
+
+    if offset == 'center':
+        op = np.round
+    elif op is None:
+        op = np.floor
+
+    j = int(op(x_raster))
+    i = int(op(y_raster))
+
+    x_nearest, y_nearest = transform * (j, i)
+    return x_nearest, y_nearest
+
+
+def get_point_on_national_hydrogeologic_grid(x, y, offset='edge', **kwargs):
     """Given an x, y location representing the upper left
     corner of a model grid, return the upper left corner
     of the cell in the National Hydrogeologic Grid that
     contains it."""
-    # national grid parameters
-    xul, yul = -2553045.0, 3907285.0 # upper left corner
-    ngrows = 4000
-    ngcols = 4980
-    natCellsize = 1000
-
-    # locations of left and top cell edges
-    ngx = np.arange(ngcols) * natCellsize
-    ngy = np.arange(ngrows) * -natCellsize
-
-    # nearest left and top edge to upper left corner
-    j = int(np.floor((x - xul) / natCellsize))
-    i = int(np.floor((yul - y) / natCellsize))
-    return ngx[j] + xul, ngy[i] + yul
+    params = get_input_arguments(national_hydrogeologic_grid_parameters, get_nearest_point_on_grid)
+    params.update(kwargs)
+    return get_nearest_point_on_grid(x, y, offset=offset, **params)
 
 
 def write_bbox_shapefile(modelgrid, outshp):
@@ -283,7 +347,7 @@ def write_bbox_shapefile(modelgrid, outshp):
 def rasterize(feature, grid, id_column=None,
               include_ids=None,
               epsg=None,
-              proj4=None, dtype=np.float32):
+              proj4=None, dtype=np.float32, **kwargs):
     """Rasterize a feature onto the model grid, using
     the rasterio.features.rasterize method. Features are intersected
     if they contain the cell center.
@@ -304,6 +368,8 @@ def rasterize(feature, grid, id_column=None,
         Proj4 string for feature CRS (optional)
     dtype : dtype
         Datatype for the output array
+    **kwargs : keyword arguments to rasterio.features.rasterize()
+        https://rasterio.readthedocs.io/en/stable/api/rasterio.features.html
 
     Returns
     -------
@@ -443,7 +509,8 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         # grids snapping to NHD must have spacings that are a factor of 1 km
         if snap_to_NHG:
             assert regular and np.allclose(1000 % delc_m, 0, atol=1e-4)
-            x, y = get_point_on_national_hydrogeologic_grid(xoff, yoff)
+            x, y = get_point_on_national_hydrogeologic_grid(xoff, yoff,
+                                                            offset='edge', op=np.floor)
             xoff = x
             yoff = y
             rotation = 0.
