@@ -6,7 +6,14 @@ Installation
 
 Installing python dependencies with Conda
 -----------------------------------------
-* Download and install the `Anaconda python distribution`_.
+* Download and install the `Anaconda python distribution`_. 
+
+  * **Make sure to install Anaconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which requires admin. privileges at the system level.
+
+    * In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.
+    * If your installer skips the “Destination Select” step, when you get to "Installation Type", click “Change Install Location” and then “Install for me only.” 
+
+
 * Download an environment file:
 
   * `environment.yml`_ for a `conda environment`_ with the minimum packages required to run modflow-setup, or
@@ -118,6 +125,7 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 
 
 .. _Anaconda python distribution: https://www.anaconda.com/distribution/
+.. _clean uninstall: https://docs.anaconda.com/anaconda/install/uninstall/
 .. _conda: https://docs.conda.io/en/latest/
 .. _conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
 .. _download: https://github.com/aleaf/modflow-setup/archive/master.zip

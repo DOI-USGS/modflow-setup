@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; modflow-setup 0.post50+g43da2b5 documentation</title>
+  <title>Installation &mdash; modflow-setup 0.post50+ga14985f documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post50+g43da2b5
+                0.post50+ga14985f
               </div>
             
           
@@ -189,7 +189,16 @@
 <div class="section" id="installing-python-dependencies-with-conda">
 <h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Download and install the <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a>.</p></li>
+<li><p>Download and install the <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a>.</p>
+<ul>
+<li><p><strong>Make sure to install Anaconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which requires admin. privileges at the system level.</p>
+<ul>
+<li><p>In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.</p></li>
+<li><p>If your installer skips the “Destination Select” step, when you get to “Installation Type”, click “Change Install Location” and then “Install for me only.”</p></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><p>Download an environment file:</p>
 <ul>
 <li><p><a class="reference external" href="https://github.com/aleaf/modflow-setup/blob/master/environment.yml">environment.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a> with the minimum packages required to run modflow-setup, or</p></li>
@@ -306,7 +315,9 @@ so it needs to be commented out on other operating systems (normally it wouldn�
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, USGS MAP Project
+      <span class="lastupdated">
+        Last updated on Apr 29, 2020.
+      </span>
 
     </p>
   </div>

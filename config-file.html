@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The configuration file &mdash; modflow-setup 0.post50+g43da2b5 documentation</title>
+  <title>The configuration file &mdash; modflow-setup 0.post50+ga14985f documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post50+g43da2b5
+                0.post50+ga14985f
               </div>
             
           
@@ -474,7 +474,18 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
 171
 172
 173
-174</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
+  <span class="nt">options</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;mfsim&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
   <span class="nt">exe_name</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
@@ -527,7 +538,7 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
   <span class="nt">top_filename_fmt</span><span class="p">:</span> <span class="s">&quot;top.dat&quot;</span>
   <span class="nt">botm_filename_fmt</span><span class="p">:</span> <span class="s">&quot;botm{:d}.dat&quot;</span>
   <span class="nt">idomain_filename_fmt</span><span class="p">:</span> <span class="s">&quot;idomain{:d}.dat&quot;</span>
-  <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span> <span class="c1"># m</span>
+  <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># in model units</span>
   <span class="nt">drop_thin_cells</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
 <span class="nt">tdis</span><span class="p">:</span>
@@ -571,6 +582,7 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
 <span class="nt">sfr</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">mover</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">budget_fileout</span><span class="p">:</span> <span class="s">&#39;sfr_out.bin&#39;</span>
   <span class="nt">stage_fileout</span><span class="p">:</span> <span class="s">&#39;sfr_stage.bin&#39;</span>
   <span class="nt">obs6_filein_fmt</span><span class="p">:</span> <span class="s">&#39;{}.sfr.obs6&#39;</span>
@@ -587,11 +599,19 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
   <span class="nt">lakzones_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakzones.dat&#39;</span> <span class="c1"># file containing zones for lakebed leakance</span>
   <span class="nt">output_files</span><span class="p">:</span>
     <span class="nt">lookup_file</span><span class="p">:</span> <span class="s">&#39;{}_lak_lookup.csv&#39;</span>  <span class="c1"># output file that maps lake ids to source polygon feature ids</span>
+
+<span class="nt">mvr</span><span class="p">:</span>
+  <span class="nt">options</span><span class="p">:</span>
+    <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+
+
+
 <span class="nt">wel</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">boundnames</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">output_files</span><span class="p">:</span>
     <span class="nt">lookup_file</span><span class="p">:</span> <span class="s">&#39;{}_wel_lookup.csv&#39;</span> <span class="c1"># output file that maps wel package data to site numbers</span>
     <span class="nt">dropped_wells_file</span><span class="p">:</span> <span class="s">&#39;{}_dropped_wells.csv&#39;</span> <span class="c1"># output file that records wells that were dropped during model setup</span>
@@ -836,7 +856,7 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
   <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;1970-01-01&#39;</span>
   <span class="nt">top_filename_fmt</span><span class="p">:</span> <span class="s">&quot;top.dat&quot;</span>
   <span class="nt">botm_filename_fmt</span><span class="p">:</span> <span class="s">&quot;botm{:d}.dat&quot;</span>
-  <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span> <span class="c1"># m</span>
+  <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># in model units</span>
   <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">lenuni</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span> <span class="c1"># meters</span>
   <span class="nt">itmuni</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">4</span> <span class="c1"># days</span>
@@ -972,7 +992,9 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, USGS MAP Project
+      <span class="lastupdated">
+        Last updated on Apr 29, 2020.
+      </span>
 
     </p>
   </div>
