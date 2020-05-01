@@ -124,6 +124,15 @@ def point_is_on_nhg(x, y, offset='edge'):
     if offset == 'center':
         xul += dxy/2
         yul -= dxy/2
-    if not np.allclose((x - xul) % dxy, 0.) & np.allclose((y - yul) % dxy, 0.):
+    # verify that the spacing is a factor of 1000
+    if not np.isscalar(x) and not np.allclose(1000 % np.diff(x), 0., rtol=0.001):
+        return False
+    if not np.isscalar(y) and not np.allclose(1000 % np.diff(y), 0., rtol=0.001):
+        return False
+
+    # verify that the first points are on an nhg point
+    x0 = x if np.isscalar(x) else x[0]
+    y0 = y if np.isscalar(y) else y[0]
+    if not np.allclose((x0 - xul) % dxy, 0.) & np.allclose((y0 - yul) % dxy, 0.):
         return False
     return True
