@@ -282,7 +282,21 @@ def test_populate_values():
     assert [v.sum() for k, v in v.items()] == [4, 6, 8]
 
 
-def test_voxels_to_layers():
+@pytest.mark.parametrize('model_botm', (np.array([[[10, -5, 0], # 3D botm array
+                                                  [10, 5, 0],
+                                                  [9, 5, 0]],
+                                                 [[9, -6, 0],
+                                                  [10, 4, 0],
+                                                  [7, 4, 0]]]),
+                                        np.array([[10, -5, 0],  # 2D botm array
+                                                  [10, 5, 0],
+                                                  [9, 5, 0]])
+                                        ))
+@pytest.mark.parametrize('z_edges', ([20, 15, 10, 5, 0],  # 1D array of voxel edges (uniform elevations)
+                                     # 2D array of voxel edges
+                                     (np.ones((3, 3, 5)) * np.array([20, 15, 10, 5, 0])).transpose(2, 0, 1)  
+                                     ))
+def test_voxels_to_layers(z_edges, model_botm):
     data = np.array([[[5, 4, 0],
                       [5, 4, 3],
                       [5, 4, 0]],
@@ -297,29 +311,29 @@ def test_voxels_to_layers():
                       [0, 0, 0]],
                      ])
     nlay, nrow, ncol = data.shape
-    z_edges = [20, 15, 10, 5, 0]
     model_top = np.array([[25, 20, 19],
                           [20, 20, 20],
                           [20, 20, 16]])
-    model_botm = np.array([[10, -5, 0],
-                           [10, 5, 0],
-                           [9, 5, 0]])
     result = voxels_to_layers(data, z_edges, model_top=model_top,
                               model_botm=model_botm, no_data_value=0)
-    assert result.shape == (nlay+2, nrow, ncol)  # voxel top edge + botm layer
+    if len(model_botm.shape) == 2:
+        n_botm_lay = 1
+    else:
+        n_botm_lay = model_botm.shape[0]
+    assert result.shape == (nlay+1+n_botm_lay, nrow, ncol)  # voxel top edge + botm layer
     assert result[-1, 0, 0] == 0  # botm was reset to 0 in this location
     # at this location, last two layers have no data, so same bottom as second layer
     # extend_botm=False by default, so another layer is added, extending from lowest voxel edge to botm
-    assert np.allclose(result[:, 2, 0], [20., 15., 10., 10., 10., 9.])
+    assert np.allclose(result[:, 2, 0], [20., 15., 10., 10., 10., 9., 7.][:result.shape[0]])
     # at this location, model botm is at 10, but voxel with botm=5 has data,
     # so model botm is pushed downward to 5.
-    assert np.allclose(result[:, 1, 0], [20., 15., 10., 5, 5, 5])
+    assert np.allclose(result[:, 1, 0], [20., 15., 10., 5, 5, 5, 5][:result.shape[0]])
 
     assert result[0, 2, 2] == 16  # consistent with model top
 
     result = voxels_to_layers(data, z_edges, model_top=model_top,
                               model_botm=model_botm, extend_top=False, no_data_value=0)
-    assert result.shape == (nlay+3, nrow, ncol)  # voxel top edge + top layer + botm layer
+    assert result.shape == (nlay+2+n_botm_lay, nrow, ncol)  # voxel top edge + top layer + botm layer
 
     result = voxels_to_layers(data, z_edges, model_top=model_top,
                               model_botm=model_botm, extend_botm=True, no_data_value=0)

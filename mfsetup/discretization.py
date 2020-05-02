@@ -558,54 +558,130 @@ def populate_values(values_dict, array_shape=None):
 
 def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_data_value=0,
                      extend_top=True, extend_botm=False, tol=0.1):
+    """Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top
+    and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and
+    additional elevation surfaces forming layering below the voxel grid (model_botm). 
+    
+        * In places where the model_botm elevations are above the lowest voxel elevations, 
+        the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations 
+        (effectively giving the underlying layer zero-thickness). 
+        * Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a
+         no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey 
+         of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then 
+         spans the highest and lowest valid voxels. 
+        * In places where the model_top (typically land-surface) elevations are higher than the highest valid voxel, 
+         the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer 
+         can be created between the top edge of the highest voxel and model_top (extent_top=False). 
+        * Similarly, in places where elevations in model_botm are below the lowest valid voxel, the lowest voxel 
+         elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill
+         the gap between the lowest voxel and highest model_botm (extend_botm=False).
+
+    Parameters
+    ----------
+    voxel_array : 3D numpy array
+        3D array of voxel data- could be zones or actually aquifer properties. Empty voxels
+        can be marked with a no_data_value. Voxels are assumed to have the same horizontal
+        discretization as the model_top and model_botm layers.
+    z_edges : 3D numpy array or sequence
+        Top and bottom edges of the voxels (length is voxel_array.shape[0] + 1). A sequence
+        can be used to specify uniform voxel edge elevations; non-uniform top and bottom 
+        elevations can be specified with a 3D numpy array (similar to the botm array in MODFLOW).
+    model_top : 2D numpy array
+        Top elevations of the model at each row/column location.
+    model_botm : 2D or 3D numpy array
+        Model layer(s) underlying the voxel grid.
+    no_data_value : scalar, optional
+        Indicates empty voxels in voxel_array.
+    extend_top : bool, optional
+        Option to extend the top voxel layer to the model_top, by default True.
+    extend_botm : bool, optional
+        Option to extend the bottom voxel layer to the next layer below in model_botm, 
+        by default False.
+    tol : float, optional
+        Depth tolerance used in comparing the voxel edges to model_top and model_botm.
+        For example, if model_top - z_edges[0] is less than tol, the model_top and top voxel
+        edge will be considered equal, and no additional layer will be added, regardless of extend_top.
+        by default 0.1
+
+    Returns
+    -------
+    layers : 3D numpy array of shape (nlay +1, nrow, ncol)
+        Model layer elevations (vertical edges of cells), including the model top.
+
+
+    Raises
+    ------
+    ValueError
+        If z_edges is not 1D or 3D
+    """    
     model_top = model_top.copy()
     model_botm = model_botm.copy()
-    z_values = z_edges[1:]
+    if len(model_botm.shape) == 2:
+        model_botm = np.reshape(model_botm, (1, *model_botm.shape))
+    z_values = np.array(z_edges)[1:]
+    
+    # convert nodata values to nans
     hasdata = voxel_array.astype(float).copy()
     hasdata[hasdata == no_data_value] = np.nan
     hasdata[~np.isnan(hasdata)] = 1
-    thicknesses = -np.diff(z_edges)
-    b = (hasdata.transpose(1, 2, 0) * thicknesses).transpose(2, 0, 1)
-    z = (hasdata.transpose(1, 2, 0) * z_values).transpose(2, 0, 1)
+    thicknesses = -np.diff(z_edges, axis=0)
+    
+    # apply nodata to thicknesses and botm elevations
+    if len(z_values.shape) == 3:
+        z = hasdata * z_values
+        b = hasdata * thicknesses
+    elif len(z_values.shape) == 1:
+        z = (hasdata.transpose(1, 2, 0) * z_values).transpose(2, 0, 1)
+        b = (hasdata.transpose(1, 2, 0) * thicknesses).transpose(2, 0, 1)
+    else:
+        msg = 'z_edges.shape = {}; z_edges must be a 3D or 1D numpy array'
+        raise ValueError(msg.format(z_edges.shape))
 
     assert np.all(np.isnan(b[np.isnan(b)]))
     b[np.isnan(b)] = 0
     # cumulative sum from bottom to top
-    filled = np.cumsum(b[::-1], axis=0)[::-1]
+    layers = np.cumsum(b[::-1], axis=0)[::-1]
     # add in the model bottom elevations
     # use the minimum values instead of the bottom layer,
     # in case there are nans in the bottom layer
-    filled += np.nanmin(z, axis=0)  # botm[-1]
+    layers += np.nanmin(z, axis=0)  # botm[-1]
     # append the model bottom elevations
-    filled = np.append(filled, [np.nanmin(z, axis=0)], axis=0)
+    layers = np.append(layers, [np.nanmin(z, axis=0)], axis=0)
 
     # set all voxel edges greater than land surface to land surface
-    k, i, j = np.where(filled > model_top)
-    filled[k, i, j] = model_top[i, j]
+    k, i, j = np.where(layers > model_top)
+    layers[k, i, j] = model_top[i, j]
 
     # reset model bottom to lowest valid voxels, where they are lower than model bottom
-    lowest_valid_edges = np.nanmin(filled, axis=0)
-    i, j = np.where(lowest_valid_edges < model_botm)
-    model_botm[i, j] = lowest_valid_edges[i, j]
+    lowest_valid_edges = np.nanmin(layers, axis=0)
+    for i, layer_botm in enumerate(model_botm):
+        loc = layer_botm > lowest_valid_edges
+        model_botm[i][loc] = lowest_valid_edges[loc]
 
     # option to add another layer on top of voxel sequence,
     # if any part of the model top is above the highest valid voxel edges
-    if np.any(filled[0] < model_top - tol) and not extend_top:
-        filled = np.vstack([np.reshape(model_top, (1, *model_top.shape)), filled])
+    if np.any(layers[0] < model_top - tol) and not extend_top:
+        layers = np.vstack([np.reshape(model_top, (1, *model_top.shape)), layers])
     # otherwise set the top edges of the voxel sequence to be consistent with model top
     else:
-        filled[0] = model_top
+        layers[0] = model_top
 
     # option to add another layer below voxel sequence,
     # if any part of the model botm is below the lowest valid voxel edges
-    if np.any(filled[-1] > model_botm + tol) and not extend_botm:
-        filled = np.vstack([filled, np.reshape(model_botm, (1, *model_botm.shape))])
-    # otherwise just set the lowest voxel edges to the model botm
+    if not extend_botm:
+        new_botms = [layers]
+        for layer_botm in model_botm:
+            if np.any(layers[-1] > layer_botm + tol):
+                new_botms.append(np.reshape(layer_botm, (1, *layer_botm.shape)))
+            layers = np.vstack(new_botms)
+    # otherwise just set the lowest voxel edges to the highest layer in model botm
+    # (model botm was already set to lowest valid voxels that were lower than the model botm;
+    #  this extends any voxels that were above the model botm to the model botm)
     else:
-        filled[-1] = model_botm
+        layers[-1] = model_botm[0]
 
     # finally, fill any remaining nans with next layer elevation (going upward)
     # might still have nans in areas where there are no voxel values, but model top and botm values
-    top, botm = fill_cells_vertically(filled[0], filled[1:])
-    filled = np.vstack([np.reshape(top, (1, *top.shape)), botm])
-    return filled
+    top, botm = fill_cells_vertically(layers[0], layers[1:])
+    layers = np.vstack([np.reshape(top, (1, *top.shape)), botm])
+    return layers
