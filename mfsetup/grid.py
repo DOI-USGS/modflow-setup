@@ -1,7 +1,8 @@
 """
-Grid stuff that flopy.discretization.StructuredGrid doesn't do and other grid-related functions
+Code for creating and working with regular (structured) grids. Focus is on the 2D representation of
+the grid in the cartesian plane. For methods involving layering (in the vertical dimension), see
+the discretization module.
 """
-import os
 import time
 import collections
 import numpy as np
@@ -16,28 +17,61 @@ from .utils import get_input_arguments
 
 
 class MFsetupGrid(StructuredGrid):
+    """Class representing a structured grid. Extends flopy.discretization.StructuredGrid
+    to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).
+    
+    Parameters
+    ----------
+    delc : ndarray
+        1D numpy array of grid spacing along a column (len nrow), in CRS units.
+    delr : ndarray
+        1D numpy array of grid spacing along a row (len ncol), in CRS units.
+    top : ndarray
+        2D numpy array of model top elevations
+    botm : ndarray
+        3D numpy array of model bottom elevations
+    idomain : ndarray
+        3D numpy array of model idomain values
+    lenuni : int, optional
+        MODFLOW length units variable. See 
+        `the Online Guide to MODFLOW <https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?beginners_guide_to_modflow.htm>`_
+    epsg : int, optional
+        EPSG code for the model CRS
+    proj_str : str, optional
+        PROJ string for model CRS
+    prj : str, optional
+        Filepath for ESRI projection file describing model CRS
+    xoff, yoff : float, float, optional
+        Model grid offset (location of lower left corner), by default 0.0, 0.0
+    xul, yul : float, float, optional
+        Model grid offset (location of upper left corner), by default 0.0, 0.0
+    angrot : float, optional
+        Rotation of the model grid, in degrees clockwise about the lower left corner, by default 0.0
+ 
+
+    """
 
     def __init__(self, delc, delr, top=None, botm=None, idomain=None,
-                 lenuni=None, epsg=None, proj4=None, prj=None, xoff=0.0,
+                 lenuni=None, epsg=None, proj_str=None, prj=None, xoff=0.0,
                  yoff=0.0, xul=None, yul=None, angrot=0.0):
-
         super(MFsetupGrid, self).__init__(np.array(delc), np.array(delr),
                                           top, botm, idomain,
-                                          lenuni, epsg, proj4, prj, xoff,
+                                          lenuni, epsg, proj_str, prj, xoff,
                                           yoff, angrot)
+  
         # properties
         self._vertices = None
         self._polygons = None
 
         # if no epsg, set from proj4 string if possible
-        if epsg is None and proj4 is not None and 'epsg' in proj4.lower():
-            self.epsg = int(proj4.split(':')[1])
+        if epsg is None and proj_str is not None and 'epsg' in proj_str.lower():
+            self.epsg = int(proj_str.split(':')[1])
 
         # in case the upper left corner is known but the lower left corner is not
         if xul is not None and yul is not None:
             xll = self._xul_to_xll(xul)
             yll = self._yul_to_yll(yul)
-            self.set_coord_info(xoff=xll, yoff=yll, epsg=epsg, proj4=proj4)
+            self.set_coord_info(xoff=xll, yoff=yll, epsg=epsg, proj4=proj_str)
 
     def __eq__(self, other):
         if not isinstance(other, StructuredGrid):
@@ -135,7 +169,6 @@ class MFsetupGrid(StructuredGrid):
     # stuff to conform to sr
     @property
     def length_multiplier(self):
-        """assume that """
         return convert_length_units(self.lenuni,
                                     2)
 

@@ -13,7 +13,7 @@ from ..testing import point_is_on_nhg
 @pytest.fixture(scope='module')
 def modelgrid():
     return MFsetupGrid(xoff=100., yoff=200., angrot=20.,
-                       proj4='epsg:3070',
+                       proj_str='epsg:3070',
                        delr=np.ones(10), delc=np.ones(2))
 
 
@@ -29,7 +29,7 @@ def test_grid_init():
     "delc": np.ones(nrow) * 5280.0 * .3048,
     "delr": np.ones(ncol) * 5280.0 * .3048,
     "epsg": 5070,
-    "proj4": "+init=epsg:5070",
+    "proj_str": "+init=epsg:5070",
     "angrot": 0.0,
     "xul": 178389.0,
     "yul": 1604780.4160000002,

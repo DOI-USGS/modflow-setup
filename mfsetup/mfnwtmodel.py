@@ -1,30 +1,23 @@
-import sys
-sys.path.append('..')
-sys.path.append('/Users/aleaf/Documents/GitHub/sfrmaker')
 import os
 import time
 import numpy as np
 np.warnings.filterwarnings('ignore')
 import pandas as pd
-from shapely.geometry import MultiPolygon
 import flopy
 fm = flopy.modflow
 from flopy.modflow import Modflow
-from flopy.utils import binaryfile as bf
 from .bcs import setup_ghb_data
 from .discretization import (deactivate_idomain_above, make_ibound,
                              find_remove_isolated_cells)
-from .grid import MFsetupGrid
-from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
-    load_cfg, setup_external_filepaths
+from .fileio import load, save_array, check_source_files, flopy_mf2005_load, \
+    load_cfg
 from .lakes import (make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes,
                     setup_lake_info, setup_lake_tablefiles)
-from .utils import update, get_packages, get_input_arguments
+from .utils import get_packages, get_input_arguments
 from .obs import read_observation_data, setup_head_observations
-from .sourcedata import TabularSourceData
 from .tdis import setup_perioddata_group, get_parent_stress_periods
 from .tmr import Tmr
-from .units import convert_length_units, convert_time_units, convert_flux_units, lenuni_text, itmuni_text, lenuni_values
+from .units import convert_length_units, lenuni_text, itmuni_text
 from .wells import setup_wel_data
 from .mfmodel import MFsetupMixin
 
@@ -794,22 +787,4 @@ class MFnwtModel(MFsetupMixin, Modflow):
         m = flopy_mf2005_load(m, load_only=load_only, forgive=forgive, check=check)
         print('finished loading model in {:.2f}s'.format(time.time() - t0))
         return m
-
-
-class Inset(MFnwtModel):
-    """Class representing a MODFLOW-NWT model that is an
-    inset of a parent MODFLOW model."""
-    def __init__(self, parent=None, cfg=None,
-                 modelname='pfl_nwt', exe_name='mfnwt',
-                 version='mfnwt', model_ws='.',
-                 external_path='external/', **kwargs):
-
-        MFnwtModel.__init__(self,  parent=parent, cfg=cfg,
-                            modelname=modelname, exe_name=exe_name,
-                            version=version, model_ws=model_ws,
-                            external_path=external_path, **kwargs)
-
-        inset_cfg = load(self.source_path + '/inset_defaults.yml')
-        update(self.cfg, inset_cfg)
-        self.cfg['filename'] = self.source_path + '/inset_defaults.yml'
 

@@ -9,17 +9,15 @@ mf6 = flopy.mf6
 from gisutils import (shp2df, get_values_at_points, project, get_proj_str)
 from .bcs import get_bc_package_cells
 from .grid import MFsetupGrid, get_ij, setup_structured_grid, rasterize
-from .fileio import load, dump, load_array, save_array, check_source_files, flopy_mf2005_load, \
-    load_cfg, setup_external_filepaths
-from .utils import update, get_input_arguments
+from .fileio import (load, load_array, save_array, check_source_files,
+                     load_cfg, setup_external_filepaths)
 from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
 from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
 from .utils import update, flatten, get_input_arguments
 from .sourcedata import setup_array
-from .tdis import (setup_perioddata_group, setup_perioddata,
+from .tdis import (setup_perioddata,
                    get_parent_stress_periods, parse_perioddata_groups)
-from .testing import issequence
-from .units import convert_length_units, lenuni_text, itmuni_text, lenuni_values
+from .units import convert_length_units, lenuni_values
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
@@ -175,7 +173,9 @@ class MFsetupMixin():
     @property
     def perioddata(self):
         """DataFrame summarizing stress period information.
+        
         Columns:
+        
           start_date_time : pandas datetimes; start date/time of each stress period
           (does not include steady-state periods)
           end_date_time : pandas datetimes; end date/time of each stress period

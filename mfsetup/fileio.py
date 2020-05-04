@@ -1,3 +1,5 @@
+"""Functions for reading and writing stuff to disk, and working with file paths.
+"""
 import inspect
 import sys
 import os

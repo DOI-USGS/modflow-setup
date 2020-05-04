@@ -1,7 +1,5 @@
-import sys
 import os
 import time
-import shutil
 from collections import defaultdict
 import numpy as np
 import pandas as pd
@@ -15,7 +13,6 @@ from .discretization import (make_idomain, make_lgr_idomain, deactivate_idomain_
                              create_vertical_pass_through_cells)
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
-from .grid import MFsetupGrid
 from .lakes import (setup_lake_connectiondata, setup_lake_info,
                     setup_lake_tablefiles, setup_lake_fluxes,
                     get_lakeperioddata, setup_mf6_lake_obs)

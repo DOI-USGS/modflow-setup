@@ -223,16 +223,16 @@ def fill_cells_vertically(top, botm):
     all have valid thicknesses (and all other layers have zero thicknesses).
 
     algorithm:
-    * given a top and botm array (top of the model and layer bottom elevations),
-      get the layer thicknesses (accounting for any nodata values)
-      idomain != 1 cells in thickness array must be set to np.nan
-    * set thickness to zero in nan cells
-      take the cumulative sum of the thickness array along the 0th (depth) axis,
-      from the bottom of the array to the top (going backwards in a depth-positive sense)
-    * add the cumulative sum to the array bottom elevations. The backward difference
-      in bottom elevations should be zero in inactive cells, and representative of the
-      desired thickness in the active cells.
-    * append the model bottom elevations (excluded in bottom-up difference)
+        * given a top and botm array (top of the model and layer bottom elevations), 
+          get the layer thicknesses (accounting for any nodata values) idomain != 1 cells in 
+          thickness array must be set to np.nan
+        * set thickness to zero in nan cells take the cumulative sum of the thickness array 
+          along the 0th (depth) axis, from the bottom of the array to the top 
+          (going backwards in a depth-positive sense)
+        * add the cumulative sum to the array bottom elevations. The backward difference in 
+          bottom elevations should be zero in inactive cells, and representative of the 
+          desired thickness in the active cells.
+        * append the model bottom elevations (excluded in bottom-up difference)
 
     Parameters
     ----------
@@ -408,11 +408,9 @@ def make_idomain(top, botm, nodata=-9999,
     cells that will be excluded from the simulation. Cells are
     excluded based on:
     1) np.nans or nodata values in the botm array
-    2) np.nans or nodata values in the top array
-       (applies to the highest cells with valid botm elevations;
-       in other words, these cells have no thicknesses)
-    3) layer thicknesses less than the specified minimum thickness
-       plus a tolerance (tol)
+    2) np.nans or nodata values in the top array (applies to the highest cells with valid botm elevations; 
+    in other words, these cells have no thicknesses)
+    3) layer thicknesses less than the specified minimum thickness plus a tolerance (tol)
 
     Parameters
     ----------
@@ -558,23 +556,22 @@ def populate_values(values_dict, array_shape=None):
 
 def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_data_value=0,
                      extend_top=True, extend_botm=False, tol=0.1):
-    """Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top
-    and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and
-    additional elevation surfaces forming layering below the voxel grid (model_botm). 
+    """Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top 
+    and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and 
+    additional elevation surfaces forming layering below the voxel grid (model_botm).
     
         * In places where the model_botm elevations are above the lowest voxel elevations, 
-        the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations 
-        (effectively giving the underlying layer zero-thickness). 
-        * Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a
-         no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey 
-         of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then 
-         spans the highest and lowest valid voxels. 
+          the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations 
+          (effectively giving the underlying layer zero-thickness).
+        * Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a 
+          no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey 
+          of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then spans the highest and lowest valid voxels. 
         * In places where the model_top (typically land-surface) elevations are higher than the highest valid voxel, 
-         the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer 
-         can be created between the top edge of the highest voxel and model_top (extent_top=False). 
+          the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer 
+          can be created between the top edge of the highest voxel and model_top (extent_top=False). 
         * Similarly, in places where elevations in model_botm are below the lowest valid voxel, the lowest voxel 
-         elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill
-         the gap between the lowest voxel and highest model_botm (extend_botm=False).
+          elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill 
+          the gap between the lowest voxel and highest model_botm (extend_botm=False).
 
     Parameters
     ----------

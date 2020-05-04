@@ -29,6 +29,12 @@ Modflow-setup is intended to facilitate automated setup of MODFLOW models, from 
    
 .. toctree::
   :maxdepth: 1
+  :caption: Code reference
+  
+   Modules <api/index>
+
+.. toctree::
+  :maxdepth: 1
   :caption: Release history
   
    Release History <release-history>
