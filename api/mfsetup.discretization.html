@@ -1,0 +1,631 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mfsetup.discretization module &mdash; modflow-setup 0.post50+g3d84edd documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mfsetup.fileio module" href="mfsetup.fileio.html" />
+    <link rel="prev" title="MFsetupMixin class" href="mfsetup.mfmodel.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> modflow-setup
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.post50+g3d84edd
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Code reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Model classes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html#supporting-modules">Supporting modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mfsetup.discretization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Release history</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to modflow-setup</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Model classes</a> &raquo;</li>
+        
+      <li>mfsetup.discretization module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/mfsetup.discretization.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-mfsetup.discretization">
+<span id="mfsetup-discretization-module"></span><h1>mfsetup.discretization module<a class="headerlink" href="#module-mfsetup.discretization" title="Permalink to this headline">¶</a></h1>
+<p>Functions related to the Discretization Package.</p>
+<dl class="py function">
+<dt id="mfsetup.discretization.adjust_layers">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">adjust_layers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dis</span></em>, <em class="sig-param"><span class="n">minimum_thickness</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#adjust_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.adjust_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust bottom layer elevations to maintain a minimum thickness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>dis</strong><span class="classifier">flopy.modflow.ModflowDis instance</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>new_layer_elevs</strong><span class="classifier">ndarray of shape (nlay, ncol, nrow)</span></dt><dd><p>New layer bottom elevations</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.cellids_to_kij">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">cellids_to_kij</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cellids</span></em>, <em class="sig-param"><span class="n">drop_inactive</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#cellids_to_kij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.cellids_to_kij" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack tuples of MODFLOW-6 cellids (k, i, j) to
+lists of k, i, j values; ignoring instances
+where cellid is None (unconnected cells).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cellids</strong><span class="classifier">sequence of (k, i, j) tuples</span></dt><dd></dd>
+<dt><strong>drop_inactive</strong><span class="classifier">bool</span></dt><dd><p>If True, drop cellids == ‘none’. If False,
+distribute these to k, i, j.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>k, i, j</strong><span class="classifier">1D numpy arrays of integers</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.create_vertical_pass_through_cells">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">create_vertical_pass_through_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idomain</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#create_vertical_pass_through_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.create_vertical_pass_through_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces inactive cells with vertical pass-through cells at locations that have an active cell
+above and below by setting these cells to -1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>idomain</strong><span class="classifier">np.ndarray with 2 or 3 dimensions. 2D arrays are returned as-is.</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>revised</strong><span class="classifier">np.ndarray</span></dt><dd><p>idomain with -1s added at locations that were previous &lt;= 0
+that have an active cell (idomain=1) above and below.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.deactivate_idomain_above">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">deactivate_idomain_above</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idomain</span></em>, <em class="sig-param"><span class="n">packagedata</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#deactivate_idomain_above"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.deactivate_idomain_above" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets ibound to 0 for all cells above active SFR cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>packagedata</strong><span class="classifier">MFList, recarray or DataFrame</span></dt><dd><p>SFR package reach data</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This routine updates the ibound array of the flopy.model.ModflowBas6 instance. To produce a
+new BAS6 package file, model.write() or flopy.model.ModflowBas6.write()
+must be run.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.fill_cells_vertically">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">fill_cells_vertically</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top</span></em>, <em class="sig-param"><span class="n">botm</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#fill_cells_vertically"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.fill_cells_vertically" title="Permalink to this definition">¶</a></dt>
+<dd><p>In MODFLOW 6, cells where idomain != 1 are excluded from the solution.
+However, in the botm array, values are needed in overlying cells to
+compute layer thickness (cells with idomain != 1 overlying cells with idomain != 1 need
+values in botm). Given a 3D numpy array with nan values indicating excluded cells,
+fill in the nans with the overlying values. For example, given the column of cells
+[10, nan, 8, nan, nan, 5, nan, nan, nan, 1], fill the nan values to make
+[10, 10, 8, 8, 8, 5, 5, 5, 5], so that layers 2, 5, and 9 (zero-based)
+all have valid thicknesses (and all other layers have zero thicknesses).</p>
+<dl class="simple">
+<dt>algorithm:</dt><dd><ul class="simple">
+<li><p>given a top and botm array (top of the model and layer bottom elevations), 
+get the layer thicknesses (accounting for any nodata values) idomain != 1 cells in 
+thickness array must be set to np.nan</p></li>
+<li><p>set thickness to zero in nan cells take the cumulative sum of the thickness array 
+along the 0th (depth) axis, from the bottom of the array to the top 
+(going backwards in a depth-positive sense)</p></li>
+<li><p>add the cumulative sum to the array bottom elevations. The backward difference in 
+bottom elevations should be zero in inactive cells, and representative of the 
+desired thickness in the active cells.</p></li>
+<li><p>append the model bottom elevations (excluded in bottom-up difference)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>top</strong><span class="classifier">2D numpy array; model top elevations</span></dt><dd></dd>
+<dt><strong>botm</strong><span class="classifier">3D (nlay, nrow, ncol) array; model bottom elevations</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>top, botm</strong><span class="classifier">filled top and botm arrays</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.fill_empty_layers">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">fill_empty_layers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#fill_empty_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.fill_empty_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill empty layers in a 3D array by linearly interpolating
+between the values above and below. Layers are defined
+as empty if they contain all nan values. In the example of
+model layer elevations, this would create equal layer thicknesses
+between layer surfaces with values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">3D numpy.ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>filled</strong><span class="classifier">ndarray of same shape as array</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.find_remove_isolated_cells">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">find_remove_isolated_cells</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">minimum_cluster_size</span><span class="o">=</span><span class="default_value">10</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#find_remove_isolated_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.find_remove_isolated_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify clusters of isolated cells in a binary array.
+Remove clusters less than a specified minimum cluster size.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.fix_model_layer_conflicts">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">fix_model_layer_conflicts</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top_array</span></em>, <em class="sig-param"><span class="n">botm_array</span></em>, <em class="sig-param"><span class="n">ibound_array</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">minimum_thickness</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#fix_model_layer_conflicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.fix_model_layer_conflicts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare model layer elevations; adjust layer bottoms downward
+as necessary to maintain a minimum thickness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>top_array</strong><span class="classifier">2D numpy array (nrow * ncol)</span></dt><dd><p>Model top elevations</p>
+</dd>
+<dt><strong>botm_array</strong><span class="classifier">3D numpy array (nlay * nrow * ncol)</span></dt><dd><p>Model bottom elevations</p>
+</dd>
+<dt><strong>minimum thickness</strong><span class="classifier">scalar</span></dt><dd><p>Minimum layer thickness to enforce</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>new_botm_array</strong><span class="classifier">3D numpy array of new layer bottom elevations</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.get_layer">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">get_layer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">botm_array</span></em>, <em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">j</span></em>, <em class="sig-param"><span class="n">elev</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#get_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.get_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the layers for elevations at i, j locations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>botm_array</strong><span class="classifier">3D numpy array of layer bottom elevations</span></dt><dd></dd>
+<dt><strong>i</strong><span class="classifier">scaler or sequence</span></dt><dd><p>row index (zero-based)</p>
+</dd>
+<dt><strong>j</strong><span class="classifier">scaler or sequence</span></dt><dd><p>column index</p>
+</dd>
+<dt><strong>elev</strong><span class="classifier">scaler or sequence</span></dt><dd><p>elevation (in same units as model)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>k</strong><span class="classifier">np.ndarray (1-D) or scalar</span></dt><dd><p>zero-based layer index</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.get_layer_thicknesses">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">get_layer_thicknesses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top</span></em>, <em class="sig-param"><span class="n">botm</span></em>, <em class="sig-param"><span class="n">idomain</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#get_layer_thicknesses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.get_layer_thicknesses" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each i, j location in the grid, get thicknesses
+between pairs of subsequent valid elevation values. Make
+a thickness array of the same shape as the model grid, assign the
+computed thicknesses for each pair of valid elevations to the
+position of the elevation representing the cell botm. For example,
+given the column of cells [nan nan  8. nan nan nan nan nan  2. nan],
+a thickness of 6 would be assigned to the second to last layer
+(position -2).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>top</strong><span class="classifier">nrow x ncol array of model top elevations</span></dt><dd></dd>
+<dt><strong>botm</strong><span class="classifier">nlay x nrow x ncol array of model botm elevations</span></dt><dd></dd>
+<dt><strong>idomain</strong><span class="classifier">nlay x nrow x ncol array indicating cells to be</span></dt><dd><p>included in the model solution. idomain=0 are converted to np.nans
+in the example column of cells above. (optional)
+If idomain is not specified, excluded cells are expected to be
+designated in the top and botm arrays as np.nans.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Make a fake model grid with 7 layers, but only top and two layer bottoms specified:
+&gt;&gt;&gt; top = np.reshape([[10]]* 4, (2, 2))
+&gt;&gt;&gt; botm = np.reshape([[np.nan,  8., np.nan, np.nan, np.nan,  2., np.nan]]*4, (2, 2, 7)).transpose(2, 0, 1)
+&gt;&gt;&gt; result = get_layer_thicknesses(top, botm)
+&gt;&gt;&gt; result[:, 0, 0]
+array([nan  2. nan nan nan  6. nan])</p>
+<p>example with all layer elevations specified
+note: this is the same result that np.diff(… axis=0) would produce;
+except positive in the direction of the zero axis
+&gt;&gt;&gt; top = np.reshape([[10]] * 4, (2, 2))
+&gt;&gt;&gt; botm = np.reshape([[9, 8., 8, 6, 3, 2., -10]] * 4, (2, 2, 7)).transpose(2, 0, 1)
+&gt;&gt;&gt; result = get_layer_thicknesses(top, botm)
+array([1.,  1., 0., 2., 3.,  1., 12.])</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.make_ibound">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">make_ibound</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top</span></em>, <em class="sig-param"><span class="n">botm</span></em>, <em class="sig-param"><span class="n">nodata</span><span class="o">=</span><span class="default_value">- 9999</span></em>, <em class="sig-param"><span class="n">minimum_layer_thickness</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">drop_thin_cells</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">0.0001</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#make_ibound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.make_ibound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the ibound array that specifies
+cells that will be excluded from the simulation. Cells are
+excluded based on:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model</strong><span class="classifier">mfsetup.MFnwtModel model instance</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>idomain</strong><span class="classifier">np.ndarray (int)</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.make_idomain">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">make_idomain</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top</span></em>, <em class="sig-param"><span class="n">botm</span></em>, <em class="sig-param"><span class="n">nodata</span><span class="o">=</span><span class="default_value">- 9999</span></em>, <em class="sig-param"><span class="n">minimum_layer_thickness</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">drop_thin_cells</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">0.0001</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#make_idomain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.make_idomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the idomain array for MODFLOW 6 that specifies
+cells that will be excluded from the simulation. Cells are
+excluded based on:
+1) np.nans or nodata values in the botm array
+2) np.nans or nodata values in the top array (applies to the highest cells with valid botm elevations; 
+in other words, these cells have no thicknesses)
+3) layer thicknesses less than the specified minimum thickness plus a tolerance (tol)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model</strong><span class="classifier">mfsetup.MF6model model instance</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>idomain</strong><span class="classifier">np.ndarray (int)</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.make_lgr_idomain">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">make_lgr_idomain</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_modelgrid</span></em>, <em class="sig-param"><span class="n">inset_modelgrid</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#make_lgr_idomain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.make_lgr_idomain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inactivate cells in parent_modelgrid that coincide
+with area of inset_modelgrid.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.populate_values">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">populate_values</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values_dict</span></em>, <em class="sig-param"><span class="n">array_shape</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#populate_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.populate_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an input dictionary with non-consecutive keys,
+make a second dictionary with consecutive keys, with values
+that are linearly interpolated from the first dictionary,
+based on the key values. For example, given {0: 1.0, 2: 2.0},
+{0: 1.0, 1: 1.5, 2: 2.0} would be returned.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">populate_values</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span> <span class="n">array_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="go">{0: 1.0, 1: 1.5, 2: 2.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">populate_values</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span> <span class="n">array_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">{0: array([[1., 1.],</span>
+<span class="go">           [1., 1.]]),</span>
+<span class="go"> 1: array([[1.5, 1.5],</span>
+<span class="go">           [1.5, 1.5]]),</span>
+<span class="go"> 2: array([[2., 2.],</span>
+<span class="go">           [2., 2.]])}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.verify_minimum_layer_thickness">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">verify_minimum_layer_thickness</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">top</span></em>, <em class="sig-param"><span class="n">botm</span></em>, <em class="sig-param"><span class="n">isactive</span></em>, <em class="sig-param"><span class="n">minimum_layer_thickness</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#verify_minimum_layer_thickness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.verify_minimum_layer_thickness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verify that model layer thickness is equal to or
+greater than a minimum thickness.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.voxels_to_layers">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">voxels_to_layers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">voxel_array</span></em>, <em class="sig-param"><span class="n">z_edges</span></em>, <em class="sig-param"><span class="n">model_top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">no_data_value</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">extend_top</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">extend_botm</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#voxels_to_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.voxels_to_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top 
+and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and 
+additional elevation surfaces forming layering below the voxel grid (model_botm).</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>In places where the model_botm elevations are above the lowest voxel elevations, 
+the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations 
+(effectively giving the underlying layer zero-thickness).</p></li>
+<li><p>Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a 
+no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey 
+of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then spans the highest and lowest valid voxels.</p></li>
+<li><p>In places where the model_top (typically land-surface) elevations are higher than the highest valid voxel, 
+the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer 
+can be created between the top edge of the highest voxel and model_top (extent_top=False).</p></li>
+<li><p>Similarly, in places where elevations in model_botm are below the lowest valid voxel, the lowest voxel 
+elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill 
+the gap between the lowest voxel and highest model_botm (extend_botm=False).</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>voxel_array</strong><span class="classifier">3D numpy array</span></dt><dd><p>3D array of voxel data- could be zones or actually aquifer properties. Empty voxels
+can be marked with a no_data_value. Voxels are assumed to have the same horizontal
+discretization as the model_top and model_botm layers.</p>
+</dd>
+<dt><strong>z_edges</strong><span class="classifier">3D numpy array or sequence</span></dt><dd><p>Top and bottom edges of the voxels (length is voxel_array.shape[0] + 1). A sequence
+can be used to specify uniform voxel edge elevations; non-uniform top and bottom 
+elevations can be specified with a 3D numpy array (similar to the botm array in MODFLOW).</p>
+</dd>
+<dt><strong>model_top</strong><span class="classifier">2D numpy array</span></dt><dd><p>Top elevations of the model at each row/column location.</p>
+</dd>
+<dt><strong>model_botm</strong><span class="classifier">2D or 3D numpy array</span></dt><dd><p>Model layer(s) underlying the voxel grid.</p>
+</dd>
+<dt><strong>no_data_value</strong><span class="classifier">scalar, optional</span></dt><dd><p>Indicates empty voxels in voxel_array.</p>
+</dd>
+<dt><strong>extend_top</strong><span class="classifier">bool, optional</span></dt><dd><p>Option to extend the top voxel layer to the model_top, by default True.</p>
+</dd>
+<dt><strong>extend_botm</strong><span class="classifier">bool, optional</span></dt><dd><p>Option to extend the bottom voxel layer to the next layer below in model_botm, 
+by default False.</p>
+</dd>
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Depth tolerance used in comparing the voxel edges to model_top and model_botm.
+For example, if model_top - z_edges[0] is less than tol, the model_top and top voxel
+edge will be considered equal, and no additional layer will be added, regardless of extend_top.
+by default 0.1</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>layers</strong><span class="classifier">3D numpy array of shape (nlay +1, nrow, ncol)</span></dt><dd><p>Model layer elevations (vertical edges of cells), including the model top.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If z_edges is not 1D or 3D</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.discretization.weighted_average_between_layers">
+<code class="sig-prename descclassname">mfsetup.discretization.</code><code class="sig-name descname">weighted_average_between_layers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr0</span></em>, <em class="sig-param"><span class="n">arr1</span></em>, <em class="sig-param"><span class="n">weight0</span><span class="o">=</span><span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#weighted_average_between_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.discretization.weighted_average_between_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mfsetup.fileio.html" class="btn btn-neutral float-right" title="mfsetup.fileio module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mfsetup.mfmodel.html" class="btn btn-neutral float-left" title="MFsetupMixin class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on May 06, 2020.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
