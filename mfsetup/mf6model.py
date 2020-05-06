@@ -699,7 +699,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                'belev', 'telev', 'connlen', 'connwidth']
         kwargs['connectiondata'] = connectiondata[connectiondata_cols].values.tolist()
         kwargs['ntables'] = len(tab_files)
-        kwargs['tables'] = [(i, f) for i, f in enumerate(tab_files)]
+        kwargs['tables'] = [(i, f, 'junk', 'junk') for i, f in enumerate(tab_files)]
         kwargs['outlets'] = None  # not implemented
         #kwargs['outletperioddata'] = None  # not implemented
         kwargs['perioddata'] = lakeperioddata
