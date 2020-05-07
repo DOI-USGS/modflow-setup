@@ -886,7 +886,8 @@ class MFsetupMixin():
         assert np.array_equal(self._perioddata['per'].values, np.arange(len(self._perioddata)))
         # reset nper property so that it will reference perioddata table
         self._nper = None
-        self._perioddata.to_csv('{}/tables/stress_period_data.csv'.format(self.model_ws), index=False)
+        path = cfg['postprocessing']['output_folders']['tables']
+        self._perioddata.to_csv('{}/stress_period_data.csv'.format(path), index=False)
 
     def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
                       source_model=None, source_package=None,
