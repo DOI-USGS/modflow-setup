@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post50+gf758815 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post50+g0a31a0b documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.post50+gf758815
+                0.post50+g0a31a0b
               </div>
             
           
@@ -1059,7 +1059,8 @@
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="p">)))</span>
         <span class="c1"># reset nper property so that it will reference perioddata table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nper</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/tables/stress_period_data.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;postprocessing&#39;</span><span class="p">][</span><span class="s1">&#39;output_folders&#39;</span><span class="p">][</span><span class="s1">&#39;tables&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/stress_period_data.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_setup_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mf">1e30</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1e30</span><span class="p">,</span>
                       <span class="n">source_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_package</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
