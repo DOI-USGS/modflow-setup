@@ -51,7 +51,7 @@ script:
   - set -e
   - make -C docs html  # Build the documentation.
   - pip install doctr
-  #  Publish the documentation with builds on master or develop branch
+  #  Publish the documentation with builds on master or develop branch  
   - doctr deploy --built-docs docs/build/html . --branch-whitelist master develop
 
 after_success:

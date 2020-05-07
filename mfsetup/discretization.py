@@ -555,7 +555,8 @@ def populate_values(values_dict, array_shape=None):
 
 
 def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_data_value=0,
-                     extend_top=True, extend_botm=False, tol=0.1):
+                     extend_top=True, extend_botm=False, tol=0.1,
+                     minimum_frac_active_cells=0.01):
     """Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top 
     and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and 
     additional elevation surfaces forming layering below the voxel grid (model_botm).
@@ -599,6 +600,9 @@ def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_d
         For example, if model_top - z_edges[0] is less than tol, the model_top and top voxel
         edge will be considered equal, and no additional layer will be added, regardless of extend_top.
         by default 0.1
+    minimum_frac_active_cells : float
+        Minimum fraction of cells with a thickness of > 0 for a layer to be retained,
+        by default 0.01.
 
     Returns
     -------
@@ -663,12 +667,14 @@ def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_d
     else:
         layers[0] = model_top
 
-    # option to add another layer below voxel sequence,
-    # if any part of the model botm is below the lowest valid voxel edges
+    # option to add additional layers below the voxel sequence,
+    # if any part of those layers in model botm array are below the lowest valid voxel edges
     if not extend_botm:
         new_botms = [layers]
         for layer_botm in model_botm:
-            if np.any(layers[-1] > layer_botm + tol):
+            # get the percentage of active cells with > 0 thickness
+            pct_cells = np.sum(layers[-1] > layer_botm + tol)/layers[-1].size
+            if pct_cells > minimum_frac_active_cells:
                 new_botms.append(np.reshape(layer_botm, (1, *layer_botm.shape)))
             layers = np.vstack(new_botms)
     # otherwise just set the lowest voxel edges to the highest layer in model botm
