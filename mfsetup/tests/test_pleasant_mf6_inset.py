@@ -282,7 +282,8 @@ def test_rch_setup(get_pleasant_mf6_with_dis):
 
 
 def test_wel_setup(get_pleasant_mf6_with_dis):
-    m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    m = get_pleasant_mf6_with_dis
+    m.cfg['wel']['external_files'] = False
     wel = m.setup_wel()
     wel.write()
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))
@@ -297,6 +298,7 @@ def test_wel_setup(get_pleasant_mf6_with_dis):
 
 def test_lak_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    m.cfg['lak']['external_files'] = False
     lak = m.setup_lak()
     lak.write()
     assert isinstance(lak, mf6.ModflowGwflak)
@@ -324,6 +326,32 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
             loc = m.lak.perioddata.array[0]['laksetting'] == var
             value = m.lak.perioddata.array[per]['laksetting_data'][loc][0]
             assert np.allclose(value, lake_fluxes.loc[per, var])
+
+
+def test_external_tables(get_pleasant_mf6_with_dis):
+    m = get_pleasant_mf6_with_dis
+    lak = m.setup_lak()
+    lak.write()
+    assert os.path.exists(m.cfg['external_files']['lak_connectiondata'][0])
+    blocks = read_mf6_block(lak.filename, 'connectiondata')
+    assert blocks['connectiondata'][0].strip().split()[1].strip('\'') == \
+           m.cfg['external_files']['lak_connectiondata'][0]
+
+    wel = m.setup_wel()
+    wel.write()
+    for f in m.cfg['external_files']['wel_stress_period_data']:
+        assert os.path.exists(f)
+    blocks = read_mf6_block(wel.filename, 'period')
+    for period, block in blocks.items():
+        assert block[0].strip().split()[1].strip('\'') in m.cfg['external_files']['wel_stress_period_data'].values()
+
+    chd = m.setup_perimeter_boundary()
+    chd.write()
+    for f in m.cfg['external_files']['chd_stress_period_data']:
+        assert os.path.exists(f)
+    blocks = read_mf6_block(chd.filename, 'period')
+    for period, block in blocks.items():
+        assert block[0].strip().split()[1].strip('\'') in m.cfg['external_files']['chd_stress_period_data'].values()
 
 
 def test_lak_obs_setup(get_pleasant_mf6_with_dis):
@@ -399,10 +427,10 @@ def test_sfr_setup(get_pleasant_mf6_with_dis):
     assert os.path.exists(sfr_obs_filename)
 
 
-
 def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
 
     m = get_pleasant_mf6_with_dis  #deepcopy(pfl_nwt_with_dis)
+    m.cfg['chd']['external_files'] = False
     chd = m.setup_perimeter_boundary()
     chd.write()
     assert os.path.exists(os.path.join(m.model_ws, chd.filename))

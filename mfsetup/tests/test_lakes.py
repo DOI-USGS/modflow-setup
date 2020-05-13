@@ -77,7 +77,7 @@ def test_setup_lake_info(get_pleasant_mf6_with_dis):
 
 def test_setup_lake_connectiondata(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
-    df = setup_lake_connectiondata(m)
+    df = setup_lake_connectiondata(m, for_external_file=False)
     df['k'], df['i'], df['j'] = zip(*df['cellid'])
     vertical_connections = df.loc[df.claktype == 'vertical']
     lakezones = load_array(m.cfg['intermediate_data']['lakzones'][0])

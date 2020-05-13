@@ -351,7 +351,7 @@ class MFsetupMixin():
         if self._lakarr is None:
             self.setup_external_filepaths('lak', 'lakarr',
                                           self.cfg['lak']['{}_filename_fmt'.format('lakarr')],
-                                          nfiles=self.nlay)
+                                          file_numbers=list(range(self.nlay)))
             if self.isbc is None:
                 return None
             else:
@@ -547,7 +547,7 @@ class MFsetupMixin():
         return regridded
 
     def setup_external_filepaths(self, package, variable_name,
-                                 filename_format, nfiles=1):
+                                 filename_format, file_numbers=None):
         """Set up external file paths for a MODFLOW package variable. Sets paths
         for intermediate files, which are written from the (processed) source data.
         Intermediate files are supplied to Flopy as external files for a given package
@@ -567,8 +567,9 @@ class MFsetupMixin():
             (e.g. 'top.dat'), or for variables where a file is written for each layer or
             stress period, a format string that will be formated with the zero-based layer
             number (e.g. 'botm{}.dat') for files botm0.dat, botm1.dat, ...
-        nfiles : int
-            Number of external files for the variable (e.g. nlay or nper)
+        file_numbers : list of ints
+            List of numbers for the external files. Usually these represent zero-based
+            layers or stress periods.
         relative_external_paths : bool
             If true, external paths will be specified relative to model_ws,
             otherwise, they will be absolute paths
@@ -585,7 +586,7 @@ class MFsetupMixin():
         if self.lgr or self._is_lgr:
             filename_format = '{}_{}'.format(self.name, filename_format)
         return setup_external_filepaths(self, package, variable_name,
-                                        filename_format, nfiles=nfiles,
+                                        filename_format, file_numbers=file_numbers,
                                         relative_external_paths=self.relative_external_paths)
 
     def _get_model_ws(self):
@@ -755,7 +756,7 @@ class MFsetupMixin():
     def _set_lakarr(self):
         self.setup_external_filepaths('lak', 'lakarr',
                                       self.cfg['lak']['{}_filename_fmt'.format('lakarr')],
-                                      nfiles=self.nlay)
+                                      file_numbers=list(range(self.nlay)))
         # assign lakarr values from 3D isbc array
         lakarr = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)
         for k in range(self.nlay):

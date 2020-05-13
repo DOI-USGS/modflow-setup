@@ -41,12 +41,19 @@ def test_notebook(notebook, kernel_name, tmpdir, project_root_path):
     # run autotest on each notebook
     notebook = os.path.join(project_root_path, notebook)
     path, fname = os.path.split(notebook)
+    
+    # save the rendered notebook to the documentation folder
+    # so that nbsphinx can render it in the docs
+    # the docs get built when the tests are run on travis
+    # so successful execution of this test will build the notebooks for the docs
+    output_folder = os.path.join(project_root_path, 'docs/source/notebooks')
+    
     cmd = ('jupyter ' + 'nbconvert '
            '--ExecutePreprocessor.timeout=600 '
            '--ExecutePreprocessor.kernel_name={} '.format(kernel_name) +
            '--to ' + 'notebook '
            '--execute ' + '{} '.format(notebook) +
-           '--output-dir ' + '{} '.format(tmpdir) +
+           '--output-dir ' + '{} '.format(output_folder) +
            '--output ' + '{}'.format(fname))
     ival = os.system(cmd)
     assert ival == 0, 'could not run {}'.format(os.path.abspath(notebook))

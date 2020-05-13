@@ -39,7 +39,7 @@ def update(d, u):
     return d
 
 
-def get_input_arguments(kwargs, function, warn=True, exclude=None):
+def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=None):
     """Return subset of keyword arguments in kwargs dict
     that are valid parameters to a function or method.
 
@@ -57,7 +57,8 @@ def get_input_arguments(kwargs, function, warn=True, exclude=None):
     input_kwargs : dict
     """
     np.set_printoptions(threshold=20)
-    print('\narguments to {}:'.format(function.__qualname__))
+    if verbose:
+        print('\narguments to {}:'.format(function.__qualname__))
     params = inspect.signature(function)
     input_kwargs = {}
     not_arguments = {}
@@ -69,12 +70,13 @@ def get_input_arguments(kwargs, function, warn=True, exclude=None):
             print_item(k, v)
         else:
             not_arguments[k] = v
-    if warn:
+    if verbose and warn:
         print('\nother arguments:')
         for k, v in not_arguments.items():
             #print('{}: {}'.format(k, v))
             print_item(k, v)
-    print('\n')
+    if verbose:
+        print('\n')
     return input_kwargs
 
 

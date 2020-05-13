@@ -21,7 +21,7 @@ def test_minimum_well_layer_thickness(shellmound_model_with_dis, all_layers):
     minthickness = 2
     m.cfg['wel']['source_data']['csvfiles']['vertical_flux_distribution']\
         ['minimum_layer_thickness'] = minthickness
-    df = setup_wel_data(m)
+    df = setup_wel_data(m, for_external_files=False)
     assert np.all((-np.diff(all_layers, axis=0))[df.k, df.i, df.j] > minthickness)
 
 
@@ -46,7 +46,9 @@ def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
 
 
 def test_get_package_stress_period_data(models_with_dis):
-    wel = models_with_dis.setup_wel()
+    m = models_with_dis
+    m.cfg['wel']['external_files'] = False
+    wel = m.setup_wel()
     result = get_package_stress_period_data(models_with_dis, package_name='wel')
     assert isinstance(result, pd.DataFrame)
     assert len({'k', 'i', 'j'}.intersection(result.columns)) == 3

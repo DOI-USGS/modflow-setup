@@ -55,7 +55,6 @@ def test_conflicts_negative_layers():
             -6.611952336182595, -609.1836436464844]
     botm = np.transpose(np.array(botm) * np.ones((2, 2, len(botm))))
     result = fix_model_layer_conflicts(top, botm, minimum_thickness=1)
-    j=2
 
 
 @pytest.fixture

@@ -86,7 +86,7 @@ def test_wel_setup(get_pleasant_nwt_with_dis_bas6):
     wel.write_file()
     assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
     df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
-    bfluxes0 = df.loc[(df.comments == 'boundary_flux') & (df.per == 0)]
+    bfluxes0 = df.loc[(df.boundname == 'boundary_flux') & (df.per == 0)]
     assert len(bfluxes0) == 0
     # verify that water use fluxes are negative
     assert wel.stress_period_data[0]['flux'].max() <= 0.

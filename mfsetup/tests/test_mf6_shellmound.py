@@ -538,6 +538,7 @@ def test_rch_setup(shellmound_model_with_dis):
 
 def test_wel_setup(shellmound_model_with_dis):
     m = shellmound_model_with_dis  # deepcopy(model)
+    m.cfg['wel']['external_files'] = False
     wel = m.setup_wel()
     wel.write()
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))

@@ -1,5 +1,3 @@
-# argments to flopy.modflow.Modflow.__init__ or load for pfl_nwt
-
 model:
   modelname: 'pfl'
   model_ws: '../tmp/pfl_inset/'
@@ -19,7 +17,6 @@ model:
              'nwt'
   ]
 
-# argments to flopy.modflow.Modflow.load for pfl_nwt
 parent:
   namefile: 'pfl.nam'
   model_ws: 'plainfieldlakes/'
@@ -109,8 +106,8 @@ rch:
 wel:
   options: ['SPECIFY', '0.01']
   source_data:
-    wells: # name: per, x, y or i, j location; layer (k), flux; or csv file with these columns
-      well1: {per: 1, x: 563343.92, y: 414988.09, k: 0, flux: -2000}
+    wells: # name: per, x, y or i, j location; layer (k), q (flux); or csv file with these columns
+      well1: {per: 1, x: 563343.92, y: 414988.09, k: 0, q: -2000}
     wdnr_dataset:
       water_use: 'plainfieldlakes/source_data/master_wu.csv' # monthly water use rates from WDNR
       water_use_points: 'plainfieldlakes/source_data/wu_points.shp' # point locations of wells in water_use
@@ -124,7 +121,7 @@ mnw:
   added_wells:
     well1: {per: 1, x: 563343.92, y: 414988.09,
             depth: 10, # m
-            flux: -2000,
+            flux: -2000,  # pumping rate, in model units
             rw: 0.1, # well radius, m
             rskin: 0.1524, # radius to outer limit of skin
             kskin: 50 # m/day

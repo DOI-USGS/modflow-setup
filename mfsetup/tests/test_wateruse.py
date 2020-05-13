@@ -55,10 +55,10 @@ def test_get_mean_pumping_rates(pfl_nwt_with_dis_bas6):
     means = wu.dropna(subset=['annual_wdrl_total_gallons'], axis=0).groupby('site_no').mean()
     means['Q_m3d'] = sums['annual_wdrl_total_gallons'] / sums['days'] / conversions[2]
 
-    sites = [int(s.strip('site')) for s in df.comments]
+    sites = [int(s.strip('site')) for s in df.boundname]
     means = means.loc[sites]
     compare = pd.DataFrame({'site_no': df.index,
-                            'Q1': df['flux'],  # wel package flux computed by get_mean_pumping_rates
+                            'Q1': df['q'],  # wel package flux computed by get_mean_pumping_rates
                             'Q2': -means['Q_m3d']})  # expected wel package flux
     compare['rpd'] = np.abs(np.abs(compare.Q2-compare.Q1)/compare.Q1)
     compare.dropna(subset=['rpd'], axis=0, inplace=True)
@@ -91,11 +91,11 @@ def test_resample_pumping_rates(pleasant_nwt_with_dis_bas6):
         site_data = monthly_data.loc[loc].sort_values(by=['year', 'month'])
         ndays = perioddata.iloc[1:].loc[site_data.datetime, 'perlen']
         periods = perioddata.iloc[1:].loc[site_data.datetime, 'per'].values
-        site_data['flux'] = site_data['gallons'].values/ndays.values / conversions[m.dis.lenuni]
-        wur_loc = [True if str(site) in r.comments.lower() and r.per in periods
+        site_data['q'] = site_data['gallons'].values/ndays.values / conversions[m.dis.lenuni]
+        wur_loc = [True if str(site) in r.boundname.lower() and r.per in periods
                    else False for i, r in wu_resampled.iterrows()]
-        assert len(-site_data.flux.values) == len(wu_resampled.loc[wur_loc, 'flux'].values)
-        assert np.allclose(-site_data.flux.values, wu_resampled.loc[wur_loc, 'flux'].values)
+        assert len(-site_data.q.values) == len(wu_resampled.loc[wur_loc, 'q'].values)
+        assert np.allclose(-site_data.q.values, wu_resampled.loc[wur_loc, 'q'].values)
 
 
 @pytest.mark.skip("still working on this test")
@@ -129,8 +129,8 @@ def test_resample_ss_first_period(inset_with_transient_parent, wu_data):
                                  period_stats={0: 'mean'}
                                  )
     # reference fluxes by k, i, j locations
-    wel_ss_fluxes = dict(zip(zip(df.k, df.i, df.j), df.flux0))
-    expected_ss_fluxes = dict(zip(zip(df2.k, df2.i, df2.j), df2.flux))
+    wel_ss_fluxes = dict(zip(zip(df.k, df.i, df.j), df.q0))
+    expected_ss_fluxes = dict(zip(zip(df2.k, df2.i, df2.j), df2.q))
 
     # put the site numbers back with the well package data
     sites = dict(zip(zip(well_info.k, well_info.i, well_info.j), well_info.index))
@@ -148,9 +148,9 @@ def test_resample_ss_first_period(inset_with_transient_parent, wu_data):
         loc = (monthly_data.site_no == site) & \
               (monthly_data.year.isin(transient_perioddata['start_datetime'].dt.year.unique()))
         site_data = monthly_data.loc[loc].sort_values(by=['year', 'month'])
-        site_data['flux'] = site_data['gallons'] / transient_perioddata.perlen.values / conversions[m.dis.lenuni]
-        for i, q in enumerate(site_data.flux.values):
-            col = 'flux{}'.format(i + 1)
+        site_data['q'] = site_data['gallons'] / transient_perioddata.perlen.values / conversions[m.dis.lenuni]
+        for i, q in enumerate(site_data.q.values):
+            col = 'q{}'.format(i + 1)
             value = 0.0
             if col in df.columns:
                 value = df.loc[site, col]

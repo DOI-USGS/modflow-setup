@@ -378,7 +378,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print('setting up WEL package...')
         t0 = time.time()
 
-        df = setup_wel_data(self)
+        # munge the well package input
+        # for_external_files only needs to be called on the modflow-6 side
+        df = setup_wel_data(self, for_external_files=False)
 
         # extend spd dtype to include comments
         dtype = fm.ModflowWel.get_default_dtype()
@@ -388,8 +390,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
         spd = {}
         for per, perdf in groups:
             ra = np.recarray(len(perdf), dtype=dtype)
-            for c in ['k', 'i', 'j', 'flux']:
+            for c in ['k', 'i', 'j']:
                 ra[c] = perdf[c]
+            ra['flux'] = perdf['q']
             spd[per] = ra
 
         wel = fm.ModflowWel(self, ipakcb=self.ipakcb,
@@ -545,11 +548,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
             tab_files_argument = [os.path.relpath(f) for f in tab_files]
 
         self.setup_external_filepaths('lak', 'lakzones',
-                                      self.cfg['lak']['{}_filename_fmt'.format('lakzones')],
-                                      nfiles=1)
+                                      self.cfg['lak']['{}_filename_fmt'.format('lakzones')])
         self.setup_external_filepaths('lak', 'bdlknc',
                                       self.cfg['lak']['{}_filename_fmt'.format('bdlknc')],
-                                      nfiles=self.nlay)
+                                      file_numbers=list(range(self.nlay)))
 
         # make the arrays or load them
         lakzones = make_bdlknc_zones(self.modelgrid, self.lake_info,
@@ -739,7 +741,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                   inset_parent_layer_mapping=self.parent_layers,
                   inset_parent_period_mapping=self.parent_stress_periods)
 
-        df = tmr.get_inset_boundary_heads()
+        df = tmr.get_inset_boundary_heads(for_external_files=False)
 
         spd = {}
         by_period = df.groupby('per')

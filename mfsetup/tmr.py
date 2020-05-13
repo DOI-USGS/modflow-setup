@@ -538,7 +538,7 @@ class Tmr:
         for k, v in components.items():
             print('{} {parent} {inset}'.format(k, **v))
 
-    def get_inset_boundary_heads(self):
+    def get_inset_boundary_heads(self, for_external_files=True):
 
         # source data
         headfile = self.hpth
@@ -626,6 +626,13 @@ class Tmr:
                                })
             dfs.append(df)
         df = pd.concat(dfs)
+
+        # convert to one-based and comment out header if df will be written straight to external file
+        if for_external_files:
+            df.rename(columns={'k': '#k'}, inplace=True)
+            df['#k'] += 1
+            df['i'] += 1
+            df['j'] += 1
         return df
 
 

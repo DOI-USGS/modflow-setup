@@ -331,7 +331,7 @@ def test_wel_tmr(pfl_nwt_with_dis):
     wel.write_file()
     assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
     df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
-    bfluxes0 = df.loc[(df.comments == 'boundary_flux') & (df.per == 0)]
+    bfluxes0 = df.loc[(df.boundname == 'boundary_flux') & (df.per == 0)]
     assert len(bfluxes0) == (m.nrow*2 + m.ncol*2) * m.nlay
 
 
@@ -345,7 +345,7 @@ def test_wel_setup(pfl_nwt_with_dis_bas6):
     wel.write_file()
     assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
     df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
-    bfluxes0 = df.loc[(df.comments == 'boundary_flux') & (df.per == 0)]
+    bfluxes0 = df.loc[(df.boundname == 'boundary_flux') & (df.per == 0)]
     assert len(bfluxes0) == 0
     # verify that water use fluxes are negative
     assert wel.stress_period_data[0]['flux'].max() <= 0.
@@ -366,7 +366,7 @@ def test_wel_setup_drop_ids(pfl_nwt_with_dis_bas6):
     m.cfg['wel']['source_data']['wdnr_dataset']['drop_ids'] = [4026]
     wel = m.setup_wel()
     df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
-    assert 'site4026' not in df.comments.tolist()
+    assert 'site4026' not in df.boundname.tolist()
     assert len(df) == len(wel.stress_period_data[1])
 
 

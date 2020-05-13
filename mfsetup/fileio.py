@@ -398,7 +398,7 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
 
 
 def setup_external_filepaths(model, package, variable_name,
-                             filename_format, nfiles=1,
+                             filename_format, file_numbers=None,
                              relative_external_paths=True):
     """Set up external file paths for a MODFLOW package variable. Sets paths
     for intermediate files, which are written from the (processed) source data.
@@ -421,8 +421,9 @@ def setup_external_filepaths(model, package, variable_name,
         (e.g. 'top.dat'), or for variables where a file is written for each layer or
         stress period, a format string that will be formated with the zero-based layer
         number (e.g. 'botm{}.dat') for files botm0.dat, botm1.dat, ...
-    nfiles : int
-        Number of external files for the variable (e.g. nlay or nper)
+    file_numbers : list of ints
+        List of numbers for the external files. Usually these represent zero-based
+        layers or stress periods.
 
     Returns
     -------
@@ -433,6 +434,8 @@ def setup_external_filepaths(model, package, variable_name,
     For MODFLOW-6 models, Adds external file paths to model.cfg[<package>][<variable_name>]
     """
     package = package.lower()
+    if file_numbers is None:
+        file_numbers = [0]
 
     # in lieu of a way to get these from Flopy somehow
     griddata_variables = ['top', 'botm', 'idomain', 'strt',
@@ -441,22 +444,27 @@ def setup_external_filepaths(model, package, variable_name,
                              'finf', 'pet', 'extdp', 'extwc',
                              }
     transient3D_variables = {'lakarr', 'bdlknc'}
+    tabular_variables = {'connectiondata'}
+    transient_tabular_variables = {'stress_period_data'}
+    transient_variables = transient2D_variables | transient3D_variables | transient_tabular_variables
 
     model.get_package(package)
     # intermediate data
     filename_format = os.path.split(filename_format)[-1]
     if not relative_external_paths:
         intermediate_files = [os.path.normpath(os.path.join(model.tmpdir,
-                              filename_format).format(i)) for i in range(nfiles)]
+                              filename_format).format(i)) for i in file_numbers]
     else:
         intermediate_files = [os.path.join(model.tmpdir,
-                              filename_format).format(i) for i in range(nfiles)]
+                              filename_format).format(i) for i in file_numbers]
 
-    if variable_name in transient2D_variables:
-        model.cfg['intermediate_data'][variable_name] = {i: f for i, f in
-                                                         enumerate(intermediate_files)}
+    if variable_name in transient2D_variables or variable_name in transient_tabular_variables:
+        model.cfg['intermediate_data'][variable_name] = {per: f for per, f in
+                                                         zip(file_numbers, intermediate_files)}
     elif variable_name in transient3D_variables:
         model.cfg['intermediate_data'][variable_name] = {0: intermediate_files}
+    elif variable_name in tabular_variables:
+        model.cfg['intermediate_data']['{}_{}'.format(package, variable_name)] = intermediate_files
     else:
         model.cfg['intermediate_data'][variable_name] = intermediate_files
 
@@ -465,15 +473,15 @@ def setup_external_filepaths(model, package, variable_name,
     if not relative_external_paths:
         external_files = [os.path.normpath(os.path.join(model.model_ws,
                                        model.external_path,
-                                       filename_format.format(i))) for i in range(nfiles)]
+                                       filename_format.format(i))) for i in file_numbers]
     else:
         external_files = [os.path.join(model.model_ws,
                                        model.external_path,
-                                       filename_format.format(i)) for i in range(nfiles)]
+                                       filename_format.format(i)) for i in file_numbers]
 
-    if variable_name in transient2D_variables:
-        model.cfg['external_files'][variable_name] = {i: f for i, f in
-                                                         enumerate(external_files)}
+    if variable_name in transient2D_variables or variable_name in transient_tabular_variables:
+        model.cfg['external_files'][variable_name] = {per: f for per, f in
+                                                         zip(file_numbers, external_files)}
     elif variable_name in transient3D_variables:
         model.cfg['external_files'][variable_name] = {0: external_files}
     else:
@@ -483,17 +491,27 @@ def setup_external_filepaths(model, package, variable_name,
         # skip these for now (not implemented yet for MF6)
         if variable_name in transient3D_variables:
             return
-        #if not relative_external_paths:
         ext_files_key = 'external_files'
-        #else:
-        #    ext_files_key = 'intermediate_data'
-        filepaths = [{'filename': model.cfg[ext_files_key][variable_name][i]}
-                     for i in range(len(external_files))]
+        if variable_name not in transient_variables:
+            filepaths = [{'filename': f} for f in model.cfg[ext_files_key][variable_name]]
+        else:
+            filepaths = {per: {'filename': f}
+                         for per, f in model.cfg[ext_files_key][variable_name].items()}
         # set package variable input (to Flopy)
         if variable_name in griddata_variables:
             model.cfg[package]['griddata'][variable_name] = filepaths
+        elif variable_name in tabular_variables:
+            model.cfg[package][variable_name] = filepaths[0]
+            model.cfg[ext_files_key]['{}_{}'.format(package, variable_name)] = model.cfg[ext_files_key].pop(variable_name)
+            #elif variable_name in transient_variables:
+            #    filepaths = {per: {'filename': f} for per, f in
+            #                 zip(file_numbers, model.cfg[ext_files_key][variable_name])}
+            #    model.cfg[package][variable_name] = filepaths
+        elif variable_name in transient_tabular_variables:
+            model.cfg[package][variable_name] = filepaths
+            model.cfg[ext_files_key]['{}_{}'.format(package, variable_name)] = model.cfg[ext_files_key].pop(variable_name)
         else:
-            model.cfg[package][variable_name] = {per: d for per, d in enumerate(filepaths)}
+            model.cfg[package][variable_name] = filepaths # {per: d for per, d in zip(file_numbers, filepaths)}
     else:
         filepaths = model.cfg['intermediate_data'][variable_name]
         model.cfg[package][variable_name] = filepaths
@@ -994,6 +1012,9 @@ def read_mf6_block(filename, blockname):
                     data[fname] = []
                 elif blockname == 'packagedata':
                     data['packagedata'] = []
+                else:
+                    blockname = line.strip().split()[-1]
+                    data[blockname] = []
                 read = blockname
                 continue
             if 'end' in line and blockname in line:
@@ -1012,6 +1033,8 @@ def read_mf6_block(filename, blockname):
                 data[fname].append(' '.join(line.strip().split()))
             elif read == 'packagedata':
                 data['packagedata'].append(' '.join(line.strip().split()))
+            elif read == blockname:
+                data[blockname].append(' '.join(line.strip().split()))
     return data
 
 

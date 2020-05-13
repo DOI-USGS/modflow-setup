@@ -1174,7 +1174,7 @@ def setup_array(model, package, var, data=None,
     # set paths to intermediate files and external files
     filepaths = model.setup_external_filepaths(package, var,
                                                model.cfg[package]['{}_filename_fmt'.format(var)],
-                                               nfiles=len(data))
+                                               file_numbers=list(data.keys()))
 
     # write out array data to intermediate files
     # assign lake recharge values (water balance surplus) for any high-K lakes
@@ -1195,8 +1195,7 @@ def setup_array(model, package, var, data=None,
     # with botm array above
     if var == 'botm':
         top_filepath = model.setup_external_filepaths(package, 'top',
-                                                      model.cfg[package]['top_filename_fmt'],
-                                                      nfiles=1)[0]
+                                                      model.cfg[package]['top_filename_fmt'])[0]
         save_array(top_filepath, top,
                    nodata=write_nodata,
                    fmt=write_fmt)

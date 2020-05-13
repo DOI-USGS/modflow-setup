@@ -1,0 +1,115 @@
+simulation:
+  sim_name: 'sm_tmr'
+  version: 'mf6'
+  sim_ws: '../tmp/shellmound_tmr_inset'
+
+model:
+  simulation: 'sm_tmr'
+  modelname: 'sm_tmr'
+  options:
+    print_input: True
+    save_flows: True
+    newton: True
+    newton_under_relaxation: False
+  packages: ['dis',
+             'ic',
+             'npf',
+             'oc',
+             'sto',
+             'rch',
+             'sfr',
+             'obs',
+             'wel',
+             'ims'
+  ]
+  external_path: 'external/'
+  relative_external_filepaths: True
+
+parent:
+  # argments to flopy.modflow.Modflow.load for parent model
+  namefile: 'shellmound.nam'
+  model_ws: 'shellmound/tmr_parent'
+  version: 'mf6'
+  # information for modflow-setup
+  # note: parent model is geo-located in namfile header
+  # (only works if length_units='meters')
+  headfile: '../meras3/meras3_1L/meras3_1L.hds'  # needed for the perimeter boundary setup
+  copy_stress_periods: 'all'
+  start_date_time: '1998-04-01'
+  inset_layer_mapping:  # mapping between inset and parent model layers
+    0: 0  # inset: parent  (inset layers 1 and 0 copied from parent layer 0)
+    1: 0
+    2: 1
+    3: 2
+    4: 3
+  length_units: 'meters'
+  time_units: 'days'
+
+setup_grid:
+  xoff: 501405 # lower left x-coordinate
+  yoff: 1175835 # lower left y-coordinate
+  rotation: 0.
+  epsg: 5070
+  snap_to_NHG: True
+
+
+dis:
+  remake_top: True
+  options:
+    length_units: 'meters'
+  dimensions:
+    nlay: 13
+    nrow: 30
+    ncol: 35
+  griddata:
+    delr: 1000.
+    delc: 1000.
+  source_data:
+    top:
+      filename: 'shellmound/rasters/meras_100m_dem.tif' # DEM file; path relative to setup script
+      elevation_units: 'feet'
+    botm:
+      filenames:
+        0: 'shellmound/rasters/vkbg_surf.tif' # Vicksburg-Jackson Group (top)
+        1: 'shellmound/rasters/ucaq_surf.tif' # Upper Claiborne aquifer (top)
+        2: 'shellmound/rasters/mccu_surf.tif' # Middle Claiborne confining unit (top)
+        3: 'shellmound/rasters/mcaq_surf.tif' # Middle Claiborne aquifer (top)
+        6: 'shellmound/rasters/lccu_surf.tif' # Lower Claiborne confining unit (top)
+        8: 'shellmound/rasters/lcaq_surf.tif' # Lower Claiborne aquifer (top)
+        9: 'shellmound/rasters/mwaq_surf.tif' # Middle Wilcox aquifer (top)
+        10: 'shellmound/rasters/lwaq_surf.tif' # Lower Wilcox aquifer (top)
+        12: 'shellmound/rasters/mdwy_surf.tif' # Midway confining unit (top)
+      elevation_units: 'feet'
+    idomain:
+      filename: 'shellmound/shps/active_area.shp'
+  minimum_layer_thickness: 1 # layers less than this thickness are converted to vertical pass-through cells
+  drop_thin_cells: True
+
+tdis:
+  options:
+    time_units: 'days'
+    start_date_time: '1998-04-01'
+  perioddata:
+    # time discretization info can be specified directly under the perioddata key
+    # or in groups of stress periods that are discretized in a similar way
+    group 1: # initial steady-state period (steady specified under sto package)
+      #perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
+      nper: 1
+      nstp: 1
+      tsmult: 1
+      steady: True  # "steady" can be entered here; otherwise the global entry specified in the sto package is used as the default
+      # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
+    group 2: # single long period for spin-up of pumping
+      start_date_time: '1998-04-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
+      end_date_time: '2007-04-01'  # end times are specified following pandas slice convention, which includes the specified end date
+      nper: 1
+      nstp: 10
+      tsmult: 1.5
+      steady: False
+    group 3:
+      start_date_time: '2007-04-01'
+      end_date_time: '2015-09-30'  # end times are specified following pandas slice convention, which includes the specified end date
+      freq: '6MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
+      nstp: 5
+      tsmult: 1.5
+      steady: False

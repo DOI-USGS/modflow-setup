@@ -17,7 +17,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
+import shutil
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -41,9 +42,27 @@ extensions = [
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'matplotlib.sphinxext.plot_directive',
+    'nbsphinx',
+    #'sphinx_nbexamples',
     'numpydoc',
     'sphinx_copybutton',
 ]
+
+# copy notebooks to docs folder for use with nbsphinx
+#if not os.path.isdir('notebooks'):
+#    os.makedirs('notebooks')
+#shutil.copy('../../examples/Pleasant_lake_lgr_example.ipynb', 'notebooks')
+
+# settings for sphinx_nbexamples (couldn't get this to work)
+#example_gallery_config = {
+#    'examples_dirs': ['../../examples/'],
+#    'pattern': '.ipynb',
+#    'urls': 'https://github.com/aleaf/modflow-setup/tree/develop/examples',
+#    'binder_url': 'https://mybinder.org/v2/gh/aleaf/modflow-setup/develop?filepath=examples'
+#}
+#
+#process_examples = not os.path.exists(os.path.join(os.path.dirname(__file__), 'examples'))
+
 
 # Configuration options for plot_directive. See:
 # https://github.com/matplotlib/matplotlib/blob/f3ed922d935751e08494e5fb5311d3050a3b637b/lib/matplotlib/sphinxext/plot_directive.py#L81
@@ -91,7 +110,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = ['_build', 'pleasant-example.rst']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'

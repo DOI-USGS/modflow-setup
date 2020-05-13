@@ -98,6 +98,16 @@ def make_bdlknc2d(lakzones, littoral_leakance, profundal_leakance):
     return bdlknc
 
 
+def get_littoral_profundal_zones(lakzones):
+    """Make a version of the lakebed leakance zone
+    array that just designates cells as littoral or profundal.
+    """
+    zones = np.zeros(lakzones.shape, dtype=object)
+    zones[(lakzones > 0) & (lakzones < 100)] = 'littoral'
+    zones[lakzones >= 100] = 'profundal'
+    return zones
+
+
 def get_stage_observations(listfile, lake_numbers):
     mfllak = LakListBudget(listfile)
     df_flux, df_vol = mfllak.get_dataframes()
@@ -284,7 +294,7 @@ def setup_lake_tablefiles(model, cfg):
     return tab_files
 
 
-def setup_lake_connectiondata(model,
+def setup_lake_connectiondata(model, for_external_file=True,
                               include_horizontal_connections=True):
 
     cfg = model.cfg['lak']
@@ -292,11 +302,17 @@ def setup_lake_connectiondata(model,
     # set up littoral and profundal zones
     if model.lake_info is None:
         model.lake_info = setup_lake_info(model)
+    
+    # zone numbers
+    # littoral zones are the same as the one-based lake number
+    # profundal zones are the one-based lake number times 100
+    # for example, for lake 1, littoral zone is 1; profundal zone is 100.
     lakzones = make_bdlknc_zones(model.modelgrid, model.lake_info,
                                  include_ids=model.lake_info['feat_id'])
+    littoral_profundal_zones = get_littoral_profundal_zones(lakzones)
+    
     model.setup_external_filepaths('lak', 'lakzones',
-                                   cfg['{}_filename_fmt'.format('lakzones')],
-                                   nfiles=1)
+                                   cfg['{}_filename_fmt'.format('lakzones')])
     save_array(model.cfg['intermediate_data']['lakzones'][0], lakzones, fmt='%d')
 
     # make the (2D) areal footprint of lakebed leakance from the zones
@@ -312,6 +328,7 @@ def setup_lake_connectiondata(model,
     lakeno = []
     cellid = []
     bedleak = []
+    zone = []
     for lake_id in range(1, model.nlakes + 1):
 
         # get the vertical GWF connections for each lake
@@ -323,16 +340,18 @@ def setup_lake_connectiondata(model,
         cellid += list(zip(k, i, j))
         lakeno += [lake_id] * len(k)
         bedleak += list(bdlknc[i, j])
+        zone += list(littoral_profundal_zones[i, j])
 
     df = pd.DataFrame({'lakeno': lakeno,
-                       'cellid': cellid,
-                       'claktype': 'vertical',
-                       'bedleak': bedleak,
-                       'belev': 0.,
-                       'telev': 0.,
-                       'connlen': 0.,
-                       'connwidth': 0.
-                       })
+            'cellid': cellid,
+            'claktype': 'vertical',
+            'bedleak': bedleak,
+            'belev': 0.,
+            'telev': 0.,
+            'connlen': 0.,
+            'connwidth': 0.,
+            'zone': zone
+            })
 
     if include_horizontal_connections:
         for lake_id in range(1, model.nlakes + 1):
@@ -355,7 +374,18 @@ def setup_lake_connectiondata(model,
         group['iconn'] = list(range(len(group)))
         dfs.append(group)
     df = pd.concat(dfs)
-    df['lakeno'] -= 1  # convert to zero-based for mf6
+
+    # convert to one-based and comment out header if df will be written straight to external file
+    if for_external_file:
+        df.rename(columns={'lakeno': '#lakeno'}, inplace=True)
+        df['iconn'] += 1
+        k, i, j = zip(*df['cellid'])
+        df.drop('cellid', axis=1, inplace=True)
+        df['k'] = np.array(k) + 1
+        df['i'] = np.array(i) + 1
+        df['j'] = np.array(j) + 1
+    else:
+        df['lakeno'] -= 1  # convert to zero-based for mf6
     return df
 
 

@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 from collections import defaultdict
 import numpy as np
@@ -405,9 +406,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # put together keyword arguments for dis package
         kwargs = self.cfg['grid'].copy() # nrow, ncol, delr, delc
+        kwargs.update(self.cfg['dis'])
         kwargs.update(self.cfg['dis']['dimensions']) # nper, nlay, etc.
         kwargs.update(self.cfg['dis']['griddata'])
-        kwargs.update(self.cfg['dis'])
 
         # modelgrid: dis arguments
         remaps = {'xoff': 'xorigin',
@@ -599,31 +600,47 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
+        # option to write stress_period_data to external files
+        external_files = self.cfg[package]['external_files']
+
         # munge well package input
         # returns dataframe with information to populate stress_period_data
-        df = setup_wel_data(self)
+        df = setup_wel_data(self, for_external_files=external_files)
         if len(df) == 0:
             print('No wells in active model area')
             return
 
         # set up stress_period_data
+        if external_files:
+            # get the file path (allowing for different external file locations, specified name format, etc.)
+            filename_format = package + '_{:03d}.dat'  # stress period suffix
+            filepaths = self.setup_external_filepaths(package, 'stress_period_data',
+                                                      filename_format=filename_format,
+                                                      file_numbers=sorted(df.per.unique().tolist()))
         spd = {}
         period_groups = df.groupby('per')
         for kper in range(self.nper):
             if kper in period_groups.groups:
                 group = period_groups.get_group(kper)
-                kspd = mf6.ModflowGwfwel.stress_period_data.empty(self,
-                                                                  len(group),
-                                                                  boundnames=True)[0]
-                kspd['cellid'] = list(zip(group.k, group.i, group.j))
-                kspd['q'] = group['flux']
-                kspd['boundname'] = group['comments']
-                spd[kper] = kspd
+                group.drop('per', axis=1, inplace=True)
+                if external_files:
+                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+                    # make a copy for the intermediate data folder, for consistency with mf-2005
+                    shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
+                else:
+                    kspd = mf6.ModflowGwfwel.stress_period_data.empty(self,
+                                                                      len(group),
+                                                                      boundnames=True)[0]
+                    kspd['cellid'] = list(zip(group.k, group.i, group.j))
+                    kspd['q'] = group['q']
+                    kspd['boundname'] = group['boundname']
+                    spd[kper] = kspd
             else:
                 pass  # spd[kper] = None
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])
-        kwargs['stress_period_data'] = spd
+        if not external_files:
+            kwargs['stress_period_data'] = spd
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfwel)
         wel = mf6.ModflowGwfwel(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
@@ -647,6 +664,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             print("lakes_shapefile not specified, or no lakes in model area")
             return
 
+        # option to write connectiondata to external file
+        external_files = self.cfg['lak']['external_files']
+
         # source data
         source_data = self.cfg['lak']['source_data']
 
@@ -655,9 +675,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self.lake_info = setup_lake_info(self)
 
         # returns dataframe with connection information
-        connectiondata = setup_lake_connectiondata(self)
-        nlakeconn = connectiondata.groupby('lakeno').count().iconn.to_dict()
-        self.lake_info['nlakeconn'] = [nlakeconn[id - 1] for id in self.lake_info['lak_id']]
+        connectiondata = setup_lake_connectiondata(self, for_external_file=external_files)
+        # lakeno column will have # in front if for_external_file=True
+        lakeno_col = [c for c in connectiondata.columns if 'lakeno' in c][0]
+        nlakeconn = connectiondata.groupby(lakeno_col).count().iconn.to_dict()
+        offset = 0 if external_files else 1
+        self.lake_info['nlakeconn'] = [nlakeconn[id - offset] for id in self.lake_info['lak_id']]
 
         # set up the tab files
         if 'stage_area_volume_file' in source_data:
@@ -674,6 +697,20 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # perioddata
         self.lake_fluxes = setup_lake_fluxes(self)
         lakeperioddata = get_lakeperioddata(self.lake_fluxes)
+
+        # set up external files
+        connectiondata_cols = [lakeno_col, 'iconn', 'k', 'i', 'j', 'claktype', 'bedleak',
+                               'belev', 'telev', 'connlen', 'connwidth']
+        if external_files:
+            # get the file path (allowing for different external file locations, specified name format, etc.)
+            filepath = self.setup_external_filepaths(package, 'connectiondata',
+                                                     self.cfg[package]['connectiondata_filename_fmt'])
+            connectiondata[connectiondata_cols].to_csv(filepath[0]['filename'], index=False, sep=' ')
+            # make a copy for the intermediate data folder, for consistency with mf-2005
+            shutil.copy(filepath[0]['filename'], self.cfg['intermediate_data']['output_folder'])
+        else:
+            connectiondata_cols = connectiondata_cols[:2] + ['cellid'] + connectiondata_cols[5:]
+            self.cfg[package]['connectiondata'] = connectiondata[connectiondata_cols].values.tolist()
 
         # set up input arguments
         kwargs = self.cfg[package].copy()
@@ -695,9 +732,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         packagedata = self.lake_info[packagedata_cols]
         packagedata['lak_id'] -= 1  # convert to zero-based
         kwargs['packagedata'] = packagedata.values.tolist()
-        connectiondata_cols = ['lakeno', 'iconn', 'cellid', 'claktype', 'bedleak',
-                               'belev', 'telev', 'connlen', 'connwidth']
-        kwargs['connectiondata'] = connectiondata[connectiondata_cols].values.tolist()
         kwargs['ntables'] = len(tab_files)
         kwargs['tables'] = [(i, f, 'junk', 'junk') for i, f in enumerate(tab_files)]
         kwargs['outlets'] = None  # not implemented
@@ -855,27 +889,47 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """Set up constant head package for perimeter boundary.
         TODO: integrate perimeter boundary with wel package setup
         """
+        package = 'chd'
         print('setting up specified head perimeter boundary with CHD package...')
         t0 = time.time()
+
+        # option to write stress_period_data to external files
+        external_files = self.cfg[package]['external_files']
 
         tmr = Tmr(self.parent, self,
                   parent_head_file=self.cfg['parent']['headfile'],
                   inset_parent_layer_mapping=self.parent_layers,
                   inset_parent_period_mapping=self.parent_stress_periods)
 
-        df = tmr.get_inset_boundary_heads()
+        df = tmr.get_inset_boundary_heads(for_external_files=external_files)
+
+        if external_files:
+            # get the file path (allowing for different external file locations, specified name format, etc.)
+            filename_format = package + '_{:03d}.dat'  # stress period suffix
+            filepaths = self.setup_external_filepaths(package, 'stress_period_data',
+                                                      filename_format=filename_format,
+                                                      file_numbers=sorted(df.per.unique().tolist()))
 
         spd = {}
         by_period = df.groupby('per')
-        for per, df_per in by_period:
-            maxbound = len(df_per)
-            spd[per] = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=maxbound)[0]
-            spd[per]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
-            spd[per]['head'] = df_per['bhead']
+        for kper, df_per in by_period:
+            if external_files:
+                df_per.rename(columns={'bhead': 'head'}, inplace=True)
+                df_per.drop('per', axis=1, inplace=True)
+                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+                # make a copy for the intermediate data folder, for consistency with mf-2005
+                shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
+            else:
+                maxbound = len(df_per)
+                spd[kper] = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=maxbound)[0]
+                spd[kper]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
+                spd[kper]['head'] = df_per['bhead']
 
-        kwargs = flatten(self.cfg['chd'])
+        kwargs = self.cfg['chd']
+        kwargs.update(self.cfg['chd']['options'])
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfchd)
-        kwargs['stress_period_data'] = spd
+        if not external_files:
+            kwargs['stress_period_data'] = spd
         chd = mf6.ModflowGwfchd(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return chd

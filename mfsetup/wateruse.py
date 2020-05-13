@@ -137,7 +137,7 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     # move to layer with screen top, then screen botm,
     # put remainder in layer 1 and hope for the best
     well_info = wells.assign_layers_from_screen_top_botm(well_info, model,
-                                       flux_col='flux',
+                                       flux_col='q',
                                        screen_top_col='elv_top_m',
                                        screen_botm_col='elv_botm_m',
                                        across_layers=False,
@@ -262,16 +262,16 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
         site_means['gal_d'] = site_sums['gallons'] / site_sums['days']
         # conversion to model units is based on lenuni variable in DIS package
         gal_to_model_units = convert_volume_units('gal', get_length_units(model))
-        site_means['flux'] = site_means.gal_d * gal_to_model_units
+        site_means['q'] = site_means.gal_d * gal_to_model_units
         site_means['per'] = per
 
-        wel_data.append(well_info[['k', 'i', 'j']].join(site_means[['flux', 'per']], how='inner'))
+        wel_data.append(well_info[['k', 'i', 'j']].join(site_means[['q', 'per']], how='inner'))
 
     wel_data = pd.concat(wel_data, axis=0)
     # water use fluxes should be negative
-    if not wel_data.flux.max() <= 0:
-        wel_data.loc[wel_data.flux.abs() != 0., 'flux'] *= -1
-    wel_data['comments'] = ['site{:d}'.format(s) for s in wel_data.index]
+    if not wel_data.q.max() <= 0:
+        wel_data.loc[wel_data.q.abs() != 0., 'q'] *= -1
+    wel_data['boundname'] = ['site{:d}'.format(s) for s in wel_data.index]
     assert not np.any(wel_data.isna()), "Nans in Well Data"
     return wel_data
 
@@ -373,16 +373,16 @@ def resample_pumping_rates(wu_file, wu_points, model,
         # convert units from monthly gallon totals to daily model length units
         site_period_data['gal_d'] = site_period_data['gallons'] / site_period_data['perlen']
         gal_to_model_units = convert_volume_units('gal', get_length_units(model))#model.dis.lenuni]
-        site_period_data['flux'] = site_period_data.gal_d * gal_to_model_units
+        site_period_data['q'] = site_period_data.gal_d * gal_to_model_units
         for col in ['i', 'j', 'k']:
             site_period_data[col] = well_info.loc[site, col]
         site_period_data.index = [site] * len(site_period_data)
-        dfs.append(site_period_data[['k', 'i', 'j', 'flux', 'per']])
+        dfs.append(site_period_data[['k', 'i', 'j', 'q', 'per']])
     wel_data = pd.concat(dfs)
     # water use fluxes should be negative
-    if not wel_data.flux.max() <= 0:
-        wel_data.loc[wel_data.flux.abs() != 0., 'flux'] *= -1
-    wel_data['comments'] = ['site{:d}'.format(s) for s in wel_data.index]
+    if not wel_data.q.max() <= 0:
+        wel_data.loc[wel_data.q.abs() != 0., 'q'] *= -1
+    wel_data['boundname'] = ['site{:d}'.format(s) for s in wel_data.index]
     assert not np.any(wel_data.isna()), "Nans in Well Data"
     print("took {:.2f}s\n".format(time.time() - t0))
     return wel_data

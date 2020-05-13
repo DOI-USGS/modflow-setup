@@ -11,7 +11,7 @@ from .tmr import Tmr
 from mfsetup.wateruse import get_mean_pumping_rates, resample_pumping_rates
 
 
-def setup_wel_data(model):
+def setup_wel_data(model, for_external_files=True):
     """Performs the part of well package setup that is independent of
     MODFLOW version. Returns a DataFrame with the information
     needed to set up stress_period_data.
@@ -25,7 +25,7 @@ def setup_wel_data(model):
                     }
 
     # master dataframe for stress period data
-    columns = ['per', 'k', 'i', 'j', 'flux', 'comments']
+    columns = ['per', 'k', 'i', 'j', 'q', 'boundname']
     df = pd.DataFrame(columns=columns)
 
     # check for source data
@@ -42,9 +42,6 @@ def setup_wel_data(model):
         and 'WEL' in model.parent.get_package_list():
 
         # get well stress period data from mfnwt or mf6 model
-        renames = {'q': 'flux',
-                   'boundname': 'comments'
-                   }
         parent = model.parent
         spd = get_package_stress_period_data(parent, package_name='wel')
         # map the parent stress period data to inset stress periods
@@ -64,7 +61,7 @@ def setup_wel_data(model):
 
         # set boundnames based on well locations in parent model
         parent_name = parent.name
-        spd['comments'] = ['{}_({},{},{})'.format(parent_name, pk, pi, pj)
+        spd['boundname'] = ['{}_({},{},{})'.format(parent_name, pk, pi, pj)
                            for pk, pi, pj in zip(parent_well_k, parent_well_i, parent_well_j)]
 
         parent_well_x = parent.modelgrid.xcellcenters[parent_well_i, parent_well_j]
@@ -81,7 +78,6 @@ def setup_wel_data(model):
         spd = spd.loc[within].copy()
         spd['i'] = i
         spd['j'] = j
-        spd.rename(columns=renames, inplace=True)
         df = df.append(spd)
 
 
@@ -95,8 +91,8 @@ def setup_wel_data(model):
                 sd = TransientTabularSourceData.from_config(v,
                                                             dest_model=model)
                 csvdata = sd.get_data()
-                csvdata.rename(columns={v['data_column']: 'flux',
-                                        v['id_column']: 'comments'}, inplace=True)
+                csvdata.rename(columns={v['data_column']: 'q',
+                                        v['id_column']: 'boundname'}, inplace=True)
                 if 'k' not in csvdata.columns:
                     if model.nlay > 1:
                         vfd = vfd_defaults.copy()
@@ -112,7 +108,7 @@ def setup_wel_data(model):
                 added_wells = {k: v for k, v in v.items() if v is not None}
                 if len(added_wells) > 0:
                     aw = pd.DataFrame(added_wells).T
-                    aw['comments'] = aw.index
+                    aw['boundname'] = aw.index
                 else:
                     aw = None
                 if aw is not None:
@@ -168,7 +164,7 @@ def setup_wel_data(model):
         # parent periods to copy over
         kstpkper = [(0, per) for per in model.cfg['model']['parent_stress_periods']]
         bfluxes = tmr.get_inset_boundary_fluxes(kstpkper=kstpkper)
-        bfluxes['comments'] = 'boundary_flux'
+        bfluxes['boundname'] = 'boundary_flux'
         df = df.append(bfluxes)
 
     for col in ['per', 'k', 'i', 'j']:
@@ -204,21 +200,28 @@ def setup_wel_data(model):
     model.cfg['wel']['output_files']['lookup_file'] = wel_lookup_file
 
     # verify that all wells have a boundname
-    if df.comments.isna().any():
-        no_name = df.comments.isna().any()
+    if df.boundname.isna().any():
+        no_name = df.boundname.isna()
         k, i, j = df.loc[no_name, ['k', 'i', 'j']].T.values
         names = ['({},{},{})'.format(k, i, j) for k, i, j in zip(k, i, j)]
-        df.loc[no_name, ['k', 'i', 'j']] = names
-    assert not df.comments.isna().any()
+        df.loc[no_name, 'boundname'] = names
+    assert not df.boundname.isna().any()
 
     # save a lookup file with well site numbers/categories
-    df.sort_values(by=['comments', 'per'], inplace=True)
-    df[['per', 'k', 'i', 'j', 'flux', 'comments']].to_csv(wel_lookup_file, index=False)
+    df.sort_values(by=['boundname', 'per'], inplace=True)
+    df[['per', 'k', 'i', 'j', 'q', 'boundname']].to_csv(wel_lookup_file, index=False)
+
+    # convert to one-based and comment out header if df will be written straight to external file
+    if for_external_files:
+        df.rename(columns={'k': '#k'}, inplace=True)
+        df['#k'] += 1
+        df['i'] += 1
+        df['j'] += 1
     return df
 
 
 def assign_layers_from_screen_top_botm(data, model,
-                                       flux_col='flux',
+                                       flux_col='q',
                                        screen_top_col='screen_top',
                                        screen_botm_col='screen_botm',
                                        label_col='site_no',
@@ -257,9 +260,9 @@ def assign_layers_from_screen_top_botm(data, model,
     else:
         idomain = model.bas6.ibound.array
 
-    # 'comments' column is used by wel setup for identifying wells
+    # 'boundname' column is used by wel setup for identifying wells
     if label_col in data.columns:
-        data['comments'] = data[label_col]
+        data['boundname'] = data[label_col]
     if across_layers:
         raise NotImplemented('Distributing fluxes to multiple layers')
     else:
@@ -339,7 +342,7 @@ def assign_layers_from_screen_top_botm(data, model,
                     print(msg)
 
                 # write shapefile and CSV output for wells that were dropped
-                cols = ['k', 'i', 'j', 'comments',
+                cols = ['k', 'i', 'j', 'boundname',
                         'category', 'laythick', 'idomain', 'reason', 'routine', 'x', 'y']
                 if flux_col in data.columns:
                     cols.insert(3, flux_col)
@@ -485,7 +488,7 @@ def copy_fluxes_to_subsequent_periods(df):
         # to last stress period
         # copy non-zero fluxes that are not already in subsequent stress periods
         if i < len(copied_fluxes):
-            in_subsequent_periods = copied_fluxes[i].comments.duplicated(keep=False)
+            in_subsequent_periods = copied_fluxes[i].boundname.duplicated(keep=False)
             # (copied_fluxes[i].per < last_specified_per) & \
             tocopy = (copied_fluxes[i].flux != 0) & \
                      ~in_subsequent_periods
@@ -493,7 +496,7 @@ def copy_fluxes_to_subsequent_periods(df):
                 copied = copied_fluxes[i].loc[tocopy].copy()
 
                 # make sure that wells to be copied aren't in subsequent stress periods
-                duplicated = np.array([r.comments in df.loc[df.per > i, 'comments']
+                duplicated = np.array([r.boundname in df.loc[df.per > i, 'boundname']
                                        for idx, r in copied.iterrows()])
                 copied = copied.loc[~duplicated]
                 copied['per'] += 1
@@ -521,4 +524,6 @@ def get_package_stress_period_data(model, package_name, skip_packages=None):
         k, i, j = zip(*df['cellid'])
         df.drop(['cellid'], axis=1, inplace=True)
         df['k'], df['i'], df['j'] = k, i, j
+    # use MODFLOW-6 variable
+    df.rename(columns={'flux': 'q'}, inplace=True)
     return df
