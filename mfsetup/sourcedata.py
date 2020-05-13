@@ -853,8 +853,9 @@ class TransientTabularSourceData(SourceData):
             # missing (period) keys default to 'mean';
             # 'none' to explicitly skip the stress period
             period_stat = self.period_stats.get(kper, current_stat)
-            if period_stat is not None and period_stat.lower() == 'none':
-                continue
+            if period_stat is not None and isinstance(period_stat, str):
+                if period_stat.lower() == 'none':
+                    continue
             aggregated = aggregate_dataframe_to_stress_period(df,
                                                               start_datetime=start,
                                                               end_datetime=end,
