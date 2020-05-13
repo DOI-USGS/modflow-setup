@@ -375,6 +375,11 @@ def setup_lake_connectiondata(model, for_external_file=True,
         dfs.append(group)
     df = pd.concat(dfs)
 
+    connections_lookup_file = model.cfg['lak']['output_files']['connections_lookup_file'].format(model.name)
+    connections_lookup_file = os.path.join(model.model_ws, os.path.split(connections_lookup_file)[1])
+    model.cfg['lak']['output_files']['connections_lookup_file'] = connections_lookup_file
+    df.to_csv(connections_lookup_file, index=False)
+
     # convert to one-based and comment out header if df will be written straight to external file
     if for_external_file:
         df.rename(columns={'lakeno': '#lakeno'}, inplace=True)
