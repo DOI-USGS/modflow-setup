@@ -633,11 +633,11 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
                         package_load_args = \
                             list(inspect.getargspec(item.package.load))[0]
                         if "check" in package_load_args:
-                            pck = item.package.load(
+                            item.package.load(
                                 item.filename, m,
                                 ext_unit_dict=ext_unit_dict, check=False)
                         else:
-                            pck = item.package.load(
+                            item.package.load(
                                 item.filename, m,
                                 ext_unit_dict=ext_unit_dict)
                         files_successfully_loaded.append(item.filename)
@@ -654,11 +654,11 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
                     package_load_args = \
                         list(inspect.getargspec(item.package.load))[0]
                     if "check" in package_load_args:
-                        pck = item.package.load(
+                        item.package.load(
                             item.filename, m,
                             ext_unit_dict=ext_unit_dict, check=False)
                     else:
-                        pck = item.package.load(
+                        item.package.load(
                             item.filename, m,
                             ext_unit_dict=ext_unit_dict)
                     files_successfully_loaded.append(item.filename)
@@ -1052,8 +1052,8 @@ def read_lak_ggo(f, model,
 
 
 def read_ggofile(gagefile, model,
-                 start_datetime='1970-01-01',
-                 keep_only_last_timestep=True):
+                start_datetime='1970-01-01',
+                keep_only_last_timestep=True):
     with open(gagefile) as src:
         next(src)
         namesstr = next(src)
@@ -1062,10 +1062,10 @@ def read_ggofile(gagefile, model,
             .replace('"','').strip().split()
         names = [n.lower() for n in names]
         df = pd.read_csv(src, skiprows=0,
-                         header=None,
-                         delim_whitespace=True,
-                         names=names
-                         )
+                            header=None,
+                            delim_whitespace=True,
+                            names=names
+                            )
     kstp = []
     kper = []
     for i, nstp in enumerate(model.dis.nstp.array):
@@ -1085,5 +1085,3 @@ def read_ggofile(gagefile, model,
     df['datetime'] = pd.to_timedelta(df.time, unit='D') + start_ts
     df.index = df.datetime
     return df
-
-

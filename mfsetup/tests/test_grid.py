@@ -4,7 +4,8 @@ import numpy as np
 import fiona
 import pytest
 from gisutils import shp2df
-from ..grid import (MFsetupGrid, get_ij, get_nearest_point_on_grid,
+from ..fileio import dump, load_modelgrid
+from ..grid import (MFsetupGrid, get_nearest_point_on_grid,
                     get_point_on_national_hydrogeologic_grid)
 from ..testing import point_is_on_nhg
 
@@ -76,3 +77,15 @@ def test_get_point_on_national_hydrogeologic_grid(offset):
     x, y = 178389, 938512
     x_nhg, y_nhg = get_point_on_national_hydrogeologic_grid(x, y, offset=offset)
     assert point_is_on_nhg(x_nhg, y_nhg, offset=offset)
+
+
+def test_load_modelgrid(tmpdir):
+    cfg = {'xoff': 100, 'yoff': 100, 'angrot': 20.,
+           'proj_str': 'epsg:3070',
+           'delr': np.ones(10).tolist(), 'delc': np.ones(2).tolist()}
+    grid1 = MFsetupGrid(**cfg)
+    grid_file = os.path.join(tmpdir, 'test_grid.json')
+    dump(grid_file, cfg)
+
+    grid2 = load_modelgrid(grid_file)
+    assert grid1 == grid2

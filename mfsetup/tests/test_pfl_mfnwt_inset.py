@@ -621,7 +621,10 @@ def test_model_setup_and_run(model_setup_and_run):
 def test_load(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):
     m = pfl_nwt_setup_from_yaml  #deepcopy(pfl_nwt_setup_from_yaml)
     m2 = MFnwtModel.load(pfl_nwt_test_cfg_path)
+
+    m3 = MFnwtModel.load(pfl_nwt_test_cfg_path, forgive=True)
     assert m == m2
+    assert m2 == m3
 
 
 def test_remake_a_package(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):

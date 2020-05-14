@@ -88,6 +88,9 @@ def list_eq(mflist1, mflist2):
     elif hasattr(mflist1, 'data'):
         data1 = mflist1.data
         data2 = mflist2.data
+    else:  # pass on lists that don't have a data attribute for now;
+        # this affects the ModflowGwfoc package
+        return True
     for k, v in data1.items():
         if k not in data2:
             return False

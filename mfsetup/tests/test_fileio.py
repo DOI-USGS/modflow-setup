@@ -2,7 +2,6 @@ import os
 import platform
 import numpy as np
 import pytest
-import flopy.modflow as fm
 from ..fileio import (load, load_array, dump_yml, load_yml,
                       load_modelgrid, load_cfg, which, exe_exists)
 

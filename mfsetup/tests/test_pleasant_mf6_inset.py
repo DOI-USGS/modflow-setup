@@ -8,7 +8,6 @@ import os
 import glob
 import numpy as np
 import pandas as pd
-import rasterio
 import pytest
 import flopy
 mf6 = flopy.mf6
@@ -16,8 +15,6 @@ fm = flopy.modflow
 from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
 from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists, read_lak_ggo
-from mfsetup.grid import get_ij
-from mfsetup.lakes import get_lakeperioddata
 from mfsetup.testing import compare_inset_parent_values
 from mfsetup.utils import get_input_arguments
 
@@ -477,13 +474,14 @@ def test_check_external_files():
         assert False, has_nans
 
 
-@pytest.mark.skip("still working on comparing mfnwt and mf6 versions of pleasant test case")
+#@pytest.mark.skip("still working on comparing mfnwt and mf6 versions of pleasant test case")
 def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant_nwt_model_run):
     #pleasant_mf6_model_run = None
     #pleasant_nwt_model_run = None
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
 
+    make_plot = False
     if pleasant_mf6_model_run is None:
         sim = mf6.MFSimulation.load('mfsim', sim_ws='{}/pleasant_mf6'.format(tmpdir))
         pleasant_mf6_model_run = sim.get_model('pleasant_mf6')
@@ -558,6 +556,7 @@ def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant
             #loc = pleasant_mf6_model_run.dis.idomain.array == 1
             #rms = np.sqrt(np.mean((mf6_wt - mfnwt_wt) ** 2))
 
+    if make_plot:
         fig, ax = plt.subplots(figsize=(11, 8.5))
         plt.plot(mf6_bhead_avg, label='mf6')
         plt.plot(mfnwt_bhead_avg, label='mfnwt')
