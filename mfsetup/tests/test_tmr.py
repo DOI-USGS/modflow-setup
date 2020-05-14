@@ -42,7 +42,7 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
     reflects parent model head solution, including when cells
     are dry or missing (e.g. pinched out cells in MF6).
     """
-    bheads_df = tmr.get_inset_boundary_heads()
+    bheads_df = tmr.get_inset_boundary_heads(for_external_files=False)
     groups = bheads_df.groupby('per')
     all_kstpkper = parent_heads.get_kstpkper()
     kstpkper_list = [all_kstpkper[0], all_kstpkper[-1]]
