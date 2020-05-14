@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g0732124 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g2ffccd2 documentation</title>
   
 
   
@@ -27,6 +27,7 @@
         <script src="../../_static/language_data.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.post51+g0732124
+                0.post51+g2ffccd2
               </div>
             
           
@@ -90,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html">     Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-gallery.html"> Configuration File Gallery</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -551,7 +553,9 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up WEL package...&#39;</span><span class="p">)</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="n">df</span> <span class="o">=</span> <span class="n">setup_wel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># munge the well package input</span>
+        <span class="c1"># for_external_files only needs to be called on the modflow-6 side</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">setup_wel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># extend spd dtype to include comments</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowWel</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
@@ -561,8 +565,9 @@
         <span class="n">spd</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">perdf</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
             <span class="n">ra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perdf</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;flux&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]:</span>
                 <span class="n">ra</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">perdf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+            <span class="n">ra</span><span class="p">[</span><span class="s1">&#39;flux&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perdf</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span>
             <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">]</span> <span class="o">=</span> <span class="n">ra</span>
 
         <span class="n">wel</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowWel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipakcb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ipakcb</span><span class="p">,</span>
@@ -718,11 +723,10 @@
             <span class="n">tab_files_argument</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tab_files</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;lakzones&#39;</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_filename_fmt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;lakzones&#39;</span><span class="p">)],</span>
-                                      <span class="n">nfiles</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_filename_fmt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;lakzones&#39;</span><span class="p">)])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;bdlknc&#39;</span><span class="p">,</span>
                                       <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_filename_fmt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;bdlknc&#39;</span><span class="p">)],</span>
-                                      <span class="n">nfiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">)</span>
+                                      <span class="n">file_numbers</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">)))</span>
 
         <span class="c1"># make the arrays or load them</span>
         <span class="n">lakzones</span> <span class="o">=</span> <span class="n">make_bdlknc_zones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">,</span>
@@ -912,7 +916,7 @@
                   <span class="n">inset_parent_layer_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_layers</span><span class="p">,</span>
                   <span class="n">inset_parent_period_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_stress_periods</span><span class="p">)</span>
 
-        <span class="n">df</span> <span class="o">=</span> <span class="n">tmr</span><span class="o">.</span><span class="n">get_inset_boundary_heads</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">tmr</span><span class="o">.</span><span class="n">get_inset_boundary_heads</span><span class="p">(</span><span class="n">for_external_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">spd</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">by_period</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
@@ -974,7 +978,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 13, 2020.
+        Last updated on May 14, 2020.
       </span>
 
     </p>

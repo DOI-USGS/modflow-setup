@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g0732124 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g2ffccd2 documentation</title>
   
 
   
@@ -27,6 +27,7 @@
         <script src="../../_static/language_data.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.post51+g0732124
+                0.post51+g2ffccd2
               </div>
             
           
@@ -90,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html">     Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-gallery.html"> Configuration File Gallery</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -524,7 +526,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lakarr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;lakarr&#39;</span><span class="p">,</span>
                                           <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_filename_fmt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;lakarr&#39;</span><span class="p">)],</span>
-                                          <span class="n">nfiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">)</span>
+                                          <span class="n">file_numbers</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">)))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isbc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
@@ -720,7 +722,7 @@
         <span class="k">return</span> <span class="n">regridded</span></div>
 
 <div class="viewcode-block" id="MFsetupMixin.setup_external_filepaths"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_external_filepaths">[docs]</a>    <span class="k">def</span> <span class="nf">setup_external_filepaths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span>
-                                 <span class="n">filename_format</span><span class="p">,</span> <span class="n">nfiles</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                                 <span class="n">filename_format</span><span class="p">,</span> <span class="n">file_numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set up external file paths for a MODFLOW package variable. Sets paths</span>
 <span class="sd">        for intermediate files, which are written from the (processed) source data.</span>
 <span class="sd">        Intermediate files are supplied to Flopy as external files for a given package</span>
@@ -740,8 +742,9 @@
 <span class="sd">            (e.g. &#39;top.dat&#39;), or for variables where a file is written for each layer or</span>
 <span class="sd">            stress period, a format string that will be formated with the zero-based layer</span>
 <span class="sd">            number (e.g. &#39;botm{}.dat&#39;) for files botm0.dat, botm1.dat, ...</span>
-<span class="sd">        nfiles : int</span>
-<span class="sd">            Number of external files for the variable (e.g. nlay or nper)</span>
+<span class="sd">        file_numbers : list of ints</span>
+<span class="sd">            List of numbers for the external files. Usually these represent zero-based</span>
+<span class="sd">            layers or stress periods.</span>
 <span class="sd">        relative_external_paths : bool</span>
 <span class="sd">            If true, external paths will be specified relative to model_ws,</span>
 <span class="sd">            otherwise, they will be absolute paths</span>
@@ -758,7 +761,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_lgr</span><span class="p">:</span>
             <span class="n">filename_format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">filename_format</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">setup_external_filepaths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span>
-                                        <span class="n">filename_format</span><span class="p">,</span> <span class="n">nfiles</span><span class="o">=</span><span class="n">nfiles</span><span class="p">,</span>
+                                        <span class="n">filename_format</span><span class="p">,</span> <span class="n">file_numbers</span><span class="o">=</span><span class="n">file_numbers</span><span class="p">,</span>
                                         <span class="n">relative_external_paths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">relative_external_paths</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_model_ws</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -928,7 +931,7 @@
     <span class="k">def</span> <span class="nf">_set_lakarr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;lakarr&#39;</span><span class="p">,</span>
                                       <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_filename_fmt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;lakarr&#39;</span><span class="p">)],</span>
-                                      <span class="n">nfiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">)</span>
+                                      <span class="n">file_numbers</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">)))</span>
         <span class="c1"># assign lakarr values from 3D isbc array</span>
         <span class="n">lakarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">):</span>
@@ -1389,7 +1392,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 13, 2020.
+        Last updated on May 14, 2020.
       </span>
 
     </p>

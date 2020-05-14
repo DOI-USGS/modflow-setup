@@ -36,7 +36,7 @@ The above dictionary would then be fed to the Flopy `Simulation class`_ construc
 
 Sub-blocks
 ^^^^^^^^^^
-Sub-blocks (nested dictionaries) with blocks are used to denote input to MODFLOW-6 blocks within packages or modflow-setup features. For example, the options block below represents input to the options block for the MODFLOW-6 name file:
+Sub-blocks (nested dictionaries) with blocks are used to denote either input to MODFLOW-6 package blocks or input to modflow-setup features. For example, the options block below represents input to the options block for the MODFLOW-6 name file:
 
 .. code-block:: yaml
 

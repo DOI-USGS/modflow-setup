@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+g0732124 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+g2ffccd2 documentation</title>
   
 
   
@@ -27,6 +27,7 @@
         <script src="../../_static/language_data.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.post51+g0732124
+                0.post51+g2ffccd2
               </div>
             
           
@@ -90,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html">     Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-gallery.html"> Configuration File Gallery</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -172,6 +174,7 @@
             
   <h1>Source code for mfsetup.mf6model</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -578,9 +581,9 @@
 
         <span class="c1"># put together keyword arguments for dis package</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># nrow, ncol, delr, delc</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">])</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">])</span> <span class="c1"># nper, nlay, etc.</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">])</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">])</span>
 
         <span class="c1"># modelgrid: dis arguments</span>
         <span class="n">remaps</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xoff&#39;</span><span class="p">:</span> <span class="s1">&#39;xorigin&#39;</span><span class="p">,</span>
@@ -772,31 +775,47 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
+        <span class="c1"># option to write stress_period_data to external files</span>
+        <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;external_files&#39;</span><span class="p">]</span>
+
         <span class="c1"># munge well package input</span>
         <span class="c1"># returns dataframe with information to populate stress_period_data</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">setup_wel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">setup_wel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_files</span><span class="o">=</span><span class="n">external_files</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No wells in active model area&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="c1"># set up stress_period_data</span>
+        <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="c1"># get the file path (allowing for different external file locations, specified name format, etc.)</span>
+            <span class="n">filename_format</span> <span class="o">=</span> <span class="n">package</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">{:03d}</span><span class="s1">.dat&#39;</span>  <span class="c1"># stress period suffix</span>
+            <span class="n">filepaths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;stress_period_data&#39;</span><span class="p">,</span>
+                                                      <span class="n">filename_format</span><span class="o">=</span><span class="n">filename_format</span><span class="p">,</span>
+                                                      <span class="n">file_numbers</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">per</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
         <span class="n">spd</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">period_groups</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">kper</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nper</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">kper</span> <span class="ow">in</span> <span class="n">period_groups</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
                 <span class="n">group</span> <span class="o">=</span> <span class="n">period_groups</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">kper</span><span class="p">)</span>
-                <span class="n">kspd</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfwel</span><span class="o">.</span><span class="n">stress_period_data</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                                                  <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">),</span>
-                                                                  <span class="n">boundnames</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">kspd</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
-                <span class="n">kspd</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;flux&#39;</span><span class="p">]</span>
-                <span class="n">kspd</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;comments&#39;</span><span class="p">]</span>
-                <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">]</span> <span class="o">=</span> <span class="n">kspd</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
+                    <span class="n">group</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filepaths</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+                    <span class="c1"># make a copy for the intermediate data folder, for consistency with mf-2005</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">filepaths</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;output_folder&#39;</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kspd</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfwel</span><span class="o">.</span><span class="n">stress_period_data</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                                      <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">),</span>
+                                                                      <span class="n">boundnames</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">kspd</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
+                    <span class="n">kspd</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span>
+                    <span class="n">kspd</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span>
+                    <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">]</span> <span class="o">=</span> <span class="n">kspd</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>  <span class="c1"># spd[kper] = None</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">])</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfwel</span><span class="p">)</span>
         <span class="n">wel</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfwel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
@@ -820,6 +839,9 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;lakes_shapefile not specified, or no lakes in model area&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
+        <span class="c1"># option to write connectiondata to external file</span>
+        <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;external_files&#39;</span><span class="p">]</span>
+
         <span class="c1"># source data</span>
         <span class="n">source_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;source_data&#39;</span><span class="p">]</span>
 
@@ -828,9 +850,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="o">=</span> <span class="n">setup_lake_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># returns dataframe with connection information</span>
-        <span class="n">connectiondata</span> <span class="o">=</span> <span class="n">setup_lake_connectiondata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">nlakeconn</span> <span class="o">=</span> <span class="n">connectiondata</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;lakeno&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">iconn</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="s1">&#39;nlakeconn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">nlakeconn</span><span class="p">[</span><span class="nb">id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="s1">&#39;lak_id&#39;</span><span class="p">]]</span>
+        <span class="n">connectiondata</span> <span class="o">=</span> <span class="n">setup_lake_connectiondata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_file</span><span class="o">=</span><span class="n">external_files</span><span class="p">)</span>
+        <span class="c1"># lakeno column will have # in front if for_external_file=True</span>
+        <span class="n">lakeno_col</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">connectiondata</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s1">&#39;lakeno&#39;</span> <span class="ow">in</span> <span class="n">c</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nlakeconn</span> <span class="o">=</span> <span class="n">connectiondata</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">lakeno_col</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">iconn</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">external_files</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="s1">&#39;nlakeconn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">nlakeconn</span><span class="p">[</span><span class="nb">id</span> <span class="o">-</span> <span class="n">offset</span><span class="p">]</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="s1">&#39;lak_id&#39;</span><span class="p">]]</span>
 
         <span class="c1"># set up the tab files</span>
         <span class="k">if</span> <span class="s1">&#39;stage_area_volume_file&#39;</span> <span class="ow">in</span> <span class="n">source_data</span><span class="p">:</span>
@@ -847,6 +872,20 @@
         <span class="c1"># perioddata</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lake_fluxes</span> <span class="o">=</span> <span class="n">setup_lake_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">lakeperioddata</span> <span class="o">=</span> <span class="n">get_lakeperioddata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lake_fluxes</span><span class="p">)</span>
+
+        <span class="c1"># set up external files</span>
+        <span class="n">connectiondata_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">lakeno_col</span><span class="p">,</span> <span class="s1">&#39;iconn&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;claktype&#39;</span><span class="p">,</span> <span class="s1">&#39;bedleak&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;belev&#39;</span><span class="p">,</span> <span class="s1">&#39;telev&#39;</span><span class="p">,</span> <span class="s1">&#39;connlen&#39;</span><span class="p">,</span> <span class="s1">&#39;connwidth&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="c1"># get the file path (allowing for different external file locations, specified name format, etc.)</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;connectiondata&#39;</span><span class="p">,</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;connectiondata_filename_fmt&#39;</span><span class="p">])</span>
+            <span class="n">connectiondata</span><span class="p">[</span><span class="n">connectiondata_cols</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="c1"># make a copy for the intermediate data folder, for consistency with mf-2005</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">filepath</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;output_folder&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">connectiondata_cols</span> <span class="o">=</span> <span class="n">connectiondata_cols</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">connectiondata_cols</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;connectiondata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connectiondata</span><span class="p">[</span><span class="n">connectiondata_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
         <span class="c1"># set up input arguments</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -868,9 +907,6 @@
         <span class="n">packagedata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="n">packagedata_cols</span><span class="p">]</span>
         <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;lak_id&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># convert to zero-based</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;packagedata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="n">connectiondata_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lakeno&#39;</span><span class="p">,</span> <span class="s1">&#39;iconn&#39;</span><span class="p">,</span> <span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="s1">&#39;claktype&#39;</span><span class="p">,</span> <span class="s1">&#39;bedleak&#39;</span><span class="p">,</span>
-                               <span class="s1">&#39;belev&#39;</span><span class="p">,</span> <span class="s1">&#39;telev&#39;</span><span class="p">,</span> <span class="s1">&#39;connlen&#39;</span><span class="p">,</span> <span class="s1">&#39;connwidth&#39;</span><span class="p">]</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;connectiondata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connectiondata</span><span class="p">[</span><span class="n">connectiondata_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ntables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tab_files</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s1">&#39;junk&#39;</span><span class="p">,</span> <span class="s1">&#39;junk&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tab_files</span><span class="p">)]</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># not implemented</span>
@@ -1028,27 +1064,47 @@
         <span class="sd">&quot;&quot;&quot;Set up constant head package for perimeter boundary.</span>
 <span class="sd">        TODO: integrate perimeter boundary with wel package setup</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;chd&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up specified head perimeter boundary with CHD package...&#39;</span><span class="p">)</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># option to write stress_period_data to external files</span>
+        <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;external_files&#39;</span><span class="p">]</span>
 
         <span class="n">tmr</span> <span class="o">=</span> <span class="n">Tmr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
                   <span class="n">parent_head_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;headfile&#39;</span><span class="p">],</span>
                   <span class="n">inset_parent_layer_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_layers</span><span class="p">,</span>
                   <span class="n">inset_parent_period_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_stress_periods</span><span class="p">)</span>
 
-        <span class="n">df</span> <span class="o">=</span> <span class="n">tmr</span><span class="o">.</span><span class="n">get_inset_boundary_heads</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">tmr</span><span class="o">.</span><span class="n">get_inset_boundary_heads</span><span class="p">(</span><span class="n">for_external_files</span><span class="o">=</span><span class="n">external_files</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="c1"># get the file path (allowing for different external file locations, specified name format, etc.)</span>
+            <span class="n">filename_format</span> <span class="o">=</span> <span class="n">package</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">{:03d}</span><span class="s1">.dat&#39;</span>  <span class="c1"># stress period suffix</span>
+            <span class="n">filepaths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;stress_period_data&#39;</span><span class="p">,</span>
+                                                      <span class="n">filename_format</span><span class="o">=</span><span class="n">filename_format</span><span class="p">,</span>
+                                                      <span class="n">file_numbers</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">per</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
 
         <span class="n">spd</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">by_period</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">df_per</span> <span class="ow">in</span> <span class="n">by_period</span><span class="p">:</span>
-            <span class="n">maxbound</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_per</span><span class="p">)</span>
-            <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">]</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfchd</span><span class="o">.</span><span class="n">stress_period_data</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxbound</span><span class="o">=</span><span class="n">maxbound</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">],</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">],</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]))</span>
-            <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;head&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;bhead&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">kper</span><span class="p">,</span> <span class="n">df_per</span> <span class="ow">in</span> <span class="n">by_period</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
+                <span class="n">df_per</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;bhead&#39;</span><span class="p">:</span> <span class="s1">&#39;head&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">df_per</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">df_per</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filepaths</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="c1"># make a copy for the intermediate data folder, for consistency with mf-2005</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">filepaths</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;output_folder&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">maxbound</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_per</span><span class="p">)</span>
+                <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">]</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfchd</span><span class="o">.</span><span class="n">stress_period_data</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxbound</span><span class="o">=</span><span class="n">maxbound</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">],</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">],</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]))</span>
+                <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;head&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;bhead&#39;</span><span class="p">]</span>
 
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;chd&#39;</span><span class="p">])</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;chd&#39;</span><span class="p">]</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;chd&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">])</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfchd</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd</span>
         <span class="n">chd</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfchd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">chd</span></div>
@@ -1137,7 +1193,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 13, 2020.
+        Last updated on May 14, 2020.
       </span>
 
     </p>

@@ -18,6 +18,7 @@ Modflow-setup is intended to facilitate automated setup of MODFLOW models, from 
 	Philosophy <philosophy>
     Installation <installation>
     Examples <examples>
+    Configuration File Gallery <config-file-gallery>
 
    
 .. toctree::

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.fileio module &mdash; modflow-setup 0.post51+g0732124 documentation</title>
+  <title>mfsetup.fileio module &mdash; modflow-setup 0.post51+g2ffccd2 documentation</title>
   
 
   
@@ -27,6 +27,7 @@
         <script src="../_static/language_data.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -63,7 +64,7 @@
             
             
               <div class="version">
-                0.post51+g0732124
+                0.post51+g2ffccd2
               </div>
             
           
@@ -92,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -181,7 +183,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-mfsetup.fileio">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-mfsetup.fileio">
 <span id="mfsetup-fileio-module"></span><h1>mfsetup.fileio module<a class="headerlink" href="#module-mfsetup.fileio" title="Permalink to this headline">¶</a></h1>
 <p>Functions for reading and writing stuff to disk, and working with file paths.</p>
 <dl class="py function">
@@ -326,7 +352,7 @@ some escaped characters.</p>
 
 <dl class="py function">
 <dt id="mfsetup.fileio.setup_external_filepaths">
-<code class="sig-prename descclassname">mfsetup.fileio.</code><code class="sig-name descname">setup_external_filepaths</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">package</span></em>, <em class="sig-param"><span class="n">variable_name</span></em>, <em class="sig-param"><span class="n">filename_format</span></em>, <em class="sig-param"><span class="n">nfiles</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">relative_external_paths</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#setup_external_filepaths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.fileio.setup_external_filepaths" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.fileio.</code><code class="sig-name descname">setup_external_filepaths</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">package</span></em>, <em class="sig-param"><span class="n">variable_name</span></em>, <em class="sig-param"><span class="n">filename_format</span></em>, <em class="sig-param"><span class="n">file_numbers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">relative_external_paths</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#setup_external_filepaths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.fileio.setup_external_filepaths" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up external file paths for a MODFLOW package variable. Sets paths
 for intermediate files, which are written from the (processed) source data.
 Intermediate files are supplied to Flopy as external files for a given package
@@ -348,7 +374,8 @@ under their respective variables.</p>
 stress period, a format string that will be formated with the zero-based layer
 number (e.g. ‘botm{}.dat’) for files botm0.dat, botm1.dat, …</p>
 </dd>
-<dt><strong>nfiles</strong><span class="classifier">int</span></dt><dd><p>Number of external files for the variable (e.g. nlay or nper)</p>
+<dt><strong>file_numbers</strong><span class="classifier">list of ints</span></dt><dd><p>List of numbers for the external files. Usually these represent zero-based
+layers or stress periods.</p>
 </dd>
 </dl>
 </dd>
@@ -393,7 +420,7 @@ number (e.g. ‘botm{}.dat’) for files botm0.dat, botm1.dat, …</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 13, 2020.
+        Last updated on May 14, 2020.
       </span>
 
     </p>

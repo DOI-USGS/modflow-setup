@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.fileio &mdash; modflow-setup 0.post51+g0732124 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.post51+g2ffccd2 documentation</title>
   
 
   
@@ -27,6 +27,7 @@
         <script src="../../_static/language_data.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -61,7 +62,7 @@
             
             
               <div class="version">
-                0.post51+g0732124
+                0.post51+g2ffccd2
               </div>
             
           
@@ -90,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../philosophy.html">     Philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-gallery.html"> Configuration File Gallery</a></li>
 </ul>
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
@@ -571,7 +573,7 @@
 
 
 <div class="viewcode-block" id="setup_external_filepaths"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.setup_external_filepaths">[docs]</a><span class="k">def</span> <span class="nf">setup_external_filepaths</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span>
-                             <span class="n">filename_format</span><span class="p">,</span> <span class="n">nfiles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">filename_format</span><span class="p">,</span> <span class="n">file_numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                              <span class="n">relative_external_paths</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Set up external file paths for a MODFLOW package variable. Sets paths</span>
 <span class="sd">    for intermediate files, which are written from the (processed) source data.</span>
@@ -594,8 +596,9 @@
 <span class="sd">        (e.g. &#39;top.dat&#39;), or for variables where a file is written for each layer or</span>
 <span class="sd">        stress period, a format string that will be formated with the zero-based layer</span>
 <span class="sd">        number (e.g. &#39;botm{}.dat&#39;) for files botm0.dat, botm1.dat, ...</span>
-<span class="sd">    nfiles : int</span>
-<span class="sd">        Number of external files for the variable (e.g. nlay or nper)</span>
+<span class="sd">    file_numbers : list of ints</span>
+<span class="sd">        List of numbers for the external files. Usually these represent zero-based</span>
+<span class="sd">        layers or stress periods.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -606,6 +609,8 @@
 <span class="sd">    For MODFLOW-6 models, Adds external file paths to model.cfg[&lt;package&gt;][&lt;variable_name&gt;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">package</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">file_numbers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># in lieu of a way to get these from Flopy somehow</span>
     <span class="n">griddata_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="s1">&#39;strt&#39;</span><span class="p">,</span>
@@ -614,22 +619,27 @@
                              <span class="s1">&#39;finf&#39;</span><span class="p">,</span> <span class="s1">&#39;pet&#39;</span><span class="p">,</span> <span class="s1">&#39;extdp&#39;</span><span class="p">,</span> <span class="s1">&#39;extwc&#39;</span><span class="p">,</span>
                              <span class="p">}</span>
     <span class="n">transient3D_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lakarr&#39;</span><span class="p">,</span> <span class="s1">&#39;bdlknc&#39;</span><span class="p">}</span>
+    <span class="n">tabular_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;connectiondata&#39;</span><span class="p">}</span>
+    <span class="n">transient_tabular_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">}</span>
+    <span class="n">transient_variables</span> <span class="o">=</span> <span class="n">transient2D_variables</span> <span class="o">|</span> <span class="n">transient3D_variables</span> <span class="o">|</span> <span class="n">transient_tabular_variables</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
     <span class="c1"># intermediate data</span>
     <span class="n">filename_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename_format</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">relative_external_paths</span><span class="p">:</span>
         <span class="n">intermediate_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">,</span>
-                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">intermediate_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">,</span>
-                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
-                                                         <span class="nb">enumerate</span><span class="p">(</span><span class="n">intermediate_files</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span> <span class="ow">or</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
+                                                         <span class="nb">zip</span><span class="p">(</span><span class="n">file_numbers</span><span class="p">,</span> <span class="n">intermediate_files</span><span class="p">)}</span>
     <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient3D_variables</span><span class="p">:</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">intermediate_files</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">tabular_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">intermediate_files</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">intermediate_files</span>
 
@@ -638,15 +648,15 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">relative_external_paths</span><span class="p">:</span>
         <span class="n">external_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
                                        <span class="n">model</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
-                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">external_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
                                        <span class="n">model</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
-                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
-                                                         <span class="nb">enumerate</span><span class="p">(</span><span class="n">external_files</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span> <span class="ow">or</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
+                                                         <span class="nb">zip</span><span class="p">(</span><span class="n">file_numbers</span><span class="p">,</span> <span class="n">external_files</span><span class="p">)}</span>
     <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient3D_variables</span><span class="p">:</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">external_files</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
@@ -656,17 +666,27 @@
         <span class="c1"># skip these for now (not implemented yet for MF6)</span>
         <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient3D_variables</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="c1">#if not relative_external_paths:</span>
         <span class="n">ext_files_key</span> <span class="o">=</span> <span class="s1">&#39;external_files&#39;</span>
-        <span class="c1">#else:</span>
-        <span class="c1">#    ext_files_key = &#39;intermediate_data&#39;</span>
-        <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="n">variable_name</span><span class="p">][</span><span class="n">i</span><span class="p">]}</span>
-                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">external_files</span><span class="p">))]</span>
+        <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transient_variables</span><span class="p">:</span>
+            <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">}</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filepaths</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">}</span>
+                         <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="c1"># set package variable input (to Flopy)</span>
         <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">griddata_variables</span><span class="p">:</span>
             <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span>
+        <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">tabular_variables</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">variable_name</span><span class="p">)</span>
+            <span class="c1">#elif variable_name in transient_variables:</span>
+            <span class="c1">#    filepaths = {per: {&#39;filename&#39;: f} for per, f in</span>
+            <span class="c1">#                 zip(file_numbers, model.cfg[ext_files_key][variable_name])}</span>
+            <span class="c1">#    model.cfg[package][variable_name] = filepaths</span>
+        <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">variable_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="n">d</span> <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)}</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span> <span class="c1"># {per: d for per, d in zip(file_numbers, filepaths)}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">filepaths</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span>
@@ -1167,6 +1187,9 @@
                     <span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">elif</span> <span class="n">blockname</span> <span class="o">==</span> <span class="s1">&#39;packagedata&#39;</span><span class="p">:</span>
                     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;packagedata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">blockname</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">blockname</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">read</span> <span class="o">=</span> <span class="n">blockname</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="s1">&#39;end&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">blockname</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
@@ -1185,6 +1208,8 @@
                 <span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
             <span class="k">elif</span> <span class="n">read</span> <span class="o">==</span> <span class="s1">&#39;packagedata&#39;</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;packagedata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+            <span class="k">elif</span> <span class="n">read</span> <span class="o">==</span> <span class="n">blockname</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">blockname</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
     <span class="k">return</span> <span class="n">data</span></div>
 
 
@@ -1250,7 +1275,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 13, 2020.
+        Last updated on May 14, 2020.
       </span>
 
     </p>
