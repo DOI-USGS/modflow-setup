@@ -162,9 +162,9 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
         input, the information specified for a period will continue to apply until
         information for another period is specified.
     nstp : int or sequence
-        Number of timesteps in a stress period. Must be a integer if perlen=None.
+        Number of timesteps in a stress period. Must be an integer if perlen=None.
     nstp : int or sequence
-        Timestep multiplier for a stress period. Must be a integer if perlen=None.
+        Timestep multiplier for a stress period. Must be an integer if perlen=None.
     oc_saverecord : dict
         Dictionary with zero-based stress periods as keys and output control options as values.
         Similar to MODFLOW-6 input, the information specified for a period will
@@ -173,20 +173,19 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
     Returns
     -------
     perrioddata : pandas.DataFrame
-        DataFrame summarizing stress period information.
-        Has columns:
-        start_datetime : pandas datetimes; start date/time of each stress period
-            (does not include steady-state periods)
-        end_datetime : pandas datetimes; end date/time of each stress period
-            (does not include steady-state periods)
-        time : float; cumulative MODFLOW time at end of period
-            (includes steady-state periods)
-        per : int, zero-based stress period
-        perlen : float; stress period length in model time units
-        nstp : int; number of timesteps in the stress period
-        tsmult : int; timestep multiplier for stress period
-        steady : bool; True=steady-state, False=Transient
-        oc : dict; MODFLOW-6 output control options
+        DataFrame summarizing stress period information. Data columns:
+
+        ==================  ================  ==============================================
+        **start_datetime**  pandas datetimes  start date/time of each stress period (does not include steady-state periods)
+        **end_datetime**    pandas datetimes  end date/time of each stress period (does not include steady-state periods)
+        **time**            float             cumulative MODFLOW time at end of period (includes steady-state periods)
+        **per**             int               zero-based stress period
+        **perlen**          float             stress period length in model time units
+        **nstp**            int               number of timesteps in the stress period
+        **tsmult**          int               timestep multiplier for stress period
+        **steady**          bool              True=steady-state, False=Transient
+        **oc**              dict              MODFLOW-6 output control options
+        ==================  ================  ==============================================
 
     """
     # todo: refactor/simplify setup_perioddata_group
@@ -354,40 +353,68 @@ def concat_periodata_groups(groups):
     return df
 
 
-def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
-                                         period_stat, id_column, data_column):
-    """
+def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_column='datetime',
+                                         end_datetime_column=None,
+                                         start_datetime=None, end_datetime=None, period_stat='mean'):
+    """Aggregate time-series data in a DataFrame to a single value representing
+    a period defined by a start and end date. 
 
     Parameters
     ----------
-    data : pd.DataFrame
+    data : DataFrame
         Must have 'start_datetime' and 'end_datetime' columns with dates
         indicating the time bounds associated with each row (e.g. the time
         period for a specified model stress)
-    start_datetime
-    end_datetime
-    period_stat
-    id_column : column with location identifier (e.g. node or well id)
-    data_column : column with data to aggregate (e.g. fluxes)
+    id_column : str
+        Column in data with location identifier (e.g. node or well id).
+    data_column : str or list
+        Column(s) in data with values to aggregate.
+    datetime_column : str
+        Column in data with times for each value. For downsampling of multiple values in data
+        to a longer period represented by start_datetime and end_datetime, this is all that is needed.
+        Aggregated values will include values in datetime_column that are >= start_datetime and < end_datetime.
+        In other words, datetime_column represents the start of each time interval in data.
+        Values can be strings (e.g. YYYY-MM-DD) or pandas Timestamps. By default, None.
+    end_datetime_column : str
+        Column in data with end times for period represented by each value. This is only needed
+        for upsampling, where the interval defined by start_datetime and end_datetime is smaller
+        than the time intervals in data. The row(s) in data that have a datetime_column value < end_datetime,
+        and an end_datetime_column value > start_datetime will be retained in aggregated.
+        Values can be strings (e.g. YYYY-MM-DD) or pandas Timestamps. By default, None.
+    start_datetime : str or pandas.Timestamp
+        Start time of aggregation period. Only used if an aggregation start
+        and end time are not given in period_stat. If None, and no start
+        and end time are specified in period_stat, the first time in datetime_column is used.
+        By default, None.
+    end_datetime : str or pandas.Timestamp
+        End time of aggregation period. Only used if an aggregation start
+        and end time are not given in period_stat. If None, and no start
+        and end time are specified in period_stat, the last time in datetime_column is used.
+        By default, None.
+    period_stat : str, list, or NoneType
+        Method for aggregating data.
+
+        * Strings will be passed to DataFrame.groupby
+          as the aggregation method. For example, ``'mean'`` would result in DataFrame.groupby().mean().
+        * If period_stat is None, ``'mean'`` is used.
+        * Lists of length 2 can be used to specify a statistic for a month (e.g. ``['mean', 'august']``),
+          or for a time period that can be represented as a single string in pandas.
+          For example, ``['mean', '2014']`` would average all values in the year 2014; ``['mean', '2014-01']``
+          would average all values in January of 2014, etc. Basically, if the string
+          can be used to slice a DataFrame or Series, it can be used here.
+        * Lists of length 3 can be used to specify a statistic and a start and end date.
+          For example, ``['mean', '2014-01-01', '2014-03-31']`` would average the values for
+          the first three months of 2014.
 
     Returns
     -------
+    aggregated : DataFrame
+        Aggregated values. Columns are the same as data, except the time column
+        is named 'start_datetime'. In other words, aggregated periods are represented by
+        their start dates (as opposed to midpoint dates or end dates).
 
-    Notes
-    -----
-    pandas reindex could potentially be used for cases where
-    the source time series needs to be resampled to the model stress periods
-    e.g.
-    def reindex_by_date(df):
-        dates = [start_datetime, end_datetime]
-        return df.reindex(dates, method='nearest')
-    welldata.groupby('node').apply(reindex_by_date).reset_index(0, drop=True)
     """
 
-    #if isinstance(start_datetime, pd.Timestamp):
-    #    start_datetime = start_datetime.strftime('%Y-%m-%d')
-    #if isinstance(end_datetime, pd.Timestamp):
-    #    end_datetime = end_datetime.strftime('%Y-%m-%d')
     if isinstance(period_stat, str):
         period_stat = [period_stat]
     elif period_stat is None:
@@ -402,6 +429,7 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
     if len(data_columns) > 1:
         pass
 
+    start, end = None, None
     if isinstance(period_stat, list):
         stat = period_stat.pop(0)
 
@@ -423,14 +451,24 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
 
         # no time period in source data specified for statistic; use start/end of current model period
         elif len(period_stat) == 0:
-            assert 'start_datetime' in data.columns and 'end_datetime' in data.columns, \
-                "start_datetime and end_datetime columns needed for " \
+            assert datetime_column in data.columns, \
+                "datetime_column needed for " \
                 "resampling irregular data to model stress periods"
-            for col in ['start_datetime', 'end_datetime']:
-                if data[col].dtype == np.object:
-                    data[col] = pd.to_datetime(data[col])
-            data_overlaps_period = (data.start_datetime < end_datetime) & \
-                                   (data.end_datetime > start_datetime)
+            if data[datetime_column].dtype == np.object:
+                data[datetime_column] = pd.to_datetime(data[datetime_column])
+            if start_datetime is None:
+                start_datetime = data[datetime_column].iloc[0]
+            if end_datetime is None:
+                end_datetime = data[datetime_column].iloc[-1]
+            # >= includes the start datetime
+            if end_datetime_column is None:
+                data_overlaps_period = (data[datetime_column] < end_datetime) & \
+                                       (data[datetime_column] >= start_datetime)
+            else:
+                if data[end_datetime_column].dtype == np.object:
+                    data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])
+                data_overlaps_period = (data[datetime_column] < end_datetime) & \
+                                       (data[end_datetime_column] > start_datetime)
             period_data = data.loc[data_overlaps_period]
 
         else:
@@ -442,14 +480,14 @@ def aggregate_dataframe_to_stress_period(data, start_datetime, end_datetime,
     # (only sum the data column)
     if len(period_data) > 0:
         period_data.index.name = None
-        by_period = period_data.groupby([id_column, 'start_datetime']).first().reset_index()
-        by_period[data_column] = period_data.groupby([id_column, 'start_datetime']).sum()[data_column].values
+        by_period = period_data.groupby([id_column, datetime_column]).first().reset_index()
+        by_period[data_column] = period_data.groupby([id_column, datetime_column]).sum()[data_column].values
         period_data = by_period
     aggregated = period_data.groupby(id_column).first().reset_index()
     aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
-    aggregated['start_datetime'] = start_datetime # add datetime back in
-    #aggregated.index.name = None
-    #aggregated[id_column] = aggregated.index
+    # add datetime back in
+    aggregated['start_datetime'] = pd.Timestamp(start) if start is not None else start_datetime
+
     return aggregated
 
 

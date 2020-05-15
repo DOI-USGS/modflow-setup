@@ -780,7 +780,7 @@ class TabularSourceData(SourceData):
         # rename any columns specified in config file to required names
         if self.column_mappings is not None:
             df.rename(columns=self.column_mappings, inplace=True)
-        df.columns = [c.lower() for c in df.columns]
+        #df.columns = [c.lower() for c in df.columns]
 
         # drop any extra unnamed columns from accidental saving of the index on to_csv
         drop_columns = [c for c in df.columns if 'unnamed' in c]
@@ -793,7 +793,7 @@ class TransientTabularSourceData(SourceData):
     represents a time series."""
 
     def __init__(self, filenames, data_column, datetime_column, id_column,
-                 x_col='x', y_col='y', period_stats='mean',
+                 x_col='x', y_col='y', end_datetime_column=None, period_stats={0: 'mean'},
                  length_units='unknown', time_units='unknown', volume_units=None,
                  column_mappings=None,
                  dest_model=None):
@@ -804,6 +804,7 @@ class TransientTabularSourceData(SourceData):
 
         self.data_column = data_column
         self.datetime_column = datetime_column
+        self.end_datetime_column = end_datetime_column
         self.id_column = id_column
         self.column_mappings = column_mappings
         self.period_stats = period_stats
@@ -828,10 +829,10 @@ class TransientTabularSourceData(SourceData):
         # rename any columns specified in config file to required names
         if self.column_mappings is not None:
             df.rename(columns=self.column_mappings, inplace=True)
-        df.columns = [c.lower() for c in df.columns]
+        #df.columns = [c.lower() for c in df.columns]
 
         # cull data to model bounds
-        if 'geometry' not in df.columns:
+        if 'geometry' not in df.columns or isinstance(df.geometry.iloc[0], str):
             df['geometry'] = [Point(x, y) for x, y in zip(df[self.x_col], df[self.y_col])]
         within = [g.within(self.dest_model.bbox) for g in df.geometry]
         df = df.loc[within]
@@ -856,13 +857,11 @@ class TransientTabularSourceData(SourceData):
             if period_stat is not None and isinstance(period_stat, str):
                 if period_stat.lower() == 'none':
                     continue
-            aggregated = aggregate_dataframe_to_stress_period(df,
-                                                              start_datetime=start,
-                                                              end_datetime=end,
-                                                              period_stat=period_stat,
-                                                              id_column=self.id_column,
-                                                              data_column=self.data_column
-                                                              )
+            aggregated = aggregate_dataframe_to_stress_period(df, id_column=self.id_column,
+                                                              datetime_column=self.datetime_column,
+                                                              end_datetime_column=self.end_datetime_column,
+                                                              data_column=self.data_column, start_datetime=start,
+                                                              end_datetime=end, period_stat=period_stat)
             aggregated['per'] = kper
             period_data.append(aggregated)
         dfm = pd.concat(period_data)

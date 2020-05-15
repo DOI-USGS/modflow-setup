@@ -229,6 +229,9 @@ wel:
       time_units: 'days'
       data_column: 'flux_m3'
       datetime_column: 'start_datetime'
+      # end datetimes only for input data that needs upsampling;
+      # see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period
+      end_datetime_column: 'end_datetime'
       id_column: 'node'
       period_stats:  # how fluxes will be distributed across model stress periods
         0: none  # no wells simulated in initial period

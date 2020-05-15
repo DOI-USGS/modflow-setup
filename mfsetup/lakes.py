@@ -594,7 +594,8 @@ class PrismSourceData(SourceData):
             meta = self.parse_header(f)
             df = pd.read_csv(f, skiprows=meta['skiprows'],
                              header=None, names=meta['column_names'])
-            df.index = pd.to_datetime(df[self.datetime_column])
+            df[self.datetime_column] = pd.to_datetime(df[self.datetime_column])
+            df.index = df[self.datetime_column]
             df['start_datetime'] = df.index
             # check if data are monthly
             ndays0 = (df.index[1] - df.index[0]).days
@@ -640,13 +641,10 @@ class PrismSourceData(SourceData):
             # 'none' to explicitly skip the stress period
             period_stat = self.period_stats.get(kper, current_stat)
             current_stat = period_stat
-            aggregated = aggregate_dataframe_to_stress_period(df,
-                                                              start_datetime=start,
-                                                              end_datetime=end,
-                                                              period_stat=period_stat,
-                                                              id_column=self.id_column,
-                                                              data_column=self.data_columns
-                                                              )
+            aggregated = aggregate_dataframe_to_stress_period(df, id_column=self.id_column, data_column=self.data_columns,
+                                                              datetime_column=self.datetime_column,
+                                                              start_datetime=start, end_datetime=end,
+                                                              period_stat=period_stat)
             aggregated['per'] = kper
             period_data.append(aggregated)
         dfm = pd.concat(period_data)

@@ -504,57 +504,58 @@ def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant
                  }
 
     # compare the terms
-    os.chdir(project_root_path)
-    pdf_outfile = '../modflow-setup-dirty/pleasant_mfnwt_mf6_compare.pdf'
-    with PdfPages(pdf_outfile) as pdf:
-        for k, v in mf6_terms.items():
-            term = k
-            out_term = term.replace('IN', 'OUT')
-            mf6_term = v
-            fig, ax = plt.subplots(figsize=(11, 8.5))
-            ax = df_flux[term].plot(c='C0')
-            ax = (-df_flux[out_term]).plot(ax=ax, c='C0')
-            if isinstance(mf6_term, list):
-                mf6_series = df_flux6[mf6_term].sum(axis=1)
-                mf6_out_term = [s.replace('IN', 'OUT') for s in mf6_term]
-                mf6_out_series = df_flux6[mf6_out_term].sum(axis=1)
-            else:
-                mf6_out_term = mf6_term.replace('IN', 'OUT')
-                mf6_series = df_flux6[mf6_term]
-                mf6_out_series = df_flux6[mf6_out_term]
-            mf6_series.plot(ax=ax, c='C1')
-            (-mf6_out_series).plot(ax=ax, c='C1')
-            h, l = ax.get_legend_handles_labels()
-            ax.legend(h[::2], ['mfnwt', 'mf6'])
-            ax.set_title(term.split('_')[0])
-            pdf.savefig()
-            plt.close()
+    if make_plot:
+        os.chdir(project_root_path)
+        pdf_outfile = '../modflow-setup-dirty/pleasant_mfnwt_mf6_compare.pdf'
+        with PdfPages(pdf_outfile) as pdf:
+            for k, v in mf6_terms.items():
+                term = k
+                out_term = term.replace('IN', 'OUT')
+                mf6_term = v
+                fig, ax = plt.subplots(figsize=(11, 8.5))
+                ax = df_flux[term].plot(c='C0')
+                ax = (-df_flux[out_term]).plot(ax=ax, c='C0')
+                if isinstance(mf6_term, list):
+                    mf6_series = df_flux6[mf6_term].sum(axis=1)
+                    mf6_out_term = [s.replace('IN', 'OUT') for s in mf6_term]
+                    mf6_out_series = df_flux6[mf6_out_term].sum(axis=1)
+                else:
+                    mf6_out_term = mf6_term.replace('IN', 'OUT')
+                    mf6_series = df_flux6[mf6_term]
+                    mf6_out_series = df_flux6[mf6_out_term]
+                mf6_series.plot(ax=ax, c='C1')
+                (-mf6_out_series).plot(ax=ax, c='C1')
+                h, l = ax.get_legend_handles_labels()
+                ax.legend(h[::2], ['mfnwt', 'mf6'])
+                ax.set_title(term.split('_')[0])
+                pdf.savefig()
+                plt.close()
 
-        # head results
-        HeadFile = flopy.utils.binaryfile.HeadFile
-        mf6_hds_obj = HeadFile('{}/pleasant_mf6/pleasant_mf6.hds'.format(tmpdir))
-        mfnwt_hds_obj = HeadFile('{}/pleasant_nwt/pleasant.hds'.format(tmpdir))
-        assert np.allclose(mf6_hds_obj.get_times(), mfnwt_hds_obj.get_times(), rtol=1e-4)
-        all_kstpkper = mf6_hds_obj.get_kstpkper()
+    # head results
+    HeadFile = flopy.utils.binaryfile.HeadFile
+    mf6_hds_obj = HeadFile('{}/pleasant_mf6/pleasant_mf6.hds'.format(tmpdir))
+    mfnwt_hds_obj = HeadFile('{}/pleasant_nwt/pleasant.hds'.format(tmpdir))
+    assert np.allclose(mf6_hds_obj.get_times(), mfnwt_hds_obj.get_times(), rtol=1e-4)
+    all_kstpkper = mf6_hds_obj.get_kstpkper()
 
-        # compare heads along the boundary
-        k, i, j = pleasant_nwt_model_run.get_boundary_cells(exclude_inactive=True)
-        mf6_bhead_avg = []
-        mfnwt_bhead_avg = []
-        for kstp, kper in all_kstpkper:
-            mf6_hds = mf6_hds_obj.get_data(kstpkper=(kstp, kper))
-            mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=(kstp, kper))
-            mf6_bhead_avg.append(mf6_hds[k, i, j].mean())
-            mfnwt_bhead_avg.append(mfnwt_hds[k, i, j].mean())
+    # compare heads along the boundary
+    k, i, j = pleasant_nwt_model_run.get_boundary_cells(exclude_inactive=True)
+    mf6_bhead_avg = []
+    mfnwt_bhead_avg = []
+    for kstp, kper in all_kstpkper:
+        mf6_hds = mf6_hds_obj.get_data(kstpkper=(kstp, kper))
+        mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=(kstp, kper))
+        mf6_bhead_avg.append(mf6_hds[k, i, j].mean())
+        mfnwt_bhead_avg.append(mfnwt_hds[k, i, j].mean())
 
-            #last = [all_kstpkper-1]
-            #mf6_hds = mf6_hds_obj.get_data(kstpkper=last)
-            #mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=last)
-            #from flopy.utils.postprocessing import get_water_table
-            #mf6_wt = get_water_table(mf6_hds, nodata=1e30)
-            #mfnwt_wt = get_water_table(mfnwt_hds, nodata=-9999)
-            #loc = pleasant_mf6_model_run.dis.idomain.array == 1
-            #rms = np.sqrt(np.mean((mf6_wt - mfnwt_wt) ** 2))
+        #last = [all_kstpkper-1]
+        #mf6_hds = mf6_hds_obj.get_data(kstpkper=last)
+        #mfnwt_hds = mfnwt_hds_obj.get_data(kstpkper=last)
+        #from flopy.utils.postprocessing import get_water_table
+        #mf6_wt = get_water_table(mf6_hds, nodata=1e30)
+        #mfnwt_wt = get_water_table(mfnwt_hds, nodata=-9999)
+        #loc = pleasant_mf6_model_run.dis.idomain.array == 1
+        #rms = np.sqrt(np.mean((mf6_wt - mfnwt_wt) ** 2))
 
     if make_plot:
         fig, ax = plt.subplots(figsize=(11, 8.5))
@@ -584,14 +585,16 @@ def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant
         #mf6_cb_obj = HeadFile('pleasant_mf6.cbc')
         #mfnwt_cb_obj = HeadFile('../pleasant_nwt/pleasant.cbc')
 
-        # lake stage results
-        df_mf6 = pd.read_csv('{}/pleasant_mf6/lake1.obs.csv'.format(tmpdir))
-        df_mfnwt = read_lak_ggo('{}/pleasant_nwt/lak1_600059060.ggo'.format(tmpdir),
-                                model=pleasant_nwt_model_run)
+    # lake stage results
+    # this also tests that the gage package is writing to the correct unit
+    df_mf6 = pd.read_csv('{}/pleasant_mf6/lake1.obs.csv'.format(tmpdir))
+    df_mfnwt = read_lak_ggo('{}/pleasant_nwt/lak1_600059060.ggo'.format(tmpdir),
+                            model=pleasant_nwt_model_run)
+    if make_plot:
         plt.plot(df_mf6.time, df_mf6.STAGE, label='mf6')
         plt.plot(df_mfnwt.time, df_mfnwt.stageh, label='mfnwt')
         plt.legend()
-        lake_stage_rms = np.sqrt(np.mean((df_mfnwt.stage.values - df_mf6.STAGE.values) ** 2))
-        j=2
-        #pdf.close()
+    lake_stage_rms = np.sqrt(np.mean((df_mfnwt.stage.values - df_mf6.STAGE.values) ** 2))
+    j=2
+    #pdf.close()
 

@@ -1093,6 +1093,8 @@ class MFsetupMixin():
 
         # add observations
         observations_input = self.cfg['sfr'].get('source_data', {}).get('observations')
+        if self.version != 'mf6':
+            sfr.gage_starting_unit_number = self.cfg['gag']['starting_unit_number']
         if observations_input is not None:
             key = 'filename' if 'filename' in observations_input else 'filenames'
             observations_input['data'] = observations_input[key]

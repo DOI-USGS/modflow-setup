@@ -4,14 +4,13 @@ import pytest
 import numpy as np
 import pandas as pd
 import xarray as xr
+from shapely.geometry import Point
 from ..fileio import _parse_file_path_keys_from_source_data
 from ..sourcedata import (ArraySourceData, TabularSourceData, TransientTabularSourceData,
                           MFArrayData, MFBinaryArraySourceData, transient2d_to_xarray)
 from mfsetup.tdis import aggregate_dataframe_to_stress_period
 from mfsetup.discretization import weighted_average_between_layers
 from ..units import convert_length_units, convert_time_units
-from mfsetup import MFnwtModel
-from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture
@@ -333,12 +332,10 @@ def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, d
     welldata = welldata.append(duplicate_well)
     start_datetime = pd.Timestamp(start)
     end_datetime = pd.Timestamp(end)  # pandas convention of including last day
-    result = aggregate_dataframe_to_stress_period(welldata,
-                                                  start_datetime=start_datetime,
-                                                  end_datetime=end_datetime,
-                                                  period_stat='mean',
-                                                  id_column='node',
-                                                  data_column='flux_m3')
+    result = aggregate_dataframe_to_stress_period(welldata, id_column='node', data_column='flux_m3',
+                                                  datetime_column='start_datetime', end_datetime_column='end_datetime',
+                                                  start_datetime=start_datetime, end_datetime=end_datetime,
+                                                  period_stat='mean')
     overlap = (welldata.start_datetime < end_datetime) & \
                                (welldata.end_datetime > start_datetime)
     #period_inside_welldata = (welldata.start_datetime < start_datetime) & \
@@ -370,3 +367,43 @@ def test_transient2d_to_DataArray():
     assert np.array_equal(result['x'], np.arange(2))
     assert np.array_equal(result['y'], np.arange(2)[::-1])
     assert np.array_equal(result, data)
+
+
+def test_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_dis):
+    
+    m = shellmound_model_with_dis
+    # capitalize the column names so that they're mixed case
+    csvfile = os.path.join(project_root_path, 'mfsetup/tests/data/shellmound/tables/head_obs_well_info.csv')
+    input_csv = os.path.join(tmpdir, 'csv_cap_cols.csv')
+    df = pd.read_csv(csvfile)
+    df.columns = [c.capitalize() for c in df.columns]
+    df.to_csv(input_csv, index=False)
+
+    sd = TabularSourceData(filenames=input_csv, data_column='Head_m', id_column='Site_no',
+                                    length_units = 'unknown', volume_units=None,
+                                    column_mappings=None,
+                                    dest_model=m)
+    sd.get_data()
+    j=2
+
+
+def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_dis):
+    
+    m = shellmound_model_with_dis
+    # capitalize the column names so that they're mixed case
+    csvfile = os.path.join(project_root_path, 'mfsetup/tests/data/shellmound/tables/iwum_m3_1M.csv')
+    input_csv = os.path.join(tmpdir, 'csv_cap_cols.csv')
+    df = pd.read_csv(csvfile)
+    df.columns = [c.capitalize() for c in df.columns]
+    # create a geometry column of wkt strings, as would result if the csv were written by geopandas.to_csv
+    df['geometry'] = [str(Point(x, y)) for x, y in zip(df.X, df.Y)]
+    df.to_csv(input_csv, index=False)
+
+    sd = TransientTabularSourceData(filenames=input_csv, data_column='Flux_m3', 
+                                    datetime_column='Start_datetime', id_column='Node',
+                                    x_col='X', y_col='Y', period_stats={0: 'mean'},
+                                    length_units='unknown', time_units='unknown', volume_units=None,
+                                    column_mappings=None,
+                                    dest_model=m)
+    sd.get_data()
+    j=2
