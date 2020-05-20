@@ -1198,6 +1198,18 @@ def setup_array(model, package, var, data=None,
 
         # fill nan values adjacent to active cells to avoid cell thickness errors
         top, botm = fill_cells_vertically(top, botm)
+        # the top may have been modified by fill_cells_vertically
+        # update the top in the model
+        # todo: refactor this code to be consolidated with _set_idomain and setup_dis
+        model._setup_array('dis', 'top',
+                data={0: top},
+                datatype='array2d', resample_method='linear',
+                write_fmt='%.2f', dtype=float)
+        if hasattr(model, 'dis') and model.dis is not None:
+            if model.version == 'mf6':
+                model.dis.top = model.cfg['dis']['griddata']['top']
+            else:
+                model.dis.top = model.cfg['dis']['top'][0]
         data = {i: arr for i, arr in enumerate(botm)}
     elif var in ['rech', 'recharge']:
         for per in range(model.nper):

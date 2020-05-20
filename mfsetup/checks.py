@@ -32,7 +32,10 @@ def check_external_files_for_nans(files_list):
     has_nans = []
     for f in files_list:
         try:  # array text files
-            arr = load_array(f)
+            # set nodata to np.nan
+            # so that default nodata value of -9999 is not cast to np.nan
+            # want to only check for instances of 'nan' that will crash MODFLOW
+            arr = load_array(f, nodata=np.nan)
             if np.any(np.isnan(arr)):
                 has_nans.append(f)
         except:  # other text files (MODFLOW-6 input with blocks)

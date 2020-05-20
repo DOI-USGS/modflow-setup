@@ -5,8 +5,19 @@ import time
 import numpy as np
 from scipy import ndimage
 from scipy.signal import convolve2d
+import flopy
 from flopy.mf6.data.mfdatalist import MFList
 
+
+class ModflowGwfdis(flopy.mf6.ModflowGwfdis):
+    def __init__(self, *args, **kwargs):
+        flopy.mf6.ModflowGwfdis.__init__(self, *args, **kwargs)
+        
+    @property
+    def thickness(self):
+        return -1 * np.diff(np.stack([self.top.array] + 
+                                     [b for b in self.botm.array]), axis=0)
+    
 
 def adjust_layers(dis, minimum_thickness=1):
     """
@@ -215,7 +226,7 @@ def fill_empty_layers(array):
 def fill_cells_vertically(top, botm):
     """In MODFLOW 6, cells where idomain != 1 are excluded from the solution.
     However, in the botm array, values are needed in overlying cells to
-    compute layer thickness (cells with idomain != 1 overlying cells with idomain != 1 need
+    compute layer thickness (cells with idomain != 1 overlying cells with idomain == 1 need
     values in botm). Given a 3D numpy array with nan values indicating excluded cells,
     fill in the nans with the overlying values. For example, given the column of cells
     [10, nan, 8, nan, nan, 5, nan, nan, nan, 1], fill the nan values to make

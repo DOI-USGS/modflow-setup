@@ -366,13 +366,13 @@ def test_dis_setup(shellmound_model_with_grid):
     assert np.array_equal(m.dis.idomain.array, updated_idomain)
 
     # check that units were converted (or not)
-    assert np.allclose(dis.top.array.mean(), 40, atol=10)
+    assert np.allclose(dis.top.array[dis.idomain.array[0] == 1].mean(), 40, atol=10)
     mcaq = m.cfg['dis']['source_data']['botm']['filenames'][3]
     assert 'mcaq' in mcaq
     with rasterio.open(mcaq) as src:
         mcaq_data = src.read(1)
         mcaq_data[mcaq_data == src.meta['nodata']] = np.nan
-    assert np.allclose(m.dis.botm.array[3].mean() / .3048, np.nanmean(mcaq_data), atol=5)
+    assert np.allclose(m.dis.botm.array[3][dis.idomain.array[3] == 1].mean() / .3048, np.nanmean(mcaq_data), atol=5)
 
 
 def test_idomain(shellmound_model_with_dis):
@@ -629,6 +629,20 @@ def test_sfr_setup(model_with_sfr):
     for f in shapefiles:
         assert os.path.exists(f)
     assert m.sfrdata.model == m
+    
+    # verify that only unconnected sfr reaches are in 
+    # places where all layers are inactive
+    k, i, j = m.sfrdata.reach_data.k, m.sfrdata.reach_data.i, m.sfrdata.reach_data.j
+    reach_idomain = m.idomain[k, i, j]
+    inactive_reaches = m.sfrdata.reach_data.loc[reach_idomain != 1]
+    ki, ii, ji = inactive_reaches.k, inactive_reaches.i, inactive_reaches.j
+    # 26, 13
+    j=2
+    
+
+
+    # array([  23.46,   10.72,   -2.02,  -10.03,  -35.99,  -61.96, -145.56,
+    #   -184.6 , -315.14, -354.63, -411.11, -467.58, -697.97])
 
 
 #@pytest.mark.xfail(reason='flopy remove_package() issue')

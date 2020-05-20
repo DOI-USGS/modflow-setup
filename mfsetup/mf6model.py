@@ -9,8 +9,8 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
-from .discretization import (make_idomain, make_lgr_idomain, deactivate_idomain_above,
-                             find_remove_isolated_cells,
+from .discretization import (ModflowGwfdis, make_idomain, make_lgr_idomain, deactivate_idomain_above,
+                             find_remove_isolated_cells, fill_cells_vertically,
                              create_vertical_pass_through_cells)
 from .fileio import (load, dump, load_cfg,
                      flopy_mfsimulation_load)
@@ -128,13 +128,30 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         self._idomain = idomain
 
+        # take the updated idomain array and set cells != 1 to np.nan in layer botm array
+        botm = self.dis.botm.array.copy()
+        botm[idomain != 1] = np.nan
+        # fill_cells_vertically will be run in the setup_array routing, 
+        # to collapse the nan cells to zero-thickness
+        # (assign their layer botm to the next valid layer botm above)
+
         # re-write the input files
+        # todo: integrate this better with setup_dis
+        # to reduce the number of times the arrays need to be remade
+
+        self._setup_array('dis', 'botm',
+                        data={i: arr for i, arr in enumerate(botm)},
+                        datatype='array3d', resample_method='linear',
+                        write_fmt='%.2f', dtype=float)
+        self.dis.botm = self.cfg['dis']['griddata']['botm']
         self._setup_array('dis', 'idomain',
                           data={i: arr for i, arr in enumerate(idomain)},
                           datatype='array3d', resample_method='nearest',
                           write_fmt='%d', dtype=int)
         self.dis.idomain = self.cfg['dis']['griddata']['idomain']
         self._mg_resync = False
+        self.setup_grid()  # reset the model grid
+
 
     def _set_parent(self):
         """Set attributes related to a parent or source model
@@ -419,13 +436,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             if v not in kwargs:
                 kwargs[v] = kwargs.pop(k)
         kwargs['length_units'] = self.length_units
+        # get the arguments for the flopy version of ModflowGwfdis
+        # but instantiate with modflow-setup subclass of ModflowGwfdis
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
-        dis = mf6.ModflowGwfdis(model=self, **kwargs)
+        dis = ModflowGwfdis(model=self, **kwargs)
         self._perioddata = None  # reset perioddata
         #if not isinstance(self._modelgrid, MFsetupGrid):
         #    self._modelgrid = None  # override DIS package grid setup
         self._mg_resync = False
-        self.setup_grid()  # reset the model grid
         self._reset_bc_arrays()
         self._set_idomain()
         print("finished in {:.2f}s\n".format(time.time() - t0))

@@ -168,6 +168,16 @@ def test_dis_setup(get_pleasant_mf6_with_grid):
         assert np.array_equal(model_array, data)
 
 
+def test_dis_setup_inactive_thickness(get_pleasant_mf6_with_grid):
+
+    m = get_pleasant_mf6_with_grid #deepcopy(model_with_grid)
+    # test intermediate array creation
+    m.cfg['dis']['remake_top'] = True
+    dis = m.setup_dis()
+    assert np.all(dis.thickness[m.idomain != 1] == 0.)
+    assert np.all(dis.thickness[m.idomain == 1] >= m.cfg['dis']['minimum_layer_thickness'])
+
+
 def test_idomain(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
     assert issubclass(m.idomain.dtype.type, np.integer)

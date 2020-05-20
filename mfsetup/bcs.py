@@ -148,15 +148,16 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
         names += ['wellid']
 
     # monkey patch the mf6 version to behave like the mf2005 version
-    if isinstance(mftransientlist, flopy.mf6.data.mfdatalist.MFTransientList):
-        mftransientlist.data = {per: ra for per, ra in enumerate(mftransientlist.array)}
+    #if isinstance(mftransientlist, flopy.mf6.data.mfdatalist.MFTransientList):
+    #    mftransientlist.data = {per: ra for per, ra in enumerate(mftransientlist.array)}
 
     # find relevant variable names
     # may have to iterate over the first stress period
-    for per in range(data.model.nper):
-        if hasattr(data.data[per], 'dtype'):
-            varnames = list([n for n in data.data[per].dtype.names
-                             if n not in ['k', 'i', 'j', 'cellid']])
+    #for per in range(data.model.nper):
+    for per, spd in data.data.items():
+        if spd is not None and hasattr(spd, 'dtype'):
+            varnames = list([n for n in spd.dtype.names
+                             if n not in ['k', 'i', 'j', 'cellid', 'boundname']])
             break
 
     # create list of dataframes for each stress period
