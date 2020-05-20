@@ -69,7 +69,7 @@ class SourceData:
 
         # data are areas
         if self.area_units is not None:
-            raise NotImplemented('Conversion of area units.')
+            raise NotImplementedError('Conversion of area units.')
 
         # data are volumes
         elif self.volume_units is not None:
@@ -144,6 +144,92 @@ class SourceData:
         return cls(**data_dict, **kwargs)
 
 
+class TransientSourceDataMixin():
+    """Class for shared functionality among the SourceData subclasses
+    that deal with transient data.
+    """
+    def __init__(self, period_stats, dest_model):
+
+        # property attributes
+        self._period_stats_input = period_stats
+        self._period_stats = None
+        
+        # attributes
+        self.perioddata = dest_model.perioddata.sort_values(by='per').reset_index(drop=True)
+    
+    @property
+    def period_stats(self):
+        if self._period_stats is None:
+            self._period_stats = self.get_period_stats()
+        return self._period_stats
+        
+    def get_period_stats(self):
+        """Populate each stress period with period_stat information
+        for temporal resampling (tdis.aggregate_dataframe_to_stress_period and
+        tdis.aggregate_xarray_to_stress_period methods), implementing default
+        behavior for periods with unspecified start and end times.
+        """
+        
+        perioddata = self.perioddata
+        period_stats = {}
+        period_stat_input = None
+        for i, r in perioddata.iterrows():
+            
+            # get start end end datetimes from period_stats if provided
+            start_datetime = None
+            end_datetime = None
+            
+            # if there is no input for a period, reuse input for the last one
+            if r.per not in self._period_stats_input:
+                period_stats[r.per] = period_stat_input
+            else:
+                period_stat_input = self._period_stats_input[r.per]
+            
+            # dict of info for this period
+            period_data_output = {}
+            
+            # set entries parsed as 'None' or 'none' to NoneType
+            # if None was input for a period, skip it
+            if isinstance(period_stat_input, str) and period_stat_input.lower() == 'none':
+                period_stat_input = None
+            if period_stat_input is None:
+                period_stats[r.per] = None
+                continue
+            
+            # if no start and end date are given in period_stats
+            elif isinstance(period_stat_input, str):
+                
+                period_data_output['period_stat'] = period_stat_input
+                # if the period is longer than one day, or transient
+                # use start_datetime and end_datetime from perioddata
+                if r.perlen > 1 or not r.steady: 
+                    period_data_output['start_datetime'] = r.start_datetime
+                    period_data_output['end_datetime'] = r.end_datetime
+                    if end_datetime == start_datetime:
+                        period_data_output['end_datetime'] -= pd.Timedelta(1, unit=self.dest_model.time_units)
+                # otherwise, for steady-state periods of one day
+                # default to start and end datetime default as None
+                # which will result in default aggregation of whole data file
+                # by tdis.aggregate_dataframe_to_stress_period
+            
+            # aggregation time period defined by single string
+            # e.g. 'august' or '2014-01'
+            elif len(period_stat_input) == 2:
+                period_data_output['period_stat'] = period_stat_input
+            
+            # aggregation time period defined by start and end dates
+            elif len(period_stat_input) == 3:
+                period_data_output['period_stat'] = period_stat_input
+                period_data_output['start_datetime'] = period_stat_input[1]
+                period_data_output['end_datetime'] = period_stat_input[2]
+            
+            else:
+                raise ValueError('period_stat input for period {} not understood: {}'.format(r.per, period_stat_input))
+            
+            period_stats[r.per] = period_data_output
+        return period_stats
+
+
 class ArraySourceData(SourceData):
     """Subclass for handling array-based source data.
 
@@ -199,7 +285,7 @@ class ArraySourceData(SourceData):
         if source_array is not None:
             if len(source_array.shape) == 2:
                 source_array = source_array.reshape(1, *source_array.shape)
-            self.source_array = source_array
+            self.source_array = source_array.copy()
         self.dest_modelgrid = getattr(self.dest_model, 'modelgrid', None)
         self.datatype = datatype
         self.id_column = id_column
@@ -415,12 +501,13 @@ class ArraySourceData(SourceData):
         return data
 
 
-class TransientArraySourceData(ArraySourceData):
+class TransientArraySourceData(ArraySourceData, TransientSourceDataMixin):
     def __init__(self, filenames, variable, period_stats=None,
                  length_units='unknown', time_units='days',
                  dest_model=None, source_modelgrid=None, source_array=None,
                  from_source_model_layers=None, datatype=None,
-                 resample_method='nearest', vmin=-1e30, vmax=1e30
+                 resample_method='nearest', vmin=-1e30, vmax=1e30,
+                 multiplier=1.
                  ):
 
         ArraySourceData.__init__(self, variable=None, filenames=filenames,
@@ -429,10 +516,11 @@ class TransientArraySourceData(ArraySourceData):
                                  source_array=source_array,
                                  from_source_model_layers=from_source_model_layers,
                                  datatype=datatype,
-                                 resample_method=resample_method, vmin=vmin, vmax=vmax)
+                                 resample_method=resample_method, vmin=vmin, vmax=vmax,
+                                 multiplier=multiplier)
+        TransientSourceDataMixin.__init__(self, period_stats=period_stats, dest_model=dest_model)
 
         self.variable = variable
-        self.period_stats = period_stats
         self.resample_method = resample_method
         self.dest_model = dest_model
 
@@ -449,7 +537,7 @@ class TransientArraySourceData(ArraySourceData):
 
         # regrid source data from another model
         elif self.source_array is not None:
-            source_data = self.source_array
+            source_data = self.source_array * self.unit_conversion * self.mult
             regrid = True
 
         # cast data to an xarray DataArray for time-sliceing
@@ -461,7 +549,7 @@ class TransientArraySourceData(ArraySourceData):
         # between source and dest model stress periods
         results = {}
         for inset_kper, parent_kper in self.dest_model.parent_stress_periods.items():
-            data = source_data[parent_kper]
+            data = source_data[parent_kper].copy()
             if regrid:
                 # sample the data onto the model grid
                 resampled = self.regrid_from_source_model(data, method=self.resample_method)
@@ -470,12 +558,12 @@ class TransientArraySourceData(ArraySourceData):
             # reshape results to model grid
             period_mean2d = resampled.reshape(self.dest_model.nrow,
                                               self.dest_model.ncol)
-            results[inset_kper] = period_mean2d * self.unit_conversion
+            results[inset_kper] = period_mean2d
         self.data = results
         return results
 
 
-class NetCDFSourceData(ArraySourceData):
+class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
     def __init__(self, filenames, variable, period_stats,
                  length_units='unknown', time_units='days',
                  dest_model=None, source_modelgrid=None,
@@ -489,6 +577,7 @@ class NetCDFSourceData(ArraySourceData):
                                  from_source_model_layers=from_source_model_layers,
                                  datatype=datatype,
                                  resample_method=resample_method, vmin=vmin, vmax=vmax)
+        TransientSourceDataMixin.__init__(self, period_stats=period_stats, dest_model=dest_model)
 
         if isinstance(filenames, dict):
             filenames = list(filenames.values())
@@ -499,7 +588,6 @@ class NetCDFSourceData(ArraySourceData):
         else:
             self.filename = filenames
         self.variable = variable
-        self.period_stats = period_stats
         self.resample_method = resample_method
         self.dest_model = dest_model
         self.time_col = 'time'
@@ -555,24 +643,16 @@ class NetCDFSourceData(ArraySourceData):
         data = ds[self.variable]
 
         # sample values to model stress periods
-        # TODO: make this general for using with lists of files or other input by stress period
-        starttimes = self.dest_model.perioddata['start_datetime']
-        endtimes = self.dest_model.perioddata['end_datetime']
         results = {}
-        current_stat = None
-        for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
-            period_stat = self.period_stats.get(kper, current_stat)
-            current_stat = period_stat
+        for kper, period_stat in self.period_stats.items():
+            if period_stat is None:
+                continue
             aggregated = aggregate_xarray_to_stress_period(data,
-                                                           start_datetime=start,
-                                                           end_datetime=end,
-                                                           period_stat=period_stat,
-                                                           datetime_column=self.time_col)
-
+                                                           datetime_column=self.time_col,
+                                                           **period_stat)
             # sample the data onto the model grid
             resampled = self.regrid_from_source(aggregated,
                                                 method=self.resample_method)
-
             # reshape results to model grid
             period_mean2d = resampled.reshape(self.dest_model.nrow,
                                               self.dest_model.ncol)
@@ -788,7 +868,7 @@ class TabularSourceData(SourceData):
         return df.reset_index(drop=True)
 
 
-class TransientTabularSourceData(SourceData):
+class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
     """Subclass for handling tabular source data that
     represents a time series."""
 
@@ -801,13 +881,13 @@ class TransientTabularSourceData(SourceData):
                             length_units=length_units, time_units=time_units,
                             volume_units=volume_units,
                             dest_model=dest_model)
+        TransientSourceDataMixin.__init__(self, period_stats=period_stats, dest_model=dest_model)
 
         self.data_column = data_column
         self.datetime_column = datetime_column
         self.end_datetime_column = end_datetime_column
         self.id_column = id_column
         self.column_mappings = column_mappings
-        self.period_stats = period_stats
         self.time_col = datetime_column
         self.x_col = x_col
         self.y_col = y_col
@@ -819,17 +899,16 @@ class TransientTabularSourceData(SourceData):
         for i, f in self.filenames.items():
             if f.endswith('.shp') or f.endswith('.dbf'):
                 df = shp2df(f)
-
             elif f.endswith('.csv'):
                 df = pd.read_csv(f)
-
+            else:
+                raise ValueError("Unsupported file type: '{}', for {}".format(f[:-4], f))
             dfs.append(df)
         df = pd.concat(dfs)
         df.index = pd.to_datetime(df[self.datetime_column])
         # rename any columns specified in config file to required names
         if self.column_mappings is not None:
             df.rename(columns=self.column_mappings, inplace=True)
-        #df.columns = [c.lower() for c in df.columns]
 
         # cull data to model bounds
         if 'geometry' not in df.columns or isinstance(df.geometry.iloc[0], str):
@@ -837,31 +916,14 @@ class TransientTabularSourceData(SourceData):
         within = [g.within(self.dest_model.bbox) for g in df.geometry]
         df = df.loc[within]
 
-        # sample values to model stress periods
-        starttimes = self.dest_model.perioddata['start_datetime'].copy()
-        endtimes = self.dest_model.perioddata['end_datetime'].copy()
-
-        # if period ends are specified as the same as the next starttime
-        # need to subtract a day, otherwise
-        # pandas will include the first day of the next period in slices
-        endtimes_equal_startimes = np.all(endtimes[:-1].values == starttimes[1:].values)
-        if endtimes_equal_startimes:
-            endtimes -= pd.Timedelta(1, unit='d')
-
         period_data = []
-        current_stat = None
-        for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
-            # missing (period) keys default to 'mean';
-            # 'none' to explicitly skip the stress period
-            period_stat = self.period_stats.get(kper, current_stat)
-            if period_stat is not None and isinstance(period_stat, str):
-                if period_stat.lower() == 'none':
-                    continue
+        for kper, period_stat in self.period_stats.items():
+            if period_stat is None:
+                continue
             aggregated = aggregate_dataframe_to_stress_period(df, id_column=self.id_column,
                                                               datetime_column=self.datetime_column,
                                                               end_datetime_column=self.end_datetime_column,
-                                                              data_column=self.data_column, start_datetime=start,
-                                                              end_datetime=end, period_stat=period_stat)
+                                                              data_column=self.data_column, **period_stat)
             aggregated['per'] = kper
             period_data.append(aggregated)
         dfm = pd.concat(period_data)

@@ -6,9 +6,9 @@ import pandas as pd
 import xarray as xr
 from shapely.geometry import Point
 from ..fileio import _parse_file_path_keys_from_source_data
-from ..sourcedata import (ArraySourceData, TabularSourceData, TransientTabularSourceData,
+from ..sourcedata import (ArraySourceData, TransientArraySourceData,
+                          TabularSourceData, TransientTabularSourceData,
                           MFArrayData, MFBinaryArraySourceData, transient2d_to_xarray)
-from mfsetup.tdis import aggregate_dataframe_to_stress_period
 from mfsetup.discretization import weighted_average_between_layers
 from ..units import convert_length_units, convert_time_units
 
@@ -290,73 +290,6 @@ def test_weighted_average_between_layers():
     assert np.allclose(result.mean(axis=(0, 1)), weight0)
 
 
-@pytest.mark.parametrize('dates', [('2007-04-01', '2007-03-31'),
-                                   ('2008-04-01', '2008-09-30'),
-                                   ('2008-10-01', '2009-03-31')])
-@pytest.mark.parametrize('sourcefile', ['tables/sp69_pumping_from_meras21_m3.csv',
-                                        'tables/iwum_m3_1M.csv',
-                                        'tables/iwum_m3_6M.csv'])
-def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, dates):
-    """
-    dates
-    1) similar to initial steady-state period that doesn't represent a real time period
-    2) period that spans one or more periods in source data
-    3) period that doesn't span any periods in source data
-
-    sourcefiles
-
-    'tables/sp69_pumping_from_meras21_m3.csv'
-        case where dest. period is completely within the start and end dates for the source data
-        (source start date is before dest start date; source end date is after dest end date)
-
-    'tables/iwum_m3_6M.csv'
-        case where 1) start date coincides with start date in source data; end date spans
-        one period in source data. 2) start and end date do not span any periods
-        in source data (should return a result of length 0)
-
-    'tables/iwum_m3_1M.csv'
-        case where 1) start date coincides with start date in source data; end date spans
-        multiple periods in source data. 2) start and end date do not span any periods
-        in source data (should return a result of length 0)
-    Returns
-    -------
-
-    """
-    start, end = dates
-    welldata = pd.read_csv(os.path.join(shellmound_datapath, sourcefile
-                                        ))
-
-    welldata['start_datetime'] = pd.to_datetime(welldata.start_datetime)
-    welldata['end_datetime'] = pd.to_datetime(welldata.end_datetime)
-    duplicate_well = welldata.groupby('node').get_group(welldata.node.values[0])
-    welldata = welldata.append(duplicate_well)
-    start_datetime = pd.Timestamp(start)
-    end_datetime = pd.Timestamp(end)  # pandas convention of including last day
-    result = aggregate_dataframe_to_stress_period(welldata, id_column='node', data_column='flux_m3',
-                                                  datetime_column='start_datetime', end_datetime_column='end_datetime',
-                                                  start_datetime=start_datetime, end_datetime=end_datetime,
-                                                  period_stat='mean')
-    overlap = (welldata.start_datetime < end_datetime) & \
-                               (welldata.end_datetime > start_datetime)
-    #period_inside_welldata = (welldata.start_datetime < start_datetime) & \
-    #                         (welldata.end_datetime > end_datetime)
-    #overlap = welldata_overlaps_period #| period_inside_welldata
-
-    # for each location (id), take the mean across source data time periods
-    agg = welldata.loc[overlap].copy().groupby(['start_datetime', 'node']).sum().reset_index()
-    agg = agg.groupby('node').mean().reset_index()
-    if end_datetime < start_datetime:
-        assert result['flux_m3'].sum() == 0
-    if overlap.sum() == 0:
-        assert len(result) == 0
-    expected_sum = agg['flux_m3'].sum()
-    if duplicate_well.node.values[0] in agg.index:
-        dw_overlaps = (duplicate_well.start_datetime < end_datetime) & \
-                (duplicate_well.end_datetime > start_datetime)
-        expected_sum += duplicate_well.loc[dw_overlaps, 'flux_m3'].mean()
-    assert np.allclose(result['flux_m3'].sum(), expected_sum)
-
-
 def test_transient2d_to_DataArray():
     data = np.random.randn(2, 2, 2)
     times = ['2008-01-01', '2008-02-01']
@@ -384,7 +317,6 @@ def test_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_di
                                     column_mappings=None,
                                     dest_model=m)
     sd.get_data()
-    j=2
 
 
 def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_dis):
@@ -401,9 +333,33 @@ def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_mod
 
     sd = TransientTabularSourceData(filenames=input_csv, data_column='Flux_m3', 
                                     datetime_column='Start_datetime', id_column='Node',
-                                    x_col='X', y_col='Y', period_stats={0: 'mean'},
+                                    x_col='X', y_col='Y', 
+                                    period_stats={0: 'mean', 1: None, 2: 'none', 3: 'mean'},
                                     length_units='unknown', time_units='unknown', volume_units=None,
                                     column_mappings=None,
                                     dest_model=m)
-    sd.get_data()
-    j=2
+    # expected period stats
+    sd.period_stats
+    assert sd.period_stats[0] == {'period_stat': 'mean'}
+    assert sd.period_stats[1] == None
+    assert sd.period_stats[2] == None
+    for per in 3, m.nper-1:
+        assert sd.period_stats[per] == {'period_stat': 'mean', 
+                                        'start_datetime': m.perioddata.start_datetime[per], 
+                                        'end_datetime': m.perioddata.end_datetime[per] - pd.Timedelta(1, unit='days')
+                                        }
+    data = sd.get_data()
+    
+    # verify that first (steady-state) period has data
+    # if period is steady and no end_datetime_column is given, default should be to take mean for whole file
+    assert not any(np.in1d([1, 2], data.per.unique()))
+
+@pytest.mark.skip(reason='still working on tests for other SourceData classes')
+def test_transient_array_source_data(pfl_nwt_with_dis):
+    filenames = None
+    sd = TransientArraySourceData(filenames, 'rech', period_stats=None,
+                 length_units='unknown', time_units='days',
+                 dest_model=None, source_modelgrid=None, source_array=None,
+                 from_source_model_layers=None, datatype=None,
+                 resample_method='nearest', vmin=-1e30, vmax=1e30
+                 )

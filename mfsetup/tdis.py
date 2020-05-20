@@ -362,9 +362,8 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
     Parameters
     ----------
     data : DataFrame
-        Must have 'start_datetime' and 'end_datetime' columns with dates
-        indicating the time bounds associated with each row (e.g. the time
-        period for a specified model stress)
+        Must have an id_column, data_column, datetime_column, and optionally,
+        an end_datetime_column.
     id_column : str
         Column in data with location identifier (e.g. node or well id).
     data_column : str or list

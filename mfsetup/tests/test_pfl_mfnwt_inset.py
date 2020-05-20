@@ -9,13 +9,14 @@ import glob
 import pytest
 import numpy as np
 import pandas as pd
+import rasterio
 import flopy
 fm = flopy.modflow
 from mfsetup import MFnwtModel
 from mfsetup.checks import check_external_files_for_nans
 from mfsetup.grid import get_ij
 from mfsetup.fileio import exe_exists, load_cfg
-from mfsetup.units import convert_length_units
+from mfsetup.units import convert_length_units, convert_time_units
 from mfsetup.utils import get_input_arguments
 
 
@@ -237,12 +238,19 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path):
     inf_array = 'mfsetup/tests/data/plainfieldlakes/source_data/' \
                 'net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif'
     inf_array = os.path.join(project_root_path, inf_array)
+    with rasterio.open(inf_array) as src:
+        inf_values = src.read(1)
 
     m.cfg['rch']['source_data']['rech']['filename'] = inf_array
     m.cfg['rch']['rech'] = None
     m.cfg['rch']['source_data']['rech']['length_units'] = 'inches'
     m.cfg['rch']['source_data']['rech']['time_units'] = 'years'
     rch = m.setup_rch()
+    
+    # spatial mean recharge in model should approx. match the GeoTiff (which covers a larger area)
+    avg_in_yr = rch.rech.array[0, 0, :, :].mean() * convert_length_units('meters', 'inches') * \
+        convert_time_units('days', 'years')
+    assert np.allclose(avg_in_yr, inf_values.mean() * m.cfg['rch']['source_data']['rech']['mult'], rtol=0.25)
     arrayfiles = m.cfg['intermediate_data']['rech']
     for f in arrayfiles:
         assert os.path.exists(f)

@@ -13,7 +13,8 @@ from gisutils import shp2df, project, get_proj_str
 from mfsetup.evaporation import hamon_evaporation
 from mfsetup.fileio import save_array
 from mfsetup.grid import rasterize
-from mfsetup.sourcedata import SourceData, aggregate_dataframe_to_stress_period, TabularSourceData
+from mfsetup.sourcedata import (SourceData, TransientSourceDataMixin,
+                                aggregate_dataframe_to_stress_period, TabularSourceData)
 from mfsetup.units import convert_length_units, convert_temperature_units
 
 
@@ -549,7 +550,7 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
     return df
 
 
-class PrismSourceData(SourceData):
+class PrismSourceData(SourceData, TransientSourceDataMixin):
     """Subclass for handling tabular source data that
     represents a time series."""
 
@@ -558,9 +559,10 @@ class PrismSourceData(SourceData):
                  dest_model=None):
         SourceData.__init__(self, filenames=filenames,
                             dest_model=dest_model)
+        TransientSourceDataMixin.__init__(self, period_stats=period_stats, dest_model=dest_model)
+
 
         self.id_column = id_column
-        self.period_stats = period_stats
         self.data_columns = ['precipitation', 'temp']
         self.datetime_column = 'datetime'
         self.dest_temperature_units = dest_temperature_units
@@ -624,27 +626,29 @@ class PrismSourceData(SourceData):
         df = pd.concat(dfs)
 
         # sample values to model stress periods
-        starttimes = self.dest_model.perioddata['start_datetime'].copy()
-        endtimes = self.dest_model.perioddata['end_datetime'].copy()
+        #starttimes = self.dest_model.perioddata['start_datetime'].copy()
+        #endtimes = self.dest_model.perioddata['end_datetime'].copy()
 
         # if period ends are specified as the same as the next starttime
         # need to subtract a day, otherwise
         # pandas will include the first day of the next period in slices
-        endtimes_equal_startimes = np.all(endtimes[:-1].values == starttimes[1:].values)
+        #endtimes_equal_startimes = np.all(endtimes[:-1].values == starttimes[1:].values)
         #if endtimes_equal_startimes:
         #    endtimes -= pd.Timedelta(1, unit='d')
 
         period_data = []
-        current_stat = None
-        for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
+        #current_stat = None
+        #for kper, (start, end) in enumerate(zip(starttimes, endtimes)):
+        for kper, period_stat in self.period_stats.items():
+            if period_stat is None:
+                continue
             # missing (period) keys default to 'mean';
             # 'none' to explicitly skip the stress period
-            period_stat = self.period_stats.get(kper, current_stat)
-            current_stat = period_stat
+            #period_stat = self.period_stats.get(kper, current_stat)
+            #current_stat = period_stat
             aggregated = aggregate_dataframe_to_stress_period(df, id_column=self.id_column, data_column=self.data_columns,
                                                               datetime_column=self.datetime_column,
-                                                              start_datetime=start, end_datetime=end,
-                                                              period_stat=period_stat)
+                                                              **period_stat)
             aggregated['per'] = kper
             period_data.append(aggregated)
         dfm = pd.concat(period_data)

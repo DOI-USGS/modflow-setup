@@ -18,6 +18,15 @@ Modflow-setup uses the `pyyaml`_ package to parse the configuration file into th
    Description of source datatypes <source-data>
 
 
+Some additional notes on YAML
+---------------------------------------
+* quotes are optional for strings without special meanings. See `this reference`_ for more details.
+* (``None`` and ``'none'``) (``'None'`` and ``'none'``) are parsed as strings (``'None'`` and ``'none'``)
+* null is parsed to a ``NoneType`` instance (``None``)
+* numbers in exponential format need a decimal place to be parsed as floats (``1e5`` parses to ``'1e5'``; ``1.e5`` parses to a float)
+
+
+
 
 
 
@@ -27,4 +36,5 @@ Modflow-setup uses the `pyyaml`_ package to parse the configuration file into th
 
 .. _JSON: https://www.json.org/json-en.html
 .. _pyyaml: https://pyyaml.org/
+.. _this reference: http://blogs.perl.org/users/tinita/2018/03/strings-in-yaml---to-quote-or-not-to-quote.html
 .. _yaml format: https://yaml.org/

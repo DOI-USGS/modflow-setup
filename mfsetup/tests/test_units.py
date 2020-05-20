@@ -28,6 +28,8 @@ def test_convert_length_units():
     assert np.allclose(convert_length_units('m', 'ft'), 1/.3048)
     assert np.allclose(convert_length_units('ft', 'm'), .3048)
     assert np.allclose(convert_length_units(None, 'm'), 1.)
+    assert np.allclose(convert_length_units('millimeters', 'meters'), 1/1000)
+    assert np.allclose(convert_length_units('meters', 'millimeters'), 1000)
 
 
 def test_convert_time_units():

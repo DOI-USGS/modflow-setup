@@ -7,11 +7,12 @@ and the reference within on frequency strings.
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html
 https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
 """
+import os
 import copy
 import numpy as np
 import pandas as pd
 import pytest
-from mfsetup.tdis import get_parent_stress_periods
+from mfsetup.tdis import get_parent_stress_periods, aggregate_dataframe_to_stress_period
 from .test_pleasant_mf6_inset import get_pleasant_mf6
 
 
@@ -219,3 +220,70 @@ def test_get_parent_stress_periods(copy_periods, nper, basic_model_instance, req
     m._set_parent()
     m._set_perioddata()
     assert np.array_equal(m.perioddata['parent_sp'], np.array(expected[test_name]))
+    
+    
+@pytest.mark.parametrize('dates', [('2007-04-01', '2007-03-31'),
+                                   ('2008-04-01', '2008-09-30'),
+                                   ('2008-10-01', '2009-03-31')])
+@pytest.mark.parametrize('sourcefile', ['tables/sp69_pumping_from_meras21_m3.csv',
+                                        'tables/iwum_m3_1M.csv',
+                                        'tables/iwum_m3_6M.csv'])
+def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, dates):
+    """
+    dates
+    1) similar to initial steady-state period that doesn't represent a real time period
+    2) period that spans one or more periods in source data
+    3) period that doesn't span any periods in source data
+
+    sourcefiles
+
+    'tables/sp69_pumping_from_meras21_m3.csv'
+        case where dest. period is completely within the start and end dates for the source data
+        (source start date is before dest start date; source end date is after dest end date)
+
+    'tables/iwum_m3_6M.csv'
+        case where 1) start date coincides with start date in source data; end date spans
+        one period in source data. 2) start and end date do not span any periods
+        in source data (should return a result of length 0)
+
+    'tables/iwum_m3_1M.csv'
+        case where 1) start date coincides with start date in source data; end date spans
+        multiple periods in source data. 2) start and end date do not span any periods
+        in source data (should return a result of length 0)
+    Returns
+    -------
+
+    """
+    start, end = dates
+    welldata = pd.read_csv(os.path.join(shellmound_datapath, sourcefile
+                                        ))
+
+    welldata['start_datetime'] = pd.to_datetime(welldata.start_datetime)
+    welldata['end_datetime'] = pd.to_datetime(welldata.end_datetime)
+    duplicate_well = welldata.groupby('node').get_group(welldata.node.values[0])
+    welldata = welldata.append(duplicate_well)
+    start_datetime = pd.Timestamp(start)
+    end_datetime = pd.Timestamp(end)  # pandas convention of including last day
+    result = aggregate_dataframe_to_stress_period(welldata, id_column='node', data_column='flux_m3',
+                                                  datetime_column='start_datetime', end_datetime_column='end_datetime',
+                                                  start_datetime=start_datetime, end_datetime=end_datetime,
+                                                  period_stat='mean')
+    overlap = (welldata.start_datetime < end_datetime) & \
+                               (welldata.end_datetime > start_datetime)
+    #period_inside_welldata = (welldata.start_datetime < start_datetime) & \
+    #                         (welldata.end_datetime > end_datetime)
+    #overlap = welldata_overlaps_period #| period_inside_welldata
+
+    # for each location (id), take the mean across source data time periods
+    agg = welldata.loc[overlap].copy().groupby(['start_datetime', 'node']).sum().reset_index()
+    agg = agg.groupby('node').mean().reset_index()
+    if end_datetime < start_datetime:
+        assert result['flux_m3'].sum() == 0
+    if overlap.sum() == 0:
+        assert len(result) == 0
+    expected_sum = agg['flux_m3'].sum()
+    if duplicate_well.node.values[0] in agg.index:
+        dw_overlaps = (duplicate_well.start_datetime < end_datetime) & \
+                (duplicate_well.end_datetime > start_datetime)
+        expected_sum += duplicate_well.loc[dw_overlaps, 'flux_m3'].mean()
+    assert np.allclose(result['flux_m3'].sum(), expected_sum)
