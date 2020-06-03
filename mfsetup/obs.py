@@ -51,6 +51,13 @@ def setup_head_observations(model, obs_info_files=None,
     self = model
     package = format
     source_data_config = self.cfg[package]['source_data']
+    
+    # set a 14 character obsname limit for the hydmod package
+    # https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?hyd.htm
+    # 40 character limit for MODFLOW-6 (see IO doc)
+    obsname_character_limit = 40
+    if format == 'hyd':
+        obsname_character_limit = 14
 
     # TODO: read head observation data using TabularSourceData instead
     if obs_info_files is None:
@@ -125,7 +132,14 @@ def setup_head_observations(model, obs_info_files=None,
         print('Dropping head observations specified in {}...'.format(self.cfg.get('filename', 'config file')))
         df = df.loc[~df[obsname_column].astype(str).isin(drop_obs)]
 
+    # make unique observation names for each model layer; applying the character limit
+    # preserve end of obsname, truncating initial characters as needed
+    # (for observations based on lat-lon coordinates such as usgs, or other naming schemes
+    #  where names share leading characters)
+    prefix_character_limit = obsname_character_limit  # - 2
+    df[obsname_column] = [obsname[-prefix_character_limit:] for obsname in df[obsname_column]]
     duplicated = df[obsname_column].duplicated(keep=False)
+    # check for duplicate names after truncation
     if duplicated.sum() > 0:
         print('Warning- {} duplicate observation names encountered. First instance of each name will be used.'.format(
             duplicated.sum()))
@@ -138,6 +152,9 @@ def setup_head_observations(model, obs_info_files=None,
     heads0[obsname_column] = heads0[obsname_column].astype(str)
     heads_all_layers = pd.concat([heads0] * self.nlay).sort_values(by=obsname_column)
     heads_all_layers['klay'] = list(range(self.nlay)) * len(heads0)
+    heads_all_layers[obsname_column] = ['{}'.format(obsname)  # _{:.0f}'.format(obsname, k) 
+                                        for obsname, k in zip(heads_all_layers[obsname_column], 
+                                                              heads_all_layers['klay'])]
     df = pd.concat([heads_all_layers, non_heads], axis=0)
 
     # dtypes
