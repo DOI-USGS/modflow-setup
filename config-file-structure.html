@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Configuration file structure &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Configuration defaults" href="config-file-defaults.html" />
+    <link rel="prev" title="The configuration file" href="config-file.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> modflow-setup
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.post51+ge771e6a
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="config-file.html"> The configuration file</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="config-file.html#the-yaml-format">The YAML format</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Configuration file structure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#package-blocks">Package blocks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sub-blocks">Sub-blocks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#directly-specifying-modflow-input">Directly specifying MODFLOW input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#source-data-sub-blocks">Source_data sub-blocks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="config-file-defaults.html">Configuration defaults</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="config-file.html#some-additional-notes-on-yaml">Some additional notes on YAML</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Code reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">Model classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html#supporting-modules">Supporting modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Release history</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to modflow-setup</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">modflow-setup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="config-file.html">The configuration file</a> &raquo;</li>
+        
+      <li>Configuration file structure</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/config-file-structure.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="configuration-file-structure">
+<h1>Configuration file structure<a class="headerlink" href="#configuration-file-structure" title="Permalink to this headline">¶</a></h1>
+<p>In general, the configuration file structure is patterned after the MODFLOW input structure, especially the <a class="reference external" href="https://water.usgs.gov/water-resources/software/MODFLOW-6/mf6io_6.1.0.pdf">input structure to MODFLOW-6</a>. Larger blocks represent input to MODFLOW packages or modflow-setup features, with sub-blocks representing MODFLOW-6 input blocks (within individual packages) or individual features in modflow-setup. Naming of blocks and the variables within is intended to follow MODFLOW and Flopy naming as closely as possible; where these conflict, the MODFLOW naming conventions are used (see also the <a class="reference external" href="https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/">MODFLOW-NWT Online Guide</a>).</p>
+<div class="section" id="package-blocks">
+<h2>Package blocks<a class="headerlink" href="#package-blocks" title="Permalink to this headline">¶</a></h2>
+<p>The modflow-setup configuration file is divided into blocks, which represent sub-dictionaries within the <code class="docutils literal notranslate"><span class="pre">cfg</span></code> dictionary represented by the whole configuration file. The blocks are generally organized as input to individual object classes in Flopy, or features specific to MODFLOW-setup. For example, this block would represent input to the <a class="reference external" href="https://github.com/modflowpy/flopy/blob/develop/flopy/mf6/modflow/mfsimulation.py">Simulation class</a> for MODFLOW-6:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
+  <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;mfsim&#39;</span>
+  <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
+  <span class="nt">sim_ws</span><span class="p">:</span> <span class="s">&#39;../tmp/shellmound&#39;</span>
+</pre></div>
+</div>
+<p>and would be loaded into the configuration dictionary as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;simulation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sim_name: &#39;</span><span class="n">mfsim</span><span class="s1">&#39;,</span>
+                     <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;sim_ws&#39;</span><span class="p">:</span> <span class="s1">&#39;../tmp/shellmound&#39;</span>
+                     <span class="p">}</span>
+</pre></div>
+</div>
+<p>The above dictionary would then be fed to the Flopy <a class="reference external" href="https://github.com/modflowpy/flopy/blob/develop/flopy/mf6/modflow/mfsimulation.py">Simulation class</a> constructor as <a class="reference external" href="https://stackoverflow.com/questions/1769403/what-is-the-purpose-and-use-of-kwargs">keyword arguments (**kwargs)</a>.</p>
+</div>
+<div class="section" id="sub-blocks">
+<h2>Sub-blocks<a class="headerlink" href="#sub-blocks" title="Permalink to this headline">¶</a></h2>
+<p>Sub-blocks (nested dictionaries) with blocks are used to denote either input to MODFLOW-6 package blocks or input to modflow-setup features. For example, the options block below represents input to the options block for the MODFLOW-6 name file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+  <span class="nt">simulation</span><span class="p">:</span> <span class="s">&#39;shellmound&#39;</span>
+  <span class="nt">modelname</span><span class="p">:</span> <span class="s">&#39;shellmound&#39;</span>
+  <span class="nt">options</span><span class="p">:</span>
+    <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">newton</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">newton_under_relaxation</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">packages</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;ic&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;npf&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;oc&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;sto&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;rch&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;sfr&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;obs&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;wel&#39;</span><span class="p p-Indicator">,</span>
+             <span class="s">&#39;ims&#39;</span>
+             <span class="p p-Indicator">]</span>
+  <span class="nt">external_path</span><span class="p">:</span> <span class="s">&#39;external/&#39;</span>
+  <span class="nt">relative_external_filepaths</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+<p>Note that some items in the model block above do not represent flopy
+input. The <code class="docutils literal notranslate"><span class="pre">relative_external_filepaths</span></code> item is a flag for modflow-setup that instructs it to reference external files relative to the model workspace, to avoid broken paths when the model is copied to a different location.</p>
+</div>
+<div class="section" id="directly-specifying-modflow-input">
+<h2>Directly specifying MODFLOW input<a class="headerlink" href="#directly-specifying-modflow-input" title="Permalink to this headline">¶</a></h2>
+<p>MODFLOW input can be specified directly in the configuration file using the appropriate variables described in the <a class="reference external" href="https://water.usgs.gov/water-resources/software/MODFLOW-6/mf6io_6.1.0.pdf">MODFLOW-6 input instructions</a> and <a class="reference external" href="https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/">MODFLOW-NWT Online Guide</a>. For example, in the block below, the dimensions and griddata sub-blocks would be fed directly to the <a class="reference external" href="https://github.com/modflowpy/flopy/blob/develop/flopy/mf6/modflow/mfgwfdis.py">ModflowGwfdis</a> constructor in Flopy:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
+  <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="nt">options</span><span class="p">:</span>
+    <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+  <span class="nt">dimensions</span><span class="p">:</span>
+    <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+    <span class="nt">nrow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30</span>
+    <span class="nt">ncol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">35</span>
+  <span class="nt">griddata</span><span class="p">:</span>
+    <span class="nt">delr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
+    <span class="nt">delc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
+    <span class="nt">top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2.</span>
+    <span class="nt">botm</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="source-data-sub-blocks">
+<h2>Source_data sub-blocks<a class="headerlink" href="#source-data-sub-blocks" title="Permalink to this headline">¶</a></h2>
+<p>Alternatively, <code class="docutils literal notranslate"><span class="pre">source_data</span></code> subblocks indicate input from general file formats (shapefiles, csvs, rasters, etc.) that needs to be mapped to the model space and time discretization. The <code class="docutils literal notranslate"><span class="pre">source_data</span></code> blocks are intended to be general across input types. For example- <code class="docutils literal notranslate"><span class="pre">filename</span></code> indicates a file path (string), regardless of the type of file, and <code class="docutils literal notranslate"><span class="pre">filenames</span></code> indicates a list or dictionary of files that map to model layers or stress periods. Items with the ‘_units’ suffix indicate the units of the source data, allowing modflow-setup to convert the values to model units accordingly. In the example below, the model top would be read from the specified <a class="reference external" href="https://en.wikipedia.org/wiki/GeoTIFF">GeoTiff</a> and mapped onto the model grid via linear interpolation (the default method for model layer elevations) using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html">scipy.interpolate.griddata</a> method. The model botm elevations would be read similarly, with missing layers sub-divided evenly between the specified layers. For example, the layer 7 bottom elevations would be set halfway between the layer 6 and 8 bottoms. Finally, supplying a shapefile as input to idomain instructs modflow-setup to intersect the shapefile with the model grid (using <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html">rasterio.features.rastersize</a>), and limit the active cells to the intersected area.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
+  <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="nt">options</span><span class="p">:</span>
+    <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+  <span class="nt">dimensions</span><span class="p">:</span>
+    <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">13</span>
+    <span class="nt">nrow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30</span>
+    <span class="nt">ncol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">35</span>
+  <span class="nt">griddata</span><span class="p">:</span>
+    <span class="nt">delr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
+    <span class="nt">delc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
+  <span class="nt">source_data</span><span class="p">:</span>
+    <span class="nt">top</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span> <span class="c1"># DEM file; path relative to setup script</span>
+      <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>
+    <span class="nt">botm</span><span class="p">:</span>
+      <span class="nt">filenames</span><span class="p">:</span>
+        <span class="nt">0</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/vkbg_surf.tif&#39;</span> <span class="c1"># Vicksburg-Jackson Group (top)</span>
+        <span class="nt">1</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/ucaq_surf.tif&#39;</span> <span class="c1"># Upper Claiborne aquifer (top)</span>
+        <span class="nt">2</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mccu_surf.tif&#39;</span> <span class="c1"># Middle Claiborne confining unit (top)</span>
+        <span class="nt">3</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mcaq_surf.tif&#39;</span> <span class="c1"># Middle Claiborne aquifer (top)</span>
+        <span class="nt">6</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/lccu_surf.tif&#39;</span> <span class="c1"># Lower Claiborne confining unit (top)</span>
+        <span class="nt">8</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/lcaq_surf.tif&#39;</span> <span class="c1"># Lower Claiborne aquifer (top)</span>
+        <span class="nt">9</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mwaq_surf.tif&#39;</span> <span class="c1"># Middle Wilcox aquifer (top)</span>
+        <span class="nt">10</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/lwaq_surf.tif&#39;</span> <span class="c1"># Lower Wilcox aquifer (top)</span>
+        <span class="nt">12</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mdwy_surf.tif&#39;</span> <span class="c1"># Midway confining unit (top)</span>
+      <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>
+    <span class="nt">idomain</span><span class="p">:</span>
+      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/shps/active_area.shp&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="config-file-defaults.html" class="btn btn-neutral float-right" title="Configuration defaults" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="config-file.html" class="btn btn-neutral float-left" title="The configuration file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+      <span class="lastupdated">
+        Last updated on Jun 03, 2020.
+      </span>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

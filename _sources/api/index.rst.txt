@@ -16,5 +16,6 @@ Supporting modules
    mfsetup.discretization
    mfsetup.fileio
    mfsetup.grid
+   mfsetup.tdis
 
 

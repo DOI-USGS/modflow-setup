@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g4c1de6d documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.post51+g4c1de6d
+                0.post51+ge771e6a
               </div>
             
           
@@ -221,6 +221,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>  <span class="c1"># set up the model configuration dictionary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">relative_external_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;relative_external_paths&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_ws</span><span class="p">()</span>
+        
+        <span class="c1"># set the list file path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;list_filename_fmt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
 
         <span class="c1"># property arrays</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ibound</span> <span class="o">=</span> <span class="kc">None</span>
@@ -978,7 +981,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 14, 2020.
+        Last updated on Jun 03, 2020.
       </span>
 
     </p>

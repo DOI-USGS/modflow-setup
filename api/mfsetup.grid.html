@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.grid module &mdash; modflow-setup 0.post51+g4c1de6d documentation</title>
+  <title>mfsetup.grid module &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
   
 
   
@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Release History" href="../release-history.html" />
+    <link rel="next" title="mfsetup.tdis module" href="mfsetup.tdis.html" />
     <link rel="prev" title="mfsetup.fileio module" href="mfsetup.fileio.html" /> 
 </head>
 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.post51+g4c1de6d
+                0.post51+ge771e6a
               </div>
             
           
@@ -107,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">mfsetup.grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a></li>
 </ul>
 </li>
 </ul>
@@ -413,7 +414,7 @@ Defaults to np.round if offset == ‘center’; otherwise defaults to np.floor.<
 
 <dl class="py function">
 <dt id="mfsetup.grid.get_point_on_national_hydrogeologic_grid">
-<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_point_on_national_hydrogeologic_grid</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">offset='edge'</em>, <em class="sig-param">\*\*kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_point_on_national_hydrogeologic_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_point_on_national_hydrogeologic_grid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_point_on_national_hydrogeologic_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">'edge'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_point_on_national_hydrogeologic_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_point_on_national_hydrogeologic_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an x, y location representing the upper left
 corner of a model grid, return the upper left corner
 of the cell in the National Hydrogeologic Grid that
@@ -422,7 +423,7 @@ contains it.</p>
 
 <dl class="py function">
 <dt id="mfsetup.grid.rasterize">
-<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">rasterize</code><span class="sig-paren">(</span><em class="sig-param">feature</em>, <em class="sig-param">grid</em>, <em class="sig-param">id_column=None</em>, <em class="sig-param">include_ids=None</em>, <em class="sig-param">epsg=None</em>, <em class="sig-param">proj4=None</em>, <em class="sig-param">dtype=&lt;class 'numpy.float32'&gt;</em>, <em class="sig-param">\*\*kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">rasterize</code><span class="sig-paren">(</span><em class="sig-param">feature</em>, <em class="sig-param">grid</em>, <em class="sig-param">id_column=None</em>, <em class="sig-param">include_ids=None</em>, <em class="sig-param">epsg=None</em>, <em class="sig-param">proj4=None</em>, <em class="sig-param">dtype=&lt;class 'numpy.float32'&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rasterize a feature onto the model grid, using
 the rasterio.features.rasterize method. Features are intersected
 if they contain the cell center.</p>
@@ -457,7 +458,7 @@ isn’t a shapefile, and isn’t in the same CRS as the model.</p>
 
 <dl class="py function">
 <dt id="mfsetup.grid.setup_structured_grid">
-<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">setup_structured_grid</code><span class="sig-paren">(</span><em class="sig-param">xoff=None</em>, <em class="sig-param">yoff=None</em>, <em class="sig-param">xul=None</em>, <em class="sig-param">yul=None</em>, <em class="sig-param">nrow=None</em>, <em class="sig-param">ncol=None</em>, <em class="sig-param">nlay=None</em>, <em class="sig-param">dxy=None</em>, <em class="sig-param">delr=None</em>, <em class="sig-param">delc=None</em>, <em class="sig-param">top=None</em>, <em class="sig-param">botm=None</em>, <em class="sig-param">rotation=0.0</em>, <em class="sig-param">parent_model=None</em>, <em class="sig-param">snap_to_NHG=False</em>, <em class="sig-param">features=None</em>, <em class="sig-param">features_shapefile=None</em>, <em class="sig-param">id_column=None</em>, <em class="sig-param">include_ids=[]</em>, <em class="sig-param">buffer=1000</em>, <em class="sig-param">epsg=None</em>, <em class="sig-param">model_length_units=None</em>, <em class="sig-param">grid_file='grid.json'</em>, <em class="sig-param">bbox_shapefile=None</em>, <em class="sig-param">\*\*kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">setup_structured_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nrow</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ncol</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nlay</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dxy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">parent_model</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snap_to_NHG</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">features</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">features_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">id_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_ids</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">buffer</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_length_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid_file</span><span class="o">=</span><span class="default_value">'grid.json'</span></em>, <em class="sig-param"><span class="n">bbox_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -475,7 +476,7 @@ isn’t a shapefile, and isn’t in the same CRS as the model.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../release-history.html" class="btn btn-neutral float-right" title="Release History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="mfsetup.tdis.html" class="btn btn-neutral float-right" title="mfsetup.tdis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="mfsetup.fileio.html" class="btn btn-neutral float-left" title="mfsetup.fileio module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -488,7 +489,7 @@ isn’t a shapefile, and isn’t in the same CRS as the model.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 14, 2020.
+        Last updated on Jun 03, 2020.
       </span>
 
     </p>

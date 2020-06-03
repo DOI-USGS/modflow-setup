@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration File Gallery &mdash; modflow-setup 0.post51+g4c1de6d documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.post51+g4c1de6d
+                0.post51+ge771e6a
               </div>
             
           
@@ -508,7 +508,10 @@
 281
 282
 283
-284</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
+284
+285
+286
+287</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
 <span class="c1">#</span>
 <span class="c1"># The MF6model.setup_from_yaml reads this in as a python dictionary (via the pyyaml package),</span>
 <span class="c1"># and attaches it to a newly created MF6model object instance (MF6model is a subclass of flopy.mf6.ModflowGwf).</span>
@@ -739,6 +742,9 @@
       <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
       <span class="nt">data_column</span><span class="p">:</span> <span class="s">&#39;flux_m3&#39;</span>
       <span class="nt">datetime_column</span><span class="p">:</span> <span class="s">&#39;start_datetime&#39;</span>
+      <span class="c1"># end datetimes only for input data that needs upsampling;</span>
+      <span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span>
+      <span class="nt">end_datetime_column</span><span class="p">:</span> <span class="s">&#39;end_datetime&#39;</span>
       <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;node&#39;</span>
       <span class="nt">period_stats</span><span class="p">:</span>  <span class="c1"># how fluxes will be distributed across model stress periods</span>
         <span class="nt">0</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">none</span>  <span class="c1"># no wells simulated in initial period</span>
@@ -2076,12 +2082,16 @@
 167
 168
 169
-170</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
+170
+171
+172</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
   <span class="nt">modelname</span><span class="p">:</span> <span class="s">&#39;pfl&#39;</span>
   <span class="nt">model_ws</span><span class="p">:</span> <span class="s">&#39;../tmp/pfl_inset/&#39;</span>
   <span class="nt">exe_name</span><span class="p">:</span> <span class="s">&#39;mfnwt&#39;</span>
   <span class="nt">external_path</span><span class="p">:</span> <span class="s">&#39;external/&#39;</span>
   <span class="nt">perimeter_boundary_type</span><span class="p">:</span> <span class="s">&#39;specified</span><span class="nv"> </span><span class="s">head&#39;</span>
+  <span class="c1"># list file path is relative to model_ws</span>
+  <span class="nt">list_filename_fmt</span><span class="p">:</span> <span class="s">&#39;external/{}.list&#39;</span>
   <span class="nt">packages</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span>
              <span class="s">&#39;bas6&#39;</span><span class="p p-Indicator">,</span>
              <span class="s">&#39;oc&#39;</span><span class="p p-Indicator">,</span>
@@ -2272,7 +2282,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 14, 2020.
+        Last updated on Jun 03, 2020.
       </span>
 
     </p>

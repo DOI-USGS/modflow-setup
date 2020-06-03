@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; modflow-setup 0.post51+g4c1de6d documentation</title>
+  <title>Index &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g4c1de6d
+                0.post51+ge771e6a
               </div>
             
           
@@ -202,8 +202,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mfsetup.discretization.html#mfsetup.discretization.adjust_layers">adjust_layers() (in module mfsetup.discretization)</a>
 </li>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period">aggregate_dataframe_to_stress_period() (in module mfsetup.tdis)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.aggregate_xarray_to_stress_period">aggregate_xarray_to_stress_period() (in module mfsetup.tdis)</a>
+</li>
       <li><a href="api/mfsetup.fileio.html#mfsetup.fileio.append_csv">append_csv() (in module mfsetup.fileio)</a>
 </li>
   </ul></td>
@@ -226,9 +230,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mfsetup.discretization.html#mfsetup.discretization.cellids_to_kij">cellids_to_kij() (in module mfsetup.discretization)</a>
 </li>
+      <li><a href="api/mfsetup.fileio.html#mfsetup.fileio.check_source_files">check_source_files() (in module mfsetup.fileio)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/mfsetup.fileio.html#mfsetup.fileio.check_source_files">check_source_files() (in module mfsetup.fileio)</a>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.concat_periodata_groups">concat_periodata_groups() (in module mfsetup.tdis)</a>
+</li>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.convert_freq_to_period_start">convert_freq_to_period_start() (in module mfsetup.tdis)</a>
 </li>
       <li><a href="api/mfsetup.discretization.html#mfsetup.discretization.create_vertical_pass_through_cells">create_vertical_pass_through_cells() (in module mfsetup.discretization)</a>
 </li>
@@ -301,6 +309,8 @@
       <li><a href="api/mfsetup.grid.html#mfsetup.grid.get_nearest_point_on_grid">get_nearest_point_on_grid() (in module mfsetup.grid)</a>
 </li>
       <li><a href="api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_package_list">get_package_list() (mfsetup.mf6model.MF6model method)</a>
+</li>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.get_parent_stress_periods">get_parent_stress_periods() (in module mfsetup.tdis)</a>
 </li>
       <li><a href="api/mfsetup.grid.html#mfsetup.grid.get_point_on_national_hydrogeologic_grid">get_point_on_national_hydrogeologic_grid() (in module mfsetup.grid)</a>
 </li>
@@ -416,8 +426,6 @@
         <li><a href="api/mfsetup.mf6model.html#module-mfsetup.mf6model">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mfsetup.mfmodel
 
@@ -425,11 +433,20 @@
         <li><a href="api/mfsetup.mfmodel.html#module-mfsetup.mfmodel">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mfsetup.mfnwtmodel
 
       <ul>
         <li><a href="api/mfsetup.mfnwtmodel.html#module-mfsetup.mfnwtmodel">module</a>
+</li>
+      </ul></li>
+      <li>
+    mfsetup.tdis
+
+      <ul>
+        <li><a href="api/mfsetup.tdis.html#module-mfsetup.tdis">module</a>
 </li>
       </ul></li>
       <li><a href="api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid">MFsetupGrid (class in mfsetup.grid)</a>
@@ -452,6 +469,8 @@
 </li>
         <li><a href="api/mfsetup.mfnwtmodel.html#module-mfsetup.mfnwtmodel">mfsetup.mfnwtmodel</a>
 </li>
+        <li><a href="api/mfsetup.tdis.html#module-mfsetup.tdis">mfsetup.tdis</a>
+</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -466,6 +485,8 @@
       <li><a href="api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.parent_mask">parent_mask() (mfsetup.mfmodel.MFsetupMixin property)</a>
 </li>
       <li><a href="api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.parent_stress_periods">parent_stress_periods() (mfsetup.mfmodel.MFsetupMixin property)</a>
+</li>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.parse_perioddata_groups">parse_perioddata_groups() (in module mfsetup.tdis)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -535,16 +556,20 @@
 </li>
       <li><a href="api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_obs">setup_obs() (mfsetup.mf6model.MF6model method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_oc">setup_oc() (mfsetup.mf6model.MF6model method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_perimeter_boundary">setup_perimeter_boundary() (mfsetup.mf6model.MF6model method)</a>
 
       <ul>
         <li><a href="api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_perimeter_boundary">(mfsetup.mfnwtmodel.MFnwtModel method)</a>
 </li>
       </ul></li>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.setup_perioddata">setup_perioddata() (in module mfsetup.tdis)</a>
+</li>
+      <li><a href="api/mfsetup.tdis.html#mfsetup.tdis.setup_perioddata_group">setup_perioddata_group() (in module mfsetup.tdis)</a>
+</li>
       <li><a href="api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_rch">setup_rch() (mfsetup.mf6model.MF6model method)</a>
 </li>
       <li><a href="api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_simulation_mover">setup_simulation_mover() (mfsetup.mf6model.MF6model method)</a>
@@ -643,7 +668,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on May 14, 2020.
+        Last updated on Jun 03, 2020.
       </span>
 
     </p>
