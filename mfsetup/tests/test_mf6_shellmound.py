@@ -162,6 +162,18 @@ def test_model(shellmound_model):
            os.path.normpath(os.path.join(os.path.abspath(model.model_ws), model.external_path))
 
 
+def test_namefile(shellmound_model_with_dis):
+    model = shellmound_model_with_dis
+    model.write_input()
+    
+    # check that listing file was written correctly
+    expected_listfile_name = model.cfg['model']['list_filename_fmt'].format(model.name)
+    with open(model.namefile) as src:
+        for line in src:
+            if 'LIST' in line:
+                assert line.strip().split()[-1] == expected_listfile_name
+
+
 def test_snap_to_NHG(shellmound_cfg, shellmound_simulation):
     cfg = deepcopy(shellmound_cfg)
     #simulation = deepcopy(simulation)

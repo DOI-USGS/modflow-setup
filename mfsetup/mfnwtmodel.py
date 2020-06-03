@@ -46,6 +46,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._set_cfg(cfg)  # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
+        
+        # set the list file path
+        self.lst.file_name = [self.cfg['model']['list_filename_fmt'].format(self.name)]
 
         # property arrays
         self._ibound = None

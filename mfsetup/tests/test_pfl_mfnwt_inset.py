@@ -72,6 +72,18 @@ def test_pfl_nwt_with_grid(pfl_nwt_with_grid):
     assert pfl_nwt_with_grid.modelgrid is not None
 
 
+def test_namefile(pfl_nwt_with_dis):
+    model = pfl_nwt_with_dis
+    model.write_input()
+    
+    # check that listing file was written correctly
+    expected_listfile_name = model.cfg['model']['list_filename_fmt'].format(model.name)
+    with open(model.namefile) as src:
+        for line in src:
+            if 'LIST' in line:
+                assert line.strip().split()[-1] == expected_listfile_name
+                
+                
 def test_perioddata(pfl_nwt):
     model = pfl_nwt
     assert np.array_equal(model.perioddata.steady, [True, False])

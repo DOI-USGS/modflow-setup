@@ -181,7 +181,7 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
         specified_options = {'list', 'print_input', 'save_flows', 'newton'}
         assert not any(specified_options.difference(name_options.keys()))
         path, fname = os.path.split(name_options['list'][0])
-        assert os.path.abspath(m.model_ws).lower() == path.lower()
+        assert os.path.abspath(m.model_ws).lower() == os.path.abspath(path).lower()
         assert name_options['newton'][0] == 'under_relaxation'
 
     # check that the model names were included in the external files

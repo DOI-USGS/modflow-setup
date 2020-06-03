@@ -962,8 +962,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             raise TypeError('unrecognized configuration input for simulation.')
 
         # listing file
-        cfg['model']['list'] = os.path.join(sim_ws,
-                                            cfg['model']['list_filename_fmt']
+        cfg['model']['list'] = os.path.join(cfg['model']['list_filename_fmt']
                                             .format(cfg['model']['modelname']))
 
         # newton options

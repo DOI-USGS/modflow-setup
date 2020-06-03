@@ -15,7 +15,6 @@ Modflow-setup uses the `pyyaml`_ package to parse the configuration file into th
 
    Configuration file structure <config-file-structure>
    Configuration defaults <config-file-defaults>
-   Description of source datatypes <source-data>
 
 
 Some additional notes on YAML
