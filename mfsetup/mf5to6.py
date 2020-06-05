@@ -1,6 +1,7 @@
 """
 Utilities for swapping data between MODFLOW-6 and MODFLOW-2005 models
 """
+from .units import lenuni_text, itmuni_text, lenuni_values, itmuni_values
 
 # mapping of variables to packages
 variable_packages = {'mf6': {'sy': 'sto',
@@ -102,3 +103,23 @@ def get_package_name(package, model_version):
         msg = ('Could not get equivalent package for {}; '
                'unrecognized MODFLOW version: {}'.format(package, model_version))
         raise ValueError(msg)
+
+
+def get_model_length_units(model, lenuni_format=False):
+    if model.version == 'mf6':
+        unit_text = model.dis.length_units.array
+    else:
+        unit_text =  lenuni_text[model.dis.lenuni]
+    if lenuni_format:
+        return lenuni_values[unit_text]
+    return unit_text
+
+
+def get_model_time_units(model, itmuni_format=False):
+    if model.version == 'mf6':
+        unit_text = model.simulation.tdis.time_units.array
+    else:
+        unit_text = itmuni_text[model.dis.itmuni]
+    if itmuni_format:
+        return itmuni_values[unit_text]
+    return unit_text

@@ -94,12 +94,22 @@ def print_item(k, v):
 def get_packages(namefile):
     packages = []
     with open(namefile) as src:
+        read = True
         for line in src:
             if line.startswith('#') or \
                     line.lower().startswith('data') or \
-                    line.lower().startswith('list'):
+                    line.lower().strip().startswith('list'):
                 continue
-            else:
-                packages.append(line.lower().split()[0])
+            elif 'begin options' in line.lower():
+                read = False
+            elif 'begin packages' in line.lower():
+                read = True
+            elif 'end packages' in line.lower():
+                read = False
+            elif read:
+                package_name = line.strip().lower().split()[0]
+                if package_name not in {'bas6'}:
+                    package_name = package_name.replace('6', '')
+                packages.append(package_name)
     return packages
 

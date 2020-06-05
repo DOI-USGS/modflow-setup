@@ -7,17 +7,19 @@ import flopy
 fm = flopy.modflow
 mf6 = flopy.mf6
 from gisutils import (shp2df, get_values_at_points, project, get_proj_str)
+import mfsetup
 from .bcs import get_bc_package_cells
 from .grid import MFsetupGrid, get_ij, setup_structured_grid, rasterize
 from .fileio import (load, load_array, save_array, check_source_files,
                      load_cfg, setup_external_filepaths)
 from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
 from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
-from .utils import update, flatten, get_input_arguments
+from .mf5to6 import get_package_name, get_model_length_units, get_model_time_units
 from .sourcedata import setup_array
-from .tdis import (setup_perioddata,
+from .tdis import (setup_perioddata, setup_perioddata_group,
                    get_parent_stress_periods, parse_perioddata_groups)
-from .units import convert_length_units, lenuni_values
+from .utils import update, get_input_arguments, flatten, get_packages
+from .units import convert_length_units, lenuni_text, lenuni_values
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
@@ -110,7 +112,7 @@ class MFsetupMixin():
         """Test for equality to another model object."""
         if not isinstance(other, self.__class__):
             return False
-        if other.get_package_list() != self.get_package_list():
+        if sorted(other.get_package_list()) != sorted(self.get_package_list()):
             return False
         if other.modelgrid != self.modelgrid:
             return False
@@ -214,7 +216,7 @@ class MFsetupMixin():
             elif isinstance(botm_source_data, dict) and 'from_parent' in botm_source_data:
                 parent_layers = botm_source_data.get('from_parent')
             else:
-                parent_layers = dict(zip(range(self.parent.nlay), range(self.parent.nlay)))
+                parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
             self._parent_layers = parent_layers
         return self._parent_layers
 
@@ -317,10 +319,10 @@ class MFsetupMixin():
             pi, pj = get_ij(self.parent.modelgrid, x, y)
             pad = 3
             i0 = np.max([pi.min() - pad, 0])
-            i1 = np.min([pi.max() + pad + 1, self.parent.nrow])
+            i1 = np.min([pi.max() + pad + 1, self.parent.modelgrid.nrow])
             j0 = np.max([pj.min() - pad, 0])
-            j1 = np.min([pj.max() + pad + 1, self.parent.ncol])
-            mask = np.zeros((self.parent.nrow, self.parent.ncol), dtype=bool)
+            j1 = np.min([pj.max() + pad + 1, self.parent.modelgrid.ncol])
+            mask = np.zeros((self.parent.modelgrid.nrow, self.parent.modelgrid.ncol), dtype=bool)
             mask[i0:i1, j0:j1] = True
             self._parent_mask = mask
         return self._parent_mask
@@ -794,8 +796,6 @@ class MFsetupMixin():
         """Reset the parent model grid from keyword arguments
         or existing modelgrid, and DIS package.
         """
-        if self.cfg['parent']['version'] == 'mf6':
-            raise NotImplementedError("MODFLOW-6 parent models")
 
         if mg_kwargs is not None:
             kwargs = mg_kwargs.copy()
@@ -806,20 +806,166 @@ class MFsetupMixin():
                       'epsg': self.parent.modelgrid.epsg,
                       'proj4': self.parent.modelgrid.proj4,
                       }
-        parent_lenuni = self.parent.dis.lenuni
+        parent_units = get_model_length_units(self.parent)
         if 'lenuni' in self.cfg['parent']:
-            parent_lenuni = self.cfg['parent']['lenuni']
+            parent_units = lenuni_text[self.cfg['parent']['lenuni']]
         elif 'length_units' in self.cfg['parent']:
-            parent_lenuni = lenuni_values[self.cfg['parent']['length_units']]
+            parent_units = self.cfg['parent']['length_units']
 
-        self.parent.dis.lenuni = parent_lenuni
-        lmult = convert_length_units(parent_lenuni, 'meters')
+        if self.version == 'mf6':
+            self.parent.dis.length_units = parent_units
+        else:
+            self.parent.dis.lenuni = lenuni_values[parent_units]
+        # assume that model grid is in a projected CRS of meters
+        lmult = convert_length_units(parent_units, 'meters')
         kwargs['delr'] = self.parent.dis.delr.array * lmult
         kwargs['delc'] = self.parent.dis.delc.array * lmult
-        kwargs['lenuni'] = 2  # parent modelgrid in same CRS as pfl_nwt modelgrid
+        kwargs['top'] = self.parent.dis.top.array
+        kwargs['botm'] = self.parent.dis.botm.array
+        kwargs['lenuni'] = 2
         kwargs = get_input_arguments(kwargs, MFsetupGrid, warn=False)
         self._parent._mg_resync = False
         self._parent._modelgrid = MFsetupGrid(**kwargs)
+
+    def _set_parent(self):
+        """Set attributes related to a parent or source model
+        if one is specified.
+        """
+
+        # if it's an LGR model (where parent is also being created)
+        # set up the parent DIS package
+        if self._is_lgr and isinstance(self.parent, MFsetupMixin):
+            if 'DIS' not in self.parent.get_package_list():
+                dis = self.parent.setup_dis()
+
+        kwargs = self.cfg['parent'].copy()
+        if kwargs is not None:
+            kwargs = kwargs.copy()
+
+            # load only specified packages that the parent model has
+            packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
+                                                                    kwargs['namefile']))
+            specified_packages = set(self.cfg['model'].get('packages', set()))
+
+            # get equivalent packages to load if parent is another MODFLOW version;
+            # then flatten (a package may have more than one equivalent)
+            parent_packages = [get_package_name(p, kwargs['version'])
+                               for p in specified_packages]
+            parent_packages = {item for subset in parent_packages for item in subset}
+            load_only = list(set(packages_in_parent_namefile).intersection(parent_packages))
+            kwargs['load_only'] = load_only
+
+            # load MF6 or MF2005 parent
+            if self.parent is None:
+                print('loading parent model {}...'.format(os.path.join(kwargs['model_ws'],
+                                                                 kwargs['namefile'])))
+                t0 = time.time()
+                if self.cfg['parent']['version'] == 'mf6':
+                    sim_kwargs = kwargs.copy()
+                    if 'sim_name' not in kwargs:
+                        sim_kwargs['sim_name'] = kwargs.get('simulation', 'mfsim')
+                    if 'sim_ws' not in kwargs:
+                        sim_kwargs['sim_ws'] = sim_kwargs.get('model_ws', '.')
+                    sim_kwargs = get_input_arguments(sim_kwargs, mf6.MFSimulation.load, warn=False)
+                    parent_sim = mf6.MFSimulation.load(**sim_kwargs)
+                    modelname, _ = os.path.splitext(kwargs['namefile'])
+                    self._parent = parent_sim.get_model(modelname)
+                else:
+                    kwargs['f'] = kwargs.pop('namefile')
+                    kwargs = get_input_arguments(kwargs, fm.Modflow.load, warn=False)
+                    self._parent = fm.Modflow.load(**kwargs)
+                print("finished in {:.2f}s\n".format(time.time() - t0))
+
+            # set parent model units in config if not entered
+            if 'length_units' not in self.cfg['parent']:
+                self.cfg['parent']['length_units'] = get_model_length_units(self.parent)
+            if 'time_units' not in self.cfg['parent']:
+                self.cfg['parent']['time_units'] = get_model_time_units(self.parent)
+
+            # set the parent model grid from mg_kwargs if not None
+            # otherwise, convert parent model grid to MFsetupGrid
+            mg_kwargs = self.cfg['parent'].get('SpatialReference',
+                                          self.cfg['parent'].get('modelgrid', None))
+            self._set_parent_modelgrid(mg_kwargs)
+
+            # setup parent model perioddata table
+            if not hasattr(self.parent, 'perioddata'):
+                kwargs = self.cfg['parent'].copy()
+                kwargs['nper'] = self.parent.nper
+                kwargs['model_time_units'] = self.cfg['parent']['time_units']
+                if self.version == 'mf6':
+                    for var in ['perlen', 'nstp', 'tsmult']:
+                        kwargs[var] = getattr(self.parent.modeltime, var)
+                    kwargs['steady'] = self.parent.modeltime.steady_state
+                else:
+                    for var in ['perlen', 'steady', 'nstp', 'tsmult']:
+                        kwargs[var] = self.parent.dis.__dict__[var].array
+                kwargs = get_input_arguments(kwargs, setup_perioddata_group)
+                kwargs['oc_saverecord'] = {}
+                self._parent.perioddata = setup_perioddata_group(**kwargs)
+
+            # default_source_data, where omitted configuration input is
+            # obtained from parent model by default
+            # Set default_source_data to True by default if it isn't specified
+            if self.cfg['parent'].get('default_source_data') is None:
+                self.cfg['parent']['default_source_data'] = True
+            if self.cfg['parent'].get('default_source_data'):
+                self._parent_default_source_data = True
+
+                # set number of layers from parent if not specified
+                if self.version == 'mf6' and self.cfg['dis']['dimensions'].get('nlay') is None:
+                    self.cfg['dis']['dimensions']['nlay'] = self.parent.dis.nlay
+                elif self.cfg['dis'].get('nlay') is None:
+                    self.cfg['dis']['nlay'] = self.parent.dis.nlay
+
+                # set start date/time from parent if not specified
+                if not self._is_lgr:
+                    parent_start_date_time = self.cfg.get('parent', {}).get('start_date_time')
+                    if self.version == 'mf6':
+                        if self.cfg['tdis']['options'].get('start_date_time', '1970-01-01') == '1970-01-01' \
+                                and parent_start_date_time is not None:
+                            self.cfg['tdis']['options']['start_date_time'] = self.cfg['parent']['start_date_time']
+                    else:
+                        if self.cfg['dis'].get('start_date_time', '1970-01-01') == '1970-01-01' \
+                                and parent_start_date_time is not None:
+                            self.cfg['dis']['start_date_time'] = self.cfg['parent']['start_date_time']
+
+                    # only get time dis information from parent if
+                    # no periodata groups are specified, and nper is not specified under dimensions
+                    tdis_package = 'tdis' if self.version == 'mf6' else 'dis'
+                    # check if any item within perioddata block is a dictionary
+                    # (groups are subblocks within perioddata block)
+                    has_perioddata_groups = any([isinstance(k, dict)
+                                                 for k in self.cfg[tdis_package]['perioddata'].values()])
+                    # get the number of inset model periods
+                    if not has_perioddata_groups:
+                        if self.version == 'mf6':
+                            if self.cfg['tdis']['dimensions'].get('nper') is None:
+                                self.cfg['tdis']['dimensions']['nper'] = self.parent.modeltime.nper
+                            nper = self.cfg['tdis']['dimensions']['nper']
+                        else:
+                            if self.cfg['dis']['nper'] is None:
+                                self.cfg['dis']['nper'] = self.dis.nper
+                            nper = self.cfg['dis']['nper']
+                        # get the periods that are shared with the parent model
+                        parent_periods = get_parent_stress_periods(self.parent, nper=nper,
+                                                                   parent_stress_periods=self.cfg['parent'][
+                                                                       'copy_stress_periods'])
+                        # get time discretization info. from the parent model
+                        if self.version == 'mf6':
+                            for var in ['perlen', 'nstp', 'tsmult']:
+                                if self.cfg['tdis']['perioddata'].get(var) is None:
+                                    self.cfg['tdis']['perioddata'][var] = getattr(self.parent.modeltime, var)[
+                                        parent_periods]
+                                # 'steady' can be specified under sto package (as in MODFLOW-6)
+                                # or within perioddata group blocks
+                                # but not in the tdis perioddata block itset
+                                if self.cfg['sto'].get('steady') is None:
+                                    self.cfg['sto']['steady'] = self.parent.modeltime.steady_state[parent_periods]
+                        else:
+                            for var in ['perlen', 'nstp', 'tsmult', 'steady']:
+                                if self.cfg['dis'].get(var) is None:
+                                    self.cfg['dis'][var] = self.parent.dis.__dict__[var].array[parent_periods]
 
     def _set_perioddata(self):
         """Sets up the perioddata DataFrame.
@@ -1109,6 +1255,16 @@ class MFsetupMixin():
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return sfr_package
 
+    def setup_solver(self):
+        if self.version == 'mf6':
+            solver_package = 'ims'
+        else:
+            solver_package = 'nwt'
+        assert solver_package not in self.package_list
+        setup_method_name = 'setup_{}'.format(solver_package)
+        package_setup = getattr(self, setup_method_name, None)
+        package_setup()
+
     def setup_packages(self, reset_existing=True):
         package_list = self.package_list #['sfr'] #m.package_list # ['tdis', 'dis', 'npf', 'oc']
         if not reset_existing:
@@ -1184,6 +1340,9 @@ class MFsetupMixin():
 
         # establish time discretization, including TDIS setup for MODFLOW-6
         m.setup_tdis()
+
+        # set up the solver
+        m.setup_solver()
 
         # set up all of the packages specified in the config file
         m.setup_packages(reset_existing=False)

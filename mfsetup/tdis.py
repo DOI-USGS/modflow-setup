@@ -24,22 +24,19 @@ def get_parent_stress_periods(parent_model, nper=None,
                               parent_stress_periods='all'):
 
     parent_sp = copy.copy(parent_stress_periods)
-    if parent_model.version == 'mf6':
-        raise NotImplementedError('MODFLOW-6 parent models')
+    parent_model_nper = parent_model.modeltime.nper
 
     # use all stress periods from parent model
     if isinstance(parent_sp, str) and parent_sp.lower() == 'all':
         if nper is None:  # or nper < parent_model.nper:
-            nper = parent_model.nper
+            nper = parent_model_nper
             parent_sp = list(range(nper))
-        elif nper > parent_model.nper:
-            parent_sp = list(range(parent_model.nper))
-            for i in range(nper - parent_model.nper):
+        elif nper > parent_model_nper:
+            parent_sp = list(range(parent_model_nper))
+            for i in range(nper - parent_model_nper):
                 parent_sp.append(parent_sp[-1])
         else:
             parent_sp = list(range(nper))
-        # self.cfg['dis']['perlen'] = None # set from parent model
-        # self.cfg['dis']['steady'] = None
 
     # use only specified stress periods from parent model
     elif isinstance(parent_sp, list):
@@ -48,15 +45,15 @@ def get_parent_stress_periods(parent_model, nper=None,
         if nper is None:
             nper = len(parent_sp)
 
-        perlen = [parent_model.dis.perlen.array[0]]
+        perlen = [parent_model.modeltime.perlen[0]]
         for i, p in enumerate(parent_sp):
             if i == nper:
                 break
-            if p == parent_model.nper:
+            if p == parent_model_nper:
                 break
             if p > 0 and p >= parent_sp[-1] and len(parent_sp) < nper:
                 parent_sp.append(p)
-                perlen.append(parent_model.dis.perlen.array[p])
+                perlen.append(parent_model.modeltime.perlen[p])
         if nper < len(parent_sp):
             nper = len(parent_sp)
         else:

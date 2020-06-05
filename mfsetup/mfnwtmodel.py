@@ -39,7 +39,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # default configuration
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
                                      'ghb', 'lak', 'sfr', 'wel', 'mnw2',
-                                     'gag', 'hyd', 'nwt']
+                                     'gag', 'hyd']
         # default configuration (different for nwt vs mf6)
         self.cfg = load(self.source_path + self.default_file) # '/mfnwt_defaults.yml')
         self.cfg['filename'] = self.source_path + self.default_file #'/mfnwt_defaults.yml'

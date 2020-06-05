@@ -12,9 +12,10 @@ import pandas as pd
 import rasterio
 import flopy
 fm = flopy.modflow
+mf6 = flopy.mf6
 from mfsetup import MFnwtModel
 from mfsetup.checks import check_external_files_for_nans
-from mfsetup.grid import get_ij
+from mfsetup.grid import get_ij, MFsetupGrid
 from mfsetup.fileio import exe_exists, load_cfg
 from mfsetup.units import convert_length_units, convert_time_units
 from mfsetup.utils import get_input_arguments
@@ -87,6 +88,16 @@ def test_namefile(pfl_nwt_with_dis):
 def test_perioddata(pfl_nwt):
     model = pfl_nwt
     assert np.array_equal(model.perioddata.steady, [True, False])
+
+
+def test_set_parent_model(pfl_nwt):
+    m = pfl_nwt
+    assert isinstance(m.parent, fm.Modflow)
+    assert isinstance(m.parent.perioddata, pd.DataFrame)
+    assert isinstance(m.parent.modelgrid, MFsetupGrid)
+    assert m.parent.modelgrid.nrow == m.parent.nrow
+    assert m.parent.modelgrid.ncol == m.parent.ncol
+    assert m.parent.modelgrid.nlay == m.parent.nlay
 
 
 def test_set_parent_perioddata(pfl_nwt):

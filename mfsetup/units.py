@@ -157,18 +157,6 @@ def get_length_conversions():
     return length_conversions
 
 
-def get_length_units(model):
-    """Get length units from modflow-2005 or modflow-6 model.
-    """
-    units = getattr(model, 'length_units', None)
-    if units is None:
-        if model.version == 'mf6':
-            pass
-        else:
-            units = lenuni_text[model.dis.lenuni]
-    return units
-
-
 def get_volume_conversions():
     length_conversions = get_length_conversions()
     m, n = length_conversions.shape

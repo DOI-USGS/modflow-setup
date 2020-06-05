@@ -12,7 +12,8 @@ from shapely.geometry import Polygon, MultiPolygon
 from flopy.discretization import StructuredGrid
 from gisutils import df2shp, get_proj_str, project, shp2df
 import mfsetup.fileio as fileio
-from .units import convert_length_units, get_length_units
+from .mf5to6 import get_model_length_units
+from .units import convert_length_units
 from .utils import get_input_arguments
 
 
@@ -513,7 +514,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             else:
                 regular = False
     if parent_model is not None:
-        to_meters_parent = convert_length_units(get_length_units(parent_model), 'meters')
+        to_meters_parent = convert_length_units(get_model_length_units(parent_model), 'meters')
         # parent model grid spacing in meters
         parent_delr_m = np.round(parent_model.dis.delr.array[0] * to_meters_parent, 4)
         if not parent_delr_m % delr_m == 0:

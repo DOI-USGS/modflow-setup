@@ -39,7 +39,7 @@ def setup_wel_data(model, for_external_files=True):
     # get well package input from source (parent) model in lieu of source data
     # todo: fetching correct well package from mf6 parent model
     if datasets is None and model.cfg['parent'].get('default_source_data') \
-        and 'WEL' in model.parent.get_package_list():
+        and hasattr(model.parent, 'wel'):
 
         # get well stress period data from mfnwt or mf6 model
         parent = model.parent
@@ -48,11 +48,12 @@ def setup_wel_data(model, for_external_files=True):
         periods = spd.groupby('per')
         dfs = []
         for inset_per, parent_per in model.parent_stress_periods.items():
-            period = periods.get_group(parent_per)
-            if len(dfs) > 0 and period.drop('per', axis=1).equals(dfs[-1].drop('per', axis=1)):
-                continue
-            else:
-                dfs.append(period)
+            if parent_per in periods.groups:
+                period = periods.get_group(parent_per)
+                if len(dfs) > 0 and period.drop('per', axis=1).equals(dfs[-1].drop('per', axis=1)):
+                    continue
+                else:
+                    dfs.append(period)
         spd = pd.concat(dfs)
 
         parent_well_i = spd.i.copy()

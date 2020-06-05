@@ -7,7 +7,8 @@ from shapely.geometry import Polygon, MultiPolygon
 from gisutils import shp2df
 from .discretization import get_layer, get_layer_thicknesses
 from .grid import get_ij
-from mfsetup.units import convert_volume_units, get_length_units
+from .mf5to6 import get_model_length_units
+from mfsetup.units import convert_volume_units
 import mfsetup.wells as wells
 
 
@@ -261,7 +262,7 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
         site_sums = period_data.groupby('site_no').sum()
         site_means['gal_d'] = site_sums['gallons'] / site_sums['days']
         # conversion to model units is based on lenuni variable in DIS package
-        gal_to_model_units = convert_volume_units('gal', get_length_units(model))
+        gal_to_model_units = convert_volume_units('gal', get_model_length_units(model))
         site_means['q'] = site_means.gal_d * gal_to_model_units
         site_means['per'] = per
 
@@ -372,7 +373,7 @@ def resample_pumping_rates(wu_file, wu_points, model,
 
         # convert units from monthly gallon totals to daily model length units
         site_period_data['gal_d'] = site_period_data['gallons'] / site_period_data['perlen']
-        gal_to_model_units = convert_volume_units('gal', get_length_units(model))#model.dis.lenuni]
+        gal_to_model_units = convert_volume_units('gal', get_model_length_units(model))#model.dis.lenuni]
         site_period_data['q'] = site_period_data.gal_d * gal_to_model_units
         for col in ['i', 'j', 'k']:
             site_period_data[col] = well_info.loc[site, col]
