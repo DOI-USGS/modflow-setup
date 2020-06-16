@@ -354,6 +354,8 @@ def setup_lake_connectiondata(model, for_external_file=True,
             inactive = model.idomain[k, i, j] < 1
             horizontal_connections = horizontal_connections.loc[~inactive].copy()
             horizontal_connections['lakeno'] = lake_id
+            i, j = zip(*[c[1:] for c in horizontal_connections.cellid])
+            horizontal_connections['zone'] = littoral_profundal_zones[i, j]
             df = df.append(horizontal_connections)
     # assign iconn (connection number) values for each lake
     dfs = []
@@ -493,6 +495,7 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
     telev = []
     connlen = []
     connwidth = []
+    cellface = []
     for klay, lake_extent_k in enumerate(lake_extent):
         sobel_x = sobel(lake_extent_k, axis=1, mode='constant', cval=0.)
         sobel_x[lake_extent_k == 1] = 10
@@ -508,6 +511,7 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
         telev += list(layer_elevations[k, i, j])
         connlen += list(0.5 * delr[j - 1] + 0.5 * delr[j])
         connwidth += list(delc[i])
+        cellface += ['right'] * len(i)
 
         # left face connections
         i, j = np.where((sobel_x >= 2) & (sobel_x <= 4))
@@ -518,6 +522,7 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
         telev += list(layer_elevations[k, i, j])
         connlen += list(0.5 * delr[j + 1] + 0.5 * delr[j])
         connwidth += list(delc[i])
+        cellface += ['left'] * len(i)
 
         # bottom face connections
         i, j = np.where((sobel_y <= -2) & (sobel_y >= -4))
@@ -528,6 +533,7 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
         telev += list(layer_elevations[k, i, j])
         connlen += list(0.5 * delc[i-1] + 0.5 * delc[i])
         connwidth += list(delr[j])
+        cellface += ['bottom'] * len(i)
 
         # top face connections
         i, j = np.where((sobel_y >= 2) & (sobel_y <= 4))
@@ -538,6 +544,7 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
         telev += list(layer_elevations[k, i, j])
         connlen += list(0.5 * delc[i + 1] + 0.5 * delc[i])
         connwidth += list(delr[j])
+        cellface += ['top'] * len(i)
 
     df = pd.DataFrame({'cellid': cellid,
                        'claktype': 'horizontal',
@@ -545,7 +552,8 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
                        'belev': belev,
                        'telev': telev,
                        'connlen': connlen,
-                       'connwidth': connwidth
+                       'connwidth': connwidth,
+                       'cellface': cellface
                        })
     return df
 

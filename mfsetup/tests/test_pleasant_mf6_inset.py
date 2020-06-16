@@ -334,6 +334,13 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
             value = m.lak.perioddata.array[per]['laksetting_data'][loc][0]
             assert np.allclose(value, lake_fluxes.loc[per, var])
 
+    # check the auxilliary table
+    connections_lookup_file = m.cfg['lak']['output_files']['connections_lookup_file'].format(m.name)
+    connections_lookup_file = os.path.join(m.model_ws, os.path.split(connections_lookup_file)[1])
+    info = pd.read_csv(connections_lookup_file)
+    assert not info.zone.isnull().any()
+    assert not info.loc[info.claktype == 'horizontal', 'cellface'].isnull().any()
+
 
 def test_external_tables(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
