@@ -842,24 +842,25 @@ class MFsetupMixin():
         if kwargs is not None:
             kwargs = kwargs.copy()
 
-            # load only specified packages that the parent model has
-            packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
-                                                                    kwargs['namefile']))
-            specified_packages = set(self.cfg['model'].get('packages', set()))
-
-            # get equivalent packages to load if parent is another MODFLOW version;
-            # then flatten (a package may have more than one equivalent)
-            parent_packages = [get_package_name(p, kwargs['version'])
-                               for p in specified_packages]
-            parent_packages = {item for subset in parent_packages for item in subset}
-            load_only = list(set(packages_in_parent_namefile).intersection(parent_packages))
-            kwargs['load_only'] = load_only
-
             # load MF6 or MF2005 parent
             if self.parent is None:
                 print('loading parent model {}...'.format(os.path.join(kwargs['model_ws'],
                                                                  kwargs['namefile'])))
                 t0 = time.time()
+                
+                # load only specified packages that the parent model has
+                packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
+                                                                        kwargs['namefile']))
+                specified_packages = set(self.cfg['model'].get('packages', set()))
+
+                # get equivalent packages to load if parent is another MODFLOW version;
+                # then flatten (a package may have more than one equivalent)
+                parent_packages = [get_package_name(p, kwargs['version'])
+                                   for p in specified_packages]
+                parent_packages = {item for subset in parent_packages for item in subset}
+                load_only = list(set(packages_in_parent_namefile).intersection(parent_packages))
+                kwargs['load_only'] = load_only
+
                 if self.cfg['parent']['version'] == 'mf6':
                     sim_kwargs = kwargs.copy()
                     if 'sim_name' not in kwargs:
