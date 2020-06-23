@@ -112,6 +112,18 @@ def test_set_parent_model(shellmound_tmr_model_with_dis):
     assert m.parent.modelgrid.nlay == m.parent.dis.nlay.array
 
 
+def test_sfr_riv_setup(shellmound_tmr_model_with_dis):
+    m = shellmound_tmr_model_with_dis
+    m.setup_sfr()
+    assert isinstance(m.riv, mf6.ModflowGwfriv)
+    rivdata_file = m.cfg['riv']['output_files']['rivdata_file'].format(m.name)
+    rivdata = pd.read_csv(rivdata_file)
+    for line_id in m.cfg['sfr']['to_riv']:
+        assert line_id not in m.sfrdata.reach_data.line_id.values
+        assert line_id in rivdata.line_id.values
+    assert 'Yazoo River' in rivdata.name.unique()
+
+
 def test_model_setup(shellmound_tmr_model_setup):
     m = shellmound_tmr_model_setup
     specified_packages = m.cfg['model']['packages']

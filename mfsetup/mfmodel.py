@@ -1164,11 +1164,6 @@ class MFsetupMixin():
         self.modelgrid.model_length_units = self.length_units
 
         # create an sfrmaker.sfrdata instance from the lines instance
-        #from flopy.utils.reference import SpatialReference
-        #sr = SpatialReference(delr=self.modelgrid.delr, delc=self.modelgrid.delc,
-        #                      xll=self.modelgrid.xoffset, yll=self.modelgrid.yoffset,
-        #                      rotation=self.modelgrid.angrot, epsg=self.modelgrid.epsg,
-        #                      proj4_str=self.modelgrid.proj_str)
         sfr = lns.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,
@@ -1211,15 +1206,16 @@ class MFsetupMixin():
             else:
                 self.dis.botm = self.cfg['dis']['botm']
 
+        # option to convert reaches to the River Package
+        if self.cfg['sfr']['to_riv']:
+            rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['to_riv'],
+                                 drop_in_sfr=True)
+            self.setup_riv(rivdata)
+            rivdata.write_table(self.cfg['riv']['output_files']['rivdata_file'].format(self.name))
+            rivdata.write_shapefiles('{}/{}'.format(output_path, self.name))
+
         # write reach and segment data tables
         sfr.write_tables('{}/{}'.format(output_path, self.name))
-
-        # export shapefiles of lines, routing, cell polygons, inlets and outlets
-        sfr.export_cells('{}/{}_sfr_cells.shp'.format(output_path, self.name))
-        sfr.export_outlets('{}/{}_sfr_outlets.shp'.format(output_path, self.name))
-        sfr.export_transient_variable('flow', '{}/{}_sfr_inlets.shp'.format(output_path, self.name))
-        sfr.export_lines('{}/{}_sfr_lines.shp'.format(output_path, self.name))
-        sfr.export_routing('{}/{}_sfr_routing.shp'.format(output_path, self.name))
 
         # attach the sfrmaker.sfrdata instance as an attribute
         self.sfrdata = sfr
@@ -1246,8 +1242,8 @@ class MFsetupMixin():
             kwargs = get_input_arguments(observations_input.copy(), sfr.add_observations)
             sfr.add_observations(**kwargs)
 
-            # make a shapefile of the observation locations
-            sfr.export_observations('{}/{}_sfr_observations.shp'.format(output_path, self.name))
+        # export shapefiles of lines, routing, cell polygons, inlets and outlets
+        sfr.write_shapefiles('{}/{}'.format(output_path, self.name))
 
         # reset dependent arrays
         self._reset_bc_arrays()

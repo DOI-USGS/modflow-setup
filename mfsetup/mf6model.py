@@ -43,7 +43,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # default configuration
         self._is_lgr = lgr
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
-                                     'ghb', 'sfr', 'lak',
+                                     'ghb', 'sfr', 'lak', 'riv',
                                      'wel', 'maw', 'obs']
         self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
         self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
@@ -671,6 +671,61 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         lak = mf6.ModflowGwflak(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return lak
+
+    def setup_riv(self, rivdata=None):
+        """Set up River package.
+        TODO: riv package input through configuration file
+        """
+        package = 'riv'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+
+        if rivdata is None:
+            raise NotImplementedError("River package input through configuration file;"
+                                      "currently only supported through to_riv option"
+                                      "in sfr configuration block.")
+        df = rivdata.stress_period_data
+        if len(df) == 0:
+            print('No input specified or streams not in model.')
+            return
+
+        # option to write stress_period_data to external files
+        external_files = self.cfg[package].get('external_files', True)
+
+        if external_files:
+            # get the file path (allowing for different external file locations, specified name format, etc.)
+            filename_format = package + '_{:03d}.dat'  # stress period suffix
+            filepaths = self.setup_external_filepaths(package, 'stress_period_data',
+                                                      filename_format=filename_format,
+                                                      file_numbers=sorted(df.per.unique().tolist()))
+
+        spd = {}
+        by_period = df.groupby('per')
+        for kper, df_per in by_period:
+            if external_files:
+                df_per = df_per[['k', 'i', 'j', 'cond', 'stage', 'rbot']].copy()
+                df_per.rename(columns={'k': '#k'}, inplace=True)
+                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+                # make a copy for the intermediate data folder, for consistency with mf-2005
+                shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
+            else:
+                maxbound = len(df_per)
+                spd[kper] = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=maxbound,
+                                                                       boundnames=True)[0]
+                spd[kper]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
+                for col in 'cond', 'stage', 'rbot':
+                    spd[kper][col] = df_per[col]
+                spd[kper]['boundname'] = ["'{}'".format(s) for s in df_per['name']]
+
+        kwargs = self.cfg['riv']
+        # need default options from rivdata instance or cfg defaults
+        kwargs.update(self.cfg['riv']['options'])
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfriv)
+        if not external_files:
+            kwargs['stress_period_data'] = spd
+        riv = mf6.ModflowGwfriv(self, **kwargs)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return riv
 
     def setup_obs(self):
         """
