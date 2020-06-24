@@ -61,7 +61,8 @@ class Tmr:
                  parent_head_file=None, parent_cell_budget_file=None,
                  parent_length_units=None, inset_length_units=None,
                  inset_parent_layer_mapping=None,
-                 inset_parent_period_mapping=None):
+                 inset_parent_period_mapping=None,
+                 ):
 
         self.inset = inset_model
         self.parent = parent_model
@@ -80,18 +81,18 @@ class Tmr:
 
         if parent_head_file is None:
             parent_head_file = os.path.join(self.parent.model_ws,
-                                     '{}.{}'.format(self.parent.name,
-                                                    self.parent.hext))
+                                     '{}.hds'.format(self.parent.name))
             if os.path.exists(parent_head_file):
                 self.hpth = parent_cell_budget_file
         else:
             self.hpth = parent_head_file
         if parent_cell_budget_file is None:
-            parent_cell_budget_file = os.path.join(self.parent.model_ws,
-                                     '{}.{}'.format(self.parent.name,
-                                                    self.parent.cext))
-            if os.path.exists(parent_cell_budget_file):
-                self.cpth = parent_cell_budget_file
+            for extension in 'cbc', 'cbb':
+                parent_cell_budget_file = os.path.join(self.parent.model_ws,
+                                         '{}.{}'.format(self.parent.name, extension))
+                if os.path.exists(parent_cell_budget_file):
+                    self.cpth = parent_cell_budget_file
+                    break
         else:
             self.cpth = parent_cell_budget_file
 
