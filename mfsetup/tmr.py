@@ -24,10 +24,10 @@ class Tmr:
     Parameters
     ----------
     parent_model : flopy.modflow.Modflow instance of parent model
-        Must have a valid, attached SpatialReference (sr) attribute.
+        Must have a valid, attached ModelGrid (modelgrid) attribute.
     inset_model : flopy.modflow.Modflow instance of pfl_nwt model
-        Must have a valid, attached SpatialReference (sr) attribute.
-        SpatialReference of pfl_nwt and parent models is used to determine cell
+        Must have a valid, attached ModelGrid (modelgrid) attribute.
+        ModelGrid of pfl_nwt and parent models is used to determine cell
         connections.
     parent_head_file : filepath
         MODFLOW binary head output
@@ -70,6 +70,8 @@ class Tmr:
         self._inset_parent_layer_mapping = inset_parent_layer_mapping
         self._source_mask = None
         self._inset_parent_period_mapping = inset_parent_period_mapping
+        self.hpth = None  # path to parent heads output file
+        self.cpth = None  # path to parent cell budget output file
         if parent_length_units is None:
             parent_length_units = self.inset.cfg['parent']['length_units']
         if inset_length_units is None:
@@ -77,19 +79,24 @@ class Tmr:
         self.length_unit_conversion = convert_length_units(parent_length_units, inset_length_units)
 
         if parent_head_file is None:
-            self.hpth = os.path.join(self.parent.model_ws,
+            parent_head_file = os.path.join(self.parent.model_ws,
                                      '{}.{}'.format(self.parent.name,
                                                     self.parent.hext))
-            assert os.path.exists(self.hpth), '{} not found.'.format(self.hpth)
+            if os.path.exists(parent_head_file):
+                self.hpth = parent_cell_budget_file
         else:
             self.hpth = parent_head_file
         if parent_cell_budget_file is None:
-            self.cpth = os.path.join(self.parent.model_ws,
+            parent_cell_budget_file = os.path.join(self.parent.model_ws,
                                      '{}.{}'.format(self.parent.name,
                                                     self.parent.cext))
-            assert os.path.exists(self.cpth), '{} not found.'.format(self.cpth)
+            if os.path.exists(parent_cell_budget_file):
+                self.cpth = parent_cell_budget_file
         else:
             self.cpth = parent_cell_budget_file
+
+        if self.hpth is None and self.cpth is None:
+            raise ValueError("No head or cell budget output files found for parent model {}".format(self.parent.name))
 
         # get bounding cells in parent model for pfl_nwt model
         self.pi0, self.pj0 = get_ij(self.parent.modelgrid,
