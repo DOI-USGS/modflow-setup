@@ -703,7 +703,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         by_period = df.groupby('per')
         for kper, df_per in by_period:
             if external_files:
-                df_per = df_per[['k', 'i', 'j', 'cond', 'stage', 'rbot']].copy()
+                df_per = df_per[['k', 'i', 'j', 'stage', 'cond', 'rbot']].copy()
+                for col in 'k', 'i', 'j':
+                    df_per[col] += 1
                 df_per.rename(columns={'k': '#k'}, inplace=True)
                 df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
                 # make a copy for the intermediate data folder, for consistency with mf-2005

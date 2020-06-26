@@ -72,8 +72,8 @@ def shellmound_tmr_model_setup(shellmound_tmr_cfg_path):
         m.sfrdata.write_package(sfr_package_filename,
                                     version='mf6',
                                     options=['save_flows',
-                                             'BUDGET FILEOUT shellmound.sfr.cbc',
-                                             'STAGE FILEOUT shellmound.sfr.stage.bin',
+                                             'BUDGET FILEOUT {}.sfr.cbc'.format(m.name),
+                                             'STAGE FILEOUT {}.sfr.stage.bin'.format(m.name),
                                              # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
                                              # location of obs6 file relative to sfr package file (same folder)
                                              ]

@@ -10,7 +10,6 @@ model:
     print_input: True
     save_flows: True
     newton: True
-    newton_under_relaxation: False
   packages: ['dis',
              'ic',
              'npf',
@@ -22,6 +21,7 @@ model:
   ]
   external_path: 'external/'
   relative_external_filepaths: True
+  perimeter_boundary_type: 'specified head'
 
 parent:
   # argments to flopy.modflow.Modflow.load for parent model
@@ -62,7 +62,7 @@ dis:
   source_data:
     top: from_parent
     botm: from_parent
-    idomain: from_parent
+    #idomain: from_parent
   minimum_layer_thickness: 1 # layers less than this thickness are converted to vertical pass-through cells
   drop_thin_cells: True
 
