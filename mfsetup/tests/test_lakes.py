@@ -114,7 +114,8 @@ def test_setup_lake_connectiondata(get_pleasant_mf6_with_dis):
         assert np.sum(kvc.bedleak == litleak) == np.sum(lakezones[lake_thickness == k] == 1)
 
 
-def test_get_horizontal_connections():
+@pytest.mark.parametrize('connection_info', (False, True))
+def test_get_horizontal_connections(tmpdir, connection_info):
     nlay, nrow, ncol = 2, 20, 20
     lakarr = np.zeros((nlay, nrow, ncol))
     lakarr[0, 4, 7] = 1
@@ -131,10 +132,43 @@ def test_get_horizontal_connections():
     layer_elevations[1] = 1
     delr = np.ones(ncol)
     delc = np.ones(nrow)
-    connections = get_horizontal_connections(lakarr, layer_elevations, delr, delc)
-    connections['k'] = [c[0] for c in connections['cellid']]
+    connections = get_horizontal_connections(lakarr, connection_info=connection_info,
+                                             layer_elevations=layer_elevations,
+                                             delr=delr, delc=delc)
 
     from scipy.ndimage import sobel
+
+    try:
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(2, 2)
+        ax = ax.flat
+        ax[0].imshow(lakarr[0])
+        ax[0].set_title('lake extent')
+
+        # sobel
+        sobel_x = sobel(lakarr[0], axis=1, mode='constant', cval=0.)
+        sobel_x[lakarr[0] == 1] = 0
+        sobel_y = sobel(lakarr[0], axis=0, mode='constant', cval=0.)
+        sobel_y[lakarr[0] == 1] = 0
+        im = ax[1].imshow(sobel_x)
+        ax[1].set_title('sobel filter applied in x direction')
+        ax[2].imshow(sobel_y)
+        ax[2].set_title('sobel filter applied in y direction')
+        fig.colorbar(im, ax=ax[1])
+        fig.colorbar(im, ax=ax[2])
+
+        # get_horizontal_connections
+        k, i, j = zip(*connections.cellid)
+        hconn = np.zeros(lakarr.shape)
+        hconn[0][lakarr[0] == 1] = 1
+        hconn[k, i, j] = 2
+        im = ax[3].imshow(hconn[0])
+        ax[3].set_title('results from\nlakes.get_horizontal_connections()')
+        plt.tight_layout()
+        plt.savefig(os.path.join(tmpdir, 'horizontal_connections.pdf'))
+    except:
+        pass
+
     for k, lakarr2d in enumerate(lakarr):
         sobel_x = sobel(lakarr2d, axis=1, mode='constant', cval=0.)
         sobel_x[lakarr2d == 1] = 0

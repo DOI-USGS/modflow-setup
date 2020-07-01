@@ -345,17 +345,20 @@ def setup_lake_connectiondata(model, for_external_file=True,
         for lake_id in range(1, model.nlakes + 1):
             lake_extent = model.lakarr == lake_id
             horizontal_connections = get_horizontal_connections(lake_extent,
-                                                                layer_elevations,
-                                                                model.dis.delr.array,
-                                                                model.dis.delc.array,
-                                                                bdlknc)
+                                                                connection_info=True,
+                                                                layer_elevations=layer_elevations,
+                                                                delr=model.dis.delr.array,
+                                                                delc=model.dis.delc.array,
+                                                                bdlknc=bdlknc)
             # drop horizontal connections to inactive cells
-            k, i, j = zip(*horizontal_connections['cellid'])
+            k, i, j = horizontal_connections[['k', 'i', 'j']].T.values
             inactive = model.idomain[k, i, j] < 1
             horizontal_connections = horizontal_connections.loc[~inactive].copy()
             horizontal_connections['lakeno'] = lake_id
-            i, j = zip(*[c[1:] for c in horizontal_connections.cellid])
+            k, i, j = horizontal_connections[['k', 'i', 'j']].T.values
             horizontal_connections['zone'] = littoral_profundal_zones[i, j]
+            horizontal_connections['cellid'] = list(zip(k, i, j))
+            horizontal_connections.drop(['k', 'i', 'j'], axis=1, inplace=True)
             df = df.append(horizontal_connections)
     # assign iconn (connection number) values for each lake
     dfs = []
@@ -451,10 +454,11 @@ def get_lakeperioddata(lake_fluxes):
     return lakeperioddata
 
 
-def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
+def get_horizontal_connections(extent, inside=False, connection_info=False,
+                               layer_elevations=None, delr=None, delc=None,
                                bdlknc=None):
-    """Get cells along the edge of a lake, using the sobel filter method
-    (for edge detection) in SciPy.
+    """Get cells along the edge of an aerial feature (e.g. a lake or irregular model inset area),
+    using the sobel filter method (for edge detection) in SciPy.
 
     see:
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.sobel.html
@@ -462,13 +466,28 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
 
     Parameters
     ----------
-    lake_extent : 2 or 3D array of ones and zeros
-        With ones indicating cells containing the lake
+    extent : 2 or 3D array of ones and zeros
+        With ones indicating an area interest. get_horizontal_connections
+        will return connection information between cells == 1 and
+        any neighboring cells == 0 that share a face (no diagonal connections).
+    inside : bool
+        Option to return the cells along the inside edge of the area(s) defined
+        by ``extent``. In other words, the cells along the edge == 1. By default,
+        the cells along the outside edge of the connection are returned (inside=False).
+    connection_info : bool
+        Option to return the top and bottom elevation, length, width, cell face, and
+        bdlknc value of each connection (i.e., as needed for the MODFLOW-6 lake package).
+        By default, False.
     layer_elevations : np.ndarray
         Numpy array of cell top and bottom elevations.
-        (shape = nlay + 1, nrow, ncol)
+        (shape = nlay + 1, nrow, ncol). Optional, only needed if connection_info == True
+        (by default, None).
     delr : 1D array of cell spacings along a model row
+        Optional, only needed if connection_info == True
+        (by default, None).
     delc : 1D array of cell spacings along a model column
+        Optional, only needed if connection_info == True
+        (by default, None).
     bdlknc : 2D array
         Array of lakebed leakance values
         (optional; default=1)
@@ -476,18 +495,20 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
     Returns
     -------
     df : DataFrame
-        Table of horizontal cell connections for the Connectiondata
-        input block in MODFLOW-6.
+        Table of horizontal cell connections
         Columns:
-        cellid, claktype, bedleak, belev, telev, connlen, connwidth
-        (see MODFLOW-6 io guide for an explanation)
+        k, i, j;
+        optionally (if connection_info == True):
+        claktype, bedleak, belev, telev, connlen, connwidth
+        (see MODFLOW-6 io guide for an explanation or the Connectiondata
+        input block)
 
     """
-    lake_extent = lake_extent.astype(float)
-    if len(lake_extent.shape) != 3:
-        lake_extent = np.expand_dims(lake_extent, axis=0)
+    extent = extent.astype(float)
+    if len(extent.shape) != 3:
+        extent = np.expand_dims(extent, axis=0)
     if bdlknc is None:
-        bdlknc = np.ones_like(lake_extent[0], dtype=float)
+        bdlknc = np.ones_like(extent[0], dtype=float)
 
     cellid = []
     bedleak = []
@@ -496,7 +517,7 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
     connlen = []
     connwidth = []
     cellface = []
-    for klay, lake_extent_k in enumerate(lake_extent):
+    for klay, lake_extent_k in enumerate(extent):
         sobel_x = sobel(lake_extent_k, axis=1, mode='constant', cval=0.)
         sobel_x[lake_extent_k == 1] = 10
         sobel_y = sobel(lake_extent_k, axis=0, mode='constant', cval=0.)
@@ -504,57 +525,75 @@ def get_horizontal_connections(lake_extent, layer_elevations, delr, delc,
 
         # right face connections
         i, j = np.where((sobel_x <= -2) & (sobel_x >= -4))
+        if inside:
+            j -= 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
-        bedleak += list(bdlknc[i, j])
-        belev += list(layer_elevations[k + 1, i, j])
-        telev += list(layer_elevations[k, i, j])
-        connlen += list(0.5 * delr[j - 1] + 0.5 * delr[j])
-        connwidth += list(delc[i])
-        cellface += ['right'] * len(i)
+        if connection_info:
+            bedleak += list(bdlknc[i, j])
+            belev += list(layer_elevations[k + 1, i, j])
+            telev += list(layer_elevations[k, i, j])
+            connlen += list(0.5 * delr[j - 1] + 0.5 * delr[j])
+            connwidth += list(delc[i])
+            cellface += ['right'] * len(i)
 
         # left face connections
         i, j = np.where((sobel_x >= 2) & (sobel_x <= 4))
+        if inside:
+            j += 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
-        bedleak += list(bdlknc[i, j])
-        belev += list(layer_elevations[k + 1, i, j])
-        telev += list(layer_elevations[k, i, j])
-        connlen += list(0.5 * delr[j + 1] + 0.5 * delr[j])
-        connwidth += list(delc[i])
-        cellface += ['left'] * len(i)
+        if connection_info:
+            bedleak += list(bdlknc[i, j])
+            belev += list(layer_elevations[k + 1, i, j])
+            telev += list(layer_elevations[k, i, j])
+            connlen += list(0.5 * delr[j + 1] + 0.5 * delr[j])
+            connwidth += list(delc[i])
+            cellface += ['left'] * len(i)
 
         # bottom face connections
         i, j = np.where((sobel_y <= -2) & (sobel_y >= -4))
+        if inside:
+            i -= 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
-        bedleak += list(bdlknc[i, j])
-        belev += list(layer_elevations[k + 1, i, j])
-        telev += list(layer_elevations[k, i, j])
-        connlen += list(0.5 * delc[i-1] + 0.5 * delc[i])
-        connwidth += list(delr[j])
-        cellface += ['bottom'] * len(i)
+        if connection_info:
+            bedleak += list(bdlknc[i, j])
+            belev += list(layer_elevations[k + 1, i, j])
+            telev += list(layer_elevations[k, i, j])
+            connlen += list(0.5 * delc[i-1] + 0.5 * delc[i])
+            connwidth += list(delr[j])
+            cellface += ['bottom'] * len(i)
 
         # top face connections
         i, j = np.where((sobel_y >= 2) & (sobel_y <= 4))
+        if inside:
+            i += 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
-        bedleak += list(bdlknc[i, j])
-        belev += list(layer_elevations[k + 1, i, j])
-        telev += list(layer_elevations[k, i, j])
-        connlen += list(0.5 * delc[i + 1] + 0.5 * delc[i])
-        connwidth += list(delr[j])
-        cellface += ['top'] * len(i)
+        if connection_info:
+            bedleak += list(bdlknc[i, j])
+            belev += list(layer_elevations[k + 1, i, j])
+            telev += list(layer_elevations[k, i, j])
+            connlen += list(0.5 * delc[i + 1] + 0.5 * delc[i])
+            connwidth += list(delr[j])
+            cellface += ['top'] * len(i)
 
-    df = pd.DataFrame({'cellid': cellid,
-                       'claktype': 'horizontal',
-                       'bedleak': bedleak,
-                       'belev': belev,
-                       'telev': telev,
-                       'connlen': connlen,
-                       'connwidth': connwidth,
-                       'cellface': cellface
-                       })
+    k, i, j = zip(*cellid)
+    data = {'k': k,
+            'i': i,
+            'j': j
+            }
+    if connection_info:
+        data.update({'claktype': 'horizontal',
+                     'bedleak': bedleak,
+                     'belev': belev,
+                     'telev': telev,
+                     'connlen': connlen,
+                     'connwidth': connwidth,
+                     'cellface': cellface
+                    })
+    df = pd.DataFrame(data)
     return df
 
 
