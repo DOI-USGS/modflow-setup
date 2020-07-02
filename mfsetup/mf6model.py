@@ -93,6 +93,15 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """Remake the idomain array from the source data,
         no data values in the top and bottom arrays, and
         so that cells above SFR reaches are inactive."""
+        
+        # first write out a copy of the layer 0 maximum idomsin footprint for potential use 
+        # to assign boundary conditions later
+        tmppath = os.path.join(self.cfg['simulation']['sim_ws'],
+                               'original',
+                               'idomain_max_extent.dat')
+        np.savetxt(tmppath, self.dis.idomain.array[0,:,:], fmt = '%d')
+        print('Writing maximum idomain footprint to: {}'.format(tmppath))
+        
         # loop thru LGR models and inactivate area of parent grid for each one
         lgr_idomain = np.ones(self.dis.idomain.array.shape, dtype=int)
         if isinstance(self.lgr, dict):
