@@ -602,11 +602,25 @@ class Tmr:
         if self.pi_list is None and self.pj_list is None:
             k, i, j = self.inset.get_boundary_cells(exclude_inactive=True)
         else:
-            k =[]
+            ktmp =[]
             for clay in range(self.inset.nlay):
-                k += list(clay*np.ones(len(self.pi_list)).astype(int))
-            i = self.inset.nlay * self.pi_list
-            j = self.inset.nlay * self.pj_list
+                ktmp += list(clay*np.ones(len(self.pi_list)).astype(int))
+            itmp = self.inset.nlay * self.pi_list
+            jtmp = self.inset.nlay * self.pj_list
+            
+            # get rid of cells that are inactive
+            wh = np.where(self.inset.dis.idomain.array >0)
+            activecells = set([(i,j,k) for i,j,k in zip(wh[0],wh[1],wh[2])])
+            chdcells = set([(kk,ii,jj) for ii,jj,kk in zip(itmp,jtmp,ktmp)])
+            active_chd_cells = set(chdcells).intersection(activecells)
+            
+            # unpack back to lists, then convert to numpy arrays
+            k,i,j = [],[],[]
+            for ccell in active_chd_cells:
+                ck,ci,cj = ccell
+                k.append(ck)
+                i.append(ci)
+                j.append(cj)
             k = np.array(k)
             i = np.array(i)
             j = np.array(j)
