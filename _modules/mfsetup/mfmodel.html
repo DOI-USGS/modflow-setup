@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g70c8573 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+gd2f9073 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g70c8573
+                0.post51+gd2f9073
               </div>
             
           
@@ -1331,9 +1331,11 @@
 
         <span class="c1"># create isfr array (where SFR cells will be populated)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-            <span class="n">active_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">active_cells</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="c1">#active_cells = self.idomain.sum(axis=0) &gt; 0</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">active_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">active_cells</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ibound</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="c1">#active_cells = self.ibound.sum(axis=0) &gt; 0</span>
         <span class="c1"># only include active cells that don&#39;t have another boundary condition</span>
         <span class="c1"># (besides the wel package)</span>
         <span class="n">isfr</span> <span class="o">=</span> <span class="n">active_cells</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_isbc2d</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
