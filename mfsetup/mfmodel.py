@@ -1153,9 +1153,11 @@ class MFsetupMixin():
 
         # create isfr array (where SFR cells will be populated)
         if self.version == 'mf6':
-            active_cells = self.idomain.sum(axis=0) > 0
+            active_cells = np.sum(self.idomain == 1, axis=0) > 0
+            #active_cells = self.idomain.sum(axis=0) > 0
         else:
-            active_cells = self.ibound.sum(axis=0) > 0
+            active_cells = np.sum(self.ibound == 1, axis=0) > 0
+            #active_cells = self.ibound.sum(axis=0) > 0
         # only include active cells that don't have another boundary condition
         # (besides the wel package)
         isfr = active_cells & (self._isbc2d <= 0)
