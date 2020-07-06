@@ -1,0 +1,50 @@
+BEGIN options
+  LENGTH_UNITS  meters
+  XORIGIN  5.00955000E+05
+  YORIGIN  1.17528500E+06
+  ANGROT       0.00000000
+END options
+
+BEGIN dimensions
+  NLAY  13
+  NROW  30
+  NCOL  35
+END dimensions
+
+BEGIN griddata
+  delr
+    CONSTANT    1000.00000000
+  delc
+    CONSTANT    1000.00000000
+  top
+    OPEN/CLOSE  './external/top.dat'  FACTOR  1.0
+  botm  LAYERED
+    OPEN/CLOSE  './external/botm0.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm1.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm2.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm3.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm4.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm5.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm6.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm7.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm8.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm9.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm10.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm11.dat'  FACTOR  1.0
+    OPEN/CLOSE  './external/botm12.dat'  FACTOR  1.0
+  idomain  LAYERED
+    OPEN/CLOSE  './external/idomain0.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain1.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain2.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain3.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain4.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain5.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain6.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain7.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain8.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain9.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain10.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain11.dat'  FACTOR  1
+    OPEN/CLOSE  './external/idomain12.dat'  FACTOR  1
+END griddata
+
