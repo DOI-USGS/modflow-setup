@@ -13,7 +13,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from mfsetup.tdis import get_parent_stress_periods, aggregate_dataframe_to_stress_period
-from .test_pleasant_mf6_inset import get_pleasant_mf6
+from ..mf6model import MF6model
+from ..sourcedata import TransientTabularSourceData
 
 
 @pytest.fixture(scope='function')
@@ -267,7 +268,7 @@ def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, d
     result = aggregate_dataframe_to_stress_period(welldata, id_column='node', data_column='flux_m3',
                                                   datetime_column='start_datetime', end_datetime_column='end_datetime',
                                                   start_datetime=start_datetime, end_datetime=end_datetime,
-                                                  period_stat='mean')
+                                                  period_stat='mean', resolve_duplicates_with='sum')
     overlap = (welldata.start_datetime < end_datetime) & \
                                (welldata.end_datetime > start_datetime)
     #period_inside_welldata = (welldata.start_datetime < start_datetime) & \
@@ -287,3 +288,98 @@ def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, d
                 (duplicate_well.end_datetime > start_datetime)
         expected_sum += duplicate_well.loc[dw_overlaps, 'flux_m3'].mean()
     assert np.allclose(result['flux_m3'].sum(), expected_sum)
+
+
+@pytest.fixture()
+def dest_model(shellmound_simulation, project_root_path):
+    m = MF6model(simulation=shellmound_simulation)
+    m._config_path = os.path.join(project_root_path, 'mfsetup/tests/data')
+    return m
+
+
+@pytest.fixture()
+def obsdata():
+    return pd.DataFrame({'datetime': ['2001-01-01', # per 0, site 2000
+                                  '2002-01-01', # per 0, site 2001
+                                  '2002-02-02', # per 0, site 2001
+                                  '2014-10-02', # per 1, site 2002
+                                  '2015-01-01', # per 1, site 2002
+                                  '2015-01-02', # per 1, site 2002
+                                  '2015-01-02', # per 1, site 2000
+                                  '2017-01-01', #        site 2003
+                                  '2018-01-01', #        site 2003
+                                  '2019-01-01'], #       site 2000
+                         'flow_m3d': [1, 1, 0, 4, 2, 3, 2, 1, 0, 10],
+                         'comment': ['measured',
+                                     'measured',
+                                     'measured',
+                                     'estimated',
+                                     'estimated',
+                                     'estimated',
+                                     'estimated',
+                                     'measured',
+                                     'measured',
+                                     'estimated'
+                                     ],
+                         'site_no': [2000,
+                                     2001,
+                                     2001,
+                                     2002,
+                                     2002,
+                                     2002,
+                                     2000,
+                                     2003,
+                                     2003,
+                                     2000
+                                     ],
+                         'line_id': [1002000,
+                                     1002001,
+                                     1002001,
+                                     1002002,
+                                     1002002,
+                                     1002002,
+                                     1002000,
+                                     1002003,
+                                     1002003,
+                                     1002000
+                                     ]
+                         })
+
+
+@pytest.fixture()
+def times():
+    start_datetime = pd.to_datetime(['2001-01-01', '2014-10-01'])
+    end_datetime = pd.to_datetime(['2014-09-30', '2015-09-30'])
+    perlen = [(edt - sdt).days for edt, sdt in zip(start_datetime, end_datetime)]
+    times = pd.DataFrame({'start_datetime': start_datetime,
+                          'end_datetime': end_datetime,
+                          'per': [0, 1],
+                          'perlen': perlen,
+                          'steady': False})
+    return times
+
+
+@pytest.mark.parametrize('category_col', (None, 'comment'))
+def test_aggregate_values_with_categories(obsdata, times, category_col, dest_model, tmpdir):
+    file = os.path.join(tmpdir, 'obsdata.csv')
+    obsdata.to_csv(file, index=False)
+    dest_model._perioddata = times
+    sd = TransientTabularSourceData(file, data_column='flow_m3d', datetime_column='datetime', id_column='line_id',
+                                    x_col='x', y_col='y', end_datetime_column=None, period_stats={0: 'mean'},
+                                    length_units='unknown', time_units='unknown', volume_units=None,
+                                    column_mappings=None, category_column=category_col,
+                                    resolve_duplicates_with='raise error',
+                                    dest_model=dest_model)
+    results = sd.get_data()
+    results.sort_values(by=['per', 'site_no'], inplace=True)
+    assert np.array_equal(results.site_no.values,
+                          np.array([2000, 2001, 2000, 2002]))
+    assert np.array_equal(results['flow_m3d'].values,
+                          np.array([1.000000,  # 2000 value in per 0
+                                    0.500000,  # 2001 average for per 0
+                                    2.000000,  # 2000 value in per 1
+                                    3.000000,  # 2002 average for period 1
+                                    ]))  #  2003 has no values within model timeframe
+    if category_col is not None:
+        assert np.array_equal(results['n_measured'].values, [1, 2, 0, 0])
+        assert np.array_equal(results['n_estimated'].values, [0, 0, 1, 3])

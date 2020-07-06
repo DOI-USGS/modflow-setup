@@ -619,7 +619,7 @@ def test_sfr_setup(model_with_sfr):
     m.sfr.write()
     assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
     assert isinstance(m.sfr, mf6.ModflowGwfsfr)
-    output_path = m.cfg['sfr']['output_path']
+    output_path = m._shapefiles_path
     shapefiles = ['{}/{}_sfr_cells.shp'.format(output_path, m.name),
                   '{}/{}_sfr_outlets.shp'.format(output_path, m.name),
                   #'{}/{}_sfr_inlets.shp'.format(output_path, m.name),
@@ -638,11 +638,22 @@ def test_sfr_setup(model_with_sfr):
     ki, ii, ji = inactive_reaches.k, inactive_reaches.i, inactive_reaches.j
     # 26, 13
     j=2
-    
 
 
-    # array([  23.46,   10.72,   -2.02,  -10.03,  -35.99,  -61.96, -145.56,
-    #   -184.6 , -315.14, -354.63, -411.11, -467.58, -697.97])
+def test_sfr_inflows_from_csv(model_with_sfr):
+    m = model_with_sfr
+
+    # compare input values resampled to 6 months to sfr period data
+    inflow_input = pd.read_csv(m.cfg['sfr']['source_data']['inflows']['filename'])
+    inflow_input['start_datetime'] = pd.to_datetime(inflow_input['datetime'])
+    inflow_input.index = inflow_input['start_datetime']
+    sfr_pd = m.sfrdata.period_data.dropna(axis=1)
+    sfr_pd.index = sfr_pd.start_datetime
+
+    left = inflow_input.loc[inflow_input.line_id == 18021542].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
+    right = sfr_pd.loc[sfr_pd.rno == 275].loc['2007-04-01':, 'inflow']
+    left = left.loc[:right.index[-1]]
+    pd.testing.assert_series_equal(left, right, check_names=False)
 
 
 #@pytest.mark.xfail(reason='flopy remove_package() issue')

@@ -875,8 +875,8 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
     def __init__(self, filenames, data_column, datetime_column, id_column,
                  x_col='x', y_col='y', end_datetime_column=None, period_stats={0: 'mean'},
                  length_units='unknown', time_units='unknown', volume_units=None,
-                 column_mappings=None,
-                 dest_model=None):
+                 column_mappings=None, category_column=None,
+                 dest_model=None, resolve_duplicates_with='raise error'):
         SourceData.__init__(self, filenames=filenames,
                             length_units=length_units, time_units=time_units,
                             volume_units=volume_units,
@@ -888,9 +888,11 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         self.end_datetime_column = end_datetime_column
         self.id_column = id_column
         self.column_mappings = column_mappings
+        self.category_column = category_column
         self.time_col = datetime_column
         self.x_col = x_col
         self.y_col = y_col
+        self.resolve_duplicates_with = resolve_duplicates_with
 
     def get_data(self):
 
@@ -911,10 +913,16 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
             df.rename(columns=self.column_mappings, inplace=True)
 
         # cull data to model bounds
+        has_locations = False
         if 'geometry' not in df.columns or isinstance(df.geometry.iloc[0], str):
-            df['geometry'] = [Point(x, y) for x, y in zip(df[self.x_col], df[self.y_col])]
-        within = [g.within(self.dest_model.bbox) for g in df.geometry]
-        df = df.loc[within]
+            if self.x_col in df.columns and self.y_col in df.columns:
+                df['geometry'] = [Point(x, y) for x, y in zip(df[self.x_col], df[self.y_col])]
+                has_locations = True
+        else:
+            has_locations = True
+        if has_locations:
+            within = [g.within(self.dest_model.bbox) for g in df.geometry]
+            df = df.loc[within]
 
         period_data = []
         for kper, period_stat in self.period_stats.items():
@@ -923,7 +931,10 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
             aggregated = aggregate_dataframe_to_stress_period(df, id_column=self.id_column,
                                                               datetime_column=self.datetime_column,
                                                               end_datetime_column=self.end_datetime_column,
-                                                              data_column=self.data_column, **period_stat)
+                                                              data_column=self.data_column,
+                                                              category_column=self.category_column,
+                                                              resolve_duplicates_with=self.resolve_duplicates_with,
+                                                              **period_stat)
             aggregated['per'] = kper
             period_data.append(aggregated)
         dfm = pd.concat(period_data)
@@ -937,10 +948,11 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         dfm.drop(drop_columns, axis=1, inplace=True)
 
         # map x, y locations to modelgrid
-        i, j = get_ij(self.dest_model.modelgrid,
-                      dfm[self.x_col].values, dfm[self.y_col].values)
-        dfm['i'] = i
-        dfm['j'] = j
+        if has_locations:
+            i, j = get_ij(self.dest_model.modelgrid,
+                          dfm[self.x_col].values, dfm[self.y_col].values)
+            dfm['i'] = i
+            dfm['j'] = j
         return dfm
 
 

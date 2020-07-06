@@ -351,8 +351,9 @@ def concat_periodata_groups(groups):
 
 
 def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_column='datetime',
-                                         end_datetime_column=None,
-                                         start_datetime=None, end_datetime=None, period_stat='mean'):
+                                         end_datetime_column=None, category_column=None,
+                                         start_datetime=None, end_datetime=None, period_stat='mean',
+                                         resolve_duplicates_with='raise error'):
     """Aggregate time-series data in a DataFrame to a single value representing
     a period defined by a start and end date. 
 
@@ -401,6 +402,10 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
         * Lists of length 3 can be used to specify a statistic and a start and end date.
           For example, ``['mean', '2014-01-01', '2014-03-31']`` would average the values for
           the first three months of 2014.
+    resolve_duplicates_with : {'sum', 'mean', 'first', 'raise error'}
+        Method for reducing duplicates (of times, sites and measured or estimated category).
+        By default, 'raise error' will result in a ValueError if duplicates are encountered.
+        Otherwise any aggregate method in pandas can be used (e.g. DataFrame.groupby().<method>())
 
     Returns
     -------
@@ -470,20 +475,55 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
         else:
             raise Exception("")
 
+    # create category column if there is none, to conform to logic below
+    categories = False
+    if category_column is None:
+        category_column = 'category'
+        period_data[category_column] = 'measured'
+    elif category_column not in period_data.columns:
+        raise KeyError('category_column: {} not in data'.format(category_column))
+    else:
+        categories = True
+
     # compute statistic on data
     # ensure that ids are unique in each time period
     # by summing multiple id instances by period
     # (only sum the data column)
-    if len(period_data) > 0:
+    # check for duplicates with same time, id, and category (measured vs estimated)
+    duplicated = pd.Series(list(zip(period_data[datetime_column],
+                                    period_data[id_column],
+                                    period_data[category_column]))).duplicated()
+    # if len(period_data) > 0:
+    if any(duplicated):
+        if resolve_duplicates_with == 'raise error':
+            duplicate_info = period_data.loc[duplicated.values]
+            msg = 'The following locations are duplicates which need to be resolved:\n'.format(duplicate_info.__str__())
+            raise ValueError(msg)
         period_data.index.name = None
         by_period = period_data.groupby([id_column, datetime_column]).first().reset_index()
-        by_period[data_column] = period_data.groupby([id_column, datetime_column]).sum()[data_column].values
+        by_period[data_column] = getattr(period_data.groupby([id_column, datetime_column]),
+                                            resolve_duplicates_with)()[data_column].values
         period_data = by_period
-    aggregated = period_data.groupby(id_column).first().reset_index()
+    aggregated = period_data.groupby(id_column).first()
     aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
+    # if category column was argued, get counts of measured vs estimated
+    # for each measurement location, for current stress period
+    if categories:
+        counts = period_data.groupby([id_column, category_column]).size().unstack(fill_value=0)
+        for col in 'measured', 'estimated':
+            if col not in counts.columns:
+                counts[col] = 0
+            aggregated['n_{}'.format(col)] = counts[col]
+    aggregated.reset_index(inplace=True)
+
     # add datetime back in
     aggregated['start_datetime'] = pd.Timestamp(start) if start is not None else start_datetime
 
+    # drop original datetime column, which doesn't reflect dates for period averages
+    drop_cols = [datetime_column]
+    if not categories:  # drop category column if it was created
+        drop_cols.append(category_column)
+    aggregated.drop(drop_cols, axis=1, inplace=True)
     return aggregated
 
 

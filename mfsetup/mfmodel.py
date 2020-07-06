@@ -15,7 +15,7 @@ from .fileio import (load, load_array, save_array, check_source_files,
 from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
 from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
 from .mf5to6 import get_package_name, get_model_length_units, get_model_time_units
-from .sourcedata import setup_array
+from .sourcedata import setup_array, TransientTabularSourceData
 from .tdis import (setup_perioddata, setup_perioddata_group,
                    get_parent_stress_periods, parse_perioddata_groups)
 from .utils import update, get_input_arguments, flatten, get_packages
@@ -660,10 +660,11 @@ class MFsetupMixin():
         if 'namefile' in self.cfg.get('parent', {}).keys():
             self._set_parent()
 
-        output_paths = list(self.cfg['postprocessing']['output_folders'].values())
-        for folder in output_paths:
-            if not os.path.exists(folder):
-                os.makedirs(folder)
+        output_paths = self.cfg['postprocessing']['output_folders']
+        for name, folder_path in output_paths.items():
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+            setattr(self, '_{}_path'.format(name), folder_path)
 
         # absolute path to config file
         self._config_path = os.path.split(os.path.abspath(self.cfg['filename']))[0]
@@ -1032,8 +1033,7 @@ class MFsetupMixin():
         assert np.array_equal(self._perioddata['per'].values, np.arange(len(self._perioddata)))
         # reset nper property so that it will reference perioddata table
         self._nper = None
-        path = cfg['postprocessing']['output_folders']['tables']
-        self._perioddata.to_csv('{}/stress_period_data.csv'.format(path), index=False)
+        self._perioddata.to_csv('{}/stress_period_data.csv'.format(self._tables_path), index=False)
 
     def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
                       source_model=None, source_package=None,
@@ -1211,14 +1211,67 @@ class MFsetupMixin():
             rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['to_riv'],
                                  drop_in_sfr=True)
             self.setup_riv(rivdata)
-            rivdata.write_table(self.cfg['riv']['output_files']['rivdata_file'].format(self.name))
-            rivdata.write_shapefiles('{}/{}'.format(output_path, self.name))
+            rivdata_filename = self.cfg['riv']['output_files']['rivdata_file'].format(self.name)
+            rivdata.write_table(os.path.join(self._tables_path, rivdata_filename))
+            rivdata.write_shapefiles('{}/{}'.format(self._shapefiles_path, self.name))
+
+        # add inflows
+        inflows_input = self.cfg['sfr'].get('source_data', {}).get('inflows')
+        if inflows_input is not None:
+            # resample inflows to model stress periods
+            inflows_input['id_column'] = inflows_input['line_id_column']
+            sd = TransientTabularSourceData.from_config(inflows_input,
+                                                        dest_model=self)
+            inflows_by_stress_period = sd.get_data()
+
+            # check if all inflow sites are included in sfr network
+            missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
+                                difference(lns._original_routing.keys())
+            if any(missing_sites):
+                inflows_routing_input = self.cfg['sfr'].get('source_data', {}).get('inflows_routing')
+                if inflows_routing_input is None:
+                    raise KeyError(('inflow sites {} are not within the model sfr network. '
+                                   'Please supply an inflows_routing source_data block '
+                                    '(see shellmound example config file)'.format(missing_sites)))
+                routing = pd.read_csv(inflows_routing_input['filename'])
+                routing = dict(zip(routing[inflows_routing_input['id_column']],
+                                   routing[inflows_routing_input['routing_column']]))
+            else:
+                routing = lns._original_routing
+            missing_sites = any(set(inflows_by_stress_period[inflows_input['id_column']]). \
+                                difference(routing.keys())),
+            if any(missing_sites):
+                raise KeyError(('Inflow sites {} not found in {}'.format(missing_sites,
+                                                                         inflows_routing_input['filename'])))
+
+            # add resampled inflows to SFR package
+            inflows_input['data'] = inflows_by_stress_period
+            inflows_input['flowline_routing'] = routing
+            if self.version == 'mf6':
+                inflows_input['variable'] = 'inflow'
+                method = sfr.add_to_perioddata
+            else:
+                method = sfr.add_to_segment_data
+            kwargs = get_input_arguments(inflows_input.copy(), method)
+            method(**kwargs)
+
+        # add observations
+        observations_input = self.cfg['sfr'].get('source_data', {}).get('observations')
+        if self.version != 'mf6':
+            sfr.gage_starting_unit_number = self.cfg['gag']['starting_unit_number']
+        if observations_input is not None:
+            key = 'filename' if 'filename' in observations_input else 'filenames'
+            observations_input['data'] = observations_input[key]
+            kwargs = get_input_arguments(observations_input.copy(), sfr.add_observations)
+            obsdata = sfr.add_observations(**kwargs)
+            j=2
+            # resample observations to model stress periods; write to table
 
         # write reach and segment data tables
-        sfr.write_tables('{}/{}'.format(output_path, self.name))
+        sfr.write_tables('{}/{}'.format(self._tables_path, self.name))
 
-        # attach the sfrmaker.sfrdata instance as an attribute
-        self.sfrdata = sfr
+        # export shapefiles of lines, routing, cell polygons, inlets and outlets
+        sfr.write_shapefiles('{}/{}'.format(self._shapefiles_path, self.name))
 
         # create the flopy SFR package instance
         sfr.create_modflow_sfr2(model=self, istcb2=223)
@@ -1232,18 +1285,8 @@ class MFsetupMixin():
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2
             sfr_package.reach_data = sfr.modflow_sfr2.reach_data
 
-        # add observations
-        observations_input = self.cfg['sfr'].get('source_data', {}).get('observations')
-        if self.version != 'mf6':
-            sfr.gage_starting_unit_number = self.cfg['gag']['starting_unit_number']
-        if observations_input is not None:
-            key = 'filename' if 'filename' in observations_input else 'filenames'
-            observations_input['data'] = observations_input[key]
-            kwargs = get_input_arguments(observations_input.copy(), sfr.add_observations)
-            sfr.add_observations(**kwargs)
-
-        # export shapefiles of lines, routing, cell polygons, inlets and outlets
-        sfr.write_shapefiles('{}/{}'.format(output_path, self.name))
+        # attach the sfrmaker.sfrdata instance as an attribute
+        self.sfrdata = sfr
 
         # reset dependent arrays
         self._reset_bc_arrays()

@@ -174,7 +174,7 @@ def setup_lake_info(model):
 
     # save a lookup file mapping lake ids to hydroids
     lookup_file = model.cfg['lak']['output_files']['lookup_file'].format(model.name)
-    df.drop('geometry', axis=1).to_csv(lookup_file, index=False)
+    df.drop('geometry', axis=1).to_csv(os.path.join(model._tables_path, lookup_file), index=False)
 
     # clean up names
     #df['name'].replace('nan', '', inplace=True)
@@ -369,7 +369,7 @@ def setup_lake_connectiondata(model, for_external_file=True,
     df = pd.concat(dfs)
 
     connections_lookup_file = model.cfg['lak']['output_files']['connections_lookup_file'].format(model.name)
-    connections_lookup_file = os.path.join(model.model_ws, os.path.split(connections_lookup_file)[1])
+    connections_lookup_file = os.path.join(model._tables_path, os.path.split(connections_lookup_file)[1])
     model.cfg['lak']['output_files']['connections_lookup_file'] = connections_lookup_file
     df.to_csv(connections_lookup_file, index=False)
 

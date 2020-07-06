@@ -214,6 +214,19 @@ sfr:
       name_column: 'GNIS_NAME'
       attr_length_units: 'feet'  # units of source data
       attr_height_units: 'feet'  # units of source data
+    inflows:  # see sfrmaker.data.add_to_perioddata for arguments
+      filename: 'shellmound/tables/inflows.csv'
+      datetime_column: 'datetime'
+      line_id_column: 'line_id'
+      data_column: 'flow_m3d'  # flows are already in cubic meters/day; can therefore skip unit input
+      category_column: 'category'
+    # modflow-setup will try to located the inflows using the routing information in the flowlines shapefile
+    # however, in some cases an inflow location might be just outside of the flowlines that are provided
+    # (for example, if they were clipped to the model grid, or if they are outside of the model bounding box)
+    inflows_routing:
+      filename: 'shellmound/tables/routing.csv'
+      id_column: 'COMID'  # arguments to sfrmaker.Lines.from_shapefile
+      routing_column: 'tocomid'
 
 wel:
   options:

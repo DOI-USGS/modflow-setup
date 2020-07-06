@@ -89,7 +89,10 @@ def setup_wel_data(model, for_external_files=True):
 
             # determine the format
             if 'csvfile' in k.lower():  # generic csv
+                #  read csv file and aggregate flow rates to model stress periods
+                #  sum well fluxes co-located in a cell
                 sd = TransientTabularSourceData.from_config(v,
+                                                            resolve_duplicates_with='sum',
                                                             dest_model=model)
                 csvdata = sd.get_data()
                 csvdata.rename(columns={v['data_column']: 'q',
@@ -197,7 +200,7 @@ def setup_wel_data(model, for_external_files=True):
         df = copy_fluxes_to_subsequent_periods(df)
 
     wel_lookup_file = model.cfg['wel']['output_files']['lookup_file'].format(model.name)
-    wel_lookup_file = os.path.join(model.model_ws, os.path.split(wel_lookup_file)[1])
+    wel_lookup_file = os.path.join(model._tables_path, os.path.split(wel_lookup_file)[1])
     model.cfg['wel']['output_files']['lookup_file'] = wel_lookup_file
 
     # verify that all wells have a boundname

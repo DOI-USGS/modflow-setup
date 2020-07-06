@@ -336,7 +336,7 @@ def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_mod
                                     x_col='X', y_col='Y', 
                                     period_stats={0: 'mean', 1: None, 2: 'none', 3: 'mean'},
                                     length_units='unknown', time_units='unknown', volume_units=None,
-                                    column_mappings=None,
+                                    column_mappings=None, resolve_duplicates_with='sum',
                                     dest_model=m)
     # expected period stats
     sd.period_stats
