@@ -1,15 +1,19 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.tdis module &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
+  <title>mfsetup.tdis module &mdash; modflow-setup 0.post51+g70c8573 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
   
   
@@ -17,7 +21,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -32,11 +38,6 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Release History" href="../release-history.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> modflow-setup
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> modflow-setup
           
 
           
@@ -64,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+ge771e6a
+                0.post51+g70c8573
               </div>
             
           
@@ -81,6 +82,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -123,6 +125,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -161,7 +164,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="index.html">Model classes</a> &raquo;</li>
         
@@ -213,7 +216,7 @@
 <p>Functions related to temporal discretization</p>
 <dl class="py function">
 <dt id="mfsetup.tdis.aggregate_dataframe_to_stress_period">
-<code class="sig-prename descclassname">mfsetup.tdis.</code><code class="sig-name descname">aggregate_dataframe_to_stress_period</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">id_column</span></em>, <em class="sig-param"><span class="n">data_column</span></em>, <em class="sig-param"><span class="n">datetime_column</span><span class="o">=</span><span class="default_value">'datetime'</span></em>, <em class="sig-param"><span class="n">end_datetime_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">start_datetime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_datetime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">period_stat</span><span class="o">=</span><span class="default_value">'mean'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_dataframe_to_stress_period"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_dataframe_to_stress_period" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.tdis.</code><code class="sig-name descname">aggregate_dataframe_to_stress_period</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">id_column</span></em>, <em class="sig-param"><span class="n">data_column</span></em>, <em class="sig-param"><span class="n">datetime_column</span><span class="o">=</span><span class="default_value">'datetime'</span></em>, <em class="sig-param"><span class="n">end_datetime_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">category_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">start_datetime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_datetime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">period_stat</span><span class="o">=</span><span class="default_value">'mean'</span></em>, <em class="sig-param"><span class="n">resolve_duplicates_with</span><span class="o">=</span><span class="default_value">'raise error'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_dataframe_to_stress_period"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_dataframe_to_stress_period" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate time-series data in a DataFrame to a single value representing
 a period defined by a start and end date.</p>
 <dl class="field-list simple">
@@ -262,6 +265,10 @@ can be used to slice a DataFrame or Series, it can be used here.</p></li>
 For example, <code class="docutils literal notranslate"><span class="pre">['mean',</span> <span class="pre">'2014-01-01',</span> <span class="pre">'2014-03-31']</span></code> would average the values for
 the first three months of 2014.</p></li>
 </ul>
+</dd>
+<dt><strong>resolve_duplicates_with</strong><span class="classifier">{‘sum’, ‘mean’, ‘first’, ‘raise error’}</span></dt><dd><p>Method for reducing duplicates (of times, sites and measured or estimated category).
+By default, ‘raise error’ will result in a ValueError if duplicates are encountered.
+Otherwise any aggregate method in pandas can be used (e.g. DataFrame.groupby().&lt;method&gt;())</p>
 </dd>
 </dl>
 </dd>
@@ -434,12 +441,19 @@ continue to apply until information for another perior is specified.</p>
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 03, 2020.
+        Last updated on Jul 06, 2020.
       </span>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -450,7 +464,6 @@ continue to apply until information for another perior is specified.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

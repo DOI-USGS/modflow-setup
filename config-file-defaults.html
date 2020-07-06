@@ -1,15 +1,19 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration defaults &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
+  <title>Configuration defaults &mdash; modflow-setup 0.post51+g70c8573 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
 
   
   
@@ -17,7 +21,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -32,11 +38,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Model classes" href="api/index.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> modflow-setup
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> modflow-setup
           
 
           
@@ -64,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+ge771e6a
+                0.post51+g70c8573
               </div>
             
           
@@ -81,6 +82,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -129,6 +131,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -167,7 +170,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="config-file.html">The configuration file</a> &raquo;</li>
         
@@ -407,7 +410,16 @@
 186
 187
 188
-189</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;mfsim&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
@@ -510,7 +522,6 @@
   <span class="nt">budget_fileout</span><span class="p">:</span> <span class="s">&#39;sfr_out.bin&#39;</span>
   <span class="nt">stage_fileout</span><span class="p">:</span> <span class="s">&#39;sfr_stage.bin&#39;</span>
   <span class="nt">obs6_filein_fmt</span><span class="p">:</span> <span class="s">&#39;{}.sfr.obs6&#39;</span>
-  <span class="nt">output_path</span><span class="p">:</span> <span class="s">&#39;sfr&#39;</span>
   <span class="nt">external_files</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>  <span class="c1"># option to write packagedata to an external file</span>
 
 <span class="nt">lak</span><span class="p">:</span>
@@ -531,6 +542,16 @@
 <span class="nt">mvr</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">riv</span><span class="p">:</span>
+  <span class="nt">options</span><span class="p">:</span>
+    <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+    <span class="nt">boundnames</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="nt">output_files</span><span class="p">:</span>
+    <span class="nt">rivdata_file</span><span class="p">:</span> <span class="s">&#39;{}_rivdata.csv&#39;</span> <span class="c1"># table with auxillary information on river reaches (routing, source hydrography IDs, etc.)</span>
+  <span class="nt">external_files</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>  <span class="c1"># option to write stress_period_data to external files</span>
 
 <span class="nt">wel</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
@@ -749,7 +770,10 @@
 146
 147
 148
-149</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
+149
+150
+151
+152</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
   <span class="nt">output_folder</span><span class="p">:</span> <span class="s">&#39;original/&#39;</span>  <span class="c1"># external arrays are read from here by flopy, and written to external_path</span>
 
 <span class="nt">model</span><span class="p">:</span>
@@ -829,7 +853,10 @@
     <span class="nt">lookup_file</span><span class="p">:</span> <span class="s">&#39;lak_lookup.csv&#39;</span>
 
 <span class="nt">sfr</span><span class="p">:</span>
-  <span class="nt">output_path</span><span class="p">:</span> <span class="s">&#39;sfr&#39;</span>
+
+<span class="nt">riv</span><span class="p">:</span>
+  <span class="nt">output_files</span><span class="p">:</span>
+    <span class="nt">rivdata_file</span><span class="p">:</span> <span class="s">&#39;{}_rivdata.csv&#39;</span> <span class="c1"># table with auxillary information on river reaches (routing, source hydrography IDs, etc.)</span>
 
 <span class="nt">wel</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span>
@@ -924,12 +951,19 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 03, 2020.
+        Last updated on Jul 06, 2020.
       </span>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -940,7 +974,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

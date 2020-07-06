@@ -1,15 +1,19 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.tdis &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.post51+g70c8573 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
   
@@ -17,7 +21,9 @@
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -32,11 +38,6 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -52,7 +53,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> modflow-setup
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> modflow-setup
           
 
           
@@ -62,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+ge771e6a
+                0.post51+g70c8573
               </div>
             
           
@@ -79,6 +80,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -115,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -199,22 +202,19 @@
                               <span class="n">parent_stress_periods</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
 
     <span class="n">parent_sp</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">parent_stress_periods</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;MODFLOW-6 parent models&#39;</span><span class="p">)</span>
+    <span class="n">parent_model_nper</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modeltime</span><span class="o">.</span><span class="n">nper</span>
 
     <span class="c1"># use all stress periods from parent model</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent_sp</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">nper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># or nper &lt; parent_model.nper:</span>
-            <span class="n">nper</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">nper</span>
+            <span class="n">nper</span> <span class="o">=</span> <span class="n">parent_model_nper</span>
             <span class="n">parent_sp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nper</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="n">nper</span> <span class="o">&gt;</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">nper</span><span class="p">:</span>
-            <span class="n">parent_sp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">nper</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nper</span> <span class="o">-</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">nper</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">nper</span> <span class="o">&gt;</span> <span class="n">parent_model_nper</span><span class="p">:</span>
+            <span class="n">parent_sp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">parent_model_nper</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nper</span> <span class="o">-</span> <span class="n">parent_model_nper</span><span class="p">):</span>
                 <span class="n">parent_sp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parent_sp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nper</span><span class="p">))</span>
-        <span class="c1"># self.cfg[&#39;dis&#39;][&#39;perlen&#39;] = None # set from parent model</span>
-        <span class="c1"># self.cfg[&#39;dis&#39;][&#39;steady&#39;] = None</span>
 
     <span class="c1"># use only specified stress periods from parent model</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -223,15 +223,15 @@
         <span class="k">if</span> <span class="n">nper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">nper</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">)</span>
 
-        <span class="n">perlen</span> <span class="o">=</span> <span class="p">[</span><span class="n">parent_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">perlen</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">perlen</span> <span class="o">=</span> <span class="p">[</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modeltime</span><span class="o">.</span><span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">nper</span><span class="p">:</span>
                 <span class="k">break</span>
-            <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">nper</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">parent_model_nper</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="n">parent_sp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">nper</span><span class="p">:</span>
                 <span class="n">parent_sp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                <span class="n">perlen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">perlen</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+                <span class="n">perlen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modeltime</span><span class="o">.</span><span class="n">perlen</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">nper</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">):</span>
             <span class="n">nper</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -529,8 +529,9 @@
 
 
 <div class="viewcode-block" id="aggregate_dataframe_to_stress_period"><a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period">[docs]</a><span class="k">def</span> <span class="nf">aggregate_dataframe_to_stress_period</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">id_column</span><span class="p">,</span> <span class="n">data_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">,</span>
-                                         <span class="n">end_datetime_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                         <span class="n">start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period_stat</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+                                         <span class="n">end_datetime_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">category_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period_stat</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
+                                         <span class="n">resolve_duplicates_with</span><span class="o">=</span><span class="s1">&#39;raise error&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Aggregate time-series data in a DataFrame to a single value representing</span>
 <span class="sd">    a period defined by a start and end date. </span>
 
@@ -579,6 +580,10 @@
 <span class="sd">        * Lists of length 3 can be used to specify a statistic and a start and end date.</span>
 <span class="sd">          For example, ``[&#39;mean&#39;, &#39;2014-01-01&#39;, &#39;2014-03-31&#39;]`` would average the values for</span>
 <span class="sd">          the first three months of 2014.</span>
+<span class="sd">    resolve_duplicates_with : {&#39;sum&#39;, &#39;mean&#39;, &#39;first&#39;, &#39;raise error&#39;}</span>
+<span class="sd">        Method for reducing duplicates (of times, sites and measured or estimated category).</span>
+<span class="sd">        By default, &#39;raise error&#39; will result in a ValueError if duplicates are encountered.</span>
+<span class="sd">        Otherwise any aggregate method in pandas can be used (e.g. DataFrame.groupby().&lt;method&gt;())</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -648,20 +653,55 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
+    <span class="c1"># create category column if there is none, to conform to logic below</span>
+    <span class="n">categories</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">category_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">category_column</span> <span class="o">=</span> <span class="s1">&#39;category&#39;</span>
+        <span class="n">period_data</span><span class="p">[</span><span class="n">category_column</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;measured&#39;</span>
+    <span class="k">elif</span> <span class="n">category_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">period_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;category_column: </span><span class="si">{}</span><span class="s1"> not in data&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">category_column</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1"># compute statistic on data</span>
     <span class="c1"># ensure that ids are unique in each time period</span>
     <span class="c1"># by summing multiple id instances by period</span>
     <span class="c1"># (only sum the data column)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">period_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="c1"># check for duplicates with same time, id, and category (measured vs estimated)</span>
+    <span class="n">duplicated</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">period_data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">],</span>
+                                    <span class="n">period_data</span><span class="p">[</span><span class="n">id_column</span><span class="p">],</span>
+                                    <span class="n">period_data</span><span class="p">[</span><span class="n">category_column</span><span class="p">])))</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span>
+    <span class="c1"># if len(period_data) &gt; 0:</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">duplicated</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">resolve_duplicates_with</span> <span class="o">==</span> <span class="s1">&#39;raise error&#39;</span><span class="p">:</span>
+            <span class="n">duplicate_info</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">duplicated</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The following locations are duplicates which need to be resolved:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">duplicate_info</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">period_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">by_period</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-        <span class="n">by_period</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">by_period</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">]),</span>
+                                            <span class="n">resolve_duplicates_with</span><span class="p">)()[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="n">period_data</span> <span class="o">=</span> <span class="n">by_period</span>
-    <span class="n">aggregated</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">id_column</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">aggregated</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">id_column</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
     <span class="n">aggregated</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">id_column</span><span class="p">),</span> <span class="n">stat</span><span class="p">)()[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="c1"># if category column was argued, get counts of measured vs estimated</span>
+    <span class="c1"># for each measurement location, for current stress period</span>
+    <span class="k">if</span> <span class="n">categories</span><span class="p">:</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">category_column</span><span class="p">])</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">&#39;measured&#39;</span><span class="p">,</span> <span class="s1">&#39;estimated&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">counts</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">aggregated</span><span class="p">[</span><span class="s1">&#39;n_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col</span><span class="p">)]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+    <span class="n">aggregated</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="c1"># add datetime back in</span>
     <span class="n">aggregated</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">start_datetime</span>
 
+    <span class="c1"># drop original datetime column, which doesn&#39;t reflect dates for period averages</span>
+    <span class="n">drop_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">categories</span><span class="p">:</span>  <span class="c1"># drop category column if it was created</span>
+        <span class="n">drop_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">category_column</span><span class="p">)</span>
+    <span class="n">aggregated</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_cols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aggregated</span></div>
 
 
@@ -720,12 +760,19 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 03, 2020.
+        Last updated on Jul 06, 2020.
       </span>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -736,7 +783,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

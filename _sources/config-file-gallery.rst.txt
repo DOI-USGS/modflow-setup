@@ -20,6 +20,25 @@ Shellmound test case
     :language: yaml
     :linenos:
 
+
+Shellmound TMR inset test case
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* 13 layer MODFLOW-6 Telescopic Mesh Refinement (TMR) model with a MODFLOW-6 parent model
+* 1:1 layer mapping between parent and TMR inset (default)
+* parent model grid defined with a SpatialReference subblock (which overrides information in MODFLOW Namefile)
+* DIS package top and bottom elevations copied from parent model
+* IC, NPF, STO, RCH, and WEL packages copied from parent model (default if not specified in config file)
+* `default OC configuration <#MODFLOW-6 configuration defaults>`_
+* variable time discretization
+* model grid aligned with the `National Hydrologic Grid`_
+* SFR network created from custom hydrography
+
+
+.. literalinclude:: ../../mfsetup/tests/data/shellmound_tmr_inset.yml
+    :language: yaml
+    :linenos:
+
+
 Pleasant Lake test case
 ^^^^^^^^^^^^^^^^^^^^^^^
 * MODFLOW-6 model with local grid refinement (LGR)

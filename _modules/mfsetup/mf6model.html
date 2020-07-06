@@ -1,15 +1,19 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+ge771e6a documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+g70c8573 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
   
@@ -17,7 +21,9 @@
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -32,11 +38,6 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -52,7 +53,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> modflow-setup
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> modflow-setup
           
 
           
@@ -62,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+ge771e6a
+                0.post51+g70c8573
               </div>
             
           
@@ -79,6 +80,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -115,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -184,15 +187,14 @@
 <span class="n">mf6</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span>
 <span class="kn">from</span> <span class="nn">flopy.utils.lgrutil</span> <span class="kn">import</span> <span class="n">Lgr</span>
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_values_at_points</span>
-<span class="kn">from</span> <span class="nn">.discretization</span> <span class="kn">import</span> <span class="p">(</span><span class="n">make_idomain</span><span class="p">,</span> <span class="n">make_lgr_idomain</span><span class="p">,</span> <span class="n">deactivate_idomain_above</span><span class="p">,</span>
-                             <span class="n">find_remove_isolated_cells</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">.discretization</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ModflowGwfdis</span><span class="p">,</span> <span class="n">make_idomain</span><span class="p">,</span> <span class="n">make_lgr_idomain</span><span class="p">,</span> <span class="n">deactivate_idomain_above</span><span class="p">,</span>
+                             <span class="n">find_remove_isolated_cells</span><span class="p">,</span> <span class="n">fill_cells_vertically</span><span class="p">,</span>
                              <span class="n">create_vertical_pass_through_cells</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.fileio</span> <span class="kn">import</span> <span class="p">(</span><span class="n">load</span><span class="p">,</span> <span class="n">dump</span><span class="p">,</span> <span class="n">load_cfg</span><span class="p">,</span>
                      <span class="n">flopy_mfsimulation_load</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.lakes</span> <span class="kn">import</span> <span class="p">(</span><span class="n">setup_lake_connectiondata</span><span class="p">,</span> <span class="n">setup_lake_info</span><span class="p">,</span>
                     <span class="n">setup_lake_tablefiles</span><span class="p">,</span> <span class="n">setup_lake_fluxes</span><span class="p">,</span>
                     <span class="n">get_lakeperioddata</span><span class="p">,</span> <span class="n">setup_mf6_lake_obs</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.mf5to6</span> <span class="kn">import</span> <span class="n">get_package_name</span>
 <span class="kn">from</span> <span class="nn">.mover</span> <span class="kn">import</span> <span class="n">get_mover_sfr_package_input</span>
 <span class="kn">from</span> <span class="nn">.obs</span> <span class="kn">import</span> <span class="n">setup_head_observations</span>
 <span class="kn">from</span> <span class="nn">.tdis</span> <span class="kn">import</span> <span class="n">setup_perioddata_group</span><span class="p">,</span> <span class="n">get_parent_stress_periods</span>
@@ -210,16 +212,17 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">modelname</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">exe_name</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
-                 <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                 <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span> <span class="n">lgr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwf</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="p">,</span>
                                 <span class="n">modelname</span><span class="p">,</span> <span class="n">exe_name</span><span class="o">=</span><span class="n">exe_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">MFsetupMixin</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="c1"># default configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_lgr</span> <span class="o">=</span> <span class="n">lgr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_package_setup_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">,</span> <span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;ic&#39;</span><span class="p">,</span> <span class="s1">&#39;npf&#39;</span><span class="p">,</span> <span class="s1">&#39;sto&#39;</span><span class="p">,</span> <span class="s1">&#39;rch&#39;</span><span class="p">,</span> <span class="s1">&#39;oc&#39;</span><span class="p">,</span>
-                                     <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">,</span> <span class="s1">&#39;lak&#39;</span><span class="p">,</span>
-                                     <span class="s1">&#39;wel&#39;</span><span class="p">,</span> <span class="s1">&#39;maw&#39;</span><span class="p">,</span> <span class="s1">&#39;obs&#39;</span><span class="p">,</span> <span class="s1">&#39;ims&#39;</span><span class="p">]</span>
+                                     <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">,</span> <span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;riv&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;wel&#39;</span><span class="p">,</span> <span class="s1">&#39;maw&#39;</span><span class="p">,</span> <span class="s1">&#39;obs&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span><span class="p">)</span> <span class="c1">#&#39;/mf6_defaults.yml&#39;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span> <span class="c1">#&#39;/mf6_defaults.yml&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>   <span class="c1"># set up the model configuration dictionary</span>
@@ -228,7 +231,6 @@
 
         <span class="c1"># property attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span> <span class="o">=</span> <span class="kc">None</span>
-
 
         <span class="c1"># other attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># dictionary for caching shapefile datasets in memory</span>
@@ -303,104 +305,30 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span> <span class="o">=</span> <span class="n">idomain</span>
 
+        <span class="c1"># take the updated idomain array and set cells != 1 to np.nan in layer botm array</span>
+        <span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">botm</span><span class="p">[</span><span class="n">idomain</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1"># fill_cells_vertically will be run in the setup_array routing, </span>
+        <span class="c1"># to collapse the nan cells to zero-thickness</span>
+        <span class="c1"># (assign their layer botm to the next valid layer botm above)</span>
+
         <span class="c1"># re-write the input files</span>
+        <span class="c1"># todo: integrate this better with setup_dis</span>
+        <span class="c1"># to reduce the number of times the arrays need to be remade</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span>
+                        <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">arr</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">botm</span><span class="p">)},</span>
+                        <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                        <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span>
                           <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">arr</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">idomain</span><span class="p">)},</span>
                           <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
                           <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mg_resync</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>  <span class="c1"># reset the model grid</span>
 
-    <span class="k">def</span> <span class="nf">_set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set attributes related to a parent or source model</span>
-<span class="sd">        if one is specified.</span>
-<span class="sd">        todo: move this method to mfmodel mixin class</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;lgr&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">MF6model</span><span class="p">):</span>
-                <span class="k">if</span> <span class="s1">&#39;DIS&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">():</span>
-                    <span class="n">dis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">setup_dis</span><span class="p">()</span>
-                <span class="k">return</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;TMR from MODFLOW-6 parent models&quot;</span><span class="p">)</span>
-
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;namefile&#39;</span><span class="p">)</span>
-
-            <span class="c1"># load only specified packages that the parent model has</span>
-            <span class="n">packages_in_parent_namefile</span> <span class="o">=</span> <span class="n">get_packages</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model_ws&#39;</span><span class="p">],</span>
-                                                                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">]))</span>
-            <span class="n">specified_packages</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;packages&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="p">()))</span>
-            <span class="c1"># get equivalent packages to load if parent is another MODFLOW version;</span>
-            <span class="c1"># then flatten (a package may have more than one equivalent)</span>
-            <span class="n">parent_packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_package_name</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">])</span>
-                               <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">specified_packages</span><span class="p">]</span>
-            <span class="n">parent_packages</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span> <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">parent_packages</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">}</span>
-            <span class="n">load_only</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">packages_in_parent_namefile</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">parent_packages</span><span class="p">))</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;load_only&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_only</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">Modflow</span><span class="o">.</span><span class="n">load</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loading parent model </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model_ws&#39;</span><span class="p">],</span>
-                                                                   <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">])))</span>
-            <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">Modflow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
-
-            <span class="c1"># parent model units</span>
-            <span class="k">if</span> <span class="s1">&#39;length_units&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;length_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lenuni_text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">lenuni</span><span class="p">]</span>
-            <span class="k">if</span> <span class="s1">&#39;time_units&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;time_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">itmuni_text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">itmuni</span><span class="p">]</span>
-
-            <span class="c1"># set the parent model grid from mg_kwargs if not None</span>
-            <span class="c1"># otherwise, convert parent model grid to MFsetupGrid</span>
-            <span class="n">mg_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SpatialReference&#39;</span><span class="p">,</span>
-                                          <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;modelgrid&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_parent_modelgrid</span><span class="p">(</span><span class="n">mg_kwargs</span><span class="p">)</span>
-
-            <span class="c1"># parent model perioddata</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;perioddata&#39;</span><span class="p">):</span>
-                <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">nper</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model_time_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;time_units&#39;</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">]:</span>
-                    <span class="n">kwargs</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">array</span>
-                <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">setup_perioddata_group</span><span class="p">)</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;oc_saverecord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">perioddata</span> <span class="o">=</span> <span class="n">setup_perioddata_group</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-            <span class="c1"># default_source_data, where omitted configuration input is</span>
-            <span class="c1"># obtained from parent model by default</span>
-            <span class="c1"># Set default_source_data to True by default if it isn&#39;t specified</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default_source_data&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;default_source_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default_source_data&#39;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_parent_default_source_data</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nlay&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">][</span><span class="s1">&#39;nlay&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">nlay</span>
-                <span class="n">parent_start_date_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parent&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">,</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;1970-01-01&#39;</span> \
-                        <span class="ow">and</span> <span class="n">parent_start_date_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">]</span>
-
-                <span class="c1"># only get time dis information from parent if</span>
-                <span class="c1"># no periodata groups are specified, and nper is not specified under dimensions</span>
-                <span class="n">has_perioddata_groups</span> <span class="o">=</span> <span class="nb">any</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-                                             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;perioddata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">has_perioddata_groups</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nper&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;nper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">nper</span>
-                    <span class="n">parent_periods</span> <span class="o">=</span> <span class="n">get_parent_stress_periods</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">nper</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;nper&#39;</span><span class="p">],</span>
-                                                               <span class="n">parent_stress_periods</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span>
-                                                                   <span class="s1">&#39;copy_stress_periods&#39;</span><span class="p">])</span>
-                    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">]:</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;perioddata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;perioddata&#39;</span><span class="p">][</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">parent_periods</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sto&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;steady&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sto&#39;</span><span class="p">][</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">parent_periods</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_update_grid_configuration_with_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update grid configuration with any information supplied to dis package</span>
@@ -493,7 +421,7 @@
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">inset_cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">],</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwf</span><span class="p">,</span>
                                          <span class="n">exclude</span><span class="o">=</span><span class="s1">&#39;packages&#39;</span><span class="p">)</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>  <span class="c1"># otherwise will try to load parent model</span>
-            <span class="n">inset_model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">inset_cfg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">inset_model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">inset_cfg</span><span class="p">,</span> <span class="n">lgr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">inset_model</span><span class="o">.</span><span class="n">_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span>  <span class="c1"># whether model is being made or loaded from existing files</span>
             <span class="n">inset_model</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
             <span class="k">del</span> <span class="n">inset_model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;ims&#39;</span><span class="p">]</span>
@@ -503,7 +431,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span> <span class="o">=</span> <span class="p">{}</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">inset_model</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">_is_lgr</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#self.inset[inset_model.name]._is_lgr = True</span>
 
             <span class="c1"># create idomain indicating area of parent grid that is LGR</span>
             <span class="n">lgr_idomain</span> <span class="o">=</span> <span class="n">make_lgr_idomain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">)</span>
@@ -594,13 +522,14 @@
             <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;length_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_units</span>
+        <span class="c1"># get the arguments for the flopy version of ModflowGwfdis</span>
+        <span class="c1"># but instantiate with modflow-setup subclass of ModflowGwfdis</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfdis</span><span class="p">)</span>
-        <span class="n">dis</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfdis</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">dis</span> <span class="o">=</span> <span class="n">ModflowGwfdis</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reset perioddata</span>
         <span class="c1">#if not isinstance(self._modelgrid, MFsetupGrid):</span>
         <span class="c1">#    self._modelgrid = None  # override DIS package grid setup</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mg_resync</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>  <span class="c1"># reset the model grid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_bc_arrays</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_idomain</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
@@ -921,6 +850,63 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">lak</span></div>
 
+<div class="viewcode-block" id="MF6model.setup_riv"><a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_riv">[docs]</a>    <span class="k">def</span> <span class="nf">setup_riv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rivdata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up River package.</span>
+<span class="sd">        TODO: riv package input through configuration file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;riv&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">rivdata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;River package input through configuration file;&quot;</span>
+                                      <span class="s2">&quot;currently only supported through to_riv option&quot;</span>
+                                      <span class="s2">&quot;in sfr configuration block.&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">rivdata</span><span class="o">.</span><span class="n">stress_period_data</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No input specified or streams not in model.&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># option to write stress_period_data to external files</span>
+        <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external_files&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="c1"># get the file path (allowing for different external file locations, specified name format, etc.)</span>
+            <span class="n">filename_format</span> <span class="o">=</span> <span class="n">package</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">{:03d}</span><span class="s1">.dat&#39;</span>  <span class="c1"># stress period suffix</span>
+            <span class="n">filepaths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;stress_period_data&#39;</span><span class="p">,</span>
+                                                      <span class="n">filename_format</span><span class="o">=</span><span class="n">filename_format</span><span class="p">,</span>
+                                                      <span class="n">file_numbers</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">per</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
+
+        <span class="n">spd</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">by_period</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">kper</span><span class="p">,</span> <span class="n">df_per</span> <span class="ow">in</span> <span class="n">by_period</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
+                <span class="n">df_per</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;stage&#39;</span><span class="p">,</span> <span class="s1">&#39;cond&#39;</span><span class="p">,</span> <span class="s1">&#39;rbot&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">:</span>
+                    <span class="n">df_per</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">df_per</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="s1">&#39;#k&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">df_per</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filepaths</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="c1"># make a copy for the intermediate data folder, for consistency with mf-2005</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">filepaths</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;output_folder&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">maxbound</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_per</span><span class="p">)</span>
+                <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">]</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfchd</span><span class="o">.</span><span class="n">stress_period_data</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxbound</span><span class="o">=</span><span class="n">maxbound</span><span class="p">,</span>
+                                                                       <span class="n">boundnames</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">],</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">],</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]))</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">&#39;cond&#39;</span><span class="p">,</span> <span class="s1">&#39;stage&#39;</span><span class="p">,</span> <span class="s1">&#39;rbot&#39;</span><span class="p">:</span>
+                    <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+                <span class="n">spd</span><span class="p">[</span><span class="n">kper</span><span class="p">][</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;riv&#39;</span><span class="p">]</span>
+        <span class="c1"># need default options from rivdata instance or cfg defaults</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;riv&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">])</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfriv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd</span>
+        <span class="n">riv</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">riv</span></div>
+
 <div class="viewcode-block" id="MF6model.setup_obs"><a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_obs">[docs]</a>    <span class="k">def</span> <span class="nf">setup_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the OBS utility.</span>
@@ -1192,12 +1178,19 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jun 03, 2020.
+        Last updated on Jul 06, 2020.
       </span>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1208,7 +1201,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
