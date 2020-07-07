@@ -8,7 +8,6 @@ fm = flopy.modflow
 import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
-
 from mfsetup.discretization import weighted_average_between_layers
 #from mfsetup.export import get_surface_bc_flux
 from mfsetup.fileio import check_source_files
