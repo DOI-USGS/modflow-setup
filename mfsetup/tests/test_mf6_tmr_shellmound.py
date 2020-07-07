@@ -104,6 +104,12 @@ def shellmound_tmr_model_setup_and_run(shellmound_tmr_model_setup, mf6_exe):
     return m
 
 
+def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis):
+    m = shellmound_tmr_model_with_dis
+    chd = m.setup_perimeter_boundary()
+    j=2
+
+
 def test_set_parent_model(shellmound_tmr_model_with_dis):
     m = shellmound_tmr_model_with_dis
     assert isinstance(m.parent, mf6.MFModel)

@@ -19,7 +19,7 @@ from mfsetup.interpolate import (
     regrid,
 )
 from mfsetup.lakes import get_horizontal_connections
-
+from mfsetup.sourcedata import ArraySourceData
 from mfsetup.units import convert_length_units
 
 
@@ -118,17 +118,18 @@ class Tmr:
 
         # get bounding cells in parent model for pfl_nwt model
         irregular_domain = False
+        
         # see if irregular domain
-        if 'dis' in self.inset.cfg.keys():
-            if 'source_data' in self.inset.cfg['dis'].keys():
-                if 'idomain' in self.inset.cfg['dis']['source_data'].keys():
-                    if 'filename' in self.inset.cfg['dis']['source_data']['idomain'].keys():
-                        irregular_domain = True
-
-        if irregular_domain:
-            idm_outline = np.loadtxt(os.path.join(self.inset.cfg['simulation']['sim_ws'],
-                                                  'original',
-                                                  'idomain_max_extent.dat'))
+        irregbound_cfg = self.inset.cfg['perimeter_boundary'].get('source_data',{}).get('irregular_boundary')
+        if irregbound_cfg is not None:
+            irregular_domain = True
+            irregbound_cfg['variable'] = 'perimeter_boundary'
+            irregbound_cfg['dest_model'] = self.inset
+            
+            
+            sd = ArraySourceData.from_config(irregbound_cfg)
+            data = sd.get_data()
+            idm_outline = data[0]
             connections = get_horizontal_connections(idm_outline, connection_info=False,
                                              layer_elevations=1,
                                              delr=1, delc=1, inside=True)
@@ -622,12 +623,7 @@ class Tmr:
             active_chd_cells = list(set(chdcells).intersection(activecells))
             
             # unpack back to lists, then convert to numpy arrays
-            k,i,j = [],[],[]
-            for ccell in active_chd_cells:
-                ck,ci,cj = ccell
-                k.append(ck)
-                i.append(ci)
-                j.append(cj)
+            k, i, j = zip(*active_chd_cells)
             k = np.array(k)
             i = np.array(i)
             j = np.array(j)
