@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g48b8cc1 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g772fe52 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g48b8cc1
+                0.post51+g772fe52
               </div>
             
           
@@ -178,26 +178,37 @@
   <h1>Source code for mfsetup.mfnwtmodel</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="n">np</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">flopy</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
 <span class="kn">from</span> <span class="nn">flopy.modflow</span> <span class="kn">import</span> <span class="n">Modflow</span>
+
 <span class="kn">from</span> <span class="nn">.bcs</span> <span class="kn">import</span> <span class="n">setup_ghb_data</span>
-<span class="kn">from</span> <span class="nn">.discretization</span> <span class="kn">import</span> <span class="p">(</span><span class="n">deactivate_idomain_above</span><span class="p">,</span> <span class="n">make_ibound</span><span class="p">,</span>
-                             <span class="n">find_remove_isolated_cells</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.fileio</span> <span class="kn">import</span> <span class="n">load</span><span class="p">,</span> <span class="n">save_array</span><span class="p">,</span> <span class="n">check_source_files</span><span class="p">,</span> <span class="n">flopy_mf2005_load</span><span class="p">,</span> \
-    <span class="n">load_cfg</span>
-<span class="kn">from</span> <span class="nn">.lakes</span> <span class="kn">import</span> <span class="p">(</span><span class="n">make_bdlknc_zones</span><span class="p">,</span> <span class="n">make_bdlknc2d</span><span class="p">,</span> <span class="n">setup_lake_fluxes</span><span class="p">,</span>
-                    <span class="n">setup_lake_info</span><span class="p">,</span> <span class="n">setup_lake_tablefiles</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_packages</span><span class="p">,</span> <span class="n">get_input_arguments</span>
-<span class="kn">from</span> <span class="nn">.obs</span> <span class="kn">import</span> <span class="n">read_observation_data</span><span class="p">,</span> <span class="n">setup_head_observations</span>
-<span class="kn">from</span> <span class="nn">.tdis</span> <span class="kn">import</span> <span class="n">setup_perioddata_group</span><span class="p">,</span> <span class="n">get_parent_stress_periods</span>
-<span class="kn">from</span> <span class="nn">.tmr</span> <span class="kn">import</span> <span class="n">Tmr</span>
-<span class="kn">from</span> <span class="nn">.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">lenuni_text</span><span class="p">,</span> <span class="n">itmuni_text</span>
-<span class="kn">from</span> <span class="nn">.wells</span> <span class="kn">import</span> <span class="n">setup_wel_data</span>
+<span class="kn">from</span> <span class="nn">.discretization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">deactivate_idomain_above</span><span class="p">,</span>
+    <span class="n">find_remove_isolated_cells</span><span class="p">,</span>
+    <span class="n">make_ibound</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.fileio</span> <span class="kn">import</span> <span class="n">check_source_files</span><span class="p">,</span> <span class="n">flopy_mf2005_load</span><span class="p">,</span> <span class="n">load</span><span class="p">,</span> <span class="n">load_cfg</span><span class="p">,</span> <span class="n">save_array</span>
+<span class="kn">from</span> <span class="nn">.lakes</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">make_bdlknc2d</span><span class="p">,</span>
+    <span class="n">make_bdlknc_zones</span><span class="p">,</span>
+    <span class="n">setup_lake_fluxes</span><span class="p">,</span>
+    <span class="n">setup_lake_info</span><span class="p">,</span>
+    <span class="n">setup_lake_tablefiles</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
+<span class="kn">from</span> <span class="nn">.obs</span> <span class="kn">import</span> <span class="n">read_observation_data</span><span class="p">,</span> <span class="n">setup_head_observations</span>
+<span class="kn">from</span> <span class="nn">.tdis</span> <span class="kn">import</span> <span class="n">get_parent_stress_periods</span><span class="p">,</span> <span class="n">setup_perioddata_group</span>
+<span class="kn">from</span> <span class="nn">.tmr</span> <span class="kn">import</span> <span class="n">Tmr</span>
+<span class="kn">from</span> <span class="nn">.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">itmuni_text</span><span class="p">,</span> <span class="n">lenuni_text</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span>
+<span class="kn">from</span> <span class="nn">.wells</span> <span class="kn">import</span> <span class="n">setup_wel_data</span>
 
 
 <div class="viewcode-block" id="MFnwtModel"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel">[docs]</a><span class="k">class</span> <span class="nc">MFnwtModel</span><span class="p">(</span><span class="n">MFsetupMixin</span><span class="p">,</span> <span class="n">Modflow</span><span class="p">):</span>
@@ -224,7 +235,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>  <span class="c1"># set up the model configuration dictionary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">relative_external_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;relative_external_paths&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_ws</span><span class="p">()</span>
-        
+
         <span class="c1"># set the list file path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;list_filename_fmt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
 
@@ -437,7 +448,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;strt&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span>
                           <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
                           <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
-        
+
         <span class="c1"># initial ibound input for creating a bas6 package instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;ibound&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>
                           <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
@@ -970,7 +981,6 @@
         <span class="n">m</span> <span class="o">=</span> <span class="n">flopy_mf2005_load</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="n">load_only</span><span class="p">,</span> <span class="n">forgive</span><span class="o">=</span><span class="n">forgive</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="n">check</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;finished loading model in </span><span class="si">{:.2f}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">m</span></div></div>
-
 </pre></div>
 
            </div>
@@ -984,7 +994,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jul 06, 2020.
+        Last updated on Jul 07, 2020.
       </span>
 
     </p>

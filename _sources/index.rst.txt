@@ -20,24 +20,24 @@ Modflow-setup is intended to facilitate automated setup of MODFLOW models, from 
     Examples <examples>
     Configuration File Gallery <config-file-gallery>
 
-   
+
 .. toctree::
   :maxdepth: 2
   :caption: User Guide
-  
+
    Basic program structure and usage <structure>
    The configuration file <config-file>
-   
+
 .. toctree::
   :maxdepth: 1
   :caption: Code reference
-  
+
    Modules <api/index>
 
 .. toctree::
   :maxdepth: 1
   :caption: Release history
-  
+
    Release History <release-history>
 
 .. toctree::

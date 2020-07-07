@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.discretization &mdash; modflow-setup 0.post51+g48b8cc1 documentation</title>
+  <title>mfsetup.discretization &mdash; modflow-setup 0.post51+g772fe52 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g48b8cc1
+                0.post51+g772fe52
               </div>
             
           
@@ -180,22 +180,23 @@
 <span class="sd">Functions related to the Discretization Package.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">flopy.mf6.data.mfdatalist</span> <span class="kn">import</span> <span class="n">MFList</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span>
 <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">convolve2d</span>
-<span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">from</span> <span class="nn">flopy.mf6.data.mfdatalist</span> <span class="kn">import</span> <span class="n">MFList</span>
 
 
 <div class="viewcode-block" id="ModflowGwfdis"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.ModflowGwfdis">[docs]</a><span class="k">class</span> <span class="nc">ModflowGwfdis</span><span class="p">(</span><span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfdis</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfdis</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">]</span> <span class="o">+</span> 
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">]</span> <span class="o">+</span>
                                      <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
-    
+
 
 <div class="viewcode-block" id="adjust_layers"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.adjust_layers">[docs]</a><span class="k">def</span> <span class="nf">adjust_layers</span><span class="p">(</span><span class="n">dis</span><span class="p">,</span> <span class="n">minimum_thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -412,14 +413,14 @@
 <span class="sd">    all have valid thicknesses (and all other layers have zero thicknesses).</span>
 
 <span class="sd">    algorithm:</span>
-<span class="sd">        * given a top and botm array (top of the model and layer bottom elevations), </span>
-<span class="sd">          get the layer thicknesses (accounting for any nodata values) idomain != 1 cells in </span>
+<span class="sd">        * given a top and botm array (top of the model and layer bottom elevations),</span>
+<span class="sd">          get the layer thicknesses (accounting for any nodata values) idomain != 1 cells in</span>
 <span class="sd">          thickness array must be set to np.nan</span>
-<span class="sd">        * set thickness to zero in nan cells take the cumulative sum of the thickness array </span>
-<span class="sd">          along the 0th (depth) axis, from the bottom of the array to the top </span>
+<span class="sd">        * set thickness to zero in nan cells take the cumulative sum of the thickness array</span>
+<span class="sd">          along the 0th (depth) axis, from the bottom of the array to the top</span>
 <span class="sd">          (going backwards in a depth-positive sense)</span>
-<span class="sd">        * add the cumulative sum to the array bottom elevations. The backward difference in </span>
-<span class="sd">          bottom elevations should be zero in inactive cells, and representative of the </span>
+<span class="sd">        * add the cumulative sum to the array bottom elevations. The backward difference in</span>
+<span class="sd">          bottom elevations should be zero in inactive cells, and representative of the</span>
 <span class="sd">          desired thickness in the active cells.</span>
 <span class="sd">        * append the model bottom elevations (excluded in bottom-up difference)</span>
 
@@ -597,7 +598,7 @@
 <span class="sd">    cells that will be excluded from the simulation. Cells are</span>
 <span class="sd">    excluded based on:</span>
 <span class="sd">    1) np.nans or nodata values in the botm array</span>
-<span class="sd">    2) np.nans or nodata values in the top array (applies to the highest cells with valid botm elevations; </span>
+<span class="sd">    2) np.nans or nodata values in the top array (applies to the highest cells with valid botm elevations;</span>
 <span class="sd">    in other words, these cells have no thicknesses)</span>
 <span class="sd">    3) layer thicknesses less than the specified minimum thickness plus a tolerance (tol)</span>
 
@@ -746,21 +747,21 @@
 <div class="viewcode-block" id="voxels_to_layers"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.voxels_to_layers">[docs]</a><span class="k">def</span> <span class="nf">voxels_to_layers</span><span class="p">(</span><span class="n">voxel_array</span><span class="p">,</span> <span class="n">z_edges</span><span class="p">,</span> <span class="n">model_top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_data_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                      <span class="n">extend_top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extend_botm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
                      <span class="n">minimum_frac_active_cells</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top </span>
-<span class="sd">    and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and </span>
+    <span class="sd">&quot;&quot;&quot;Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top</span>
+<span class="sd">    and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and</span>
 <span class="sd">    additional elevation surfaces forming layering below the voxel grid (model_botm).</span>
-<span class="sd">    </span>
-<span class="sd">        * In places where the model_botm elevations are above the lowest voxel elevations, </span>
-<span class="sd">          the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations </span>
+
+<span class="sd">        * In places where the model_botm elevations are above the lowest voxel elevations,</span>
+<span class="sd">          the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations</span>
 <span class="sd">          (effectively giving the underlying layer zero-thickness).</span>
-<span class="sd">        * Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a </span>
-<span class="sd">          no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey </span>
-<span class="sd">          of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then spans the highest and lowest valid voxels. </span>
-<span class="sd">        * In places where the model_top (typically land-surface) elevations are higher than the highest valid voxel, </span>
-<span class="sd">          the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer </span>
-<span class="sd">          can be created between the top edge of the highest voxel and model_top (extent_top=False). </span>
-<span class="sd">        * Similarly, in places where elevations in model_botm are below the lowest valid voxel, the lowest voxel </span>
-<span class="sd">          elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill </span>
+<span class="sd">        * Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a</span>
+<span class="sd">          no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey</span>
+<span class="sd">          of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then spans the highest and lowest valid voxels.</span>
+<span class="sd">        * In places where the model_top (typically land-surface) elevations are higher than the highest valid voxel,</span>
+<span class="sd">          the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer</span>
+<span class="sd">          can be created between the top edge of the highest voxel and model_top (extent_top=False).</span>
+<span class="sd">        * Similarly, in places where elevations in model_botm are below the lowest valid voxel, the lowest voxel</span>
+<span class="sd">          elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill</span>
 <span class="sd">          the gap between the lowest voxel and highest model_botm (extend_botm=False).</span>
 
 <span class="sd">    Parameters</span>
@@ -771,7 +772,7 @@
 <span class="sd">        discretization as the model_top and model_botm layers.</span>
 <span class="sd">    z_edges : 3D numpy array or sequence</span>
 <span class="sd">        Top and bottom edges of the voxels (length is voxel_array.shape[0] + 1). A sequence</span>
-<span class="sd">        can be used to specify uniform voxel edge elevations; non-uniform top and bottom </span>
+<span class="sd">        can be used to specify uniform voxel edge elevations; non-uniform top and bottom</span>
 <span class="sd">        elevations can be specified with a 3D numpy array (similar to the botm array in MODFLOW).</span>
 <span class="sd">    model_top : 2D numpy array</span>
 <span class="sd">        Top elevations of the model at each row/column location.</span>
@@ -782,7 +783,7 @@
 <span class="sd">    extend_top : bool, optional</span>
 <span class="sd">        Option to extend the top voxel layer to the model_top, by default True.</span>
 <span class="sd">    extend_botm : bool, optional</span>
-<span class="sd">        Option to extend the bottom voxel layer to the next layer below in model_botm, </span>
+<span class="sd">        Option to extend the bottom voxel layer to the next layer below in model_botm,</span>
 <span class="sd">        by default False.</span>
 <span class="sd">    tol : float, optional</span>
 <span class="sd">        Depth tolerance used in comparing the voxel edges to model_top and model_botm.</span>
@@ -803,19 +804,19 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If z_edges is not 1D or 3D</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model_top</span> <span class="o">=</span> <span class="n">model_top</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">model_botm</span> <span class="o">=</span> <span class="n">model_botm</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_botm</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">model_botm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">model_botm</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">model_botm</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
     <span class="n">z_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z_edges</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
-    
+
     <span class="c1"># convert nodata values to nans</span>
     <span class="n">hasdata</span> <span class="o">=</span> <span class="n">voxel_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">hasdata</span><span class="p">[</span><span class="n">hasdata</span> <span class="o">==</span> <span class="n">no_data_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="n">hasdata</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">hasdata</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">thicknesses</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">z_edges</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    
+
     <span class="c1"># apply nodata to thicknesses and botm elevations</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z_values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">hasdata</span> <span class="o">*</span> <span class="n">z_values</span>
@@ -890,7 +891,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jul 06, 2020.
+        Last updated on Jul 07, 2020.
       </span>
 
     </p>

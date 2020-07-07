@@ -38,4 +38,3 @@ Hunt, R.J. and Zheng, C. (2012), The Current State of Modeling. Groundwater, 50:
 .. _step-wise modeling: https://www.haitjema.com/stepwise.html
 
 .. _Flopy package: https://github.com/modflowpy/flopy
-
