@@ -1,12 +1,14 @@
 """
 Functions related to temporal discretization
 """
-import copy
 import calendar
+import copy
+
 import numpy as np
 import pandas as pd
+
 from .checks import is_valid_perioddata
-from .utils import print_item, get_input_arguments
+from .utils import get_input_arguments, print_item
 
 months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 
@@ -355,7 +357,7 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
                                          start_datetime=None, end_datetime=None, period_stat='mean',
                                          resolve_duplicates_with='raise error'):
     """Aggregate time-series data in a DataFrame to a single value representing
-    a period defined by a start and end date. 
+    a period defined by a start and end date.
 
     Parameters
     ----------

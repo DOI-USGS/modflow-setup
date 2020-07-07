@@ -4,17 +4,19 @@ Tests for Pleasant Lake inset case, MODFLOW-6 version
 * MODFLOW-6 Lake package
 """
 import copy
-import os
 import glob
+import os
+
+import flopy
 import numpy as np
 import pandas as pd
 import pytest
-import flopy
+
 mf6 = flopy.mf6
 fm = flopy.modflow
 from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
-from mfsetup.fileio import load_cfg, read_mf6_block, exe_exists, read_lak_ggo
+from mfsetup.fileio import exe_exists, load_cfg, read_lak_ggo, read_mf6_block
 from mfsetup.testing import compare_inset_parent_values
 from mfsetup.utils import get_input_arguments
 
@@ -497,7 +499,7 @@ def test_check_external_files():
 def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant_nwt_model_run):
     #pleasant_mf6_model_run = None
     #pleasant_nwt_model_run = None
-    import matplotlib.pyplot as plt
+    from matplotlib import pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
 
     make_plot = False
@@ -616,4 +618,3 @@ def test_mf6_results(tmpdir, project_root_path, pleasant_mf6_model_run, pleasant
     #    plt.legend()
     #lake_stage_rms = np.sqrt(np.mean((df_mfnwt.stage.values - df_mf6.STAGE.values) ** 2))
     #pdf.close()
-

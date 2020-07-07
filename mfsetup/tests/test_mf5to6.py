@@ -1,9 +1,10 @@
 import copy
 import os
+
 import numpy as np
 import pytest
-from ..mf5to6 import (get_variable_package_name,
-                      get_package_name, get_variable_name)
+
+from ..mf5to6 import get_package_name, get_variable_name, get_variable_package_name
 
 
 @pytest.mark.parametrize('version_var_expected', [('mfnwt', 'k', 'hk'),

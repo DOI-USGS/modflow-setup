@@ -1,23 +1,34 @@
+import numbers
 import os
 import shutil
-import numbers
 import warnings
+
 import numpy as np
+import pandas as pd
+from flopy.utils import binaryfile as bf
+from gisutils import get_values_at_points, shp2df
 from scipy.interpolate import griddata
 from shapely.geometry import Point
-import pandas as pd
+
 import xarray as xr
-from flopy.utils import binaryfile as bf
 from mfsetup.discretization import weighted_average_between_layers
-from mfsetup.tdis import aggregate_dataframe_to_stress_period, aggregate_xarray_to_stress_period
+from mfsetup.tdis import (
+    aggregate_dataframe_to_stress_period,
+    aggregate_xarray_to_stress_period,
+)
+
+from .discretization import (
+    fill_cells_vertically,
+    fill_empty_layers,
+    fix_model_layer_conflicts,
+    populate_values,
+    verify_minimum_layer_thickness,
+)
 from .fileio import save_array
-from .discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
-                             fill_empty_layers, fill_cells_vertically, populate_values)
-from gisutils import (get_values_at_points, shp2df)
 from .grid import get_ij, rasterize
 from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
-from .mf5to6 import get_variable_package_name, get_variable_name
-from .units import (convert_length_units, convert_time_units, convert_volume_units)
+from .mf5to6 import get_variable_name, get_variable_package_name
+from .units import convert_length_units, convert_time_units, convert_volume_units
 from .utils import get_input_arguments
 
 renames = {'mult': 'multiplier',
@@ -153,41 +164,41 @@ class TransientSourceDataMixin():
         # property attributes
         self._period_stats_input = period_stats
         self._period_stats = None
-        
+
         # attributes
         self.perioddata = dest_model.perioddata.sort_values(by='per').reset_index(drop=True)
-    
+
     @property
     def period_stats(self):
         if self._period_stats is None:
             self._period_stats = self.get_period_stats()
         return self._period_stats
-        
+
     def get_period_stats(self):
         """Populate each stress period with period_stat information
         for temporal resampling (tdis.aggregate_dataframe_to_stress_period and
         tdis.aggregate_xarray_to_stress_period methods), implementing default
         behavior for periods with unspecified start and end times.
         """
-        
+
         perioddata = self.perioddata
         period_stats = {}
         period_stat_input = None
         for i, r in perioddata.iterrows():
-            
+
             # get start end end datetimes from period_stats if provided
             start_datetime = None
             end_datetime = None
-            
+
             # if there is no input for a period, reuse input for the last one
             if r.per not in self._period_stats_input:
                 period_stats[r.per] = period_stat_input
             else:
                 period_stat_input = self._period_stats_input[r.per]
-            
+
             # dict of info for this period
             period_data_output = {}
-            
+
             # set entries parsed as 'None' or 'none' to NoneType
             # if None was input for a period, skip it
             if isinstance(period_stat_input, str) and period_stat_input.lower() == 'none':
@@ -195,14 +206,14 @@ class TransientSourceDataMixin():
             if period_stat_input is None:
                 period_stats[r.per] = None
                 continue
-            
+
             # if no start and end date are given in period_stats
             elif isinstance(period_stat_input, str):
-                
+
                 period_data_output['period_stat'] = period_stat_input
                 # if the period is longer than one day, or transient
                 # use start_datetime and end_datetime from perioddata
-                if r.perlen > 1 or not r.steady: 
+                if r.perlen > 1 or not r.steady:
                     period_data_output['start_datetime'] = r.start_datetime
                     period_data_output['end_datetime'] = r.end_datetime
                     if end_datetime == start_datetime:
@@ -211,21 +222,21 @@ class TransientSourceDataMixin():
                 # default to start and end datetime default as None
                 # which will result in default aggregation of whole data file
                 # by tdis.aggregate_dataframe_to_stress_period
-            
+
             # aggregation time period defined by single string
             # e.g. 'august' or '2014-01'
             elif len(period_stat_input) == 2:
                 period_data_output['period_stat'] = period_stat_input
-            
+
             # aggregation time period defined by start and end dates
             elif len(period_stat_input) == 3:
                 period_data_output['period_stat'] = period_stat_input
                 period_data_output['start_datetime'] = period_stat_input[1]
                 period_data_output['end_datetime'] = period_stat_input[2]
-            
+
             else:
                 raise ValueError('period_stat input for period {} not understood: {}'.format(r.per, period_stat_input))
-            
+
             period_stats[r.per] = period_data_output
         return period_stats
 
@@ -1317,7 +1328,3 @@ def transient2d_to_xarray(data, x=None, y=None, time=None):
                               "time": time},
                       dims=["x", "y", "time"])
     return da
-
-
-
-

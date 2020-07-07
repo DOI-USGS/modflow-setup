@@ -1,27 +1,41 @@
 import os
 import time
 from collections import defaultdict
+
+import flopy
 import numpy as np
 import pandas as pd
-import flopy
+
 fm = flopy.modflow
 mf6 = flopy.mf6
-from gisutils import (shp2df, get_values_at_points, project, get_proj_str)
-import mfsetup
-from .bcs import get_bc_package_cells
-from .grid import MFsetupGrid, get_ij, setup_structured_grid, rasterize
-from .fileio import (load, load_array, save_array, check_source_files,
-                     load_cfg, setup_external_filepaths)
-from .interpolate import interp_weights, interpolate, regrid, get_source_dest_model_xys
-from .lakes import make_lakarr2d, setup_lake_info, setup_lake_fluxes
-from .mf5to6 import get_package_name, get_model_length_units, get_model_time_units
-from .sourcedata import setup_array, TransientTabularSourceData
-from .tdis import (setup_perioddata, setup_perioddata_group,
-                   get_parent_stress_periods, parse_perioddata_groups)
-from .utils import update, get_input_arguments, flatten, get_packages
-from .units import convert_length_units, lenuni_text, lenuni_values
+from gisutils import get_proj_str, get_values_at_points, project, shp2df
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
+
+import mfsetup
+
+from .bcs import get_bc_package_cells
+from .fileio import (
+    check_source_files,
+    load,
+    load_array,
+    load_cfg,
+    save_array,
+    setup_external_filepaths,
+)
+from .grid import MFsetupGrid, get_ij, rasterize, setup_structured_grid
+from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
+from .lakes import make_lakarr2d, setup_lake_fluxes, setup_lake_info
+from .mf5to6 import get_model_length_units, get_model_time_units, get_package_name
+from .sourcedata import TransientTabularSourceData, setup_array
+from .tdis import (
+    get_parent_stress_periods,
+    parse_perioddata_groups,
+    setup_perioddata,
+    setup_perioddata_group,
+)
+from .units import convert_length_units, lenuni_text, lenuni_values
+from .utils import flatten, get_input_arguments, get_packages, update
 
 
 class MFsetupMixin():
@@ -175,9 +189,9 @@ class MFsetupMixin():
     @property
     def perioddata(self):
         """DataFrame summarizing stress period information.
-        
+
         Columns:
-        
+
           start_date_time : pandas datetimes; start date/time of each stress period
           (does not include steady-state periods)
           end_date_time : pandas datetimes; end date/time of each stress period
@@ -848,7 +862,7 @@ class MFsetupMixin():
                 print('loading parent model {}...'.format(os.path.join(kwargs['model_ws'],
                                                                  kwargs['namefile'])))
                 t0 = time.time()
-                
+
                 # load only specified packages that the parent model has
                 packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
                                                                         kwargs['namefile']))
@@ -1404,4 +1418,3 @@ class MFsetupMixin():
         print('finished setting up model in {:.2f}s'.format(time.time() - t0))
         print('\n{}'.format(m))
         return m
-

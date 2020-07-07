@@ -2,22 +2,23 @@
 Functions related to the Discretization Package.
 """
 import time
+
+import flopy
 import numpy as np
+from flopy.mf6.data.mfdatalist import MFList
 from scipy import ndimage
 from scipy.signal import convolve2d
-import flopy
-from flopy.mf6.data.mfdatalist import MFList
 
 
 class ModflowGwfdis(flopy.mf6.ModflowGwfdis):
     def __init__(self, *args, **kwargs):
         flopy.mf6.ModflowGwfdis.__init__(self, *args, **kwargs)
-        
+
     @property
     def thickness(self):
-        return -1 * np.diff(np.stack([self.top.array] + 
+        return -1 * np.diff(np.stack([self.top.array] +
                                      [b for b in self.botm.array]), axis=0)
-    
+
 
 def adjust_layers(dis, minimum_thickness=1):
     """
@@ -234,14 +235,14 @@ def fill_cells_vertically(top, botm):
     all have valid thicknesses (and all other layers have zero thicknesses).
 
     algorithm:
-        * given a top and botm array (top of the model and layer bottom elevations), 
-          get the layer thicknesses (accounting for any nodata values) idomain != 1 cells in 
+        * given a top and botm array (top of the model and layer bottom elevations),
+          get the layer thicknesses (accounting for any nodata values) idomain != 1 cells in
           thickness array must be set to np.nan
-        * set thickness to zero in nan cells take the cumulative sum of the thickness array 
-          along the 0th (depth) axis, from the bottom of the array to the top 
+        * set thickness to zero in nan cells take the cumulative sum of the thickness array
+          along the 0th (depth) axis, from the bottom of the array to the top
           (going backwards in a depth-positive sense)
-        * add the cumulative sum to the array bottom elevations. The backward difference in 
-          bottom elevations should be zero in inactive cells, and representative of the 
+        * add the cumulative sum to the array bottom elevations. The backward difference in
+          bottom elevations should be zero in inactive cells, and representative of the
           desired thickness in the active cells.
         * append the model bottom elevations (excluded in bottom-up difference)
 
@@ -419,7 +420,7 @@ def make_idomain(top, botm, nodata=-9999,
     cells that will be excluded from the simulation. Cells are
     excluded based on:
     1) np.nans or nodata values in the botm array
-    2) np.nans or nodata values in the top array (applies to the highest cells with valid botm elevations; 
+    2) np.nans or nodata values in the top array (applies to the highest cells with valid botm elevations;
     in other words, these cells have no thicknesses)
     3) layer thicknesses less than the specified minimum thickness plus a tolerance (tol)
 
@@ -568,21 +569,21 @@ def populate_values(values_dict, array_shape=None):
 def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_data_value=0,
                      extend_top=True, extend_botm=False, tol=0.1,
                      minimum_frac_active_cells=0.01):
-    """Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top 
-    and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and 
+    """Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top
+    and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and
     additional elevation surfaces forming layering below the voxel grid (model_botm).
-    
-        * In places where the model_botm elevations are above the lowest voxel elevations, 
-          the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations 
+
+        * In places where the model_botm elevations are above the lowest voxel elevations,
+          the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations
           (effectively giving the underlying layer zero-thickness).
-        * Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a 
-          no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey 
-          of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then spans the highest and lowest valid voxels. 
-        * In places where the model_top (typically land-surface) elevations are higher than the highest valid voxel, 
-          the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer 
-          can be created between the top edge of the highest voxel and model_top (extent_top=False). 
-        * Similarly, in places where elevations in model_botm are below the lowest valid voxel, the lowest voxel 
-          elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill 
+        * Voxels with no_data_value(s) are also given zero-thickness. Typically these would be cells beyond a
+          no-flow boundary, or below the depth of investigation (for example, in an airborne electromagnetic survey
+          of aquifer electrical resisitivity). The vertical extent of the layering representing the voxel data then spans the highest and lowest valid voxels.
+        * In places where the model_top (typically land-surface) elevations are higher than the highest valid voxel,
+          the voxel layer can either be extended to the model_top (extend_top=True), or an additional layer
+          can be created between the top edge of the highest voxel and model_top (extent_top=False).
+        * Similarly, in places where elevations in model_botm are below the lowest valid voxel, the lowest voxel
+          elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill
           the gap between the lowest voxel and highest model_botm (extend_botm=False).
 
     Parameters
@@ -593,7 +594,7 @@ def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_d
         discretization as the model_top and model_botm layers.
     z_edges : 3D numpy array or sequence
         Top and bottom edges of the voxels (length is voxel_array.shape[0] + 1). A sequence
-        can be used to specify uniform voxel edge elevations; non-uniform top and bottom 
+        can be used to specify uniform voxel edge elevations; non-uniform top and bottom
         elevations can be specified with a 3D numpy array (similar to the botm array in MODFLOW).
     model_top : 2D numpy array
         Top elevations of the model at each row/column location.
@@ -604,7 +605,7 @@ def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_d
     extend_top : bool, optional
         Option to extend the top voxel layer to the model_top, by default True.
     extend_botm : bool, optional
-        Option to extend the bottom voxel layer to the next layer below in model_botm, 
+        Option to extend the bottom voxel layer to the next layer below in model_botm,
         by default False.
     tol : float, optional
         Depth tolerance used in comparing the voxel edges to model_top and model_botm.
@@ -625,19 +626,19 @@ def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_d
     ------
     ValueError
         If z_edges is not 1D or 3D
-    """    
+    """
     model_top = model_top.copy()
     model_botm = model_botm.copy()
     if len(model_botm.shape) == 2:
         model_botm = np.reshape(model_botm, (1, *model_botm.shape))
     z_values = np.array(z_edges)[1:]
-    
+
     # convert nodata values to nans
     hasdata = voxel_array.astype(float).copy()
     hasdata[hasdata == no_data_value] = np.nan
     hasdata[~np.isnan(hasdata)] = 1
     thicknesses = -np.diff(z_edges, axis=0)
-    
+
     # apply nodata to thicknesses and botm elevations
     if len(z_values.shape) == 3:
         z = hasdata * z_values

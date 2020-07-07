@@ -2,6 +2,7 @@
 Tests for utils.py module
 """
 import pytest
+
 from ..utils import flatten, update
 
 
@@ -44,4 +45,3 @@ def test_update(default_config, specified_config):
 
     # test that only keys in specified are updated
     assert 'parent' not in result
-

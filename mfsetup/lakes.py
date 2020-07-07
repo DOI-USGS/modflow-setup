@@ -1,20 +1,27 @@
 import os
 import re
-from collections import OrderedDict
 import time
+from collections import OrderedDict
+
+import flopy
 import numpy as np
 import pandas as pd
 from scipy.ndimage import sobel
 from shapely.geometry import Polygon
-import flopy
+
 fm = flopy.modflow
 from flopy.utils.mflistfile import ListBudget
-from gisutils import shp2df, project, get_proj_str
+from gisutils import get_proj_str, project, shp2df
+
 from mfsetup.evaporation import hamon_evaporation
 from mfsetup.fileio import save_array
 from mfsetup.grid import rasterize
-from mfsetup.sourcedata import (SourceData, TransientSourceDataMixin,
-                                aggregate_dataframe_to_stress_period, TabularSourceData)
+from mfsetup.sourcedata import (
+    SourceData,
+    TabularSourceData,
+    TransientSourceDataMixin,
+    aggregate_dataframe_to_stress_period,
+)
 from mfsetup.units import convert_length_units, convert_temperature_units
 
 
@@ -290,7 +297,7 @@ def setup_lake_connectiondata(model, for_external_file=True,
     # set up littoral and profundal zones
     if model.lake_info is None:
         model.lake_info = setup_lake_info(model)
-    
+
     # zone numbers
     # littoral zones are the same as the one-based lake number
     # profundal zones are the one-based lake number times 100
@@ -298,7 +305,7 @@ def setup_lake_connectiondata(model, for_external_file=True,
     lakzones = make_bdlknc_zones(model.modelgrid, model.lake_info,
                                  include_ids=model.lake_info['feat_id'])
     littoral_profundal_zones = get_littoral_profundal_zones(lakzones)
-    
+
     model.setup_external_filepaths('lak', 'lakzones',
                                    cfg['{}_filename_fmt'.format('lakzones')])
     save_array(model.cfg['intermediate_data']['lakzones'][0], lakzones, fmt='%d')
@@ -701,4 +708,3 @@ class PrismSourceData(SourceData, TransientSourceDataMixin):
         dfm = pd.concat(period_data)
         dfm.sort_values(by=['per', self.id_column], inplace=True)
         return dfm.reset_index(drop=True)
-

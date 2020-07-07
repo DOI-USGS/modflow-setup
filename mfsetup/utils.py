@@ -1,6 +1,7 @@
 import collections
 import inspect
 import pprint
+
 import numpy as np
 
 
@@ -112,4 +113,3 @@ def get_packages(namefile):
                     package_name = package_name.replace('6', '')
                 packages.append(package_name)
     return packages
-

@@ -1,17 +1,26 @@
-import os
-import shutil
-import platform
 import copy
-import pytest
+import os
+import platform
+import shutil
+
 import flopy
+import pytest
+
 fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MF6model, MFnwtModel
 from mfsetup.fileio import exe_exists, load_cfg
 from mfsetup.utils import get_input_arguments
-from .test_pleasant_mf6_inset import (get_pleasant_mf6_with_dis, get_pleasant_mf6_with_grid,
-                                      get_pleasant_mf6, pleasant_mf6_cfg, pleasant_simulation,
-                                      pleasant_mf6_test_cfg_path, pleasant_mf6_setup_from_yaml)
+
+from .test_pleasant_mf6_inset import (
+    get_pleasant_mf6,
+    get_pleasant_mf6_with_dis,
+    get_pleasant_mf6_with_grid,
+    pleasant_mf6_cfg,
+    pleasant_mf6_setup_from_yaml,
+    pleasant_mf6_test_cfg_path,
+    pleasant_simulation,
+)
 
 
 @pytest.fixture(scope="session")

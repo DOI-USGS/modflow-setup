@@ -2,6 +2,7 @@
 Module with functions to check input data.
 """
 import numpy as np
+
 from .fileio import load_array
 
 

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
+
 from .fileio import check_source_files
 from .grid import get_ij
 
@@ -51,7 +52,7 @@ def setup_head_observations(model, obs_info_files=None,
     self = model
     package = format
     source_data_config = self.cfg[package]['source_data']
-    
+
     # set a 14 character obsname limit for the hydmod package
     # https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?hyd.htm
     # 40 character limit for MODFLOW-6 (see IO doc)
@@ -152,8 +153,8 @@ def setup_head_observations(model, obs_info_files=None,
     heads0[obsname_column] = heads0[obsname_column].astype(str)
     heads_all_layers = pd.concat([heads0] * self.nlay).sort_values(by=obsname_column)
     heads_all_layers['klay'] = list(range(self.nlay)) * len(heads0)
-    heads_all_layers[obsname_column] = ['{}'.format(obsname)  # _{:.0f}'.format(obsname, k) 
-                                        for obsname, k in zip(heads_all_layers[obsname_column], 
+    heads_all_layers[obsname_column] = ['{}'.format(obsname)  # _{:.0f}'.format(obsname, k)
+                                        for obsname, k in zip(heads_all_layers[obsname_column],
                                                               heads_all_layers['klay'])]
     df = pd.concat([heads_all_layers, non_heads], axis=0)
 

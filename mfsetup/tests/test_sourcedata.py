@@ -1,15 +1,24 @@
-import os
 import copy
-import pytest
+import os
+
 import numpy as np
 import pandas as pd
-import xarray as xr
+import pytest
 from shapely.geometry import Point
-from ..fileio import _parse_file_path_keys_from_source_data
-from ..sourcedata import (ArraySourceData, TransientArraySourceData,
-                          TabularSourceData, TransientTabularSourceData,
-                          MFArrayData, MFBinaryArraySourceData, transient2d_to_xarray)
+
+import xarray as xr
 from mfsetup.discretization import weighted_average_between_layers
+
+from ..fileio import _parse_file_path_keys_from_source_data
+from ..sourcedata import (
+    ArraySourceData,
+    MFArrayData,
+    MFBinaryArraySourceData,
+    TabularSourceData,
+    TransientArraySourceData,
+    TransientTabularSourceData,
+    transient2d_to_xarray,
+)
 from ..units import convert_length_units, convert_time_units
 
 
@@ -303,7 +312,7 @@ def test_transient2d_to_DataArray():
 
 
 def test_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_dis):
-    
+
     m = shellmound_model_with_dis
     # capitalize the column names so that they're mixed case
     csvfile = os.path.join(project_root_path, 'mfsetup/tests/data/shellmound/tables/head_obs_well_info.csv')
@@ -320,7 +329,7 @@ def test_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_di
 
 
 def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_dis):
-    
+
     m = shellmound_model_with_dis
     # capitalize the column names so that they're mixed case
     csvfile = os.path.join(project_root_path, 'mfsetup/tests/data/shellmound/tables/iwum_m3_1M.csv')
@@ -331,9 +340,9 @@ def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_mod
     df['geometry'] = [str(Point(x, y)) for x, y in zip(df.X, df.Y)]
     df.to_csv(input_csv, index=False)
 
-    sd = TransientTabularSourceData(filenames=input_csv, data_column='Flux_m3', 
+    sd = TransientTabularSourceData(filenames=input_csv, data_column='Flux_m3',
                                     datetime_column='Start_datetime', id_column='Node',
-                                    x_col='X', y_col='Y', 
+                                    x_col='X', y_col='Y',
                                     period_stats={0: 'mean', 1: None, 2: 'none', 3: 'mean'},
                                     length_units='unknown', time_units='unknown', volume_units=None,
                                     column_mappings=None, resolve_duplicates_with='sum',
@@ -344,12 +353,12 @@ def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_mod
     assert sd.period_stats[1] == None
     assert sd.period_stats[2] == None
     for per in 3, m.nper-1:
-        assert sd.period_stats[per] == {'period_stat': 'mean', 
-                                        'start_datetime': m.perioddata.start_datetime[per], 
+        assert sd.period_stats[per] == {'period_stat': 'mean',
+                                        'start_datetime': m.perioddata.start_datetime[per],
                                         'end_datetime': m.perioddata.end_datetime[per] - pd.Timedelta(1, unit='days')
                                         }
     data = sd.get_data()
-    
+
     # verify that first (steady-state) period has data
     # if period is steady and no end_datetime_column is given, default should be to take mean for whole file
     assert not any(np.in1d([1, 2], data.per.unique()))

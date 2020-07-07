@@ -1,9 +1,19 @@
 import os
 import platform
+
 import numpy as np
 import pytest
-from ..fileio import (load, load_array, dump_yml, load_yml,
-                      load_modelgrid, load_cfg, which, exe_exists)
+
+from ..fileio import (
+    dump_yml,
+    exe_exists,
+    load,
+    load_array,
+    load_cfg,
+    load_modelgrid,
+    load_yml,
+    which,
+)
 
 
 @pytest.fixture
@@ -115,4 +125,3 @@ def test_exe_exists(modflow_executable):
     else:
         assert exe_exists(modflow_executable)
         print('{} exists'.format(modflow_executable))
-

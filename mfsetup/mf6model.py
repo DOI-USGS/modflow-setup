@@ -2,29 +2,42 @@ import os
 import shutil
 import time
 from collections import defaultdict
+
+import flopy
 import numpy as np
 import pandas as pd
-import flopy
+
 fm = flopy.modflow
 mf6 = flopy.mf6
 from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
-from .discretization import (ModflowGwfdis, make_idomain, make_lgr_idomain, deactivate_idomain_above,
-                             find_remove_isolated_cells, fill_cells_vertically,
-                             create_vertical_pass_through_cells)
-from .fileio import (load, dump, load_cfg,
-                     flopy_mfsimulation_load)
-from .lakes import (setup_lake_connectiondata, setup_lake_info,
-                    setup_lake_tablefiles, setup_lake_fluxes,
-                    get_lakeperioddata, setup_mf6_lake_obs)
+
+from .discretization import (
+    ModflowGwfdis,
+    create_vertical_pass_through_cells,
+    deactivate_idomain_above,
+    fill_cells_vertically,
+    find_remove_isolated_cells,
+    make_idomain,
+    make_lgr_idomain,
+)
+from .fileio import dump, flopy_mfsimulation_load, load, load_cfg
+from .lakes import (
+    get_lakeperioddata,
+    setup_lake_connectiondata,
+    setup_lake_fluxes,
+    setup_lake_info,
+    setup_lake_tablefiles,
+    setup_mf6_lake_obs,
+)
+from .mfmodel import MFsetupMixin
 from .mover import get_mover_sfr_package_input
 from .obs import setup_head_observations
-from .tdis import setup_perioddata_group, get_parent_stress_periods
+from .tdis import get_parent_stress_periods, setup_perioddata_group
 from .tmr import Tmr
-from .units import lenuni_text, itmuni_text, convert_length_units, convert_time_units
-from .utils import update, get_input_arguments, flatten, get_packages
+from .units import convert_length_units, convert_time_units, itmuni_text, lenuni_text
+from .utils import flatten, get_input_arguments, get_packages, update
 from .wells import setup_wel_data
-from .mfmodel import MFsetupMixin
 
 
 class MF6model(MFsetupMixin, mf6.ModflowGwf):
@@ -130,7 +143,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # take the updated idomain array and set cells != 1 to np.nan in layer botm array
         botm = self.dis.botm.array.copy()
         botm[idomain != 1] = np.nan
-        # fill_cells_vertically will be run in the setup_array routing, 
+        # fill_cells_vertically will be run in the setup_array routing,
         # to collapse the nan cells to zero-thickness
         # (assign their layer botm to the next valid layer botm above)
 

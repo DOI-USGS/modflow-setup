@@ -3,11 +3,16 @@ Tests for units.py module
 """
 import numpy as np
 import pytest
-from ..units import (convert_flux_units, convert_length_units,
-                     convert_volume_units,
-                     convert_time_units, parse_length_units,
-                     lenuni_values,
-                     convert_temperature_units)
+
+from ..units import (
+    convert_flux_units,
+    convert_length_units,
+    convert_temperature_units,
+    convert_time_units,
+    convert_volume_units,
+    lenuni_values,
+    parse_length_units,
+)
 
 
 def test_convert_flux():

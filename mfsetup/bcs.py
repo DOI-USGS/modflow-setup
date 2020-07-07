@@ -1,14 +1,16 @@
 """
 Functions for simple MODFLOW boundary conditions such as ghb, drain, etc.
 """
+import flopy
 import numpy as np
 import pandas as pd
-import flopy
+
 fm = flopy.modflow
-from shapely.geometry import Polygon
 import rasterio
 from rasterstats import zonal_stats
-from mfsetup.discretization import get_layer, cellids_to_kij
+from shapely.geometry import Polygon
+
+from mfsetup.discretization import cellids_to_kij, get_layer
 from mfsetup.grid import rasterize
 from mfsetup.units import convert_length_units
 

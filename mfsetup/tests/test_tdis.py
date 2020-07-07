@@ -7,12 +7,15 @@ and the reference within on frequency strings.
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html
 https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
 """
-import os
 import copy
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
-from mfsetup.tdis import get_parent_stress_periods, aggregate_dataframe_to_stress_period
+
+from mfsetup.tdis import aggregate_dataframe_to_stress_period, get_parent_stress_periods
+
 from ..mf6model import MF6model
 from ..sourcedata import TransientTabularSourceData
 
@@ -221,8 +224,8 @@ def test_get_parent_stress_periods(copy_periods, nper, basic_model_instance, req
     m._set_parent()
     m._set_perioddata()
     assert np.array_equal(m.perioddata['parent_sp'], np.array(expected[test_name]))
-    
-    
+
+
 @pytest.mark.parametrize('dates', [('2007-04-01', '2007-03-31'),
                                    ('2008-04-01', '2008-09-30'),
                                    ('2008-10-01', '2009-03-31')])

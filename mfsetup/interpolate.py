@@ -1,10 +1,11 @@
-import time
-import numpy as np
-import scipy.interpolate as spint
-import scipy.spatial.qhull as qhull
-from scipy.signal import convolve2d
 import itertools
+import time
+
 import flopy
+import numpy as np
+from scipy import interpolate as spint
+from scipy.signal import convolve2d
+from scipy.spatial import qhull as qhull
 
 
 def get_source_dest_model_xys(source_model, dest_model,

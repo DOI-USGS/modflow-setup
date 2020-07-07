@@ -1,11 +1,21 @@
 import numpy as np
 import pandas as pd
 import pytest
-from ..discretization import (fix_model_layer_conflicts, verify_minimum_layer_thickness,
-                              fill_empty_layers, fill_cells_vertically, make_idomain, make_ibound,
-                              get_layer_thicknesses, create_vertical_pass_through_cells,
-                              deactivate_idomain_above, find_remove_isolated_cells,
-                              populate_values, voxels_to_layers)
+
+from ..discretization import (
+    create_vertical_pass_through_cells,
+    deactivate_idomain_above,
+    fill_cells_vertically,
+    fill_empty_layers,
+    find_remove_isolated_cells,
+    fix_model_layer_conflicts,
+    get_layer_thicknesses,
+    make_ibound,
+    make_idomain,
+    populate_values,
+    verify_minimum_layer_thickness,
+    voxels_to_layers,
+)
 
 
 @pytest.fixture(scope="function")
@@ -92,7 +102,7 @@ def test_fill_layers(all_layers):
                           a*b)
     make_plot = False
     if make_plot:
-        import matplotlib.pyplot as plt
+        from matplotlib import pyplot as plt
         fig, ax = plt.subplots()
         for i in range(nlay):
             lw = 0.5
@@ -293,7 +303,7 @@ def test_populate_values():
                                         ))
 @pytest.mark.parametrize('z_edges', ([20, 15, 10, 5, 0],  # 1D array of voxel edges (uniform elevations)
                                      # 2D array of voxel edges
-                                     (np.ones((3, 3, 5)) * np.array([20, 15, 10, 5, 0])).transpose(2, 0, 1)  
+                                     (np.ones((3, 3, 5)) * np.array([20, 15, 10, 5, 0])).transpose(2, 0, 1)
                                      ))
 def test_voxels_to_layers(z_edges, model_botm):
     data = np.array([[[5, 4, 0],

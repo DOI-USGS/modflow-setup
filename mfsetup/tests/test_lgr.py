@@ -1,19 +1,28 @@
 import copy
-import os
 import glob
+import os
+
+import flopy
 import numpy as np
 import pytest
-import flopy
+
 mf6 = flopy.mf6
 fm = flopy.modflow
 from flopy.utils import binaryfile as bf
+
 from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
-from mfsetup.fileio import (load_cfg, exe_exists, load, dump,
-                            read_mf6_block, load_modelgrid)
+from mfsetup.fileio import (
+    dump,
+    exe_exists,
+    load,
+    load_cfg,
+    load_modelgrid,
+    read_mf6_block,
+)
 from mfsetup.mover import get_sfr_package_connections
-from mfsetup.utils import get_input_arguments
 from mfsetup.testing import compare_inset_parent_values
+from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture(scope="session")

@@ -1,16 +1,17 @@
 import calendar
 import time
-from shapely.geometry import box
+
 import numpy as np
 import pandas as pd
-from shapely.geometry import Polygon, MultiPolygon
 from gisutils import shp2df
+from shapely.geometry import MultiPolygon, Polygon, box
+
+from mfsetup import wells as wells
+from mfsetup.units import convert_volume_units
+
 from .discretization import get_layer, get_layer_thicknesses
 from .grid import get_ij
 from .mf5to6 import get_model_length_units
-from mfsetup.units import convert_volume_units
-import mfsetup.wells as wells
-
 
 months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 

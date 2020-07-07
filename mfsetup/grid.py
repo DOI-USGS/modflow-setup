@@ -3,15 +3,18 @@ Code for creating and working with regular (structured) grids. Focus is on the 2
 the grid in the cartesian plane. For methods involving layering (in the vertical dimension), see
 the discretization module.
 """
-import time
 import collections
+import time
+
 import numpy as np
 import pandas as pd
-from rasterio import Affine
-from shapely.geometry import Polygon, MultiPolygon
 from flopy.discretization import StructuredGrid
 from gisutils import df2shp, get_proj_str, project, shp2df
-import mfsetup.fileio as fileio
+from rasterio import Affine
+from shapely.geometry import MultiPolygon, Polygon
+
+from mfsetup import fileio as fileio
+
 from .mf5to6 import get_model_length_units
 from .units import convert_length_units
 from .utils import get_input_arguments
@@ -20,7 +23,7 @@ from .utils import get_input_arguments
 class MFsetupGrid(StructuredGrid):
     """Class representing a structured grid. Extends flopy.discretization.StructuredGrid
     to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).
-    
+
     Parameters
     ----------
     delc : ndarray
@@ -34,7 +37,7 @@ class MFsetupGrid(StructuredGrid):
     idomain : ndarray
         3D numpy array of model idomain values
     lenuni : int, optional
-        MODFLOW length units variable. See 
+        MODFLOW length units variable. See
         `the Online Guide to MODFLOW <https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?beginners_guide_to_modflow.htm>`_
     epsg : int, optional
         EPSG code for the model CRS
@@ -48,7 +51,7 @@ class MFsetupGrid(StructuredGrid):
         Model grid offset (location of upper left corner), by default 0.0, 0.0
     angrot : float, optional
         Rotation of the model grid, in degrees clockwise about the lower left corner, by default 0.0
- 
+
 
     """
 
@@ -59,7 +62,7 @@ class MFsetupGrid(StructuredGrid):
                                           top, botm, idomain,
                                           lenuni, epsg, proj_str, prj, xoff,
                                           yoff, angrot)
-  
+
         # properties
         self._vertices = None
         self._polygons = None
@@ -411,8 +414,7 @@ def rasterize(feature, grid, id_column=None,
 
     """
     try:
-        from rasterio import features
-        from rasterio import Affine
+        from rasterio import Affine, features
     except:
         print('This method requires rasterio.')
         return
@@ -447,7 +449,7 @@ def rasterize(feature, grid, id_column=None,
     elif epsg is not None and grid.epsg is not None:
         if epsg != grid.epsg:
             reproject = True
-            from fiona.crs import to_string, from_epsg
+            from fiona.crs import from_epsg, to_string
             proj4 = to_string(from_epsg(epsg))
     if reproject:
         df['geometry'] = project(df.geometry.values, proj4, grid.proj_str)
@@ -660,5 +662,3 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         write_bbox_shapefile(modelgrid, bbox_shapefile)
     print("finished in {:.2f}s\n".format(time.time() - t0))
     return modelgrid
-
-

@@ -1,18 +1,21 @@
 import os
 import time
+
+import flopy
 import numpy as np
 import pandas as pd
-import flopy
+
 fm = flopy.modflow
+import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
+
+from .discretization import weighted_average_between_layers
 #from .export import get_surface_bc_flux
 from .fileio import check_source_files
-from .discretization import weighted_average_between_layers
-from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .grid import get_ij
+from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
 from .units import convert_length_units
-import numpy as np
 
 
 class Tmr:
@@ -249,7 +252,7 @@ class Tmr:
                    np.arange(pj0, pj1)
         elif side == 'left':
             return np.arange(pi0, pi1), \
-                   np.ones(parent_height, dtype=int) * pj0-1 
+                   np.ones(parent_height, dtype=int) * pj0-1
         elif side == 'bottom':
             return np.ones(parent_width, dtype=int) * pi1-1, \
                    np.arange(pj0, pj1)

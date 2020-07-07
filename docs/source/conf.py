@@ -19,6 +19,7 @@
 #
 import os
 import shutil
+
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -95,6 +96,7 @@ author = 'USGS MAP Project'
 # built documents.
 #
 import mfsetup
+
 # The short X.Y version.
 version = mfsetup.__version__
 # The full version, including alpha/beta/rc tags.
@@ -126,6 +128,7 @@ todo_include_todos = True
 #
 html_theme = 'sphinx_rtd_theme'
 import sphinx_rtd_theme
+
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme

@@ -1,22 +1,25 @@
 import sys
+
 sys.path.append('..')
+import filecmp
+import glob
+import os
+import shutil
 import time
 from copy import copy, deepcopy
-import shutil
-import filecmp
-import os
-import glob
-import pytest
+
+import flopy
 import numpy as np
 import pandas as pd
+import pytest
 import rasterio
-import flopy
+
 fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MFnwtModel
 from mfsetup.checks import check_external_files_for_nans
-from mfsetup.grid import get_ij, MFsetupGrid
 from mfsetup.fileio import exe_exists, load_cfg
+from mfsetup.grid import MFsetupGrid, get_ij
 from mfsetup.units import convert_length_units, convert_time_units
 from mfsetup.utils import get_input_arguments
 
@@ -76,15 +79,15 @@ def test_pfl_nwt_with_grid(pfl_nwt_with_grid):
 def test_namefile(pfl_nwt_with_dis):
     model = pfl_nwt_with_dis
     model.write_input()
-    
+
     # check that listing file was written correctly
     expected_listfile_name = model.cfg['model']['list_filename_fmt'].format(model.name)
     with open(model.namefile) as src:
         for line in src:
             if 'LIST' in line:
                 assert line.strip().split()[-1] == expected_listfile_name
-                
-                
+
+
 def test_perioddata(pfl_nwt):
     model = pfl_nwt
     assert np.array_equal(model.perioddata.steady, [True, False])
@@ -269,7 +272,7 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path):
     m.cfg['rch']['source_data']['rech']['length_units'] = 'inches'
     m.cfg['rch']['source_data']['rech']['time_units'] = 'years'
     rch = m.setup_rch()
-    
+
     # spatial mean recharge in model should approx. match the GeoTiff (which covers a larger area)
     avg_in_yr = rch.rech.array[0, 0, :, :].mean() * convert_length_units('meters', 'inches') * \
         convert_time_units('days', 'years')

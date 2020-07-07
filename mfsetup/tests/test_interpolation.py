@@ -1,11 +1,14 @@
 import os
+
 import numpy as np
-import xarray as xr
+import pytest
 import rasterio
 from scipy.interpolate import griddata, interpn
-import pytest
+
+import xarray as xr
+
 from ..grid import MFsetupGrid
-from ..interpolate import interp_weights, get_source_dest_model_xys
+from ..interpolate import get_source_dest_model_xys, interp_weights
 from ..testing import compare_float_arrays
 
 
@@ -40,7 +43,7 @@ def modelgrid(dem_DataArray):
 
 def test_interp(dem_DataArray, modelgrid):
 
-    import matplotlib.pyplot as plt
+    from matplotlib import pyplot as plt
 
     da = dem_DataArray
     mg = modelgrid
@@ -149,4 +152,3 @@ def test_regrid_nearest(pfl_nwt_with_grid):
     rg1 = m.regrid_from_parent(arr, method='nearest')
     rg2 = regrid(arr, m.parent.modelgrid, m.modelgrid, method='nearest')
     np.testing.assert_allclose(rg1, rg2)
-

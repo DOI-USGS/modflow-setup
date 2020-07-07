@@ -1,25 +1,36 @@
 import os
 import time
+
 import numpy as np
+
 np.warnings.filterwarnings('ignore')
-import pandas as pd
 import flopy
+import pandas as pd
+
 fm = flopy.modflow
 from flopy.modflow import Modflow
+
 from .bcs import setup_ghb_data
-from .discretization import (deactivate_idomain_above, make_ibound,
-                             find_remove_isolated_cells)
-from .fileio import load, save_array, check_source_files, flopy_mf2005_load, \
-    load_cfg
-from .lakes import (make_bdlknc_zones, make_bdlknc2d, setup_lake_fluxes,
-                    setup_lake_info, setup_lake_tablefiles)
-from .utils import get_packages, get_input_arguments
-from .obs import read_observation_data, setup_head_observations
-from .tdis import setup_perioddata_group, get_parent_stress_periods
-from .tmr import Tmr
-from .units import convert_length_units, lenuni_text, itmuni_text
-from .wells import setup_wel_data
+from .discretization import (
+    deactivate_idomain_above,
+    find_remove_isolated_cells,
+    make_ibound,
+)
+from .fileio import check_source_files, flopy_mf2005_load, load, load_cfg, save_array
+from .lakes import (
+    make_bdlknc2d,
+    make_bdlknc_zones,
+    setup_lake_fluxes,
+    setup_lake_info,
+    setup_lake_tablefiles,
+)
 from .mfmodel import MFsetupMixin
+from .obs import read_observation_data, setup_head_observations
+from .tdis import get_parent_stress_periods, setup_perioddata_group
+from .tmr import Tmr
+from .units import convert_length_units, itmuni_text, lenuni_text
+from .utils import get_input_arguments, get_packages
+from .wells import setup_wel_data
 
 
 class MFnwtModel(MFsetupMixin, Modflow):
@@ -46,7 +57,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._set_cfg(cfg)  # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
-        
+
         # set the list file path
         self.lst.file_name = [self.cfg['model']['list_filename_fmt'].format(self.name)]
 
@@ -259,7 +270,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._setup_array(package, 'strt', datatype='array3d',
                           resample_method='linear',
                           write_fmt='%.2f')
-        
+
         # initial ibound input for creating a bas6 package instance
         self._setup_array(package, 'ibound', datatype='array3d', write_fmt='%d',
                           resample_method='nearest',
@@ -792,4 +803,3 @@ class MFnwtModel(MFsetupMixin, Modflow):
         m = flopy_mf2005_load(m, load_only=load_only, forgive=forgive, check=check)
         print('finished loading model in {:.2f}s'.format(time.time() - t0))
         return m
-

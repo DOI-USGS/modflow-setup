@@ -1,11 +1,12 @@
 """
 Functions for checking equality between Flopy objects
 """
-import numpy as np
 import flopy
+import numpy as np
+
 fm = flopy.modflow
 mf6 = flopy.mf6
-from flopy.datbase import DataType, DataInterface
+from flopy.datbase import DataInterface, DataType
 from flopy.mbase import ModelInterface
 from flopy.utils import TemporalReference
 

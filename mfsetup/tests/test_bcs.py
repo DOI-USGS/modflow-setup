@@ -1,6 +1,8 @@
 import os
+
 import numpy as np
 import pytest
+
 from mfsetup.bcs import get_bc_package_cells
 from mfsetup.testing import dtypeisinteger
 

@@ -6,14 +6,18 @@ Tests for Pleasant Lake inset case
 * transient parent model with initial steady-state; copy unspecified data from parent
 """
 import os
+
+import flopy
 import numpy as np
 import pandas as pd
-import flopy
+
 fm = flopy.modflow
 import pytest
+
 from mfsetup import MFnwtModel
 from mfsetup.discretization import find_remove_isolated_cells
 from mfsetup.fileio import load_array
+
 from .test_lakes import get_prism_data
 
 

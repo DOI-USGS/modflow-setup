@@ -1,9 +1,14 @@
 import calendar
+
 import numpy as np
 import pandas as pd
 import pytest
-from ..wateruse import read_wdnr_monthly_water_use, resample_pumping_rates, get_mean_pumping_rates
 
+from ..wateruse import (
+    get_mean_pumping_rates,
+    read_wdnr_monthly_water_use,
+    resample_pumping_rates,
+)
 
 conversions = {1: 7.48052, # gallons per cubic foot
                2: 264.172} # gallons per cubic meter

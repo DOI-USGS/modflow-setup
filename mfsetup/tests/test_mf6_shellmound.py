@@ -1,24 +1,32 @@
 import sys
+
 sys.path.append('..')
+import glob
+import os
+import shutil
 import time
 from copy import deepcopy
-import shutil
-import os
-import glob
-import pytest
+
+import flopy
 import numpy as np
 import pandas as pd
-import xarray as xr
+import pytest
 import rasterio
 from shapely.geometry import box
-import flopy
+
+import xarray as xr
+
 mf6 = flopy.mf6
+from .. import testing
 from ..checks import check_external_files_for_nans
-from ..discretization import get_layer_thicknesses, find_remove_isolated_cells, cellids_to_kij
-from ..fileio import load_array, exe_exists, read_mf6_block, load_cfg
+from ..discretization import (
+    cellids_to_kij,
+    find_remove_isolated_cells,
+    get_layer_thicknesses,
+)
+from ..fileio import exe_exists, load_array, load_cfg, read_mf6_block
 from ..grid import rasterize
 from ..mf6model import MF6model
-from .. import testing
 from ..units import convert_length_units
 from ..utils import get_input_arguments
 
@@ -165,7 +173,7 @@ def test_model(shellmound_model):
 def test_namefile(shellmound_model_with_dis):
     model = shellmound_model_with_dis
     model.write_input()
-    
+
     # check that listing file was written correctly
     expected_listfile_name = model.cfg['model']['list_filename_fmt'].format(model.name)
     with open(model.namefile) as src:
@@ -629,8 +637,8 @@ def test_sfr_setup(model_with_sfr):
     for f in shapefiles:
         assert os.path.exists(f)
     assert m.sfrdata.model == m
-    
-    # verify that only unconnected sfr reaches are in 
+
+    # verify that only unconnected sfr reaches are in
     # places where all layers are inactive
     k, i, j = m.sfrdata.reach_data.k, m.sfrdata.reach_data.i, m.sfrdata.reach_data.j
     reach_idomain = m.idomain[k, i, j]

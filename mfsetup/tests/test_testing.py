@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-from ..testing import (dtypeisfloat, dtypeisinteger, point_is_on_nhg)
+
+from ..testing import dtypeisfloat, dtypeisinteger, point_is_on_nhg
 
 
 def test_rtree():
@@ -34,4 +35,3 @@ def test_dtypeisinteger():
                                  ))
 def test_point_is_on_nhg(x, y):
     assert point_is_on_nhg(x, y, offset='edge')
-

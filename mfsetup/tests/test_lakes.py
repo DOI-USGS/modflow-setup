@@ -2,13 +2,18 @@
 Test lake package functionality
 """
 import os
+
 import numpy as np
 import pandas as pd
 import pytest
+
 from mfsetup.fileio import load_array
-from mfsetup.lakes import (PrismSourceData, setup_lake_info,
-                           setup_lake_connectiondata,
-                           get_horizontal_connections)
+from mfsetup.lakes import (
+    PrismSourceData,
+    get_horizontal_connections,
+    setup_lake_connectiondata,
+    setup_lake_info,
+)
 
 
 @pytest.fixture
@@ -139,7 +144,7 @@ def test_get_horizontal_connections(tmpdir, connection_info):
     from scipy.ndimage import sobel
 
     try:
-        import matplotlib.pyplot as plt
+        from matplotlib import pyplot as plt
         fig, ax = plt.subplots(2, 2)
         ax = ax.flat
         ax[0].imshow(lakarr[0])

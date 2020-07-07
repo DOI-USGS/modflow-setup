@@ -1,9 +1,14 @@
 import numpy as np
 import pytest
-from ..evaporation import (solar_declination, sunset_hour_angle,
-                           max_daylight_hours, saturation_vapor_pressure,
-                           saturation_vapor_density,
-                           hamon_evaporation)
+
+from ..evaporation import (
+    hamon_evaporation,
+    max_daylight_hours,
+    saturation_vapor_density,
+    saturation_vapor_pressure,
+    solar_declination,
+    sunset_hour_angle,
+)
 
 
 @pytest.mark.parametrize('jday_lat_expected', [(105, 30, 12.7)  # Jan 2003

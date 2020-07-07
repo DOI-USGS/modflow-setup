@@ -2,8 +2,12 @@
 import numpy as np
 import pandas as pd
 import pytest
-from mfsetup.wells import (setup_wel_data, get_open_interval_thickness,
-                           get_package_stress_period_data)
+
+from mfsetup.wells import (
+    get_open_interval_thickness,
+    get_package_stress_period_data,
+    setup_wel_data,
+)
 
 
 @pytest.fixture(scope='function')

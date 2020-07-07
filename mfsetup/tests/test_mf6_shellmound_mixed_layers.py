@@ -3,8 +3,10 @@ Test setting up the shellmound model layering with a mix of raster surfaces and 
 (for incorporating property info from a voxel grid, for example)
 """
 import os
-import pytest
+
 import flopy
+import pytest
+
 mf6 = flopy.mf6
 from ..fileio import load_cfg
 from ..mf6model import MF6model

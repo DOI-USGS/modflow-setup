@@ -1,20 +1,28 @@
 """Functions for reading and writing stuff to disk, and working with file paths.
 """
 import inspect
-import sys
-import os
 import json
-import yaml
+import os
+import sys
 import time
 from collections import defaultdict
+
 import numpy as np
 import pandas as pd
-from flopy.utils import SpatialReference, mfreadnam, TemporalReference
-from flopy.mf6.mfbase import PackageContainer, MFFileMgmt, ExtFileAction, \
-    PackageContainerType, MFDataException, FlopyException, \
-    VerbosityLevel
+import yaml
 from flopy.mf6.data import mfstructure
-from flopy.mf6.modflow import mfnam, mfims, mftdis, mfgwfgnc, mfgwfmvr
+from flopy.mf6.mfbase import (
+    ExtFileAction,
+    FlopyException,
+    MFDataException,
+    MFFileMgmt,
+    PackageContainer,
+    PackageContainerType,
+    VerbosityLevel,
+)
+from flopy.mf6.modflow import mfgwfgnc, mfgwfmvr, mfims, mfnam, mftdis
+from flopy.utils import SpatialReference, TemporalReference, mfreadnam
+
 from .grid import MFsetupGrid
 from .utils import get_input_arguments, update
 
