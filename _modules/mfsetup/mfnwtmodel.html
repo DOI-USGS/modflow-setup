@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g772fe52 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g3c59186 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g772fe52
+                0.post51+g3c59186
               </div>
             
           
@@ -188,26 +188,33 @@
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
 <span class="kn">from</span> <span class="nn">flopy.modflow</span> <span class="kn">import</span> <span class="n">Modflow</span>
 
-<span class="kn">from</span> <span class="nn">.bcs</span> <span class="kn">import</span> <span class="n">setup_ghb_data</span>
-<span class="kn">from</span> <span class="nn">.discretization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">mfsetup.bcs</span> <span class="kn">import</span> <span class="n">setup_ghb_data</span>
+<span class="kn">from</span> <span class="nn">mfsetup.discretization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">deactivate_idomain_above</span><span class="p">,</span>
     <span class="n">find_remove_isolated_cells</span><span class="p">,</span>
     <span class="n">make_ibound</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.fileio</span> <span class="kn">import</span> <span class="n">check_source_files</span><span class="p">,</span> <span class="n">flopy_mf2005_load</span><span class="p">,</span> <span class="n">load</span><span class="p">,</span> <span class="n">load_cfg</span><span class="p">,</span> <span class="n">save_array</span>
-<span class="kn">from</span> <span class="nn">.lakes</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">check_source_files</span><span class="p">,</span>
+    <span class="n">flopy_mf2005_load</span><span class="p">,</span>
+    <span class="n">load</span><span class="p">,</span>
+    <span class="n">load_cfg</span><span class="p">,</span>
+    <span class="n">save_array</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mfsetup.lakes</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">make_bdlknc2d</span><span class="p">,</span>
     <span class="n">make_bdlknc_zones</span><span class="p">,</span>
     <span class="n">setup_lake_fluxes</span><span class="p">,</span>
     <span class="n">setup_lake_info</span><span class="p">,</span>
     <span class="n">setup_lake_tablefiles</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
-<span class="kn">from</span> <span class="nn">.obs</span> <span class="kn">import</span> <span class="n">read_observation_data</span><span class="p">,</span> <span class="n">setup_head_observations</span>
-<span class="kn">from</span> <span class="nn">.tdis</span> <span class="kn">import</span> <span class="n">get_parent_stress_periods</span><span class="p">,</span> <span class="n">setup_perioddata_group</span>
-<span class="kn">from</span> <span class="nn">.tmr</span> <span class="kn">import</span> <span class="n">Tmr</span>
-<span class="kn">from</span> <span class="nn">.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">itmuni_text</span><span class="p">,</span> <span class="n">lenuni_text</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span>
+<span class="kn">from</span> <span class="nn">mfsetup.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
+<span class="kn">from</span> <span class="nn">mfsetup.obs</span> <span class="kn">import</span> <span class="n">read_observation_data</span><span class="p">,</span> <span class="n">setup_head_observations</span>
+<span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="n">get_parent_stress_periods</span><span class="p">,</span> <span class="n">setup_perioddata_group</span>
+<span class="kn">from</span> <span class="nn">mfsetup.tmr</span> <span class="kn">import</span> <span class="n">Tmr</span>
+<span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">itmuni_text</span><span class="p">,</span> <span class="n">lenuni_text</span>
+<span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span>
+
 <span class="kn">from</span> <span class="nn">.wells</span> <span class="kn">import</span> <span class="n">setup_wel_data</span>
 
 

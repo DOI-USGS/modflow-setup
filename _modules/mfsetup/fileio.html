@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.fileio &mdash; modflow-setup 0.post51+g772fe52 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.post51+g3c59186 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g772fe52
+                0.post51+g3c59186
               </div>
             
           
@@ -183,26 +183,17 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">from</span> <span class="nn">flopy.mf6.data</span> <span class="kn">import</span> <span class="n">mfstructure</span>
-<span class="kn">from</span> <span class="nn">flopy.mf6.mfbase</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ExtFileAction</span><span class="p">,</span>
-    <span class="n">FlopyException</span><span class="p">,</span>
-    <span class="n">MFDataException</span><span class="p">,</span>
-    <span class="n">MFFileMgmt</span><span class="p">,</span>
-    <span class="n">PackageContainer</span><span class="p">,</span>
-    <span class="n">PackageContainerType</span><span class="p">,</span>
-    <span class="n">VerbosityLevel</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">flopy.mf6.modflow</span> <span class="kn">import</span> <span class="n">mfgwfgnc</span><span class="p">,</span> <span class="n">mfgwfmvr</span><span class="p">,</span> <span class="n">mfims</span><span class="p">,</span> <span class="n">mfnam</span><span class="p">,</span> <span class="n">mftdis</span>
+<span class="kn">from</span> <span class="nn">flopy.mf6.mfbase</span> <span class="kn">import</span> <span class="n">MFDataException</span><span class="p">,</span> <span class="n">VerbosityLevel</span>
+<span class="kn">from</span> <span class="nn">flopy.mf6.modflow</span> <span class="kn">import</span> <span class="n">mfims</span><span class="p">,</span> <span class="n">mftdis</span>
 <span class="kn">from</span> <span class="nn">flopy.utils</span> <span class="kn">import</span> <span class="n">SpatialReference</span><span class="p">,</span> <span class="n">TemporalReference</span><span class="p">,</span> <span class="n">mfreadnam</span>
 
-<span class="kn">from</span> <span class="nn">.grid</span> <span class="kn">import</span> <span class="n">MFsetupGrid</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">update</span>
+<span class="kn">from</span> <span class="nn">mfsetup.grid</span> <span class="kn">import</span> <span class="n">MFsetupGrid</span>
+<span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">update</span>
 
 
 <div class="viewcode-block" id="check_source_files"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.check_source_files">[docs]</a><span class="k">def</span> <span class="nf">check_source_files</span><span class="p">(</span><span class="n">fileslist</span><span class="p">):</span>

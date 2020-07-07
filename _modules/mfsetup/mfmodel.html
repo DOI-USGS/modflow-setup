@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g772fe52 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g3c59186 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g772fe52
+                0.post51+g3c59186
               </div>
             
           
@@ -190,10 +190,8 @@
 <span class="kn">from</span> <span class="nn">sfrmaker</span> <span class="kn">import</span> <span class="n">Lines</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="n">assign_layers</span>
 
-<span class="kn">import</span> <span class="nn">mfsetup</span>
-
-<span class="kn">from</span> <span class="nn">.bcs</span> <span class="kn">import</span> <span class="n">get_bc_package_cells</span>
-<span class="kn">from</span> <span class="nn">.fileio</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">mfsetup.bcs</span> <span class="kn">import</span> <span class="n">get_bc_package_cells</span>
+<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">check_source_files</span><span class="p">,</span>
     <span class="n">load</span><span class="p">,</span>
     <span class="n">load_array</span><span class="p">,</span>
@@ -201,19 +199,28 @@
     <span class="n">save_array</span><span class="p">,</span>
     <span class="n">setup_external_filepaths</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.grid</span> <span class="kn">import</span> <span class="n">MFsetupGrid</span><span class="p">,</span> <span class="n">get_ij</span><span class="p">,</span> <span class="n">rasterize</span><span class="p">,</span> <span class="n">setup_structured_grid</span>
-<span class="kn">from</span> <span class="nn">.interpolate</span> <span class="kn">import</span> <span class="n">get_source_dest_model_xys</span><span class="p">,</span> <span class="n">interp_weights</span><span class="p">,</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">regrid</span>
-<span class="kn">from</span> <span class="nn">.lakes</span> <span class="kn">import</span> <span class="n">make_lakarr2d</span><span class="p">,</span> <span class="n">setup_lake_fluxes</span><span class="p">,</span> <span class="n">setup_lake_info</span>
-<span class="kn">from</span> <span class="nn">.mf5to6</span> <span class="kn">import</span> <span class="n">get_model_length_units</span><span class="p">,</span> <span class="n">get_model_time_units</span><span class="p">,</span> <span class="n">get_package_name</span>
-<span class="kn">from</span> <span class="nn">.sourcedata</span> <span class="kn">import</span> <span class="n">TransientTabularSourceData</span><span class="p">,</span> <span class="n">setup_array</span>
-<span class="kn">from</span> <span class="nn">.tdis</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">mfsetup.grid</span> <span class="kn">import</span> <span class="n">MFsetupGrid</span><span class="p">,</span> <span class="n">get_ij</span><span class="p">,</span> <span class="n">rasterize</span><span class="p">,</span> <span class="n">setup_structured_grid</span>
+<span class="kn">from</span> <span class="nn">mfsetup.interpolate</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_source_dest_model_xys</span><span class="p">,</span>
+    <span class="n">interp_weights</span><span class="p">,</span>
+    <span class="n">interpolate</span><span class="p">,</span>
+    <span class="n">regrid</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mfsetup.lakes</span> <span class="kn">import</span> <span class="n">make_lakarr2d</span><span class="p">,</span> <span class="n">setup_lake_fluxes</span><span class="p">,</span> <span class="n">setup_lake_info</span>
+<span class="kn">from</span> <span class="nn">mfsetup.mf5to6</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_model_length_units</span><span class="p">,</span>
+    <span class="n">get_model_time_units</span><span class="p">,</span>
+    <span class="n">get_package_name</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mfsetup.sourcedata</span> <span class="kn">import</span> <span class="n">TransientTabularSourceData</span><span class="p">,</span> <span class="n">setup_array</span>
+<span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_parent_stress_periods</span><span class="p">,</span>
     <span class="n">parse_perioddata_groups</span><span class="p">,</span>
     <span class="n">setup_perioddata</span><span class="p">,</span>
     <span class="n">setup_perioddata_group</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">lenuni_text</span><span class="p">,</span> <span class="n">lenuni_values</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span><span class="p">,</span> <span class="n">update</span>
+<span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">lenuni_text</span><span class="p">,</span> <span class="n">lenuni_values</span>
+<span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span><span class="p">,</span> <span class="n">update</span>
 
 
 <div class="viewcode-block" id="MFsetupMixin"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin">[docs]</a><span class="k">class</span> <span class="nc">MFsetupMixin</span><span class="p">():</span>
