@@ -1,7 +1,5 @@
 import os
-import re
 import time
-from collections import OrderedDict
 
 import flopy
 import numpy as np
@@ -10,7 +8,6 @@ from scipy.ndimage import sobel
 from shapely.geometry import Polygon
 
 fm = flopy.modflow
-from flopy.utils.mflistfile import ListBudget
 from gisutils import get_proj_str, project, shp2df
 
 from mfsetup.evaporation import hamon_evaporation

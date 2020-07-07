@@ -10,26 +10,33 @@ import pandas as pd
 fm = flopy.modflow
 from flopy.modflow import Modflow
 
-from .bcs import setup_ghb_data
-from .discretization import (
+from mfsetup.bcs import setup_ghb_data
+from mfsetup.discretization import (
     deactivate_idomain_above,
     find_remove_isolated_cells,
     make_ibound,
 )
-from .fileio import check_source_files, flopy_mf2005_load, load, load_cfg, save_array
-from .lakes import (
+from mfsetup.fileio import (
+    check_source_files,
+    flopy_mf2005_load,
+    load,
+    load_cfg,
+    save_array,
+)
+from mfsetup.lakes import (
     make_bdlknc2d,
     make_bdlknc_zones,
     setup_lake_fluxes,
     setup_lake_info,
     setup_lake_tablefiles,
 )
-from .mfmodel import MFsetupMixin
-from .obs import read_observation_data, setup_head_observations
-from .tdis import get_parent_stress_periods, setup_perioddata_group
-from .tmr import Tmr
-from .units import convert_length_units, itmuni_text, lenuni_text
-from .utils import get_input_arguments, get_packages
+from mfsetup.mfmodel import MFsetupMixin
+from mfsetup.obs import read_observation_data, setup_head_observations
+from mfsetup.tdis import get_parent_stress_periods, setup_perioddata_group
+from mfsetup.tmr import Tmr
+from mfsetup.units import convert_length_units, itmuni_text, lenuni_text
+from mfsetup.utils import get_input_arguments, get_packages
+
 from .wells import setup_wel_data
 
 

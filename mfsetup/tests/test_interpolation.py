@@ -6,10 +6,9 @@ import rasterio
 from scipy.interpolate import griddata, interpn
 
 import xarray as xr
-
-from ..grid import MFsetupGrid
-from ..interpolate import get_source_dest_model_xys, interp_weights
-from ..testing import compare_float_arrays
+from mfsetup.grid import MFsetupGrid
+from mfsetup.interpolate import get_source_dest_model_xys, interp_weights
+from mfsetup.testing import compare_float_arrays
 
 
 @pytest.fixture
@@ -42,8 +41,6 @@ def modelgrid(dem_DataArray):
 
 
 def test_interp(dem_DataArray, modelgrid):
-
-    from matplotlib import pyplot as plt
 
     da = dem_DataArray
     mg = modelgrid

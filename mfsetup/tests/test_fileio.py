@@ -4,7 +4,7 @@ import platform
 import numpy as np
 import pytest
 
-from ..fileio import (
+from mfsetup.fileio import (
     dump_yml,
     exe_exists,
     load,

@@ -4,7 +4,7 @@ Tests for units.py module
 import numpy as np
 import pytest
 
-from ..units import (
+from mfsetup.units import (
     convert_flux_units,
     convert_length_units,
     convert_temperature_units,

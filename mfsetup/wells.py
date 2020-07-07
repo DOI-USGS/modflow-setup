@@ -1,17 +1,15 @@
 import os
 
-import flopy
 import numpy as np
 import pandas as pd
 from gisutils import df2shp, project
 from shapely.geometry import Point
 
+from mfsetup.fileio import append_csv, check_source_files
+from mfsetup.grid import get_ij
+from mfsetup.sourcedata import TransientTabularSourceData
+from mfsetup.tmr import Tmr
 from mfsetup.wateruse import get_mean_pumping_rates, resample_pumping_rates
-
-from .fileio import append_csv, check_source_files
-from .grid import get_ij
-from .sourcedata import TransientTabularSourceData
-from .tmr import Tmr
 
 
 def setup_wel_data(model, for_external_files=True):

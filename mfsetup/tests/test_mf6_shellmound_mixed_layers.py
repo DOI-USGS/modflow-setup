@@ -8,9 +8,9 @@ import flopy
 import pytest
 
 mf6 = flopy.mf6
-from ..fileio import load_cfg
-from ..mf6model import MF6model
-from ..utils import get_input_arguments
+from mfsetup.fileio import load_cfg
+from mfsetup.mf6model import MF6model
+from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture(scope="module")

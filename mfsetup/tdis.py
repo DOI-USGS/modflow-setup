@@ -7,8 +7,8 @@ import copy
 import numpy as np
 import pandas as pd
 
-from .checks import is_valid_perioddata
-from .utils import get_input_arguments, print_item
+from mfsetup.checks import is_valid_perioddata
+from mfsetup.utils import get_input_arguments, print_item
 
 months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 

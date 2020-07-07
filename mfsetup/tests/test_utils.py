@@ -3,7 +3,7 @@ Tests for utils.py module
 """
 import pytest
 
-from ..utils import flatten, update
+from mfsetup.utils import flatten, update
 
 
 @pytest.fixture(scope="function")

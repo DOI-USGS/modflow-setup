@@ -12,17 +12,16 @@ mf6 = flopy.mf6
 from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
 
-from .discretization import (
+from mfsetup.discretization import (
     ModflowGwfdis,
     create_vertical_pass_through_cells,
     deactivate_idomain_above,
-    fill_cells_vertically,
     find_remove_isolated_cells,
     make_idomain,
     make_lgr_idomain,
 )
-from .fileio import dump, flopy_mfsimulation_load, load, load_cfg
-from .lakes import (
+from mfsetup.fileio import flopy_mfsimulation_load, load, load_cfg
+from mfsetup.lakes import (
     get_lakeperioddata,
     setup_lake_connectiondata,
     setup_lake_fluxes,
@@ -30,14 +29,13 @@ from .lakes import (
     setup_lake_tablefiles,
     setup_mf6_lake_obs,
 )
-from .mfmodel import MFsetupMixin
-from .mover import get_mover_sfr_package_input
-from .obs import setup_head_observations
-from .tdis import get_parent_stress_periods, setup_perioddata_group
-from .tmr import Tmr
-from .units import convert_length_units, convert_time_units, itmuni_text, lenuni_text
-from .utils import flatten, get_input_arguments, get_packages, update
-from .wells import setup_wel_data
+from mfsetup.mfmodel import MFsetupMixin
+from mfsetup.mover import get_mover_sfr_package_input
+from mfsetup.obs import setup_head_observations
+from mfsetup.tmr import Tmr
+from mfsetup.units import convert_time_units
+from mfsetup.utils import flatten, get_input_arguments
+from mfsetup.wells import setup_wel_data
 
 
 class MF6model(MFsetupMixin, mf6.ModflowGwf):

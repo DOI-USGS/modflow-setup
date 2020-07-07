@@ -3,7 +3,6 @@ from flopy.utils import binaryfile as bf
 
 from mfsetup.discretization import get_layer
 from mfsetup.grid import get_ij
-from mfsetup.testing import rms_error
 from mfsetup.tmr import Tmr
 
 

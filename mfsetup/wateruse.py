@@ -4,14 +4,13 @@ import time
 import numpy as np
 import pandas as pd
 from gisutils import shp2df
-from shapely.geometry import MultiPolygon, Polygon, box
+from shapely.geometry import MultiPolygon, Polygon
 
 from mfsetup import wells as wells
+from mfsetup.discretization import get_layer, get_layer_thicknesses
+from mfsetup.grid import get_ij
+from mfsetup.mf5to6 import get_model_length_units
 from mfsetup.units import convert_volume_units
-
-from .discretization import get_layer, get_layer_thicknesses
-from .grid import get_ij
-from .mf5to6 import get_model_length_units
 
 months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 

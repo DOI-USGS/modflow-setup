@@ -1,4 +1,3 @@
-import copy
 import os
 
 import numpy as np
@@ -8,9 +7,8 @@ from shapely.geometry import Point
 
 import xarray as xr
 from mfsetup.discretization import weighted_average_between_layers
-
-from ..fileio import _parse_file_path_keys_from_source_data
-from ..sourcedata import (
+from mfsetup.fileio import _parse_file_path_keys_from_source_data
+from mfsetup.sourcedata import (
     ArraySourceData,
     MFArrayData,
     MFBinaryArraySourceData,
@@ -19,7 +17,7 @@ from ..sourcedata import (
     TransientTabularSourceData,
     transient2d_to_xarray,
 )
-from ..units import convert_length_units, convert_time_units
+from mfsetup.units import convert_length_units, convert_time_units
 
 
 @pytest.fixture

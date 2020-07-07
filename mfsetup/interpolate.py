@@ -4,7 +4,6 @@ import time
 import flopy
 import numpy as np
 from scipy import interpolate as spint
-from scipy.signal import convolve2d
 from scipy.spatial import qhull as qhull
 
 

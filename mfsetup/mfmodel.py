@@ -12,10 +12,8 @@ from gisutils import get_proj_str, get_values_at_points, project, shp2df
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
-import mfsetup
-
-from .bcs import get_bc_package_cells
-from .fileio import (
+from mfsetup.bcs import get_bc_package_cells
+from mfsetup.fileio import (
     check_source_files,
     load,
     load_array,
@@ -23,19 +21,28 @@ from .fileio import (
     save_array,
     setup_external_filepaths,
 )
-from .grid import MFsetupGrid, get_ij, rasterize, setup_structured_grid
-from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
-from .lakes import make_lakarr2d, setup_lake_fluxes, setup_lake_info
-from .mf5to6 import get_model_length_units, get_model_time_units, get_package_name
-from .sourcedata import TransientTabularSourceData, setup_array
-from .tdis import (
+from mfsetup.grid import MFsetupGrid, get_ij, rasterize, setup_structured_grid
+from mfsetup.interpolate import (
+    get_source_dest_model_xys,
+    interp_weights,
+    interpolate,
+    regrid,
+)
+from mfsetup.lakes import make_lakarr2d, setup_lake_fluxes, setup_lake_info
+from mfsetup.mf5to6 import (
+    get_model_length_units,
+    get_model_time_units,
+    get_package_name,
+)
+from mfsetup.sourcedata import TransientTabularSourceData, setup_array
+from mfsetup.tdis import (
     get_parent_stress_periods,
     parse_perioddata_groups,
     setup_perioddata,
     setup_perioddata_group,
 )
-from .units import convert_length_units, lenuni_text, lenuni_values
-from .utils import flatten, get_input_arguments, get_packages, update
+from mfsetup.units import convert_length_units, lenuni_text, lenuni_values
+from mfsetup.utils import flatten, get_input_arguments, get_packages, update
 
 
 class MFsetupMixin():

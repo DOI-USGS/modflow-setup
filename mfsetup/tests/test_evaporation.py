@@ -1,11 +1,9 @@
 import numpy as np
 import pytest
 
-from ..evaporation import (
+from mfsetup.evaporation import (
     hamon_evaporation,
     max_daylight_hours,
-    saturation_vapor_density,
-    saturation_vapor_pressure,
     solar_declination,
     sunset_hour_angle,
 )

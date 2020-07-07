@@ -2,7 +2,6 @@ import os
 import time
 
 import flopy
-import numpy as np
 import pandas as pd
 
 fm = flopy.modflow
@@ -10,12 +9,17 @@ import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
 
-from .discretization import weighted_average_between_layers
-#from .export import get_surface_bc_flux
-from .fileio import check_source_files
-from .grid import get_ij
-from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
-from .units import convert_length_units
+from mfsetup.discretization import weighted_average_between_layers
+#from mfsetup.export import get_surface_bc_flux
+from mfsetup.fileio import check_source_files
+from mfsetup.grid import get_ij
+from mfsetup.interpolate import (
+    get_source_dest_model_xys,
+    interp_weights,
+    interpolate,
+    regrid,
+)
+from mfsetup.units import convert_length_units
 
 
 class Tmr:

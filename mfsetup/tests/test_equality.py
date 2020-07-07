@@ -1,9 +1,9 @@
 import copy
 
-from flopy.datbase import DataInterface, DataType
+from flopy.datbase import DataInterface
 from flopy.mf6.data.mfdatalist import MFList
 
-from ..equality import list_eq, model_eq, package_eq
+from mfsetup.equality import list_eq, model_eq, package_eq
 
 
 def test_model_equality(shellmound_model_with_dis):

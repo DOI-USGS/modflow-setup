@@ -5,8 +5,7 @@ import filecmp
 import glob
 import os
 import shutil
-import time
-from copy import copy, deepcopy
+from copy import deepcopy
 
 import flopy
 import numpy as np

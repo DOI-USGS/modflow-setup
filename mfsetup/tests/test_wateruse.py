@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ..wateruse import (
+from mfsetup.wateruse import (
     get_mean_pumping_rates,
     read_wdnr_monthly_water_use,
     resample_pumping_rates,

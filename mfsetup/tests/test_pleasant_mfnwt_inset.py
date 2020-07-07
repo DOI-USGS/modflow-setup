@@ -17,8 +17,7 @@ import pytest
 from mfsetup import MFnwtModel
 from mfsetup.discretization import find_remove_isolated_cells
 from mfsetup.fileio import load_array
-
-from .test_lakes import get_prism_data
+from mfsetup.tests.test_lakes import get_prism_data
 
 
 def test_perioddata(get_pleasant_nwt):

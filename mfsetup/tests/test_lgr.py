@@ -12,14 +12,7 @@ from flopy.utils import binaryfile as bf
 
 from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
-from mfsetup.fileio import (
-    dump,
-    exe_exists,
-    load,
-    load_cfg,
-    load_modelgrid,
-    read_mf6_block,
-)
+from mfsetup.fileio import dump, exe_exists, load, load_cfg, read_mf6_block
 from mfsetup.mover import get_sfr_package_connections
 from mfsetup.testing import compare_inset_parent_values
 from mfsetup.utils import get_input_arguments

@@ -7,17 +7,15 @@ and the reference within on frequency strings.
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html
 https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
 """
-import copy
 import os
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from mfsetup.mf6model import MF6model
+from mfsetup.sourcedata import TransientTabularSourceData
 from mfsetup.tdis import aggregate_dataframe_to_stress_period, get_parent_stress_periods
-
-from ..mf6model import MF6model
-from ..sourcedata import TransientTabularSourceData
 
 
 @pytest.fixture(scope='function')

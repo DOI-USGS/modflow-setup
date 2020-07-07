@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point
 
-from .fileio import check_source_files
-from .grid import get_ij
+from mfsetup.fileio import check_source_files
+from mfsetup.grid import get_ij
 
 
 def read_observation_data(f=None, column_info=None,

@@ -3,7 +3,7 @@ Module with functions to check input data.
 """
 import numpy as np
 
-from .fileio import load_array
+from mfsetup.fileio import load_array
 
 
 def is_valid_perioddata(data):

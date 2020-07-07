@@ -1,7 +1,7 @@
 """
 Utilities for swapping data between MODFLOW-6 and MODFLOW-2005 models
 """
-from .units import itmuni_text, itmuni_values, lenuni_text, lenuni_values
+from mfsetup.units import itmuni_text, itmuni_values, lenuni_text, lenuni_values
 
 # mapping of variables to packages
 variable_packages = {'mf6': {'sy': 'sto',

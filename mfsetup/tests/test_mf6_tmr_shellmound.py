@@ -7,7 +7,7 @@ import pytest
 from flopy import mf6 as mf6
 
 from mfsetup import MF6model
-from mfsetup.fileio import exe_exists, load_array, load_cfg, read_mf6_block
+from mfsetup.fileio import exe_exists, load_array, load_cfg
 from mfsetup.grid import MFsetupGrid
 from mfsetup.utils import get_input_arguments
 

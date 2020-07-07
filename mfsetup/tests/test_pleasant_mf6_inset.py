@@ -16,7 +16,7 @@ mf6 = flopy.mf6
 fm = flopy.modflow
 from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
-from mfsetup.fileio import exe_exists, load_cfg, read_lak_ggo, read_mf6_block
+from mfsetup.fileio import exe_exists, load_cfg, read_mf6_block
 from mfsetup.testing import compare_inset_parent_values
 from mfsetup.utils import get_input_arguments
 

@@ -1,8 +1,4 @@
-import numpy as np
-import pandas as pd
-import pytest
-
-from ..obs import make_obsname
+from mfsetup.obs import make_obsname
 
 
 def test_make_obsname():

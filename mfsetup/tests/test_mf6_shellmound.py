@@ -4,7 +4,6 @@ sys.path.append('..')
 import glob
 import os
 import shutil
-import time
 from copy import deepcopy
 
 import flopy
@@ -12,23 +11,22 @@ import numpy as np
 import pandas as pd
 import pytest
 import rasterio
-from shapely.geometry import box
 
 import xarray as xr
 
 mf6 = flopy.mf6
-from .. import testing
-from ..checks import check_external_files_for_nans
-from ..discretization import (
+from mfsetup import testing
+from mfsetup.checks import check_external_files_for_nans
+from mfsetup.discretization import (
     cellids_to_kij,
     find_remove_isolated_cells,
     get_layer_thicknesses,
 )
-from ..fileio import exe_exists, load_array, load_cfg, read_mf6_block
-from ..grid import rasterize
-from ..mf6model import MF6model
-from ..units import convert_length_units
-from ..utils import get_input_arguments
+from mfsetup.fileio import exe_exists, load_array, load_cfg, read_mf6_block
+from mfsetup.grid import rasterize
+from mfsetup.mf6model import MF6model
+from mfsetup.units import convert_length_units
+from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -593,7 +591,7 @@ def test_wel_setup(shellmound_model_with_dis):
     df = df.loc[~outside]
     df['start_datetime'] = pd.to_datetime(df.start_datetime)
     df['end_datetime'] = pd.to_datetime(df.end_datetime)
-    from ..grid import get_ij
+    from mfsetup.grid import get_ij
     i, j = get_ij(m.modelgrid, df.x.values, df.y.values)
     df['i'] = i
     df['j'] = j

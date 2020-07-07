@@ -1,7 +1,6 @@
 import numbers
 import os
 import shutil
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -11,25 +10,29 @@ from scipy.interpolate import griddata
 from shapely.geometry import Point
 
 import xarray as xr
-from mfsetup.discretization import weighted_average_between_layers
-from mfsetup.tdis import (
-    aggregate_dataframe_to_stress_period,
-    aggregate_xarray_to_stress_period,
-)
-
-from .discretization import (
+from mfsetup.discretization import (
     fill_cells_vertically,
     fill_empty_layers,
     fix_model_layer_conflicts,
     populate_values,
     verify_minimum_layer_thickness,
+    weighted_average_between_layers,
 )
-from .fileio import save_array
-from .grid import get_ij, rasterize
-from .interpolate import get_source_dest_model_xys, interp_weights, interpolate, regrid
-from .mf5to6 import get_variable_name, get_variable_package_name
-from .units import convert_length_units, convert_time_units, convert_volume_units
-from .utils import get_input_arguments
+from mfsetup.fileio import save_array
+from mfsetup.grid import get_ij, rasterize
+from mfsetup.interpolate import (
+    get_source_dest_model_xys,
+    interp_weights,
+    interpolate,
+    regrid,
+)
+from mfsetup.mf5to6 import get_variable_name, get_variable_package_name
+from mfsetup.tdis import (
+    aggregate_dataframe_to_stress_period,
+    aggregate_xarray_to_stress_period,
+)
+from mfsetup.units import convert_length_units, convert_time_units, convert_volume_units
+from mfsetup.utils import get_input_arguments
 
 renames = {'mult': 'multiplier',
            'elevation_units': 'length_units',

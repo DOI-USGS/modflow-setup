@@ -5,26 +5,17 @@ import json
 import os
 import sys
 import time
-from collections import defaultdict
 
 import numpy as np
 import pandas as pd
 import yaml
 from flopy.mf6.data import mfstructure
-from flopy.mf6.mfbase import (
-    ExtFileAction,
-    FlopyException,
-    MFDataException,
-    MFFileMgmt,
-    PackageContainer,
-    PackageContainerType,
-    VerbosityLevel,
-)
-from flopy.mf6.modflow import mfgwfgnc, mfgwfmvr, mfims, mfnam, mftdis
+from flopy.mf6.mfbase import MFDataException, VerbosityLevel
+from flopy.mf6.modflow import mfims, mftdis
 from flopy.utils import SpatialReference, TemporalReference, mfreadnam
 
-from .grid import MFsetupGrid
-from .utils import get_input_arguments, update
+from mfsetup.grid import MFsetupGrid
+from mfsetup.utils import get_input_arguments, update
 
 
 def check_source_files(fileslist):

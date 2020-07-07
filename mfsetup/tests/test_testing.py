@@ -1,11 +1,11 @@
 import numpy as np
 import pytest
 
-from ..testing import dtypeisfloat, dtypeisinteger, point_is_on_nhg
+from mfsetup.testing import dtypeisfloat, dtypeisinteger, point_is_on_nhg
 
 
 def test_rtree():
-    from rtree import index
+    pass
 
 
 def test_dtypeisfloat():

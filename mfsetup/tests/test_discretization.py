@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ..discretization import (
+from mfsetup.discretization import (
     create_vertical_pass_through_cells,
     deactivate_idomain_above,
     fill_cells_vertically,

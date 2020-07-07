@@ -10,9 +10,7 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MF6model, MFnwtModel
 from mfsetup.fileio import exe_exists, load_cfg
-from mfsetup.utils import get_input_arguments
-
-from .test_pleasant_mf6_inset import (
+from mfsetup.tests.test_pleasant_mf6_inset import (
     get_pleasant_mf6,
     get_pleasant_mf6_with_dis,
     get_pleasant_mf6_with_grid,
@@ -21,6 +19,7 @@ from .test_pleasant_mf6_inset import (
     pleasant_mf6_test_cfg_path,
     pleasant_simulation,
 )
+from mfsetup.utils import get_input_arguments
 
 
 @pytest.fixture(scope="session")

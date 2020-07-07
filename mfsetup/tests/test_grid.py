@@ -6,13 +6,13 @@ import numpy as np
 import pytest
 from gisutils import shp2df
 
-from ..fileio import dump, load_modelgrid
-from ..grid import (
+from mfsetup.fileio import dump, load_modelgrid
+from mfsetup.grid import (
     MFsetupGrid,
     get_nearest_point_on_grid,
     get_point_on_national_hydrogeologic_grid,
 )
-from ..testing import point_is_on_nhg
+from mfsetup.testing import point_is_on_nhg
 
 # TODO: add tests for grid.py
 
