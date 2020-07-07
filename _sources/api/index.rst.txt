@@ -17,5 +17,3 @@ Supporting modules
    mfsetup.fileio
    mfsetup.grid
    mfsetup.tdis
-
-

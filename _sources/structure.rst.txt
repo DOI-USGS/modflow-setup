@@ -1,13 +1,13 @@
 Basic program structure and usage
 =================================
 
-Modflow-setup is intended to provide both a collection of python modules with functions for performing various model construction tasks and a boiler plate workflow for automated construction of a working MODFLOW model from a configuration file. The latter goal is implemented in the ``MF6model`` and ``MFnwtModel`` classes, which can both be imported at the top level. 
+Modflow-setup is intended to provide both a collection of python modules with functions for performing various model construction tasks and a boiler plate workflow for automated construction of a working MODFLOW model from a configuration file. The latter goal is implemented in the ``MF6model`` and ``MFnwtModel`` classes, which can both be imported at the top level.
 
 .. code-block:: python
 
     from mfsetup import MF6model
     from mfsetup import MFnwtModel
-    
+
 
 MF6model extends the ``mf6.ModflowGwf`` (MODFLOW-6 groundwater flow model) class in Flopy; MFnwtModel extends the ``modflow.Modflow`` (pre-MODFLOW-6 groundwater flow model) class in Flopy. These two classes are intended to provide methods and attributes specific to MODFLOW-6 or MODFLOW-NWT. A third `mixin class`_ (``MFsetupMixin``) contains methods and attributes that are general to both MODFLOW-6 and MODFLOW-NWT (and therefore used by both MF6model and MFnwtModel). The goal in this is to make modflow-setup be agnostic to MODFLOW version to the extent feasible.
 
@@ -40,8 +40,8 @@ The ``.setup_from_yaml`` method above calls individual package setup methods for
 
     model = MF6model.load('config_file.yml')
     model.setup_dis()
-    
+
 In this case, the discretization package is built from information in `config_file.yml`.
-    
+
 
 .. _mixin class: https://en.wikipedia.org/wiki/Mixin
