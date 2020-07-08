@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Contributing to modflow-setup &mdash; modflow-setup 0.post51+g3239e20 documentation</title>
+  <title>Contributing to modflow-setup &mdash; modflow-setup 0.post51+gfa65135 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.post51+g3239e20
+                0.post51+gfa65135
               </div>
             
           
@@ -112,7 +112,29 @@
 </ul>
 <p class="caption"><span class="caption-text">Developer</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to modflow-setup</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to modflow-setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#seven-steps-for-contributing">Seven Steps for Contributing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#forking-the-modflow-setup-repository-using-git">1) Forking the <em>modflow-setup</em> repository using Git</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#getting-started-with-git">Getting started with Git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#forking">Forking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-branch">Creating a branch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-development-environment-with-the-required-dependencies">2 &amp; 3) Creating a development environment with the required dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-modflow-setup-source-code">4) Installing the modflow-setup source code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#making-changes-and-writing-tests">5) Making changes and writing tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-tests">Writing tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-test-suite">Running the test suite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#updating-the-documentation">6) Updating the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submitting-a-pull-request">7) Submitting a Pull Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#style-guide-linting">Style Guide &amp; Linting</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -204,6 +226,237 @@
 </style>
 <div class="section" id="contributing-to-modflow-setup">
 <h1>Contributing to modflow-setup<a class="headerlink" href="#contributing-to-modflow-setup" title="Permalink to this headline">¶</a></h1>
+<p>(Note: much of this page was cribbed from the <a class="reference external" href="https://geopandas.org/">geopandas</a> project,
+which has similar guidelines to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/contributing.html">pandas</a>
+and <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a>.)</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Contributions to modflow-setup are very welcome.  They are likely to
+be accepted more quickly if they follow these guidelines.</p>
+<p>In general, modflow-setup follows the conventions of the pandas project
+where applicable.</p>
+<p>In particular, when submitting a pull request:</p>
+<ul class="simple">
+<li><p>All existing tests should pass.  Please make sure that the test
+suite passes, both locally and on
+<a class="reference external" href="https://travis-ci.org/modflow-setup/modflow-setup">Travis CI</a>.  Status on
+Travis will be visible on a pull request.  If you want to enable
+Travis CI on your own fork, please read the pandas guidelines link
+above or the
+<a class="reference external" href="https://docs.travis-ci.com/user/tutorial/">getting started docs</a>.</p></li>
+<li><p>New functionality should include tests.  Please write reasonable
+tests for your code and make sure that they pass on your pull request.</p></li>
+<li><p>Classes, methods, functions, etc. should have docstrings.  The first
+line of a docstring should be a standalone summary.  Parameters and
+return values should be documented explicitly. (Note: there are admittedly more than a few places in the existing code where docstrings are missing. Docstring contributions are especially welcome!</p></li>
+<li><p>Follow PEP 8 when possible. For more details see
+<a class="reference internal" href="#contributing-style"><span class="std std-ref">below</span></a>.</p></li>
+<li><p>Following the <a class="reference external" href="https://github.com/modflowpy/flopy/blob/develop/CONTRIBUTING.md">FloPy Commit Message Guidelines</a> (which are similar to the <a class="reference external" href="https://www.conventionalcommits.org/en/v1.0.0/">Conventional Commits</a> specification) is encouraged. Structured commit messages like these can result in more explicit commit messages that are more informative, and also facilitate automation of project maintenance tasks.</p></li>
+<li><p>Imports should be grouped with standard library imports first,
+3rd-party libraries next, and modflow-setup imports third.  Within each
+grouping, imports should be alphabetized.  Always use absolute
+imports when possible, and explicit relative imports for local
+imports when necessary in tests. Imports can be sorted automatically using the isort package with a pre-commit hook. For more details see <a class="reference internal" href="#contributing-style"><span class="std std-ref">below</span></a>.</p></li>
+<li><p>modflow-setup supports Python 3.7+ only.</p></li>
+</ul>
+<div class="section" id="seven-steps-for-contributing">
+<h3>Seven Steps for Contributing<a class="headerlink" href="#seven-steps-for-contributing" title="Permalink to this headline">¶</a></h3>
+<p>There are seven basic steps to contributing to <em>modflow-setup</em>:</p>
+<ol class="arabic simple">
+<li><p>Fork the <em>modflow-setup</em> git repository</p></li>
+<li><p>Create a development environment</p></li>
+<li><p>Install <em>modflow-setup</em> dependencies</p></li>
+<li><p>Installing the modflow-setup source code</p></li>
+<li><p>Make changes to code and add tests</p></li>
+<li><p>Update the documentation</p></li>
+<li><p>Submit a Pull Request</p></li>
+</ol>
+<p>Each of these 7 steps is detailed below.</p>
+</div>
+</div>
+<div class="section" id="forking-the-modflow-setup-repository-using-git">
+<h2>1) Forking the <em>modflow-setup</em> repository using Git<a class="headerlink" href="#forking-the-modflow-setup-repository-using-git" title="Permalink to this headline">¶</a></h2>
+<p>To the new user, working with Git is one of the more daunting aspects of contributing to <em>modflow-setup*</em>.
+It can very quickly become overwhelming, but sticking to the guidelines below will help keep the process
+straightforward and mostly trouble free.  As always, if you are having difficulties please
+feel free to ask for help.</p>
+<p>The code is hosted on <a class="reference external" href="https://github.com/modflow-setup/modflow-setup">GitHub</a>. To
+contribute you will need to sign up for a <a class="reference external" href="https://github.com/signup/free">free GitHub account</a>. We use <a class="reference external" href="http://git-scm.com/">Git</a> for
+version control to allow many people to work together on the project.</p>
+<p>Some great resources for learning Git:</p>
+<ul class="simple">
+<li><p>Software Carpentry’s <a class="reference external" href="http://swcarpentry.github.io/git-novice/">Git Tutorial</a></p></li>
+<li><p><a class="reference external" href="https://www.atlassian.com/git/tutorials/what-is-version-control">Atlassian</a></p></li>
+<li><p>the <a class="reference external" href="http://help.github.com/">GitHub help pages</a>.</p></li>
+<li><p>Matthew Brett’s <a class="reference external" href="http://matthew-brett.github.com/pydagogue/">Pydagogue</a>.</p></li>
+</ul>
+<div class="section" id="getting-started-with-git">
+<h3>Getting started with Git<a class="headerlink" href="#getting-started-with-git" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://help.github.com/set-up-git-redirect">GitHub has instructions</a> for installing git,
+setting up your SSH key, and configuring git.  All these steps need to be completed before
+you can work seamlessly between your local repository and GitHub.</p>
+</div>
+<div class="section" id="forking">
+<span id="contributing-forking"></span><h3>Forking<a class="headerlink" href="#forking" title="Permalink to this headline">¶</a></h3>
+<p>You will need your own fork to work on the code. Go to the <a class="reference external" href="https://github.com/modflow-setup/modflow-setup">modflow-setup project
+page</a> and hit the <code class="docutils literal notranslate"><span class="pre">Fork</span></code> button. You will
+want to clone your fork to your machine:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span><span class="o">/</span><span class="n">modflow</span><span class="o">-</span><span class="n">setup</span><span class="o">.</span><span class="n">git</span> <span class="n">modflow</span><span class="o">-</span><span class="n">setup</span><span class="o">-</span><span class="n">yourname</span>
+<span class="n">cd</span> <span class="n">modflow</span><span class="o">-</span><span class="n">setup</span><span class="o">-</span><span class="n">yourname</span>
+<span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">upstream</span> <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">modflow</span><span class="o">-</span><span class="n">setup</span><span class="o">/</span><span class="n">modflow</span><span class="o">-</span><span class="n">setup</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>This creates the directory <cite>modflow-setup-yourname</cite> and connects your repository to
+the upstream (main project) <em>modflow-setup</em> repository.</p>
+<p>The testing suite will run automatically on Travis-CI once your pull request is
+submitted.  However, if you wish to run the test suite on a branch prior to
+submitting the pull request, then Travis-CI needs to be hooked up to your
+GitHub repository.  Instructions for doing so are <a class="reference external" href="http://about.travis-ci.org/docs/user/getting-started/">here</a>.</p>
+</div>
+<div class="section" id="creating-a-branch">
+<h3>Creating a branch<a class="headerlink" href="#creating-a-branch" title="Permalink to this headline">¶</a></h3>
+<p>You want your master branch to reflect only production-ready code, so create a
+feature branch for making your changes. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">branch</span> <span class="n">shiny</span><span class="o">-</span><span class="n">new</span><span class="o">-</span><span class="n">feature</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">shiny</span><span class="o">-</span><span class="n">new</span><span class="o">-</span><span class="n">feature</span>
+</pre></div>
+</div>
+<p>The above can be simplified to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">shiny</span><span class="o">-</span><span class="n">new</span><span class="o">-</span><span class="n">feature</span>
+</pre></div>
+</div>
+<p>This changes your working directory to the shiny-new-feature branch.  Keep any
+changes in this branch specific to one bug or feature so it is clear
+what the branch brings to <em>modflow-setup</em>. You can have many shiny-new-features
+and switch in between them using the git checkout command.</p>
+<p>To update this branch, you need to retrieve the changes from the master branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+<span class="n">git</span> <span class="n">rebase</span> <span class="n">upstream</span><span class="o">/</span><span class="n">master</span>
+</pre></div>
+</div>
+<p>This will replay your commits on top of the latest modflow-setup git master.  If this
+leads to merge conflicts, you must resolve these before submitting your pull
+request.  If you have uncommitted changes, you will need to <code class="docutils literal notranslate"><span class="pre">stash</span></code> them prior
+to updating.  This will effectively store your changes and they can be reapplied
+after updating.</p>
+</div>
+</div>
+<div class="section" id="creating-a-development-environment-with-the-required-dependencies">
+<span id="contributing-dev-env"></span><h2>2 &amp; 3) Creating a development environment with the required dependencies<a class="headerlink" href="#creating-a-development-environment-with-the-required-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>A development environment is a virtual space where you can keep an independent installation of <em>modflow-setup</em>.
+This makes it easy to keep both a stable version of python in one place you use for work, and a development
+version (which you may break while playing with code) in another.</p>
+<p>An easy way to create a <em>modflow-setup</em> development environment is as follows:</p>
+<ul class="simple">
+<li><p>Install either <a class="reference external" href="http://docs.continuum.io/anaconda/">Anaconda</a> or
+<a class="reference external" href="http://conda.pydata.org/miniconda.html">miniconda</a></p></li>
+<li><p>Make sure that you have <a class="reference internal" href="#contributing-forking"><span class="std std-ref">cloned the repository</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span></code> to the <em>modflow-setup*</em> source directory</p></li>
+</ul>
+<p>Tell conda to create a new environment, named <code class="docutils literal notranslate"><span class="pre">modflow-setup_dev</span></code>, that has all of the python packages needed to contribute to modflow-setup. Note that in the <a class="reference external" href="https://geopandas.org/contributing.html">geopandas instructions</a>, this step is broken into two parts- 2) creating the environment, and 3) installing the dependencies. By using a yaml file that includes the environment name and package requirements, these two steps can be combined:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<p>This will create the new environment, and not touch any of your existing environments,
+nor any existing python installation.</p>
+<p>To work in this environment, you need to <code class="docutils literal notranslate"><span class="pre">activate</span></code> it. The instructions below
+should work for both Windows, Mac and Linux:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">modflow</span><span class="o">-</span><span class="n">setup_dev</span>
+</pre></div>
+</div>
+<p>Once your environment is activated, you will see a confirmation message to
+indicate you are in the new development environment.</p>
+<p>To view your environments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">info</span> <span class="o">-</span><span class="n">e</span>
+</pre></div>
+</div>
+<p>To return to your home root environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">deactivate</span>
+</pre></div>
+</div>
+<p>See the full conda docs <a class="reference external" href="http://conda.pydata.org/docs">here</a>.</p>
+<p>At this point you can easily do a <em>development</em> install, as detailed in the next sections.</p>
+</div>
+<div class="section" id="installing-the-modflow-setup-source-code">
+<h2>4) Installing the modflow-setup source code<a class="headerlink" href="#installing-the-modflow-setup-source-code" title="Permalink to this headline">¶</a></h2>
+<p>Once dependencies are in place, install the modflow-setup source code by navigating to the gitclone of the <em>modflow-setup</em> repository and (with the <code class="docutils literal notranslate"><span class="pre">modflow-setup_dev</span></code> environment activated) running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="making-changes-and-writing-tests">
+<h2>5) Making changes and writing tests<a class="headerlink" href="#making-changes-and-writing-tests" title="Permalink to this headline">¶</a></h2>
+<p><em>modflow-setup</em> is serious about testing and strongly encourages contributors to embrace
+<a class="reference external" href="http://en.wikipedia.org/wiki/Test-driven_development">test-driven development (TDD)</a>.
+This development process “relies on the repetition of a very short development cycle:
+first the developer writes an (initially failing) automated test case that defines a desired
+improvement or new function, then produces the minimum amount of code to pass that test.”
+So, before actually writing any code, you should write your tests.  Often the test can be
+taken from the original GitHub issue.  However, it is always worth considering additional
+use cases and writing corresponding tests.</p>
+<p>In general, tests are required for code pushed to <em>modflow-setup</em>.  Therefore,
+it is worth getting in the habit of writing tests ahead of time so this is never an issue.</p>
+<p><em>modflow-setup</em> uses the <a class="reference external" href="http://doc.pytest.org/en/latest/">pytest testing system</a> and the convenient
+extensions in <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/routines.testing.html">numpy.testing</a> and <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/general_utility_functions.html">pandas.testing</a>.</p>
+<div class="section" id="writing-tests">
+<h3>Writing tests<a class="headerlink" href="#writing-tests" title="Permalink to this headline">¶</a></h3>
+<p>All tests should go into the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory. This folder contains many
+current examples of tests, and we suggest looking to these for inspiration. In general,
+the tests in this folder aim to be organized by module (e.g. <code class="docutils literal notranslate"><span class="pre">test_lakes.py</span></code> for the functions in <code class="docutils literal notranslate"><span class="pre">lakes.py</span></code>) or test case (e.g. <code class="docutils literal notranslate"><span class="pre">test_mf6_shellmound.py</span></code> for the <a class="reference internal" href="config-file-gallery.html#shellmound-test-case"><span class="std std-ref">Shellmound test case</span></a>).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">.testing</span></code> module has some special functions to facilitate writing tests. The easiest way to verify that your code is correct is to explicitly construct the result you expect, then compare the actual result to the expected correct result.</p>
+</div>
+<div class="section" id="running-the-test-suite">
+<h3>Running the test suite<a class="headerlink" href="#running-the-test-suite" title="Permalink to this headline">¶</a></h3>
+<p>The tests can then be run directly inside your Git clone (without having to
+install <em>modflow-setup</em>) by typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="updating-the-documentation">
+<h2>6) Updating the Documentation<a class="headerlink" href="#updating-the-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The <em>modflow-setup</em> documentation resides in the <cite>docs</cite> folder. Changes to the docs are
+made by modifying the appropriate file in the <cite>source</cite> folder within <cite>docs</cite>.
+The <em>modflow-setup</em> docs use reStructuredText syntax, <a class="reference external" href="http://www.sphinx-doc.org/en/stable/rest.html#rst-primer">which is explained here</a>
+and the docstrings follow the <a class="reference external" href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">Numpy Docstring standard</a>.</p>
+<p>Once you have made your changes, you can try building the docs using sphinx. To do so, you can navigate to the <cite>doc</cite> folder and type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="o">-</span><span class="n">C</span> <span class="n">docs</span> <span class="n">html</span>
+</pre></div>
+</div>
+<p>The resulting html pages will be located in <cite>docs/build/html</cite>. It’s a good practice to rebuild the docs often while writing to stay on top of any mistakes. The <a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=lextudio.restructuredtext">reStructuredText extension in VS Code</a> is another way to continuously preview a rendered documentation page while writing.</p>
+</div>
+<div class="section" id="submitting-a-pull-request">
+<h2>7) Submitting a Pull Request<a class="headerlink" href="#submitting-a-pull-request" title="Permalink to this headline">¶</a></h2>
+<p>Once you’ve made changes and pushed them to your forked repository, you then
+submit a pull request to have them integrated into the <em>modflow-setup</em> code base.</p>
+<p>You can find a pull request (or PR) tutorial in the <a class="reference external" href="https://help.github.com/articles/using-pull-requests/">GitHub’s Help Docs</a>.</p>
+</div>
+<div class="section" id="style-guide-linting">
+<span id="contributing-style"></span><h2>Style Guide &amp; Linting<a class="headerlink" href="#style-guide-linting" title="Permalink to this headline">¶</a></h2>
+<p>modflow-setup tries to follow the <a class="reference external" href="http://www.python.org/dev/peps/pep-0008/">PEP8</a> standard. At this point, there’s no enforcement of this, but I am considering implementing <a class="reference external" href="https://black.readthedocs.io/en/stable/">Black</a>, which automates a code style that is PEP8-complient. Many editors perform automatic linting that makes following PEP8 easy.</p>
+<p>modflow-setup does use the <a class="reference external" href="https://github.com/timothycrosley/isort">isort</a> package to automatically organize import statements. isort can installed via pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install isort
+</pre></div>
+</div>
+<p>And then run with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ isort .
+</pre></div>
+</div>
+<p>from the root level of the project.</p>
+<p>Optionally (but recommended), you can setup <a class="reference external" href="https://pre-commit.com/">pre-commit hooks</a>
+to automatically run <code class="docutils literal notranslate"><span class="pre">isort</span></code> when you make a git commit. This
+can be done by installing <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python -m pip install pre-commit
+</pre></div>
+</div>
+<p>From the root of the modflow-setup repository, you should then install the
+<code class="docutils literal notranslate"><span class="pre">pre-commit</span></code> included in <em>modflow-setup</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pre-commit install
+</pre></div>
+</div>
+<p>Then <code class="docutils literal notranslate"><span class="pre">isort</span></code> will be run automatically each time you commit changes. You can skip these checks with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">--no-verify</span></code>.</p>
+</div>
 </div>
 
 
