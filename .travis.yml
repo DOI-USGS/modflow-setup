@@ -50,7 +50,6 @@ script:
   - coverage report -m  # Generate test coverage report.
   - set -e
   - make -C docs html  # Build the documentation.
-  - pip install doctr
   #  Publish the documentation with builds on master or develop branch
   - doctr deploy --built-docs docs/build/html . --branch-whitelist master develop
 
