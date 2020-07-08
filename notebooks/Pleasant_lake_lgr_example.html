@@ -464,7 +464,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Lake package created from polygon features, bathymetry raster, stage-area-volume file and climate data from <code class="docutils literal notranslate"><span class="pre">PRISM</span></code>_.</p></li>
 <li><p>Lake package observations set up automatically (output file for each lake)</p></li>
 </ul>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -481,14 +481,6 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">mfexport</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packages/flopy
-</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -538,9 +530,9 @@ newtonoptions: [&#39;under_relaxation&#39;]
 loading parent model /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/pleasant.nam...
 model_ws: /home/travis/build/aleaf/modflow-setup/examples/data/pleasant
 version: mfnwt
-load_only: [&#39;upw&#39;, &#39;wel&#39;, &#39;sfr&#39;, &#39;bas6&#39;, &#39;oc&#39;, &#39;rch&#39;, &#39;dis&#39;]
+load_only: [&#39;sfr&#39;, &#39;oc&#39;, &#39;wel&#39;, &#39;upw&#39;, &#39;bas6&#39;, &#39;dis&#39;, &#39;rch&#39;]
 f: pleasant.nam
-finished in 0.12s
+finished in 0.14s
 
 xoff: 552200.0
 yoff: 387000.0
@@ -670,7 +662,7 @@ top: None
 botm: None
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_parent_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_parent_bbox.shp...
-finished in 0.04s
+finished in 0.05s
 
 loading configuration file /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr_inset.yml...
 modelname: plsnt_lgr_inset
@@ -769,7 +761,7 @@ reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/
 finished in 0.00s
 loading ./external/plsnt_lgr_parent_top.dat, shape=(25, 25), took 0.00s
 computing cell thicknesses...
-finished in 0.04s
+finished in 0.02s
 
 wrote ./external/plsnt_lgr_parent_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_parent_botm0.dat, took 0.00s
@@ -1040,10 +1032,10 @@ botm: [[[319.91 321.42 322.74 ... 307.77 305.47 304.45]
   [191.84 191.64 191.44 ... 189.37 189.41 189.46]]]
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_parent_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_parent_bbox.shp...
-finished in 0.02s
+finished in 0.03s
 
 loading configuration file /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr_inset.yml...
-finished in 0.22s
+finished in 0.24s
 
 xoff: 552800.0
 yoff: 388200.0
@@ -1298,10 +1290,10 @@ top: None
 botm: None
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp...
-finished in 0.20s
+finished in 0.23s
 
 computing cell thicknesses...
-finished in 0.03s
+finished in 0.02s
 
 wrote original/plsnt_lgr_parent_lakarr0.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr1.dat, took 0.00s
@@ -1489,7 +1481,7 @@ botm: [[[319.91 321.42 322.74 ... 307.77 305.47 304.45]
   [191.84 191.64 191.44 ... 189.37 189.41 189.46]]]
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_parent_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_parent_bbox.shp...
-finished in 0.02s
+finished in 0.04s
 
 
 Setting up TDIS package...
@@ -1524,7 +1516,7 @@ relaxation_factor: 0.0
 number_orthogonalizations: 0
 preconditioner_levels: 7
 preconditioner_drop_tolerance: 0.001
-finished in 0.00s
+finished in 0.01s
 
 
 Setting up IC package...
@@ -1541,7 +1533,7 @@ strt: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_strt0.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_strt2.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_strt3.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_strt4.dat&#39;}]
-finished in 0.10s
+finished in 0.11s
 
 
 Setting up NPF package...
@@ -1572,7 +1564,7 @@ k33: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k330.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k332.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k333.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k334.dat&#39;}]
-finished in 0.20s
+finished in 0.21s
 
 
 Setting up STO package...
@@ -1624,7 +1616,7 @@ transient: {0: False,
  10: True,
  11: True,
  12: True}
-finished in 0.19s
+finished in 0.20s
 
 
 Setting up RCH package...
@@ -1687,7 +1679,7 @@ reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_dat
 reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.08s
+load finished in 0.09s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.02s
@@ -1698,7 +1690,7 @@ SFRmaker version 0.4.0.post13+g8ed2f8a
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.04s
+grid class created in 0.05s
 
 Model grid information
 structured grid
@@ -1753,7 +1745,7 @@ Intersecting 2 features...
 finished in 0.00s
 
 Setting up reach data... (may take a few minutes for large grids)
-finished in 0.00s
+finished in 0.01s
 
 Computing widths...
 
@@ -1789,10 +1781,10 @@ bounds: 552800.00, 388200.00, 557800.00, 393200.00
 active area defined by: isfr array
 
 
-Time to create sfr dataset: 0.23s
+Time to create sfr dataset: 0.28s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 0.03s
+finished in 0.04s
 
 
 Smoothing elevations...
@@ -1824,7 +1816,7 @@ wrote original/plsnt_lgr_parent_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr4.dat, took 0.00s
 loading ./external/plsnt_lgr_parent_top.dat, shape=(25, 25), took 0.00s
 computing cell thicknesses...
-finished in 0.03s
+finished in 0.04s
 
 wrote ./external/plsnt_lgr_parent_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_parent_botm0.dat, took 0.00s
@@ -2005,7 +1997,7 @@ wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_par
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_parent_bbox.shp...
 finished in 0.03s
 
-finished in 0.86s
+finished in 1.01s
 
 
 Setting up LAK package...
@@ -2038,7 +2030,7 @@ print_input: True
 print_flows: True
 save_flows: True
 boundnames: True
-finished in 0.13s
+finished in 0.15s
 
 
 Setting up OBS package...
@@ -2088,7 +2080,7 @@ continuous: {&#39;plsnt_lgr_parent.head.obs&#39;: rec.array([(&#39;10051240_lk&#
            (&#39;ys864&#39;, &#39;HEAD&#39;, (2, 5, 3)), (&#39;ys864&#39;, &#39;HEAD&#39;, (3, 5, 3)),
            (&#39;ys864&#39;, &#39;HEAD&#39;, (4, 5, 3))],
           dtype=[(&#39;obsname&#39;, &#39;O&#39;), (&#39;obstype&#39;, &#39;O&#39;), (&#39;id&#39;, &#39;O&#39;)])}
-finished in 0.06s
+finished in 0.07s
 
 setting up specified head perimeter boundary with CHD package...
 xoff: 552200.0
@@ -2152,7 +2144,7 @@ stress_period_data: {0: {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_ch
 print_input: False
 print_flows: False
 save_flows: True
-finished in 1.21s
+finished in 1.32s
 
 
 Setting up DIS package...
@@ -2192,15 +2184,15 @@ vmin: -1e+30
 vmax: 1e+30
 resample_method: linear
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/botm0.tif...
-finished in 0.00s
+finished in 0.01s
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/botm1.tif...
-finished in 0.00s
+finished in 0.01s
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/botm2.tif...
-finished in 0.00s
+finished in 0.01s
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/botm3.tif...
-finished in 0.00s
+finished in 0.01s
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.02s
+finished in 0.03s
 filename: /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/all_lakes.shp
 id_column: HYDROID
 include_ids: [600059060]
@@ -2218,7 +2210,7 @@ reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/
 finished in 0.02s
 loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.01s
 computing cell thicknesses...
-finished in 0.17s
+finished in 0.20s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm0.dat, took 0.00s
@@ -2401,7 +2393,7 @@ xorigin: None
 yorigin: None
 length_units: meters
 computing cell thicknesses...
-finished in 0.18s
+finished in 0.20s
 
 filename: /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/all_lakes.shp
 id_column: HYDROID
@@ -2420,7 +2412,7 @@ wrote original/plsnt_lgr_inset_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr4.dat, took 0.00s
 loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.01s
 computing cell thicknesses...
-finished in 0.22s
+finished in 0.24s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm0.dat, took 0.00s
@@ -2710,9 +2702,9 @@ botm: [[[328.38 326.66 326.05 ... 300.96 300.22 300.56]
   [192.75 192.71 192.68 ... 191.28 191.28 191.29]]]
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp...
-finished in 0.20s
+finished in 0.23s
 
-finished in 1.39s
+finished in 1.49s
 
 
 Setting up IC package...
@@ -2740,9 +2732,9 @@ filename: /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_d
 id_column: HYDROID
 include_ids: [600059060]
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.02s
+finished in 0.03s
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.02s
+finished in 0.03s
 wrote original/plsnt_lgr_inset_lakarr0.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr1.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr2.dat, took 0.00s
@@ -2752,12 +2744,12 @@ wrote ./external/plsnt_lgr_inset_k0.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_k1.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_k2.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_k3.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_k4.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_k330.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_k331.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_k332.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_k333.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_k334.dat, took 0.00s
+wrote ./external/plsnt_lgr_inset_k4.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_k330.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_k331.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_k332.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_k333.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_k334.dat, took 0.01s
 save_flows: True
 icelltype: 1
 k: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k0.dat&#39;},
@@ -2770,7 +2762,7 @@ k33: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k330.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k332.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k333.dat&#39;},
  {&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k334.dat&#39;}]
-finished in 0.26s
+finished in 0.30s
 
 start_date_time: 2012-01-01
 nper: 1
@@ -2788,16 +2780,16 @@ nstp: 1
 tsmult: 1.5
 
 Setting up STO package...
-wrote ./external/plsnt_lgr_inset_sy0.dat, took 0.00s
+wrote ./external/plsnt_lgr_inset_sy0.dat, took 0.01s
 wrote ./external/plsnt_lgr_inset_sy1.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_sy2.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_sy3.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_sy4.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_ss0.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_ss1.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_ss2.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_ss3.dat, took 0.00s
-wrote ./external/plsnt_lgr_inset_ss4.dat, took 0.00s
+wrote ./external/plsnt_lgr_inset_sy2.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_sy3.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_sy4.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_ss0.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_ss1.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_ss2.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_ss3.dat, took 0.01s
+wrote ./external/plsnt_lgr_inset_ss4.dat, took 0.01s
 save_flows: True
 iconvert: 1
 sy: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_sy0.dat&#39;},
@@ -2836,7 +2828,7 @@ transient: {0: False,
  10: True,
  11: True,
  12: True}
-finished in 0.15s
+finished in 0.18s
 
 
 Setting up RCH package...
@@ -2880,7 +2872,7 @@ print_input: True
 print_flows: True
 save_flows: True
 readasarrays: True
-finished in 0.33s
+finished in 0.38s
 
 
 Setting up OC package...
@@ -2909,10 +2901,10 @@ reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_dat
 reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.06s
+load finished in 0.07s
 
 Getting routing information from NHDPlus Plusflow table...
-finished in 0.01s
+finished in 0.02s
 
 
 SFRmaker version 0.4.0.post13+g8ed2f8a
@@ -2920,7 +2912,7 @@ SFRmaker version 0.4.0.post13+g8ed2f8a
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.08s
+grid class created in 0.17s
 
 Model grid information
 structured grid
@@ -3011,10 +3003,10 @@ bounds: 554200.00, 389000.00, 557400.00, 391800.00
 active area defined by: isfr array
 
 
-Time to create sfr dataset: 0.31s
+Time to create sfr dataset: 0.44s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 0.07s
+finished in 0.08s
 
 
 Smoothing elevations...
@@ -3032,7 +3024,7 @@ mover: True
 converting reach and segment data to package data...
 converting segment data to period data...
 computing cell thicknesses...
-finished in 0.28s
+finished in 0.15s
 
 filename: /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/all_lakes.shp
 id_column: HYDROID
@@ -3051,7 +3043,7 @@ wrote original/plsnt_lgr_inset_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr4.dat, took 0.00s
 loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.01s
 computing cell thicknesses...
-finished in 0.30s
+finished in 0.20s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm0.dat, took 0.00s
@@ -3341,7 +3333,7 @@ botm: [[[328.38 326.66 326.05 ... 300.96 300.22 300.56]
   [192.75 192.71 192.68 ... 191.28 191.28 191.29]]]
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp...
-finished in 0.20s
+finished in 0.24s
 
 finished in 1.87s
 
@@ -3368,7 +3360,7 @@ wrote original/plsnt_lgr_inset_lakarr2.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr4.dat, took 0.00s
 setting up lakebed leakance zones...
-finished in 0.01s
+finished in 0.02s
 wrote original/plsnt_lgr_inset_lakzones.dat, took 0.00s
 setting up tabfiles...
 length_units: meters
@@ -3386,351 +3378,351 @@ CRS: epsg:3070
 Bounds: (554200.0, 557400.0, 389000.0, 391800.0)
 Grid spacing: 40.00 meters
 Packages: dis ic npf sto rcha oc sfr_0
-connectiondata: [[0, 0, (2, 29, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 1, (2, 30, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 2, (3, 34, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 3, (2, 32, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 4, (2, 31, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 5, (3, 35, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 6, (3, 33, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 7, (2, 30, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 8, (3, 36, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 9, (3, 34, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 10, (3, 37, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 11, (2, 44, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 12, (3, 38, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 13, (2, 45, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 14, (3, 39, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 15, (3, 32, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 16, (3, 35, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 17, (4, 33, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 18, (2, 42, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 19, (3, 40, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 20, (3, 36, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 21, (3, 34, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 22, (3, 41, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 23, (2, 31, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 24, (3, 37, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 25, (3, 35, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 26, (3, 38, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 27, (2, 43, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 28, (3, 39, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 29, (2, 37, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 30, (3, 40, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 31, (2, 34, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 32, (3, 41, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 33, (2, 42, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 34, (3, 40, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 35, (2, 43, 45), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 36, (3, 39, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 37, (2, 45, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 38, (3, 32, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 39, (2, 46, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 40, (3, 41, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 41, (3, 31, 33), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 42, (3, 35, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 43, (2, 42, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 44, (3, 36, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 45, (3, 43, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 46, (2, 42, 53), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 47, (2, 39, 54), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 48, (3, 29, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 49, (2, 33, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 50, (2, 30, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 51, (3, 34, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 52, (2, 32, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 53, (3, 35, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 54, (2, 33, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 55, (3, 30, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 56, (3, 36, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 57, (3, 34, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 58, (2, 31, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 59, (2, 37, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 60, (3, 35, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 61, (3, 38, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 62, (2, 45, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 63, (3, 43, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 64, (3, 39, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 65, (2, 40, 31), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 66, (3, 32, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 67, (2, 41, 30), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 68, (2, 33, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 69, (3, 40, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 70, (3, 36, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 71, (3, 34, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 72, (2, 41, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 73, (3, 37, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 74, (2, 35, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 75, (2, 42, 39), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 76, (2, 38, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 77, (3, 36, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 78, (3, 39, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 79, (3, 37, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 80, (3, 44, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 81, (3, 40, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 82, (3, 41, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 83, (3, 42, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 84, (3, 40, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 85, (3, 43, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 86, (3, 41, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 87, (3, 38, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 88, (2, 28, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 89, (2, 32, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 90, (3, 33, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 91, (2, 30, 42), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 92, (3, 32, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 93, (2, 31, 35), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 94, (2, 29, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 95, (3, 35, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 96, (2, 42, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 97, (3, 36, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 98, (2, 43, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 99, (3, 41, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 100, (3, 37, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 101, (3, 42, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 102, (2, 38, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 103, (3, 39, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 104, (2, 34, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 105, (2, 32, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 106, (2, 31, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 107, (3, 35, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 108, (2, 33, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 109, (2, 40, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 110, (3, 36, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 111, (3, 34, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 112, (2, 43, 29), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 113, (3, 37, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 114, (3, 35, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 115, (2, 44, 30), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 116, (3, 38, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 117, (3, 36, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 118, (2, 45, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 119, (2, 43, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 120, (3, 39, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 121, (2, 44, 52), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 122, (2, 46, 49), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 123, (3, 32, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 124, (4, 33, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 125, (3, 40, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 126, (3, 34, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 127, (2, 41, 38), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 128, (3, 37, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 129, (2, 42, 37), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 130, (3, 38, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 131, (3, 36, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 132, (3, 39, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 133, (3, 37, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 134, (2, 44, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 135, (2, 45, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 136, (2, 46, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 137, (3, 40, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 138, (3, 41, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 139, (2, 35, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 140, (2, 42, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 141, (3, 40, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 142, (2, 43, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 143, (3, 41, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 144, (3, 38, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 145, (2, 39, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 146, (2, 28, 50), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 147, (2, 32, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 148, (2, 29, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 149, (2, 33, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 150, (2, 30, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 151, (2, 32, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 152, (2, 31, 45), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 153, (3, 35, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 154, (3, 33, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 155, (2, 30, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 156, (2, 36, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 157, (3, 37, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 158, (2, 44, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 159, (3, 42, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 160, (3, 38, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 161, (2, 45, 36), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 162, (3, 39, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 163, (3, 32, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 164, (2, 31, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 165, (3, 35, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 166, (3, 33, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 167, (3, 40, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 168, (3, 36, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 169, (3, 34, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 170, (2, 43, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 171, (3, 41, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 172, (3, 31, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 173, (3, 37, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 174, (2, 35, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 175, (3, 38, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 176, (2, 36, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 177, (3, 39, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 178, (3, 33, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 179, (3, 40, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 180, (3, 34, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 181, (3, 41, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 182, (3, 42, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 183, (3, 38, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 184, (2, 43, 42), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 185, (2, 39, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 186, (3, 37, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 187, (3, 45, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 188, (2, 32, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 189, (2, 46, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 190, (3, 30, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 191, (3, 41, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 192, (3, 31, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 193, (3, 35, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 194, (3, 42, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 195, (1, 40, 54), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 196, (3, 36, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 197, (2, 43, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 198, (2, 44, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 199, (2, 42, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 200, (2, 38, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 201, (3, 29, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 202, (2, 33, 54), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 203, (2, 34, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 204, (2, 32, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 205, (2, 31, 47), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 206, (3, 35, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 207, (3, 33, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 208, (3, 30, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 209, (3, 36, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 210, (2, 34, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 211, (2, 31, 53), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 212, (3, 37, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 213, (2, 44, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 214, (3, 38, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 215, (2, 45, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 216, (3, 39, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 217, (2, 46, 50), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 218, (3, 32, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 219, (2, 41, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 220, (3, 33, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 221, (3, 40, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 222, (3, 36, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 223, (3, 34, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 224, (2, 41, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 225, (3, 31, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 226, (3, 37, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 227, (2, 38, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 228, (3, 36, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 229, (3, 39, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 230, (2, 37, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 231, (3, 44, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 232, (3, 40, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 233, (3, 34, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 234, (3, 41, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 235, (2, 42, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 236, (3, 40, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 237, (2, 43, 44), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 238, (3, 39, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 239, (3, 44, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 240, (3, 32, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 241, (3, 33, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 242, (3, 32, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 243, (3, 35, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 244, (2, 42, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 245, (3, 36, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 246, (2, 41, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 247, (3, 37, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 248, (3, 42, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 249, (3, 38, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 250, (3, 39, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 251, (3, 33, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 252, (3, 34, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 253, (2, 32, 47), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 254, (2, 31, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 255, (3, 35, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 256, (2, 33, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 257, (3, 36, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 258, (3, 34, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 259, (2, 37, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 260, (3, 35, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 261, (2, 44, 29), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 262, (3, 38, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 263, (2, 45, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 264, (3, 43, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 265, (3, 39, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 266, (2, 46, 48), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 267, (3, 32, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 268, (3, 33, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 269, (3, 40, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 270, (3, 34, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 271, (2, 41, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 272, (3, 37, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 273, (2, 42, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 274, (3, 38, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 275, (3, 36, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 276, (2, 43, 41), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 277, (3, 39, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 278, (3, 37, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 279, (3, 44, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 280, (2, 45, 51), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 281, (3, 40, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 282, (2, 41, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 283, (2, 31, 37), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 284, (3, 42, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 285, (3, 40, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 286, (2, 43, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 287, (3, 41, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 288, (3, 38, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 289, (2, 28, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 290, (2, 32, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 291, (2, 29, 52), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 292, (3, 33, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 293, (2, 30, 43), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 294, (2, 28, 47), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 295, (2, 34, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 296, (3, 32, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 297, (2, 31, 34), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 298, (3, 35, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 299, (3, 33, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 300, (3, 37, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 301, (2, 44, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 302, (3, 42, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 303, (3, 38, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 304, (3, 39, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 305, (3, 34, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 306, (3, 32, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 307, (2, 31, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 308, (3, 35, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 309, (3, 33, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 310, (3, 40, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 311, (2, 30, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 312, (3, 36, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 313, (3, 34, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 314, (3, 31, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 315, (3, 37, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 316, (3, 35, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 317, (2, 44, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 318, (3, 38, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 319, (3, 36, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 320, (2, 45, 30), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 321, (3, 43, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 322, (3, 39, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 323, (4, 33, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 324, (3, 40, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 325, (3, 34, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 326, (2, 41, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 327, (3, 42, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 328, (3, 38, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 329, (2, 43, 43), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 330, (3, 39, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 331, (3, 37, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 332, (3, 45, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 333, (2, 46, 35), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 334, (3, 40, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 335, (2, 30, 38), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
- [0, 336, (3, 41, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 337, (3, 31, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 338, (2, 42, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 339, (2, 40, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 340, (2, 43, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 341, (3, 41, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 342, (3, 38, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 343, (3, 39, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
- [0, 344, (2, 28, 51), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+connectiondata: [[0, 0, (3, 36, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 1, (3, 40, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 2, (2, 29, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 3, (3, 40, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 4, (2, 41, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 5, (2, 44, 29), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 6, (3, 41, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 7, (4, 33, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 8, (3, 41, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 9, (2, 33, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 10, (3, 44, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 11, (2, 45, 30), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 12, (3, 37, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 13, (3, 36, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 14, (3, 40, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 15, (3, 40, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 16, (1, 40, 54), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 17, (2, 41, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 18, (3, 33, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 19, (2, 44, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 20, (3, 33, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 21, (2, 44, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 22, (3, 36, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 23, (3, 36, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 24, (3, 36, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 25, (2, 28, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 26, (2, 40, 31), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 27, (3, 40, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 28, (3, 29, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 29, (3, 40, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 30, (2, 41, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 31, (4, 33, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 32, (3, 32, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 33, (2, 43, 41), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 34, (3, 32, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 35, (3, 43, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 36, (3, 35, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 37, (3, 36, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 38, (3, 36, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 39, (3, 40, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 40, (3, 40, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 41, (3, 39, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 42, (2, 31, 53), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 43, (3, 32, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 44, (2, 43, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 45, (2, 32, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 46, (2, 43, 45), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 47, (3, 35, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 48, (3, 35, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 49, (2, 36, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 50, (3, 36, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 51, (3, 36, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 52, (2, 28, 47), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 53, (3, 39, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 54, (3, 39, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 55, (3, 31, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 56, (2, 43, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 57, (3, 32, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 58, (3, 35, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 59, (3, 32, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 60, (3, 43, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 61, (3, 35, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 62, (2, 35, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 63, (3, 36, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 64, (2, 42, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 65, (2, 42, 53), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 66, (3, 39, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 67, (2, 31, 34), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 68, (3, 39, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 69, (2, 31, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 70, (2, 31, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 71, (3, 32, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 72, (2, 43, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 73, (2, 32, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 74, (2, 43, 44), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 75, (3, 35, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 76, (3, 35, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 77, (3, 38, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 78, (2, 42, 39), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 79, (3, 42, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 80, (3, 39, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 81, (3, 39, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 82, (3, 31, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 83, (3, 39, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 84, (2, 31, 47), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 85, (3, 32, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 86, (3, 35, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 87, (3, 35, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 88, (2, 46, 50), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 89, (3, 38, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 90, (3, 42, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 91, (2, 30, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 92, (2, 42, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 93, (2, 30, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 94, (2, 42, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 95, (3, 39, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 96, (3, 31, 33), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 97, (3, 39, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 98, (2, 31, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 99, (2, 31, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 100, (3, 43, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 101, (2, 34, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 102, (2, 38, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 103, (3, 38, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 104, (3, 38, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 105, (3, 42, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 106, (2, 39, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 107, (3, 39, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 108, (2, 31, 37), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 109, (3, 34, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 110, (2, 34, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 111, (3, 45, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 112, (3, 37, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 113, (2, 37, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 114, (3, 38, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 115, (2, 46, 49), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 116, (3, 38, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 117, (2, 38, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 118, (2, 42, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 119, (2, 30, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 120, (3, 42, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 121, (3, 30, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 122, (3, 41, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 123, (3, 33, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 124, (3, 34, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 125, (2, 45, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 126, (3, 34, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 127, (3, 37, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 128, (3, 34, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 129, (3, 37, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 130, (2, 46, 35), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 131, (3, 38, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 132, (3, 38, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 133, (3, 41, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 134, (3, 41, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 135, (2, 33, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 136, (3, 34, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 137, (3, 37, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 138, (2, 34, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 139, (2, 45, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 140, (3, 37, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 141, (3, 37, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 142, (3, 38, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 143, (2, 40, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 144, (3, 41, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 145, (2, 33, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 146, (2, 44, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 147, (3, 41, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 148, (3, 33, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 149, (3, 33, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 150, (3, 44, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 151, (3, 34, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 152, (2, 45, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 153, (3, 34, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 154, (3, 37, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 155, (3, 34, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 156, (2, 45, 51), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 157, (3, 37, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 158, (3, 40, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 159, (3, 29, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 160, (3, 40, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 161, (2, 41, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 162, (2, 41, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 163, (3, 33, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 164, (2, 44, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 165, (3, 41, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 166, (2, 33, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 167, (2, 33, 54), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 168, (3, 34, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 169, (2, 37, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 170, (3, 37, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 171, (3, 36, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 172, (2, 28, 51), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 173, (3, 40, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 174, (3, 40, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 175, (2, 29, 52), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 176, (3, 40, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 177, (3, 41, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 178, (2, 44, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 179, (3, 41, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 180, (3, 33, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 181, (3, 33, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 182, (3, 44, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 183, (2, 32, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 184, (2, 45, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 185, (3, 36, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 186, (3, 36, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 187, (3, 40, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 188, (2, 29, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 189, (3, 40, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 190, (2, 41, 30), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 191, (2, 41, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 192, (3, 33, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 193, (2, 44, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 194, (3, 33, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 195, (2, 32, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 196, (3, 43, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 197, (2, 35, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 198, (3, 36, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 199, (3, 36, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 200, (2, 36, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 201, (2, 28, 50), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 202, (3, 40, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 203, (3, 40, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 204, (2, 29, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 205, (3, 40, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 206, (2, 44, 30), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 207, (3, 32, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 208, (2, 32, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 209, (2, 43, 43), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 210, (3, 35, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 211, (2, 32, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 212, (2, 43, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 213, (3, 35, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 214, (3, 36, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 215, (3, 36, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 216, (3, 40, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 217, (3, 39, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 218, (2, 43, 29), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 219, (3, 32, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 220, (3, 35, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 221, (2, 32, 47), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 222, (3, 43, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 223, (3, 35, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 224, (3, 35, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 225, (3, 36, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 226, (3, 36, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 227, (2, 28, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 228, (2, 40, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 229, (3, 42, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 230, (3, 39, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 231, (3, 39, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 232, (2, 31, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 233, (2, 39, 54), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 234, (3, 31, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 235, (3, 32, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 236, (2, 43, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 237, (3, 32, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 238, (2, 43, 42), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 239, (3, 35, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 240, (2, 32, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 241, (2, 43, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 242, (3, 35, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 243, (3, 36, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 244, (2, 42, 37), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 245, (3, 42, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 246, (3, 39, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 247, (3, 39, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 248, (2, 31, 45), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 249, (3, 32, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 250, (2, 35, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 251, (2, 32, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 252, (2, 43, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 253, (3, 35, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 254, (3, 35, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 255, (2, 46, 48), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 256, (3, 38, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 257, (2, 38, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 258, (2, 42, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 259, (3, 30, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 260, (2, 42, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 261, (3, 30, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 262, (3, 42, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 263, (3, 39, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 264, (3, 39, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 265, (2, 31, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 266, (2, 39, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 267, (3, 31, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 268, (2, 32, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 269, (2, 43, 32), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 270, (3, 35, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 271, (2, 46, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 272, (3, 38, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 273, (3, 38, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 274, (2, 42, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 275, (2, 30, 43), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 276, (2, 42, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 277, (2, 30, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 278, (3, 39, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 279, (2, 31, 35), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 280, (2, 31, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 281, (3, 34, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 282, (3, 37, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 283, (3, 38, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 284, (3, 38, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 285, (3, 38, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 286, (2, 42, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 287, (2, 30, 38), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 288, (2, 42, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 289, (2, 30, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 290, (3, 42, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 291, (3, 39, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 292, (2, 41, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 293, (3, 31, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 294, (2, 34, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 295, (3, 34, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 296, (3, 37, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 297, (3, 34, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 298, (2, 45, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 299, (3, 37, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 300, (2, 46, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 301, (3, 38, 38), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 302, (3, 38, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 303, (3, 42, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 304, (2, 30, 42), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 305, (2, 30, 51), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 306, (3, 41, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 307, (2, 33, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 308, (3, 34, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 309, (2, 45, 36), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 310, (2, 37, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 311, (3, 34, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 312, (3, 37, 41), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 313, (2, 34, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 314, (3, 37, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 315, (2, 38, 33), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 316, (3, 38, 42), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 317, (3, 41, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 318, (3, 41, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 319, (3, 33, 39), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 320, (3, 41, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 321, (2, 33, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 322, (3, 44, 48), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 323, (2, 45, 31), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 324, (3, 34, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 325, (3, 37, 36), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 326, (3, 34, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 327, (3, 45, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 328, (3, 37, 45), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 329, (2, 37, 54), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 330, (2, 46, 32), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 331, (3, 38, 37), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 332, (3, 40, 46), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 333, (2, 41, 38), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 334, (4, 33, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 335, (2, 44, 34), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 336, (3, 41, 47), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 337, (3, 33, 43), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 338, (3, 33, 52), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 339, (2, 44, 52), &#39;vertical&#39;, 0.045, 0.0, 0.0, 0.0, 0.0],
+ [0, 340, (3, 34, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 341, (2, 45, 35), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 342, (3, 34, 44), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 343, (3, 37, 40), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
+ [0, 344, (3, 37, 49), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0],
  [0, 345, (0, 28, 52), &#39;horizontal&#39;, 0.045, 297.36, 303.48, 40.0, 40.0],
  [0, 346, (0, 29, 53), &#39;horizontal&#39;, 0.045, 297.86, 305.08, 40.0, 40.0],
  [0, 347, (0, 30, 44), &#39;horizontal&#39;, 0.045, 296.71, 300.82, 40.0, 40.0],
@@ -4152,58 +4144,58 @@ packagedata: [[0, 298.38, 755, &#39;lake1&#39;]]
 ntables: 1
 tables: [(0, &#39;./external/600059060_stage_area_volume.dat&#39;, &#39;junk&#39;, &#39;junk&#39;)]
 outlets: None
-perioddata: {0: [[0, &#39;withdrawal&#39;, 0.0],
+perioddata: {0: [[0, &#39;rainfall&#39;, 0.0026829936043197404],
+     [0, &#39;evaporation&#39;, 0.0006298262025336206],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.0026829936043197404],
-     [0, &#39;evaporation&#39;, 0.0006298262025336206]],
- 1: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 1: [[0, &#39;rainfall&#39;, 0.0006472903225806452],
+     [0, &#39;evaporation&#39;, 0.0002576362885573776],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.0006472903225806452],
-     [0, &#39;evaporation&#39;, 0.0002576362885573776]],
- 2: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 2: [[0, &#39;rainfall&#39;, 0.0008758620689655173],
+     [0, &#39;evaporation&#39;, 0.0004085819980228165],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.0008758620689655173],
-     [0, &#39;evaporation&#39;, 0.0004085819980228165]],
- 3: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 3: [[0, &#39;rainfall&#39;, 0.002425290322580645],
+     [0, &#39;evaporation&#39;, 0.0011436341364568883],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.002425290322580645],
-     [0, &#39;evaporation&#39;, 0.0011436341364568883]],
- 4: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 4: [[0, &#39;rainfall&#39;, 0.0030564666666666666],
+     [0, &#39;evaporation&#39;, 0.0013827463730816112],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.0030564666666666666],
-     [0, &#39;evaporation&#39;, 0.0013827463730816112]],
- 5: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 5: [[0, &#39;rainfall&#39;, 0.005743677419354838],
+     [0, &#39;evaporation&#39;, 0.0028871244926997044],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.005743677419354838],
-     [0, &#39;evaporation&#39;, 0.0028871244926997044]],
- 6: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 6: [[0, &#39;rainfall&#39;, 0.0014816666666666665],
+     [0, &#39;evaporation&#39;, 0.004020965243130107],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.0014816666666666665],
-     [0, &#39;evaporation&#39;, 0.004020965243130107]],
- 7: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 7: [[0, &#39;rainfall&#39;, 0.0003769032258064516],
+     [0, &#39;evaporation&#39;, 0.005004471438241819],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.0003769032258064516],
-     [0, &#39;evaporation&#39;, 0.005004471438241819]],
- 8: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 8: [[0, &#39;rainfall&#39;, 0.002318774193548387],
+     [0, &#39;evaporation&#39;, 0.003269811775826732],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.002318774193548387],
-     [0, &#39;evaporation&#39;, 0.003269811775826732]],
- 9: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 9: [[0, &#39;rainfall&#39;, 0.0008636000000000001],
+     [0, &#39;evaporation&#39;, 0.0018495745973831075],
      [0, &#39;runoff&#39;, 0.0],
-     [0, &#39;rainfall&#39;, 0.0008636000000000001],
-     [0, &#39;evaporation&#39;, 0.0018495745973831075]],
- 10: [[0, &#39;withdrawal&#39;, 0.0],
+     [0, &#39;withdrawal&#39;, 0.0]],
+ 10: [[0, &#39;rainfall&#39;, 0.004563806451612903],
+      [0, &#39;evaporation&#39;, 0.0008984485130861423],
       [0, &#39;runoff&#39;, 0.0],
-      [0, &#39;rainfall&#39;, 0.004563806451612903],
-      [0, &#39;evaporation&#39;, 0.0008984485130861423]],
- 11: [[0, &#39;withdrawal&#39;, 0.0],
+      [0, &#39;withdrawal&#39;, 0.0]],
+ 11: [[0, &#39;rainfall&#39;, 0.0011345333333333334],
+      [0, &#39;evaporation&#39;, 0.00045804724944191835],
       [0, &#39;runoff&#39;, 0.0],
-      [0, &#39;rainfall&#39;, 0.0011345333333333334],
-      [0, &#39;evaporation&#39;, 0.00045804724944191835]],
- 12: [[0, &#39;withdrawal&#39;, 0.0],
+      [0, &#39;withdrawal&#39;, 0.0]],
+ 12: [[0, &#39;rainfall&#39;, 0.0016223225806451611],
+      [0, &#39;evaporation&#39;, 0.0002789859599701167],
       [0, &#39;runoff&#39;, 0.0],
-      [0, &#39;rainfall&#39;, 0.0016223225806451611],
-      [0, &#39;evaporation&#39;, 0.0002789859599701167]]}
+      [0, &#39;withdrawal&#39;, 0.0]]}
 observations: {&#39;digits&#39;: 10,
  &#39;lake1.obs.csv&#39;: [(&#39;stage&#39;, &#39;stage&#39;, &#39;lake1&#39;),
                    (&#39;inflow&#39;, &#39;inflow&#39;, &#39;lake1&#39;),
@@ -4217,7 +4209,7 @@ observations: {&#39;digits&#39;: 10,
                    (&#39;surface-area&#39;, &#39;surface-area&#39;, &#39;lake1&#39;),
                    (&#39;wetted-area&#39;, &#39;wetted-area&#39;, &#39;lake1&#39;),
                    (&#39;conductance&#39;, &#39;conductance&#39;, &#39;lake1&#39;)]}
-finished in 0.51s
+finished in 0.62s
 
 
 Setting up WEL package...
@@ -4231,7 +4223,7 @@ finished in 0.00s
 took 0.00s
 
 computing cell thicknesses...
-finished in 0.27s
+finished in 0.20s
 
 
 reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/csls_sources_wu_pts.shp...
@@ -4243,7 +4235,7 @@ finished in 0.00s
 took 0.00s
 
 computing cell thicknesses...
-finished in 0.20s
+finished in 0.22s
 
 
 Resampling pumping rates in /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/tables/master_wu.csv to model stress periods...
@@ -4267,7 +4259,7 @@ print_input: True
 print_flows: True
 save_flows: True
 boundnames: True
-finished in 0.71s
+finished in 0.67s
 
 
 Setting up OBS package...
@@ -4317,7 +4309,7 @@ continuous: {&#39;plsnt_lgr_inset.head.obs&#39;: rec.array([(&#39;00400037_uwsp&
            (&#39;yq987&#39;, &#39;HEAD&#39;, (2, 28, 41)), (&#39;yq987&#39;, &#39;HEAD&#39;, (3, 28, 41)),
            (&#39;yq987&#39;, &#39;HEAD&#39;, (4, 28, 41))],
           dtype=[(&#39;obsname&#39;, &#39;O&#39;), (&#39;obstype&#39;, &#39;O&#39;), (&#39;id&#39;, &#39;O&#39;)])}
-finished in 0.06s
+finished in 0.07s
 
 
 Setting up the simulation water mover package...
@@ -4325,7 +4317,7 @@ print_flows: True
 modelnames: True
 maxmvr: 2
 maxpackages: 2
-packages: [(&#39;plsnt_lgr_parent&#39;, &#39;sfr_0&#39;), (&#39;plsnt_lgr_inset&#39;, &#39;sfr_0&#39;)]
+packages: [(&#39;plsnt_lgr_inset&#39;, &#39;sfr_0&#39;), (&#39;plsnt_lgr_parent&#39;, &#39;sfr_0&#39;)]
 perioddata: {0: [[&#39;plsnt_lgr_inset&#39;,
       &#39;sfr_0&#39;,
       22,
@@ -5626,7 +5618,7 @@ exchangedata: [[(0, 7, 6), (0, 0, 0), 1, 100.0, 20.0, 40.0, 0.0, 144.22205101855
  [(4, 20, 23), (4, 69, 79), 1, 100.0, 20.0, 40.0, 180.0, 144.22205101855957],
  [(4, 21, 22), (4, 69, 79), 1, 100.0, 20.0, 40.0, 90.0, 144.22205101855957]]
 mvr_filerecord: pleasant_lgr.mvr
-finished setting up model in 9.78s
+finished setting up model in 10.63s
 
 plsnt_lgr_parent model:
 5 layer(s), 25 row(s), 25 column(s), 13 stress period(s)
@@ -5789,7 +5781,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f88e5265b90&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f444367c880&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -5917,7 +5909,7 @@ authorized or unauthorized use. Also refer to the USGS Water
 Resources Software User Rights Notice for complete use, copyright,
 and distribution information.
 
- Run start date and time (yyyy/mm/dd hh:mm:ss): 2020/07/08 18:49:44
+ Run start date and time (yyyy/mm/dd hh:mm:ss): 2020/07/08 18:52:12
 
  Writing simulation list file: mfsim.lst
  Using Simulation name file: mfsim.nam
@@ -5934,8 +5926,8 @@ and distribution information.
  Solving:  Stress period:    11    Time step:     1
  Solving:  Stress period:    12    Time step:     1
  Solving:  Stress period:    13    Time step:     1
- Run end date and time (yyyy/mm/dd hh:mm:ss): 2020/07/08 18:49:48
- Elapsed run time:  4.100 Seconds
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2020/07/08 18:52:16
+ Elapsed run time:  4.486 Seconds
 
  Normal termination of simulation.
 </pre></div></div>
@@ -6290,7 +6282,7 @@ skipped, not implemented yet
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 creating shapely Polygons of grid cells...
-finished in 0.05s
+finished in 0.04s
 
 writing postproc/plsnt_lgr_inset/shps/lake_connections.shp...
 </pre></div></div>
