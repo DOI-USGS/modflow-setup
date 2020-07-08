@@ -8,7 +8,6 @@ fm = flopy.modflow
 import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
-
 from mfsetup.discretization import weighted_average_between_layers
 #from mfsetup.export import get_surface_bc_flux
 from mfsetup.fileio import check_source_files
@@ -19,6 +18,8 @@ from mfsetup.interpolate import (
     interpolate,
     regrid,
 )
+from mfsetup.lakes import get_horizontal_connections
+from mfsetup.sourcedata import ArraySourceData
 from mfsetup.units import convert_length_units
 
 
@@ -40,6 +41,7 @@ class Tmr:
         MODFLOW binary head output
     parent_cell_budget_file : filepath
         MODFLOW binary cell budget output
+
 
     Notes
     -----
@@ -80,6 +82,14 @@ class Tmr:
         self._inset_parent_period_mapping = inset_parent_period_mapping
         self.hpth = None  # path to parent heads output file
         self.cpth = None  # path to parent cell budget output file
+        
+        self.pi0 = None
+        self.pj0 = None
+        self.pi1 = None
+        self.pj1 = None
+        self.pi_list = None
+        self.pj_list = None
+        
         if parent_length_units is None:
             parent_length_units = self.inset.cfg['parent']['length_units']
         if inset_length_units is None:
@@ -107,14 +117,33 @@ class Tmr:
             raise ValueError("No head or cell budget output files found for parent model {}".format(self.parent.name))
 
         # get bounding cells in parent model for pfl_nwt model
-        self.pi0, self.pj0 = get_ij(self.parent.modelgrid,
-                                    self.inset.modelgrid.xcellcenters[0, 0],
-                                    self.inset.modelgrid.ycellcenters[0, 0])
-        self.pi1, self.pj1 = get_ij(self.parent.modelgrid,
-                                    self.inset.modelgrid.xcellcenters[-1, -1],
-                                    self.inset.modelgrid.ycellcenters[-1, -1])
-        self.parent_nrow_in_inset = self.pi1 - self.pi0 + 1
-        self.parent_ncol_in_inset = self.pj1 - self.pj0 + 1
+        irregular_domain = False
+        
+        # see if irregular domain
+        irregbound_cfg = self.inset.cfg['perimeter_boundary'].get('source_data',{}).get('irregular_boundary')
+        if irregbound_cfg is not None:
+            irregular_domain = True
+            irregbound_cfg['variable'] = 'perimeter_boundary'
+            irregbound_cfg['dest_model'] = self.inset
+            
+            
+            sd = ArraySourceData.from_config(irregbound_cfg)
+            data = sd.get_data()
+            idm_outline = data[0]
+            connections = get_horizontal_connections(idm_outline, connection_info=False,
+                                             layer_elevations=1,
+                                             delr=1, delc=1, inside=True)
+            self.pi_list, self.pj_list = connections.i.to_list(), connections.j.to_list()
+        # otherwise just get the corners of the inset if rectangular domain
+        else:
+            self.pi0, self.pj0 = get_ij(self.parent.modelgrid,
+                                        self.inset.modelgrid.xcellcenters[0, 0],
+                                        self.inset.modelgrid.ycellcenters[0, 0])
+            self.pi1, self.pj1 = get_ij(self.parent.modelgrid,
+                                        self.inset.modelgrid.xcellcenters[-1, -1],
+                                        self.inset.modelgrid.ycellcenters[-1, -1])
+            self.parent_nrow_in_inset = self.pi1 - self.pi0 + 1
+            self.parent_ncol_in_inset = self.pj1 - self.pj0 + 1
 
         # check for an even number of pfl_nwt cells per parent cell in x and y directions
         x_refinment = self.parent.modelgrid.delr[0] / self.inset.modelgrid.delr[0]
@@ -577,9 +606,27 @@ class Tmr:
         #                                                       sorted(list(set(self.copy_stress_periods)))
         #                                                       )
 
-        # get active cells along model perimeter
-        k, i, j = self.inset.get_boundary_cells(exclude_inactive=True)
-
+        # get active cells along model edge
+        if self.pi_list is None and self.pj_list is None:
+            k, i, j = self.inset.get_boundary_cells(exclude_inactive=True)
+        else:
+            ktmp =[]
+            for clay in range(self.inset.nlay):
+                ktmp += list(clay*np.ones(len(self.pi_list)).astype(int))
+            itmp = self.inset.nlay * self.pi_list
+            jtmp = self.inset.nlay * self.pj_list
+            
+            # get rid of cells that are inactive
+            wh = np.where(self.inset.dis.idomain.array >0)
+            activecells = set([(i,j,k) for i,j,k in zip(wh[0],wh[1],wh[2])])
+            chdcells = set([(kk,ii,jj) for ii,jj,kk in zip(itmp,jtmp,ktmp)])
+            active_chd_cells = list(set(chdcells).intersection(activecells))
+            
+            # unpack back to lists, then convert to numpy arrays
+            k, i, j = zip(*active_chd_cells)
+            k = np.array(k)
+            i = np.array(i)
+            j = np.array(j)
         # get heads from parent model
         # TODO: generalize head extraction from parent model using 3D interpolation
 
