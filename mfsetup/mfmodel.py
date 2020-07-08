@@ -644,7 +644,8 @@ class MFsetupMixin():
     def _set_cfg(self, cfg_updates):
         """Load configuration file; update dictionary.
         """
-        self.cfg = defaultdict(None, self.cfg)
+        #self.cfg = defaultdict(dict)
+        self.cfg = defaultdict(dict, self.cfg)
 
         if isinstance(cfg_updates, str):
             assert os.path.exists(cfg_updates), \
