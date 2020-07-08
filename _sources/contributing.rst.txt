@@ -128,14 +128,16 @@ changes in this branch specific to one bug or feature so it is clear
 what the branch brings to *modflow-setup*. You can have many shiny-new-features
 and switch in between them using the git checkout command.
 
-To update this branch, you need to retrieve the changes from the master branch::
+To update this branch, you need to retrieve the changes from the develop branch::
 
     git fetch upstream
-    git rebase upstream/master
+    git rebase upstream/develop
 
-This will replay your commits on top of the latest modflow-setup git master.  If this
+This will replay your commits on top of the latest modflow-setup git develop.  If this
 leads to merge conflicts, you must resolve these before submitting your pull
-request.  If you have uncommitted changes, you will need to ``stash`` them prior
+request.  **It's a good idea to move slowly while doing this and pay attention to the messages from git.** The wrong command at the wrong time can quickly spiral into a confusing mess.
+
+If you have uncommitted changes, you will need to ``stash`` them prior
 to updating.  This will effectively store your changes and they can be reapplied
 after updating.
 
