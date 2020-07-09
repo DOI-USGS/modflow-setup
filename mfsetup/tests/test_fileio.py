@@ -14,6 +14,7 @@ from mfsetup.fileio import (
     load_yml,
     which,
 )
+from mfsetup.grid import MFsetupGrid
 
 
 @pytest.fixture
@@ -68,12 +69,9 @@ def test_load_array(tmpdir):
 
 
 def test_load_grid():
-    gridfile = '/Users/aleaf/Documents/CSLS/source/test/data/Transient_MODFLOW-NWT/LPR_parent_grid.yml'
-    if os.path.exists(gridfile):
-        modelgrid = load_modelgrid(gridfile)
-        assert True
-    else:
-        pass
+    gridfile = 'examples/data/pleasant/grid.json'
+    modelgrid = load_modelgrid(gridfile)
+    assert isinstance(modelgrid, MFsetupGrid)
 
 
 def test_load_cfg(pfl_nwt_test_cfg_path):
