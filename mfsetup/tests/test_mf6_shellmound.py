@@ -516,7 +516,7 @@ def test_rch_setup(shellmound_model_with_dis):
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
     assert isinstance(rch, mf6.ModflowGwfrcha)
     assert rch.recharge is not None
-
+    print(';ginger')
     # get the same data from the source file
     ds = xr.open_dataset(m.cfg['rch']['source_data']['recharge']['filename'])
     x = xr.DataArray(m.modelgrid.xcellcenters.ravel(), dims='z')
