@@ -18,6 +18,7 @@ from mfsetup.discretization import (
     deactivate_idomain_above,
     find_remove_isolated_cells,
     make_idomain,
+    make_irch,
     make_lgr_idomain,
 )
 from mfsetup.fileio import flopy_mfsimulation_load, load, load_cfg
@@ -103,7 +104,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def _set_idomain(self):
         """Remake the idomain array from the source data,
         no data values in the top and bottom arrays, and
-        so that cells above SFR reaches are inactive."""
+        so that cells above SFR reaches are inactive.
+        
+        Also remakes irch for the recharge package"""
         # loop thru LGR models and inactivate area of parent grid for each one
         lgr_idomain = np.ones(self.dis.idomain.array.shape, dtype=int)
         if isinstance(self.lgr, dict):
@@ -161,6 +164,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self.dis.idomain = self.cfg['dis']['griddata']['idomain']
         self._mg_resync = False
         self.setup_grid()  # reset the model grid
+        
+        # rebuild irch to keep it in sync with idomain changes
+        irch = make_irch(idomain)
+        self._setup_array('rch', 'irch',
+                                data={0: irch},
+                                datatype='array2d', 
+                                write_fmt='%d', dtype=int)
+        #self.dis.irch = self.cfg['dis']['irch']
 
 
     def _update_grid_configuration_with_dis(self):
@@ -507,13 +518,18 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         # make the irch array
-        # TODO: ich
-        pass
+        irch = make_irch(self.idomain)
+        
+        self._setup_array('rch', 'irch',
+                          data={0: irch},
+                          datatype='array2d', 
+                          write_fmt='%d', dtype=int)
 
         # make the rech array
         self._setup_array(package, 'recharge', datatype='transient2d',
                           resample_method='nearest', write_fmt='%.6e',
                           write_nodata=0.)
+
 
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])
