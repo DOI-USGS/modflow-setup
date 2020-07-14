@@ -518,7 +518,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         t0 = time.time()
 
         # make the irch array
-        irch = makr_irch(self.idomain)
+        irch = make_irch(self.idomain)
         
         self._setup_array('rch', 'irch',
                           data={0: irch},

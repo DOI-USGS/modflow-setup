@@ -467,6 +467,7 @@ def make_irch(idomain):
     irch = np.min(idm_lay, axis=0)
     # set all inactive and pass through back to -1
     irch[irch==9999] = 0
+    irch += 1 # set to one-based
     return irch
 
 def get_layer_thicknesses(top, botm, idomain=None):

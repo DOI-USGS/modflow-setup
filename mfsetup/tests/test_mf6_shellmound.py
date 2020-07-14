@@ -513,10 +513,17 @@ def test_rch_setup(shellmound_model_with_dis):
     m = shellmound_model_with_dis  # deepcopy(model)
     rch = m.setup_rch()
     rch.write()
+    # check for irch file
+    irchfile = os.path.join(m.model_ws, m.cfg['rch']['irch'][0]['filename'])
+    assert os.path.exists(irchfile)
+    irch = load_array(os.path.join(m.model_ws, m.cfg['rch']['irch'][0]['filename']))
+    assert irch.shape[0] == m.nrow
+    assert irch.shape[1] == m.ncol
+    
+    
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
     assert isinstance(rch, mf6.ModflowGwfrcha)
     assert rch.recharge is not None
-    print(';ginger')
     # get the same data from the source file
     ds = xr.open_dataset(m.cfg['rch']['source_data']['recharge']['filename'])
     x = xr.DataArray(m.modelgrid.xcellcenters.ravel(), dims='z')
