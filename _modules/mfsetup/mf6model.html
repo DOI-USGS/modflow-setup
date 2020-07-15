@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+g6dc19fc documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+g71b3a88 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g6dc19fc
+                0.post51+g71b3a88
               </div>
             
           
@@ -196,6 +196,7 @@
     <span class="n">deactivate_idomain_above</span><span class="p">,</span>
     <span class="n">find_remove_isolated_cells</span><span class="p">,</span>
     <span class="n">make_idomain</span><span class="p">,</span>
+    <span class="n">make_irch</span><span class="p">,</span>
     <span class="n">make_lgr_idomain</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">flopy_mfsimulation_load</span><span class="p">,</span> <span class="n">load</span><span class="p">,</span> <span class="n">load_cfg</span>
@@ -281,7 +282,9 @@
     <span class="k">def</span> <span class="nf">_set_idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remake the idomain array from the source data,</span>
 <span class="sd">        no data values in the top and bottom arrays, and</span>
-<span class="sd">        so that cells above SFR reaches are inactive.&quot;&quot;&quot;</span>
+<span class="sd">        so that cells above SFR reaches are inactive.</span>
+<span class="sd">        </span>
+<span class="sd">        Also remakes irch for the recharge package&quot;&quot;&quot;</span>
         <span class="c1"># loop thru LGR models and inactivate area of parent grid for each one</span>
         <span class="n">lgr_idomain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -339,6 +342,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mg_resync</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>  <span class="c1"># reset the model grid</span>
+        
+        <span class="c1"># rebuild irch to keep it in sync with idomain changes</span>
+        <span class="n">irch</span> <span class="o">=</span> <span class="n">make_irch</span><span class="p">(</span><span class="n">idomain</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;rch&#39;</span><span class="p">,</span> <span class="s1">&#39;irch&#39;</span><span class="p">,</span>
+                                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">irch</span><span class="p">},</span>
+                                <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span> 
+                                <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c1">#self.dis.irch = self.cfg[&#39;dis&#39;][&#39;irch&#39;]</span>
 
 
     <span class="k">def</span> <span class="nf">_update_grid_configuration_with_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -685,13 +696,18 @@
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
         <span class="c1"># make the irch array</span>
-        <span class="c1"># TODO: ich</span>
-        <span class="k">pass</span>
+        <span class="n">irch</span> <span class="o">=</span> <span class="n">make_irch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;rch&#39;</span><span class="p">,</span> <span class="s1">&#39;irch&#39;</span><span class="p">,</span>
+                          <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">irch</span><span class="p">},</span>
+                          <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span> 
+                          <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="c1"># make the rech array</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;recharge&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;transient2d&#39;</span><span class="p">,</span>
                           <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.6e</span><span class="s1">&#39;</span><span class="p">,</span>
                           <span class="n">write_nodata</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+
 
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">])</span>
@@ -1189,7 +1205,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Jul 08, 2020.
+        Last updated on Jul 15, 2020.
       </span>
 
     </p>
