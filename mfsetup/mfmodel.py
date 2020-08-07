@@ -1188,10 +1188,11 @@ class MFsetupMixin():
         self.modelgrid.model_length_units = self.length_units
 
         # create an sfrmaker.sfrdata instance from the lines instance
+        to_sfr_kwargs = get_input_arguments(self.cfg['sfr'], Lines.to_sfr)
         sfr = lns.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,
-                         )
+                         **to_sfr_kwargs)
         if self.cfg['sfr']['set_streambed_top_elevations_from_dem']:
             error_msg = ("If set_streambed_top_elevations_from_dem=True, "
                          "need a dem block in source_data for SFR package.")

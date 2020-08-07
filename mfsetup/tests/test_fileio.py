@@ -68,8 +68,8 @@ def test_load_array(tmpdir):
     np.testing.assert_allclose(a, b)
 
 
-def test_load_grid():
-    gridfile = 'examples/data/pleasant/grid.json'
+def test_load_grid(project_root_path):
+    gridfile = os.path.join(project_root_path, 'examples/data/pleasant/grid.json')
     modelgrid = load_modelgrid(gridfile)
     assert isinstance(modelgrid, MFsetupGrid)
 

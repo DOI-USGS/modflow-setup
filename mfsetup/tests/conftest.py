@@ -28,6 +28,17 @@ def project_root_path():
     return os.path.normpath(os.path.join(filepath, '../../'))
 
 
+@pytest.fixture(scope="session", autouse=True)
+def tmpdir(project_root_path):
+    folder = project_root_path + '/mfsetup/tests/tmp'
+    reset = True
+    if reset:
+        if os.path.isdir(folder):
+            shutil.rmtree(folder)
+        os.makedirs(folder)
+    return folder
+
+
 def get_model(model):
     """Fetch a fresh copy of a model from a fixture;
     updating the workspace if needed."""
@@ -273,17 +284,6 @@ def full_pleasant_nwt(pleasant_nwt_setup_from_yaml):
     m = get_model(pleasant_nwt_setup_from_yaml)
     m.write_input()
     return m
-
-
-@pytest.fixture(scope="session", autouse=True)
-def tmpdir(project_root_path):
-    folder = project_root_path + '/mfsetup/tests/tmp'
-    reset = True
-    if reset:
-        if os.path.isdir(folder):
-            shutil.rmtree(folder)
-        os.makedirs(folder)
-    return folder
 
 
 # fixture to feed multiple model fixtures to a test

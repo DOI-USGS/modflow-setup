@@ -3,6 +3,7 @@ import inspect
 import pprint
 
 import numpy as np
+import pandas as pd
 
 
 def compare_nan_array(func, a, thresh):
@@ -57,9 +58,9 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
     -------
     input_kwargs : dict
     """
-    np.set_printoptions(threshold=20)
-    if verbose:
-        print('\narguments to {}:'.format(function.__qualname__))
+    np.set_printoptions(threshold=20, edgeitems=1)
+
+    print('\narguments to {}:'.format(function.__qualname__))
     params = inspect.signature(function)
     input_kwargs = {}
     not_arguments = {}
@@ -84,10 +85,24 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
 def print_item(k, v):
     print('{}: '.format(k), end='')
     if isinstance(v, dict):
-        #print(json.dumps(v, indent=4))
-        pprint.pprint(v)
+        if len(v) > 1:
+            print('{{{}: {}\n ...\n}}'.format(*next(iter(v.items()))))
+        else:
+            print(v)
     elif isinstance(v, list):
-        pprint.pprint(v)
+        if len(v) > 3:
+            print('[{} ... {}]'.format(v[0], v[-1]))
+        else:
+            pprint.pprint(v, compact=True)
+    elif isinstance(v, pd.DataFrame):
+        print(v.head())
+    elif isinstance(v, np.ndarray):
+        txt = 'array: {}, {}'.format(v.shape, v.dtype)
+        try:
+            txt += ', min: {:g}, mean: {:g}, max: {:g}'.format(v.min(), v.mean(), v.max())
+        except:
+            pass
+        print(txt)
     else:
         print(v)
 

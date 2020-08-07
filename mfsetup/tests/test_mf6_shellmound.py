@@ -519,8 +519,8 @@ def test_rch_setup(shellmound_model_with_dis):
     irch = load_array(os.path.join(m.model_ws, m.cfg['rch']['irch'][0]['filename']))
     assert irch.shape[0] == m.nrow
     assert irch.shape[1] == m.ncol
-    
-    
+
+
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
     assert isinstance(rch, mf6.ModflowGwfrcha)
     assert rch.recharge is not None
@@ -650,7 +650,8 @@ def test_sfr_setup(model_with_sfr):
     inactive_reaches = m.sfrdata.reach_data.loc[reach_idomain != 1]
     ki, ii, ji = inactive_reaches.k, inactive_reaches.i, inactive_reaches.j
     # 26, 13
-    j=2
+    # verify that reaches were consolidated to one per cell
+    assert len(m.sfrdata.reach_data.node.unique()) == len(m.sfrdata.reach_data)
 
 
 def test_sfr_inflows_from_csv(model_with_sfr):
@@ -663,10 +664,13 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     sfr_pd = m.sfrdata.period_data.dropna(axis=1)
     sfr_pd.index = sfr_pd.start_datetime
 
-    left = inflow_input.loc[inflow_input.line_id == 18021542].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
-    right = sfr_pd.loc[sfr_pd.rno == 275].loc['2007-04-01':, 'inflow']
+    line_id = 18021542
+    left = inflow_input.loc[inflow_input.line_id == line_id].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
+    lookup = dict(zip(sfr_pd.specified_line_id, sfr_pd.rno))
+    rno = lookup[line_id]
+    right = sfr_pd.loc[sfr_pd.rno == rno].loc['2007-04-01':, 'inflow']
     left = left.loc[:right.index[-1]]
-    pd.testing.assert_series_equal(left, right, check_names=False)
+    pd.testing.assert_series_equal(left, right, check_names=False, check_freq=False)
 
 
 #@pytest.mark.xfail(reason='flopy remove_package() issue')
