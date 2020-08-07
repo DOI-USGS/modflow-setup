@@ -18,7 +18,7 @@ Installing python dependencies with Conda
 
   * `environment.yml`_ for a `conda environment`_ with the minimum packages required to run modflow-setup, or
   * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by ``environment.yml`` is called `mfsetup`, while environment in ``gis.yml`` is called `gis`.
-  * Alternatively, clone (`using git`_) or `download`_ the ``modflow-setup`` repository, which includes the two environmental files at the root level.
+  * Alternatively, clone (`using git`_) or `download`_ the ``modflow-setup`` repository, which includes the two environment files at the root level.
   * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
 
 Creating a `conda environment`_
