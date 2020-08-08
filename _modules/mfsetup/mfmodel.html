@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g020ca64 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+gc95ef01 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g020ca64
+                0.post51+gc95ef01
               </div>
             
           
@@ -1366,10 +1366,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">model_length_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_units</span>
 
         <span class="c1"># create an sfrmaker.sfrdata instance from the lines instance</span>
+        <span class="n">to_sfr_kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">],</span> <span class="n">Lines</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">)</span>
         <span class="n">sfr</span> <span class="o">=</span> <span class="n">lns</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
                          <span class="n">isfr</span><span class="o">=</span><span class="n">isfr</span><span class="p">,</span>
                          <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-                         <span class="p">)</span>
+                         <span class="o">**</span><span class="n">to_sfr_kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;set_streambed_top_elevations_from_dem&#39;</span><span class="p">]:</span>
             <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;If set_streambed_top_elevations_from_dem=True, &quot;</span>
                          <span class="s2">&quot;need a dem block in source_data for SFR package.&quot;</span><span class="p">)</span>
@@ -1617,7 +1618,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 07, 2020.
+        Last updated on Aug 08, 2020.
       </span>
 
     </p>
