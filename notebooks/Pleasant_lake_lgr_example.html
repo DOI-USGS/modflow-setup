@@ -464,7 +464,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Lake package created from polygon features, bathymetry raster, stage-area-volume file and climate data from <code class="docutils literal notranslate"><span class="pre">PRISM</span></code>_.</p></li>
 <li><p>Lake package observations set up automatically (output file for each lake)</p></li>
 </ul>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -481,6 +481,14 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">mfexport</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+flopy is installed in /home/travis/miniconda/envs/test/lib/python3.7/site-packages/flopy
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -536,7 +544,7 @@ loading parent model /home/travis/build/aleaf/modflow-setup/examples/data/pleasa
 arguments to Modflow.load:
 model_ws: /home/travis/build/aleaf/modflow-setup/examples/data/pleasant
 version: mfnwt
-load_only: [sfr ... dis]
+load_only: [bas6 ... dis]
 f: pleasant.nam
 finished in 0.14s
 
@@ -703,7 +711,7 @@ reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/
 finished in 0.00s
 loading ./external/plsnt_lgr_parent_top.dat, shape=(25, 25), took 0.00s
 computing cell thicknesses...
-finished in 0.02s
+finished in 0.03s
 
 wrote ./external/plsnt_lgr_parent_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_parent_botm0.dat, took 0.00s
@@ -741,7 +749,7 @@ wrote original/plsnt_lgr_parent_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr4.dat, took 0.00s
 loading ./external/plsnt_lgr_parent_top.dat, shape=(25, 25), took 0.00s
 computing cell thicknesses...
-finished in 0.04s
+finished in 0.02s
 
 wrote ./external/plsnt_lgr_parent_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_parent_botm0.dat, took 0.00s
@@ -865,7 +873,7 @@ top: None
 botm: None
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp...
-finished in 0.20s
+finished in 0.21s
 
 computing cell thicknesses...
 finished in 0.02s
@@ -877,7 +885,7 @@ wrote original/plsnt_lgr_parent_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr4.dat, took 0.00s
 loading ./external/plsnt_lgr_parent_top.dat, shape=(25, 25), took 0.00s
 computing cell thicknesses...
-finished in 0.03s
+finished in 0.04s
 
 wrote ./external/plsnt_lgr_parent_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_parent_botm0.dat, took 0.00s
@@ -962,7 +970,7 @@ relaxation_factor: 0.0
 number_orthogonalizations: 0
 preconditioner_levels: 7
 preconditioner_drop_tolerance: 0.001
-finished in 0.00s
+finished in 0.01s
 
 
 Setting up IC package...
@@ -1028,7 +1036,7 @@ steady_state: {0: True
 transient: {0: False
  ...
 }
-finished in 0.34s
+finished in 0.32s
 
 
 Setting up RCH package...
@@ -1152,7 +1160,7 @@ finished in 0.00s
 Intersecting 2 flowlines with 625 grid cells...
 Intersecting 2 features...
 2
-finished in 0.00s
+finished in 0.01s
 
 Setting up reach data... (may take a few minutes for large grids)
 finished in 0.00s
@@ -1191,7 +1199,7 @@ bounds: 552800.00, 388200.00, 557800.00, 393200.00
 active area defined by: isfr array
 
 
-Time to create sfr dataset: 0.25s
+Time to create sfr dataset: 0.26s
 
 running rasterstats.zonal_stats on buffered LineStrings...
 finished in 0.03s
@@ -1223,7 +1231,7 @@ mover: True
 converting reach and segment data to package data...
 converting segment data to period data...
 computing cell thicknesses...
-finished in 0.04s
+finished in 0.03s
 
 wrote original/plsnt_lgr_parent_lakarr0.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr1.dat, took 0.00s
@@ -1232,7 +1240,7 @@ wrote original/plsnt_lgr_parent_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr4.dat, took 0.00s
 loading ./external/plsnt_lgr_parent_top.dat, shape=(25, 25), took 0.00s
 computing cell thicknesses...
-finished in 0.04s
+finished in 0.02s
 
 wrote ./external/plsnt_lgr_parent_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_parent_botm0.dat, took 0.00s
@@ -1282,7 +1290,7 @@ writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/sh
 finished in 0.02s
 
 wrote ./external/plsnt_lgr_parent_irch.dat, took 0.00s
-finished in 0.86s
+finished in 0.89s
 
 
 Setting up LAK package...
@@ -1382,7 +1390,7 @@ stress_period_data: {0: {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_ch
 print_input: False
 print_flows: False
 save_flows: True
-finished in 2.07s
+finished in 2.12s
 
 
 Setting up DIS package...
@@ -1457,9 +1465,9 @@ reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/
 finished in 0.02s
 reading data from /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
 finished in 0.02s
-loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.00s
+loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.01s
 computing cell thicknesses...
-finished in 0.15s
+finished in 0.21s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm0.dat, took 0.00s
@@ -1488,7 +1496,7 @@ xorigin: None
 yorigin: None
 length_units: meters
 computing cell thicknesses...
-finished in 0.15s
+finished in 0.19s
 
 
 arguments to MFsetupMixin.load_features:
@@ -1509,9 +1517,9 @@ wrote original/plsnt_lgr_inset_lakarr1.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr2.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr4.dat, took 0.00s
-loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.00s
+loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.01s
 computing cell thicknesses...
-finished in 0.33s
+finished in 0.25s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm0.dat, took 0.00s
@@ -1569,10 +1577,10 @@ top: array: (70, 80), float64, min: 290.5, mean: 313.365, max: 348.75
 botm: array: (5, 70, 80), float64, min: 191.27, mean: 276.217, max: 338.89
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp...
-finished in 0.19s
+finished in 0.20s
 
 wrote ./external/plsnt_lgr_inset_irch.dat, took 0.00s
-finished in 1.35s
+finished in 1.46s
 
 
 Setting up IC package...
@@ -1626,7 +1634,7 @@ save_flows: True
 icelltype: 1
 k: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k0.dat&#39;} ... {&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k4.dat&#39;}]
 k33: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k330.dat&#39;} ... {&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k334.dat&#39;}]
-finished in 0.36s
+finished in 0.37s
 
 
 arguments to setup_perioddata_group:
@@ -1745,7 +1753,7 @@ reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_dat
 reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.06s
+load finished in 0.07s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.01s
@@ -1758,7 +1766,7 @@ SFRmaker version 0.4.0.post26+ge11e929
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.16s
+grid class created in 0.15s
 
 Model grid information
 structured grid
@@ -1810,7 +1818,7 @@ finished in 0.00s
 Intersecting 2 flowlines with 5,600 grid cells...
 Intersecting 2 features...
 2
-finished in 0.02s
+finished in 0.03s
 
 Setting up reach data... (may take a few minutes for large grids)
 finished in 0.01s
@@ -1852,7 +1860,7 @@ active area defined by: isfr array
 Time to create sfr dataset: 0.40s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 0.07s
+finished in 0.08s
 
 
 Smoothing elevations...
@@ -1874,7 +1882,7 @@ mover: True
 converting reach and segment data to package data...
 converting segment data to period data...
 computing cell thicknesses...
-finished in 0.30s
+finished in 0.16s
 
 
 arguments to MFsetupMixin.load_features:
@@ -1895,9 +1903,9 @@ wrote original/plsnt_lgr_inset_lakarr1.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr2.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr3.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr4.dat, took 0.00s
-loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.00s
+loading ./external/plsnt_lgr_inset_top.dat, shape=(70, 80), took 0.01s
 computing cell thicknesses...
-finished in 0.18s
+finished in 0.19s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm0.dat, took 0.00s
@@ -1955,10 +1963,10 @@ top: array: (70, 80), float64, min: 290.5, mean: 313.365, max: 348.75
 botm: array: (5, 70, 80), float64, min: 191.27, mean: 276.409, max: 338.89
 wrote /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/travis/build/aleaf/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp...
-finished in 0.19s
+finished in 0.20s
 
 wrote ./external/plsnt_lgr_inset_irch.dat, took 0.00s
-finished in 1.78s
+finished in 1.71s
 
 
 Setting up LAK package...
@@ -2017,7 +2025,7 @@ Grid spacing: 40.00 meters
 Packages: dis ic npf sto rcha oc sfr_0
 
 arguments to ModflowGwflak:
-connectiondata: [[0, 0, (3, 36, 53), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0] ... [0, 754, (4, 32, 38), &#39;horizontal&#39;, 0.025, 195.25, 280.67, 40.0, 40.0]]
+connectiondata: [[0, 0, (2, 29, 50), &#39;vertical&#39;, 0.025, 0.0, 0.0, 0.0, 0.0] ... [0, 754, (4, 32, 38), &#39;horizontal&#39;, 0.025, 195.25, 280.67, 40.0, 40.0]]
 save_flows: True
 boundnames: True
 surfdep: 0.1
@@ -2029,13 +2037,13 @@ packagedata: [[0, 298.38, 755, &#39;lake1&#39;]]
 ntables: 1
 tables: [(0, &#39;./external/600059060_stage_area_volume.dat&#39;, &#39;junk&#39;, &#39;junk&#39;)]
 outlets: None
-perioddata: {0: [[0, &#39;rainfall&#39;, 0.0026829936043197404], [0, &#39;evaporation&#39;, 0.0006298262025336206], [0, &#39;withdrawal&#39;, 0.0], [0, &#39;runoff&#39;, 0.0]]
+perioddata: {0: [[0, &#39;rainfall&#39;, 0.0026829936043197404], [0, &#39;runoff&#39;, 0.0], [0, &#39;evaporation&#39;, 0.0006298262025336206], [0, &#39;withdrawal&#39;, 0.0]]
  ...
 }
 observations: {lake1.obs.csv: [(&#39;stage&#39;, &#39;stage&#39;, &#39;lake1&#39;), (&#39;inflow&#39;, &#39;inflow&#39;, &#39;lake1&#39;), (&#39;rainfall&#39;, &#39;rainfall&#39;, &#39;lake1&#39;), (&#39;runoff&#39;, &#39;runoff&#39;, &#39;lake1&#39;), (&#39;lak&#39;, &#39;lak&#39;, &#39;lake1&#39;), (&#39;withdrawal&#39;, &#39;withdrawal&#39;, &#39;lake1&#39;), (&#39;evaporation&#39;, &#39;evaporation&#39;, &#39;lake1&#39;), (&#39;storage&#39;, &#39;storage&#39;, &#39;lake1&#39;), (&#39;volume&#39;, &#39;volume&#39;, &#39;lake1&#39;), (&#39;surface-area&#39;, &#39;surface-area&#39;, &#39;lake1&#39;), (&#39;wetted-area&#39;, &#39;wetted-area&#39;, &#39;lake1&#39;), (&#39;conductance&#39;, &#39;conductance&#39;, &#39;lake1&#39;)]
  ...
 }
-finished in 0.39s
+finished in 0.43s
 
 
 Setting up WEL package...
@@ -2049,7 +2057,7 @@ finished in 0.00s
 took 0.00s
 
 computing cell thicknesses...
-finished in 0.15s
+finished in 0.16s
 
 
 reading /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/shps/csls_sources_wu_pts.shp...
@@ -2061,7 +2069,7 @@ finished in 0.00s
 took 0.00s
 
 computing cell thicknesses...
-finished in 0.18s
+finished in 0.16s
 
 
 Resampling pumping rates in /home/travis/build/aleaf/modflow-setup/examples/data/pleasant/source_data/tables/master_wu.csv to model stress periods...
@@ -2077,7 +2085,7 @@ print_input: True
 print_flows: True
 save_flows: True
 boundnames: True
-finished in 0.55s
+finished in 0.56s
 
 
 Setting up OBS package...
@@ -2149,7 +2157,7 @@ nexg: 1276
 auxiliary: [(&#39;angldegx&#39;, &#39;cdist&#39;)]
 exchangedata: [[(0, 7, 6), (0, 0, 0), 1, 100.0, 20.0, 40.0, 0.0, 144.22205101855957] ... [(4, 21, 22), (4, 69, 79), 1, 100.0, 20.0, 40.0, 90.0, 144.22205101855957]]
 mvr_filerecord: pleasant_lgr.mvr
-finished setting up model in 10.74s
+finished setting up model in 10.90s
 
 plsnt_lgr_parent model:
 5 layer(s), 25 row(s), 25 column(s), 13 stress period(s)
@@ -2312,7 +2320,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fe2ff6f4100&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f5478d0bd90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2540,7 +2548,7 @@ authorized or unauthorized use. Also refer to the USGS Water
 Resources Software User Rights Notice for complete use, copyright,
 and distribution information.
 
- Run start date and time (yyyy/mm/dd hh:mm:ss): 2020/08/08 15:17:02
+ Run start date and time (yyyy/mm/dd hh:mm:ss): 2020/08/08 15:34:52
 
  Writing simulation list file: mfsim.lst
  Using Simulation name file: mfsim.nam
@@ -2557,8 +2565,8 @@ and distribution information.
  Solving:  Stress period:    11    Time step:     1
  Solving:  Stress period:    12    Time step:     1
  Solving:  Stress period:    13    Time step:     1
- Run end date and time (yyyy/mm/dd hh:mm:ss): 2020/08/08 15:17:06
- Elapsed run time:  4.148 Seconds
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2020/08/08 15:34:56
+ Elapsed run time:  4.293 Seconds
 
  Normal termination of simulation.
 </pre></div></div>
