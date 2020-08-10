@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+gc95ef01 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g23028fd documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+gc95ef01
+                0.post51+g23028fd
               </div>
             
           
@@ -1482,7 +1482,8 @@
             <span class="n">sfr_package</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">modflow_sfr2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># pass options kwargs through to mf6 constructor</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;source_data&#39;</span><span class="p">})</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span>
+                              <span class="p">{</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="s1">&#39;flowlines&#39;</span><span class="p">,</span> <span class="s1">&#39;inflows&#39;</span><span class="p">,</span> <span class="s1">&#39;observations&#39;</span><span class="p">,</span> <span class="s1">&#39;inflows_routing&#39;</span><span class="p">,</span> <span class="s1">&#39;dem&#39;</span><span class="p">}})</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfsfr</span><span class="p">)</span>
             <span class="n">sfr_package</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">create_mf6sfr</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># monkey patch ModflowGwfsfr instance to behave like ModflowSfr2</span>
@@ -1618,7 +1619,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 08, 2020.
+        Last updated on Aug 10, 2020.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+gc95ef01 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+g23028fd documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+gc95ef01
+                0.post51+g23028fd
               </div>
             
           
@@ -283,7 +283,7 @@
         <span class="sd">&quot;&quot;&quot;Remake the idomain array from the source data,</span>
 <span class="sd">        no data values in the top and bottom arrays, and</span>
 <span class="sd">        so that cells above SFR reaches are inactive.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Also remakes irch for the recharge package&quot;&quot;&quot;</span>
         <span class="c1"># loop thru LGR models and inactivate area of parent grid for each one</span>
         <span class="n">lgr_idomain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -342,12 +342,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mg_resync</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>  <span class="c1"># reset the model grid</span>
-        
+
         <span class="c1"># rebuild irch to keep it in sync with idomain changes</span>
         <span class="n">irch</span> <span class="o">=</span> <span class="n">make_irch</span><span class="p">(</span><span class="n">idomain</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;rch&#39;</span><span class="p">,</span> <span class="s1">&#39;irch&#39;</span><span class="p">,</span>
                                 <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">irch</span><span class="p">},</span>
-                                <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span> 
+                                <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span>
                                 <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="c1">#self.dis.irch = self.cfg[&#39;dis&#39;][&#39;irch&#39;]</span>
 
@@ -697,10 +697,10 @@
 
         <span class="c1"># make the irch array</span>
         <span class="n">irch</span> <span class="o">=</span> <span class="n">make_irch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;rch&#39;</span><span class="p">,</span> <span class="s1">&#39;irch&#39;</span><span class="p">,</span>
                           <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">irch</span><span class="p">},</span>
-                          <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span> 
+                          <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span>
                           <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="c1"># make the rech array</span>
@@ -1123,9 +1123,42 @@
         <span class="k">return</span> <span class="n">chd</span></div>
 
 <div class="viewcode-block" id="MF6model.write_input"><a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.write_input">[docs]</a>    <span class="k">def</span> <span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Same syntax as MODFLOW-2005 flopy</span>
+        <span class="sd">&quot;&quot;&quot;Write the model input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">write_simulation</span><span class="p">()</span></div>
+        <span class="c1"># write the model with flopy</span>
+        <span class="c1"># but skip the sfr package</span>
+        <span class="c1"># by monkey-patching the write method</span>
+        <span class="k">def</span> <span class="nf">skip_write</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfr</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">skip_write</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">write_simulation</span><span class="p">()</span>
+
+        <span class="c1"># write the sfr package with SFRmaker</span>
+        <span class="k">if</span> <span class="s1">&#39;SFR&#39;</span> <span class="ow">in</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">()):</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;mover&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;mvr&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;save_flows&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                <span class="n">budget_fileout</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;budget_fileout&#39;</span><span class="p">])</span>
+                <span class="n">stage_fileout</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;stage_fileout&#39;</span><span class="p">])</span>
+                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;budget fileout </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">budget_fileout</span><span class="p">))</span>
+                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;stage fileout </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stage_fileout</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">observations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obs6 filein </span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                          <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;obs6_filein_fmt&#39;</span><span class="p">])</span>
+                               <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">idomain</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">,</span>
+                                       <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
+                                       <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
+                                       <span class="n">external_files_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">external_path</span>
+                                       <span class="p">)</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
@@ -1205,7 +1238,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 08, 2020.
+        Last updated on Aug 10, 2020.
       </span>
 
     </p>

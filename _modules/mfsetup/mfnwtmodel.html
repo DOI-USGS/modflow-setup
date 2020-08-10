@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+gc95ef01 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post51+g23028fd documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+gc95ef01
+                0.post51+g23028fd
               </div>
             
           
@@ -868,46 +868,53 @@
             <span class="n">lak_outtype</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;lak_outtype&#39;</span><span class="p">]]</span> <span class="o">*</span> <span class="n">nlak_gages</span>
             <span class="c1"># need minus sign to tell MF to read outtype</span>
             <span class="n">lake_unit</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">starting_unit_number</span><span class="p">,</span>
-                                        <span class="n">starting_unit_number</span> <span class="o">+</span> <span class="n">nlak_gages</span><span class="p">))</span>
+                                        <span class="n">starting_unit_number</span> <span class="o">+</span> <span class="n">nlak_gages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
             <span class="c1"># TODO: make private attribute to facilitate keeping track of lake IDs</span>
             <span class="n">lak_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lak</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">.ggo&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">hydroid</span><span class="p">)</span>
                          <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hydroid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;source_data&#39;</span><span class="p">][</span><span class="s1">&#39;lakes_shapefile&#39;</span><span class="p">][</span><span class="s1">&#39;include_ids&#39;</span><span class="p">])]</span>
 
         <span class="c1"># need to add streams at some point</span>
         <span class="n">nstream_gages</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="s1">&#39;sfr&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">obs_info_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;observation_data&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">obs_info_files</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># get obs_info_files into dictionary format</span>
-                <span class="c1"># filename: dict of column names mappings</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs_info_files</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                    <span class="n">obs_info_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs_info_files</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs_info_files</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">obs_info_files</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;default_columns&#39;</span><span class="p">]</span>
-                                      <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">obs_info_files</span><span class="p">}</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs_info_files</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obs_info_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">obs_info_files</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;default_columns&#39;</span><span class="p">]</span>
-
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reading observation files...&#39;</span><span class="p">)</span>
-                <span class="n">check_source_files</span><span class="p">(</span><span class="n">obs_info_files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-                <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">column_info</span> <span class="ow">in</span> <span class="n">obs_info_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">read_observation_data</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
-                                               <span class="n">column_info</span><span class="p">,</span>
-                                               <span class="n">column_mappings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;hyd&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;column_mappings&#39;</span><span class="p">))</span>
-                    <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="c1"># cull to cols that are needed</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">ngages</span> <span class="o">+=</span> <span class="n">nstream_gages</span>
-        <span class="c1"># TODO: stream gage setup</span>
         <span class="n">stream_gageseg</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">stream_gagerch</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">stream_unit</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">stream_outtype</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;sfr_outtype&#39;</span><span class="p">]]</span> <span class="o">*</span> <span class="n">nstream_gages</span>
+        <span class="n">stream_outtype</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">stream_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="s1">&#39;sfr&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#observations_input = self.cfg[&#39;sfr&#39;].get(&#39;source_data&#39;, {}).get(&#39;observations&#39;)</span>
+            <span class="c1">#obs_info_files = self.cfg[&#39;gag&#39;].get(&#39;observation_data&#39;)</span>
+            <span class="c1">#if obs_info_files is not None:</span>
+            <span class="c1">#    # get obs_info_files into dictionary format</span>
+            <span class="c1">#    # filename: dict of column names mappings</span>
+            <span class="c1">#    if isinstance(obs_info_files, str):</span>
+            <span class="c1">#        obs_info_files = [obs_info_files]</span>
+            <span class="c1">#    if isinstance(obs_info_files, list):</span>
+            <span class="c1">#        obs_info_files = {f: self.cfg[&#39;gag&#39;][&#39;default_columns&#39;]</span>
+            <span class="c1">#                          for f in obs_info_files}</span>
+            <span class="c1">#    elif isinstance(obs_info_files, dict):</span>
+            <span class="c1">#        for k, v in obs_info_files.items():</span>
+            <span class="c1">#            if v is None:</span>
+            <span class="c1">#                obs_info_files[k] = self.cfg[&#39;gag&#39;][&#39;default_columns&#39;]</span>
+<span class="c1">#</span>
+            <span class="c1">#    print(&#39;Reading observation files...&#39;)</span>
+            <span class="c1">#    check_source_files(obs_info_files.keys())</span>
+            <span class="c1">#    dfs = []</span>
+            <span class="c1">#    for f, column_info in obs_info_files.items():</span>
+            <span class="c1">#        print(f)</span>
+            <span class="c1">#        df = read_observation_data(f,</span>
+            <span class="c1">#                                   column_info,</span>
+            <span class="c1">#                                   column_mappings=self.cfg[&#39;hyd&#39;].get(&#39;column_mappings&#39;))</span>
+            <span class="c1">#        dfs.append(df) # cull to cols that are needed</span>
+            <span class="c1">#    df = pd.concat(dfs, axis=0)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">observations</span>
+            <span class="n">nstream_gages</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="n">stream_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.ggo&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">site_no</span><span class="p">)</span> <span class="k">for</span> <span class="n">site_no</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">obsname</span><span class="p">]</span>
+            <span class="n">stream_gageseg</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iseg</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">stream_gagerch</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ireach</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">stream_unit</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">starting_unit_number</span><span class="p">,</span>
+                                         <span class="n">starting_unit_number</span> <span class="o">+</span> <span class="n">nstream_gages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+            <span class="n">stream_outtype</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;sfr_outtype&#39;</span><span class="p">]]</span> <span class="o">*</span> <span class="n">nstream_gages</span>
+        <span class="n">ngages</span> <span class="o">+=</span> <span class="n">nstream_gages</span>
 
         <span class="k">if</span> <span class="n">ngages</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No gage package input.&#39;</span><span class="p">)</span>
@@ -919,7 +926,7 @@
         <span class="n">gage_data</span><span class="p">[</span><span class="s1">&#39;gagerch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lak_gagerch</span> <span class="o">+</span> <span class="n">stream_gagerch</span>
         <span class="n">gage_data</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lake_unit</span> <span class="o">+</span> <span class="n">stream_unit</span>
         <span class="n">gage_data</span><span class="p">[</span><span class="s1">&#39;outtype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lak_outtype</span> <span class="o">+</span> <span class="n">stream_outtype</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ggo_files&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ggo_files&#39;</span><span class="p">,</span> <span class="p">{}))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;ggo_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lak_files</span> <span class="o">+</span> <span class="n">stream_files</span>
         <span class="n">gag</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowGage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numgage</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">gage_data</span><span class="p">),</span>
                              <span class="n">gage_data</span><span class="o">=</span><span class="n">gage_data</span><span class="p">,</span>
@@ -964,6 +971,20 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">chd</span></div>
 
+<div class="viewcode-block" id="MFnwtModel.write_input"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.write_input">[docs]</a>    <span class="k">def</span> <span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write the model input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># write the model with flopy</span>
+        <span class="c1"># but skip the sfr package</span>
+        <span class="c1"># by monkey-patching the write method</span>
+        <span class="n">SelPackList</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="s1">&#39;SFR&#39;</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">write_input</span><span class="p">(</span><span class="n">SelPackList</span><span class="o">=</span><span class="n">SelPackList</span><span class="p">)</span>
+
+        <span class="c1"># write the sfr package with SFRmaker</span>
+        <span class="c1"># gage package was already set-up and then written by Flopy</span>
+        <span class="k">if</span> <span class="s1">&#39;SFR&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">write_observations_input</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">cfg</span>
@@ -1001,7 +1022,7 @@
   <div role="contentinfo">
     <p>
       <span class="lastupdated">
-        Last updated on Aug 08, 2020.
+        Last updated on Aug 10, 2020.
       </span>
 
     </p>
