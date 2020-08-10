@@ -71,6 +71,13 @@ def get_pleasant_mf6_with_dis(get_pleasant_mf6_with_grid):
 
 
 @pytest.fixture(scope="function")
+def get_pleasant_mf6_with_sfr(get_pleasant_mf6_with_dis):
+    m = copy.deepcopy(get_pleasant_mf6_with_dis)
+    m.setup_sfr()
+    return m
+
+
+@pytest.fixture(scope="function")
 def get_pleasant_mf6_with_lak(get_pleasant_mf6_with_dis):
     print('creating Pleasant Lake MFnwtModel instance with LAKE package...')
     m = copy.deepcopy(get_pleasant_mf6_with_dis)
@@ -83,18 +90,18 @@ def get_pleasant_mf6_with_lak(get_pleasant_mf6_with_dis):
 def pleasant_mf6_setup_from_yaml(pleasant_mf6_test_cfg_path):
     m = MF6model.setup_from_yaml(pleasant_mf6_test_cfg_path)
     m.write_input()
-    if hasattr(m, 'sfr'):
-        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-        m.sfrdata.write_package(sfr_package_filename,
-                                version='mf6',
-                                idomain=m.idomain,
-                                options=['save_flows',
-                                         'BUDGET FILEOUT shellmound.sfr.cbc',
-                                         'STAGE FILEOUT shellmound.sfr.stage.bin',
-                                         # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
-                                         # location of obs6 file relative to sfr package file (same folder)
-                                         ]
-                                    )
+    #if hasattr(m, 'sfr'):
+    #    sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+    #    m.sfrdata.write_package(sfr_package_filename,
+    #                            version='mf6',
+    #                            idomain=m.idomain,
+    #                            options=['save_flows',
+    #                                     'BUDGET FILEOUT shellmound.sfr.cbc',
+    #                                     'STAGE FILEOUT shellmound.sfr.stage.bin',
+    #                                     # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
+    #                                     # location of obs6 file relative to sfr package file (same folder)
+    #                                     ]
+    #                                )
     return m
 
 
@@ -417,10 +424,9 @@ def test_ghb_setup(get_pleasant_mf6_with_dis):
     assert np.all(spd0['head'] > m.dis.botm.array[k, i, j])
 
 
-def test_sfr_setup(get_pleasant_mf6_with_dis):
-    m = get_pleasant_mf6_with_dis
-    m.setup_sfr()
-    m.sfr.write()
+def test_sfr_setup(get_pleasant_mf6_with_sfr):
+    m = get_pleasant_mf6_with_sfr
+    m.write_input()
     assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
     assert isinstance(m.sfr, mf6.ModflowGwfsfr)
     output_path = m.cfg['sfr']['output_path']
@@ -434,15 +440,36 @@ def test_sfr_setup(get_pleasant_mf6_with_dis):
         assert os.path.exists(f)
     assert m.sfrdata.model == m
 
+
+def test_write_sfr(get_pleasant_mf6_with_sfr):
+    m = get_pleasant_mf6_with_sfr
+    m.write_input()
+    sfr_package_file = m.sfrdata.modflow_sfr2.fn_path
+    options = read_mf6_block(sfr_package_file, 'options')
+    assert 'save_flows' in options
+    assert options['budget'] == ['fileout', 'pleasant_mf6.sfr.out.bin']
+    assert options['stage'] == ['fileout', 'pleasant_mf6.sfr.stage.bin']
+    assert options['obs6'] == ['filein', 'pleasant_mf6.sfr.obs6']
+    assert options['unit_conversion'] == ['86400.0']
+    assert options['auxiliary'] == ['line_id']
+
+
+def test_sfr_obs(get_pleasant_mf6_with_sfr):
+    m = get_pleasant_mf6_with_sfr
+    m.write_input()
     # verify that observation data were added and written
     sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-    m.sfrdata.write_package(sfr_package_filename, version='mf6')
     obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])
     assert len(m.sfrdata.observations) == len(obs)
     expected = obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist()
     assert m.sfrdata.observations['obsname'].tolist() == expected
-    sfr_obs_filename = os.path.join(m.model_ws, m.sfrdata.observations_file)
+    sfr_obs_filename = os.path.normpath(os.path.join(m.model_ws, m.sfrdata.observations_file))
     assert os.path.exists(sfr_obs_filename)
+    obs_input = read_mf6_block(sfr_obs_filename, 'continuous')
+    assert obs_input[sfr_obs_filename + '.output.csv'] == \
+           ['# obsname obstype rno',
+            '1000000 downstream-flow 22',
+            '2000000 downstream-flow 25']
 
 
 def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):

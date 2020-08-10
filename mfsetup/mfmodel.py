@@ -1304,7 +1304,8 @@ class MFsetupMixin():
             sfr_package = sfr.modflow_sfr2
         else:
             # pass options kwargs through to mf6 constructor
-            kwargs = flatten({k:v for k, v in self.cfg[package].items() if k != 'source_data'})
+            kwargs = flatten({k:v for k, v in self.cfg[package].items() if k not in
+                              {'source_data', 'flowlines', 'inflows', 'observations', 'inflows_routing', 'dem'}})
             kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsfr)
             sfr_package = sfr.create_mf6sfr(model=self, **kwargs)
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2

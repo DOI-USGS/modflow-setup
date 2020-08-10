@@ -240,7 +240,7 @@ def pleasant_nwt_setup_from_yaml(pleasant_nwt_test_cfg_path):
     m.write_input()
     # verify that observation data were added and written
     sfr_package_filename = os.path.join(m.model_ws, m.sfr.file_name[0])
-    m.sfrdata.write_package(sfr_package_filename)
+    #m.sfrdata.write_package(sfr_package_filename)
     return m
 
 

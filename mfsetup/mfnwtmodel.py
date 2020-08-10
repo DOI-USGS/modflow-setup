@@ -690,46 +690,53 @@ class MFnwtModel(MFsetupMixin, Modflow):
             lak_outtype = [self.cfg['gag']['lak_outtype']] * nlak_gages
             # need minus sign to tell MF to read outtype
             lake_unit = list(-np.arange(starting_unit_number,
-                                        starting_unit_number + nlak_gages))
+                                        starting_unit_number + nlak_gages, dtype=int))
             # TODO: make private attribute to facilitate keeping track of lake IDs
             lak_files = ['lak{}_{}.ggo'.format(i+1, hydroid)
                          for i, hydroid in enumerate(self.cfg['lak']['source_data']['lakes_shapefile']['include_ids'])]
 
         # need to add streams at some point
         nstream_gages = 0
-        if self.get_package('sfr') is not None:
-
-            obs_info_files = self.cfg['gag'].get('observation_data')
-            if obs_info_files is not None:
-                # get obs_info_files into dictionary format
-                # filename: dict of column names mappings
-                if isinstance(obs_info_files, str):
-                    obs_info_files = [obs_info_files]
-                if isinstance(obs_info_files, list):
-                    obs_info_files = {f: self.cfg['gag']['default_columns']
-                                      for f in obs_info_files}
-                elif isinstance(obs_info_files, dict):
-                    for k, v in obs_info_files.items():
-                        if v is None:
-                            obs_info_files[k] = self.cfg['gag']['default_columns']
-
-                print('Reading observation files...')
-                check_source_files(obs_info_files.keys())
-                dfs = []
-                for f, column_info in obs_info_files.items():
-                    print(f)
-                    df = read_observation_data(f,
-                                               column_info,
-                                               column_mappings=self.cfg['hyd'].get('column_mappings'))
-                    dfs.append(df) # cull to cols that are needed
-                df = pd.concat(dfs, axis=0)
-        ngages += nstream_gages
-        # TODO: stream gage setup
         stream_gageseg = []
         stream_gagerch = []
         stream_unit = []
-        stream_outtype = [self.cfg['gag']['sfr_outtype']] * nstream_gages
+        stream_outtype = []
         stream_files = []
+        if self.get_package('sfr') is not None:
+            #observations_input = self.cfg['sfr'].get('source_data', {}).get('observations')
+            #obs_info_files = self.cfg['gag'].get('observation_data')
+            #if obs_info_files is not None:
+            #    # get obs_info_files into dictionary format
+            #    # filename: dict of column names mappings
+            #    if isinstance(obs_info_files, str):
+            #        obs_info_files = [obs_info_files]
+            #    if isinstance(obs_info_files, list):
+            #        obs_info_files = {f: self.cfg['gag']['default_columns']
+            #                          for f in obs_info_files}
+            #    elif isinstance(obs_info_files, dict):
+            #        for k, v in obs_info_files.items():
+            #            if v is None:
+            #                obs_info_files[k] = self.cfg['gag']['default_columns']
+#
+            #    print('Reading observation files...')
+            #    check_source_files(obs_info_files.keys())
+            #    dfs = []
+            #    for f, column_info in obs_info_files.items():
+            #        print(f)
+            #        df = read_observation_data(f,
+            #                                   column_info,
+            #                                   column_mappings=self.cfg['hyd'].get('column_mappings'))
+            #        dfs.append(df) # cull to cols that are needed
+            #    df = pd.concat(dfs, axis=0)
+            df = self.sfrdata.observations
+            nstream_gages = len(df)
+            stream_files = ['{}.ggo'.format(site_no) for site_no in df.obsname]
+            stream_gageseg = df.iseg.tolist()
+            stream_gagerch = df.ireach.tolist()
+            stream_unit = list(np.arange(starting_unit_number,
+                                         starting_unit_number + nstream_gages, dtype=int))
+            stream_outtype = [self.cfg['gag']['sfr_outtype']] * nstream_gages
+        ngages += nstream_gages
 
         if ngages == 0:
             print('No gage package input.')
@@ -741,7 +748,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         gage_data['gagerch'] = lak_gagerch + stream_gagerch
         gage_data['unit'] = lake_unit + stream_unit
         gage_data['outtype'] = lak_outtype + stream_outtype
-        if self.cfg['gag'].get('ggo_files') is None:
+        if len(self.cfg['gag'].get('ggo_files', {})) == 0:
             self.cfg['gag']['ggo_files'] = lak_files + stream_files
         gag = fm.ModflowGage(self, numgage=len(gage_data),
                              gage_data=gage_data,
@@ -785,6 +792,20 @@ class MFnwtModel(MFsetupMixin, Modflow):
         chd = fm.ModflowChd(self, stress_period_data=spd)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return chd
+
+    def write_input(self):
+        """Write the model input.
+        """
+        # write the model with flopy
+        # but skip the sfr package
+        # by monkey-patching the write method
+        SelPackList = [p for p in self.get_package_list() if p != 'SFR']
+        super().write_input(SelPackList=SelPackList)
+
+        # write the sfr package with SFRmaker
+        # gage package was already set-up and then written by Flopy
+        if 'SFR' in self.get_package_list():
+            self.sfrdata.write_package(write_observations_input=False)
 
     @staticmethod
     def _parse_model_kwargs(cfg):

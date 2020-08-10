@@ -69,17 +69,17 @@ def shellmound_tmr_model_with_dis(shellmound_tmr_model_with_grid):
 def shellmound_tmr_model_setup(shellmound_tmr_cfg_path):
     m = MF6model.setup_from_yaml(shellmound_tmr_cfg_path)
     m.write_input()
-    if hasattr(m, 'sfr'):
-        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-        m.sfrdata.write_package(sfr_package_filename,
-                                    version='mf6',
-                                    options=['save_flows',
-                                             'BUDGET FILEOUT {}.sfr.cbc'.format(m.name),
-                                             'STAGE FILEOUT {}.sfr.stage.bin'.format(m.name),
-                                             # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
-                                             # location of obs6 file relative to sfr package file (same folder)
-                                             ]
-                                    )
+    #if hasattr(m, 'sfr'):
+    #    sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+    #    m.sfrdata.write_package(sfr_package_filename,
+    #                                version='mf6',
+    #                                options=['save_flows',
+    #                                         'BUDGET FILEOUT {}.sfr.cbc'.format(m.name),
+    #                                         'STAGE FILEOUT {}.sfr.stage.bin'.format(m.name),
+    #                                         # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
+    #                                         # location of obs6 file relative to sfr package file (same folder)
+    #                                         ]
+    #                                )
     return m
 
 

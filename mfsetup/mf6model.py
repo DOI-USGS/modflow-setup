@@ -105,7 +105,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """Remake the idomain array from the source data,
         no data values in the top and bottom arrays, and
         so that cells above SFR reaches are inactive.
-        
+
         Also remakes irch for the recharge package"""
         # loop thru LGR models and inactivate area of parent grid for each one
         lgr_idomain = np.ones(self.dis.idomain.array.shape, dtype=int)
@@ -164,12 +164,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self.dis.idomain = self.cfg['dis']['griddata']['idomain']
         self._mg_resync = False
         self.setup_grid()  # reset the model grid
-        
+
         # rebuild irch to keep it in sync with idomain changes
         irch = make_irch(idomain)
         self._setup_array('rch', 'irch',
                                 data={0: irch},
-                                datatype='array2d', 
+                                datatype='array2d',
                                 write_fmt='%d', dtype=int)
         #self.dis.irch = self.cfg['dis']['irch']
 
@@ -519,10 +519,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # make the irch array
         irch = make_irch(self.idomain)
-        
+
         self._setup_array('rch', 'irch',
                           data={0: irch},
-                          datatype='array2d', 
+                          datatype='array2d',
                           write_fmt='%d', dtype=int)
 
         # make the rech array
@@ -945,9 +945,42 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         return chd
 
     def write_input(self):
-        """Same syntax as MODFLOW-2005 flopy
+        """Write the model input.
         """
+        # write the model with flopy
+        # but skip the sfr package
+        # by monkey-patching the write method
+        def skip_write(**kwargs):
+            pass
+        if hasattr(self, 'sfr'):
+            self.sfr.write = skip_write
         self.simulation.write_simulation()
+
+        # write the sfr package with SFRmaker
+        if 'SFR' in ' '.join(self.get_package_list()):
+            options = []
+            for k, b in self.cfg['sfr']['options'].items():
+                if k == 'mover':
+                    if 'mvr' not in self.simulation.package_key_dict:
+                        continue
+                options.append(k)
+            if 'save_flows' in options:
+                budget_fileout = '{}.{}'.format(self.name,
+                                                self.cfg['sfr']['budget_fileout'])
+                stage_fileout = '{}.{}'.format(self.name,
+                                               self.cfg['sfr']['stage_fileout'])
+                options.append('budget fileout {}'.format(budget_fileout))
+                options.append('stage fileout {}'.format(stage_fileout))
+            if len(self.sfrdata.observations) > 0:
+                options.append('obs6 filein {}.{}'.format(self.name,
+                                                          self.cfg['sfr']['obs6_filein_fmt'])
+                               )
+            self.sfrdata.write_package(idomain=self.idomain,
+                                       version='mf6',
+                                       options=options,
+                                       external_files_path=self.external_path
+                                       )
+
 
     @staticmethod
     def _parse_model_kwargs(cfg):
