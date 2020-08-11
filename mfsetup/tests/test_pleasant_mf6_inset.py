@@ -449,7 +449,7 @@ def test_write_sfr(get_pleasant_mf6_with_sfr):
     assert 'save_flows' in options
     assert options['budget'] == ['fileout', 'pleasant_mf6.sfr.out.bin']
     assert options['stage'] == ['fileout', 'pleasant_mf6.sfr.stage.bin']
-    assert options['obs6'] == ['filein', 'pleasant_mf6.sfr.obs6']
+    assert options['obs6'] == ['filein', 'pleasant_mf6.sfr.obs']
     assert options['unit_conversion'] == ['86400.0']
     assert options['auxiliary'] == ['line_id']
 
