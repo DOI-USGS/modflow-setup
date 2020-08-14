@@ -4,10 +4,12 @@ Stuff for handling units
 import numpy as np
 
 lenuni_values = {'unknown': 0,
+                 'undefined': 0,
                  'feet': 1,
                  'meters': 2,
                  'centimeters': 3,
                  'millimeters': 4,
+                 'kilometers': 9,
                  'inches': 10,
                  'miles': 11,
                  'ft': 1,
@@ -16,14 +18,16 @@ lenuni_values = {'unknown': 0,
                  'mm': 4,
                  'in': 10,
                  'mi': 11,
+                 'km': 9,
                  'foot': 1,
                  'meter': 2
                  }
 
-fullnames = {'unknown', 'feet', 'meters', 'centimeters',
+fullnames = {'unknown', 'undefined', 'feet', 'meters', 'centimeters',
+             'millimeters', 'inches', 'miles', 'kilometers',
              'seconds', 'minutes', 'hours', 'days', 'years'}
-lenuni_text = {v: k for k, v in lenuni_values.items() if k in fullnames}
 
+lenuni_text = {v: k for k, v in lenuni_values.items() if k in fullnames}
 
 volumetric_units = {'liters': 13,
                     'L': 13,
@@ -39,7 +43,6 @@ volumetric_units = {'liters': 13,
                     'acre foot': 16,
                     'acre-foot': 16
                     }
-
 
 itmuni_values = {"unknown": 0,
                  "seconds": 1,
@@ -135,18 +138,22 @@ def convert_time_units(itmuni1, itmuni2):
 
 
 def get_length_conversions():
-    mults = {(1, 2): 1 * 0.3048,
+    mults = {(1, 2): 1 * 0.3048,  # feet to m
              (1, 3): 100 * 0.3048,
              (1, 4): 1000 * 0.3048,
+             (1, 9): 1 * 0.3048 / 5280,  # feet to km
              (1, 10): 1 * 12,
-             (1, 11): 1 / 5280,
-             (2, 3): 100,
+             (1, 11): 1 / 5280,  # feet to miles
+             (2, 3): 100,  # meters to cm
              (2, 4): 1000,
+             (2, 9): 1 / 1000,
              (2, 10): 1 * 12 / .3048,
              (2, 11): 1 / (.3048 * 5280),
-             (3, 4): 100,
+             (3, 4): 10,  # cm to mm
+             (3, 9): 1 / (100 * 1000),
              (3, 10): 1 * 12 / (1000 * .3048),
              (3, 11): 1 / (.3048 * 5280 * 100),
+             (4, 9): 1 / 1e6,  # mm to km
              (4, 10): 1 * 12 / (1000 * .3048),
              (4, 11): 1 / (.3048 * 5280 * 1000),
              }

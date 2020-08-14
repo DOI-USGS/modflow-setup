@@ -35,6 +35,9 @@ def test_convert_length_units():
     assert np.allclose(convert_length_units(None, 'm'), 1.)
     assert np.allclose(convert_length_units('millimeters', 'meters'), 1/1000)
     assert np.allclose(convert_length_units('meters', 'millimeters'), 1000)
+    assert np.allclose(convert_length_units('meters', 'km'), 0.001)
+    assert np.allclose(convert_length_units('kilometers', 'meters'), 1000)
+    assert np.allclose(convert_length_units('kilometers', 'cm'), 1000*100)
 
 
 def test_convert_time_units():
