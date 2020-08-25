@@ -854,7 +854,12 @@ class TabularSourceData(SourceData):
         dfs = []
         for i, f in self.filenames.items():
             if f.endswith('.shp') or f.endswith('.dbf'):
-                df = shp2df(f)
+                # implement automatic reprojection in gis-utils
+                # maintaining backwards compatibility
+                kwargs = {'dest_crs': self.dest_model.modelgrid.crs}
+                kwargs = get_input_arguments(kwargs, shp2df)
+                df = shp2df(f, **kwargs)
+                df.columns = [c.lower() for c in df.columns]
 
             elif f.endswith('.csv'):
                 df = pd.read_csv(f)
@@ -914,7 +919,11 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         dfs = []
         for i, f in self.filenames.items():
             if f.endswith('.shp') or f.endswith('.dbf'):
-                df = shp2df(f)
+                # implement automatic reprojection in gis-utils
+                # maintaining backwards compatibility
+                kwargs = {'dest_crs': self.dest_model.modelgrid.crs}
+                kwargs = get_input_arguments(kwargs, shp2df)
+                df = shp2df(f, **kwargs)
             elif f.endswith('.csv'):
                 df = pd.read_csv(f)
             else:

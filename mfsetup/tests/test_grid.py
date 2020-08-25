@@ -3,6 +3,7 @@ import os
 
 import fiona
 import numpy as np
+import pyproj
 import pytest
 from gisutils import shp2df
 
@@ -43,6 +44,8 @@ def test_grid_init():
     }
     grid = MFsetupGrid(**kwargs)
     assert np.allclose(grid.yoffset, grid.yul - grid.nrow * 5280 * .3048)
+    assert isinstance(grid.crs, pyproj.crs.CRS)
+    assert grid.crs.srs == 'EPSG:5070'
 
 
 def test_grid_write_shapefile(modelgrid, tmpdir):

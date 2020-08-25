@@ -1,10 +1,12 @@
 import os
 import time
+import warnings
 from collections import defaultdict
 
 import flopy
 import numpy as np
 import pandas as pd
+import pyproj
 
 fm = flopy.modflow
 mf6 = flopy.mf6
@@ -34,6 +36,7 @@ from mfsetup.mf5to6 import (
     get_model_time_units,
     get_package_name,
 )
+from mfsetup.model_version import get_versions
 from mfsetup.sourcedata import TransientTabularSourceData, setup_array
 from mfsetup.tdis import (
     get_parent_stress_periods,
@@ -43,6 +46,9 @@ from mfsetup.tdis import (
 )
 from mfsetup.units import convert_length_units, lenuni_text, lenuni_values
 from mfsetup.utils import flatten, get_input_arguments, get_packages, update
+
+warnings.warn('Automatic reprojection functionality requires gis-utils >= 0.2'
+              '\nPlease pip install --upgrade gis-utils')
 
 
 class MFsetupMixin():
@@ -88,6 +94,7 @@ class MFsetupMixin():
         self._nodata_value = -9999
         self._model_ws = None
         self._abs_model_ws = None
+        self._model_version = None  # semantic version of model
         self.inset = None  # dictionary of inset models attached to LGR parent
         self._is_lgr = False  # flag for lgr inset models
         self.lgr = None  # holds flopy Lgr utility object
@@ -253,7 +260,6 @@ class MFsetupMixin():
         """
         return dict(zip(self.perioddata['per'], self.perioddata['parent_sp']))
 
-
     @property
     def package_list(self):
         """Definitive list of packages. Get from namefile input first
@@ -291,6 +297,25 @@ class MFsetupMixin():
     def model_ws(self, model_ws):
         self._model_ws = model_ws
         self._abs_model_ws = os.path.normpath(os.path.abspath(model_ws))
+
+    @property
+    def model_version(self):
+        """Semantic version of model, using a hacked version of the versioneer.
+        Version is reported using git tags for the model repository
+        or a start_version: key specified in the configuration file (default 0).
+        The start_version or tag is then appended by the remaining information
+        in a pep440-post style version tag (e.g. most recent git commit hash
+        for the model repository + "dirty" if the model repository has uncommited changes)
+
+        References
+        ----------
+        https://github.com/warner/python-versioneer
+        https://github.com/warner/python-versioneer/blob/master/details.md
+        """
+        if self._model_version is None:
+            self._model_version = get_versions(path=self.model_ws,
+                                   start_version=self.cfg['start_version'])
+        return self._model_version
 
     @property
     def tmpdir(self):
@@ -458,8 +483,14 @@ class MFsetupMixin():
         for f in features_file:
             if f not in self._features.keys():
                 if os.path.exists(f):
-                    features_proj_str = get_proj_str(f)
-                    model_proj_str = "epsg:{}".format(self.cfg['setup_grid']['epsg'])
+                    try:
+                        from gisutils import get_shapefile_crs
+                        features_crs = get_shapefile_crs(kwargs['shapefile'])
+                    except Exception as e:
+                        features_crs = pyproj.crs.CRS.from_proj4(get_proj_str(f))
+                    authority = features_crs.to_authority()
+                    if authority is not None:
+                        features_crs = pyproj.CRS.from_user_input(features_crs.to_authority())
                     if filter is None:
                         if self.bbox is not None:
                             bbox = self.bbox
@@ -468,15 +499,19 @@ class MFsetupMixin():
                             model_proj_str = self.parent.modelgrid.proj_str
                             assert model_proj_str is not None
 
-                        if features_proj_str.lower() != model_proj_str:
-                            filter = project(bbox, model_proj_str, features_proj_str).bounds
+                        if features_crs != self.modelgrid.crs:
+                            filter = project(bbox, self.modelgrid.crs, features_crs).bounds
                         else:
                             filter = bbox.bounds
 
-                    df = shp2df(f, filter=filter)
+                    # implement automatic reprojection in gis-utils
+                    # maintaining backwards compatibility
+                    kwargs = {'dest_crs': self.modelgrid.crs}
+                    kwargs = get_input_arguments(kwargs, shp2df)
+                    df = shp2df(f, filter=filter, **kwargs)
                     df.columns = [c.lower() for c in df.columns]
-                    if features_proj_str.lower() != model_proj_str:
-                        df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
+                    if 'dest_crs' not in kwargs and features_crs != self.modelgrid.crs:
+                        df['geometry'] = project(df['geometry'], features_crs, self.modelgrid.crs)
                     if cache:
                         print('caching data in {}...'.format(f))
                         self._features[f] = df
@@ -1139,8 +1174,8 @@ class MFsetupMixin():
                     return
 
                 # create an sfrmaker.lines instance
-                filter = project(self.bbox, self.modelgrid.proj_str, 'epsg:4269').bounds
-                lns = Lines.from_nhdplus_v2(NHDPlus_paths=nhdplus_paths,
+                filter = project(self.bbox, self.modelgrid.crs, 'epsg:4269').bounds
+                lines = Lines.from_nhdplus_v2(NHDPlus_paths=nhdplus_paths,
                                             filter=filter)
             else:
                 for key in ['filename', 'filenames']:
@@ -1149,17 +1184,28 @@ class MFsetupMixin():
                         kwargs['shapefile'] = kwargs.pop(key)
                         check_source_files(kwargs['shapefile'])
                         if 'epsg' not in kwargs:
-                            kwargs['proj4'] = get_proj_str(kwargs['shapefile'])
+                            try:
+                                from gisutils import get_shapefile_crs
+                                shapefile_crs = get_shapefile_crs(kwargs['shapefile'])
+                            except Exception as e:
+                                print(e)
+                                msg = ('Need gis-utils >= 0.2 to get crs'
+                                       ' for shapefile: {}\nPlease pip install '
+                                       '--upgrade gis-utils'.format(kwargs['shapefile']))
+                                print(msg)
                         else:
-                            kwargs['proj4'] = 'epsg:{}'.format(kwargs['epsg'])
+                            shapefile_crs = pyproj.crs.CRS.from_epsg(kwargs['epsg'])
+                        authority = shapefile_crs.to_authority()
+                        if authority is not None:
+                            shapefile_crs = pyproj.CRS.from_user_input(shapefile_crs.to_authority())
 
                         filter = self.bbox.bounds
-                        if kwargs['proj4'] != self.modelgrid.proj_str:
-                            filter = project(self.bbox, self.modelgrid.proj_str, kwargs['proj4']).bounds
+                        if shapefile_crs != self.modelgrid.crs:
+                            filter = project(self.bbox, self.modelgrid.crs, shapefile_crs).bounds
                         kwargs['filter'] = filter
                         # create an sfrmaker.lines instance
                         kwargs = get_input_arguments(kwargs, Lines.from_shapefile)
-                        lns = Lines.from_shapefile(**kwargs)
+                        lines = Lines.from_shapefile(**kwargs)
                         break
         else:
             return
@@ -1189,7 +1235,7 @@ class MFsetupMixin():
 
         # create an sfrmaker.sfrdata instance from the lines instance
         to_sfr_kwargs = get_input_arguments(self.cfg['sfr'], Lines.to_sfr)
-        sfr = lns.to_sfr(grid=self.modelgrid,
+        sfr = lines.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,
                          **to_sfr_kwargs)
@@ -1251,7 +1297,7 @@ class MFsetupMixin():
 
             # check if all inflow sites are included in sfr network
             missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
-                                difference(lns._original_routing.keys())
+                                difference(lines._original_routing.keys())
             if any(missing_sites):
                 inflows_routing_input = self.cfg['sfr'].get('source_data', {}).get('inflows_routing')
                 if inflows_routing_input is None:
@@ -1262,7 +1308,7 @@ class MFsetupMixin():
                 routing = dict(zip(routing[inflows_routing_input['id_column']],
                                    routing[inflows_routing_input['routing_column']]))
             else:
-                routing = lns._original_routing
+                routing = lines._original_routing
             missing_sites = any(set(inflows_by_stress_period[inflows_input['id_column']]). \
                                 difference(routing.keys())),
             if any(missing_sites):

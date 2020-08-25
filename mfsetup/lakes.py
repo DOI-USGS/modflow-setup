@@ -20,6 +20,7 @@ from mfsetup.sourcedata import (
     aggregate_dataframe_to_stress_period,
 )
 from mfsetup.units import convert_length_units, convert_temperature_units
+from mfsetup.utils import get_input_arguments
 
 
 def make_lakarr2d(grid, lakesdata,
@@ -29,7 +30,11 @@ def make_lakarr2d(grid, lakesdata,
     using the numbers in the 'id' column in the lakes shapefile.
     """
     if isinstance(lakesdata, str):
-        lakes = shp2df(lakesdata)
+        # implement automatic reprojection in gis-utils
+        # maintaining backwards compatibility
+        kwargs = {'dest_crs': grid.crs}
+        kwargs = get_input_arguments(kwargs, shp2df)
+        lakes = shp2df(lakesdata, **kwargs)
     elif isinstance(lakesdata, pd.DataFrame):
         lakes = lakesdata.copy()
     else:
@@ -60,7 +65,11 @@ def make_bdlknc_zones(grid, lakesshp, include_ids,
     print('setting up lakebed leakance zones...')
     t0 = time.time()
     if isinstance(lakesshp, str):
-        lakes = shp2df(lakesshp)
+        # implement automatic reprojection in gis-utils
+        # maintaining backwards compatibility
+        kwargs = {'dest_crs': grid.crs}
+        kwargs = get_input_arguments(kwargs, shp2df)
+        lakes = shp2df(lakesshp, **kwargs)
     elif isinstance(lakesshp, pd.DataFrame):
         lakes = lakesshp.copy()
     else:

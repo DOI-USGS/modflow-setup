@@ -6,6 +6,7 @@ Version 0.1 Initial release (2020-MM-DD)
 ----------------------------------------
 * support for constructing MODFLOW-NWT or MODFLOW-6 models from scratch
 * supported source dataset formats include GeoTiff, Arc-Ascii grids, shapefiles, NetCDF, and CSV files
+* automatic reprojection of source datasets that have CRS information (GeoTiffs, shapefiles, etc.)
 * model input can also be supplied from parent model package input or MODFLOW binary output
 * supported MODFLOW-NWT packages: DIS, BAS6, OC, UPW, RCH, GHB, SFR2, LAK, WEL, MNW2, HYD, GAGE, NWT
 * supported MODFLOW-6 packages: DIS, IC, OC, NPF, RCHA, SFR, LAK, WEL, OBS, IMS, TDIS
