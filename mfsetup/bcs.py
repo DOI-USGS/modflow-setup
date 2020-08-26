@@ -6,8 +6,9 @@ import numpy as np
 import pandas as pd
 
 fm = flopy.modflow
+import pyproj
 import rasterio
-from gisutils import get_authority_crs, project
+from gisutils import project
 from rasterstats import zonal_stats
 from shapely.geometry import Polygon
 
@@ -46,7 +47,11 @@ def setup_ghb_data(model):
             meta = src.meta
 
         # reproject the polygons to the dem crs if needed
-        dem_crs = get_authority_crs(src.crs)
+        try:
+            from gisutils import get_authority_crs, src.crs
+            dem_crs = get_authority_crs(src.crs)
+        except:
+            dem_crs = pyproj.crs.CRS.from_user_input(src.crs)
         if dem_crs != m.modelgrid.crs:
             polygons = project(polygons, m.modelgrid.crs, dem_crs)
 
