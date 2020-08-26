@@ -579,7 +579,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           rotation=0.,
                           parent_model=None, snap_to_NHG=False,
                           features=None, features_shapefile=None,
-                          id_column=None, include_ids=[],
+                          id_column=None, include_ids=None,
                           buffer=1000, crs=None,
                           epsg=None, model_length_units=None,
                           grid_file='grid.json',
@@ -683,9 +683,11 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             df = shp2df(features_shapefile,
                         filter=filter, **shp2df_kwargs)
 
-            # subset shapefile data to specified features
-            rows = df.loc[df[id_column].isin(include_ids)]
-            features = rows.geometry.tolist()
+            # optionally subset shapefile data to specified features
+            if id_column is not None and include_ids is not None:
+                df = df.loc[df[id_column].isin(include_ids)]
+            # use all features by default
+            features = df.geometry.tolist()
 
             # convert multiple features to a MultiPolygon
             if isinstance(features, list):

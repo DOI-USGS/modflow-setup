@@ -48,7 +48,7 @@ def setup_ghb_data(model):
 
         # reproject the polygons to the dem crs if needed
         try:
-            from gisutils import get_authority_crs, src.crs
+            from gisutils import get_authority_crs
             dem_crs = get_authority_crs(src.crs)
         except:
             dem_crs = pyproj.crs.CRS.from_user_input(src.crs)
