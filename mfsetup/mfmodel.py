@@ -837,6 +837,7 @@ class MFsetupMixin():
             bathy = get_values_at_points(bathymetry_file,
                                          x=self.modelgrid.xcellcenters.ravel(),
                                          y=self.modelgrid.ycellcenters.ravel(),
+                                         points_crs=self.modelgrid.crs,
                                          out_of_bounds_errors='coerce')
             bathy = np.reshape(bathy, (self.nrow, self.ncol)) * lmult
             bathy[(bathy < 0) | np.isnan(bathy)] = 0

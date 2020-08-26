@@ -457,6 +457,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         t0 = time.time()
 
         # added wells
+        # todo: generalize MNW2 source data input; add auto-reprojection
         added_wells = self.cfg['mnw'].get('added_wells')
         if added_wells is not None:
             if isinstance(added_wells, str):

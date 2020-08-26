@@ -228,6 +228,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         values = get_values_at_points(raster,
                                       x=self.modelgrid.xcellcenters.ravel(),
                                       y=self.modelgrid.ycellcenters.ravel(),
+                                      points_crs=self.modelgrid.crs,
                                       out_of_bounds_errors=out_of_bounds_errors)
         if self.modelgrid.grid_type == 'structured':
             values = np.reshape(values, (self.nrow, self.ncol))

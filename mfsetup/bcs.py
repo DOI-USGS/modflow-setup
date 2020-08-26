@@ -7,6 +7,7 @@ import pandas as pd
 
 fm = flopy.modflow
 import rasterio
+from gisutils import get_authority_crs, project
 from rasterstats import zonal_stats
 from shapely.geometry import Polygon
 
@@ -43,6 +44,12 @@ def setup_ghb_data(model):
         dem_filename = source_data['dem'].pop(key)
         with rasterio.open(dem_filename) as src:
             meta = src.meta
+
+        # reproject the polygons to the dem crs if needed
+        dem_crs = get_authority_crs(src.crs)
+        if dem_crs != m.modelgrid.crs:
+            polygons = project(polygons, m.modelgrid.crs, dem_crs)
+
         all_touched = False
         if meta['transform'][0] > m.modelgrid.delr[0]:
             all_touched = True

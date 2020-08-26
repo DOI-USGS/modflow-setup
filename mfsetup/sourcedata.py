@@ -413,6 +413,7 @@ class ArraySourceData(SourceData):
                 arr = get_values_at_points(f,
                                            self.dest_model.modelgrid.xcellcenters.ravel(),
                                            self.dest_model.modelgrid.ycellcenters.ravel(),
+                                           points_crs=self.dest_model.modelgrid.crs,
                                            method=self.resample_method)
                 arr = np.reshape(arr, (self.dest_modelgrid.nrow,
                                        self.dest_modelgrid.ncol))
