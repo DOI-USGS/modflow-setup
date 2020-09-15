@@ -55,9 +55,9 @@ class MFsetupGrid(StructuredGrid):
         Well-known text string describing model CRS.
     crs : obj, optional
         A Python int, dict, str, or pyproj.crs.CRS instance
-        passed to the pyproj.crs.from_user_input
-        See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
         Can be any of:
+
           - PROJ string
           - Dictionary of PROJ parameters
           - PROJ keyword arguments for parameters
@@ -68,6 +68,7 @@ class MFsetupGrid(StructuredGrid):
           - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
           - An object with a `to_wkt` method.
           - A :class:`pyproj.crs.CRS` class
+
     xoff, yoff : float, float, optional
         Model grid offset (location of lower left corner), by default 0.0, 0.0
     xul, yul : float, float, optional
@@ -462,9 +463,9 @@ def rasterize(feature, grid, id_column=None,
     grid : grid.StructuredGrid instance
     crs : obj
         A Python int, dict, str, or pyproj.crs.CRS instance
-        passed to the pyproj.crs.from_user_input
-        See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
         Can be any of:
+
           - PROJ string
           - Dictionary of PROJ parameters
           - PROJ keyword arguments for parameters
@@ -475,6 +476,7 @@ def rasterize(feature, grid, id_column=None,
           - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
           - An object with a `to_wkt` method.
           - A :class:`pyproj.crs.CRS` class
+
     dtype : dtype
         Datatype for the output array
     **kwargs : keyword arguments to rasterio.features.rasterize()
