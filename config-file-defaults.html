@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration defaults &mdash; modflow-setup 0.post51+g435db16 documentation</title>
+  <title>Configuration defaults &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+g435db16
+                0.post51+g740d3ab
               </div>
             
           
@@ -420,7 +420,25 @@
 196
 197
 198
-199</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
+<span class="c1"># version reported by modflow-setup will then be</span>
+<span class="c1"># the start_version appended by the remaining information</span>
+<span class="c1"># in a pep440-post style version tag</span>
+<span class="c1"># (e.g. most recent git commit hash for the model repository</span>
+<span class="c1"># + &quot;dirty&quot; if the model repository has uncommited changes)</span>
+<span class="c1"># see https://github.com/warner/python-versioneer/blob/master/details.md</span>
+<span class="nt">start_version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+
+<span class="nt">simulation</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;mfsim&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
@@ -775,7 +793,25 @@
 149
 150
 151
-152</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
+<span class="c1"># version reported by modflow-setup will then be</span>
+<span class="c1"># the start_version appended by the remaining information</span>
+<span class="c1"># in a pep440-post style version tag</span>
+<span class="c1"># (e.g. most recent git commit hash for the model repository</span>
+<span class="c1"># + &quot;dirty&quot; if the model repository has uncommited changes)</span>
+<span class="c1"># see https://github.com/warner/python-versioneer/blob/master/details.md</span>
+<span class="nt">start_version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+
+<span class="nt">intermediate_data</span><span class="p">:</span>
   <span class="nt">output_folder</span><span class="p">:</span> <span class="s">&#39;original/&#39;</span>  <span class="c1"># external arrays are read from here by flopy, and written to external_path</span>
 
 <span class="nt">model</span><span class="p">:</span>
@@ -952,8 +988,10 @@
 
   <div role="contentinfo">
     <p>
+        
+        &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Aug 11, 2020.
+        Last updated on Sep 15, 2020.
       </span>
 
     </p>

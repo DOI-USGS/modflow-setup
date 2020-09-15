@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post51+g435db16 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g435db16
+                0.post51+g740d3ab
               </div>
             
           
@@ -183,11 +183,15 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
+<span class="kn">import</span> <span class="nn">gisutils</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pyproj</span>
 <span class="kn">from</span> <span class="nn">flopy.discretization</span> <span class="kn">import</span> <span class="n">StructuredGrid</span>
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_proj_str</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">shp2df</span>
+<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 <span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">Affine</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Polygon</span>
 
@@ -220,9 +224,29 @@
 <span class="sd">    epsg : int, optional</span>
 <span class="sd">        EPSG code for the model CRS</span>
 <span class="sd">    proj_str : str, optional</span>
-<span class="sd">        PROJ string for model CRS</span>
+<span class="sd">        PROJ string for model CRS. In general, a spatial reference ID</span>
+<span class="sd">        (such as an EPSG code) or Well-Known Text (WKT) string is prefered</span>
+<span class="sd">        over a PROJ string (see References)</span>
 <span class="sd">    prj : str, optional</span>
-<span class="sd">        Filepath for ESRI projection file describing model CRS</span>
+<span class="sd">        Filepath for ESRI projection file (containing wkt) describing model CRS</span>
+<span class="sd">    wkt : str, optional</span>
+<span class="sd">        Well-known text string describing model CRS.</span>
+<span class="sd">    crs : obj, optional</span>
+<span class="sd">        A Python int, dict, str, or pyproj.crs.CRS instance</span>
+<span class="sd">        passed to :meth:`pyproj.crs.CRS.from_user_input`</span>
+<span class="sd">        Can be any of:</span>
+
+<span class="sd">          - PROJ string</span>
+<span class="sd">          - Dictionary of PROJ parameters</span>
+<span class="sd">          - PROJ keyword arguments for parameters</span>
+<span class="sd">          - JSON string with PROJ parameters</span>
+<span class="sd">          - CRS WKT string</span>
+<span class="sd">          - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">          - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">          - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">          - An object with a `to_wkt` method.</span>
+<span class="sd">          - A :class:`pyproj.crs.CRS` class</span>
+
 <span class="sd">    xoff, yoff : float, float, optional</span>
 <span class="sd">        Model grid offset (location of lower left corner), by default 0.0, 0.0</span>
 <span class="sd">    xul, yul : float, float, optional</span>
@@ -230,18 +254,24 @@
 <span class="sd">    angrot : float, optional</span>
 <span class="sd">        Rotation of the model grid, in degrees clockwise about the lower left corner, by default 0.0</span>
 
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delc</span><span class="p">,</span> <span class="n">delr</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">lenuni</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                 <span class="n">yoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+                 <span class="n">lenuni</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">xoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MFsetupGrid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delc</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delr</span><span class="p">),</span>
                                           <span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="p">,</span>
                                           <span class="n">lenuni</span><span class="p">,</span> <span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="p">,</span> <span class="n">prj</span><span class="p">,</span> <span class="n">xoff</span><span class="p">,</span>
                                           <span class="n">yoff</span><span class="p">,</span> <span class="n">angrot</span><span class="p">)</span>
 
         <span class="c1"># properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>  <span class="c1"># pyproj crs instance created from epsg, proj_str or prj file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span> <span class="o">=</span> <span class="n">wkt</span>  <span class="c1"># well-known text</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -264,7 +294,7 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">angrot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">angrot</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">other</span><span class="o">.</span><span class="n">proj_str</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">other</span><span class="o">.</span><span class="n">crs</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">delr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delr</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -313,8 +343,42 @@
                <span class="n">Affine</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angrot</span><span class="p">)</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;pyproj.crs.CRS instance describing the coordinate reference system</span>
+<span class="sd">        for the model grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsg</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prj</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">wkt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wkt</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crs</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">):</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+        <span class="c1"># if possible, have pyproj try to find the closest</span>
+        <span class="c1"># authority name and code matching the crs</span>
+        <span class="c1"># so that input from epsg codes, proj strings, and prjfiles</span>
+        <span class="c1"># results in equal pyproj_crs instances</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">authority</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">authority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">proj_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj4</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -561,8 +625,8 @@
 
 <div class="viewcode-block" id="rasterize"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.rasterize">[docs]</a><span class="k">def</span> <span class="nf">rasterize</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-              <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-              <span class="n">proj4</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+              <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj4</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+              <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Rasterize a feature onto the model grid, using</span>
 <span class="sd">    the rasterio.features.rasterize method. Features are intersected</span>
 <span class="sd">    if they contain the cell center.</span>
@@ -575,12 +639,22 @@
 <span class="sd">        Column with unique integer identifying each feature; values</span>
 <span class="sd">        from this column will be assigned to the output raster.</span>
 <span class="sd">    grid : grid.StructuredGrid instance</span>
-<span class="sd">    epsg : int</span>
-<span class="sd">        EPSG code for feature coordinate reference system. Optional,</span>
-<span class="sd">        but an epgs code or proj4 string must be supplied if feature</span>
-<span class="sd">        isn&#39;t a shapefile, and isn&#39;t in the same CRS as the model.</span>
-<span class="sd">    proj4 : str</span>
-<span class="sd">        Proj4 string for feature CRS (optional)</span>
+<span class="sd">    crs : obj</span>
+<span class="sd">        A Python int, dict, str, or pyproj.crs.CRS instance</span>
+<span class="sd">        passed to :meth:`pyproj.crs.CRS.from_user_input`</span>
+<span class="sd">        Can be any of:</span>
+
+<span class="sd">          - PROJ string</span>
+<span class="sd">          - Dictionary of PROJ parameters</span>
+<span class="sd">          - PROJ keyword arguments for parameters</span>
+<span class="sd">          - JSON string with PROJ parameters</span>
+<span class="sd">          - CRS WKT string</span>
+<span class="sd">          - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">          - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">          - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">          - An object with a `to_wkt` method.</span>
+<span class="sd">          - A :class:`pyproj.crs.CRS` class</span>
+
 <span class="sd">    dtype : dtype</span>
 <span class="sd">        Datatype for the output array</span>
 <span class="sd">    **kwargs : keyword arguments to rasterio.features.rasterize()</span>
@@ -597,20 +671,37 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This method requires rasterio.&#39;</span><span class="p">)</span>
         <span class="k">return</span>
 
-    <span class="c1">#trans = Affine(sr.delr[0], 0., sr.xul,</span>
-    <span class="c1">#               0., -sr.delc[0], sr.yul) * Affine.rotation(sr.rotation)</span>
+    <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The epsg argument is deprecated. Use crs instead, &quot;</span>
+                      <span class="s2">&quot;which requires gisutils &gt;= 0.2&quot;</span><span class="p">,</span>
+                      <span class="ne">DeprecationWarning</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">proj4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The epsg argument is deprecated. Use crs instead, &quot;</span>
+                      <span class="s2">&quot;which requires gisutils &gt;= 0.2&quot;</span><span class="p">,</span>
+                      <span class="ne">DeprecationWarning</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">gisutils</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;0.2.0&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The crs argument requires gisutils &gt;= 0.2&quot;</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+
     <span class="n">trans</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">transform</span>
 
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">proj4</span> <span class="o">=</span> <span class="n">get_proj_str</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dest_crs&#39;</span><span class="p">:</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">}</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">shp2df</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
         <span class="c1"># list of shapefiles</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">proj4</span> <span class="o">=</span> <span class="n">get_proj_str</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dest_crs&#39;</span><span class="p">:</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">}</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">shp2df</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">feature</span><span class="p">})</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
@@ -620,17 +711,22 @@
         <span class="k">return</span>
 
     <span class="c1"># handle shapefiles in different CRS than model grid</span>
-    <span class="n">reproject</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">proj4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">proj4</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">proj_str</span><span class="p">:</span>
-            <span class="n">reproject</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grid</span><span class="o">.</span><span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">epsg</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">epsg</span><span class="p">:</span>
-            <span class="n">reproject</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="kn">from</span> <span class="nn">fiona.crs</span> <span class="kn">import</span> <span class="n">from_epsg</span><span class="p">,</span> <span class="n">to_string</span>
-            <span class="n">proj4</span> <span class="o">=</span> <span class="n">to_string</span><span class="p">(</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">reproject</span><span class="p">:</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">proj4</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;dest_crs&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">reproject</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># todo: consolidate rasterize reprojection to just use crs</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">crs</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">proj4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">proj4</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">proj_str</span><span class="p">:</span>
+                <span class="n">reproject</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grid</span><span class="o">.</span><span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">epsg</span> <span class="o">!=</span> <span class="n">grid</span><span class="o">.</span><span class="n">epsg</span><span class="p">:</span>
+                <span class="n">reproject</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="kn">from</span> <span class="nn">fiona.crs</span> <span class="kn">import</span> <span class="n">from_epsg</span><span class="p">,</span> <span class="n">to_string</span>
+                <span class="n">proj4</span> <span class="o">=</span> <span class="n">to_string</span><span class="p">(</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">reproject</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">proj4</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
 
     <span class="c1"># subset to include_ids</span>
     <span class="k">if</span> <span class="n">id_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">include_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -663,8 +759,8 @@
                           <span class="n">rotation</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                           <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">snap_to_NHG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                           <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_ids</span><span class="o">=</span><span class="p">[],</span>
-                          <span class="n">buffer</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                          <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">buffer</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_length_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">grid_file</span><span class="o">=</span><span class="s1">&#39;grid.json&#39;</span><span class="p">,</span>
                           <span class="n">bbox_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -705,8 +801,13 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inset delc spacing of </span><span class="si">{}</span><span class="s1"> must be factor of parent spacing of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">delc_m</span><span class="p">,</span>
                                                                                                       <span class="n">parent_delc_m</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">epsg</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">epsg</span>
+    <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span>
 
     <span class="c1"># option 1: make grid from xoff, yoff and specified dimensions</span>
     <span class="k">if</span> <span class="n">xoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">yoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -741,23 +842,32 @@
         <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">features_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Make sure shapefile and bbox filter are in dest (model) CRS</span>
             <span class="c1"># TODO: CRS wrangling could be added to shp2df as a feature</span>
-            <span class="n">features_proj_str</span> <span class="o">=</span> <span class="n">get_proj_str</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">)</span>
-            <span class="n">model_proj_str</span> <span class="o">=</span> <span class="s2">&quot;epsg:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
+            <span class="n">reproject_filter</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span>
+                <span class="n">features_crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">features_crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
+                    <span class="n">reproject_filter</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">features_crs</span> <span class="o">=</span> <span class="n">get_proj_str</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">)</span>
+                <span class="n">reproject_filter</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="nb">filter</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">features_proj_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">model_proj_str</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">reproject_filter</span><span class="p">:</span>
                     <span class="nb">filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span>
-                                     <span class="n">model_proj_str</span><span class="p">,</span> <span class="n">features_proj_str</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
+                                     <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">features_crs</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="nb">filter</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">bounds</span>
+            <span class="n">shp2df_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dest_crs&#39;</span><span class="p">:</span> <span class="n">crs</span><span class="p">}</span>
+            <span class="n">shp2df_kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">shp2df_kwargs</span><span class="p">,</span> <span class="n">shp2df</span><span class="p">)</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">,</span>
-                        <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">features_proj_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">model_proj_str</span><span class="p">:</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span> <span class="n">features_proj_str</span><span class="p">,</span> <span class="n">model_proj_str</span><span class="p">)</span>
+                        <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">,</span> <span class="o">**</span><span class="n">shp2df_kwargs</span><span class="p">)</span>
 
-            <span class="c1"># subset shapefile data to specified features</span>
-            <span class="n">rows</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">include_ids</span><span class="p">)]</span>
-            <span class="n">features</span> <span class="o">=</span> <span class="n">rows</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="c1"># optionally subset shapefile data to specified features</span>
+            <span class="k">if</span> <span class="n">id_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">include_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">include_ids</span><span class="p">)]</span>
+            <span class="c1"># use all features by default</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
             <span class="c1"># convert multiple features to a MultiPolygon</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -807,7 +917,6 @@
                 <span class="s1">&#39;xoff&#39;</span><span class="p">:</span> <span class="n">xoff</span><span class="p">,</span> <span class="s1">&#39;yoff&#39;</span><span class="p">:</span> <span class="n">yoff</span><span class="p">,</span>
                 <span class="s1">&#39;xul&#39;</span><span class="p">:</span> <span class="n">xul</span><span class="p">,</span> <span class="s1">&#39;yul&#39;</span><span class="p">:</span> <span class="n">yul</span><span class="p">,</span>
                 <span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="n">rotation</span><span class="p">,</span>
-                <span class="s1">&#39;epsg&#39;</span><span class="p">:</span> <span class="n">epsg</span><span class="p">,</span>
                 <span class="s1">&#39;lenuni&#39;</span><span class="p">:</span> <span class="mi">2</span>
                 <span class="p">}</span>
     <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
@@ -822,6 +931,18 @@
         <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grid_cfg</span><span class="p">:</span>
             <span class="n">grid_cfg</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_cfg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 
+    <span class="c1"># add epsg or wkt if there isn&#39;t an epsg</span>
+    <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epsg</span>
+    <span class="k">elif</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;epsg&#39;</span> <span class="ow">in</span> <span class="n">crs</span><span class="o">.</span><span class="n">srs</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">crs</span><span class="o">.</span><span class="n">srs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;wkt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">srs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No coordinate system reference provided for model grid!&#39;</span>
+                      <span class="s1">&#39;Model input data may not be mapped correctly.&#39;</span><span class="p">)</span>
+
     <span class="c1"># set up the model grid instance</span>
     <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top</span>
     <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">botm</span>
@@ -835,6 +956,7 @@
     <span class="c1"># (just for horizontal disc.)</span>
     <span class="k">del</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>
     <span class="k">del</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
+
     <span class="n">fileio</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">grid_file</span><span class="p">,</span> <span class="n">grid_cfg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bbox_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">write_bbox_shapefile</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">bbox_shapefile</span><span class="p">)</span>
@@ -852,8 +974,10 @@
 
   <div role="contentinfo">
     <p>
+        
+        &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Aug 11, 2020.
+        Last updated on Sep 15, 2020.
       </span>
 
     </p>

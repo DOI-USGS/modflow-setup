@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g435db16 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g435db16
+                0.post51+g740d3ab
               </div>
             
           
@@ -178,11 +178,13 @@
   <h1>Source code for mfsetup.mfmodel</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
 <span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pyproj</span>
 
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
 <span class="n">mf6</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span>
@@ -212,6 +214,7 @@
     <span class="n">get_model_time_units</span><span class="p">,</span>
     <span class="n">get_package_name</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mfsetup.model_version</span> <span class="kn">import</span> <span class="n">get_versions</span>
 <span class="kn">from</span> <span class="nn">mfsetup.sourcedata</span> <span class="kn">import</span> <span class="n">TransientTabularSourceData</span><span class="p">,</span> <span class="n">setup_array</span>
 <span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_parent_stress_periods</span><span class="p">,</span>
@@ -221,6 +224,9 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">lenuni_text</span><span class="p">,</span> <span class="n">lenuni_values</span>
 <span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span><span class="p">,</span> <span class="n">update</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Automatic reprojection functionality requires gis-utils &gt;= 0.2&#39;</span>
+              <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Please pip install --upgrade gis-utils&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MFsetupMixin"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin">[docs]</a><span class="k">class</span> <span class="nc">MFsetupMixin</span><span class="p">():</span>
@@ -266,6 +272,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_nodata_value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model_ws</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_abs_model_ws</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_version</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># semantic version of model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inset</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># dictionary of inset models attached to LGR parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_lgr</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># flag for lgr inset models</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># holds flopy Lgr utility object</span>
@@ -431,7 +438,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;parent_sp&#39;</span><span class="p">]))</span>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">package_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Definitive list of packages. Get from namefile input first</span>
@@ -469,6 +475,25 @@
     <span class="k">def</span> <span class="nf">model_ws</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_ws</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model_ws</span> <span class="o">=</span> <span class="n">model_ws</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_abs_model_ws</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">model_ws</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Semantic version of model, using a hacked version of the versioneer.</span>
+<span class="sd">        Version is reported using git tags for the model repository</span>
+<span class="sd">        or a start_version: key specified in the configuration file (default 0).</span>
+<span class="sd">        The start_version or tag is then appended by the remaining information</span>
+<span class="sd">        in a pep440-post style version tag (e.g. most recent git commit hash</span>
+<span class="sd">        for the model repository + &quot;dirty&quot; if the model repository has uncommited changes)</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+<span class="sd">        https://github.com/warner/python-versioneer</span>
+<span class="sd">        https://github.com/warner/python-versioneer/blob/master/details.md</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_version</span> <span class="o">=</span> <span class="n">get_versions</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
+                                   <span class="n">start_version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;start_version&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_version</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tmpdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -636,8 +661,14 @@
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">features_file</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-                    <span class="n">features_proj_str</span> <span class="o">=</span> <span class="n">get_proj_str</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                    <span class="n">model_proj_str</span> <span class="o">=</span> <span class="s2">&quot;epsg:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="s1">&#39;epsg&#39;</span><span class="p">])</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span>
+                        <span class="n">features_crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;shapefile&#39;</span><span class="p">])</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">features_crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_proj4</span><span class="p">(</span><span class="n">get_proj_str</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                    <span class="n">authority</span> <span class="o">=</span> <span class="n">features_crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">authority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">features_crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">features_crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">())</span>
                     <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span>
@@ -646,15 +677,19 @@
                             <span class="n">model_proj_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">proj_str</span>
                             <span class="k">assert</span> <span class="n">model_proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
-                        <span class="k">if</span> <span class="n">features_proj_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">model_proj_str</span><span class="p">:</span>
-                            <span class="nb">filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">model_proj_str</span><span class="p">,</span> <span class="n">features_proj_str</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
+                        <span class="k">if</span> <span class="n">features_crs</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+                            <span class="nb">filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">features_crs</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="nb">filter</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">bounds</span>
 
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
+                    <span class="c1"># implement automatic reprojection in gis-utils</span>
+                    <span class="c1"># maintaining backwards compatibility</span>
+                    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dest_crs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">}</span>
+                    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">shp2df</span><span class="p">)</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">features_proj_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">model_proj_str</span><span class="p">:</span>
-                        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span> <span class="n">features_proj_str</span><span class="p">,</span> <span class="n">model_proj_str</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="s1">&#39;dest_crs&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">features_crs</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+                        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span> <span class="n">features_crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;caching data in </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
@@ -980,6 +1015,7 @@
             <span class="n">bathy</span> <span class="o">=</span> <span class="n">get_values_at_points</span><span class="p">(</span><span class="n">bathymetry_file</span><span class="p">,</span>
                                          <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
                                          <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">ycellcenters</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                                         <span class="n">points_crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
                                          <span class="n">out_of_bounds_errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
             <span class="n">bathy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">bathy</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span> <span class="o">*</span> <span class="n">lmult</span>
             <span class="n">bathy</span><span class="p">[(</span><span class="n">bathy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">bathy</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1317,8 +1353,8 @@
                     <span class="k">return</span>
 
                 <span class="c1"># create an sfrmaker.lines instance</span>
-                <span class="nb">filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">proj_str</span><span class="p">,</span> <span class="s1">&#39;epsg:4269&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
-                <span class="n">lns</span> <span class="o">=</span> <span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="n">nhdplus_paths</span><span class="p">,</span>
+                <span class="nb">filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="s1">&#39;epsg:4269&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">Lines</span><span class="o">.</span><span class="n">from_nhdplus_v2</span><span class="p">(</span><span class="n">NHDPlus_paths</span><span class="o">=</span><span class="n">nhdplus_paths</span><span class="p">,</span>
                                             <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="s1">&#39;filenames&#39;</span><span class="p">]:</span>
@@ -1327,17 +1363,28 @@
                         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;shapefile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                         <span class="n">check_source_files</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;shapefile&#39;</span><span class="p">])</span>
                         <span class="k">if</span> <span class="s1">&#39;epsg&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;proj4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_proj_str</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;shapefile&#39;</span><span class="p">])</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span>
+                                <span class="n">shapefile_crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;shapefile&#39;</span><span class="p">])</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Need gis-utils &gt;= 0.2 to get crs&#39;</span>
+                                       <span class="s1">&#39; for shapefile: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">Please pip install &#39;</span>
+                                       <span class="s1">&#39;--upgrade gis-utils&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;shapefile&#39;</span><span class="p">]))</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;proj4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;epsg:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">])</span>
+                            <span class="n">shapefile_crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">])</span>
+                        <span class="n">authority</span> <span class="o">=</span> <span class="n">shapefile_crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">authority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">shapefile_crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">shapefile_crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">())</span>
 
                         <span class="nb">filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">bounds</span>
-                        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;proj4&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">proj_str</span><span class="p">:</span>
-                            <span class="nb">filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;proj4&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">bounds</span>
+                        <span class="k">if</span> <span class="n">shapefile_crs</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+                            <span class="nb">filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">shapefile_crs</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
                         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">filter</span>
                         <span class="c1"># create an sfrmaker.lines instance</span>
                         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">Lines</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">)</span>
-                        <span class="n">lns</span> <span class="o">=</span> <span class="n">Lines</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                        <span class="n">lines</span> <span class="o">=</span> <span class="n">Lines</span><span class="o">.</span><span class="n">from_shapefile</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                         <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span>
@@ -1367,7 +1414,7 @@
 
         <span class="c1"># create an sfrmaker.sfrdata instance from the lines instance</span>
         <span class="n">to_sfr_kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">],</span> <span class="n">Lines</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">)</span>
-        <span class="n">sfr</span> <span class="o">=</span> <span class="n">lns</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+        <span class="n">sfr</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
                          <span class="n">isfr</span><span class="o">=</span><span class="n">isfr</span><span class="p">,</span>
                          <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">to_sfr_kwargs</span><span class="p">)</span>
@@ -1429,7 +1476,7 @@
 
             <span class="c1"># check if all inflow sites are included in sfr network</span>
             <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
-                                <span class="n">difference</span><span class="p">(</span><span class="n">lns</span><span class="o">.</span><span class="n">_original_routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                                <span class="n">difference</span><span class="p">(</span><span class="n">lines</span><span class="o">.</span><span class="n">_original_routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">):</span>
                 <span class="n">inflows_routing_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inflows_routing&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">inflows_routing_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1440,7 +1487,7 @@
                 <span class="n">routing</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">routing</span><span class="p">[</span><span class="n">inflows_routing_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]],</span>
                                    <span class="n">routing</span><span class="p">[</span><span class="n">inflows_routing_input</span><span class="p">[</span><span class="s1">&#39;routing_column&#39;</span><span class="p">]]))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">routing</span> <span class="o">=</span> <span class="n">lns</span><span class="o">.</span><span class="n">_original_routing</span>
+                <span class="n">routing</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">_original_routing</span>
             <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
                                 <span class="n">difference</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">):</span>
@@ -1618,8 +1665,10 @@
 
   <div role="contentinfo">
     <p>
+        
+        &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Aug 11, 2020.
+        Last updated on Sep 15, 2020.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.grid module &mdash; modflow-setup 0.post51+g435db16 documentation</title>
+  <title>mfsetup.grid module &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+g435db16
+                0.post51+g740d3ab
               </div>
             
           
@@ -218,13 +218,13 @@ the grid in the cartesian plane. For methods involving layering (in the vertical
 the discretization module.</p>
 <dl class="py class">
 <dt id="mfsetup.grid.MFsetupGrid">
-<em class="property">class </em><code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">MFsetupGrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">delc</span></em>, <em class="sig-param"><span class="n">delr</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">idomain</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lenuni</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prj</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xoff</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">yoff</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">angrot</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">MFsetupGrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">delc</span></em>, <em class="sig-param"><span class="n">delr</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">idomain</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lenuni</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prj</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">wkt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xoff</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">yoff</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">angrot</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://modflowpy.github.io/flopydoc/structuredgrid.html#flopy.discretization.structuredgrid.StructuredGrid" title="(in flopy v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.discretization.structuredgrid.StructuredGrid</span></code></a></p>
 <p>Class representing a structured grid. Extends flopy.discretization.StructuredGrid
 to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>delc</strong><span class="classifier">ndarray</span></dt><dd><p>1D numpy array of grid spacing along a column (len nrow), in CRS units.</p>
 </dd>
 <dt><strong>delr</strong><span class="classifier">ndarray</span></dt><dd><p>1D numpy array of grid spacing along a row (len ncol), in CRS units.</p>
@@ -240,9 +240,31 @@ to facilitate gis operations in a projected (real-word) coordinate reference sys
 </dd>
 <dt><strong>epsg</strong><span class="classifier">int, optional</span></dt><dd><p>EPSG code for the model CRS</p>
 </dd>
-<dt><strong>proj_str</strong><span class="classifier">str, optional</span></dt><dd><p>PROJ string for model CRS</p>
+<dt><strong>proj_str</strong><span class="classifier">str, optional</span></dt><dd><p>PROJ string for model CRS. In general, a spatial reference ID
+(such as an EPSG code) or Well-Known Text (WKT) string is prefered
+over a PROJ string (see References)</p>
 </dd>
-<dt><strong>prj</strong><span class="classifier">str, optional</span></dt><dd><p>Filepath for ESRI projection file describing model CRS</p>
+<dt><strong>prj</strong><span class="classifier">str, optional</span></dt><dd><p>Filepath for ESRI projection file (containing wkt) describing model CRS</p>
+</dd>
+<dt><strong>wkt</strong><span class="classifier">str, optional</span></dt><dd><p>Well-known text string describing model CRS.</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
+passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code>
+Can be any of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code> class</p></li>
+</ul>
+</div></blockquote>
 </dd>
 <dt><strong>xoff, yoff</strong><span class="classifier">float, float, optional</span></dt><dd><p>Model grid offset (location of lower left corner), by default 0.0, 0.0</p>
 </dd>
@@ -253,6 +275,8 @@ to facilitate gis operations in a projected (real-word) coordinate reference sys
 </dl>
 </dd>
 </dl>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems</a></p>
 <dl class="py method">
 <dt id="mfsetup.grid.MFsetupGrid.bbox">
 <em class="property">property </em><code class="sig-name descname">bbox</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bbox" title="Permalink to this definition">¶</a></dt>
@@ -263,6 +287,13 @@ to facilitate gis operations in a projected (real-word) coordinate reference sys
 <dt id="mfsetup.grid.MFsetupGrid.bounds">
 <em class="property">property </em><code class="sig-name descname">bounds</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Grid bounding box in order used by shapely.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.crs">
+<em class="property">property </em><code class="sig-name descname">crs</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>pyproj.crs.CRS instance describing the coordinate reference system
+for the model grid.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -308,6 +339,11 @@ to facilitate gis operations in a projected (real-word) coordinate reference sys
 <em class="property">property </em><code class="sig-name descname">vertices</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.vertices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vertices for grid cell polygons.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.wkt">
+<em class="property">property </em><code class="sig-name descname">wkt</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.wkt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="mfsetup.grid.MFsetupGrid.write_shapefile">
@@ -426,24 +462,36 @@ contains it.</p>
 
 <dl class="py function">
 <dt id="mfsetup.grid.rasterize">
-<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">rasterize</code><span class="sig-paren">(</span><em class="sig-param">feature</em>, <em class="sig-param">grid</em>, <em class="sig-param">id_column=None</em>, <em class="sig-param">include_ids=None</em>, <em class="sig-param">epsg=None</em>, <em class="sig-param">proj4=None</em>, <em class="sig-param">dtype=&lt;class 'numpy.float32'&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">rasterize</code><span class="sig-paren">(</span><em class="sig-param">feature</em>, <em class="sig-param">grid</em>, <em class="sig-param">id_column=None</em>, <em class="sig-param">include_ids=None</em>, <em class="sig-param">crs=None</em>, <em class="sig-param">epsg=None</em>, <em class="sig-param">proj4=None</em>, <em class="sig-param">dtype=&lt;class 'numpy.float32'&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rasterize a feature onto the model grid, using
 the rasterio.features.rasterize method. Features are intersected
 if they contain the cell center.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>feature</strong><span class="classifier">str (shapefile path), list of shapely objects,</span></dt><dd><p>or dataframe with geometry column</p>
 </dd>
 <dt><strong>id_column</strong><span class="classifier">str</span></dt><dd><p>Column with unique integer identifying each feature; values
 from this column will be assigned to the output raster.</p>
 </dd>
 <dt><strong>grid</strong><span class="classifier">grid.StructuredGrid instance</span></dt><dd></dd>
-<dt><strong>epsg</strong><span class="classifier">int</span></dt><dd><p>EPSG code for feature coordinate reference system. Optional,
-but an epgs code or proj4 string must be supplied if feature
-isn’t a shapefile, and isn’t in the same CRS as the model.</p>
-</dd>
-<dt><strong>proj4</strong><span class="classifier">str</span></dt><dd><p>Proj4 string for feature CRS (optional)</p>
+<dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
+passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code>
+Can be any of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code> class</p></li>
+</ul>
+</div></blockquote>
 </dd>
 <dt><strong>dtype</strong><span class="classifier">dtype</span></dt><dd><p>Datatype for the output array</p>
 </dd>
@@ -461,7 +509,7 @@ isn’t a shapefile, and isn’t in the same CRS as the model.</p>
 
 <dl class="py function">
 <dt id="mfsetup.grid.setup_structured_grid">
-<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">setup_structured_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nrow</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ncol</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nlay</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dxy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">parent_model</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snap_to_NHG</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">features</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">features_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">id_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_ids</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">buffer</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_length_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid_file</span><span class="o">=</span><span class="default_value">'grid.json'</span></em>, <em class="sig-param"><span class="n">bbox_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">setup_structured_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nrow</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ncol</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nlay</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dxy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">parent_model</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snap_to_NHG</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">features</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">features_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">id_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_ids</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">buffer</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_length_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid_file</span><span class="o">=</span><span class="default_value">'grid.json'</span></em>, <em class="sig-param"><span class="n">bbox_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -491,8 +539,10 @@ isn’t a shapefile, and isn’t in the same CRS as the model.</p>
 
   <div role="contentinfo">
     <p>
+        
+        &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Aug 11, 2020.
+        Last updated on Sep 15, 2020.
       </span>
 
     </p>

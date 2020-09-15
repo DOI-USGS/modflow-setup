@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.discretization &mdash; modflow-setup 0.post51+g435db16 documentation</title>
+  <title>mfsetup.discretization &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g435db16
+                0.post51+g740d3ab
               </div>
             
           
@@ -630,6 +630,7 @@
     <span class="n">idomain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="o">~</span><span class="n">criteria</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">idomain</span></div>
 
+
 <div class="viewcode-block" id="make_irch"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.make_irch">[docs]</a><span class="k">def</span> <span class="nf">make_irch</span><span class="p">(</span><span class="n">idomain</span><span class="p">):</span>
     <span class="c1"># make the irch array</span>
     <span class="c1"># copy idomain</span>
@@ -638,7 +639,7 @@
         <span class="c1"># set both inactive and pass through cells to -1</span>
         <span class="n">cl</span><span class="p">[</span><span class="n">cl</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="c1"># set active cells to current layer</span>
-        <span class="n">cl</span><span class="p">[</span><span class="n">cl</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> 
+        <span class="n">cl</span><span class="p">[</span><span class="n">cl</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
     <span class="c1"># now reset all the inactive/passthrough values to large positive to not mess up min calc</span>
     <span class="n">idm_lay</span><span class="p">[</span><span class="n">idm_lay</span><span class="o">==-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">9999</span>
     <span class="c1"># find min active layer</span>
@@ -647,6 +648,7 @@
     <span class="n">irch</span><span class="p">[</span><span class="n">irch</span><span class="o">==</span><span class="mi">9999</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">irch</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1"># set to one-based</span>
     <span class="k">return</span> <span class="n">irch</span></div>
+
 
 <div class="viewcode-block" id="get_layer_thicknesses"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.get_layer_thicknesses">[docs]</a><span class="k">def</span> <span class="nf">get_layer_thicknesses</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;For each i, j location in the grid, get thicknesses</span>
@@ -907,8 +909,10 @@
 
   <div role="contentinfo">
     <p>
+        
+        &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Aug 11, 2020.
+        Last updated on Sep 15, 2020.
       </span>
 
     </p>
