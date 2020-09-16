@@ -195,7 +195,22 @@ def setup_lake_info(model):
     return df
 
 
-def setup_lake_fluxes(model):
+def setup_lake_fluxes(model, block='lak'):
+    """Set up dataframe of fluxes by lake and stress period
+
+    Parameters
+    ----------
+    model : modflow-setup model instance
+    block : str, {'lak', 'high_k_lakes'}
+        Location of input for setting up fluxes. If 'lak',
+        input is read from the Lake Package ('lak') block
+        in the configuration file. If 'high_k_lakes',
+        input is read from the 'high_k_lakes' block.
+
+    Returns
+    -------
+
+    """
 
     # setup empty dataframe
     variables = ['precipitation', 'evaporation', 'runoff', 'withdrawal']
@@ -209,15 +224,15 @@ def setup_lake_fluxes(model):
     # option 1; precip and evaporation specified directly
     # values are assumed to be in model units
     for variable in variables:
-        if variable in model.cfg['lak']:
+        if variable in model.cfg[block]:
             values = get_flux_variable_from_config(variable, model)
             # repeat values for each lake
             df[variable] = values * len(model.lake_info['lak_id'])
 
     # option 2; precip and temp specified from PRISM output
     # compute evaporation from temp using Hamon method
-    if 'climate' in model.cfg['lak']['source_data']:
-        cfg = model.cfg['lak']['source_data']['climate']
+    if 'climate' in model.cfg[block]['source_data']:
+        cfg = model.cfg[block]['source_data']['climate']
         format = cfg.get('format', 'csv').lower()
         if format == 'prism':
             sd = PrismSourceData.from_config(cfg, dest_model=model)
@@ -247,9 +262,10 @@ def setup_lake_fluxes(model):
             # TODO: option 3; general csv input for lake fluxes
             raise NotImplementedError('General csv input for lake fluxes')
     # compute a value to use for high-k lake recharge, for each stress period
-    per_means = df.groupby('per').mean()
-    highk_lake_rech = dict(per_means['precipitation'] - per_means['evaporation'])
-    df['highk_lake_rech'] = [highk_lake_rech[per] for per in df.per]
+    if block == 'high_k_lakes' and model.cfg['high_k_lakes']['simulate_high_k_lakes']:
+        per_means = df.groupby('per').mean()
+        highk_lake_rech = dict(per_means['precipitation'] - per_means['evaporation'])
+        df['highk_lake_rech'] = [highk_lake_rech[per] for per in df.per]
     return df
 
 

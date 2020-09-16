@@ -22,7 +22,14 @@ Some additional notes on YAML
 * quotes are optional for strings without special meanings. See `this reference`_ for more details.
 * (``None`` and ``'none'``) (``'None'`` and ``'none'``) are parsed as strings (``'None'`` and ``'none'``)
 * null is parsed to a ``NoneType`` instance (``None``)
-* numbers in exponential format need a decimal place to be parsed as floats (``1e5`` parses to ``'1e5'``; ``1.e5`` parses to a float)
+* numbers in exponential format need a decimal place and a sign for the exponent to be parsed as floats.
+  For example, as of pyyaml 5.3.1:
+
+    * ``1e5`` parses to ``'1e5'``
+    * ``1.e5`` parses to ``'1.e5'``
+    * ``1.e+5`` parses to ``1.e5`` (a float)
+
+
 
 
 

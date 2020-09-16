@@ -244,10 +244,11 @@ def test_bas_setup(pfl_nwt_with_dis):
     assert os.path.exists(bas.fn_path)
 
 
-def test_rch_setup(pfl_nwt_with_dis, project_root_path):
+@pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
+def test_rch_setup(pfl_nwt_with_dis, project_root_path, simulate_high_k_lakes):
 
     m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
-
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     # test intermediate array creation from rech specified as scalars
     m.cfg['rch']['rech'] = [0.001, 0.002]
     m.cfg['rch']['rech_length_units'] = 'meters'
@@ -281,10 +282,13 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path):
         assert os.path.exists(f)
 
     # check that high-K lake recharge was assigned correctly
-    highklake_recharge = m.rch.rech.array[:, 0, m.isbc[0] == 2].mean(axis=1)
-    print(highklake_recharge)
-    print(m.lake_recharge)
-    assert np.allclose(highklake_recharge, m.lake_recharge)
+    if simulate_high_k_lakes:
+        highklake_recharge = m.rch.rech.array[:, 0, m.isbc[0] == 2].mean(axis=1)
+        print(highklake_recharge)
+        print(m.high_k_lake_recharge)
+        assert np.allclose(highklake_recharge, m.high_k_lake_recharge)
+    else:
+        assert not np.any(m._isbc2d == 2)
 
     # test writing of MODFLOW arrays
     rch.write_file()
@@ -301,11 +305,13 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path):
         assert os.path.exists(f)
 
 
-@pytest.mark.parametrize('case', [0, 1])
-def test_upw_setup(pfl_nwt_with_dis, case):
+@pytest.mark.parametrize('simulate_high_k_lakes,case', [(False, 0),
+                                                        (True, 0),
+                                                        (False, 1)])
+def test_upw_setup(pfl_nwt_with_dis, case, simulate_high_k_lakes):
 
     m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
-
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     if case == 0:
         # test intermediate array creation
         m.cfg['upw']['remake_arrays'] = True
@@ -314,19 +320,18 @@ def test_upw_setup(pfl_nwt_with_dis, case):
                      m.cfg['intermediate_data']['vka']
         for f in arrayfiles:
             assert os.path.exists(f)
+
         # check that lakes were set up properly
-        hiKlakes_value = {}
-        hiKlakes_value['hk'] = float(m.cfg['parent']['hiKlakes_value'])
-        hiKlakes_value['sy'] = 1.0
-        hiKlakes_value['ss'] = 1.0
-        for var in ['hk', 'sy', 'ss']:
-            arr = upw.__dict__[var].array
-            for k, kvar in enumerate(arr):
-                if not np.any(m.isbc[k] == 2):
-                    assert kvar.max(axis=(0, 1)) < hiKlakes_value[var]
-                else:
-                    assert np.diff(kvar[m.isbc[k] == 2]).sum() == 0
-                    assert kvar[m.isbc[k] == 2][0] == hiKlakes_value[var]
+        if not simulate_high_k_lakes:
+            assert not np.any(m._isbc2d == 2)
+            assert upw.hk.array.max() < m.cfg['high_k_lakes']['high_k_value']
+            assert upw.sy.array.min() < m.cfg['high_k_lakes']['sy']
+            assert upw.ss.array.min() > m.cfg['high_k_lakes']['ss']
+        else:
+            assert np.any(m._isbc2d == 2)
+            assert upw.hk.array.max() == m.cfg['high_k_lakes']['high_k_value']
+            assert upw.sy.array.max() == m.cfg['high_k_lakes']['sy']
+            assert np.allclose(upw.ss.array.min(), m.cfg['high_k_lakes']['ss'])
 
         # compare values to parent model
         for var in ['hk', 'vka']:
@@ -336,9 +341,8 @@ def test_upw_setup(pfl_nwt_with_dis, case):
             for k, pk in parent_layer.items():
                 parent_vals = m.parent.upw.__dict__[var].array[pk, pi, pj]
                 inset_vals = upw.__dict__[var].array
-                parent_max_val = m.parent.upw.__dict__[var].array.max()
-                valid_parent = parent_vals != hiKlakes_value.get(var, -9999)
-                valid_inset = inset_vals[k].ravel() != hiKlakes_value.get(var, -9999)
+                valid_parent = parent_vals != m.cfg['high_k_lakes'].get('high_k_value', -9999)
+                valid_inset = inset_vals[k].ravel() != m.cfg['high_k_lakes'].get('high_k_value', -9999)
                 parent_vals = parent_vals[valid_parent & valid_inset]
                 inset_vals = inset_vals[k].ravel()[valid_parent & valid_inset]
                 assert np.allclose(parent_vals, inset_vals, rtol=0.01)

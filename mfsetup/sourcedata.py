@@ -1196,6 +1196,7 @@ def setup_array(model, package, var, data=None,
 
     # special handling of some variables
     # (for lakes)
+    simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
     if var == 'botm':
         bathy = model.lake_bathymetry
         top = model.load_array(model.cfg[external_files_key]['top'][0])
@@ -1247,7 +1248,7 @@ def setup_array(model, package, var, data=None,
             else:
                 model.dis.top = model.cfg['dis']['top'][0]
         data = {i: arr for i, arr in enumerate(botm)}
-    elif var in ['rech', 'recharge']:
+    elif var in ['rech', 'recharge'] and simulate_high_k_lakes:
         for per in range(model.nper):
             if per == 0 and per not in data:
                 raise KeyError("No recharge input specified for first stress period.")
@@ -1256,28 +1257,26 @@ def setup_array(model, package, var, data=None,
                 # only assign if precip and open water evaporation data were read
                 # (otherwise keep original values in recharge array)
                 last_data_array = data[per].copy()
-                if model.lake_recharge is not None:
-                    data[per][model.isbc[0] == 2] = model.lake_recharge[per]
+                if model.high_k_lake_recharge is not None:
+                    data[per][model.isbc[0] == 2] = model.high_k_lake_recharge[per]
                 # zero-values to lak package lakes
                 data[per][model.isbc[0] == 1] = 0.
             else:
-                if model.lake_recharge is not None:
+                if model.high_k_lake_recharge is not None:
                     # start with the last period with recharge data; update the high-k lake recharge
-                    last_data_array[model.isbc[0] == 2] = model.lake_recharge[per]
+                    last_data_array[model.isbc[0] == 2] = model.high_k_lake_recharge[per]
                 last_data_array[model.isbc[0] == 1] = 0.
                 # assign to current per
                 data[per] = last_data_array
-
-    elif var in ['ibound', 'idomain']:
-        pass
-        #for i, arr in data.items():
-        #    data[i][model.isbc[i] == 1] = 0.
-    elif var in ['hk', 'k']:
+    elif var in ['hk', 'k'] and simulate_high_k_lakes:
         for i, arr in data.items():
-            data[i][model.isbc[i] == 2] = model.cfg['model'].get('hiKlakes_value', 1e4)
-    elif var in ['ss', 'sy']:
+            data[i][model.isbc[i] == 2] = model.cfg['high_k_lakes']['high_k_value']
+    elif var == 'sy' and simulate_high_k_lakes:
         for i, arr in data.items():
-            data[i][model.isbc[i] == 2] = 1.
+            data[i][model.isbc[i] == 2] = model.cfg['high_k_lakes']['sy']
+    elif var == 'ss' and simulate_high_k_lakes:
+        for i, arr in data.items():
+            data[i][model.isbc[i] == 2] = model.cfg['high_k_lakes']['ss']
 
     # intermediate data
     # set paths to intermediate files and external files

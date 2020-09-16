@@ -202,9 +202,10 @@ def test_ic_setup(get_pleasant_mf6_with_dis):
     assert ic.strt.array.shape == m.dis.botm.array.shape
 
 
-def test_sto_setup(get_pleasant_mf6_with_dis):
-
+@pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
+def test_sto_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
     m = get_pleasant_mf6_with_dis  #deepcopy(model_with_grid)
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     sto = m.setup_sto()
     sto.write()
     assert os.path.exists(os.path.join(m.model_ws, sto.filename))
@@ -225,6 +226,10 @@ def test_sto_setup(get_pleasant_mf6_with_dis):
     for var in ['ss', 'sy']:
         parent_array = m.parent.upw.__dict__[var].array
         inset_array = sto.__dict__[var].array
+        # with addition of high-k lakes block,
+        # ss has a different default value than parent
+        if simulate_high_k_lakes and var == 'ss':
+            continue
         compare_inset_parent_values(inset_array, parent_array,
                                     m.modelgrid, m.parent.modelgrid,
                                     inset_parent_layer_mapping,
@@ -232,9 +237,20 @@ def test_sto_setup(get_pleasant_mf6_with_dis):
                                     rtol=0.05
                                     )
 
+    if not simulate_high_k_lakes:
+        assert not np.any(m._isbc2d == 2)
+        assert sto.sy.array.max() < m.cfg['high_k_lakes']['sy']
+        assert sto.ss.array.min() > m.cfg['high_k_lakes']['ss']
+    else:
+        assert np.any(m._isbc2d == 2)
+        assert sto.sy.array.max() == m.cfg['high_k_lakes']['sy']
+        assert sto.ss.array.min() == m.cfg['high_k_lakes']['ss']
 
-def test_npf_setup(get_pleasant_mf6_with_dis):
+
+@pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
+def test_npf_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
     m = get_pleasant_mf6_with_dis
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     npf = m.setup_npf()
     npf.write()
     assert isinstance(npf, mf6.ModflowGwfnpf)
@@ -255,6 +271,14 @@ def test_npf_setup(get_pleasant_mf6_with_dis):
                                     nodata=float(m.cfg['parent']['hiKlakes_value']),
                                     rtol=0.1
                                     )
+    if not simulate_high_k_lakes:
+        assert not np.any(m._isbc2d == 2)
+        assert npf.k.array.max() < m.cfg['high_k_lakes']['high_k_value']
+        # for now, k33 not adjusted in setting high-k lakes
+    else:
+        assert np.any(m._isbc2d == 2)
+        assert npf.k.array.max() == m.cfg['high_k_lakes']['high_k_value']
+        # for now, k33 not adjusted in setting high-k lakes
 
 
 def test_obs_setup(get_pleasant_mf6_with_dis):
@@ -288,13 +312,22 @@ def test_oc_setup(get_pleasant_mf6_with_dis):
     assert 'save budget last' in perioddata[1]
 
 
-def test_rch_setup(get_pleasant_mf6_with_dis):
+@pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
+def test_rch_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
     m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     rch = m.setup_rch()
     rch.write()
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
     assert isinstance(rch, mf6.ModflowGwfrcha)
     assert rch.recharge is not None
+
+    if not simulate_high_k_lakes:
+        assert not np.any(m._isbc2d == 2)
+        assert np.all(rch.recharge.array.min(axis=(1, 2, 3)) >= 0)
+    else:
+        assert np.any(m._isbc2d == 2)
+        assert np.any(rch.recharge.array.min(axis=(1, 2, 3)) < 0)
 
 
 def test_wel_setup(get_pleasant_mf6_with_dis):

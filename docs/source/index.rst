@@ -28,20 +28,17 @@ Modflow-setup is intended to facilitate automated setup of MODFLOW models, from 
    Basic program structure and usage <structure>
    The configuration file <config-file>
 
-.. toctree::
-  :maxdepth: 1
-  :caption: Code reference
-
-   Modules <api/index>
 
 .. toctree::
   :maxdepth: 1
-  :caption: Release history
+  :caption: Reference
 
+   Code reference <api/index>
    Release History <release-history>
+   Contributing to modflow-setup <contributing>
 
 .. toctree::
   :maxdepth: 1
-  :caption: Developer
+  :caption: Bibliography
 
-  Contributing to modflow-setup <contributing>
+   References cited <references>

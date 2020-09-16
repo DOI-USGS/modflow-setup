@@ -129,6 +129,25 @@ mnw:
             kskin: 50 # m/day
     }
 
+# option to simulate lakes as zones of high hydraulic conductivity
+# (see Anderson and others (2002) in the references)
+high_k_lakes:
+  simulate_high_k_lakes: True
+  high_k_value: 1.e+4
+  sy: 1.0
+  ss: 5.e-10  # (approx. compressibility of water in Pa-1 or m2/N)
+  precipitation: [0.002276, # 32.7 in/yr; from LPR report average value
+                  0.003646 # average for August, 2012-2018 (4.45 in for the month)
+  ]
+  evaporation: [0.001649, # 23.7 in/yr; ballpark value from LPR report
+                0.00338, # 3.38 mm/day; average August rate for Sparkling Lake from Lenters and others (2005; table 2)
+  ]
+  source_data:
+    # shapefile defining the extents of the lakes to include
+    # Note: lakes that are also simulated with the Lake Package will be excluded
+    lakes_shapefile:
+      filename: 'plainfieldlakes/source_data/all_lakes.shp'
+
 lak:
   theta: -0.7  # semi-implicit; negative value indicates that surfdep is read
   nssitr: 800  # number of Newton iterations for solution of lake stage, for each MODFLOW iteration.

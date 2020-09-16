@@ -90,7 +90,7 @@ class MFsetupMixin():
         self._lakarr = None
         self._isbc = None
         self._lake_bathymetry = None
-        self._lake_recharge = None
+        self._high_k_lake_recharge = None
         self._nodata_value = -9999
         self._model_ws = None
         self._abs_model_ws = None
@@ -406,7 +406,8 @@ class MFsetupMixin():
 
     @property
     def _isbc2d(self):
-        """2-D array indicating which cells have lakes.
+        """2-D array indicating the i, j locations of
+        boundary conditions.
         -1 : well
         0 : no lake
         1 : lak package lake (lakarr > 0)
@@ -447,16 +448,16 @@ class MFsetupMixin():
         return self._lake_bathymetry
 
     @property
-    def lake_recharge(self):
+    def high_k_lake_recharge(self):
         """Recharge value to apply to high-K lakes, in model units.
         """
-        if self._lake_recharge is None:
+        if self._high_k_lake_recharge is None and self.cfg['high_k_lakes']['simulate_high_k_lakes']:
             if self.lake_info is None:
                 self.lake_info = setup_lake_info(self)
                 if self.lake_info is not None:
-                    self.lake_fluxes = setup_lake_fluxes(self)
-                    self._lake_recharge = self.lake_fluxes.groupby('per').mean()['highk_lake_rech'].sort_index()
-        return self._lake_recharge
+                    self.lake_fluxes = setup_lake_fluxes(self, block='high_k_lakes')
+                    self._high_k_lake_recharge = self.lake_fluxes.groupby('per').mean()['highk_lake_rech'].sort_index()
+        return self._high_k_lake_recharge
 
     def load_array(self, filename):
         if isinstance(filename, list):
@@ -526,6 +527,8 @@ class MFsetupMixin():
                 df = df.loc[include_ids]
             dfs_list.append(df)
         df = pd.concat(dfs_list)
+        if len(df) == 0:
+            warnings.warn('No features loaded from {}!'.format(filename))
         return df
 
     def get_boundary_cells(self, exclude_inactive=False):
@@ -733,39 +736,56 @@ class MFsetupMixin():
         # other variables
         self.cfg['external_files'] = {}
 
+    def _get_high_k_lakes(self):
+        """Get the i, j locations of any high-k lakes within the model grid.
+        """
+        lakesdata = None
+        lakes_shapefile = self.cfg['high_k_lakes'].get('source_data', {}).get('lakes_shapefile')
+        if lakes_shapefile is not None:
+            if isinstance(lakes_shapefile, str):
+                lakes_shapefile = {'filename': lakes_shapefile}
+            kwargs = get_input_arguments(lakes_shapefile, self.load_features)
+            if 'include_ids' in kwargs:  # load all lakes in shapefile
+                kwargs.pop('include_ids')
+            lakesdata = self.load_features(**kwargs)
+        if lakesdata is not None:
+            is_high_k_lake = rasterize(lakesdata, self.modelgrid)
+            return is_high_k_lake > 0
+
     def _set_isbc2d(self):
-            isbc = np.zeros((self.nrow, self.ncol), dtype=int)
-            lakesdata = None
-            lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
-            if lakes_shapefile is not None:
-                if isinstance(lakes_shapefile, str):
-                    lakes_shapefile = {'filename': lakes_shapefile}
-                kwargs = get_input_arguments(lakes_shapefile, self.load_features)
-                kwargs.pop('include_ids')  # load all lakes in shapefile
-                lakesdata = self.load_features(**kwargs)
-            if lakesdata is not None:
-                isanylake = rasterize(lakesdata, self.modelgrid)
-                isbc[isanylake > 0] = 2
-                isbc[self._lakarr2d > 0] = 1
-            # add other bcs
-            for packagename, bcnumber in self.bc_numbers.items():
-                if 'lak' not in packagename:
-                    package = self.get_package(packagename)
-                    if package is not None:
-                        # handle multiple instances of package
-                        # (in MODFLOW-6)
-                        if isinstance(package, flopy.pakbase.PackageInterface):
-                            packages = [package]
-                        else:
-                            packages = package
-                        for package in packages:
-                            k, i, j = get_bc_package_cells(package)
-                            not_a_lake = np.where(isbc[i, j] != 1)
-                            i = i[not_a_lake]
-                            j = j[not_a_lake]
-                            isbc[i, j] = bcnumber
-            self._isbc_2d = isbc
-            self._set_lake_bathymetry()
+        """Set up the _isbc2d array, that indicates the i,j locations
+        of boundary conditions.
+        """
+        isbc = np.zeros((self.nrow, self.ncol), dtype=int)
+
+        # high-k lakes
+        if self.cfg['high_k_lakes']['simulate_high_k_lakes']:
+            is_high_k_lake = self._get_high_k_lakes()
+            if is_high_k_lake is not None:
+                isbc[is_high_k_lake] = 2
+
+        # lake package lakes
+        isbc[self._lakarr2d > 0] = 1
+
+        # add other bcs
+        for packagename, bcnumber in self.bc_numbers.items():
+            if 'lak' not in packagename:
+                package = self.get_package(packagename)
+                if package is not None:
+                    # handle multiple instances of package
+                    # (in MODFLOW-6)
+                    if isinstance(package, flopy.pakbase.PackageInterface):
+                        packages = [package]
+                    else:
+                        packages = package
+                    for package in packages:
+                        k, i, j = get_bc_package_cells(package)
+                        not_a_lake = np.where(isbc[i, j] != 1)
+                        i = i[not_a_lake]
+                        j = j[not_a_lake]
+                        isbc[i, j] = bcnumber
+        self._isbc_2d = isbc
+        self._set_lake_bathymetry()
 
     def _set_isbc(self):
             isbc = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)

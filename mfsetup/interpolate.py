@@ -159,6 +159,8 @@ def regrid(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
         arr2[fill] = np.nanmean(arr2[~fill])
     #else:
     #    arr2[fill] = nodataval
+    if arr2.min() < 0:
+        j=2
     return arr2
 
 

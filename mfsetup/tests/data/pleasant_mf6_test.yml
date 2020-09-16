@@ -122,6 +122,30 @@ wel:
     print_flows: True
     save_flows: True
 
+
+# option to simulate lakes as zones of high hydraulic conductivity
+# (see Anderson and others (2002) in the references)
+high_k_lakes:
+  simulate_high_k_lakes: True
+  high_k_value: 1.e+4
+  sy: 1.0
+  ss: 5.e-10  # (approx. compressibility of water in Pa-1 or m2/N)
+  source_data:
+    # shapefile defining the extents of the lakes to include
+    # Note: lakes that are also simulated with the Lake Package will be excluded
+    lakes_shapefile:
+      filename: '../../../examples/data/pleasant/source_data/shps/all_lakes.shp'
+    # temperature and precipitation data for computing time-varing recharge over the high-K lakes
+    # recharge is computed as the net of precip and evaporation
+    # evaporation is estimated from temperature data using the Hamon method (see the evaporation.py module)
+    climate:
+      filenames:
+        600059060: '../../../examples/data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+      format: 'prism'
+      period_stats:
+        0: ['mean', '2012-01-01', '2012-12-31']  # average daily rate for model period for initial steady state
+        1: 'mean'  # average daily rate or value for each month
+
 lak:
   options:
     boundnames: True
