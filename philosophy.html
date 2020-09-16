@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Philosophy &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
+  <title>Philosophy &mdash; modflow-setup 0.post51+gca2ebe6 documentation</title>
   
 
   
@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="installation.html" />
-    <link rel="prev" title="modflow-setup 0.post51+g740d3ab" href="index.html" /> 
+    <link rel="prev" title="modflow-setup 0.post51+gca2ebe6" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+g740d3ab
+                0.post51+gca2ebe6
               </div>
             
           
@@ -95,10 +95,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">     Philosophy</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-modflow-setup-does">What modflow-setup does</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-modflow-setup-doesnt-do">What modflow-setup doesn’t do</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#what-modflow-setup-doesnt-do">What modflow-setup doesn’t do</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
@@ -110,18 +107,15 @@
 <li class="toctree-l1"><a class="reference internal" href="structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file.html"> The configuration file</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Code reference</span></p>
+<p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html">Model classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html#supporting-modules">Supporting modules</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Release history</span></p>
-<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer</span></p>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
 </ul>
 
             
@@ -227,13 +221,6 @@
 <h2>What modflow-setup doesn’t do<a class="headerlink" href="#what-modflow-setup-doesnt-do" title="Permalink to this headline">¶</a></h2>
 <p>While modflow-setup strives to be general, it is focused on producing groundwater flow models at the site to regional scales. Streams are represented using the SFR package; Lakes can be represented using the Lake Package or high hydraulic conductivity values (Anderson and others, 2002). Current development has been focused around project needs; as opposed to making a comprehensive tool from the ground up. Currently supported packages and features are summarized in the <a class="reference external" href="https://aleaf.github.io/modflow-setup/release-history.html">Release History</a>. Examples of valid configuration files used in the test suite can be found in the <a class="reference external" href="https://aleaf.github.io/modflow-setup/docs/build/html/examples.html#configuration-file-gallery">Configuration File Gallery</a>.</p>
 <p>Currently only regular (unrotated) model grids are supported; support for unstructured grids may be added in the future. In contrast to Flopy, which is completely general, modflow-setup limits model construction options somewhat, in the interest of rapidly producing consistent results with a minimum of required input. For example, models are produced with the external files option in flopy, meaning that most array and table input are written to external files in a single folder. This facilitates parameter estimation and allows most of the intensive i/o operations to be performed by pandas and numpy, which are generally faster than parsing MODFLOW package input with base python.</p>
-<div class="section" id="references">
-<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
-<p>Anderson, M. P., Hunt, R. J., Krohelski, J. T. and Chung, K. (2002), Using High Hydraulic Conductivity Nodes to Simulate Seepage Lakes. Groundwater, 40: 117-122. doi:10.1111/j.1745-6584.2002.tb02496.x</p>
-<p>Bakker, M., Post, V., Langevin, C. D., Hughes, J. D., White, J. T., Starn, J. J. and Fienen, M. N., 2016, Scripting MODFLOW Model Development Using Python and FloPy: Groundwater, v. 54, p. 733–739, doi:10.1111/gwat.12413.</p>
-<p>Haitjema, H.M. (1995). Analytic Element Modeling of Groundwater Flow. Academic Press, Inc.</p>
-<p>Hunt, R.J. and Zheng, C. (2012), The Current State of Modeling. Groundwater, 50: 330-333. doi:10.1111/j.1745-6584.2012.00936.x</p>
-</div>
 </div>
 </div>
 
@@ -248,7 +235,7 @@
         <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="modflow-setup 0.post51+g740d3ab" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="modflow-setup 0.post51+gca2ebe6" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -260,7 +247,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Sep 15, 2020.
+        Last updated on Sep 16, 2020.
       </span>
 
     </p>

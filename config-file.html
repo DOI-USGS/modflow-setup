@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The configuration file &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
+  <title>The configuration file &mdash; modflow-setup 0.post51+gca2ebe6 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+g740d3ab
+                0.post51+gca2ebe6
               </div>
             
           
@@ -110,18 +110,15 @@
 </ul>
 </li>
 </ul>
-<p class="caption"><span class="caption-text">Code reference</span></p>
+<p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html">Model classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html#supporting-modules">Supporting modules</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Release history</span></p>
-<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer</span></p>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
 </ul>
 
             
@@ -227,11 +224,20 @@
 </div>
 <div class="section" id="some-additional-notes-on-yaml">
 <h2>Some additional notes on YAML<a class="headerlink" href="#some-additional-notes-on-yaml" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
+<ul>
 <li><p>quotes are optional for strings without special meanings. See <a class="reference external" href="http://blogs.perl.org/users/tinita/2018/03/strings-in-yaml---to-quote-or-not-to-quote.html">this reference</a> for more details.</p></li>
 <li><p>(<code class="docutils literal notranslate"><span class="pre">None</span></code> and <code class="docutils literal notranslate"><span class="pre">'none'</span></code>) (<code class="docutils literal notranslate"><span class="pre">'None'</span></code> and <code class="docutils literal notranslate"><span class="pre">'none'</span></code>) are parsed as strings (<code class="docutils literal notranslate"><span class="pre">'None'</span></code> and <code class="docutils literal notranslate"><span class="pre">'none'</span></code>)</p></li>
 <li><p>null is parsed to a <code class="docutils literal notranslate"><span class="pre">NoneType</span></code> instance (<code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
-<li><p>numbers in exponential format need a decimal place to be parsed as floats (<code class="docutils literal notranslate"><span class="pre">1e5</span></code> parses to <code class="docutils literal notranslate"><span class="pre">'1e5'</span></code>; <code class="docutils literal notranslate"><span class="pre">1.e5</span></code> parses to a float)</p></li>
+<li><p>numbers in exponential format need a decimal place and a sign for the exponent to be parsed as floats.
+For example, as of pyyaml 5.3.1:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">1e5</span></code> parses to <code class="docutils literal notranslate"><span class="pre">'1e5'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.e5</span></code> parses to <code class="docutils literal notranslate"><span class="pre">'1.e5'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.e+5</span></code> parses to <code class="docutils literal notranslate"><span class="pre">1.e5</span></code> (a float)</p></li>
+</ul>
+</div></blockquote>
+</li>
 </ul>
 </div>
 </div>
@@ -259,7 +265,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Sep 15, 2020.
+        Last updated on Sep 16, 2020.
       </span>
 
     </p>

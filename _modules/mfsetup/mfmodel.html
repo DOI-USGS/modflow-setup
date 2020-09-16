@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+gca2ebe6 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+g740d3ab
+                0.post51+gca2ebe6
               </div>
             
           
@@ -100,18 +100,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../config-file.html"> The configuration file</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Code reference</span></p>
+<p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Model classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html#supporting-modules">Supporting modules</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Release history</span></p>
-<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer</span></p>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
 </ul>
 
             
@@ -268,7 +265,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_lakarr</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_isbc</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lake_bathymetry</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lake_recharge</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_high_k_lake_recharge</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nodata_value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9999</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model_ws</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_abs_model_ws</span> <span class="o">=</span> <span class="kc">None</span>
@@ -584,7 +581,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_isbc2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;2-D array indicating which cells have lakes.</span>
+        <span class="sd">&quot;&quot;&quot;2-D array indicating the i, j locations of</span>
+<span class="sd">        boundary conditions.</span>
 <span class="sd">        -1 : well</span>
 <span class="sd">        0 : no lake</span>
 <span class="sd">        1 : lak package lake (lakarr &gt; 0)</span>
@@ -625,16 +623,16 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lake_bathymetry</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">lake_recharge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">high_k_lake_recharge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Recharge value to apply to high-K lakes, in model units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lake_recharge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high_k_lake_recharge</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;high_k_lakes&#39;</span><span class="p">][</span><span class="s1">&#39;simulate_high_k_lakes&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="o">=</span> <span class="n">setup_lake_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">lake_fluxes</span> <span class="o">=</span> <span class="n">setup_lake_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_lake_recharge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_fluxes</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()[</span><span class="s1">&#39;highk_lake_rech&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lake_recharge</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lake_fluxes</span> <span class="o">=</span> <span class="n">setup_lake_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="s1">&#39;high_k_lakes&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_high_k_lake_recharge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_fluxes</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()[</span><span class="s1">&#39;highk_lake_rech&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high_k_lake_recharge</span>
 
     <span class="k">def</span> <span class="nf">load_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -704,6 +702,8 @@
                 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">include_ids</span><span class="p">]</span>
             <span class="n">dfs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No features loaded from </span><span class="si">{}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="MFsetupMixin.get_boundary_cells"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.get_boundary_cells">[docs]</a>    <span class="k">def</span> <span class="nf">get_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_inactive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -911,39 +911,56 @@
         <span class="c1"># other variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="k">def</span> <span class="nf">_get_high_k_lakes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the i, j locations of any high-k lakes within the model grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lakesdata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">lakes_shapefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;high_k_lakes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lakes_shapefile&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lakes_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lakes_shapefile</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">lakes_shapefile</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">lakes_shapefile</span><span class="p">}</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">lakes_shapefile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_features</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;include_ids&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>  <span class="c1"># load all lakes in shapefile</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;include_ids&#39;</span><span class="p">)</span>
+            <span class="n">lakesdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_features</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lakesdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">is_high_k_lake</span> <span class="o">=</span> <span class="n">rasterize</span><span class="p">(</span><span class="n">lakesdata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">is_high_k_lake</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
     <span class="k">def</span> <span class="nf">_set_isbc2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="n">isbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-            <span class="n">lakesdata</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">lakes_shapefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lakes_shapefile&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">lakes_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lakes_shapefile</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                    <span class="n">lakes_shapefile</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">lakes_shapefile</span><span class="p">}</span>
-                <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">lakes_shapefile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_features</span><span class="p">)</span>
-                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;include_ids&#39;</span><span class="p">)</span>  <span class="c1"># load all lakes in shapefile</span>
-                <span class="n">lakesdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_features</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">lakesdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">isanylake</span> <span class="o">=</span> <span class="n">rasterize</span><span class="p">(</span><span class="n">lakesdata</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">)</span>
-                <span class="n">isbc</span><span class="p">[</span><span class="n">isanylake</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-                <span class="n">isbc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_lakarr2d</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="c1"># add other bcs</span>
-            <span class="k">for</span> <span class="n">packagename</span><span class="p">,</span> <span class="n">bcnumber</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bc_numbers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="s1">&#39;lak&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packagename</span><span class="p">:</span>
-                    <span class="n">package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="n">packagename</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">package</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="c1"># handle multiple instances of package</span>
-                        <span class="c1"># (in MODFLOW-6)</span>
-                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">flopy</span><span class="o">.</span><span class="n">pakbase</span><span class="o">.</span><span class="n">PackageInterface</span><span class="p">):</span>
-                            <span class="n">packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">package</span><span class="p">]</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">packages</span> <span class="o">=</span> <span class="n">package</span>
-                        <span class="k">for</span> <span class="n">package</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
-                            <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">get_bc_package_cells</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
-                            <span class="n">not_a_lake</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">isbc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span>
-                            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="n">not_a_lake</span><span class="p">]</span>
-                            <span class="n">j</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="n">not_a_lake</span><span class="p">]</span>
-                            <span class="n">isbc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">bcnumber</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_isbc_2d</span> <span class="o">=</span> <span class="n">isbc</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_lake_bathymetry</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;Set up the _isbc2d array, that indicates the i,j locations</span>
+<span class="sd">        of boundary conditions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">isbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># high-k lakes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;high_k_lakes&#39;</span><span class="p">][</span><span class="s1">&#39;simulate_high_k_lakes&#39;</span><span class="p">]:</span>
+            <span class="n">is_high_k_lake</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_high_k_lakes</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">is_high_k_lake</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">isbc</span><span class="p">[</span><span class="n">is_high_k_lake</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="c1"># lake package lakes</span>
+        <span class="n">isbc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_lakarr2d</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># add other bcs</span>
+        <span class="k">for</span> <span class="n">packagename</span><span class="p">,</span> <span class="n">bcnumber</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bc_numbers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;lak&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packagename</span><span class="p">:</span>
+                <span class="n">package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="n">packagename</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">package</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># handle multiple instances of package</span>
+                    <span class="c1"># (in MODFLOW-6)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">flopy</span><span class="o">.</span><span class="n">pakbase</span><span class="o">.</span><span class="n">PackageInterface</span><span class="p">):</span>
+                        <span class="n">packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">package</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">packages</span> <span class="o">=</span> <span class="n">package</span>
+                    <span class="k">for</span> <span class="n">package</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
+                        <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">get_bc_package_cells</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+                        <span class="n">not_a_lake</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">isbc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="n">not_a_lake</span><span class="p">]</span>
+                        <span class="n">j</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="n">not_a_lake</span><span class="p">]</span>
+                        <span class="n">isbc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">bcnumber</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isbc_2d</span> <span class="o">=</span> <span class="n">isbc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_lake_bathymetry</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_set_isbc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">isbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -1668,7 +1685,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Sep 15, 2020.
+        Last updated on Sep 16, 2020.
       </span>
 
     </p>

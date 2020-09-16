@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration defaults &mdash; modflow-setup 0.post51+g740d3ab documentation</title>
+  <title>Configuration defaults &mdash; modflow-setup 0.post51+gca2ebe6 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Model classes" href="api/index.html" />
+    <link rel="next" title="Code Reference" href="api/index.html" />
     <link rel="prev" title="Configuration file structure" href="config-file-structure.html" /> 
 </head>
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+g740d3ab
+                0.post51+gca2ebe6
               </div>
             
           
@@ -114,18 +114,15 @@
 </ul>
 </li>
 </ul>
-<p class="caption"><span class="caption-text">Code reference</span></p>
+<p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html">Model classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html#supporting-modules">Supporting modules</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Release history</span></p>
-<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer</span></p>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
 </ul>
 
             
@@ -429,7 +426,15 @@
 205
 206
 207
-208</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
+208
+209
+210
+211
+212
+213
+214
+215
+216</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
 <span class="c1"># version reported by modflow-setup will then be</span>
 <span class="c1"># the start_version appended by the remaining information</span>
 <span class="c1"># in a pep440-post style version tag</span>
@@ -543,6 +548,14 @@
   <span class="nt">stage_fileout</span><span class="p">:</span> <span class="s">&#39;sfr.stage.bin&#39;</span>
   <span class="nt">obs6_filein_fmt</span><span class="p">:</span> <span class="s">&#39;sfr.obs&#39;</span>
   <span class="nt">external_files</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>  <span class="c1"># option to write packagedata to an external file</span>
+
+<span class="c1"># option to simulate lakes as zones of high hydraulic conductivity</span>
+<span class="c1"># (see Anderson and others (2002) in the references)</span>
+<span class="nt">high_k_lakes</span><span class="p">:</span>
+  <span class="nt">simulate_high_k_lakes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">high_k_value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e+4</span>
+  <span class="nt">sy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+  <span class="nt">ss</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5.e-10</span>  <span class="c1"># (approx. compressibility of water in Pa-1 or m2/N)</span>
 
 <span class="nt">lak</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
@@ -802,7 +815,15 @@
 158
 159
 160
-161</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
+161
+162
+163
+164
+165
+166
+167
+168
+169</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
 <span class="c1"># version reported by modflow-setup will then be</span>
 <span class="c1"># the start_version appended by the remaining information</span>
 <span class="c1"># in a pep440-post style version tag</span>
@@ -876,6 +897,14 @@
   <span class="nt">remake_arrays</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">rech_mult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
   <span class="nt">rech_filename_fmt</span><span class="p">:</span> <span class="s">&quot;finf{:d}.dat&quot;</span>
+
+<span class="c1"># option to simulate lakes as zones of high hydraulic conductivity</span>
+<span class="c1"># (see Anderson and others (2002) in the references)</span>
+<span class="nt">high_k_lakes</span><span class="p">:</span>
+  <span class="nt">simulate_high_k_lakes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="nt">high_k_value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e+4</span>
+  <span class="nt">sy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+  <span class="nt">ss</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5.e-10</span>  <span class="c1"># (approx. compressibility of water in Pa-1 or m2/N)</span>
 
 <span class="nt">lak</span><span class="p">:</span>
   <span class="nt">lakarr_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakarr{:d}.dat&#39;</span>
@@ -976,7 +1005,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api/index.html" class="btn btn-neutral float-right" title="Model classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="api/index.html" class="btn btn-neutral float-right" title="Code Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="config-file-structure.html" class="btn btn-neutral float-left" title="Configuration file structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -991,7 +1020,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Sep 15, 2020.
+        Last updated on Sep 16, 2020.
       </span>
 
     </p>
