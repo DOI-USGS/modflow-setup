@@ -7,9 +7,11 @@ import flopy
 import numpy as np
 import pandas as pd
 import pyproj
+from packaging import version
 
 fm = flopy.modflow
 mf6 = flopy.mf6
+import gisutils
 from gisutils import get_proj_str, get_values_at_points, project, shp2df
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
@@ -47,8 +49,9 @@ from mfsetup.tdis import (
 from mfsetup.units import convert_length_units, lenuni_text, lenuni_values
 from mfsetup.utils import flatten, get_input_arguments, get_packages, update
 
-warnings.warn('Automatic reprojection functionality requires gis-utils >= 0.2'
-              '\nPlease pip install --upgrade gis-utils')
+if version.parse(gisutils.__version__) < version.parse('0.2.2'):
+    warnings.warn('Automatic reprojection functionality requires gis-utils >= 0.2.2'
+                  '\nPlease pip install --upgrade gis-utils')
 
 
 class MFsetupMixin():
