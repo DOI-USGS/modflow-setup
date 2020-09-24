@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+gca2ebe6 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+gd4dca5a documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+gca2ebe6
+                0.post51+gd4dca5a
               </div>
             
           
@@ -182,9 +182,11 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">pyproj</span>
+<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
 <span class="n">mf6</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span>
+<span class="kn">import</span> <span class="nn">gisutils</span>
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_proj_str</span><span class="p">,</span> <span class="n">get_values_at_points</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">shp2df</span>
 <span class="kn">from</span> <span class="nn">sfrmaker</span> <span class="kn">import</span> <span class="n">Lines</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="n">assign_layers</span>
@@ -222,8 +224,9 @@
 <span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">lenuni_text</span><span class="p">,</span> <span class="n">lenuni_values</span>
 <span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span><span class="p">,</span> <span class="n">update</span>
 
-<span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Automatic reprojection functionality requires gis-utils &gt;= 0.2&#39;</span>
-              <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Please pip install --upgrade gis-utils&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">gisutils</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;0.2.2&#39;</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Automatic reprojection functionality requires gis-utils &gt;= 0.2.2&#39;</span>
+                  <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Please pip install --upgrade gis-utils&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MFsetupMixin"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin">[docs]</a><span class="k">class</span> <span class="nc">MFsetupMixin</span><span class="p">():</span>
@@ -1685,7 +1688,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Sep 16, 2020.
+        Last updated on Sep 24, 2020.
       </span>
 
     </p>
