@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration File Gallery &mdash; modflow-setup 0.post51+gd4dca5a documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.post51+gfa39c24 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+gd4dca5a
+                0.post51+gfa39c24
               </div>
             
           
@@ -525,7 +525,14 @@
 297
 298
 299
-300</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
+300
+301
+302
+303
+304
+305
+306
+307</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
 <span class="c1">#</span>
 <span class="c1"># The MF6model.setup_from_yaml reads this in as a python dictionary (via the pyyaml package),</span>
 <span class="c1"># and attaches it to a newly created MF6model object instance (MF6model is a subclass of flopy.mf6.ModflowGwf).</span>
@@ -747,14 +754,21 @@
       <span class="nt">line_id_column</span><span class="p">:</span> <span class="s">&#39;line_id&#39;</span>
       <span class="nt">data_column</span><span class="p">:</span> <span class="s">&#39;flow_m3d&#39;</span>  <span class="c1"># flows are already in cubic meters/day; can therefore skip unit input</span>
       <span class="nt">category_column</span><span class="p">:</span> <span class="s">&#39;category&#39;</span>
-    <span class="c1"># modflow-setup will try to located the inflows using the routing information in the flowlines shapefile</span>
+    <span class="c1"># modflow-setup will try to locate the inflows using the routing information in the flowlines shapefile</span>
     <span class="c1"># however, in some cases an inflow location might be just outside of the flowlines that are provided</span>
     <span class="c1"># (for example, if they were clipped to the model grid, or if they are outside of the model bounding box)</span>
     <span class="nt">inflows_routing</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/tables/routing.csv&#39;</span>
       <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;COMID&#39;</span>  <span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
       <span class="nt">routing_column</span><span class="p">:</span> <span class="s">&#39;tocomid&#39;</span>
-  <span class="nt">one_reach_per_cell</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span> <span class="c1">#  consolidate SFR reaches to one per i, j location</span>
+
+  <span class="nt">sfrmaker_options</span><span class="p">:</span>
+    <span class="c1"># the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker</span>
+    <span class="c1"># (see https://aleaf.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
+    <span class="c1"># or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)</span>
+    <span class="c1"># or to_riv (shellmound_tmr example)</span>
+    <span class="nt">one_reach_per_cell</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span> <span class="c1">#  consolidate SFR reaches to one per i, j location</span>
+    <span class="nt">add_outlets</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">17955371</span>  <span class="c1"># add outlets at these line numbers</span>
 
 <span class="nt">wel</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
@@ -793,7 +807,7 @@
 
 <span class="nt">obs</span><span class="p">:</span>
   <span class="nt">source_data</span><span class="p">:</span>
-    <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/head_obs_well_info.csv&#39;</span>
+    <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/preprocessed_head_obs_info.csv&#39;</span>
     <span class="p p-Indicator">]</span>
     <span class="nt">column_mappings</span><span class="p">:</span>
       <span class="nt">obsname</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">]</span>
@@ -961,7 +975,8 @@
 118
 119
 120
-121</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
+121
+122</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;sm_tmr&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
   <span class="nt">sim_ws</span><span class="p">:</span> <span class="s">&#39;../tmp/shellmound_tmr_inset&#39;</span>
@@ -1031,7 +1046,7 @@
 
 <span class="nt">perimeter_boundary</span><span class="p">:</span>
   <span class="nt">source_data</span><span class="p">:</span>
-    <span class="nt">irregular_boundary</span><span class="p">:</span> 
+    <span class="nt">irregular_boundary</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
 
 <span class="nt">tdis</span><span class="p">:</span>
@@ -1078,10 +1093,11 @@
       <span class="nt">name_column</span><span class="p">:</span> <span class="s">&#39;GNIS_NAME&#39;</span>
       <span class="nt">attr_length_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>  <span class="c1"># units of source data</span>
       <span class="nt">attr_height_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>  <span class="c1"># units of source data</span>
-  <span class="c1"># convert reaches corresponding to these LineString identifiers</span>
-  <span class="c1"># (in the flowlines id_column), and all downstream reaches</span>
-  <span class="c1"># to the MODFLOW River package</span>
-  <span class="nt">to_riv</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">18046670</span><span class="p p-Indicator">]</span>
+  <span class="nt">sfrmaker_options</span><span class="p">:</span>
+    <span class="c1"># convert reaches corresponding to these LineString identifiers</span>
+    <span class="c1"># (in the flowlines id_column), and all downstream reaches</span>
+    <span class="c1"># to the MODFLOW River package</span>
+    <span class="nt">to_riv</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">18046670</span><span class="p p-Indicator">]</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -2157,8 +2173,8 @@
       <span class="nt">x_location_column</span><span class="p">:</span> <span class="s">&#39;x&#39;</span>
       <span class="nt">y_location_column</span><span class="p">:</span> <span class="s">&#39;y&#39;</span>
       <span class="nt">obsname_column</span><span class="p">:</span> <span class="s">&#39;site_no&#39;</span>
-  <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-  <span class="nt">output_path</span><span class="p">:</span>
+  <span class="nt">sfrmaker_options</span><span class="p">:</span>
+    <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
 <span class="nt">nwt</span><span class="p">:</span>
   <span class="c1">#use_existing_file: &#39;RGN_rjh_3_23_18.NWT&#39;</span>
@@ -2606,7 +2622,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Sep 24, 2020.
+        Last updated on Oct 15, 2020.
       </span>
 
     </p>

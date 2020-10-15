@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; modflow-setup 0.post51+gd4dca5a documentation</title>
+  <title>Installation &mdash; modflow-setup 0.post51+gfa39c24 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post51+gd4dca5a
+                0.post51+gfa39c24
               </div>
             
           
@@ -103,7 +103,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#id1">Considerations for USGS Users</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">Installing the DOI SSL certificate for use with pip</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda">Installing the DOI SSL certificate for use with conda</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#troubleshooting-issues-with-the-usgs-network">Troubleshooting issues with the USGS network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting-issues-with-the-usgs-network">Troubleshooting issues with the USGS network</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-conda">SSL-related error messages when using conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-pip">SSL-related error messages when using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message">If you are on the USGS network, using Windows, and you get this error message:</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -286,7 +291,11 @@ conda env create -f environment.yml
 </div>
 <div class="section" id="id1">
 <h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues. If you are encountering persistant issues with creating the conda environment, you may have better luck trying the install off of the USGS network (e.g. at home). See <a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">here</a> for more information about SSL verification on the USGS network, and to download the DOI SSL certificate.</p>
+<p>Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
+If you are encountering persistant issues with creating the conda environment,
+you may have better luck trying the install off of the USGS network (e.g. at home).
+See <a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">here</a> for more information
+about SSL verification on the USGS network, and to download the DOI SSL certificate.</p>
 <div class="section" id="id2">
 <h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
@@ -303,11 +312,44 @@ On OSX, create <code class="docutils literal notranslate"><span class="pre">/Use
 </div>
 <div class="section" id="installing-the-doi-ssl-certificate-for-use-with-conda">
 <h3>Installing the DOI SSL certificate for use with conda<a class="headerlink" href="#installing-the-doi-ssl-certificate-for-use-with-conda" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify">these instructions</a>. This may or may not work.</p>
+<p>See <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify">these instructions</a>.
+This may or may not work. Basically, <code class="docutils literal notranslate"><span class="pre">ssl_verify:</span></code> needs to be set in your <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a> file to point
+to a valid SSL certificate, which may be different from the basic <code class="docutils literal notranslate"><span class="pre">DOIRootCA2.cer</span></code> file.</p>
+<p>You can find the location of your <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a> file with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">info</span> <span class="o">-</span><span class="n">a</span>
+</pre></div>
+</div>
+<p>which displays information about how Conda is configured. Note that you may have multiple <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a>
+files at the system, user and possibly project levels.</p>
+<p>Common issues:</p>
+<ul>
+<li><p>Conda Install fails on the USGS network without a certificate, or with an incorrectly formatted certificate.
+Possible solutions are to either get a correctly formatted SSL certificate from your IT person, or try installing off the network.</p></li>
+<li><p>Conda Install fails off the USGS network with a certificate (may or may not be correctly formatted). Solution:
+open your <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a> file
+and comment out the SSL certificate file, if it is specified. E.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssl_verify</span><span class="p">:</span> <span class="c1">#D:\certificates\DOIRootCA2.cer</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </div>
 <div class="section" id="troubleshooting-issues-with-the-usgs-network">
 <h3>Troubleshooting issues with the USGS network<a class="headerlink" href="#troubleshooting-issues-with-the-usgs-network" title="Permalink to this headline">¶</a></h3>
-<p><strong>If you are on the USGS network, using Windows, and you get this error message:</strong></p>
+<div class="section" id="ssl-related-error-messages-when-using-conda">
+<h4>SSL-related error messages when using conda<a class="headerlink" href="#ssl-related-error-messages-when-using-conda" title="Permalink to this headline">¶</a></h4>
+<p>(with <code class="docutils literal notranslate"><span class="pre">SSL</span></code> mentioned in the message and possibly <code class="docutils literal notranslate"><span class="pre">bad</span> <span class="pre">handshake</span></code>)</p>
+<p>Make sure that the <code class="docutils literal notranslate"><span class="pre">conda</span></code> package installer is configured to use the USGS certificate
+(see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda"><span class="std std-ref">Installing the DOI SSL certificate for use with conda</span></a> above).</p>
+</div>
+<div class="section" id="ssl-related-error-messages-when-using-pip">
+<h4>SSL-related error messages when using pip<a class="headerlink" href="#ssl-related-error-messages-when-using-pip" title="Permalink to this headline">¶</a></h4>
+<p>(something similar to <code class="docutils literal notranslate"><span class="pre">SSL:</span> <span class="pre">CERTIFICATE_VERIFY_FAILED</span></code>).</p>
+<p>Make sure that the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer is configured to use the USGS certificate
+(see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</a> above).</p>
+</div>
+<div class="section" id="if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message">
+<h4>If you are on the USGS network, using Windows, and you get this error message:<a class="headerlink" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message" title="Permalink to this headline">¶</a></h4>
 <blockquote>
 <div><p>CondaHTTPError: HTTP 500 INTERNAL ERROR for url &lt;<a class="reference external" href="https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2">https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2</a>&gt;
 Elapsed: 00:30.647993</p>
@@ -322,6 +364,7 @@ HTTP errors are often intermittent, and a simple retry will get you on your way.
 so it needs to be commented out on other operating systems (normally it wouldn’t need to be listed, but the above HTTP 500 error indicates that installation from the default source location failed.)</p>
 <p><strong>If you are on the USGS network and get an SSL error message</strong>
 (something similar to <code class="docutils literal notranslate"><span class="pre">SSL:</span> <span class="pre">CERTIFICATE_VERIFY_FAILED</span></code>), you need to configure the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer to use the USGS certificate (see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</a> above).</p>
+</div>
 </div>
 </div>
 </div>
@@ -349,7 +392,7 @@ so it needs to be commented out on other operating systems (normally it wouldn�
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Sep 24, 2020.
+        Last updated on Oct 15, 2020.
       </span>
 
     </p>
