@@ -68,7 +68,7 @@ dis:
 
 perimeter_boundary:
   source_data:
-    irregular_boundary: 
+    irregular_boundary:
       filename: 'shellmound/tmr_parent/gis/irregular_boundary.shp'
 
 tdis:
@@ -115,7 +115,8 @@ sfr:
       name_column: 'GNIS_NAME'
       attr_length_units: 'feet'  # units of source data
       attr_height_units: 'feet'  # units of source data
-  # convert reaches corresponding to these LineString identifiers
-  # (in the flowlines id_column), and all downstream reaches
-  # to the MODFLOW River package
-  to_riv: [18046670]
+  sfrmaker_options:
+    # convert reaches corresponding to these LineString identifiers
+    # (in the flowlines id_column), and all downstream reaches
+    # to the MODFLOW River package
+    to_riv: [18046670]

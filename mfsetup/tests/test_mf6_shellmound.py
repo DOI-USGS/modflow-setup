@@ -444,7 +444,7 @@ def test_npf_setup(shellmound_model_with_dis):
 
 
 @pytest.mark.parametrize('config', [{'source_data':
-                                         {'filenames': ['../../data/shellmound/tables/head_obs_well_info.csv'],
+                                         {'filenames': ['../../data/shellmound/tables/preprocessed_head_obs_info.csv'],
                                           'column_mappings':
                                               {'obsname': ['obsprefix']}
                                           },
@@ -652,6 +652,13 @@ def test_sfr_setup(model_with_sfr):
     # 26, 13
     # verify that reaches were consolidated to one per cell
     assert len(m.sfrdata.reach_data.node.unique()) == len(m.sfrdata.reach_data)
+
+    # check that add_outlets works
+    expected_outlets = {17955371, 17956199}
+    for outlet_id in expected_outlets:
+        assert outlet_id in m.sfrdata.reach_data.line_id.tolist()
+        assert m.sfrdata.reach_data.loc[m.sfrdata.reach_data.line_id == outlet_id,
+                                        'outseg'].sum() == 0
 
 
 def test_sfr_inflows_from_csv(model_with_sfr):

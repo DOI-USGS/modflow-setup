@@ -75,7 +75,11 @@ Alternatively, modflow-setup could be updated by downloading the repository agai
 
 _`Considerations for USGS Users`
 --------------------------------
-Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues. If you are encountering persistant issues with creating the conda environment, you may have better luck trying the install off of the USGS network (e.g. at home). See `here <https://tst.usgs.gov/applications/application-and-script-signing/>`_ for more information about SSL verification on the USGS network, and to download the DOI SSL certificate.
+Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
+If you are encountering persistant issues with creating the conda environment,
+you may have better luck trying the install off of the USGS network (e.g. at home).
+See `here <https://tst.usgs.gov/applications/application-and-script-signing/>`_ for more information
+about SSL verification on the USGS network, and to download the DOI SSL certificate.
 
 _`Installing the DOI SSL certificate for use with pip`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -94,13 +98,49 @@ Note that when you are off the USGS network, you may have to comment out the ``c
 
 Installing the DOI SSL certificate for use with conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-See `these instructions <https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify>`_. This may or may not work.
+See `these instructions <https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify>`_.
+This may or may not work. Basically, ``ssl_verify:`` needs to be set in your `condarc`_ file to point
+to a valid SSL certificate, which may be different from the basic ``DOIRootCA2.cer`` file.
+
+You can find the location of your `condarc`_ file with::
+
+    conda info -a
+
+which displays information about how Conda is configured. Note that you may have multiple `condarc`_
+files at the system, user and possibly project levels.
+
+Common issues:
+
+* Conda Install fails on the USGS network without a certificate, or with an incorrectly formatted certificate.
+  Possible solutions are to either get a correctly formatted SSL certificate from your IT person, or try installing off the network.
+* Conda Install fails off the USGS network with a certificate (may or may not be correctly formatted). Solution:
+  open your `condarc`_ file
+  and comment out the SSL certificate file, if it is specified. E.g.::
+
+    ssl_verify: #D:\certificates\DOIRootCA2.cer
+
 
 
 Troubleshooting issues with the USGS network
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-**If you are on the USGS network, using Windows, and you get this error message:**
 
+SSL-related error messages when using conda
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(with ``SSL`` mentioned in the message and possibly ``bad handshake``)
+
+Make sure that the ``conda`` package installer is configured to use the USGS certificate
+(see :ref:`Installing the DOI SSL certificate for use with conda` above).
+
+
+SSL-related error messages when using pip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(something similar to ``SSL: CERTIFICATE_VERIFY_FAILED``).
+
+Make sure that the ``pip`` package installer is configured to use the USGS certificate
+(see `Installing the DOI SSL certificate for use with pip`_ above).
+
+If you are on the USGS network, using Windows, and you get this error message:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ..
 
     CondaHTTPError: HTTP 500 INTERNAL ERROR for url <https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2>
@@ -128,6 +168,7 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 .. _clean uninstall: https://docs.anaconda.com/anaconda/install/uninstall/
 .. _conda: https://docs.conda.io/en/latest/
 .. _conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
+.. _condarc: https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
 .. _download: https://github.com/aleaf/modflow-setup/archive/master.zip
 .. _gis.yml: https://github.com/aleaf/modflow-setup/blob/master/gis.yml
 .. _Download the DOI SSL certificate: https://tst.usgs.gov/applications/application-and-script-signing/

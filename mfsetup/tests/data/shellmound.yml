@@ -220,14 +220,21 @@ sfr:
       line_id_column: 'line_id'
       data_column: 'flow_m3d'  # flows are already in cubic meters/day; can therefore skip unit input
       category_column: 'category'
-    # modflow-setup will try to located the inflows using the routing information in the flowlines shapefile
+    # modflow-setup will try to locate the inflows using the routing information in the flowlines shapefile
     # however, in some cases an inflow location might be just outside of the flowlines that are provided
     # (for example, if they were clipped to the model grid, or if they are outside of the model bounding box)
     inflows_routing:
       filename: 'shellmound/tables/routing.csv'
       id_column: 'COMID'  # arguments to sfrmaker.Lines.from_shapefile
       routing_column: 'tocomid'
-  one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
+
+  sfrmaker_options:
+    # the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker
+    # (see https://aleaf.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)
+    # or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)
+    # or to_riv (shellmound_tmr example)
+    one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
+    add_outlets: [17955371, 17956213]  # add outlets at these line numbers
 
 wel:
   options:
@@ -266,7 +273,7 @@ oc:
 
 obs:
   source_data:
-    filenames: ['shellmound/tables/head_obs_well_info.csv'
+    filenames: ['shellmound/tables/preprocessed_head_obs_info.csv'
     ]
     column_mappings:
       obsname: ['obsprefix']

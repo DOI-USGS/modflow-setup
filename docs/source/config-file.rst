@@ -28,7 +28,13 @@ Some additional notes on YAML
     * ``1e5`` parses to ``'1e5'``
     * ``1.e5`` parses to ``'1.e5'``
     * ``1.e+5`` parses to ``1.e5`` (a float)
+* sequences must be explicitly enclosed in brackets to be parsed as lists.
+  For example:
 
+    * ``12,1.2`` parses to ``'12,1.2'``
+    * ``[12,1.2]`` parses to ``[12,1.2]``
+    * ``(12,1.2)`` parses to ``"(12,1.2)"``
+    * ``{12,1.2}`` parses to ``{12: None, 1.2: None}``
 
 
 

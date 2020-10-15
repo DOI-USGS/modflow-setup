@@ -12,6 +12,7 @@ from packaging import version
 fm = flopy.modflow
 mf6 = flopy.mf6
 import gisutils
+import sfrmaker
 from gisutils import get_proj_str, get_values_at_points, project, shp2df
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
@@ -52,6 +53,9 @@ from mfsetup.utils import flatten, get_input_arguments, get_packages, update
 if version.parse(gisutils.__version__) < version.parse('0.2.2'):
     warnings.warn('Automatic reprojection functionality requires gis-utils >= 0.2.2'
                   '\nPlease pip install --upgrade gis-utils')
+if version.parse(sfrmaker.__version__) < version.parse('0.6'):
+    warnings.warn('sfr: sfrmaker_options: add_outlet functionality requires sfrmaker >= 0.6'
+                  '\nPlease pip install --upgrade sfrmaker')
 
 
 class MFsetupMixin():
@@ -1258,12 +1262,18 @@ class MFsetupMixin():
         self.modelgrid.model_length_units = self.length_units
 
         # create an sfrmaker.sfrdata instance from the lines instance
-        to_sfr_kwargs = get_input_arguments(self.cfg['sfr'], Lines.to_sfr)
+        to_sfr_kwargs = self.cfg['sfr'].copy()
+        to_sfr_kwargs.update(self.cfg['sfr'].get('sfrmaker_options', {}))
+        to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)
         sfr = lines.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,
                          **to_sfr_kwargs)
-        if self.cfg['sfr']['set_streambed_top_elevations_from_dem']:
+        if self.cfg['sfr'].get('set_streambed_top_elevations_from_dem'):
+            warnings.warn('sfr: set_streambed_top_elevations_from_dem option is now under sfr: sfrmaker_options',
+                          DeprecationWarning)
+            self.cfg['sfr']['sfrmaker_options']['set_streambed_top_elevations_from_dem'] = True
+        if self.cfg['sfr'].get('sfrmaker_options', {}).get('set_streambed_top_elevations_from_dem'):
             error_msg = ("If set_streambed_top_elevations_from_dem=True, "
                          "need a dem block in source_data for SFR package.")
             assert 'dem' in self.cfg['sfr'].get('source_data', {}), error_msg
@@ -1302,8 +1312,12 @@ class MFsetupMixin():
                 self.dis.botm = self.cfg['dis']['botm']
 
         # option to convert reaches to the River Package
-        if self.cfg['sfr']['to_riv']:
-            rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['to_riv'],
+        if self.cfg['sfr'].get('to_riv'):
+            warnings.warn('sfr: to_riv option is now under sfr: sfrmaker_options',
+                          DeprecationWarning)
+            self.cfg['sfr']['sfrmaker_options']['to_riv'] = self.cfg['sfr'].get('to_riv')
+        if self.cfg['sfr'].get('sfrmaker_options', {}).get('to_riv'):
+            rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['sfrmaker_options']['to_riv'],
                                  drop_in_sfr=True)
             self.setup_riv(rivdata)
             rivdata_filename = self.cfg['riv']['output_files']['rivdata_file'].format(self.name)

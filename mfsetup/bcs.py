@@ -179,7 +179,7 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
     dfs = []
     for per, recs in data.data.items():
 
-        if recs is None or recs is 0:
+        if recs is None or recs == 0:
             # add an empty dataframe if a stress period is
             # set to 0 (e.g. no pumping during a predevelopment
             # period)
