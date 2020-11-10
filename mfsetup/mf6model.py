@@ -33,6 +33,7 @@ from mfsetup.lakes import (
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.mover import get_mover_sfr_package_input
 from mfsetup.obs import setup_head_observations
+from mfsetup.tdis import add_date_comments_to_tdis
 from mfsetup.tmr import Tmr
 from mfsetup.units import convert_time_units
 from mfsetup.utils import flatten, get_input_arguments
@@ -982,6 +983,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                        external_files_path=self.external_path
                                        )
 
+        # label stress periods in tdis file with comments
+        self.perioddata.sort_values(by='per', inplace=True)
+        add_date_comments_to_tdis(self.simulation.tdis.filename,
+                                  self.perioddata.start_datetime,
+                                  self.perioddata.end_datetime
+                                  )
 
     @staticmethod
     def _parse_model_kwargs(cfg):

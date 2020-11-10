@@ -148,6 +148,14 @@ def test_tdis_setup(get_pleasant_mf6):
     pd.testing.assert_frame_equal(period_df[['perlen', 'nstp', 'tsmult']],
                                   m.perioddata[['perlen', 'nstp', 'tsmult']])
 
+    # check that period start/end dates were added to tdis file
+    m.write_input()
+    results = read_mf6_block(m.simulation.tdis.filename, 'perioddata')
+    for i, line in enumerate(results['perioddata'][1:]):
+        start_date, end_date = line.split('#')[1].strip().split('to')
+        assert pd.Timestamp(start_date) == m.perioddata.start_datetime[i]
+        assert pd.Timestamp(end_date) == m.perioddata.end_datetime[i]
+
 
 def test_dis_setup(get_pleasant_mf6_with_grid):
 
