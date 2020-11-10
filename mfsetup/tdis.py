@@ -464,7 +464,7 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
             if end_datetime is None:
                 end_datetime = data[datetime_column].iloc[-1]
             # >= includes the start datetime
-            if end_datetime_column is None:
+            if end_datetime_column not in data.columns:
                 data_overlaps_period = (data[datetime_column] < end_datetime) & \
                                        (data[datetime_column] >= start_datetime)
             else:

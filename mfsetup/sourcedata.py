@@ -1,6 +1,7 @@
 import numbers
 import os
 import shutil
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -947,7 +948,13 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         if has_locations:
             within = [g.within(self.dest_model.bbox) for g in df.geometry]
             df = df.loc[within]
-
+        if self.end_datetime_column is None:
+            msg = '\n'.join(self.filenames.values()) + ':\n'
+            msg += ('Transient tabular time-series with no end_datetime_column specified.\n'
+                    'Data on time intervals longer than the model stress periods may not be\n'
+                    'upsampled correctly, as dates in the datetime_column are used for '
+                    'intersection with model stress periods.')
+            warnings.warn(msg)
         period_data = []
         for kper, period_stat in self.period_stats.items():
             if period_stat is None:
