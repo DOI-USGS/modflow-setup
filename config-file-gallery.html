@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration File Gallery &mdash; modflow-setup 0.post50+gc85745d documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.post50+gd4453e5 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post50+gc85745d
+                0.post50+gd4453e5
               </div>
             
           
@@ -531,8 +531,7 @@
 303
 304
 305
-306
-307</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
+306</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
 <span class="c1">#</span>
 <span class="c1"># The MF6model.setup_from_yaml reads this in as a python dictionary (via the pyyaml package),</span>
 <span class="c1"># and attaches it to a newly created MF6model object instance (MF6model is a subclass of flopy.mf6.ModflowGwf).</span>
@@ -819,8 +818,7 @@
     <span class="nt">complexity</span><span class="p">:</span> <span class="s">&#39;moderate&#39;</span>
     <span class="s">&#39;csv_output</span><span class="nv"> </span><span class="s">fileout&#39;</span><span class="p p-Indicator">:</span> <span class="s">&#39;solver_out.csv&#39;</span>
   <span class="nt">nonlinear</span><span class="p">:</span>
-    <span class="nt">outer_hclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
-    <span class="nt">outer_rclosebnd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e4</span>
+    <span class="nt">outer_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
     <span class="nt">outer_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">200</span>
     <span class="nt">under_relaxation</span><span class="p">:</span>  <span class="s">&#39;dbd&#39;</span>
     <span class="nt">under_relaxation_theta</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.7</span>
@@ -830,7 +828,7 @@
     <span class="nt">backtracking_number</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
   <span class="nt">linear</span><span class="p">:</span>
     <span class="nt">inner_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
-    <span class="nt">inner_hclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
+    <span class="nt">inner_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
     <span class="nt">rcloserecord</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span> <span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
     <span class="nt">linear_acceleration</span><span class="p">:</span> <span class="s">&#39;bicgstab&#39;</span>
     <span class="nt">scaling_method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
@@ -1311,8 +1309,7 @@
 190
 191
 192
-193
-194</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
+193</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
   <span class="nt">tmpdir</span><span class="p">:</span> <span class="s">&#39;original/&#39;</span>
 
 <span class="nt">simulation</span><span class="p">:</span>
@@ -1473,8 +1470,7 @@
     <span class="nt">complexity</span><span class="p">:</span> <span class="s">&#39;moderate&#39;</span>
     <span class="s">&#39;csv_output</span><span class="nv"> </span><span class="s">fileout&#39;</span><span class="p p-Indicator">:</span> <span class="s">&#39;solver_out.csv&#39;</span>
   <span class="nt">nonlinear</span><span class="p">:</span>
-    <span class="nt">outer_hclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
-    <span class="nt">outer_rclosebnd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e4</span>
+    <span class="nt">outer_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
     <span class="nt">outer_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">200</span>
     <span class="nt">under_relaxation</span><span class="p">:</span>  <span class="s">&#39;dbd&#39;</span>
     <span class="nt">under_relaxation_theta</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.7</span>
@@ -1484,7 +1480,7 @@
     <span class="nt">backtracking_number</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
   <span class="nt">linear</span><span class="p">:</span>
     <span class="nt">inner_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
-    <span class="nt">inner_hclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-4</span>
+    <span class="nt">inner_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-4</span>
     <span class="nt">rcloserecord</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span> <span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
     <span class="nt">linear_acceleration</span><span class="p">:</span> <span class="s">&#39;bicgstab&#39;</span>
     <span class="nt">scaling_method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
@@ -1675,8 +1671,7 @@
 162
 163
 164
-165
-166</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
+165</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
   <span class="nt">tmpdir</span><span class="p">:</span> <span class="s">&#39;original/&#39;</span>
 
 <span class="nt">simulation</span><span class="p">:</span>
@@ -1809,8 +1804,7 @@
     <span class="nt">complexity</span><span class="p">:</span> <span class="s">&#39;moderate&#39;</span>
     <span class="s">&#39;csv_output</span><span class="nv"> </span><span class="s">fileout&#39;</span><span class="p p-Indicator">:</span> <span class="s">&#39;solver_out.csv&#39;</span>
   <span class="nt">nonlinear</span><span class="p">:</span>
-    <span class="nt">outer_hclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
-    <span class="nt">outer_rclosebnd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e4</span>
+    <span class="nt">outer_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
     <span class="nt">outer_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">200</span>
     <span class="nt">under_relaxation</span><span class="p">:</span>  <span class="s">&#39;dbd&#39;</span>
     <span class="nt">under_relaxation_theta</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.7</span>
@@ -1820,7 +1814,7 @@
     <span class="nt">backtracking_number</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
   <span class="nt">linear</span><span class="p">:</span>
     <span class="nt">inner_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
-    <span class="nt">inner_hclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-4</span>
+    <span class="nt">inner_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-4</span>
     <span class="nt">rcloserecord</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span> <span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
     <span class="nt">linear_acceleration</span><span class="p">:</span> <span class="s">&#39;bicgstab&#39;</span>
     <span class="nt">scaling_method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
