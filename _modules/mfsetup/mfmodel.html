@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post51+gfa39c24 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post50+g97c6db2 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+gfa39c24
+                0.post50+g97c6db2
               </div>
             
           
@@ -973,10 +973,16 @@
             <span class="n">isbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
             <span class="n">isbc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isbc2d</span>
 
-            <span class="n">lake_botm_elevations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_bathymetry</span>
-            <span class="n">layer_tops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
-            <span class="c1"># lakes must be at least 10% into a layer to get simulated in that layer</span>
-            <span class="n">below</span> <span class="o">=</span> <span class="n">layer_tops</span> <span class="o">&gt;</span> <span class="n">lake_botm_elevations</span> <span class="o">+</span> <span class="mf">0.1</span>
+            <span class="c1"># in mf6 models, the model top is set to the lake botm</span>
+            <span class="c1"># and any layers originally above the lake botm</span>
+            <span class="c1"># are also reset to the lake botm (given zero-thickness)</span>
+            <span class="n">lake_botm_elevations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span>
+            <span class="n">below</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span> <span class="o">&gt;=</span> <span class="n">lake_botm_elevations</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+                <span class="n">lake_botm_elevations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_bathymetry</span>
+                <span class="n">layer_tops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+                <span class="c1"># lakes must be at least 10% into a layer to get simulated in that layer</span>
+                <span class="n">below</span> <span class="o">=</span> <span class="n">layer_tops</span> <span class="o">&gt;</span> <span class="n">lake_botm_elevations</span> <span class="o">+</span> <span class="mf">0.1</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ibelow</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">below</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">ibelow</span><span class="p">):</span>
                     <span class="n">isbc</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">ibelow</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isbc2d</span><span class="p">[</span><span class="n">ibelow</span><span class="p">]</span>
@@ -1702,7 +1708,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Oct 15, 2020.
+        Last updated on Nov 11, 2020.
       </span>
 
     </p>

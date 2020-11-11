@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post51+gfa39c24 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g97c6db2 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post51+gfa39c24
+                0.post50+g97c6db2
               </div>
             
           
@@ -208,6 +208,7 @@
 <span class="kn">from</span> <span class="nn">mfsetup.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
 <span class="kn">from</span> <span class="nn">mfsetup.mover</span> <span class="kn">import</span> <span class="n">get_mover_sfr_package_input</span>
 <span class="kn">from</span> <span class="nn">mfsetup.obs</span> <span class="kn">import</span> <span class="n">setup_head_observations</span>
+<span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="n">add_date_comments_to_tdis</span>
 <span class="kn">from</span> <span class="nn">mfsetup.tmr</span> <span class="kn">import</span> <span class="n">Tmr</span>
 <span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_time_units</span>
 <span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span>
@@ -317,11 +318,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span> <span class="o">=</span> <span class="n">idomain</span>
 
         <span class="c1"># take the updated idomain array and set cells != 1 to np.nan in layer botm array</span>
-        <span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">botm</span><span class="p">[</span><span class="n">idomain</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-        <span class="c1"># fill_cells_vertically will be run in the setup_array routing,</span>
+        <span class="c1"># including lake cells</span>
+        <span class="c1"># effect is that the layer thicknesses in these cells will be set to zero</span>
+        <span class="c1"># fill_cells_vertically will be run in the setup_array routine,</span>
         <span class="c1"># to collapse the nan cells to zero-thickness</span>
         <span class="c1"># (assign their layer botm to the next valid layer botm above)</span>
+        <span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">botm</span><span class="p">[(</span><span class="n">idomain</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="c1"># re-write the input files</span>
         <span class="c1"># todo: integrate this better with setup_dis</span>
@@ -1155,8 +1158,14 @@
                                        <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
                                        <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
                                        <span class="n">external_files_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">external_path</span>
-                                       <span class="p">)</span></div>
+                                       <span class="p">)</span>
 
+        <span class="c1"># label stress periods in tdis file with comments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">add_date_comments_to_tdis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">tdis</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">start_datetime</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">end_datetime</span>
+                                  <span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
@@ -1238,7 +1247,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Oct 15, 2020.
+        Last updated on Nov 11, 2020.
       </span>
 
     </p>
