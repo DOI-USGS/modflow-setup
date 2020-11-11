@@ -2,6 +2,7 @@ import numbers
 import os
 import shutil
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -15,6 +16,7 @@ from mfsetup.discretization import (
     fill_cells_vertically,
     fill_empty_layers,
     fix_model_layer_conflicts,
+    get_layer,
     populate_values,
     verify_minimum_layer_thickness,
     weighted_average_between_layers,
@@ -1206,8 +1208,18 @@ def setup_array(model, package, var, data=None,
     simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
     if var == 'botm':
         bathy = model.lake_bathymetry
-        top = model.load_array(model.cfg[external_files_key]['top'][0])
+        # save a copy of original top elevations
+        # (prior to adjustment for lake bathymetry)
+        original_top_file = Path(model.tmpdir,
+                                 f"{model.name}_{model.cfg[package]['top_filename_fmt']}.original")
+        if not original_top_file.exists():
+            shutil.copy(model.cfg['intermediate_data']['top'][0],
+                        original_top_file)
+        top = model.load_array(original_top_file)
         lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
+        if model.version == 'mf6':
+            # reset the model top to the lake bottom
+            top[bathy != 0] -= bathy[bathy != 0]
 
         # fill missing layers if any
         if len(data) < model.nlay:
@@ -1222,15 +1234,36 @@ def setup_array(model, package, var, data=None,
 
         # adjust layer botms to lake bathymetry (if any)
         # set layer bottom at lake cells to the botm of the lake in that layer
-        for k, kbotm in enumerate(botm):
-            inlayer = lake_botm_elevations > kbotm[bathy != 0]
-            if not np.any(inlayer):
-                continue
-            botm[k][bathy != 0][inlayer] = lake_botm_elevations[inlayer]
+        # move layer bottoms down, except for the first layer (move the model top down)
+        #botm[botm > top] = np.array([top]*5)[botm > top]
+        #i, j = np.where(bathy != 0)
+        #layers = get_layer(botm, i, j, lake_botm_elevations)
+        #layers[layers > 0] -= 1
+        ## include any overlying layers
+        #deact_lays = [list(range(k)) for k in layers]
+        #for ks, ci, cj in zip(deact_lays, i, j):
+        #    for ck in ks:
+        #        botm[ck, ci, cj] = np.nan
+
+        # the model top was reset above to any lake bottoms
+        # (defined by bathymetry)
+        # deactivate any bottom elevations above or equal to new top
+        # (decativate cell bottoms above or equal to the lake bottom)
+        # then deactivate these zero-thickness cells
+        # (so they won't get expanded again by fix_model_layer_conflicts)
+        # only do this for mf6, where pinched out cells are allowed
+        min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
+        if model.version == 'mf6':
+            botm[botm >= (top - min_thickness)] = np.nan
+
+        #for k, kbotm in enumerate(botm):
+        #    inlayer = lake_botm_elevations > kbotm[bathy != 0]
+        #    if not np.any(inlayer):
+        #        continue
+        #    botm[k][bathy != 0][inlayer] = lake_botm_elevations[inlayer]
 
         # fix any layering conflicts and save out botm files
         #if model.version == 'mf6' and model._drop_thin_cells:
-        min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
         botm = fix_model_layer_conflicts(top, botm,
                                          minimum_thickness=min_thickness)
         isvalid = verify_minimum_layer_thickness(top, botm,

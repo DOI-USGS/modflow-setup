@@ -798,10 +798,16 @@ class MFsetupMixin():
             isbc = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)
             isbc[0] = self._isbc2d
 
-            lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
-            layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
-            # lakes must be at least 10% into a layer to get simulated in that layer
-            below = layer_tops > lake_botm_elevations + 0.1
+            # in mf6 models, the model top is set to the lake botm
+            # and any layers originally above the lake botm
+            # are also reset to the lake botm (given zero-thickness)
+            lake_botm_elevations = self.dis.top.array
+            below = self.dis.botm.array >= lake_botm_elevations
+            if not self.version == 'mf6':
+                lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
+                layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
+                # lakes must be at least 10% into a layer to get simulated in that layer
+                below = layer_tops > lake_botm_elevations + 0.1
             for i, ibelow in enumerate(below[1:]):
                 if np.any(ibelow):
                     isbc[i+1][ibelow] = self._isbc2d[ibelow]

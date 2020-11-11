@@ -726,7 +726,7 @@ def test_idomain_above_sfr(model_with_sfr):
     assert idomain[:-1, i, j].sum() == 0
     active = np.array([True if c != 'none' else False for c in sfr.packagedata.array['cellid']])
     assert idomain[-1, i, j].sum() == active.sum()
-    assert np.all(m.dis.botm.array[:-1, i, j] > 9980)
+    # assert np.all(m.dis.botm.array[:-1, i, j] > 9980)
     assert np.all(m.dis.botm.array[-1, i, j] < 100)
 
 

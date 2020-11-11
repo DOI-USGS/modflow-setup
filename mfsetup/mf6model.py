@@ -143,11 +143,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self._idomain = idomain
 
         # take the updated idomain array and set cells != 1 to np.nan in layer botm array
-        botm = self.dis.botm.array.copy()
-        botm[idomain != 1] = np.nan
-        # fill_cells_vertically will be run in the setup_array routing,
+        # including lake cells
+        # effect is that the layer thicknesses in these cells will be set to zero
+        # fill_cells_vertically will be run in the setup_array routine,
         # to collapse the nan cells to zero-thickness
         # (assign their layer botm to the next valid layer botm above)
+        botm = self.dis.botm.array.copy()
+        botm[(idomain != 1)] = np.nan
 
         # re-write the input files
         # todo: integrate this better with setup_dis

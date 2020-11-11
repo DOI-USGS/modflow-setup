@@ -6,6 +6,7 @@ import glob
 import os
 import shutil
 from copy import deepcopy
+from pathlib import Path
 
 import flopy
 import numpy as np
@@ -211,6 +212,9 @@ def test_dis_setup(pfl_nwt_with_grid):
     assert m.cfg['parent']['length_units'] == 'meters'
     assert m.cfg['parent']['time_units'] == 'days'
     assert m.length_units == 'feet'
+    original_top_file = Path(m.tmpdir,
+                             f"{m.name}_{m.cfg['dis']['top_filename_fmt']}.original")
+    original_top_file.unlink(missing_ok=True)
     dis = m.setup_dis()
     assert np.allclose(dis.top.array.mean() * convert_length_units(1, 2), top_m.mean())
     assert np.allclose(dis.botm.array.mean() * convert_length_units(1, 2), botm_m.mean())

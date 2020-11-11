@@ -6,6 +6,7 @@ Tests for Pleasant Lake inset case, MODFLOW-6 version
 import copy
 import glob
 import os
+from pathlib import Path
 
 import flopy
 import numpy as np
@@ -18,6 +19,7 @@ from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
 from mfsetup.fileio import exe_exists, load_cfg, read_mf6_block
 from mfsetup.testing import compare_inset_parent_values
+from mfsetup.tests.plot import make_lake_xsections
 from mfsetup.utils import get_input_arguments
 
 
@@ -391,6 +393,19 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
     assert not info.zone.isnull().any()
     assert not info.loc[info.claktype == 'horizontal', 'cellface'].isnull().any()
 
+    # check the lake discretization
+    import rasterio
+    i, j = 35, 40  # point in the middle of the lake
+    x = m.modelgrid.xcellcenters[i, j]
+    y = m.modelgrid.ycellcenters[i, j]
+    datum = m.dis.top.array[i, j]
+    bathy_raster = m.cfg['lak']['source_data']['bathymetry_raster']['filename']
+    with rasterio.open(bathy_raster) as src:
+        bathy = np.squeeze(list(src.sample(zip([x], [y]))))
+        bathy[(bathy == src.nodata) | (bathy == 0)] = np.nan
+    assert np.allclose(m.dis.botm.array[:2, i, j], m.dis.top[i, j])
+    assert np.allclose(m.dis.idomain.array[:2, i, j], 0)
+
 
 @pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
                    reason="check for chd external files fails on Appveyor but not OSX or Linux")
@@ -536,7 +551,7 @@ def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
     assert np.all(spd0['head'] > m.dis.botm.array[k, i, j])
 
 
-def test_model_setup(pleasant_mf6_setup_from_yaml):
+def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
     m = pleasant_mf6_setup_from_yaml
     assert isinstance(m, MF6model)
     assert 'tdis' in m.simulation.package_key_dict
@@ -553,6 +568,13 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
     has_nans = '\n'.join(has_nans)
     if len(has_nans) > 0:
         assert False, has_nans
+
+    make_xsections = False
+    if make_xsections:
+        outpdf = Path('postproc/lake_xsections.pdf')
+        make_lake_xsections(m, i_range=(30, 51), j_range=(30, 41),
+                            bathymetry_raster=m.cfg['lak']['source_data']['bathymetry_raster']['filename'],
+                            datum=298.73, outpdf=outpdf)
 
 
 def test_check_external_files():
