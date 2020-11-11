@@ -194,8 +194,7 @@ ims:
     complexity: 'moderate'
     'csv_output fileout': '{}_solver_out.csv'
   nonlinear:
-    outer_hclose: 1.e-1
-    outer_rclosebnd: 1.e4
+    outer_dvclose: 1.e-1
     outer_maximum: 200
     under_relaxation:  'dbd'
     under_relaxation_theta: 0.7
@@ -205,7 +204,7 @@ ims:
     backtracking_number: 0
   linear:
     inner_maximum: 100
-    inner_hclose: 1.e-2
+    inner_dvclose: 1.e-2
     rcloserecord: [0.0001, 'relative_rclose']
     linear_acceleration: 'bicgstab'
     scaling_method: None
