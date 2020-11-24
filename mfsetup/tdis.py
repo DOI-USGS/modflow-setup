@@ -419,6 +419,10 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
         their start dates (as opposed to midpoint dates or end dates).
 
     """
+    if data.index.name == datetime_column:
+        data.sort_index(inplace=True)
+    else:
+        data.sort_values(by=datetime_column, inplace=True)
 
     if isinstance(period_stat, str):
         period_stat = [period_stat]
@@ -466,9 +470,20 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
             if end_datetime is None:
                 end_datetime = data[datetime_column].iloc[-1]
             # >= includes the start datetime
+            # if there is no end_datetime column, select values that have start_datetimes within the period
+            # this excludes values that start before the period but don't have an end date
             if end_datetime_column not in data.columns:
                 data_overlaps_period = (data[datetime_column] < end_datetime) & \
                                        (data[datetime_column] >= start_datetime)
+            # if some end_datetimes are missing, assume end_datetime is the period end
+            # this assumes that missing end datetimes indicate pumping that continues to the end of the simulation
+            elif data[end_datetime_column].isna().any():
+                data.loc[data[end_datetime_column].isna(), 'end_datetime'] = end_datetime
+                data_overlaps_period = (data[datetime_column] < end_datetime) & \
+                                       (data[end_datetime_column] >= start_datetime)
+            # otherwise, select values with start datetimes that are before the period end
+            # and end datetimes that are after the period start
+            # in other words, include all values that overlap in time with the period
             else:
                 if data[end_datetime_column].dtype == np.object:
                     data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])

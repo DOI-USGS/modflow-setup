@@ -520,7 +520,6 @@ def test_rch_setup(shellmound_model_with_dis):
     assert irch.shape[0] == m.nrow
     assert irch.shape[1] == m.ncol
 
-
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
     assert isinstance(rch, mf6.ModflowGwfrcha)
     assert rch.recharge is not None

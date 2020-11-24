@@ -935,6 +935,11 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
             dfs.append(df)
         df = pd.concat(dfs)
         df.index = pd.to_datetime(df[self.datetime_column])
+
+        # convert IDs to strings if any were read in (resulting in object dtype)
+        if df[self.id_column].dtype == object:
+            df[self.id_column] = df[self.id_column].astype(str)
+
         # rename any columns specified in config file to required names
         if self.column_mappings is not None:
             df.rename(columns=self.column_mappings, inplace=True)
