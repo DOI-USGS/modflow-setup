@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g874634e documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g85ea86c documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post50+g874634e
+                0.post50+g85ea86c
               </div>
             
           
@@ -524,6 +524,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span>
                           <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
                           <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># set number of layers to length of the created bottom array</span>
+        <span class="c1"># this needs to be set prior to setting up the idomain,</span>
+        <span class="c1"># otherwise idomain may have wrong number of layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">][</span><span class="s1">&#39;nlay&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">])</span>
 
         <span class="c1"># initial idomain input for creating a dis package instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>
@@ -1247,7 +1252,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Nov 12, 2020.
+        Last updated on Nov 24, 2020.
       </span>
 
     </p>
