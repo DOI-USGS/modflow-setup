@@ -419,6 +419,8 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
         their start dates (as opposed to midpoint dates or end dates).
 
     """
+    data = data.copy()
+
     if data.index.name == datetime_column:
         data.sort_index(inplace=True)
     else:
