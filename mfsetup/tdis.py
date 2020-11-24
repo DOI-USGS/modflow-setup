@@ -465,6 +465,9 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
                 "resampling irregular data to model stress periods"
             if data[datetime_column].dtype == np.object:
                 data[datetime_column] = pd.to_datetime(data[datetime_column])
+            if end_datetime_column in data.columns and \
+                    data[end_datetime_column].dtype == np.object:
+                data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])
             if start_datetime is None:
                 start_datetime = data[datetime_column].iloc[0]
             if end_datetime is None:
