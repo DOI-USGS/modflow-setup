@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.tdis &mdash; modflow-setup 0.post50+gab606ef documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.post50+g7724737 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post50+gab606ef
+                0.post50+g7724737
               </div>
             
           
@@ -640,6 +640,9 @@
                 <span class="s2">&quot;resampling irregular data to model stress periods&quot;</span>
             <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">end_datetime_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> \
+                    <span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">end_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
