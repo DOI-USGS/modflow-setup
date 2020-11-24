@@ -350,6 +350,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                           resample_method='linear',
                           write_fmt='%.2f')
 
+        # set number of layers to length of the created bottom array
+        # this needs to be set prior to setting up the idomain,
+        # otherwise idomain may have wrong number of layers
+        self.cfg['dis']['dimensions']['nlay'] = len(self.cfg['dis']['griddata']['botm'])
+
         # initial idomain input for creating a dis package instance
         self._setup_array(package, 'idomain', datatype='array3d', write_fmt='%d',
                           resample_method='nearest',
