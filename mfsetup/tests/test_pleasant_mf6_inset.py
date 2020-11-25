@@ -176,13 +176,11 @@ def test_dis_setup(get_pleasant_mf6_with_grid):
     for f in arrayfiles:
         assert os.path.exists(f)
         fname = os.path.splitext(os.path.split(f)[1])[0]
-        var = fname.split('_')[-1]
-        k = ''.join([s for s in var if s.isdigit()])
-        var = var.strip(k)
+        var, *k = fname.split('_')
         data = np.loadtxt(f)
         model_array = getattr(m.dis, var).array
         if len(k) > 0:
-            k = int(k)
+            k = int(k[0])
             model_array = model_array[k]
         assert np.array_equal(model_array, data)
 

@@ -575,7 +575,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # set up stress_period_data
         if external_files:
             # get the file path (allowing for different external file locations, specified name format, etc.)
-            filename_format = package + '_{:03d}.dat'  # stress period suffix
+            filename_format = self.cfg[package]['external_filename_fmt']
             filepaths = self.setup_external_filepaths(package, 'stress_period_data',
                                                       filename_format=filename_format,
                                                       file_numbers=sorted(df.per.unique().tolist()))

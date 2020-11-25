@@ -309,7 +309,7 @@ def test_dis_setup(shellmound_model_with_grid):
         assert os.path.exists(f)
         fname = os.path.splitext(os.path.split(f)[1])[0]
         k = ''.join([s for s in fname if s.isdigit()])
-        var = fname.strip(k)
+        var = fname.split('_')[0]
         data = np.loadtxt(f)
         model_array = getattr(m.dis, var).array
         if len(k) > 0:
