@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration defaults &mdash; modflow-setup 0.post50+g7724737 documentation</title>
+  <title>Configuration defaults &mdash; modflow-setup 0.post50+g49f3677 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post50+g7724737
+                0.post50+g49f3677
               </div>
             
           
@@ -433,7 +433,8 @@
 212
 213
 214
-215</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
+215
+216</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
 <span class="c1"># version reported by modflow-setup will then be</span>
 <span class="c1"># the start_version appended by the remaining information</span>
 <span class="c1"># in a pep440-post style version tag</span>
@@ -495,8 +496,8 @@
   <span class="nt">dimensions</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
   <span class="nt">griddata</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
   <span class="nt">top_filename_fmt</span><span class="p">:</span> <span class="s">&quot;top.dat&quot;</span>
-  <span class="nt">botm_filename_fmt</span><span class="p">:</span> <span class="s">&quot;botm{:d}.dat&quot;</span>
-  <span class="nt">idomain_filename_fmt</span><span class="p">:</span> <span class="s">&quot;idomain{:d}.dat&quot;</span>
+  <span class="nt">botm_filename_fmt</span><span class="p">:</span> <span class="s">&quot;botm_{:03d}.dat&quot;</span>
+  <span class="nt">idomain_filename_fmt</span><span class="p">:</span> <span class="s">&quot;idomain_{:03d}.dat&quot;</span>
   <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># in model units</span>
   <span class="nt">drop_thin_cells</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
@@ -510,7 +511,7 @@
     <span class="nt">perlen</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
 
 <span class="nt">ic</span><span class="p">:</span>
-  <span class="nt">strt_filename_fmt</span><span class="p">:</span> <span class="s">&quot;strt{:d}.dat&quot;</span>
+  <span class="nt">strt_filename_fmt</span><span class="p">:</span> <span class="s">&quot;strt_{:03d}.dat&quot;</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">strt</span><span class="p">:</span>
 
@@ -519,16 +520,16 @@
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">icelltype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-  <span class="nt">k_filename_fmt</span><span class="p">:</span> <span class="s">&quot;k{:d}.dat&quot;</span>
-  <span class="nt">k33_filename_fmt</span><span class="p">:</span> <span class="s">&quot;k33{:d}.dat&quot;</span>
+  <span class="nt">k_filename_fmt</span><span class="p">:</span> <span class="s">&quot;k_{:03d}.dat&quot;</span>
+  <span class="nt">k33_filename_fmt</span><span class="p">:</span> <span class="s">&quot;k33_{:03d}.dat&quot;</span>
 
 <span class="nt">sto</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">iconvert</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-  <span class="nt">sy_filename_fmt</span><span class="p">:</span> <span class="s">&quot;sy{:d}.dat&quot;</span>
-  <span class="nt">ss_filename_fmt</span><span class="p">:</span> <span class="s">&quot;ss{:d}.dat&quot;</span>
+  <span class="nt">sy_filename_fmt</span><span class="p">:</span> <span class="s">&quot;sy_{:03d}.dat&quot;</span>
+  <span class="nt">ss_filename_fmt</span><span class="p">:</span> <span class="s">&quot;ss_{:03d}.dat&quot;</span>
 
 <span class="nt">rch</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
@@ -536,7 +537,7 @@
     <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">readasarrays</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-  <span class="nt">recharge_filename_fmt</span><span class="p">:</span> <span class="s">&quot;rch{:d}.dat&quot;</span>
+  <span class="nt">recharge_filename_fmt</span><span class="p">:</span> <span class="s">&quot;rch_{:03d}.dat&quot;</span>
   <span class="nt">irch_filename_fmt</span><span class="p">:</span> <span class="s">&quot;irch.dat&quot;</span>
 
 <span class="nt">sfr</span><span class="p">:</span>
@@ -563,7 +564,7 @@
     <span class="nt">stage_fileout</span><span class="p">:</span> <span class="s">&#39;lake_stage.bin&#39;</span>
     <span class="nt">obs6_filein_fmt</span><span class="p">:</span> <span class="s">&#39;{}.sfr.obs6&#39;</span>
     <span class="nt">boundnames</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-  <span class="nt">lakarr_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakarr{:d}.dat&#39;</span>
+  <span class="nt">lakarr_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakarr_{:03d}.dat&#39;</span>
   <span class="nt">lakzones_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakzones.dat&#39;</span> <span class="c1"># file containing zones for lakebed leakance</span>
   <span class="nt">external_files</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">connectiondata_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lake_connectiondata.dat&#39;</span>  <span class="c1"># external table for connectiondata block</span>
@@ -596,6 +597,7 @@
     <span class="nt">dropped_wells_file</span><span class="p">:</span> <span class="s">&#39;{}_dropped_wells.csv&#39;</span> <span class="c1"># output file that records wells that were dropped during model setup</span>
   <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2.</span>
   <span class="nt">external_files</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>  <span class="c1"># option to write stress_period_data to external files</span>
+  <span class="nt">external_filename_fmt</span><span class="p">:</span> <span class="s">&quot;wel_{:03d}.dat&quot;</span>
 
 <span class="nt">chd</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
@@ -821,7 +823,8 @@
 166
 167
 168
-169</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
+169
+170</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project</span>
 <span class="c1"># version reported by modflow-setup will then be</span>
 <span class="c1"># the start_version appended by the remaining information</span>
 <span class="c1"># in a pep440-post style version tag</span>
@@ -868,7 +871,7 @@
 <span class="nt">dis</span><span class="p">:</span>
   <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;1970-01-01&#39;</span>
   <span class="nt">top_filename_fmt</span><span class="p">:</span> <span class="s">&quot;top.dat&quot;</span>
-  <span class="nt">botm_filename_fmt</span><span class="p">:</span> <span class="s">&quot;botm{:d}.dat&quot;</span>
+  <span class="nt">botm_filename_fmt</span><span class="p">:</span> <span class="s">&quot;botm_{:03d}.dat&quot;</span>
   <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># in model units</span>
   <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">lenuni</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span> <span class="c1"># meters</span>
@@ -877,15 +880,15 @@
 
 <span class="nt">bas6</span><span class="p">:</span>
   <span class="nt">hnoflo</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-9999</span>
-  <span class="nt">ibound_filename_fmt</span><span class="p">:</span> <span class="s">&quot;ibound{:d}.dat&quot;</span>
-  <span class="nt">strt_filename_fmt</span><span class="p">:</span> <span class="s">&quot;strt{:d}.dat&quot;</span>
+  <span class="nt">ibound_filename_fmt</span><span class="p">:</span> <span class="s">&quot;ibound_{:03d}.dat&quot;</span>
+  <span class="nt">strt_filename_fmt</span><span class="p">:</span> <span class="s">&quot;strt_{:03d}.dat&quot;</span>
   <span class="nt">headfile</span><span class="p">:</span>
 
 <span class="nt">upw</span><span class="p">:</span>
-  <span class="nt">hk_filename_fmt</span><span class="p">:</span> <span class="s">&quot;hk{:d}.dat&quot;</span>
-  <span class="nt">vka_filename_fmt</span><span class="p">:</span> <span class="s">&quot;vka{:d}.dat&quot;</span>
-  <span class="nt">sy_filename_fmt</span><span class="p">:</span> <span class="s">&quot;sy{:d}.dat&quot;</span>
-  <span class="nt">ss_filename_fmt</span><span class="p">:</span> <span class="s">&quot;ss{:d}.dat&quot;</span>
+  <span class="nt">hk_filename_fmt</span><span class="p">:</span> <span class="s">&quot;hk_{:03d}.dat&quot;</span>
+  <span class="nt">vka_filename_fmt</span><span class="p">:</span> <span class="s">&quot;vka_{:03d}.dat&quot;</span>
+  <span class="nt">sy_filename_fmt</span><span class="p">:</span> <span class="s">&quot;sy_{:03d}.dat&quot;</span>
+  <span class="nt">ss_filename_fmt</span><span class="p">:</span> <span class="s">&quot;ss_{:03d}.dat&quot;</span>
   <span class="nt">ipakcb</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">53</span> <span class="c1"># unit for writing cell budget output</span>
   <span class="nt">hdry</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-9999</span>
   <span class="nt">laytyp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -894,7 +897,7 @@
 <span class="nt">rch</span><span class="p">:</span>
   <span class="nt">remake_arrays</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">rech_mult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-  <span class="nt">rech_filename_fmt</span><span class="p">:</span> <span class="s">&quot;finf{:d}.dat&quot;</span>
+  <span class="nt">rech_filename_fmt</span><span class="p">:</span> <span class="s">&quot;finf_{:03d}.dat&quot;</span>
 
 <span class="c1"># option to simulate lakes as zones of high hydraulic conductivity</span>
 <span class="c1"># (see Anderson and others (2002) in the references)</span>
@@ -905,8 +908,8 @@
   <span class="nt">ss</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5.e-10</span>  <span class="c1"># (approx. compressibility of water in Pa-1 or m2/N)</span>
 
 <span class="nt">lak</span><span class="p">:</span>
-  <span class="nt">lakarr_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakarr{:d}.dat&#39;</span>
-  <span class="nt">bdlknc_filename_fmt</span><span class="p">:</span> <span class="s">&#39;bdlknc{:d}.dat&#39;</span>
+  <span class="nt">lakarr_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakarr_{:03d}.dat&#39;</span>
+  <span class="nt">bdlknc_filename_fmt</span><span class="p">:</span> <span class="s">&#39;bdlknc_{:03d}.dat&#39;</span>
   <span class="nt">lakzones_filename_fmt</span><span class="p">:</span> <span class="s">&#39;lakzones.dat&#39;</span> <span class="c1"># file containing zones for lakebed leakance</span>
   <span class="nt">theta</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-0.7</span>  <span class="c1"># semi-implicit; negative value indicates that surfdep is read</span>
   <span class="nt">nssitr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">800</span>  <span class="c1"># number of Newton iterations for solution of lake stage, for each MODFLOW iteration.</span>
@@ -931,6 +934,7 @@
     <span class="nt">lookup_file</span><span class="p">:</span> <span class="s">&#39;{}_wel_lookup.csv&#39;</span> <span class="c1"># output file that maps wel package data to site numbers</span>
     <span class="nt">dropped_wells_file</span><span class="p">:</span> <span class="s">&#39;{}_dropped_wells.csv&#39;</span> <span class="c1"># output file that records wells that were dropped during model setup</span>
   <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2.</span>
+  <span class="c1"># Note: external files are not yet implemented for the wel package in MODFLOW-NWT models</span>
 
 <span class="nt">mnw</span><span class="p">:</span>
   <span class="nt">defaults</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">losstype</span><span class="p">:</span> <span class="s">&#39;skin&#39;</span><span class="p p-Indicator">,</span>
@@ -1018,7 +1022,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Nov 24, 2020.
+        Last updated on Nov 25, 2020.
       </span>
 
     </p>

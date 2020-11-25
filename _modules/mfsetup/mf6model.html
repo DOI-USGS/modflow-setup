@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g7724737 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g49f3677 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post50+g7724737
+                0.post50+g49f3677
               </div>
             
           
@@ -750,7 +750,7 @@
         <span class="c1"># set up stress_period_data</span>
         <span class="k">if</span> <span class="n">external_files</span><span class="p">:</span>
             <span class="c1"># get the file path (allowing for different external file locations, specified name format, etc.)</span>
-            <span class="n">filename_format</span> <span class="o">=</span> <span class="n">package</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">{:03d}</span><span class="s1">.dat&#39;</span>  <span class="c1"># stress period suffix</span>
+            <span class="n">filename_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;external_filename_fmt&#39;</span><span class="p">]</span>
             <span class="n">filepaths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_external_filepaths</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;stress_period_data&#39;</span><span class="p">,</span>
                                                       <span class="n">filename_format</span><span class="o">=</span><span class="n">filename_format</span><span class="p">,</span>
                                                       <span class="n">file_numbers</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">per</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
@@ -1252,7 +1252,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Nov 24, 2020.
+        Last updated on Nov 25, 2020.
       </span>
 
     </p>
