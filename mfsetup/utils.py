@@ -60,14 +60,26 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
     """
     np.set_printoptions(threshold=20, edgeitems=1)
 
+    # translate the names of some variables
+    # to valid flopy arguments
+    # (not sure if this is the best place for this)
+    translations = {'continue': 'continue_'
+                    }
+
     print('\narguments to {}:'.format(function.__qualname__))
     params = inspect.signature(function)
+    if exclude is None:
+        exclude = set()
+    elif isinstance(exclude, str):
+        exclude = {exclude}
+    else:
+        exclude = set(exclude)
     input_kwargs = {}
     not_arguments = {}
-    if exclude is None:
-        exclude = []
     for k, v in kwargs.items():
-        if k in params.parameters and k not in exclude:
+        k_original = k
+        k = translations.get(k, k)
+        if k in params.parameters and not {k, k_original}.intersection(exclude):
             input_kwargs[k] = v
             print_item(k, v)
         else:

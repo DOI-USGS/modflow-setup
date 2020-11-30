@@ -586,7 +586,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 group = period_groups.get_group(kper)
                 group.drop('per', axis=1, inplace=True)
                 if external_files:
-                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
                     # make a copy for the intermediate data folder, for consistency with mf-2005
                     shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
                 else:
@@ -935,7 +935,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             if external_files:
                 df_per.rename(columns={'bhead': 'head'}, inplace=True)
                 df_per.drop('per', axis=1, inplace=True)
-                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
                 # make a copy for the intermediate data folder, for consistency with mf-2005
                 shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
             else:

@@ -150,7 +150,10 @@ def test_load_cfg(shellmound_cfg, shellmound_cfg_path):
 
 
 def test_simulation(shellmound_simulation):
-    assert True
+    sim = shellmound_simulation
+    # verify that "continue" option was successfully translated
+    # to flopy sim constructor arg "continue_"
+    assert sim.name_file.continue_.array
 
 
 def test_model(shellmound_model):
@@ -758,6 +761,10 @@ def test_model_setup_no_nans(model_setup):
     has_nans = '\n'.join(has_nans)
     if len(has_nans) > 0:
         assert False, has_nans
+
+    # verify that "continue" option was successfully translated
+    # to flopy sim constructor arg "continue_"
+    assert m.simulation.name_file.continue_.array
 
 
 def test_model_setup_and_run(model_setup_and_run):
