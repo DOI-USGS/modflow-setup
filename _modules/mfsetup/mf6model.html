@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g3ab5d34 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g61b5495 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post50+g3ab5d34
+                0.post50+g61b5495
               </div>
             
           
@@ -803,6 +803,7 @@
 
         <span class="c1"># option to write connectiondata to external file</span>
         <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;external_files&#39;</span><span class="p">]</span>
+        <span class="n">horizontal_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;horizontal_connections&#39;</span><span class="p">]</span>
 
         <span class="c1"># source data</span>
         <span class="n">source_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">][</span><span class="s1">&#39;source_data&#39;</span><span class="p">]</span>
@@ -812,7 +813,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="o">=</span> <span class="n">setup_lake_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># returns dataframe with connection information</span>
-        <span class="n">connectiondata</span> <span class="o">=</span> <span class="n">setup_lake_connectiondata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_file</span><span class="o">=</span><span class="n">external_files</span><span class="p">)</span>
+        <span class="n">connectiondata</span> <span class="o">=</span> <span class="n">setup_lake_connectiondata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_file</span><span class="o">=</span><span class="n">external_files</span><span class="p">,</span>
+                                                   <span class="n">include_horizontal_connections</span><span class="o">=</span><span class="n">horizontal_connections</span><span class="p">)</span>
         <span class="c1"># lakeno column will have # in front if for_external_file=True</span>
         <span class="n">lakeno_col</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">connectiondata</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s1">&#39;lakeno&#39;</span> <span class="ow">in</span> <span class="n">c</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">nlakeconn</span> <span class="o">=</span> <span class="n">connectiondata</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">lakeno_col</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">iconn</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
@@ -1252,7 +1254,7 @@
         
         &copy; Copyright 2019-2020, Modflow-setup developers |
       <span class="lastupdated">
-        Last updated on Nov 30, 2020.
+        Last updated on Dec 03, 2020.
       </span>
 
     </p>
