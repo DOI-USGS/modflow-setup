@@ -389,7 +389,7 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
     connections_lookup_file = os.path.join(m._tables_path, os.path.split(connections_lookup_file)[1])
     info = pd.read_csv(connections_lookup_file)
     assert not info.zone.isnull().any()
-    assert not info.loc[info.claktype == 'horizontal', 'cellface'].isnull().any()
+    assert not info.loc[info.claktype == 'vertical', 'cellface'].isnull().any()
 
     # check the lake discretization
     import rasterio
