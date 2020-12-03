@@ -628,6 +628,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # option to write connectiondata to external file
         external_files = self.cfg['lak']['external_files']
+        horizontal_connections = self.cfg['lak']['horizontal_connections']
 
         # source data
         source_data = self.cfg['lak']['source_data']
@@ -637,7 +638,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self.lake_info = setup_lake_info(self)
 
         # returns dataframe with connection information
-        connectiondata = setup_lake_connectiondata(self, for_external_file=external_files)
+        connectiondata = setup_lake_connectiondata(self, for_external_file=external_files,
+                                                   include_horizontal_connections=horizontal_connections)
         # lakeno column will have # in front if for_external_file=True
         lakeno_col = [c for c in connectiondata.columns if 'lakeno' in c][0]
         nlakeconn = connectiondata.groupby(lakeno_col).count().iconn.to_dict()
