@@ -1,8 +1,10 @@
+import io
 import os
 import platform
 
 import numpy as np
 import pytest
+import yaml
 
 from mfsetup.fileio import (
     dump_yml,
@@ -14,6 +16,7 @@ from mfsetup.fileio import (
     load_yml,
     which,
 )
+from mfsetup.grid import MFsetupGrid
 
 
 @pytest.fixture
@@ -67,13 +70,10 @@ def test_load_array(tmpdir):
     np.testing.assert_allclose(a, b)
 
 
-def test_load_grid():
-    gridfile = '/Users/aleaf/Documents/CSLS/source/test/data/Transient_MODFLOW-NWT/LPR_parent_grid.yml'
-    if os.path.exists(gridfile):
-        modelgrid = load_modelgrid(gridfile)
-        assert True
-    else:
-        pass
+def test_load_grid(project_root_path):
+    gridfile = os.path.join(project_root_path, 'examples/data/pleasant/grid.json')
+    modelgrid = load_modelgrid(gridfile)
+    assert isinstance(modelgrid, MFsetupGrid)
 
 
 def test_load_cfg(pfl_nwt_test_cfg_path):
@@ -96,20 +96,6 @@ def test_load_cfg(pfl_nwt_test_cfg_path):
     assert p1 == p2
 
 
-def test_whether_flopy_remembers_external_path(module_tmpdir, external_files_path):
-    #m = fm.Modflow('junk', model_ws=module_tmpdir, external_path=external_files_path)
-    #nlay, nrow, ncol = 1, 2, 2
-    #arr = np.ones((nrow, ncol))
-    #layfile = os.path.join(external_files_path, 'junk.dat')
-    #np.savetxt(layfile, arr, fmt='%.2f')
-    #dis = fm.ModflowDis(m, nrow=nrow, ncol=ncol, top=layfile, botm=[layfile])
-    #m.write_input(check=False)
-
-    #m2 = fm.Modflow.load('junk.nam', model_ws=module_tmpdir, external_path=external_files_path)
-    #assert True
-    pass
-
-
 def test_which():
     badexe = which('junk')
     assert badexe is None
@@ -125,3 +111,13 @@ def test_exe_exists(modflow_executable):
     else:
         assert exe_exists(modflow_executable)
         print('{} exists'.format(modflow_executable))
+
+
+@pytest.mark.parametrize('data,expected', (('value: 1.e+10', 1e10),
+                                           ('value: 1e+10', '1e+10'),
+                                           ('value: 1.0e10', '1.0e10'),
+                                           ('value: 1e10', '1e10'),
+                                           ))
+def test_pyyaml_scientific_notation(data, expected):
+    results = yaml.load(io.StringIO(data))
+    assert results['value'] == expected

@@ -34,6 +34,8 @@ simulation:
   sim_name: 'mfsim'
   version: 'mf6'
   sim_ws: '../tmp/shellmound'
+  options:
+    continue: True
 
 model:
   simulation: 'shellmound'
@@ -130,7 +132,7 @@ tdis:
       steady: False
 
 ic:
-  strt_filename_fmt: "strt{:d}.dat"
+  strt_filename_fmt: "strt_{:03d}.dat"
 
 npf:
   options:
@@ -170,8 +172,8 @@ npf:
         11: 'shellmound/rasters/k3310.tif' # Lower Wilcox aquifer
         12: 'shellmound/rasters/k3312.tif' # Lower Wilcox aquifer
       length_units: 'feet'
-  k_filename_fmt: "k{:d}.dat"
-  k33_filename_fmt: "k33{:d}.dat"
+  k_filename_fmt: "k_{:03d}.dat"
+  k33_filename_fmt: "k33_{:03d}.dat"
 
 sto:
   options:
@@ -220,13 +222,21 @@ sfr:
       line_id_column: 'line_id'
       data_column: 'flow_m3d'  # flows are already in cubic meters/day; can therefore skip unit input
       category_column: 'category'
-    # modflow-setup will try to located the inflows using the routing information in the flowlines shapefile
+    # modflow-setup will try to locate the inflows using the routing information in the flowlines shapefile
     # however, in some cases an inflow location might be just outside of the flowlines that are provided
     # (for example, if they were clipped to the model grid, or if they are outside of the model bounding box)
     inflows_routing:
       filename: 'shellmound/tables/routing.csv'
       id_column: 'COMID'  # arguments to sfrmaker.Lines.from_shapefile
       routing_column: 'tocomid'
+
+  sfrmaker_options:
+    # the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker
+    # (see https://aleaf.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)
+    # or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)
+    # or to_riv (shellmound_tmr example)
+    one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
+    add_outlets: [17955371, 17956213]  # add outlets at these line numbers
 
 wel:
   options:
@@ -265,7 +275,7 @@ oc:
 
 obs:
   source_data:
-    filenames: ['shellmound/tables/head_obs_well_info.csv'
+    filenames: ['shellmound/tables/preprocessed_head_obs_info.csv'
     ]
     column_mappings:
       obsname: ['obsprefix']
@@ -277,8 +287,7 @@ ims:
     complexity: 'moderate'
     'csv_output fileout': 'solver_out.csv'
   nonlinear:
-    outer_hclose: 1.e-1
-    outer_rclosebnd: 1.e4
+    outer_dvclose: 1.e-1
     outer_maximum: 200
     under_relaxation:  'dbd'
     under_relaxation_theta: 0.7
@@ -288,7 +297,7 @@ ims:
     backtracking_number: 0
   linear:
     inner_maximum: 100
-    inner_hclose: 1.e-2
+    inner_dvclose: 1.e-2
     rcloserecord: [0.0001, 'relative_rclose']
     linear_acceleration: 'bicgstab'
     scaling_method: None

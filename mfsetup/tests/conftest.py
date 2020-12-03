@@ -28,6 +28,17 @@ def project_root_path():
     return os.path.normpath(os.path.join(filepath, '../../'))
 
 
+@pytest.fixture(scope="session", autouse=True)
+def tmpdir(project_root_path):
+    folder = project_root_path + '/mfsetup/tests/tmp'
+    reset = True
+    if reset:
+        if os.path.isdir(folder):
+            shutil.rmtree(folder)
+        os.makedirs(folder)
+    return folder
+
+
 def get_model(model):
     """Fetch a fresh copy of a model from a fixture;
     updating the workspace if needed."""
@@ -144,7 +155,9 @@ def shellmound_cfg(shellmound_cfg_path):
 @pytest.fixture(scope="function")
 def shellmound_simulation(shellmound_cfg):
     cfg = shellmound_cfg.copy()
-    kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation)
+    kwargs = shellmound_cfg['simulation'].copy()
+    kwargs.update(cfg['simulation']['options'])
+    kwargs = get_input_arguments(kwargs, mf6.MFSimulation)
     sim = mf6.MFSimulation(**kwargs)
     return sim
 
@@ -229,7 +242,7 @@ def pleasant_nwt_setup_from_yaml(pleasant_nwt_test_cfg_path):
     m.write_input()
     # verify that observation data were added and written
     sfr_package_filename = os.path.join(m.model_ws, m.sfr.file_name[0])
-    m.sfrdata.write_package(sfr_package_filename)
+    #m.sfrdata.write_package(sfr_package_filename)
     return m
 
 
@@ -273,17 +286,6 @@ def full_pleasant_nwt(pleasant_nwt_setup_from_yaml):
     m = get_model(pleasant_nwt_setup_from_yaml)
     m.write_input()
     return m
-
-
-@pytest.fixture(scope="session", autouse=True)
-def tmpdir(project_root_path):
-    folder = project_root_path + '/mfsetup/tests/tmp'
-    reset = True
-    if reset:
-        if os.path.isdir(folder):
-            shutil.rmtree(folder)
-        os.makedirs(folder)
-    return folder
 
 
 # fixture to feed multiple model fixtures to a test

@@ -5,11 +5,15 @@ the discretization module.
 """
 import collections
 import time
+import warnings
 
+import gisutils
 import numpy as np
 import pandas as pd
+import pyproj
 from flopy.discretization import StructuredGrid
 from gisutils import df2shp, get_proj_str, project, shp2df
+from packaging import version
 from rasterio import Affine
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -42,9 +46,29 @@ class MFsetupGrid(StructuredGrid):
     epsg : int, optional
         EPSG code for the model CRS
     proj_str : str, optional
-        PROJ string for model CRS
+        PROJ string for model CRS. In general, a spatial reference ID
+        (such as an EPSG code) or Well-Known Text (WKT) string is prefered
+        over a PROJ string (see References)
     prj : str, optional
-        Filepath for ESRI projection file describing model CRS
+        Filepath for ESRI projection file (containing wkt) describing model CRS
+    wkt : str, optional
+        Well-known text string describing model CRS.
+    crs : obj, optional
+        A Python int, dict, str, or pyproj.crs.CRS instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+        Can be any of:
+
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+
     xoff, yoff : float, float, optional
         Model grid offset (location of lower left corner), by default 0.0, 0.0
     xul, yul : float, float, optional
@@ -52,18 +76,24 @@ class MFsetupGrid(StructuredGrid):
     angrot : float, optional
         Rotation of the model grid, in degrees clockwise about the lower left corner, by default 0.0
 
+    References
+    ----------
+    https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems
 
     """
 
     def __init__(self, delc, delr, top=None, botm=None, idomain=None,
-                 lenuni=None, epsg=None, proj_str=None, prj=None, xoff=0.0,
-                 yoff=0.0, xul=None, yul=None, angrot=0.0):
+                 lenuni=None,
+                 epsg=None, proj_str=None, prj=None, wkt=None, crs=None,
+                 xoff=0.0, yoff=0.0, xul=None, yul=None, angrot=0.0):
         super(MFsetupGrid, self).__init__(np.array(delc), np.array(delr),
                                           top, botm, idomain,
                                           lenuni, epsg, proj_str, prj, xoff,
                                           yoff, angrot)
 
         # properties
+        self._crs = crs  # pyproj crs instance created from epsg, proj_str or prj file
+        self._wkt = wkt  # well-known text
         self._vertices = None
         self._polygons = None
 
@@ -86,7 +116,7 @@ class MFsetupGrid(StructuredGrid):
             return False
         if not np.allclose(other.angrot, self.angrot):
             return False
-        if not other.proj_str == self.proj_str:
+        if not other.crs == self.crs:
             return False
         if not np.array_equal(other.delr, self.delr):
             return False
@@ -135,8 +165,42 @@ class MFsetupGrid(StructuredGrid):
                Affine.rotation(self.angrot)
 
     @property
+    def crs(self):
+        """pyproj.crs.CRS instance describing the coordinate reference system
+        for the model grid.
+        """
+        crs = None
+        if self._crs is None:
+            if self.epsg is not None:
+                crs = pyproj.CRS.from_epsg(self.epsg)
+            elif self.prj is not None:
+                with open(self.prj) as src:
+                    self._wkt = src.read()
+                    crs = pyproj.CRS.from_wkt(self._wkt)
+            elif self.wkt is not None:
+                crs = pyproj.CRS.from_wkt(self.wkt)
+            elif self.proj_str is not None:
+                crs = pyproj.CRS.from_string(self.proj_str)
+        elif not isinstance(self._crs, pyproj.crs.CRS):
+            crs = self._crs
+        # if possible, have pyproj try to find the closest
+        # authority name and code matching the crs
+        # so that input from epsg codes, proj strings, and prjfiles
+        # results in equal pyproj_crs instances
+        if crs is not None:
+            authority = crs.to_authority()
+            if authority is not None:
+                crs = pyproj.CRS.from_user_input(crs.to_authority())
+            self._crs = crs
+        return self._crs
+
+    @property
     def proj_str(self):
         return self.proj4
+
+    @property
+    def wkt(self):
+        return self._wkt
 
     @property
     def vertices(self):
@@ -383,8 +447,8 @@ def write_bbox_shapefile(modelgrid, outshp):
 
 def rasterize(feature, grid, id_column=None,
               include_ids=None,
-              epsg=None,
-              proj4=None, dtype=np.float32, **kwargs):
+              crs=None, epsg=None, proj4=None,
+              dtype=np.float32, **kwargs):
     """Rasterize a feature onto the model grid, using
     the rasterio.features.rasterize method. Features are intersected
     if they contain the cell center.
@@ -397,12 +461,22 @@ def rasterize(feature, grid, id_column=None,
         Column with unique integer identifying each feature; values
         from this column will be assigned to the output raster.
     grid : grid.StructuredGrid instance
-    epsg : int
-        EPSG code for feature coordinate reference system. Optional,
-        but an epgs code or proj4 string must be supplied if feature
-        isn't a shapefile, and isn't in the same CRS as the model.
-    proj4 : str
-        Proj4 string for feature CRS (optional)
+    crs : obj
+        A Python int, dict, str, or pyproj.crs.CRS instance
+        passed to :meth:`pyproj.crs.CRS.from_user_input`
+        Can be any of:
+
+          - PROJ string
+          - Dictionary of PROJ parameters
+          - PROJ keyword arguments for parameters
+          - JSON string with PROJ parameters
+          - CRS WKT string
+          - An authority string [i.e. 'epsg:4326']
+          - An EPSG integer code [i.e. 4326]
+          - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+          - An object with a `to_wkt` method.
+          - A :class:`pyproj.crs.CRS` class
+
     dtype : dtype
         Datatype for the output array
     **kwargs : keyword arguments to rasterio.features.rasterize()
@@ -419,20 +493,37 @@ def rasterize(feature, grid, id_column=None,
         print('This method requires rasterio.')
         return
 
-    #trans = Affine(sr.delr[0], 0., sr.xul,
-    #               0., -sr.delc[0], sr.yul) * Affine.rotation(sr.rotation)
+    if epsg is not None:
+        warnings.warn("The epsg argument is deprecated. Use crs instead, "
+                      "which requires gisutils >= 0.2",
+                      DeprecationWarning)
+    if proj4 is not None:
+        warnings.warn("The epsg argument is deprecated. Use crs instead, "
+                      "which requires gisutils >= 0.2",
+                      DeprecationWarning)
+    if crs is not None:
+        if version.parse(gisutils.__version__) < version.parse('0.2.0'):
+            raise ValueError("The crs argument requires gisutils >= 0.2")
+        from gisutils import get_authority_crs
+        crs = get_authority_crs(crs)
+
     trans = grid.transform
 
+    kwargs = {}
     if isinstance(feature, str):
         proj4 = get_proj_str(feature)
-        df = shp2df(feature)
+        kwargs = {'dest_crs': grid.crs}
+        kwargs = get_input_arguments(kwargs, shp2df)
+        df = shp2df(feature, **kwargs)
     elif isinstance(feature, pd.DataFrame):
         df = feature.copy()
     elif isinstance(feature, collections.Iterable):
         # list of shapefiles
         if isinstance(feature[0], str):
             proj4 = get_proj_str(feature[0])
-            df = shp2df(feature)
+            kwargs = {'dest_crs': grid.crs}
+            kwargs = get_input_arguments(kwargs, shp2df)
+            df = shp2df(feature, **kwargs)
         else:
             df = pd.DataFrame({'geometry': feature})
     elif not isinstance(feature, collections.Iterable):
@@ -442,17 +533,22 @@ def rasterize(feature, grid, id_column=None,
         return
 
     # handle shapefiles in different CRS than model grid
-    reproject = False
-    if proj4 is not None:
-        if proj4 != grid.proj_str:
-            reproject = True
-    elif epsg is not None and grid.epsg is not None:
-        if epsg != grid.epsg:
-            reproject = True
-            from fiona.crs import from_epsg, to_string
-            proj4 = to_string(from_epsg(epsg))
-    if reproject:
-        df['geometry'] = project(df.geometry.values, proj4, grid.proj_str)
+    if 'dest_crs' not in kwargs:
+        reproject = False
+        # todo: consolidate rasterize reprojection to just use crs
+        if crs is not None:
+            if crs != grid.crs:
+                df['geometry'] = project(df.geometry.values, crs, grid.crs)
+        if proj4 is not None:
+            if proj4 != grid.proj_str:
+                reproject = True
+        elif epsg is not None and grid.epsg is not None:
+            if epsg != grid.epsg:
+                reproject = True
+                from fiona.crs import from_epsg, to_string
+                proj4 = to_string(from_epsg(epsg))
+        if reproject:
+            df['geometry'] = project(df.geometry.values, proj4, grid.proj_str)
 
     # subset to include_ids
     if id_column is not None and include_ids is not None:
@@ -485,8 +581,8 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           rotation=0.,
                           parent_model=None, snap_to_NHG=False,
                           features=None, features_shapefile=None,
-                          id_column=None, include_ids=[],
-                          buffer=1000,
+                          id_column=None, include_ids=None,
+                          buffer=1000, crs=None,
                           epsg=None, model_length_units=None,
                           grid_file='grid.json',
                           bbox_shapefile=None, **kwargs):
@@ -527,8 +623,13 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_m,
                                                                                                       parent_delc_m))
 
-    if epsg is None and parent_model is not None:
-        epsg = parent_model.modelgrid.epsg
+    if epsg is not None:
+        crs = pyproj.crs.CRS.from_epsg(epsg)
+    elif crs is not None:
+        from gisutils import get_authority_crs
+        crs = get_authority_crs(crs)
+    elif parent_model is not None:
+        crs = parent_model.modelgrid.crs
 
     # option 1: make grid from xoff, yoff and specified dimensions
     if xoff is not None and yoff is not None:
@@ -563,23 +664,32 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         if features is None and features_shapefile is not None:
             # Make sure shapefile and bbox filter are in dest (model) CRS
             # TODO: CRS wrangling could be added to shp2df as a feature
-            features_proj_str = get_proj_str(features_shapefile)
-            model_proj_str = "epsg:{}".format(epsg)
+            reproject_filter = False
+            try:
+                from gisutils import get_shapefile_crs
+                features_crs = get_shapefile_crs(features_shapefile)
+                if features_crs != crs:
+                    reproject_filter = True
+            except:
+                features_crs = get_proj_str(features_shapefile)
+                reproject_filter = True
             filter = None
             if parent_model is not None:
-                if features_proj_str.lower() != model_proj_str:
+                if reproject_filter:
                     filter = project(parent_model.modelgrid.bbox,
-                                     model_proj_str, features_proj_str).bounds
+                                     parent_model.modelgrid.crs, features_crs).bounds
                 else:
                     filter = parent_model.modelgrid.bbox.bounds
+            shp2df_kwargs = {'dest_crs': crs}
+            shp2df_kwargs = get_input_arguments(shp2df_kwargs, shp2df)
             df = shp2df(features_shapefile,
-                        filter=filter)
-            if features_proj_str.lower() != model_proj_str:
-                df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
+                        filter=filter, **shp2df_kwargs)
 
-            # subset shapefile data to specified features
-            rows = df.loc[df[id_column].isin(include_ids)]
-            features = rows.geometry.tolist()
+            # optionally subset shapefile data to specified features
+            if id_column is not None and include_ids is not None:
+                df = df.loc[df[id_column].isin(include_ids)]
+            # use all features by default
+            features = df.geometry.tolist()
 
             # convert multiple features to a MultiPolygon
             if isinstance(features, list):
@@ -629,7 +739,6 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                 'xoff': xoff, 'yoff': yoff,
                 'xul': xul, 'yul': yul,
                 'rotation': rotation,
-                'epsg': epsg,
                 'lenuni': 2
                 }
     if regular:
@@ -644,6 +753,18 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         if k in grid_cfg:
             grid_cfg[v] = grid_cfg.pop(k)
 
+    # add epsg or wkt if there isn't an epsg
+    if epsg is not None:
+        grid_cfg['epsg'] = epsg
+    elif crs is not None:
+        if 'epsg' in crs.srs.lower():
+            grid_cfg['epsg'] = int(crs.srs.split(':')[1])
+        else:
+            grid_cfg['wkt'] = crs.srs
+    else:
+        warnings.warn('No coordinate system reference provided for model grid!'
+                      'Model input data may not be mapped correctly.')
+
     # set up the model grid instance
     grid_cfg['top'] = top
     grid_cfg['botm'] = botm
@@ -657,6 +778,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     # (just for horizontal disc.)
     del grid_cfg['top']
     del grid_cfg['botm']
+
     fileio.dump(grid_file, grid_cfg)
     if bbox_shapefile is not None:
         write_bbox_shapefile(modelgrid, bbox_shapefile)

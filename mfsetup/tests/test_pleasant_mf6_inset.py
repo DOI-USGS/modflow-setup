@@ -6,6 +6,7 @@ Tests for Pleasant Lake inset case, MODFLOW-6 version
 import copy
 import glob
 import os
+from pathlib import Path
 
 import flopy
 import numpy as np
@@ -18,6 +19,7 @@ from mfsetup import MF6model
 from mfsetup.checks import check_external_files_for_nans
 from mfsetup.fileio import exe_exists, load_cfg, read_mf6_block
 from mfsetup.testing import compare_inset_parent_values
+from mfsetup.tests.plot import make_lake_xsections
 from mfsetup.utils import get_input_arguments
 
 
@@ -71,6 +73,13 @@ def get_pleasant_mf6_with_dis(get_pleasant_mf6_with_grid):
 
 
 @pytest.fixture(scope="function")
+def get_pleasant_mf6_with_sfr(get_pleasant_mf6_with_dis):
+    m = copy.deepcopy(get_pleasant_mf6_with_dis)
+    m.setup_sfr()
+    return m
+
+
+@pytest.fixture(scope="function")
 def get_pleasant_mf6_with_lak(get_pleasant_mf6_with_dis):
     print('creating Pleasant Lake MFnwtModel instance with LAKE package...')
     m = copy.deepcopy(get_pleasant_mf6_with_dis)
@@ -83,18 +92,18 @@ def get_pleasant_mf6_with_lak(get_pleasant_mf6_with_dis):
 def pleasant_mf6_setup_from_yaml(pleasant_mf6_test_cfg_path):
     m = MF6model.setup_from_yaml(pleasant_mf6_test_cfg_path)
     m.write_input()
-    if hasattr(m, 'sfr'):
-        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-        m.sfrdata.write_package(sfr_package_filename,
-                                version='mf6',
-                                idomain=m.idomain,
-                                options=['save_flows',
-                                         'BUDGET FILEOUT shellmound.sfr.cbc',
-                                         'STAGE FILEOUT shellmound.sfr.stage.bin',
-                                         # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
-                                         # location of obs6 file relative to sfr package file (same folder)
-                                         ]
-                                    )
+    #if hasattr(m, 'sfr'):
+    #    sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+    #    m.sfrdata.write_package(sfr_package_filename,
+    #                            version='mf6',
+    #                            idomain=m.idomain,
+    #                            options=['save_flows',
+    #                                     'BUDGET FILEOUT shellmound.sfr.cbc',
+    #                                     'STAGE FILEOUT shellmound.sfr.stage.bin',
+    #                                     # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
+    #                                     # location of obs6 file relative to sfr package file (same folder)
+    #                                     ]
+    #                                )
     return m
 
 
@@ -141,6 +150,14 @@ def test_tdis_setup(get_pleasant_mf6):
     pd.testing.assert_frame_equal(period_df[['perlen', 'nstp', 'tsmult']],
                                   m.perioddata[['perlen', 'nstp', 'tsmult']])
 
+    # check that period start/end dates were added to tdis file
+    m.write_input()
+    results = read_mf6_block(m.simulation.tdis.filename, 'perioddata')
+    for i, line in enumerate(results['perioddata'][1:]):
+        start_date, end_date = line.split('#')[1].strip().split('to')
+        assert pd.Timestamp(start_date) == m.perioddata.start_datetime[i]
+        assert pd.Timestamp(end_date) == m.perioddata.end_datetime[i]
+
 
 def test_dis_setup(get_pleasant_mf6_with_grid):
 
@@ -159,13 +176,11 @@ def test_dis_setup(get_pleasant_mf6_with_grid):
     for f in arrayfiles:
         assert os.path.exists(f)
         fname = os.path.splitext(os.path.split(f)[1])[0]
-        var = fname.split('_')[-1]
-        k = ''.join([s for s in var if s.isdigit()])
-        var = var.strip(k)
+        var, *k = fname.split('_')
         data = np.loadtxt(f)
         model_array = getattr(m.dis, var).array
         if len(k) > 0:
-            k = int(k)
+            k = int(k[0])
             model_array = model_array[k]
         assert np.array_equal(model_array, data)
 
@@ -195,9 +210,10 @@ def test_ic_setup(get_pleasant_mf6_with_dis):
     assert ic.strt.array.shape == m.dis.botm.array.shape
 
 
-def test_sto_setup(get_pleasant_mf6_with_dis):
-
+@pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
+def test_sto_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
     m = get_pleasant_mf6_with_dis  #deepcopy(model_with_grid)
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     sto = m.setup_sto()
     sto.write()
     assert os.path.exists(os.path.join(m.model_ws, sto.filename))
@@ -218,6 +234,10 @@ def test_sto_setup(get_pleasant_mf6_with_dis):
     for var in ['ss', 'sy']:
         parent_array = m.parent.upw.__dict__[var].array
         inset_array = sto.__dict__[var].array
+        # with addition of high-k lakes block,
+        # ss has a different default value than parent
+        if simulate_high_k_lakes and var == 'ss':
+            continue
         compare_inset_parent_values(inset_array, parent_array,
                                     m.modelgrid, m.parent.modelgrid,
                                     inset_parent_layer_mapping,
@@ -225,9 +245,20 @@ def test_sto_setup(get_pleasant_mf6_with_dis):
                                     rtol=0.05
                                     )
 
+    if not simulate_high_k_lakes:
+        assert not np.any(m._isbc2d == 2)
+        assert sto.sy.array.max() < m.cfg['high_k_lakes']['sy']
+        assert sto.ss.array.min() > m.cfg['high_k_lakes']['ss']
+    else:
+        assert np.any(m._isbc2d == 2)
+        assert sto.sy.array.max() == m.cfg['high_k_lakes']['sy']
+        assert sto.ss.array.min() == m.cfg['high_k_lakes']['ss']
 
-def test_npf_setup(get_pleasant_mf6_with_dis):
+
+@pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
+def test_npf_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
     m = get_pleasant_mf6_with_dis
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     npf = m.setup_npf()
     npf.write()
     assert isinstance(npf, mf6.ModflowGwfnpf)
@@ -248,6 +279,14 @@ def test_npf_setup(get_pleasant_mf6_with_dis):
                                     nodata=float(m.cfg['parent']['hiKlakes_value']),
                                     rtol=0.1
                                     )
+    if not simulate_high_k_lakes:
+        assert not np.any(m._isbc2d == 2)
+        assert npf.k.array.max() < m.cfg['high_k_lakes']['high_k_value']
+        # for now, k33 not adjusted in setting high-k lakes
+    else:
+        assert np.any(m._isbc2d == 2)
+        assert npf.k.array.max() == m.cfg['high_k_lakes']['high_k_value']
+        # for now, k33 not adjusted in setting high-k lakes
 
 
 def test_obs_setup(get_pleasant_mf6_with_dis):
@@ -281,13 +320,22 @@ def test_oc_setup(get_pleasant_mf6_with_dis):
     assert 'save budget last' in perioddata[1]
 
 
-def test_rch_setup(get_pleasant_mf6_with_dis):
+@pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
+def test_rch_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
     m = get_pleasant_mf6_with_dis  # deepcopy(model)
+    m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     rch = m.setup_rch()
     rch.write()
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
     assert isinstance(rch, mf6.ModflowGwfrcha)
     assert rch.recharge is not None
+
+    if not simulate_high_k_lakes:
+        assert not np.any(m._isbc2d == 2)
+        assert np.all(rch.recharge.array.min(axis=(1, 2, 3)) >= 0)
+    else:
+        assert np.any(m._isbc2d == 2)
+        assert np.any(rch.recharge.array.min(axis=(1, 2, 3)) < 0)
 
 
 def test_wel_setup(get_pleasant_mf6_with_dis):
@@ -342,6 +390,19 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
     info = pd.read_csv(connections_lookup_file)
     assert not info.zone.isnull().any()
     assert not info.loc[info.claktype == 'horizontal', 'cellface'].isnull().any()
+
+    # check the lake discretization
+    import rasterio
+    i, j = 35, 40  # point in the middle of the lake
+    x = m.modelgrid.xcellcenters[i, j]
+    y = m.modelgrid.ycellcenters[i, j]
+    datum = m.dis.top.array[i, j]
+    bathy_raster = m.cfg['lak']['source_data']['bathymetry_raster']['filename']
+    with rasterio.open(bathy_raster) as src:
+        bathy = np.squeeze(list(src.sample(zip([x], [y]))))
+        bathy[(bathy == src.nodata) | (bathy == 0)] = np.nan
+    assert np.allclose(m.dis.botm.array[:2, i, j], m.dis.top[i, j])
+    assert np.allclose(m.dis.idomain.array[:2, i, j], 0)
 
 
 @pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
@@ -417,10 +478,9 @@ def test_ghb_setup(get_pleasant_mf6_with_dis):
     assert np.all(spd0['head'] > m.dis.botm.array[k, i, j])
 
 
-def test_sfr_setup(get_pleasant_mf6_with_dis):
-    m = get_pleasant_mf6_with_dis
-    m.setup_sfr()
-    m.sfr.write()
+def test_sfr_setup(get_pleasant_mf6_with_sfr):
+    m = get_pleasant_mf6_with_sfr
+    m.write_input()
     assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
     assert isinstance(m.sfr, mf6.ModflowGwfsfr)
     output_path = m.cfg['sfr']['output_path']
@@ -434,15 +494,36 @@ def test_sfr_setup(get_pleasant_mf6_with_dis):
         assert os.path.exists(f)
     assert m.sfrdata.model == m
 
+
+def test_write_sfr(get_pleasant_mf6_with_sfr):
+    m = get_pleasant_mf6_with_sfr
+    m.write_input()
+    sfr_package_file = m.sfrdata.modflow_sfr2.fn_path
+    options = read_mf6_block(sfr_package_file, 'options')
+    assert 'save_flows' in options
+    assert options['budget'] == ['fileout', 'pleasant_mf6.sfr.out.bin']
+    assert options['stage'] == ['fileout', 'pleasant_mf6.sfr.stage.bin']
+    assert options['obs6'] == ['filein', 'pleasant_mf6.sfr.obs']
+    assert options['unit_conversion'] == ['86400.0']
+    assert options['auxiliary'] == ['line_id']
+
+
+def test_sfr_obs(get_pleasant_mf6_with_sfr):
+    m = get_pleasant_mf6_with_sfr
+    m.write_input()
     # verify that observation data were added and written
     sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-    m.sfrdata.write_package(sfr_package_filename, version='mf6')
     obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])
     assert len(m.sfrdata.observations) == len(obs)
     expected = obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist()
     assert m.sfrdata.observations['obsname'].tolist() == expected
-    sfr_obs_filename = os.path.join(m.model_ws, m.sfrdata.observations_file)
+    sfr_obs_filename = os.path.normpath(os.path.join(m.model_ws, m.sfrdata.observations_file))
     assert os.path.exists(sfr_obs_filename)
+    obs_input = read_mf6_block(sfr_obs_filename, 'continuous')
+    assert obs_input[sfr_obs_filename + '.output.csv'] == \
+           ['# obsname obstype rno',
+            '1000000 downstream-flow 22',
+            '2000000 downstream-flow 25']
 
 
 def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
@@ -468,7 +549,7 @@ def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
     assert np.all(spd0['head'] > m.dis.botm.array[k, i, j])
 
 
-def test_model_setup(pleasant_mf6_setup_from_yaml):
+def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
     m = pleasant_mf6_setup_from_yaml
     assert isinstance(m, MF6model)
     assert 'tdis' in m.simulation.package_key_dict
@@ -485,6 +566,13 @@ def test_model_setup(pleasant_mf6_setup_from_yaml):
     has_nans = '\n'.join(has_nans)
     if len(has_nans) > 0:
         assert False, has_nans
+
+    make_xsections = False
+    if make_xsections:
+        outpdf = Path('postproc/lake_xsections.pdf')
+        make_lake_xsections(m, i_range=(30, 51), j_range=(30, 41),
+                            bathymetry_raster=m.cfg['lak']['source_data']['bathymetry_raster']['filename'],
+                            datum=298.73, outpdf=outpdf)
 
 
 def test_check_external_files():

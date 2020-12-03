@@ -88,9 +88,13 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
+import datetime
+
+now = datetime.datetime.now()
+
 project = 'modflow-setup'
-copyright = '2019, USGS MAP Project'
-author = 'USGS MAP Project'
+copyright = '2019-{}, Modflow-setup developers |'.format(now.year)
+author = 'Modflow-setup developers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -156,7 +160,7 @@ html_sidebars = {
 }
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-html_show_copyright = False
+html_show_copyright = True
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -192,7 +196,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'modflow-setup.tex', 'MFsetup Documentation',
+    (master_doc, 'modflow-setup.tex', 'Modflow-setup Documentation',
      'Contributors', 'manual'),
 ]
 
@@ -202,7 +206,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'modflow-setup', 'MFsetup Documentation',
+    (master_doc, 'modflow-setup', 'Modflow-setup Documentation',
      [author], 1)
 ]
 
@@ -213,8 +217,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'modflow-setup', 'MFsetup Documentation',
-     author, 'modflow-setup', 'Package to facilitate setup of a MODFLOW-6 rgroundwater flow model with the SFR package.',
+    (master_doc, 'modflow-setup', 'Modflow-setup Documentation',
+     author, 'modflow-setup', 'Package to facilitate setup of a MODFLOW-6 groundwater flow model with the SFR package.',
      'Miscellaneous'),
 ]
 

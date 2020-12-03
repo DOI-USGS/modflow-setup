@@ -117,8 +117,8 @@ def test_model_setup(full_pleasant_nwt):
     assert 'GAGE' in m.get_package_list()
     assert os.path.exists(sfr_obs_filename)
     with open(sfr_obs_filename) as src:
-        gagedata = src.readlines()
-    assert len(gagedata) == len(obs) +1
+        gagedata = src.read()
+    assert gagedata == '3 \n-1 -250 1 \n1 22 250 0 \n2 2 251 0 \n'
 
 
 def test_model_setup_and_run(pleasant_nwt_model_run):

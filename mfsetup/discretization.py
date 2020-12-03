@@ -470,6 +470,25 @@ def make_irch(idomain):
     irch += 1 # set to one-based
     return irch
 
+def make_irch(idomain):
+    # make the irch array
+    # copy idomain
+    idm_lay = idomain.copy()
+    for i,cl in enumerate(idm_lay):
+        # set both inactive and pass through cells to -1
+        cl[cl<=0] = -1
+        # set active cells to current layer
+        cl[cl>0] = i
+    # now reset all the inactive/passthrough values to large positive to not mess up min calc
+    idm_lay[idm_lay==-1] = 9999
+    # find min active layer
+    irch = np.min(idm_lay, axis=0)
+    # set all inactive and pass through back to -1
+    irch[irch==9999] = 0
+    irch += 1 # set to one-based
+    return irch
+
+
 def get_layer_thicknesses(top, botm, idomain=None):
     """For each i, j location in the grid, get thicknesses
     between pairs of subsequent valid elevation values. Make

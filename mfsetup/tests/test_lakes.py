@@ -77,7 +77,7 @@ def test_setup_lake_info(get_pleasant_mf6_with_dis):
     del m.cfg['lak']
     result = setup_lake_info(m)
     assert result is None
-    assert m.lake_recharge is None
+    assert m.high_k_lake_recharge is None
 
 
 def test_setup_lake_connectiondata(get_pleasant_mf6_with_dis):

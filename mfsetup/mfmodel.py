@@ -1,13 +1,18 @@
 import os
 import time
+import warnings
 from collections import defaultdict
 
 import flopy
 import numpy as np
 import pandas as pd
+import pyproj
+from packaging import version
 
 fm = flopy.modflow
 mf6 = flopy.mf6
+import gisutils
+import sfrmaker
 from gisutils import get_proj_str, get_values_at_points, project, shp2df
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
@@ -34,6 +39,7 @@ from mfsetup.mf5to6 import (
     get_model_time_units,
     get_package_name,
 )
+from mfsetup.model_version import get_versions
 from mfsetup.sourcedata import TransientTabularSourceData, setup_array
 from mfsetup.tdis import (
     get_parent_stress_periods,
@@ -43,6 +49,13 @@ from mfsetup.tdis import (
 )
 from mfsetup.units import convert_length_units, lenuni_text, lenuni_values
 from mfsetup.utils import flatten, get_input_arguments, get_packages, update
+
+if version.parse(gisutils.__version__) < version.parse('0.2.2'):
+    warnings.warn('Automatic reprojection functionality requires gis-utils >= 0.2.2'
+                  '\nPlease pip install --upgrade gis-utils')
+if version.parse(sfrmaker.__version__) < version.parse('0.6'):
+    warnings.warn('sfr: sfrmaker_options: add_outlet functionality requires sfrmaker >= 0.6'
+                  '\nPlease pip install --upgrade sfrmaker')
 
 
 class MFsetupMixin():
@@ -84,10 +97,11 @@ class MFsetupMixin():
         self._lakarr = None
         self._isbc = None
         self._lake_bathymetry = None
-        self._lake_recharge = None
+        self._high_k_lake_recharge = None
         self._nodata_value = -9999
         self._model_ws = None
         self._abs_model_ws = None
+        self._model_version = None  # semantic version of model
         self.inset = None  # dictionary of inset models attached to LGR parent
         self._is_lgr = False  # flag for lgr inset models
         self.lgr = None  # holds flopy Lgr utility object
@@ -253,7 +267,6 @@ class MFsetupMixin():
         """
         return dict(zip(self.perioddata['per'], self.perioddata['parent_sp']))
 
-
     @property
     def package_list(self):
         """Definitive list of packages. Get from namefile input first
@@ -291,6 +304,25 @@ class MFsetupMixin():
     def model_ws(self, model_ws):
         self._model_ws = model_ws
         self._abs_model_ws = os.path.normpath(os.path.abspath(model_ws))
+
+    @property
+    def model_version(self):
+        """Semantic version of model, using a hacked version of the versioneer.
+        Version is reported using git tags for the model repository
+        or a start_version: key specified in the configuration file (default 0).
+        The start_version or tag is then appended by the remaining information
+        in a pep440-post style version tag (e.g. most recent git commit hash
+        for the model repository + "dirty" if the model repository has uncommited changes)
+
+        References
+        ----------
+        https://github.com/warner/python-versioneer
+        https://github.com/warner/python-versioneer/blob/master/details.md
+        """
+        if self._model_version is None:
+            self._model_version = get_versions(path=self.model_ws,
+                                   start_version=self.cfg['start_version'])
+        return self._model_version
 
     @property
     def tmpdir(self):
@@ -381,7 +413,8 @@ class MFsetupMixin():
 
     @property
     def _isbc2d(self):
-        """2-D array indicating which cells have lakes.
+        """2-D array indicating the i, j locations of
+        boundary conditions.
         -1 : well
         0 : no lake
         1 : lak package lake (lakarr > 0)
@@ -422,16 +455,16 @@ class MFsetupMixin():
         return self._lake_bathymetry
 
     @property
-    def lake_recharge(self):
+    def high_k_lake_recharge(self):
         """Recharge value to apply to high-K lakes, in model units.
         """
-        if self._lake_recharge is None:
+        if self._high_k_lake_recharge is None and self.cfg['high_k_lakes']['simulate_high_k_lakes']:
             if self.lake_info is None:
                 self.lake_info = setup_lake_info(self)
                 if self.lake_info is not None:
-                    self.lake_fluxes = setup_lake_fluxes(self)
-                    self._lake_recharge = self.lake_fluxes.groupby('per').mean()['highk_lake_rech'].sort_index()
-        return self._lake_recharge
+                    self.lake_fluxes = setup_lake_fluxes(self, block='high_k_lakes')
+                    self._high_k_lake_recharge = self.lake_fluxes.groupby('per').mean()['highk_lake_rech'].sort_index()
+        return self._high_k_lake_recharge
 
     def load_array(self, filename):
         if isinstance(filename, list):
@@ -458,8 +491,14 @@ class MFsetupMixin():
         for f in features_file:
             if f not in self._features.keys():
                 if os.path.exists(f):
-                    features_proj_str = get_proj_str(f)
-                    model_proj_str = "epsg:{}".format(self.cfg['setup_grid']['epsg'])
+                    try:
+                        from gisutils import get_shapefile_crs
+                        features_crs = get_shapefile_crs(kwargs['shapefile'])
+                    except Exception as e:
+                        features_crs = pyproj.crs.CRS.from_proj4(get_proj_str(f))
+                    authority = features_crs.to_authority()
+                    if authority is not None:
+                        features_crs = pyproj.CRS.from_user_input(features_crs.to_authority())
                     if filter is None:
                         if self.bbox is not None:
                             bbox = self.bbox
@@ -468,15 +507,19 @@ class MFsetupMixin():
                             model_proj_str = self.parent.modelgrid.proj_str
                             assert model_proj_str is not None
 
-                        if features_proj_str.lower() != model_proj_str:
-                            filter = project(bbox, model_proj_str, features_proj_str).bounds
+                        if features_crs != self.modelgrid.crs:
+                            filter = project(bbox, self.modelgrid.crs, features_crs).bounds
                         else:
                             filter = bbox.bounds
 
-                    df = shp2df(f, filter=filter)
+                    # implement automatic reprojection in gis-utils
+                    # maintaining backwards compatibility
+                    kwargs = {'dest_crs': self.modelgrid.crs}
+                    kwargs = get_input_arguments(kwargs, shp2df)
+                    df = shp2df(f, filter=filter, **kwargs)
                     df.columns = [c.lower() for c in df.columns]
-                    if features_proj_str.lower() != model_proj_str:
-                        df['geometry'] = project(df['geometry'], features_proj_str, model_proj_str)
+                    if 'dest_crs' not in kwargs and features_crs != self.modelgrid.crs:
+                        df['geometry'] = project(df['geometry'], features_crs, self.modelgrid.crs)
                     if cache:
                         print('caching data in {}...'.format(f))
                         self._features[f] = df
@@ -491,6 +534,8 @@ class MFsetupMixin():
                 df = df.loc[include_ids]
             dfs_list.append(df)
         df = pd.concat(dfs_list)
+        if len(df) == 0:
+            warnings.warn('No features loaded from {}!'.format(filename))
         return df
 
     def get_boundary_cells(self, exclude_inactive=False):
@@ -698,48 +743,71 @@ class MFsetupMixin():
         # other variables
         self.cfg['external_files'] = {}
 
+    def _get_high_k_lakes(self):
+        """Get the i, j locations of any high-k lakes within the model grid.
+        """
+        lakesdata = None
+        lakes_shapefile = self.cfg['high_k_lakes'].get('source_data', {}).get('lakes_shapefile')
+        if lakes_shapefile is not None:
+            if isinstance(lakes_shapefile, str):
+                lakes_shapefile = {'filename': lakes_shapefile}
+            kwargs = get_input_arguments(lakes_shapefile, self.load_features)
+            if 'include_ids' in kwargs:  # load all lakes in shapefile
+                kwargs.pop('include_ids')
+            lakesdata = self.load_features(**kwargs)
+        if lakesdata is not None:
+            is_high_k_lake = rasterize(lakesdata, self.modelgrid)
+            return is_high_k_lake > 0
+
     def _set_isbc2d(self):
-            isbc = np.zeros((self.nrow, self.ncol), dtype=int)
-            lakesdata = None
-            lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile')
-            if lakes_shapefile is not None:
-                if isinstance(lakes_shapefile, str):
-                    lakes_shapefile = {'filename': lakes_shapefile}
-                kwargs = get_input_arguments(lakes_shapefile, self.load_features)
-                kwargs.pop('include_ids')  # load all lakes in shapefile
-                lakesdata = self.load_features(**kwargs)
-            if lakesdata is not None:
-                isanylake = rasterize(lakesdata, self.modelgrid)
-                isbc[isanylake > 0] = 2
-                isbc[self._lakarr2d > 0] = 1
-            # add other bcs
-            for packagename, bcnumber in self.bc_numbers.items():
-                if 'lak' not in packagename:
-                    package = self.get_package(packagename)
-                    if package is not None:
-                        # handle multiple instances of package
-                        # (in MODFLOW-6)
-                        if isinstance(package, flopy.pakbase.PackageInterface):
-                            packages = [package]
-                        else:
-                            packages = package
-                        for package in packages:
-                            k, i, j = get_bc_package_cells(package)
-                            not_a_lake = np.where(isbc[i, j] != 1)
-                            i = i[not_a_lake]
-                            j = j[not_a_lake]
-                            isbc[i, j] = bcnumber
-            self._isbc_2d = isbc
-            self._set_lake_bathymetry()
+        """Set up the _isbc2d array, that indicates the i,j locations
+        of boundary conditions.
+        """
+        isbc = np.zeros((self.nrow, self.ncol), dtype=int)
+
+        # high-k lakes
+        if self.cfg['high_k_lakes']['simulate_high_k_lakes']:
+            is_high_k_lake = self._get_high_k_lakes()
+            if is_high_k_lake is not None:
+                isbc[is_high_k_lake] = 2
+
+        # lake package lakes
+        isbc[self._lakarr2d > 0] = 1
+
+        # add other bcs
+        for packagename, bcnumber in self.bc_numbers.items():
+            if 'lak' not in packagename:
+                package = self.get_package(packagename)
+                if package is not None:
+                    # handle multiple instances of package
+                    # (in MODFLOW-6)
+                    if isinstance(package, flopy.pakbase.PackageInterface):
+                        packages = [package]
+                    else:
+                        packages = package
+                    for package in packages:
+                        k, i, j = get_bc_package_cells(package)
+                        not_a_lake = np.where(isbc[i, j] != 1)
+                        i = i[not_a_lake]
+                        j = j[not_a_lake]
+                        isbc[i, j] = bcnumber
+        self._isbc_2d = isbc
+        self._set_lake_bathymetry()
 
     def _set_isbc(self):
             isbc = np.zeros((self.nlay, self.nrow, self.ncol), dtype=int)
             isbc[0] = self._isbc2d
 
-            lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
-            layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
-            # lakes must be at least 10% into a layer to get simulated in that layer
-            below = layer_tops > lake_botm_elevations + 0.1
+            # in mf6 models, the model top is set to the lake botm
+            # and any layers originally above the lake botm
+            # are also reset to the lake botm (given zero-thickness)
+            lake_botm_elevations = self.dis.top.array
+            below = self.dis.botm.array >= lake_botm_elevations
+            if not self.version == 'mf6':
+                lake_botm_elevations = self.dis.top.array - self.lake_bathymetry
+                layer_tops = np.concatenate([[self.dis.top.array], self.dis.botm.array[:-1]])
+                # lakes must be at least 10% into a layer to get simulated in that layer
+                below = layer_tops > lake_botm_elevations + 0.1
             for i, ibelow in enumerate(below[1:]):
                 if np.any(ibelow):
                     isbc[i+1][ibelow] = self._isbc2d[ibelow]
@@ -802,6 +870,7 @@ class MFsetupMixin():
             bathy = get_values_at_points(bathymetry_file,
                                          x=self.modelgrid.xcellcenters.ravel(),
                                          y=self.modelgrid.ycellcenters.ravel(),
+                                         points_crs=self.modelgrid.crs,
                                          out_of_bounds_errors='coerce')
             bathy = np.reshape(bathy, (self.nrow, self.ncol)) * lmult
             bathy[(bathy < 0) | np.isnan(bathy)] = 0
@@ -1139,8 +1208,8 @@ class MFsetupMixin():
                     return
 
                 # create an sfrmaker.lines instance
-                filter = project(self.bbox, self.modelgrid.proj_str, 'epsg:4269').bounds
-                lns = Lines.from_nhdplus_v2(NHDPlus_paths=nhdplus_paths,
+                filter = project(self.bbox, self.modelgrid.crs, 'epsg:4269').bounds
+                lines = Lines.from_nhdplus_v2(NHDPlus_paths=nhdplus_paths,
                                             filter=filter)
             else:
                 for key in ['filename', 'filenames']:
@@ -1149,17 +1218,28 @@ class MFsetupMixin():
                         kwargs['shapefile'] = kwargs.pop(key)
                         check_source_files(kwargs['shapefile'])
                         if 'epsg' not in kwargs:
-                            kwargs['proj4'] = get_proj_str(kwargs['shapefile'])
+                            try:
+                                from gisutils import get_shapefile_crs
+                                shapefile_crs = get_shapefile_crs(kwargs['shapefile'])
+                            except Exception as e:
+                                print(e)
+                                msg = ('Need gis-utils >= 0.2 to get crs'
+                                       ' for shapefile: {}\nPlease pip install '
+                                       '--upgrade gis-utils'.format(kwargs['shapefile']))
+                                print(msg)
                         else:
-                            kwargs['proj4'] = 'epsg:{}'.format(kwargs['epsg'])
+                            shapefile_crs = pyproj.crs.CRS.from_epsg(kwargs['epsg'])
+                        authority = shapefile_crs.to_authority()
+                        if authority is not None:
+                            shapefile_crs = pyproj.CRS.from_user_input(shapefile_crs.to_authority())
 
                         filter = self.bbox.bounds
-                        if kwargs['proj4'] != self.modelgrid.proj_str:
-                            filter = project(self.bbox, self.modelgrid.proj_str, kwargs['proj4']).bounds
+                        if shapefile_crs != self.modelgrid.crs:
+                            filter = project(self.bbox, self.modelgrid.crs, shapefile_crs).bounds
                         kwargs['filter'] = filter
                         # create an sfrmaker.lines instance
                         kwargs = get_input_arguments(kwargs, Lines.from_shapefile)
-                        lns = Lines.from_shapefile(**kwargs)
+                        lines = Lines.from_shapefile(**kwargs)
                         break
         else:
             return
@@ -1188,11 +1268,18 @@ class MFsetupMixin():
         self.modelgrid.model_length_units = self.length_units
 
         # create an sfrmaker.sfrdata instance from the lines instance
-        sfr = lns.to_sfr(grid=self.modelgrid,
+        to_sfr_kwargs = self.cfg['sfr'].copy()
+        to_sfr_kwargs.update(self.cfg['sfr'].get('sfrmaker_options', {}))
+        to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)
+        sfr = lines.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,
-                         )
-        if self.cfg['sfr']['set_streambed_top_elevations_from_dem']:
+                         **to_sfr_kwargs)
+        if self.cfg['sfr'].get('set_streambed_top_elevations_from_dem'):
+            warnings.warn('sfr: set_streambed_top_elevations_from_dem option is now under sfr: sfrmaker_options',
+                          DeprecationWarning)
+            self.cfg['sfr']['sfrmaker_options']['set_streambed_top_elevations_from_dem'] = True
+        if self.cfg['sfr'].get('sfrmaker_options', {}).get('set_streambed_top_elevations_from_dem'):
             error_msg = ("If set_streambed_top_elevations_from_dem=True, "
                          "need a dem block in source_data for SFR package.")
             assert 'dem' in self.cfg['sfr'].get('source_data', {}), error_msg
@@ -1231,8 +1318,12 @@ class MFsetupMixin():
                 self.dis.botm = self.cfg['dis']['botm']
 
         # option to convert reaches to the River Package
-        if self.cfg['sfr']['to_riv']:
-            rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['to_riv'],
+        if self.cfg['sfr'].get('to_riv'):
+            warnings.warn('sfr: to_riv option is now under sfr: sfrmaker_options',
+                          DeprecationWarning)
+            self.cfg['sfr']['sfrmaker_options']['to_riv'] = self.cfg['sfr'].get('to_riv')
+        if self.cfg['sfr'].get('sfrmaker_options', {}).get('to_riv'):
+            rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['sfrmaker_options']['to_riv'],
                                  drop_in_sfr=True)
             self.setup_riv(rivdata)
             rivdata_filename = self.cfg['riv']['output_files']['rivdata_file'].format(self.name)
@@ -1250,7 +1341,7 @@ class MFsetupMixin():
 
             # check if all inflow sites are included in sfr network
             missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
-                                difference(lns._original_routing.keys())
+                                difference(lines._original_routing.keys())
             if any(missing_sites):
                 inflows_routing_input = self.cfg['sfr'].get('source_data', {}).get('inflows_routing')
                 if inflows_routing_input is None:
@@ -1261,7 +1352,7 @@ class MFsetupMixin():
                 routing = dict(zip(routing[inflows_routing_input['id_column']],
                                    routing[inflows_routing_input['routing_column']]))
             else:
-                routing = lns._original_routing
+                routing = lines._original_routing
             missing_sites = any(set(inflows_by_stress_period[inflows_input['id_column']]). \
                                 difference(routing.keys())),
             if any(missing_sites):
@@ -1303,7 +1394,8 @@ class MFsetupMixin():
             sfr_package = sfr.modflow_sfr2
         else:
             # pass options kwargs through to mf6 constructor
-            kwargs = flatten({k:v for k, v in self.cfg[package].items() if k != 'source_data'})
+            kwargs = flatten({k:v for k, v in self.cfg[package].items() if k not in
+                              {'source_data', 'flowlines', 'inflows', 'observations', 'inflows_routing', 'dem'}})
             kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsfr)
             sfr_package = sfr.create_mf6sfr(model=self, **kwargs)
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2

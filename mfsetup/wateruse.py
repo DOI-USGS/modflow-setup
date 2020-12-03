@@ -11,6 +11,7 @@ from mfsetup.discretization import get_layer, get_layer_thicknesses
 from mfsetup.grid import get_ij
 from mfsetup.mf5to6 import get_model_length_units
 from mfsetup.units import convert_volume_units
+from mfsetup.utils import get_input_arguments
 
 months = {v.lower(): k for k, v in enumerate(calendar.month_name) if k > 0}
 
@@ -59,7 +60,11 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
     if drop_ids is not None:
         df = df.loc[~df.site_no.isin(drop_ids)].copy()
 
-    locs = shp2df(wu_points)
+    # implement automatic reprojection in gis-utils
+    # maintaining backwards compatibility
+    kwargs = {'dest_crs': model.modelgrid.crs}
+    kwargs = get_input_arguments(kwargs, shp2df)
+    locs = shp2df(wu_points, **kwargs)
     site_seq_col = [c for c in locs if 'site_se' in c.lower()]
     locs_renames = {c: 'site_no' for c in site_seq_col}
     locs.rename(columns=locs_renames, inplace=True)
@@ -72,7 +77,11 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
         txt = "No wells are inside the model bounds of {}"\
             .format(model.modelgrid.extent)
     elif isinstance(active_area, str):
-        features = shp2df(active_area).geometry.tolist()
+        # implement automatic reprojection in gis-utils
+        # maintaining backwards compatibility
+        kwargs = {'dest_crs': model.modelgrid.crs}
+        kwargs = get_input_arguments(kwargs, shp2df)
+        features = shp2df(active_area, **kwargs).geometry.tolist()
         if len(features) > 1:
             features = MultiPolygon(features)
         else:

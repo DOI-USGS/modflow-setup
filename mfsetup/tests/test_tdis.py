@@ -277,18 +277,19 @@ def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, d
     #overlap = welldata_overlaps_period #| period_inside_welldata
 
     # for each location (id), take the mean across source data time periods
-    agg = welldata.loc[overlap].copy().groupby(['start_datetime', 'node']).sum().reset_index()
-    agg = agg.groupby('node').mean().reset_index()
     if end_datetime < start_datetime:
         assert result['flux_m3'].sum() == 0
-    if overlap.sum() == 0:
+    if not any(overlap):
         assert len(result) == 0
-    expected_sum = agg['flux_m3'].sum()
-    if duplicate_well.node.values[0] in agg.index:
-        dw_overlaps = (duplicate_well.start_datetime < end_datetime) & \
-                (duplicate_well.end_datetime > start_datetime)
-        expected_sum += duplicate_well.loc[dw_overlaps, 'flux_m3'].mean()
-    assert np.allclose(result['flux_m3'].sum(), expected_sum)
+    if any(overlap):
+        agg = welldata.loc[overlap].copy().groupby(['start_datetime', 'node']).sum().reset_index()
+        agg = agg.groupby('node').mean().reset_index()
+        expected_sum = agg['flux_m3'].sum()
+        if duplicate_well.node.values[0] in agg.index:
+            dw_overlaps = (duplicate_well.start_datetime < end_datetime) & \
+                    (duplicate_well.end_datetime > start_datetime)
+            expected_sum += duplicate_well.loc[dw_overlaps, 'flux_m3'].mean()
+        assert np.allclose(result['flux_m3'].sum(), expected_sum)
 
 
 @pytest.fixture()

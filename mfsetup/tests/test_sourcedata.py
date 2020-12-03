@@ -313,7 +313,7 @@ def test_tabular_source_data(tmpdir, project_root_path, shellmound_model_with_di
 
     m = shellmound_model_with_dis
     # capitalize the column names so that they're mixed case
-    csvfile = os.path.join(project_root_path, 'mfsetup/tests/data/shellmound/tables/head_obs_well_info.csv')
+    csvfile = os.path.join(project_root_path, 'mfsetup/tests/data/shellmound/tables/preprocessed_head_obs_info.csv')
     input_csv = os.path.join(tmpdir, 'csv_cap_cols.csv')
     df = pd.read_csv(csvfile)
     df.columns = [c.capitalize() for c in df.columns]

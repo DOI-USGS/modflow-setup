@@ -1,6 +1,7 @@
 import copy
 import glob
 import os
+import shutil
 
 import flopy
 import numpy as np
@@ -62,17 +63,6 @@ def get_pleasant_lgr_parent_with_grid(get_pleasant_lgr_parent):
 def pleasant_lgr_setup_from_yaml(pleasant_lgr_cfg):
     m = MF6model.setup_from_cfg(pleasant_lgr_cfg)
     m.write_input()
-    for model in m, m.inset['plsnt_lgr_inset']:
-        if hasattr(model, 'sfr'):
-            sfr_package_filename = os.path.join(model.model_ws, model.sfr.filename)
-            model.sfrdata.write_package(sfr_package_filename,
-                                        version='mf6',
-                                        options=['save_flows',
-                                                 'BUDGET FILEOUT {}.sfr.cbc'.format(model.name),
-                                                 'STAGE FILEOUT {}.sfr.stage.bin'.format(model.name),
-                                                 'mover'
-                                               ]
-                                        )
     return m
 
 
@@ -98,11 +88,6 @@ def pleasant_lgr_stand_alone_parent(pleasant_lgr_test_cfg_path, tmpdir):
 
     m = MF6model.setup_from_cfg(cfg)
     m.write_input()
-    if hasattr(m, 'sfr'):
-        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-        m.sfrdata.write_package(sfr_package_filename,
-                                    version='mf6'
-                                    )
     return m
 
 

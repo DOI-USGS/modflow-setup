@@ -1,5 +1,7 @@
 import glob
 import os
+import shutil
+from pathlib import Path
 
 import pytest
 
@@ -13,7 +15,16 @@ def included_notebooks():
 
 
 @pytest.fixture(params=included_notebooks(), scope='module')
-def notebook(request):
+def notebook(request, project_root_path):
+    reset_folders = ('examples/pleasant_lgr',
+                     )
+    for folder in reset_folders:
+        root = Path(project_root_path)
+        abspath = os.path.normpath(os.path.join(project_root_path, folder))
+        # make double sure the path is within the project before deleting it
+        if os.path.isdir(abspath) and root in Path(abspath).parents:
+            print('removing output folder {}'.format(abspath))
+            shutil.rmtree(abspath)
     return request.param
 
 

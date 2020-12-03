@@ -3,10 +3,12 @@ Functions related to temporal discretization
 """
 import calendar
 import copy
+import shutil
 
 import numpy as np
 import pandas as pd
 
+import mfsetup
 from mfsetup.checks import is_valid_perioddata
 from mfsetup.utils import get_input_arguments, print_item
 
@@ -417,6 +419,12 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
         their start dates (as opposed to midpoint dates or end dates).
 
     """
+    data = data.copy()
+
+    if data.index.name == datetime_column:
+        data.sort_index(inplace=True)
+    else:
+        data.sort_values(by=datetime_column, inplace=True)
 
     if isinstance(period_stat, str):
         period_stat = [period_stat]
@@ -459,14 +467,28 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
                 "resampling irregular data to model stress periods"
             if data[datetime_column].dtype == np.object:
                 data[datetime_column] = pd.to_datetime(data[datetime_column])
+            if end_datetime_column in data.columns and \
+                    data[end_datetime_column].dtype == np.object:
+                data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])
             if start_datetime is None:
                 start_datetime = data[datetime_column].iloc[0]
             if end_datetime is None:
                 end_datetime = data[datetime_column].iloc[-1]
             # >= includes the start datetime
-            if end_datetime_column is None:
+            # if there is no end_datetime column, select values that have start_datetimes within the period
+            # this excludes values that start before the period but don't have an end date
+            if end_datetime_column not in data.columns:
                 data_overlaps_period = (data[datetime_column] < end_datetime) & \
                                        (data[datetime_column] >= start_datetime)
+            # if some end_datetimes are missing, assume end_datetime is the period end
+            # this assumes that missing end datetimes indicate pumping that continues to the end of the simulation
+            elif data[end_datetime_column].isna().any():
+                data.loc[data[end_datetime_column].isna(), 'end_datetime'] = end_datetime
+                data_overlaps_period = (data[datetime_column] < end_datetime) & \
+                                       (data[end_datetime_column] >= start_datetime)
+            # otherwise, select values with start datetimes that are before the period end
+            # and end datetimes that are after the period start
+            # in other words, include all values that overlap in time with the period
             else:
                 if data[end_datetime_column].dtype == np.object:
                     data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])
@@ -571,3 +593,40 @@ def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
     period_stat = getattr(arr, stat)(axis=0)
 
     return period_stat
+
+
+def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
+    """Add stress period start and end dates to a tdis file as comments.
+    """
+    tempfile = tdis_file + '.temp'
+    shutil.copy(tdis_file, tempfile)
+    with open(tempfile) as src:
+        with open(tdis_file, 'w') as dest:
+            header = ''
+            read_header = True
+            for line in src:
+                if read_header and len(line) > 0 and \
+                        line.strip()[0] in {'#', '!', '//'}:
+                    header += line
+                elif 'begin options' in ' '.join(line.lower().split()):
+                    if 'modflow-setup' not in header:
+                        header += '# modflow-setup version {}\n'.format(mfsetup.__version__)
+                    dest.write(header)
+                    read_header = False
+                    dest.write(line)
+                elif 'begin perioddata' in ' '.join(line.lower().split()):
+                    dest.write(line)
+                    dest.write(2*' ' + '# perlen nstp tsmult\n')
+
+                    for i, line in enumerate(src):
+                        if 'end perioddata' in ' '.join(line.lower().split()):
+                            dest.write(line)
+                            break
+                        else:
+                            line = 2*' ' + line.strip() + f'  # {start_dates[i]:%Y-%m-%d}'
+                            if end_dates is not None:
+                                line += f' to {end_dates[i]:%Y-%m-%d}'
+                            line += '\n'
+                            dest.write(line)
+                else:
+                    dest.write(line)

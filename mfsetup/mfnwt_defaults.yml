@@ -1,3 +1,11 @@
+# starting version number for the project
+# version reported by modflow-setup will then be
+# the start_version appended by the remaining information
+# in a pep440-post style version tag
+# (e.g. most recent git commit hash for the model repository
+# + "dirty" if the model repository has uncommited changes)
+# see https://github.com/warner/python-versioneer/blob/master/details.md
+start_version: 0
 
 intermediate_data:
   output_folder: 'original/'  # external arrays are read from here by flopy, and written to external_path
@@ -37,7 +45,7 @@ postprocessing:
 dis:
   start_date_time: '1970-01-01'
   top_filename_fmt: "top.dat"
-  botm_filename_fmt: "botm{:d}.dat"
+  botm_filename_fmt: "botm_{:03d}.dat"
   minimum_layer_thickness: 1  # in model units
   remake_top: True
   lenuni: 2 # meters
@@ -46,15 +54,15 @@ dis:
 
 bas6:
   hnoflo: -9999
-  ibound_filename_fmt: "ibound{:d}.dat"
-  strt_filename_fmt: "strt{:d}.dat"
+  ibound_filename_fmt: "ibound_{:03d}.dat"
+  strt_filename_fmt: "strt_{:03d}.dat"
   headfile:
 
 upw:
-  hk_filename_fmt: "hk{:d}.dat"
-  vka_filename_fmt: "vka{:d}.dat"
-  sy_filename_fmt: "sy{:d}.dat"
-  ss_filename_fmt: "ss{:d}.dat"
+  hk_filename_fmt: "hk_{:03d}.dat"
+  vka_filename_fmt: "vka_{:03d}.dat"
+  sy_filename_fmt: "sy_{:03d}.dat"
+  ss_filename_fmt: "ss_{:03d}.dat"
   ipakcb: 53 # unit for writing cell budget output
   hdry: -9999
   laytyp: 1
@@ -63,11 +71,19 @@ upw:
 rch:
   remake_arrays: True
   rech_mult: 1
-  rech_filename_fmt: "finf{:d}.dat"
+  rech_filename_fmt: "finf_{:03d}.dat"
+
+# option to simulate lakes as zones of high hydraulic conductivity
+# (see Anderson and others (2002) in the references)
+high_k_lakes:
+  simulate_high_k_lakes: False
+  high_k_value: 1.e+4
+  sy: 1.0
+  ss: 5.e-10  # (approx. compressibility of water in Pa-1 or m2/N)
 
 lak:
-  lakarr_filename_fmt: 'lakarr{:d}.dat'
-  bdlknc_filename_fmt: 'bdlknc{:d}.dat'
+  lakarr_filename_fmt: 'lakarr_{:03d}.dat'
+  bdlknc_filename_fmt: 'bdlknc_{:03d}.dat'
   lakzones_filename_fmt: 'lakzones.dat' # file containing zones for lakebed leakance
   theta: -0.7  # semi-implicit; negative value indicates that surfdep is read
   nssitr: 800  # number of Newton iterations for solution of lake stage, for each MODFLOW iteration.
@@ -92,6 +108,7 @@ wel:
     lookup_file: '{}_wel_lookup.csv' # output file that maps wel package data to site numbers
     dropped_wells_file: '{}_dropped_wells.csv' # output file that records wells that were dropped during model setup
   minimum_layer_thickness: 2.
+  # Note: external files are not yet implemented for the wel package in MODFLOW-NWT models
 
 mnw:
   defaults: {losstype: 'skin',

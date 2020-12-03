@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -43,9 +44,10 @@ def load_array(filename, shape=None):
 
 def load(filename):
     """Load a configuration file."""
-    if filename.endswith('.yml') or filename.endswith('.yaml'):
+    filename = Path(filename)
+    if set(filename.suffixes).intersection({'.yml', '.yaml'}):
         return load_yml(filename)
-    elif filename.endswith('.json'):
+    elif filename.suffix == '.json':
         return load_json(filename)
 
 

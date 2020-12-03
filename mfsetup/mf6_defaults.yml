@@ -1,3 +1,12 @@
+# starting version number for the project
+# version reported by modflow-setup will then be
+# the start_version appended by the remaining information
+# in a pep440-post style version tag
+# (e.g. most recent git commit hash for the model repository
+# + "dirty" if the model repository has uncommited changes)
+# see https://github.com/warner/python-versioneer/blob/master/details.md
+start_version: 0
+
 simulation:
   options: {}
   sim_name: 'mfsim'
@@ -51,8 +60,8 @@ dis:
   dimensions: {}
   griddata: {}
   top_filename_fmt: "top.dat"
-  botm_filename_fmt: "botm{:d}.dat"
-  idomain_filename_fmt: "idomain{:d}.dat"
+  botm_filename_fmt: "botm_{:03d}.dat"
+  idomain_filename_fmt: "idomain_{:03d}.dat"
   minimum_layer_thickness: 1  # in model units
   drop_thin_cells: True
 
@@ -66,7 +75,7 @@ tdis:
     perlen: 1
 
 ic:
-  strt_filename_fmt: "strt{:d}.dat"
+  strt_filename_fmt: "strt_{:03d}.dat"
   griddata:
     strt:
 
@@ -75,16 +84,16 @@ npf:
     save_flows: True
   griddata:
     icelltype: 1
-  k_filename_fmt: "k{:d}.dat"
-  k33_filename_fmt: "k33{:d}.dat"
+  k_filename_fmt: "k_{:03d}.dat"
+  k33_filename_fmt: "k33_{:03d}.dat"
 
 sto:
   options:
     save_flows: True
   griddata:
     iconvert: 1
-  sy_filename_fmt: "sy{:d}.dat"
-  ss_filename_fmt: "ss{:d}.dat"
+  sy_filename_fmt: "sy_{:03d}.dat"
+  ss_filename_fmt: "ss_{:03d}.dat"
 
 rch:
   options:
@@ -92,17 +101,25 @@ rch:
     print_flows: True
     save_flows: True
     readasarrays: True
-  recharge_filename_fmt: "rch{:d}.dat"
+  recharge_filename_fmt: "rch_{:03d}.dat"
   irch_filename_fmt: "irch.dat"
 
 sfr:
   options:
     save_flows: True
     mover: True
-  budget_fileout: 'sfr_out.bin'
-  stage_fileout: 'sfr_stage.bin'
-  obs6_filein_fmt: '{}.sfr.obs6'
+  budget_fileout: 'sfr.out.bin'
+  stage_fileout: 'sfr.stage.bin'
+  obs6_filein_fmt: 'sfr.obs'
   external_files: True  # option to write packagedata to an external file
+
+# option to simulate lakes as zones of high hydraulic conductivity
+# (see Anderson and others (2002) in the references)
+high_k_lakes:
+  simulate_high_k_lakes: False
+  high_k_value: 1.e+4
+  sy: 1.0
+  ss: 5.e-10  # (approx. compressibility of water in Pa-1 or m2/N)
 
 lak:
   options:
@@ -111,9 +128,10 @@ lak:
     stage_fileout: 'lake_stage.bin'
     obs6_filein_fmt: '{}.sfr.obs6'
     boundnames: True
-  lakarr_filename_fmt: 'lakarr{:d}.dat'
+  lakarr_filename_fmt: 'lakarr_{:03d}.dat'
   lakzones_filename_fmt: 'lakzones.dat' # file containing zones for lakebed leakance
   external_files: True
+  horizontal_connections: False
   connectiondata_filename_fmt: 'lake_connectiondata.dat'  # external table for connectiondata block
   output_files:
     lookup_file: '{}_lak_lookup.csv'  # output file that maps lake ids to source polygon feature ids
@@ -144,6 +162,7 @@ wel:
     dropped_wells_file: '{}_dropped_wells.csv' # output file that records wells that were dropped during model setup
   minimum_layer_thickness: 2.
   external_files: True  # option to write stress_period_data to external files
+  external_filename_fmt: "wel_{:03d}.dat"
 
 chd:
   options:
@@ -177,8 +196,7 @@ ims:
     complexity: 'moderate'
     'csv_output fileout': '{}_solver_out.csv'
   nonlinear:
-    outer_hclose: 1.e-1
-    outer_rclosebnd: 1.e4
+    outer_dvclose: 1.e-1
     outer_maximum: 200
     under_relaxation:  'dbd'
     under_relaxation_theta: 0.7
@@ -188,7 +206,7 @@ ims:
     backtracking_number: 0
   linear:
     inner_maximum: 100
-    inner_hclose: 1.e-2
+    inner_dvclose: 1.e-2
     rcloserecord: [0.0001, 'relative_rclose']
     linear_acceleration: 'bicgstab'
     scaling_method: None

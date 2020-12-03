@@ -3,6 +3,7 @@ import inspect
 import pprint
 
 import numpy as np
+import pandas as pd
 
 
 def compare_nan_array(func, a, thresh):
@@ -57,16 +58,28 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
     -------
     input_kwargs : dict
     """
-    np.set_printoptions(threshold=20)
-    if verbose:
-        print('\narguments to {}:'.format(function.__qualname__))
+    np.set_printoptions(threshold=20, edgeitems=1)
+
+    # translate the names of some variables
+    # to valid flopy arguments
+    # (not sure if this is the best place for this)
+    translations = {'continue': 'continue_'
+                    }
+
+    print('\narguments to {}:'.format(function.__qualname__))
     params = inspect.signature(function)
+    if exclude is None:
+        exclude = set()
+    elif isinstance(exclude, str):
+        exclude = {exclude}
+    else:
+        exclude = set(exclude)
     input_kwargs = {}
     not_arguments = {}
-    if exclude is None:
-        exclude = []
     for k, v in kwargs.items():
-        if k in params.parameters and k not in exclude:
+        k_original = k
+        k = translations.get(k, k)
+        if k in params.parameters and not {k, k_original}.intersection(exclude):
             input_kwargs[k] = v
             print_item(k, v)
         else:
@@ -84,10 +97,24 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
 def print_item(k, v):
     print('{}: '.format(k), end='')
     if isinstance(v, dict):
-        #print(json.dumps(v, indent=4))
-        pprint.pprint(v)
+        if len(v) > 1:
+            print('{{{}: {}\n ...\n}}'.format(*next(iter(v.items()))))
+        else:
+            print(v)
     elif isinstance(v, list):
-        pprint.pprint(v)
+        if len(v) > 3:
+            print('[{} ... {}]'.format(v[0], v[-1]))
+        else:
+            pprint.pprint(v, compact=True)
+    elif isinstance(v, pd.DataFrame):
+        print(v.head())
+    elif isinstance(v, np.ndarray):
+        txt = 'array: {}, {}'.format(v.shape, v.dtype)
+        try:
+            txt += ', min: {:g}, mean: {:g}, max: {:g}'.format(v.min(), v.mean(), v.max())
+        except:
+            pass
+        print(txt)
     else:
         print(v)
 

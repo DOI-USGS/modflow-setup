@@ -33,6 +33,7 @@ from mfsetup.lakes import (
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.mover import get_mover_sfr_package_input
 from mfsetup.obs import setup_head_observations
+from mfsetup.tdis import add_date_comments_to_tdis
 from mfsetup.tmr import Tmr
 from mfsetup.units import convert_time_units
 from mfsetup.utils import flatten, get_input_arguments
@@ -105,7 +106,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """Remake the idomain array from the source data,
         no data values in the top and bottom arrays, and
         so that cells above SFR reaches are inactive.
-        
+
         Also remakes irch for the recharge package"""
         # loop thru LGR models and inactivate area of parent grid for each one
         lgr_idomain = np.ones(self.dis.idomain.array.shape, dtype=int)
@@ -142,11 +143,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self._idomain = idomain
 
         # take the updated idomain array and set cells != 1 to np.nan in layer botm array
-        botm = self.dis.botm.array.copy()
-        botm[idomain != 1] = np.nan
-        # fill_cells_vertically will be run in the setup_array routing,
+        # including lake cells
+        # effect is that the layer thicknesses in these cells will be set to zero
+        # fill_cells_vertically will be run in the setup_array routine,
         # to collapse the nan cells to zero-thickness
         # (assign their layer botm to the next valid layer botm above)
+        botm = self.dis.botm.array.copy()
+        botm[(idomain != 1)] = np.nan
 
         # re-write the input files
         # todo: integrate this better with setup_dis
@@ -164,12 +167,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self.dis.idomain = self.cfg['dis']['griddata']['idomain']
         self._mg_resync = False
         self.setup_grid()  # reset the model grid
-        
+
         # rebuild irch to keep it in sync with idomain changes
         irch = make_irch(idomain)
         self._setup_array('rch', 'irch',
                                 data={0: irch},
-                                datatype='array2d', 
+                                datatype='array2d',
                                 write_fmt='%d', dtype=int)
         #self.dis.irch = self.cfg['dis']['irch']
 
@@ -228,6 +231,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         values = get_values_at_points(raster,
                                       x=self.modelgrid.xcellcenters.ravel(),
                                       y=self.modelgrid.ycellcenters.ravel(),
+                                      points_crs=self.modelgrid.crs,
                                       out_of_bounds_errors=out_of_bounds_errors)
         if self.modelgrid.grid_type == 'structured':
             values = np.reshape(values, (self.nrow, self.ncol))
@@ -345,6 +349,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self._setup_array(package, 'botm', datatype='array3d',
                           resample_method='linear',
                           write_fmt='%.2f')
+
+        # set number of layers to length of the created bottom array
+        # this needs to be set prior to setting up the idomain,
+        # otherwise idomain may have wrong number of layers
+        self.cfg['dis']['dimensions']['nlay'] = len(self.cfg['dis']['griddata']['botm'])
 
         # initial idomain input for creating a dis package instance
         self._setup_array(package, 'idomain', datatype='array3d', write_fmt='%d',
@@ -519,10 +528,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # make the irch array
         irch = make_irch(self.idomain)
-        
+
         self._setup_array('rch', 'irch',
                           data={0: irch},
-                          datatype='array2d', 
+                          datatype='array2d',
                           write_fmt='%d', dtype=int)
 
         # make the rech array
@@ -566,7 +575,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # set up stress_period_data
         if external_files:
             # get the file path (allowing for different external file locations, specified name format, etc.)
-            filename_format = package + '_{:03d}.dat'  # stress period suffix
+            filename_format = self.cfg[package]['external_filename_fmt']
             filepaths = self.setup_external_filepaths(package, 'stress_period_data',
                                                       filename_format=filename_format,
                                                       file_numbers=sorted(df.per.unique().tolist()))
@@ -577,7 +586,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 group = period_groups.get_group(kper)
                 group.drop('per', axis=1, inplace=True)
                 if external_files:
-                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
                     # make a copy for the intermediate data folder, for consistency with mf-2005
                     shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
                 else:
@@ -619,6 +628,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # option to write connectiondata to external file
         external_files = self.cfg['lak']['external_files']
+        horizontal_connections = self.cfg['lak']['horizontal_connections']
 
         # source data
         source_data = self.cfg['lak']['source_data']
@@ -628,7 +638,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self.lake_info = setup_lake_info(self)
 
         # returns dataframe with connection information
-        connectiondata = setup_lake_connectiondata(self, for_external_file=external_files)
+        connectiondata = setup_lake_connectiondata(self, for_external_file=external_files,
+                                                   include_horizontal_connections=horizontal_connections)
         # lakeno column will have # in front if for_external_file=True
         lakeno_col = [c for c in connectiondata.columns if 'lakeno' in c][0]
         nlakeconn = connectiondata.groupby(lakeno_col).count().iconn.to_dict()
@@ -926,7 +937,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             if external_files:
                 df_per.rename(columns={'bhead': 'head'}, inplace=True)
                 df_per.drop('per', axis=1, inplace=True)
-                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
                 # make a copy for the intermediate data folder, for consistency with mf-2005
                 shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
             else:
@@ -945,9 +956,48 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         return chd
 
     def write_input(self):
-        """Same syntax as MODFLOW-2005 flopy
+        """Write the model input.
         """
+        # write the model with flopy
+        # but skip the sfr package
+        # by monkey-patching the write method
+        def skip_write(**kwargs):
+            pass
+        if hasattr(self, 'sfr'):
+            self.sfr.write = skip_write
         self.simulation.write_simulation()
+
+        # write the sfr package with SFRmaker
+        if 'SFR' in ' '.join(self.get_package_list()):
+            options = []
+            for k, b in self.cfg['sfr']['options'].items():
+                if k == 'mover':
+                    if 'mvr' not in self.simulation.package_key_dict:
+                        continue
+                options.append(k)
+            if 'save_flows' in options:
+                budget_fileout = '{}.{}'.format(self.name,
+                                                self.cfg['sfr']['budget_fileout'])
+                stage_fileout = '{}.{}'.format(self.name,
+                                               self.cfg['sfr']['stage_fileout'])
+                options.append('budget fileout {}'.format(budget_fileout))
+                options.append('stage fileout {}'.format(stage_fileout))
+            if len(self.sfrdata.observations) > 0:
+                options.append('obs6 filein {}.{}'.format(self.name,
+                                                          self.cfg['sfr']['obs6_filein_fmt'])
+                               )
+            self.sfrdata.write_package(idomain=self.idomain,
+                                       version='mf6',
+                                       options=options,
+                                       external_files_path=self.external_path
+                                       )
+
+        # label stress periods in tdis file with comments
+        self.perioddata.sort_values(by='per', inplace=True)
+        add_date_comments_to_tdis(self.simulation.tdis.filename,
+                                  self.perioddata.start_datetime,
+                                  self.perioddata.end_datetime
+                                  )
 
     @staticmethod
     def _parse_model_kwargs(cfg):

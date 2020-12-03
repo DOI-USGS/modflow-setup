@@ -1,6 +1,8 @@
 import numbers
 import os
 import shutil
+import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -14,6 +16,7 @@ from mfsetup.discretization import (
     fill_cells_vertically,
     fill_empty_layers,
     fix_model_layer_conflicts,
+    get_layer,
     populate_values,
     verify_minimum_layer_thickness,
     weighted_average_between_layers,
@@ -413,6 +416,7 @@ class ArraySourceData(SourceData):
                 arr = get_values_at_points(f,
                                            self.dest_model.modelgrid.xcellcenters.ravel(),
                                            self.dest_model.modelgrid.ycellcenters.ravel(),
+                                           points_crs=self.dest_model.modelgrid.crs,
                                            method=self.resample_method)
                 arr = np.reshape(arr, (self.dest_modelgrid.nrow,
                                        self.dest_modelgrid.ncol))
@@ -854,7 +858,12 @@ class TabularSourceData(SourceData):
         dfs = []
         for i, f in self.filenames.items():
             if f.endswith('.shp') or f.endswith('.dbf'):
-                df = shp2df(f)
+                # implement automatic reprojection in gis-utils
+                # maintaining backwards compatibility
+                kwargs = {'dest_crs': self.dest_model.modelgrid.crs}
+                kwargs = get_input_arguments(kwargs, shp2df)
+                df = shp2df(f, **kwargs)
+                df.columns = [c.lower() for c in df.columns]
 
             elif f.endswith('.csv'):
                 df = pd.read_csv(f)
@@ -914,7 +923,11 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         dfs = []
         for i, f in self.filenames.items():
             if f.endswith('.shp') or f.endswith('.dbf'):
-                df = shp2df(f)
+                # implement automatic reprojection in gis-utils
+                # maintaining backwards compatibility
+                kwargs = {'dest_crs': self.dest_model.modelgrid.crs}
+                kwargs = get_input_arguments(kwargs, shp2df)
+                df = shp2df(f, **kwargs)
             elif f.endswith('.csv'):
                 df = pd.read_csv(f)
             else:
@@ -922,6 +935,11 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
             dfs.append(df)
         df = pd.concat(dfs)
         df.index = pd.to_datetime(df[self.datetime_column])
+
+        # convert IDs to strings if any were read in (resulting in object dtype)
+        if df[self.id_column].dtype == object:
+            df[self.id_column] = df[self.id_column].astype(str)
+
         # rename any columns specified in config file to required names
         if self.column_mappings is not None:
             df.rename(columns=self.column_mappings, inplace=True)
@@ -937,7 +955,13 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         if has_locations:
             within = [g.within(self.dest_model.bbox) for g in df.geometry]
             df = df.loc[within]
-
+        if self.end_datetime_column is None:
+            msg = '\n'.join(self.filenames.values()) + ':\n'
+            msg += ('Transient tabular time-series with no end_datetime_column specified.\n'
+                    'Data on time intervals longer than the model stress periods may not be\n'
+                    'upsampled correctly, as dates in the datetime_column are used for '
+                    'intersection with model stress periods.')
+            warnings.warn(msg)
         period_data = []
         for kper, period_stat in self.period_stats.items():
             if period_stat is None:
@@ -1186,10 +1210,21 @@ def setup_array(model, package, var, data=None,
 
     # special handling of some variables
     # (for lakes)
+    simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
     if var == 'botm':
         bathy = model.lake_bathymetry
-        top = model.load_array(model.cfg[external_files_key]['top'][0])
+        # save a copy of original top elevations
+        # (prior to adjustment for lake bathymetry)
+        original_top_file = Path(model.tmpdir,
+                                 f"{model.name}_{model.cfg[package]['top_filename_fmt']}.original")
+        if not original_top_file.exists():
+            shutil.copy(model.cfg['intermediate_data']['top'][0],
+                        original_top_file)
+        top = model.load_array(original_top_file)
         lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
+        if model.version == 'mf6':
+            # reset the model top to the lake bottom
+            top[bathy != 0] -= bathy[bathy != 0]
 
         # fill missing layers if any
         if len(data) < model.nlay:
@@ -1204,15 +1239,36 @@ def setup_array(model, package, var, data=None,
 
         # adjust layer botms to lake bathymetry (if any)
         # set layer bottom at lake cells to the botm of the lake in that layer
-        for k, kbotm in enumerate(botm):
-            inlayer = lake_botm_elevations > kbotm[bathy != 0]
-            if not np.any(inlayer):
-                continue
-            botm[k][bathy != 0][inlayer] = lake_botm_elevations[inlayer]
+        # move layer bottoms down, except for the first layer (move the model top down)
+        #botm[botm > top] = np.array([top]*5)[botm > top]
+        #i, j = np.where(bathy != 0)
+        #layers = get_layer(botm, i, j, lake_botm_elevations)
+        #layers[layers > 0] -= 1
+        ## include any overlying layers
+        #deact_lays = [list(range(k)) for k in layers]
+        #for ks, ci, cj in zip(deact_lays, i, j):
+        #    for ck in ks:
+        #        botm[ck, ci, cj] = np.nan
+
+        # the model top was reset above to any lake bottoms
+        # (defined by bathymetry)
+        # deactivate any bottom elevations above or equal to new top
+        # (decativate cell bottoms above or equal to the lake bottom)
+        # then deactivate these zero-thickness cells
+        # (so they won't get expanded again by fix_model_layer_conflicts)
+        # only do this for mf6, where pinched out cells are allowed
+        min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
+        if model.version == 'mf6':
+            botm[botm >= (top - min_thickness)] = np.nan
+
+        #for k, kbotm in enumerate(botm):
+        #    inlayer = lake_botm_elevations > kbotm[bathy != 0]
+        #    if not np.any(inlayer):
+        #        continue
+        #    botm[k][bathy != 0][inlayer] = lake_botm_elevations[inlayer]
 
         # fix any layering conflicts and save out botm files
         #if model.version == 'mf6' and model._drop_thin_cells:
-        min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
         botm = fix_model_layer_conflicts(top, botm,
                                          minimum_thickness=min_thickness)
         isvalid = verify_minimum_layer_thickness(top, botm,
@@ -1237,7 +1293,7 @@ def setup_array(model, package, var, data=None,
             else:
                 model.dis.top = model.cfg['dis']['top'][0]
         data = {i: arr for i, arr in enumerate(botm)}
-    elif var in ['rech', 'recharge']:
+    elif var in ['rech', 'recharge'] and simulate_high_k_lakes:
         for per in range(model.nper):
             if per == 0 and per not in data:
                 raise KeyError("No recharge input specified for first stress period.")
@@ -1246,28 +1302,26 @@ def setup_array(model, package, var, data=None,
                 # only assign if precip and open water evaporation data were read
                 # (otherwise keep original values in recharge array)
                 last_data_array = data[per].copy()
-                if model.lake_recharge is not None:
-                    data[per][model.isbc[0] == 2] = model.lake_recharge[per]
+                if model.high_k_lake_recharge is not None:
+                    data[per][model.isbc[0] == 2] = model.high_k_lake_recharge[per]
                 # zero-values to lak package lakes
                 data[per][model.isbc[0] == 1] = 0.
             else:
-                if model.lake_recharge is not None:
+                if model.high_k_lake_recharge is not None:
                     # start with the last period with recharge data; update the high-k lake recharge
-                    last_data_array[model.isbc[0] == 2] = model.lake_recharge[per]
+                    last_data_array[model.isbc[0] == 2] = model.high_k_lake_recharge[per]
                 last_data_array[model.isbc[0] == 1] = 0.
                 # assign to current per
                 data[per] = last_data_array
-
-    elif var in ['ibound', 'idomain']:
-        pass
-        #for i, arr in data.items():
-        #    data[i][model.isbc[i] == 1] = 0.
-    elif var in ['hk', 'k']:
+    elif var in ['hk', 'k'] and simulate_high_k_lakes:
         for i, arr in data.items():
-            data[i][model.isbc[i] == 2] = model.cfg['model'].get('hiKlakes_value', 1e4)
-    elif var in ['ss', 'sy']:
+            data[i][model.isbc[i] == 2] = model.cfg['high_k_lakes']['high_k_value']
+    elif var == 'sy' and simulate_high_k_lakes:
         for i, arr in data.items():
-            data[i][model.isbc[i] == 2] = 1.
+            data[i][model.isbc[i] == 2] = model.cfg['high_k_lakes']['sy']
+    elif var == 'ss' and simulate_high_k_lakes:
+        for i, arr in data.items():
+            data[i][model.isbc[i] == 2] = model.cfg['high_k_lakes']['ss']
 
     # intermediate data
     # set paths to intermediate files and external files

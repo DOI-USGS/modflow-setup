@@ -35,9 +35,13 @@ def test_convert_length_units():
     assert np.allclose(convert_length_units(None, 'm'), 1.)
     assert np.allclose(convert_length_units('millimeters', 'meters'), 1/1000)
     assert np.allclose(convert_length_units('meters', 'millimeters'), 1000)
+    assert np.allclose(convert_length_units('meters', 'km'), 0.001)
+    assert np.allclose(convert_length_units('kilometers', 'meters'), 1000)
+    assert np.allclose(convert_length_units('kilometers', 'cm'), 1000*100)
 
 
 def test_convert_time_units():
+    assert np.allclose(convert_time_units('s', 'day'), 1/86400)
     assert np.allclose(convert_time_units(4, 1), 86400)
     assert np.allclose(convert_time_units('days', 'seconds'), 86400)
     assert np.allclose(convert_time_units('d', 's'), 86400)
@@ -49,6 +53,8 @@ def test_convert_time_units():
 
 
 def test_convert_volume_units():
+    assert np.allclose(convert_volume_units('cubic meters', 'mgal'), 264.172/1e6)
+    assert np.allclose(convert_volume_units('$m^3$', '$ft^3$'), 35.3147)
     assert np.allclose(convert_volume_units('cubic meters', 'cubic feet'), 35.3147)
     assert np.allclose(convert_volume_units('cubic feet', 'cubic meters'), 0.0283168)
     assert np.allclose(convert_volume_units('meters', 'feet'), 35.3147)

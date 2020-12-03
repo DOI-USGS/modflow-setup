@@ -60,17 +60,17 @@ def model_setup(shellmound_cfg_path):
             shutil.rmtree(folder)
     m = MF6model.setup_from_yaml(shellmound_cfg_path)
     m.write_input()
-    if hasattr(m, 'sfr'):
-        sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
-        m.sfrdata.write_package(sfr_package_filename,
-                                    version='mf6',
-                                    options=['save_flows',
-                                             'BUDGET FILEOUT shellmound.sfr.cbc',
-                                             'STAGE FILEOUT shellmound.sfr.stage.bin',
-                                             # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
-                                             # location of obs6 file relative to sfr package file (same folder)
-                                             ]
-                                    )
+    #if hasattr(m, 'sfr'):
+    #    sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
+    #    m.sfrdata.write_package(sfr_package_filename,
+    #                                version='mf6',
+    #                                options=['save_flows',
+    #                                         'BUDGET FILEOUT shellmound.sfr.cbc',
+    #                                         'STAGE FILEOUT shellmound.sfr.stage.bin',
+    #                                         # 'OBS6 FILEIN {}'.format(sfr_obs_filename)
+    #                                         # location of obs6 file relative to sfr package file (same folder)
+    #                                         ]
+    #                                )
     return m
 
 
@@ -150,7 +150,10 @@ def test_load_cfg(shellmound_cfg, shellmound_cfg_path):
 
 
 def test_simulation(shellmound_simulation):
-    assert True
+    sim = shellmound_simulation
+    # verify that "continue" option was successfully translated
+    # to flopy sim constructor arg "continue_"
+    assert sim.name_file.continue_.array
 
 
 def test_model(shellmound_model):
@@ -309,7 +312,7 @@ def test_dis_setup(shellmound_model_with_grid):
         assert os.path.exists(f)
         fname = os.path.splitext(os.path.split(f)[1])[0]
         k = ''.join([s for s in fname if s.isdigit()])
-        var = fname.strip(k)
+        var = fname.split('_')[0]
         data = np.loadtxt(f)
         model_array = getattr(m.dis, var).array
         if len(k) > 0:
@@ -444,7 +447,7 @@ def test_npf_setup(shellmound_model_with_dis):
 
 
 @pytest.mark.parametrize('config', [{'source_data':
-                                         {'filenames': ['../../data/shellmound/tables/head_obs_well_info.csv'],
+                                         {'filenames': ['../../data/shellmound/tables/preprocessed_head_obs_info.csv'],
                                           'column_mappings':
                                               {'obsname': ['obsprefix']}
                                           },
@@ -519,8 +522,7 @@ def test_rch_setup(shellmound_model_with_dis):
     irch = load_array(os.path.join(m.model_ws, m.cfg['rch']['irch'][0]['filename']))
     assert irch.shape[0] == m.nrow
     assert irch.shape[1] == m.ncol
-    
-    
+
     assert os.path.exists(os.path.join(m.model_ws, rch.filename))
     assert isinstance(rch, mf6.ModflowGwfrcha)
     assert rch.recharge is not None
@@ -650,7 +652,15 @@ def test_sfr_setup(model_with_sfr):
     inactive_reaches = m.sfrdata.reach_data.loc[reach_idomain != 1]
     ki, ii, ji = inactive_reaches.k, inactive_reaches.i, inactive_reaches.j
     # 26, 13
-    j=2
+    # verify that reaches were consolidated to one per cell
+    assert len(m.sfrdata.reach_data.node.unique()) == len(m.sfrdata.reach_data)
+
+    # check that add_outlets works
+    expected_outlets = {17955371, 17956199}
+    for outlet_id in expected_outlets:
+        assert outlet_id in m.sfrdata.reach_data.line_id.tolist()
+        assert m.sfrdata.reach_data.loc[m.sfrdata.reach_data.line_id == outlet_id,
+                                        'outseg'].sum() == 0
 
 
 def test_sfr_inflows_from_csv(model_with_sfr):
@@ -663,10 +673,13 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     sfr_pd = m.sfrdata.period_data.dropna(axis=1)
     sfr_pd.index = sfr_pd.start_datetime
 
-    left = inflow_input.loc[inflow_input.line_id == 18021542].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
-    right = sfr_pd.loc[sfr_pd.rno == 275].loc['2007-04-01':, 'inflow']
+    line_id = 18021542
+    left = inflow_input.loc[inflow_input.line_id == line_id].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
+    lookup = dict(zip(sfr_pd.specified_line_id, sfr_pd.rno))
+    rno = lookup[line_id]
+    right = sfr_pd.loc[sfr_pd.rno == rno].loc['2007-04-01':, 'inflow']
     left = left.loc[:right.index[-1]]
-    pd.testing.assert_series_equal(left, right, check_names=False)
+    pd.testing.assert_series_equal(left, right, check_names=False, check_freq=False)
 
 
 #@pytest.mark.xfail(reason='flopy remove_package() issue')
@@ -715,7 +728,7 @@ def test_idomain_above_sfr(model_with_sfr):
     assert idomain[:-1, i, j].sum() == 0
     active = np.array([True if c != 'none' else False for c in sfr.packagedata.array['cellid']])
     assert idomain[-1, i, j].sum() == active.sum()
-    assert np.all(m.dis.botm.array[:-1, i, j] > 9980)
+    # assert np.all(m.dis.botm.array[:-1, i, j] > 9980)
     assert np.all(m.dis.botm.array[-1, i, j] < 100)
 
 
@@ -748,6 +761,10 @@ def test_model_setup_no_nans(model_setup):
     has_nans = '\n'.join(has_nans)
     if len(has_nans) > 0:
         assert False, has_nans
+
+    # verify that "continue" option was successfully translated
+    # to flopy sim constructor arg "continue_"
+    assert m.simulation.name_file.continue_.array
 
 
 def test_model_setup_and_run(model_setup_and_run):
