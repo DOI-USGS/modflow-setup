@@ -2,22 +2,31 @@
 Installation
 ============
 
-``Modflow-setup`` depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with `conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
-
 Installing python dependencies with Conda
 -----------------------------------------
-* Download and install the `Anaconda python distribution`_.
+``Modflow-setup`` depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with `conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
 
-  * **Make sure to install Anaconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
+
+Download and install the 64-bit `Anaconda python distribution`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  * Anaconda comes with a larger selection of popular data science and scientific packages, making it ideal for those who use python frequently for scientific computing.
+  * Miniconda is a minimal installer with a much smaller footprint, making it ideal for those who only want to use ``Modflow-setup``.
+  * **Make sure to install Anaconda or Miniconda to your username** (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of ``fiona`` or ``rasterio`` failing because gdal isn't found). It is also good practice to periodically do a `clean uninstall`_ of Anaconda, which at the system level requires admin. privileges.
 
     * In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.
     * If your installer skips the “Destination Select” step, when you get to "Installation Type", click “Change Install Location” and then “Install for me only.”
 
 
-* Download an environment file:
+Download an environment file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   * `requirements.yml`_ for a `conda environment`_ with the minimum packages required to run Modflow-setup, or
   * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by ``requirements.yml`` is called `mfsetup`, while the environment in ``gis.yml`` is called `gis`.
+
+    .. note::
+        To download the above YAML files, simply follow the links to get the raw text and then go to File > Save within your web browser, and save the text as a YAML file (with the `.yaml` or `.yml` extension).
+
   * Alternatively, clone (`using git`_) or `download`_ the ``modflow-setup`` repository, which includes the two environment files at the root level.
   * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
 
@@ -200,9 +209,9 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 .. _conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
 .. _condarc: https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
 .. _download: https://github.com/aleaf/modflow-setup/archive/master.zip
-.. _gis.yml: https://github.com/aleaf/modflow-setup/blob/master/gis.yml
+.. _gis.yml: https://raw.githubusercontent.com/aleaf/modflow-setup/master/gis.yml
 .. _Download the DOI SSL certificate: https://tst.usgs.gov/applications/application-and-script-signing/
 .. _pip: https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing
 .. _Readme file: https://github.com/aleaf/modflow-setup/blob/master/Readme.md
-.. _requirements.yml: https://github.com/aleaf/modflow-setup/blob/master/requirements.yml
+.. _requirements.yml: https://raw.githubusercontent.com/aleaf/modflow-setup/master/requirements.yml
 .. _using git: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
