@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; modflow-setup 0.post50+g90388b4 documentation</title>
+  <title>Installation &mdash; modflow-setup 0.post50+g0ccc412 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post50+g90388b4
+                0.post50+g0ccc412
               </div>
             
           
@@ -95,6 +95,8 @@
 <li class="toctree-l1"><a class="reference internal" href="philosophy.html">     Philosophy</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">Download and install the 64-bit Anaconda python distribution or Miniconda</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-an-environment-file">Download an environment file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-conda-environment">Creating a Conda environment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#keeping-the-conda-environment-up-to-date">Keeping the Conda environment up to date</a></li>
 </ul>
@@ -225,29 +227,40 @@
 </style>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a>. A few packages are not available via conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
 <div class="section" id="installing-python-dependencies-with-conda">
 <h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Download and install the <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a>.</p>
-<ul>
-<li><p><strong>Make sure to install Anaconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a>. A few packages are not available via conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
+<div class="section" id="download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">
+<h3>Download and install the 64-bit <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a><a class="headerlink" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>Anaconda comes with a larger selection of popular data science and scientific packages, making it ideal for those who use python frequently for scientific computing.</p></li>
+<li><p>Miniconda is a minimal installer with a much smaller footprint, making it ideal for those who only want to use <code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code>.</p></li>
+<li><p><strong>Make sure to install Anaconda or Miniconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
 <ul>
 <li><p>In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.</p></li>
 <li><p>If your installer skips the “Destination Select” step, when you get to “Installation Type”, click “Change Install Location” and then “Install for me only.”</p></li>
 </ul>
 </li>
 </ul>
+</div></blockquote>
+</div>
+<div class="section" id="download-an-environment-file">
+<h3>Download an environment file<a class="headerlink" href="#download-an-environment-file" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul>
+<li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a> with the minimum packages required to run Modflow-setup, or</p></li>
+<li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/gis.yml">gis.yml</a> for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> is called <cite>mfsetup</cite>, while the environment in <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> is called <cite>gis</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To download the above YAML files, simply follow the links to get the raw text and then go to File &gt; Save within your web browser, and save the text as a YAML file (with the <cite>.yaml</cite> or <cite>.yml</cite> extension).</p>
+</div>
 </li>
-<li><p>Download an environment file:</p>
-<ul>
-<li><p><a class="reference external" href="https://github.com/aleaf/modflow-setup/blob/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a> with the minimum packages required to run Modflow-setup, or</p></li>
-<li><p><a class="reference external" href="https://github.com/aleaf/modflow-setup/blob/master/gis.yml">gis.yml</a> for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> is called <cite>mfsetup</cite>, while the environment in <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> is called <cite>gis</cite>.</p></li>
 <li><p>Alternatively, clone (<a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">using git</a>) or <a class="reference external" href="https://github.com/aleaf/modflow-setup/archive/master.zip">download</a> the <code class="docutils literal notranslate"><span class="pre">modflow-setup</span></code> repository, which includes the two environment files at the root level.</p></li>
 <li><p>Note that both of these environment files contain a <code class="docutils literal notranslate"><span class="pre">pip</span></code> section of packages that will be installed with pip, after the <code class="docutils literal notranslate"><span class="pre">conda</span></code> packages are installed.</p></li>
 </ul>
-</li>
-</ul>
+</div></blockquote>
+</div>
 <div class="section" id="creating-a-conda-environment">
 <h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a><a class="headerlink" href="#creating-a-conda-environment" title="Permalink to this headline">¶</a></h3>
 <p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.
