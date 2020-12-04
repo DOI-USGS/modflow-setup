@@ -356,6 +356,7 @@ def test_wel_setup(get_pleasant_mf6_with_dis):
 def test_lak_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis  # deepcopy(model)
     m.cfg['lak']['external_files'] = False
+    m.cfg['lak']['horizontal_connections'] = True
     lak = m.setup_lak()
     lak.write()
     assert isinstance(lak, mf6.ModflowGwflak)
