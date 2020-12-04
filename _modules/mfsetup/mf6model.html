@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g9ad3913 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post50+g90388b4 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.post50+g9ad3913
+                0.post50+g90388b4
               </div>
             
           
@@ -830,7 +830,8 @@
             <span class="c1"># kludge to deal with ugliness of lake package external file handling</span>
             <span class="c1"># (need to give path relative to model_ws, not folder that flopy is working in)</span>
             <span class="n">tab_files_argument</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tab_files</span><span class="p">]</span>
-
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tab_files</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># todo: implement lake outlets with SFR</span>
 
         <span class="c1"># perioddata</span>
@@ -871,8 +872,9 @@
         <span class="n">packagedata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="n">packagedata_cols</span><span class="p">]</span>
         <span class="n">packagedata</span><span class="p">[</span><span class="s1">&#39;lak_id&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># convert to zero-based</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;packagedata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">packagedata</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ntables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tab_files</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s1">&#39;junk&#39;</span><span class="p">,</span> <span class="s1">&#39;junk&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tab_files</span><span class="p">)]</span>
+        <span class="k">if</span>  <span class="n">tab_files</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ntables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tab_files</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s1">&#39;junk&#39;</span><span class="p">,</span> <span class="s1">&#39;junk&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tab_files</span><span class="p">)]</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;outlets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># not implemented</span>
         <span class="c1">#kwargs[&#39;outletperioddata&#39;] = None  # not implemented</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;perioddata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lakeperioddata</span>
