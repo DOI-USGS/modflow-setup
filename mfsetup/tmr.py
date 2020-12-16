@@ -8,6 +8,7 @@ fm = flopy.modflow
 import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
+from scipy.interpolate import griddata
 
 from mfsetup.discretization import weighted_average_between_layers
 #from mfsetup.export import get_surface_bc_flux
@@ -634,7 +635,7 @@ class Tmr:
             k = np.array(k)
             i = np.array(i)
             j = np.array(j)
-        # get heads from parent model
+            # get heads from parent model
         # TODO: generalize head extraction from parent model using 3D interpolation
 
         dfs = []
@@ -853,14 +854,219 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
     return np.array(Q_inset)
 
 
-if __name__ == '__main__':
-    parent_head_file = '../csls100_nwt/csls100.hds'
-    parent_cell_budget_file = '../csls100_nwt/csls100.cbc'
-    kstpkper = (0, 0)
+class TmrNew:
+    """
+    Class for general telescopic mesh refinement of a MODFLOW model. Head or
+    flux fields from parent model are interpolated to boundary cells of
+    inset model, which may be in any configuration (jagged, rotated, etc.).
 
-    parent = fm.Modflow.load('csls100.nam', model_ws='../csls100_nwt/',
-                             load_only=['dis'], check=False)
-    inset = fm.Modflow.load('pfl10.nam', model_ws='../plainfield_inset/',
-                            load_only=['dis', 'upw'], check=False)
-    tmr = Tmr(parent, inset)
-    df = tmr.get_inset_boundary_fluxes(kstpkper=kstpkper)
+    Parameters
+    ----------
+    parent_model : flopy model instance instance of parent model
+        Must have a valid, attached ModelGrid (modelgrid) attribute.
+    inset_model : flopy model instance instance of inset model
+        Must have a valid, attached ModelGrid (modelgrid) attribute.
+    parent_head_file : filepath
+        MODFLOW binary head output
+    parent_cell_budget_file : filepath
+        MODFLOW binary cell budget output
+    define_connections : str, {'max_active_extent', 'by_layer'}
+        Method for defining perimeter cells where the TMR boundary
+        condition will be applied. If 'max_active_extent', the
+        maximum footprint of the active area (including all cell
+        locations with at least one layer that is active) will be used.
+        If 'by_layer', the perimeter of the active area in each layer will be used
+        (excluding any interior clusters of active cells). The 'by_layer'
+        option is potentially problematic if some layers have substantial
+        areas of pinched-out (idomain != 1) cells, which may result
+        in perimeter boundary condition cells getting placed too close
+        to the area of interest. By default, 'max_active_extent'.
+
+    Notes
+    -----
+    """
+
+    def __init__(self, parent_model, inset_model,
+                 parent_head_file=None, parent_cell_budget_file=None,
+                 boundary_type=None, inset_parent_period_mapping=None,
+                 define_connections_by='max_active_extent'
+                 ):
+        self.parent = parent_model
+        self.inset = inset_model
+        self.parent_head_file = parent_head_file
+        self.parent_cell_budget_file = parent_cell_budget_file
+        self.define_connections_by = define_connections_by
+        if boundary_type is None and parent_head_file is not None:
+            self.boundary_type = 'head'
+        elif boundary_type is None and parent_cell_budget_file is not None:
+            self.boundary_type = 'flux'
+
+        # properties
+        self._idomain = None
+        self._inset_boundary_cells = None
+        self._inset_parent_period_mapping = inset_parent_period_mapping
+
+
+    @property
+    def idomain(self):
+        """Active area of the inset model.
+        """
+        if self._idomain is None:
+            if self.inset.version == 'mf6':
+                self._idomain = self.inset.dis.idomain.array
+            else:
+                self._idomain = self.inset.bas6.ibound.array
+        return self._idomain
+
+    @property
+    def inset_boundary_cells(self):
+        if self._inset_boundary_cells is None:
+            by_layer = self.define_connections_by == 'by_layer'
+            df = self.get_inset_boundary_cells(by_layer=by_layer)
+            x, y, z = self.inset.modelgrid.xyzcellcenters
+            df['x'] = x[df.i, df.j]
+            df['y'] = y[df.i, df.j]
+            df['z'] = z[df.k, df.i, df.j]
+            self._inset_boundary_cells = df
+        return self._inset_boundary_cells
+
+    @property
+    def inset_parent_period_mapping(self):
+        nper = self.inset.nper
+        # if mapping between source and dest model periods isn't specified
+        # assume one to one mapping of stress periods between models
+        if self._inset_parent_period_mapping is None:
+            parent_periods = list(range(self.parent.nper))
+            self._inset_parent_period_mapping = {i: parent_periods[i]
+            if i < self.parent.nper else parent_periods[-1] for i in range(nper)}
+        return self._inset_parent_period_mapping
+
+    @inset_parent_period_mapping.setter
+    def inset_parent_period_mapping(self, inset_parent_period_mapping):
+        self._inset_parent_period_mapping = inset_parent_period_mapping
+
+    @property
+    def parent_xyzcellcenters(self):
+        px, py, pz = self.parent.modelgrid.xyzcellcenters
+        nlay, nrow, ncol = pz.shape
+        px = np.tile(px.ravel(), nlay)
+        py = np.tile(py.ravel(), nlay)
+        return px, py, pz.ravel()
+
+    def get_inset_boundary_cells(self, by_layer=False):
+        """Get a dataframe of connection information for
+        horizontal boundary cells.
+
+        Parameters
+        ----------
+        by_layer : bool
+            Controls how boundary cells will be defined. If True,
+            the perimeter of the active area in each layer will be used
+            (excluding any interior clusters of active cells). If
+            False, the maximum footprint of the active area
+            (including all cell locations with at least one layer that
+            is active).
+        """
+        if not by_layer:
+            max_active_area = np.sum(self.idomain == 1, axis=0) > 0
+            max_active_area = max_active_area.astype(int)
+            # pad filled idomain array with zeros around the edge
+            # so that perimeter connections are identified
+            filled = np.pad(max_active_area, 1, constant_values=0)
+            filled3d = np.tile(filled, (self.idomain.shape[0], 1, 1))
+            df = get_horizontal_connections(filled3d, connection_info=False)
+            # deincrement rows and columns
+            # so that they reflect positions in the non-padded array
+            df['i'] -= 1
+            df['j'] -= 1
+            # drop inactive cells
+            isactive = self.idomain[df.k, df.i, df.j] == 1
+            df = df.loc[isactive]
+        else:
+            dfs = []
+            for k, layer_idomain in enumerate(self.idomain):
+
+                # just get the perimeter of inactive cells
+                # (exclude any interior active cells)
+                # start by filling any interior active cells
+                from scipy.ndimage import binary_fill_holes
+                binary_idm = layer_idomain > 0
+                filled = binary_fill_holes(binary_idm)
+                # pad filled idomain array with zeros around the edge
+                # so that perimeter connections are identified
+                filled = np.pad(filled, 1, constant_values=0)
+                # get the cells along the inside edge
+                # of the model active area perimeter,
+                # via a sobel filter
+                df = get_horizontal_connections(filled, connection_info=False)
+                df['k'] = k
+                # deincrement rows and columns
+                # so that they reflect positions in the non-padded array
+                df['i'] -= 1
+                df['j'] -= 1
+                dfs.append(df)
+            df = pd.concat(dfs)
+
+        # add layer top and bottom information
+        layer_tops = np.stack([self.inset.dis.top.array] +
+                              [l for l in self.inset.dis.botm.array])[:-1]
+        df['top'] = layer_tops[df.k, df.i, df.j]
+        df['botm'] = self.inset.dis.botm.array[df.k, df.i, df.j]
+        return df
+
+    def get_inset_boundary_values(self, for_external_files=True):
+
+        if self.boundary_type == 'head':
+            check_source_files([self.parent_head_file])
+            hdsobj = bf.HeadFile(self.parent_head_file)  # , precision='single')
+            all_kstpkper = hdsobj.get_kstpkper()
+
+            last_steps = {kper: kstp for kstp, kper in all_kstpkper}
+
+            dfs = []
+            parent_periods = []
+            for inset_per, parent_per in self.inset_parent_period_mapping.items():
+                # skip getting data if parent period is already represented
+                # (heads will be reused)
+                if parent_per in parent_periods:
+                    continue
+                else:
+                    parent_periods.append(parent_per)
+                parent_kstpkper = last_steps[parent_per], parent_per
+                parent_heads = hdsobj.get_data(kstpkper=parent_kstpkper)
+
+                # x, y, z locations of parent model head values
+                px, py, pz = self.parent_xyzcellcenters
+
+                # x, y, z locations of inset model boundary cells
+                x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
+
+                # interpolate inset boundary heads from 3D parent head solution
+                bheads = griddata((px, py, pz), parent_heads.ravel(),
+                                  (x, y, z), method='linear')
+
+                # make a DataFrame of interpolated heads at perimeter cell locations
+                df = self.inset_boundary_cells.copy()
+                df['per'] = inset_per
+                df['bhead'] = bheads
+                # boundary heads must be greater than the cell bottom
+                df = df.loc[df['bhead'] > df['botm']]
+                # drop invalid heads (most likely due to dry cells)
+                df = df.loc[df['bhead'] < 1e10]
+                dfs.append(df)
+            df = pd.concat(dfs)
+
+            # drop duplicate cells
+            # (that may have connections in the x and y directions,
+            #  and therefore would be listed twice)
+            df['cellid'] = list(zip(df.per, df.k, df.i, df.j))
+            duplicates = df.duplicated(subset='cellid')
+            df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'bhead']]
+
+        # convert to one-based and comment out header if df will be written straight to external file
+        if for_external_files:
+            df.rename(columns={'k': '#k'}, inplace=True)
+            df['#k'] += 1
+            df['i'] += 1
+            df['j'] += 1
+        return df
