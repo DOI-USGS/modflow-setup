@@ -34,7 +34,7 @@ from mfsetup.lakes import (
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.obs import read_observation_data, setup_head_observations
 from mfsetup.tdis import get_parent_stress_periods, setup_perioddata_group
-from mfsetup.tmr import Tmr
+from mfsetup.tmr import TmrNew
 from mfsetup.units import convert_length_units, itmuni_text, lenuni_text
 from mfsetup.utils import get_input_arguments, get_packages
 
@@ -786,18 +786,24 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print('setting up specified head perimeter boundary with CHD package...')
         t0 = time.time()
 
-        tmr = Tmr(self.parent, self,
-                  parent_head_file=self.cfg['parent']['headfile'],
-                  inset_parent_layer_mapping=self.parent_layers,
-                  inset_parent_period_mapping=self.parent_stress_periods)
+        #tmr = Tmr(self.parent, self,
+        #          parent_head_file=self.cfg['parent']['headfile'],
+        #          inset_parent_layer_mapping=self.parent_layers,
+        #          inset_parent_period_mapping=self.parent_stress_periods)
+#
+        #df = tmr.get_inset_boundary_heads(for_external_files=False)
+        tmr = TmrNew(self.parent, self,
+                     parent_head_file=self.cfg['parent']['headfile'],
+                     inset_parent_period_mapping=self.parent_stress_periods)
 
-        df = tmr.get_inset_boundary_heads(for_external_files=False)
+        df = tmr.get_inset_boundary_values(for_external_files=False)
 
         spd = {}
         by_period = df.groupby('per')
-        tmp = fm.ModflowChd.get_empty(len(by_period.get_group(0)))
+
         for per, df_per in by_period:
-            spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
+            spd[per] = fm.ModflowChd.get_empty(len(df_per))
+            #spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
             spd[per]['k'] = df_per['k']
             spd[per]['i'] = df_per['i']
             spd[per]['j'] = df_per['j']
@@ -808,8 +814,18 @@ class MFnwtModel(MFsetupMixin, Modflow):
                 spd[per]['shead'] = df_per['bhead']
                 spd[per]['ehead'] = df_per['bhead']
             else:
-                spd[per]['shead'] = by_period.get_group(per - 1)['bhead']
                 spd[per]['ehead'] = df_per['bhead']
+                # populate sheads with eheads from the same cells
+                # if the cell didn't exist previously
+                # set shead == bhead
+                # dict of ending heads from last stress period, but (k,i,j) location
+                previous_inds = spd[per-1][['k', 'i', 'j']].tolist()
+                previous_ehead = dict(zip(previous_inds, spd[per-1]['ehead']))
+                current_inds = spd[per][['k', 'i', 'j']].tolist()
+                sheads = np.array([previous_ehead.get((k, i, j), np.nan)
+                                   for (k, i, j) in current_inds])
+                sheads[np.isnan(sheads)] = spd[per]['ehead'][np.isnan(sheads)]
+                spd[per]['shead'] = sheads
 
         chd = fm.ModflowChd(self, stress_period_data=spd)
         print("finished in {:.2f}s\n".format(time.time() - t0))

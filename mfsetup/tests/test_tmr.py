@@ -1,9 +1,12 @@
+from pathlib import Path
+
+import numpy as np
 import pytest
 from flopy.utils import binaryfile as bf
 
 from mfsetup.discretization import get_layer
 from mfsetup.grid import get_ij
-from mfsetup.tmr import Tmr
+from mfsetup.tmr import Tmr, TmrNew
 
 
 # fixture to feed multiple model fixtures to a test
@@ -65,3 +68,37 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
 
         # error between parent heads and inset heads
         # todo: interpolate parent head solution to inset points for comparison
+
+
+def test_tmr_new(pleasant_model):
+    m = pleasant_model
+    parent_headfile = Path(m.cfg['parent']['headfile'])
+    parent_cellbudgetfile = parent_headfile.with_suffix('.cbc')
+
+    tmr = TmrNew(m.parent, m,
+                 parent_head_file=parent_headfile)
+
+    results = tmr.get_inset_boundary_values(for_external_files=False)
+    assert np.all(results.columns ==
+                  ['k', 'i', 'j', 'per', 'bhead'])
+    # indices should be zero-based
+    assert results['k'].min() == 0
+    # non NaN heads
+    assert not results.bhead.isna().any()
+    # no heads below cell bottoms
+    cell_botms = m.dis.botm.array[results['k'], results['i'], results['j']]
+    assert not np.any(results['bhead'] < cell_botms)
+    # no duplicate heads
+    results['cellid'] = list(zip(results.per, results.k, results.i, results.j))
+    assert not results.cellid.duplicated().any()
+
+    # test external files case
+    # and with connections defined by layer
+    tmr.define_connections_by = 'by_layer'
+    tmr._inset_boundary_cells = None  # reset property
+    results = tmr.get_inset_boundary_values(for_external_files=True)
+    # '#k' required for header row
+    assert np.all(results.columns ==
+                  ['#k', 'i', 'j', 'per', 'bhead'])
+    # indices should be one-based (written directly to external files)
+    assert results['#k'].min() == 1

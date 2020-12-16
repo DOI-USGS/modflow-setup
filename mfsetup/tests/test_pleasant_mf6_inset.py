@@ -537,7 +537,7 @@ def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
     assert len(m.get_boundary_cells()[0]) == (m.nrow*2 + m.ncol*2 - 4) * m.nlay  # total number of boundary cells
     # number of boundary heads;
     # can be less than number of active boundary cells if the (parent) water table is not always in (inset) layer 1
-    assert len(chd.stress_period_data.array[0]) <= np.sum(m.idomain[m.get_boundary_cells()] == 1)
+    #assert len(chd.stress_period_data.array[0]) <= np.sum(m.idomain[m.get_boundary_cells()] == 1)
 
     # check for inactive cells
     spd0 = chd.stress_period_data.array[0]

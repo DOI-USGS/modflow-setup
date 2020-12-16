@@ -137,7 +137,16 @@ def test_get_horizontal_connections(tmpdir, connection_info):
     layer_elevations[1] = 1
     delr = np.ones(ncol)
     delc = np.ones(nrow)
-    connections = get_horizontal_connections(lakarr, connection_info=connection_info,
+    # get_horizontal_connections finds connections
+    # from areas == 1 to areas == 0
+    # the returned cells are always within the area == 1
+    # lakarr has non-lake cells == 0
+    # we want connections from non-lake cells to lake cells
+    # (which are conceputalized as not being part of the gwflow solution)
+    # so we need to invert lakarr so that non-lake cells == 1
+    lakarr_inv = (lakarr == 0).astype(int)
+    # cval is the
+    connections = get_horizontal_connections(lakarr_inv, connection_info=connection_info,
                                              layer_elevations=layer_elevations,
                                              delr=delr, delc=delc)
 
@@ -151,10 +160,10 @@ def test_get_horizontal_connections(tmpdir, connection_info):
         ax[0].set_title('lake extent')
 
         # sobel
-        sobel_x = sobel(lakarr[0], axis=1, mode='constant', cval=0.)
-        sobel_x[lakarr[0] == 1] = 0
-        sobel_y = sobel(lakarr[0], axis=0, mode='constant', cval=0.)
-        sobel_y[lakarr[0] == 1] = 0
+        sobel_x = sobel(lakarr_inv[0], axis=1, mode='reflect') #, cval=1.)
+        sobel_x[lakarr_inv[0] == 0] = 0
+        sobel_y = sobel(lakarr_inv[0], axis=0, mode='reflect') #, cval=1.)
+        sobel_y[lakarr_inv[0] == 0] = 0
         im = ax[1].imshow(sobel_x)
         ax[1].set_title('sobel filter applied in x direction')
         ax[2].imshow(sobel_y)
@@ -174,11 +183,11 @@ def test_get_horizontal_connections(tmpdir, connection_info):
     except:
         pass
 
-    for k, lakarr2d in enumerate(lakarr):
-        sobel_x = sobel(lakarr2d, axis=1, mode='constant', cval=0.)
-        sobel_x[lakarr2d == 1] = 0
-        sobel_y = sobel(lakarr2d, axis=0, mode='constant', cval=0.)
-        sobel_y[lakarr2d == 1] = 0
+    for k, lakarr2d in enumerate(lakarr_inv):
+        sobel_x = sobel(lakarr2d, axis=1, mode='reflect') #, cval=1.)
+        sobel_x[lakarr2d == 0] = 0
+        sobel_y = sobel(lakarr2d, axis=0, mode='reflect') #, cval=1.)
+        sobel_y[lakarr2d == 0] = 0
 
         ncon = np.sum(np.abs(sobel_x) > 1) + np.sum(np.abs(sobel_y) > 1)
         assert ncon == np.sum(connections['k'] == k)

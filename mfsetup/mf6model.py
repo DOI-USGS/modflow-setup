@@ -39,7 +39,7 @@ from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.mover import get_mover_sfr_package_input
 from mfsetup.obs import setup_head_observations
 from mfsetup.tdis import add_date_comments_to_tdis
-from mfsetup.tmr import Tmr
+from mfsetup.tmr import TmrNew
 from mfsetup.units import convert_time_units
 from mfsetup.utils import flatten, get_input_arguments
 from mfsetup.wells import setup_wel_data
@@ -655,6 +655,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         external_files = self.cfg['lak']['external_files']
         horizontal_connections = self.cfg['lak']['horizontal_connections']
 
+
         # source data
         source_data = self.cfg['lak']['source_data']
 
@@ -944,12 +945,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # option to write stress_period_data to external files
         external_files = self.cfg[package]['external_files']
 
-        tmr = Tmr(self.parent, self,
-                  parent_head_file=self.cfg['parent']['headfile'],
-                  inset_parent_layer_mapping=self.parent_layers,
-                  inset_parent_period_mapping=self.parent_stress_periods)
+        tmr = TmrNew(self.parent, self,
+                     parent_head_file=self.cfg['parent']['headfile'],
+                     #inset_parent_layer_mapping=self.parent_layers,
+                     inset_parent_period_mapping=self.parent_stress_periods)
 
-        df = tmr.get_inset_boundary_heads(for_external_files=external_files)
+        df = tmr.get_inset_boundary_values(for_external_files=external_files)
+        #df = tmr.get_inset_boundary_heads(for_external_files=external_files)
 
         if external_files:
             # get the file path (allowing for different external file locations, specified name format, etc.)
