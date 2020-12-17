@@ -6,6 +6,7 @@ Tests for Pleasant Lake inset case, MODFLOW-6 version
 import copy
 import glob
 import os
+import shutil
 from pathlib import Path
 
 import flopy
@@ -574,6 +575,23 @@ def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
         make_lake_xsections(m, i_range=(30, 51), j_range=(30, 41),
                             bathymetry_raster=m.cfg['lak']['source_data']['bathymetry_raster']['filename'],
                             datum=298.73, outpdf=outpdf)
+
+
+@pytest.mark.parametrize('remake_top', (True,
+                                        pytest.param(False,
+                                                     marks=pytest.mark.xfail(reason="model can't be built "))
+                                        ))
+def test_setup_from_yaml_issue(project_root_path, remake_top):
+    cfg = MF6model.load_cfg(Path(project_root_path) / 'examples/pleasant_lgr_parent.yml')
+    shutil.rmtree(Path(project_root_path) / 'examples/pleasant_lgr')
+    keep_keys = {'simulation', 'model',  'parent', 'setup_grid', 'dis', 'tdis',
+                 'intermediate_data', 'postprocessing'}
+    new_cfg = {k: v for k, v in cfg.items() if k in keep_keys}
+    new_cfg['model']['packages'] = ['dis']
+    new_cfg['dis']['remake_top'] = remake_top
+    del new_cfg['setup_grid']['lgr']
+    MF6model.setup_from_cfg(new_cfg)
+    j=2
 
 
 def test_check_external_files():

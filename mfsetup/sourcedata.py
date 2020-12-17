@@ -21,7 +21,7 @@ from mfsetup.discretization import (
     verify_minimum_layer_thickness,
     weighted_average_between_layers,
 )
-from mfsetup.fileio import save_array
+from mfsetup.fileio import save_array, setup_external_filepaths
 from mfsetup.grid import get_ij, rasterize
 from mfsetup.interpolate import (
     get_source_dest_model_xys,
@@ -1213,11 +1213,27 @@ def setup_array(model, package, var, data=None,
     simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
     if var == 'botm':
         bathy = model.lake_bathymetry
+
         # save a copy of original top elevations
         # (prior to adjustment for lake bathymetry)
+        # name of the copy:
         original_top_file = Path(model.tmpdir,
                                  f"{model.name}_{model.cfg[package]['top_filename_fmt']}.original")
+        # if the copy doesn't exist, make it
         if not original_top_file.exists():
+            # if remake_top is False, however,
+            # there may be no preexisting top file to copy
+            # first check for a preexisting top file
+            # get the path and add to intermediate files dict if it's not in there
+            if 'top' not in model.cfg['intermediate_data']:
+                model.setup_external_filepaths('dis', 'top',
+                                               model.cfg['dis']['top_filename_fmt'])
+            existing_model_top_file = Path(model.cfg['intermediate_data']['top'][0])
+            if not existing_model_top_file.exists():
+                raise ValueError((f"Model top text array file {existing_model_top_file} doesn't exist.\n"
+                                  f"If remake_top is False in the dis configuration block, "
+                                 f"{existing_model_top_file} needs to have been made previously."))
+            # copy the preexisting top file
             shutil.copy(model.cfg['intermediate_data']['top'][0],
                         original_top_file)
         top = model.load_array(original_top_file)
