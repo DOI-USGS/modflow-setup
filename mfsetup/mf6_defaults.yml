@@ -51,7 +51,7 @@ setup_grid:
     yll: "Yoff"
   output_files:
     grid_file: '{}_grid.json'
-    bbox_shapefile: 'postproc/shps/{}_bbox.shp'
+    bbox_shapefile: '{}_bbox.shp'
   snap_to_NHG: False
 
 dis:
@@ -194,7 +194,6 @@ obs:
 ims:
   options:
     print_option: 'all'
-    complexity: 'moderate'
     'csv_output fileout': '{}_solver_out.csv'
   nonlinear:
     outer_dvclose: 1.e-1
@@ -210,9 +209,9 @@ ims:
     inner_dvclose: 1.e-2
     rcloserecord: [0.0001, 'relative_rclose']
     linear_acceleration: 'bicgstab'
-    scaling_method: None
-    reordering_method: None
     relaxation_factor: 0.0  # either ILU(0) or ILUT preconditioning
-    number_orthogonalizations: 0
     preconditioner_levels: 7
     preconditioner_drop_tolerance: 0.001
+    number_orthogonalizations: 0
+    scaling_method: None
+    reordering_method: None

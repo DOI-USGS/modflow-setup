@@ -583,15 +583,15 @@ def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
                                         ))
 def test_setup_from_yaml_issue(project_root_path, remake_top):
     cfg = MF6model.load_cfg(Path(project_root_path) / 'examples/pleasant_lgr_parent.yml')
-    shutil.rmtree(Path(project_root_path) / 'examples/pleasant_lgr')
+    lgr_test_path = Path(project_root_path) / 'examples/pleasant_lgr'
+    shutil.rmtree(lgr_test_path, ignore_errors=True)
     keep_keys = {'simulation', 'model',  'parent', 'setup_grid', 'dis', 'tdis',
-                 'intermediate_data', 'postprocessing'}
+                 'intermediate_data', 'postprocessing', 'filename'}
     new_cfg = {k: v for k, v in cfg.items() if k in keep_keys}
     new_cfg['model']['packages'] = ['dis']
     new_cfg['dis']['remake_top'] = remake_top
     del new_cfg['setup_grid']['lgr']
     MF6model.setup_from_cfg(new_cfg)
-    j=2
 
 
 def test_check_external_files():

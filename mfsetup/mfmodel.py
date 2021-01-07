@@ -2,6 +2,7 @@ import os
 import time
 import warnings
 from collections import defaultdict
+from pathlib import Path
 
 import flopy
 import numpy as np
@@ -24,6 +25,7 @@ from mfsetup.fileio import (
     load_array,
     load_cfg,
     save_array,
+    set_cfg_paths_to_absolute,
     setup_external_filepaths,
 )
 from mfsetup.grid import MFsetupGrid, get_ij, rasterize, setup_structured_grid
@@ -686,29 +688,52 @@ class MFsetupMixin():
         #self._set_lakarr2d() # calls self._set_isbc2d(), which calls self._set_lake_bathymetry()
         #self._set_isbc() # calls self._set_lakarr()
 
-    def _set_cfg(self, cfg_updates):
+    def _set_cfg(self, user_specified_cfg):
         """Load configuration file; update dictionary.
         """
         #self.cfg = defaultdict(dict)
         self.cfg = defaultdict(dict, self.cfg)
 
-        if isinstance(cfg_updates, str):
-            assert os.path.exists(cfg_updates), \
-                "config file {} not found".format(cfg_updates)
-            updates = load(cfg_updates)
-            updates['filename'] = cfg_updates
-        elif isinstance(cfg_updates, dict):
-            updates = cfg_updates.copy()
-        elif cfg_updates is None:
+        if isinstance(user_specified_cfg, str) or \
+                isinstance(user_specified_cfg, Path):
+            # convert to an absolute path
+            user_specified_cfg = Path(user_specified_cfg).resolve()
+            assert user_specified_cfg.exists(), \
+                "config file {} not found".format(user_specified_cfg)
+            updates = load(user_specified_cfg)
+            updates['filename'] = user_specified_cfg
+        elif isinstance(user_specified_cfg, dict):
+            updates = user_specified_cfg.copy()
+        elif user_specified_cfg is None:
             return
         else:
             raise TypeError("unrecognized input for cfg")
+
+        # if the user specifies a complexity option for IMS or NWT,
+        # don't import any defaults
+        ims_cfg = updates.get('ims', {})
+        if ims_cfg.get('options', {}).get('complexity'):
+            # delete the defaults
+            for default_block in 'nonlinear', 'linear':
+                if default_block in self.cfg['ims']:
+                    del self.cfg['ims'][default_block]
+        nwt_cfg = updates.get('nwt', {})
+        if nwt_cfg.get('options', 'specified').lower() != 'specified':
+            keep_args = {'headtol', 'fluxtol', 'maxiterout',
+                         'thickfact', 'linmeth', 'iprnwt', 'ibotav',
+                         'Continue', 'use_existing_file'}
+            self.cfg['nwt'] = {k: v for k, v in self.cfg['nwt'].items() if k in keep_args}
 
         update(self.cfg, updates)
         # make sure empty variables get initialized as dicts
         for k, v in self.cfg.items():
             if v is None:
                 self.cfg[k] = {}
+
+        if 'filename' in self.cfg:
+            config_file_path = Path(self.cfg['filename'])
+            if config_file_path.is_absolute():
+                self.cfg = set_cfg_paths_to_absolute(self.cfg, config_file_path.parent)
 
         # mf6 models: set up or load the simulation
         if self.version == 'mf6':
@@ -1150,7 +1175,8 @@ class MFsetupMixin():
         cfg['parent_model'] = self.parent
         cfg['model_length_units'] = self.length_units
         cfg['grid_file'] = cfg['output_files']['grid_file'].format(self.name)
-        cfg['bbox_shapefile'] = cfg['output_files']['bbox_shapefile'].format(self.name)
+        bbox_shapefile_name = Path(cfg['output_files']['bbox_shapefile'].format(self.name)).name
+        cfg['bbox_shapefile'] = Path(self._shapefiles_path) / bbox_shapefile_name
         if 'DIS' in self.get_package_list():
             cfg['top'] = self.dis.top.array
             cfg['botm'] = self.dis.botm.array

@@ -59,7 +59,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                      'ghb', 'sfr', 'lak', 'riv',
                                      'wel', 'maw', 'obs']
         self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
-        self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
+        #self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
         self._set_cfg(cfg)   # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
