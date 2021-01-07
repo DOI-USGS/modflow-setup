@@ -5,7 +5,7 @@ Package to facilitate automated setup of MODFLOW models, from source data includ
 
 
 ### Version 0.1
-[![Build Status](https://travis-ci.org/aleaf/modflow-setup.svg?branch=master)](https://travis-ci.org/aleaf/modflow-setup)
+![Tests](https://github.com/aleaf/modflow-setup/workflows/Tests/badge.svg)
 [![Build status](https://ci.appveyor.com/api/projects/status/5l11v18na9p28olh/branch/master?svg=true)](https://ci.appveyor.com/project/aleaf/modflow-setup/branch/master)
 [![codecov](https://codecov.io/gh/aleaf/modflow-setup/branch/master/graph/badge.svg)](https://codecov.io/gh/aleaf/modflow-setup)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/aleaf/modflow-setup/develop?urlpath=lab/tree/examples)
