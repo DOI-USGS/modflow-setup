@@ -18,7 +18,7 @@ Getting Started
 -----------------------------------------------
 For more details, see the [modflow-setup documentation](https://aleaf.github.io/modflow-setup/)
 
-Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/config-file.html) similar to one of the examples in the [Configuration File Gallery](https://aleaf.github.io/modflow-setup/examples.html#configuration-file-gallery).
+Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/latest/config-file.html) similar to one of the examples in the [Configuration File Gallery](https://aleaf.github.io/modflow-setup/latest/config-file-gallery.html).
 
 The yaml file summarizes source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
 
@@ -40,15 +40,9 @@ m = MFnwtModel.setup_from_yaml(<path to configuration file>)
 m.write_input()
 ```
 
-
-### Bugs
-
-If you think you have discovered a bug in modflow-setup in which you feel that the program does not work as intended, then we ask you to submit a [Github issue](https://github.com/aleaf/modflow-setup/labels/bug).
-
-
 Installation
 -----------------------------------------------
-See the [Installation Instructions](https://aleaf.github.io/modflow-setup/installation.html)
+See the [Installation Instructions](https://aleaf.github.io/modflow-setup/latest/installation.html)
 
 MODFLOW Resources
 -----------------------------------------------

@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from mfsetup.wells import (
+    assign_layers_from_screen_top_botm,
     get_open_interval_thickness,
     get_package_stress_period_data,
     setup_wel_data,
@@ -27,6 +28,56 @@ def test_minimum_well_layer_thickness(shellmound_model_with_dis, all_layers):
         ['minimum_layer_thickness'] = minthickness
     df = setup_wel_data(m, for_external_files=False)
     assert np.all((-np.diff(all_layers, axis=0))[df.k, df.i, df.j] > minthickness)
+
+
+def test_assign_layers_from_screen_top_botm(shellmound_model_with_dis, test_data_path):
+    model = shellmound_model_with_dis
+    model.setup_npf()
+
+    # edit the dis and hk arrays at a chosen location
+    all_layers = np.stack([model.dis.top.array] + [l for l in model.dis.botm.array])
+    i, j = 10, 10
+    thicknesses = np.ones(len(all_layers)) * 10
+    thicknesses[0] = 0
+    thicknesses[1:6] *= 100
+    # reset the layer elevations
+    all_layers[:, i, j] = all_layers[0, 10, 10] - np.add.accumulate(thicknesses)
+    model.dis.botm = all_layers[1:]
+
+    # reset hk, so that thickest layers at i, j
+    # have low T
+    hk = model.npf.k.array.copy()
+    hk[:, i, j] = 1e-3
+    hk[6:] = 100
+    model.npf.k = hk
+
+    # input well data
+    welldata = pd.DataFrame({
+        'i': [i],
+        'j': [j],
+        'q': [0.],
+        'screen_top': [all_layers[0, i, j]],
+        'screen_botm': [all_layers[-1, i, j]],
+        'site_no': 'test_well'
+    })
+    results = assign_layers_from_screen_top_botm(welldata, model,
+                                                 flux_col='q',
+                                                 screen_top_col='screen_top',
+                                                 screen_botm_col='screen_botm',
+                                                 label_col='site_no',
+                                                 across_layers=False,
+                                                 distribute_by='transmissivity',
+                                                 minimum_layer_thickness=10.)
+    assert results.loc[0, 'k'] == 12
+    results = assign_layers_from_screen_top_botm(welldata, model,
+                                                 flux_col='q',
+                                                 screen_top_col='screen_top',
+                                                 screen_botm_col='screen_botm',
+                                                 label_col='site_no',
+                                                 across_layers=False,
+                                                 distribute_by='thickness',
+                                                 minimum_layer_thickness=10.)
+    assert results.loc[0, 'k'] == 4
 
 
 def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):

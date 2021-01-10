@@ -922,13 +922,13 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         # aggregate the data from multiple files
         dfs = []
         for i, f in self.filenames.items():
-            if f.endswith('.shp') or f.endswith('.dbf'):
+            if str(f).endswith('.shp') or str(f).endswith('.dbf'):
                 # implement automatic reprojection in gis-utils
                 # maintaining backwards compatibility
                 kwargs = {'dest_crs': self.dest_model.modelgrid.crs}
                 kwargs = get_input_arguments(kwargs, shp2df)
                 df = shp2df(f, **kwargs)
-            elif f.endswith('.csv'):
+            elif str(f).endswith('.csv'):
                 df = pd.read_csv(f)
             else:
                 raise ValueError("Unsupported file type: '{}', for {}".format(f[:-4], f))
