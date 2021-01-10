@@ -1,0 +1,1339 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mfsetup.fileio &mdash; modflow-setup 0.post203+g3dc3958 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> modflow-setup
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.post203+g3dc3958
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file.html"> The configuration file</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">modflow-setup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>mfsetup.fileio</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mfsetup.fileio</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Functions for reading and writing stuff to disk, and working with file paths.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">flopy.mf6.data</span> <span class="kn">import</span> <span class="n">mfstructure</span>
+<span class="kn">from</span> <span class="nn">flopy.mf6.mfbase</span> <span class="kn">import</span> <span class="n">MFDataException</span><span class="p">,</span> <span class="n">VerbosityLevel</span>
+<span class="kn">from</span> <span class="nn">flopy.mf6.modflow</span> <span class="kn">import</span> <span class="n">mfims</span><span class="p">,</span> <span class="n">mftdis</span>
+<span class="kn">from</span> <span class="nn">flopy.utils</span> <span class="kn">import</span> <span class="n">SpatialReference</span><span class="p">,</span> <span class="n">TemporalReference</span><span class="p">,</span> <span class="n">mfreadnam</span>
+
+<span class="kn">from</span> <span class="nn">mfsetup.grid</span> <span class="kn">import</span> <span class="n">MFsetupGrid</span>
+<span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">update</span>
+
+
+<div class="viewcode-block" id="check_source_files"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.check_source_files">[docs]</a><span class="k">def</span> <span class="nf">check_source_files</span><span class="p">(</span><span class="n">fileslist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check that the files in fileslist exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fileslist</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">fileslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">fileslist</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fileslist</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Cannot find </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">load_array</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load an array, ensuring the correct shape.&quot;&quot;&quot;</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">shape</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data in </span><span class="si">{}</span><span class="s2"> have size </span><span class="si">{}</span><span class="s2">; should be </span><span class="si">{}</span><span class="s2">&quot;</span>
+                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">arr</span>
+
+
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load a configuration file.&quot;&quot;&quot;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">({</span><span class="s1">&#39;.yml&#39;</span><span class="p">,</span> <span class="s1">&#39;.yaml&#39;</span><span class="p">}):</span>
+        <span class="k">return</span> <span class="n">load_yml</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dump"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.dump">[docs]</a><span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write a dictionary to a configuration file.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.yml&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.yaml&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dump_yml</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dump_json</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_json"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_json">[docs]</a><span class="k">def</span> <span class="nf">load_json</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convenience function to load a json file; replacing</span>
+<span class="sd">    some escaped characters.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dump_json"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.dump_json">[docs]</a><span class="k">def</span> <span class="nf">dump_json</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write a dictionary to a json file.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="load_sr"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_sr">[docs]</a><span class="k">def</span> <span class="nf">load_sr</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a SpatialReference instance from model config json file.&quot;&quot;&quot;</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SpatialReference</span><span class="p">(</span><span class="n">delr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;ncol&#39;</span><span class="p">])</span><span class="o">*</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delr&#39;</span><span class="p">],</span>
+                            <span class="n">delc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;nrow&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delc&#39;</span><span class="p">],</span>
+                            <span class="n">xul</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;xul&#39;</span><span class="p">],</span> <span class="n">yul</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;yul&#39;</span><span class="p">],</span>
+                            <span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span>
+                              <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_modelgrid"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_modelgrid">[docs]</a><span class="k">def</span> <span class="nf">load_modelgrid</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a MFsetupGrid instance from model config json file.&quot;&quot;&quot;</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">rename</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xll&#39;</span><span class="p">:</span> <span class="s1">&#39;xoff&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;yll&#39;</span><span class="p">:</span> <span class="s1">&#39;yoff&#39;</span><span class="p">,</span>
+              <span class="p">}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rename</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">:</span>
+            <span class="n">cfg</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delr&#39;</span><span class="p">]):</span>
+        <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;ncol&#39;</span><span class="p">])</span><span class="o">*</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delr&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delc&#39;</span><span class="p">]):</span>
+        <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;nrow&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;delc&#39;</span><span class="p">]</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">MFsetupGrid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">MFsetupGrid</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_yml"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_yml">[docs]</a><span class="k">def</span> <span class="nf">load_yml</span><span class="p">(</span><span class="n">yml_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load yaml file into a dictionary.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yml_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cfg</span></div>
+
+
+<div class="viewcode-block" id="dump_yml"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.dump_yml">[docs]</a><span class="k">def</span> <span class="nf">dump_yml</span><span class="p">(</span><span class="n">yml_file</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write a dictionary to a yaml file.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yml_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span><span class="c1">#, Dumper=yaml.Dumper)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">yml_file</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="load_array"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_array">[docs]</a><span class="k">def</span> <span class="nf">load_array</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load an array, ensuring the correct shape.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+    <span class="n">shape2d</span> <span class="o">=</span> <span class="n">shape</span>
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">shape2d</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">arraylist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;loading </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shape2d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;, shape=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shape2d</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
+        <span class="c1"># arr = np.loadtxt</span>
+        <span class="c1"># pd.read_csv is &gt;3x faster than np.load_txt</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="n">shape2d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">shape2d</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape2d</span><span class="p">):</span>
+                    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">shape2d</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data in </span><span class="si">{}</span><span class="s2"> have size </span><span class="si">{}</span><span class="s2">; should be </span><span class="si">{}</span><span class="s2">&quot;</span>
+                                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">shape2d</span><span class="p">))</span>
+        <span class="n">arraylist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">arraylist</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+        <span class="n">array</span><span class="p">[</span><span class="n">array</span> <span class="o">==</span> <span class="n">nodata</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;took </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">array</span></div>
+
+
+<div class="viewcode-block" id="save_array"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.save_array">[docs]</a><span class="k">def</span> <span class="nf">save_array</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span>
+               <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save and array and print that it was written.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;filename&#39;</span> <span class="ow">in</span> <span class="n">filename</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">arr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">arr</span><span class="p">)]</span> <span class="o">=</span> <span class="n">nodata</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;took </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="append_csv"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.append_csv">[docs]</a><span class="k">def</span> <span class="nf">append_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read data from filename,</span>
+<span class="sd">    append to dataframe, and write appended dataframe</span>
+<span class="sd">    back to filename.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="n">written</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">written</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_cfg"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_cfg">[docs]</a><span class="k">def</span> <span class="nf">load_cfg</span><span class="p">(</span><span class="n">cfgfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This method loads a YAML or JSON configuration file,</span>
+<span class="sd">    applies configuration defaults from a default_file if specified,</span>
+<span class="sd">    adds the absolute file path of the configuration file</span>
+<span class="sd">    to the configuration dictionary, and converts any</span>
+<span class="sd">    relative paths in the configuration dictionary to</span>
+<span class="sd">    absolute paths, assuming the paths are relative to</span>
+<span class="sd">    the configuration file location.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cfgfile : str</span>
+<span class="sd">        Path to MFsetup configuration file (json or yaml)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cfg : dict</span>
+<span class="sd">        Dictionary of configuration data</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function is used by the model instance load and setup_from_yaml</span>
+<span class="sd">    classmethods, so that configuration defaults can be applied to the</span>
+<span class="sd">    simulation and model blocks before they are passed to the flopy simulation</span>
+<span class="sd">    constructor and the model constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loading configuration file </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cfgfile</span><span class="p">))</span>
+    <span class="n">source_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">check_source_files</span><span class="p">([</span><span class="n">cfgfile</span><span class="p">,</span> <span class="n">source_path</span> <span class="o">+</span> <span class="n">default_file</span><span class="p">])</span>
+
+    <span class="c1"># default configuration</span>
+    <span class="n">default_cfg</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">default_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">source_path</span> <span class="o">+</span> <span class="n">default_file</span><span class="p">)</span>
+        <span class="n">default_cfg</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_path</span> <span class="o">+</span> <span class="n">default_file</span>
+
+        <span class="c1"># for now, only apply defaults for the model and simulation blocks</span>
+        <span class="c1"># which are needed for the model instance constructor</span>
+        <span class="c1"># other defaults are applied in _set_cfg,</span>
+        <span class="c1"># which is called by model.__init__</span>
+        <span class="n">apply_defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;simulation&#39;</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">}</span>
+        <span class="n">default_cfg</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">default_cfg</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                       <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">apply_defaults</span><span class="p">}</span>
+
+    <span class="c1"># recursively update defaults with information from yamlfile</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">default_cfg</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">user_specified_cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">cfgfile</span><span class="p">)</span>
+
+    <span class="n">update</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">user_specified_cfg</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="n">verbose</span><span class="p">})</span>
+    <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">cfgfile</span><span class="p">)</span>
+
+    <span class="c1"># convert relative paths in the configuration dictionary</span>
+    <span class="c1"># to absolute paths, based on the location of the config file</span>
+    <span class="n">config_file_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">cfgfile</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">set_cfg_paths_to_absolute</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">config_file_location</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cfg</span></div>
+
+
+<div class="viewcode-block" id="set_cfg_paths_to_absolute"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.set_cfg_paths_to_absolute">[docs]</a><span class="k">def</span> <span class="nf">set_cfg_paths_to_absolute</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">config_file_location</span><span class="p">):</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;simulation&#39;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;mf6&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+        <span class="n">file_path_keys_relative_to_config</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;simulation.sim_ws&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;parent.model_ws&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;parent.simulation.sim_ws&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;parent.headfile&#39;</span><span class="p">,</span>
+            <span class="c1">#&#39;setup_grid.lgr.config_file&#39;</span>
+        <span class="p">]</span>
+        <span class="n">model_ws</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_file_location</span><span class="p">,</span>
+                                                 <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;simulation&#39;</span><span class="p">][</span><span class="s1">&#39;sim_ws&#39;</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">file_path_keys_relative_to_config</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;model.model_ws&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;parent.model_ws&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;parent.simulation.sim_ws&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;parent.headfile&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nwt.use_existing_file&#39;</span>
+        <span class="p">]</span>
+        <span class="n">model_ws</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_file_location</span><span class="p">,</span>
+                                                 <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;model_ws&#39;</span><span class="p">]))</span>
+    <span class="n">file_path_keys_relative_to_model_ws</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;setup_grid.grid_file&#39;</span>
+    <span class="p">]</span>
+    <span class="c1"># add additional paths by looking for source_data</span>
+    <span class="c1"># within these input blocks, convert file paths to absolute</span>
+    <span class="n">look_for_files_in</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;lgr&#39;</span>
+                         <span class="p">]</span>
+    <span class="k">for</span> <span class="n">pckgname</span><span class="p">,</span> <span class="n">pckg</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pckg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">input_block</span> <span class="ow">in</span> <span class="n">look_for_files_in</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">input_block</span> <span class="ow">in</span> <span class="n">pckg</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">file_keys</span> <span class="o">=</span> <span class="n">_parse_file_path_keys_from_source_data</span><span class="p">(</span><span class="n">pckg</span><span class="p">[</span><span class="n">input_block</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">file_keys</span><span class="p">:</span>
+                        <span class="n">file_path_keys_relative_to_config</span><span class="o">.</span> \
+                            <span class="n">append</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pckgname</span><span class="p">,</span> <span class="n">input_block</span><span class="p">,</span> <span class="n">key</span><span class="p">]))</span>
+                <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;output_files&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;output_folders&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;output_folder&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;output_path&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">pckg</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">file_keys</span> <span class="o">=</span> <span class="n">_parse_file_path_keys_from_source_data</span><span class="p">(</span><span class="n">pckg</span><span class="p">[</span><span class="n">loc</span><span class="p">],</span> <span class="n">paths</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">file_keys</span><span class="p">:</span>
+                            <span class="n">file_path_keys_relative_to_model_ws</span><span class="o">.</span> \
+                                <span class="n">append</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pckgname</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
+
+    <span class="c1"># set locations that are relative to configuration file</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">_set_absolute_paths_to_location</span><span class="p">(</span><span class="n">file_path_keys_relative_to_config</span><span class="p">,</span>
+                                          <span class="n">config_file_location</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+
+    <span class="c1"># set locations that are relative to model_ws</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">_set_absolute_paths_to_location</span><span class="p">(</span><span class="n">file_path_keys_relative_to_model_ws</span><span class="p">,</span>
+                                         <span class="n">model_ws</span><span class="p">,</span>
+                                         <span class="n">cfg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cfg</span></div>
+
+
+<span class="k">def</span> <span class="nf">_set_path</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;From a sequence of keys that point to a file</span>
+<span class="sd">    path in a nested dictionary, convert the file</span>
+<span class="sd">    path at that location from relative to absolute,</span>
+<span class="sd">    based on a provided absolute path.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    keys : sequence or str of dict keys separated by &#39;.&#39;</span>
+<span class="sd">        that point to a relative path</span>
+<span class="sd">        Example: &#39;parent.model_ws&#39; for cfg[&#39;parent&#39;][&#39;model_ws&#39;]</span>
+<span class="sd">    abspath : absolute path</span>
+<span class="sd">    cfg : dictionary</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    updates cfg with an absolute path based on abspath,</span>
+<span class="sd">    at the location in the dictionary specified by keys.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">abspath</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+                <span class="k">elif</span> <span class="n">k</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">abspath</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="n">level</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">cfg</span>
+
+
+<span class="k">def</span> <span class="nf">_set_absolute_paths_to_location</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set relative file paths in a configuration dictionary</span>
+<span class="sd">    to a specified location.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    paths : sequence</span>
+<span class="sd">        Sequence of dictionary keys read by set_path.</span>
+<span class="sd">        e.g. [&#39;parent.model_ws&#39;, &#39;parent.headfile&#39;]</span>
+<span class="sd">    location : str (path to folder)</span>
+<span class="sd">    cfg : configuration dictionary  (as read in by load_cfg)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">keys</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">_set_path</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cfg</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_file_path_keys_from_source_data</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse a source data entry in the configuration file.</span>
+
+<span class="sd">    pseudo code:</span>
+<span class="sd">    For each key or item in source_data,</span>
+<span class="sd">        If it is a string that ends with a valid extension,</span>
+<span class="sd">            a file is expected.</span>
+<span class="sd">        If it is a dict or list,</span>
+<span class="sd">            it is expected to be a file or set of files with metadata.</span>
+<span class="sd">        For each item in the dict or list,</span>
+<span class="sd">            If it is a string that ends with a valid extension,</span>
+<span class="sd">                a file is expected.</span>
+<span class="sd">            If it is a dict or list,</span>
+<span class="sd">                A set of files corresponding to</span>
+<span class="sd">                model layers or stress periods is expected.</span>
+
+<span class="sd">    valid source data file extensions: csv, shp, tif, asc</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    source_data : dict</span>
+<span class="sd">    prefix : str</span>
+<span class="sd">        text to prepend to results, e.g.</span>
+<span class="sd">        keys = prefix.keys</span>
+<span class="sd">    paths = Bool</span>
+<span class="sd">        if True, overrides check for valid extension</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    keys</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">valid_extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;csv&#39;</span><span class="p">,</span> <span class="s1">&#39;shp&#39;</span><span class="p">,</span> <span class="s1">&#39;tif&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;ref&#39;</span><span class="p">,</span> <span class="s1">&#39;dat&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;nc&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;yml&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;hds&#39;</span><span class="p">,</span> <span class="s1">&#39;cbb&#39;</span><span class="p">,</span> <span class="s1">&#39;cbc&#39;</span><span class="p">]</span>
+    <span class="n">file_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;filenames&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;binaryfile&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;nhdplus_paths&#39;</span><span class="p">]</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">source_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">source_data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">k0</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">k0</span> <span class="ow">in</span> <span class="n">file_keys</span><span class="p">:</span>
+                <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="ow">in</span> <span class="n">valid_extensions</span> <span class="ow">or</span> <span class="n">paths</span><span class="p">:</span>
+                <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;output&#39;</span> <span class="ow">in</span> <span class="n">source_data</span><span class="p">:</span>
+                <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">k0</span> <span class="ow">in</span> <span class="n">file_keys</span><span class="p">:</span>
+                    <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">k0</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]))</span>
+                <span class="k">elif</span> <span class="n">paths</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v1</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="ow">in</span> <span class="n">valid_extensions</span><span class="p">:</span>
+                    <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">k0</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">keys</span> <span class="o">+=</span> <span class="n">_parse_file_path_keys_from_source_data</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">k0</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">keys</span>
+
+
+<div class="viewcode-block" id="setup_external_filepaths"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.setup_external_filepaths">[docs]</a><span class="k">def</span> <span class="nf">setup_external_filepaths</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span>
+                             <span class="n">filename_format</span><span class="p">,</span> <span class="n">file_numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">relative_external_paths</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set up external file paths for a MODFLOW package variable. Sets paths</span>
+<span class="sd">    for intermediate files, which are written from the (processed) source data.</span>
+<span class="sd">    Intermediate files are supplied to Flopy as external files for a given package</span>
+<span class="sd">    variable. Flopy writes external files to a specified location when the MODFLOW</span>
+<span class="sd">    package file is written. This method gets the external file paths that</span>
+<span class="sd">    will be written by FloPy, and puts them in the configuration dictionary</span>
+<span class="sd">    under their respective variables.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : mfsetup.MF6model or mfsetup.MFnwtModel instance</span>
+<span class="sd">        Model with cfg attribute to update.</span>
+<span class="sd">    package : str</span>
+<span class="sd">        Three-letter package abreviation (e.g. &#39;DIS&#39; for discretization)</span>
+<span class="sd">    variable_name : str</span>
+<span class="sd">        FloPy name of variable represented by external files (e.g. &#39;top&#39; or &#39;botm&#39;)</span>
+<span class="sd">    filename_format : str</span>
+<span class="sd">        File path to the external file(s). Can be a string representing a single file</span>
+<span class="sd">        (e.g. &#39;top.dat&#39;), or for variables where a file is written for each layer or</span>
+<span class="sd">        stress period, a format string that will be formated with the zero-based layer</span>
+<span class="sd">        number (e.g. &#39;botm{}.dat&#39;) for files botm0.dat, botm1.dat, ...</span>
+<span class="sd">    file_numbers : list of ints</span>
+<span class="sd">        List of numbers for the external files. Usually these represent zero-based</span>
+<span class="sd">        layers or stress periods.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    filepaths : list</span>
+<span class="sd">        List of external file paths</span>
+
+<span class="sd">    Adds intermediated file paths to model.cfg[&lt;package&gt;][&#39;intermediate_data&#39;]</span>
+<span class="sd">    For MODFLOW-6 models, Adds external file paths to model.cfg[&lt;package&gt;][&lt;variable_name&gt;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">package</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">file_numbers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># in lieu of a way to get these from Flopy somehow</span>
+    <span class="n">griddata_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">,</span> <span class="s1">&#39;strt&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;k33&#39;</span><span class="p">,</span> <span class="s1">&#39;sy&#39;</span><span class="p">,</span> <span class="s1">&#39;ss&#39;</span><span class="p">]</span>
+    <span class="n">transient2D_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rech&#39;</span><span class="p">,</span> <span class="s1">&#39;recharge&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;finf&#39;</span><span class="p">,</span> <span class="s1">&#39;pet&#39;</span><span class="p">,</span> <span class="s1">&#39;extdp&#39;</span><span class="p">,</span> <span class="s1">&#39;extwc&#39;</span><span class="p">,</span>
+                             <span class="p">}</span>
+    <span class="n">transient3D_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lakarr&#39;</span><span class="p">,</span> <span class="s1">&#39;bdlknc&#39;</span><span class="p">}</span>
+    <span class="n">tabular_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;connectiondata&#39;</span><span class="p">}</span>
+    <span class="n">transient_tabular_variables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">}</span>
+    <span class="n">transient_variables</span> <span class="o">=</span> <span class="n">transient2D_variables</span> <span class="o">|</span> <span class="n">transient3D_variables</span> <span class="o">|</span> <span class="n">transient_tabular_variables</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="c1"># intermediate data</span>
+    <span class="n">filename_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename_format</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">relative_external_paths</span><span class="p">:</span>
+        <span class="n">intermediate_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">,</span>
+                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">intermediate_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">,</span>
+                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span> <span class="ow">or</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
+                                                         <span class="nb">zip</span><span class="p">(</span><span class="n">file_numbers</span><span class="p">,</span> <span class="n">intermediate_files</span><span class="p">)}</span>
+    <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient3D_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">intermediate_files</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">tabular_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">intermediate_files</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">intermediate_files</span>
+
+    <span class="c1"># external array(s) read by MODFLOW</span>
+    <span class="c1"># (set to reflect expected locations where flopy will save them)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">relative_external_paths</span><span class="p">:</span>
+        <span class="n">external_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
+                                       <span class="n">model</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
+                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">external_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
+                                       <span class="n">model</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
+                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span> <span class="ow">or</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
+                                                         <span class="nb">zip</span><span class="p">(</span><span class="n">file_numbers</span><span class="p">,</span> <span class="n">external_files</span><span class="p">)}</span>
+    <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient3D_variables</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">external_files</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">external_files</span>
+
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+        <span class="c1"># skip these for now (not implemented yet for MF6)</span>
+        <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient3D_variables</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">ext_files_key</span> <span class="o">=</span> <span class="s1">&#39;external_files&#39;</span>
+        <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transient_variables</span><span class="p">:</span>
+            <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">}</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filepaths</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">}</span>
+                         <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="c1"># set package variable input (to Flopy)</span>
+        <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">griddata_variables</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span>
+        <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">tabular_variables</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">variable_name</span><span class="p">)</span>
+            <span class="c1">#elif variable_name in transient_variables:</span>
+            <span class="c1">#    filepaths = {per: {&#39;filename&#39;: f} for per, f in</span>
+            <span class="c1">#                 zip(file_numbers, model.cfg[ext_files_key][variable_name])}</span>
+            <span class="c1">#    model.cfg[package][variable_name] = filepaths</span>
+        <span class="k">elif</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">][</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">ext_files_key</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">variable_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span> <span class="c1"># {per: d for per, d in zip(file_numbers, filepaths)}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filepaths</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepaths</span>
+
+    <span class="k">return</span> <span class="n">filepaths</span></div>
+
+
+<div class="viewcode-block" id="flopy_mf2005_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mf2005_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mf2005_load</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">forgive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute the code in flopy.modflow.Modflow.load on an existing</span>
+<span class="sd">    flopy.modflow.Modflow instance.&quot;&quot;&quot;</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">version</span>
+    <span class="n">verbose</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span>
+    <span class="n">model_ws</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">model_ws</span>
+
+    <span class="c1"># similar to modflow command: if file does not exist , try file.nam</span>
+    <span class="n">namefile_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_ws</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">namefile</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">namefile_path</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">namefile_path</span> <span class="o">+</span> <span class="s1">&#39;.nam&#39;</span><span class="p">)):</span>
+        <span class="n">namefile_path</span> <span class="o">+=</span> <span class="s1">&#39;.nam&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">namefile_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;cannot find name file: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">namefile_path</span><span class="p">))</span>
+
+    <span class="n">files_successfully_loaded</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">files_not_loaded</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># set the reference information</span>
+    <span class="n">ref_attributes</span> <span class="o">=</span> <span class="n">SpatialReference</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">namefile_path</span><span class="p">)</span>
+
+    <span class="c1"># read name file</span>
+    <span class="n">ext_unit_dict</span> <span class="o">=</span> <span class="n">mfreadnam</span><span class="o">.</span><span class="n">parsenamefile</span><span class="p">(</span>
+        <span class="n">namefile_path</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">mfnam_packages</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">External unit dictionary:</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">ext_unit_dict</span><span class="p">,</span> <span class="mi">50</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span><span class="p">))</span>
+
+    <span class="c1"># create a dict where key is the package name, value is unitnumber</span>
+    <span class="n">ext_pkg_d</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">filetype</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ext_unit_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># version is assumed to be mfnwt</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">set_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+    <span class="c1"># reset unit number for list file</span>
+    <span class="k">if</span> <span class="s1">&#39;LIST&#39;</span> <span class="ow">in</span> <span class="n">ext_pkg_d</span><span class="p">:</span>
+        <span class="n">unitnumber</span> <span class="o">=</span> <span class="n">ext_pkg_d</span><span class="p">[</span><span class="s1">&#39;LIST&#39;</span><span class="p">]</span>
+        <span class="n">filepth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">ext_unit_dict</span><span class="p">[</span><span class="n">unitnumber</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">unit_number</span> <span class="o">=</span> <span class="p">[</span><span class="n">unitnumber</span><span class="p">]</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepth</span><span class="p">]</span>
+
+    <span class="c1"># look for the free format flag in bas6</span>
+    <span class="n">bas_key</span> <span class="o">=</span> <span class="n">ext_pkg_d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BAS6&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bas_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bas</span> <span class="o">=</span> <span class="n">ext_unit_dict</span><span class="p">[</span><span class="n">bas_key</span><span class="p">]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">bas</span><span class="o">.</span><span class="n">filehandle</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">bas</span><span class="o">.</span><span class="n">filehandle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">bas</span><span class="o">.</span><span class="n">filehandle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;FREE&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">free_format_input</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">bas</span><span class="o">.</span><span class="n">filehandle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ModflowBas6 free format:</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">free_format_input</span><span class="p">))</span>
+
+    <span class="c1"># load dis</span>
+    <span class="n">dis_key</span> <span class="o">=</span> <span class="n">ext_pkg_d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;DIS&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ext_pkg_d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;DISU&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dis_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;discretization entry not found in nam file&#39;</span><span class="p">)</span>
+    <span class="n">disnamdata</span> <span class="o">=</span> <span class="n">ext_unit_dict</span><span class="p">[</span><span class="n">dis_key</span><span class="p">]</span>
+    <span class="n">dis</span> <span class="o">=</span> <span class="n">disnamdata</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+        <span class="n">disnamdata</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span>
+        <span class="n">ext_unit_dict</span><span class="o">=</span><span class="n">ext_unit_dict</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">files_successfully_loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">disnamdata</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">{:4s}</span><span class="s1"> package load...success&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dis</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>  <span class="c1"># reset model grid now that DIS package is loaded</span>
+    <span class="k">assert</span> <span class="n">m</span><span class="o">.</span><span class="n">pop_key_list</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="o">==</span> <span class="n">dis_key</span>
+    <span class="n">ext_unit_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">dis_key</span><span class="p">)</span>
+    <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">ref_attributes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;start_datetime&quot;</span><span class="p">,</span> <span class="s2">&quot;01-01-1970&quot;</span><span class="p">)</span>
+    <span class="n">itmuni</span> <span class="o">=</span> <span class="n">ref_attributes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;itmuni&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">ref_source</span> <span class="o">=</span> <span class="n">ref_attributes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;defaults&quot;</span><span class="p">)</span>
+    <span class="c1"># if m.structured:</span>
+    <span class="c1">#    # get model units from usgs.model.reference, if provided</span>
+    <span class="c1">#    if ref_source == &#39;usgs.model.reference&#39;:</span>
+    <span class="c1">#        pass</span>
+    <span class="c1">#    # otherwise get them from the DIS file</span>
+    <span class="c1">#    else:</span>
+    <span class="c1">#        itmuni = dis.itmuni</span>
+    <span class="c1">#        ref_attributes[&#39;lenuni&#39;] = dis.lenuni</span>
+    <span class="c1">#    sr = SpatialReference(delr=m.dis.delr.array, delc=ml.dis.delc.array,</span>
+    <span class="c1">#                          **ref_attributes)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#    sr = None</span>
+    <span class="c1">#</span>
+    <span class="n">dis</span><span class="o">.</span><span class="n">sr</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">sr</span>
+    <span class="n">dis</span><span class="o">.</span><span class="n">tr</span> <span class="o">=</span> <span class="n">TemporalReference</span><span class="p">(</span><span class="n">itmuni</span><span class="o">=</span><span class="n">itmuni</span><span class="p">,</span> <span class="n">start_datetime</span><span class="o">=</span><span class="n">start_datetime</span><span class="p">)</span>
+    <span class="n">dis</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="n">start_datetime</span>
+
+    <span class="k">if</span> <span class="n">load_only</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># load all packages/files</span>
+        <span class="n">load_only</span> <span class="o">=</span> <span class="n">ext_pkg_d</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># check items in list</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">load_only</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">load_only</span> <span class="o">=</span> <span class="p">[</span><span class="n">load_only</span><span class="p">]</span>
+        <span class="n">not_found</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">filetype</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">load_only</span><span class="p">):</span>
+            <span class="n">load_only</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">filetype</span> <span class="o">=</span> <span class="n">filetype</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">filetype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ext_pkg_d</span><span class="p">:</span>
+                <span class="n">not_found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filetype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">not_found</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;the following load_only entries were not found &quot;</span>
+                <span class="s2">&quot;in the ext_unit_dict: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_found</span><span class="p">))</span>
+
+    <span class="c1"># try loading packages in ext_unit_dict</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ext_unit_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">package</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">filetype</span> <span class="ow">in</span> <span class="n">load_only</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">forgive</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">package_load_args</span> <span class="o">=</span> \
+                            <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">load</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="s2">&quot;check&quot;</span> <span class="ow">in</span> <span class="n">package_load_args</span><span class="p">:</span>
+                            <span class="n">item</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                                <span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span>
+                                <span class="n">ext_unit_dict</span><span class="o">=</span><span class="n">ext_unit_dict</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">item</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                                <span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span>
+                                <span class="n">ext_unit_dict</span><span class="o">=</span><span class="n">ext_unit_dict</span><span class="p">)</span>
+                        <span class="n">files_successfully_loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">{:4s}</span><span class="s1"> package load...success&#39;</span>
+                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">m</span><span class="o">.</span><span class="n">load_fail</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">{:4s}</span><span class="s1"> package load...failed</span><span class="se">\n</span><span class="s1">   </span><span class="si">{!s}</span><span class="s1">&#39;</span>
+                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">files_not_loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">package_load_args</span> <span class="o">=</span> \
+                        <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">load</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="s2">&quot;check&quot;</span> <span class="ow">in</span> <span class="n">package_load_args</span><span class="p">:</span>
+                        <span class="n">item</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                            <span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span>
+                            <span class="n">ext_unit_dict</span><span class="o">=</span><span class="n">ext_unit_dict</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">item</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                            <span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span>
+                            <span class="n">ext_unit_dict</span><span class="o">=</span><span class="n">ext_unit_dict</span><span class="p">)</span>
+                    <span class="n">files_successfully_loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">{:4s}</span><span class="s1"> package load...success&#39;</span>
+                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">{:4s}</span><span class="s1"> package load...skipped&#39;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="p">))</span>
+                <span class="n">files_not_loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;data&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">files_not_loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">{:4s}</span><span class="s1"> package load...skipped&#39;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="s2">&quot;data&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   </span><span class="si">{}</span><span class="s1"> file load...skipped</span><span class="se">\n</span><span class="s1">      </span><span class="si">{}</span><span class="s1">&#39;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="p">,</span>
+                              <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">pop_key_list</span><span class="p">:</span>
+                <span class="c1"># do not add unit number (key) if it already exists</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">external_units</span><span class="p">:</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">external_fnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">external_units</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">external_binflag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;binary&quot;</span>
+                                              <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">filetype</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">external_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;unhandled case: </span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
+
+    <span class="c1"># pop binary output keys and any external file units that are now</span>
+    <span class="c1"># internal</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">pop_key_list</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">remove_external</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">ext_unit_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: external file unit </span><span class="si">{}</span><span class="s1"> does not exist in &#39;</span>
+                      <span class="s1">&#39;ext_unit_dict.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="c1"># write message indicating packages that were successfully loaded</span>
+    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   The following </span><span class="si">{0}</span><span class="s1"> packages were successfully loaded.&#39;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files_successfully_loaded</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">files_successfully_loaded</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      &#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files_not_loaded</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   The following </span><span class="si">{0}</span><span class="s1"> packages were not loaded.&#39;</span>
+                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files_not_loaded</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">files_not_loaded</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;      &#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.chk&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># return model object</span>
+    <span class="k">return</span> <span class="n">m</span></div>
+
+
+<div class="viewcode-block" id="flopy_mfsimulation_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mfsimulation_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mfsimulation_load</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">verify_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute the code in flopy.mf6.MFSimulation.load on</span>
+<span class="sd">    existing instances of flopy.mf6.MFSimulation and flopy.mf6.MF6model&quot;&quot;&quot;</span>
+
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">sim</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">model_instances</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model_instances</span> <span class="o">=</span> <span class="n">model</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">version</span>
+    <span class="n">exe_name</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">exe_name</span>
+    <span class="n">verbosity_level</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">verbosity_level</span>
+
+    <span class="k">if</span> <span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loading simulation...&#39;</span><span class="p">)</span>
+
+    <span class="c1"># build case consistent load_only dictionary for quick lookups</span>
+    <span class="n">load_only</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">_load_only_dict</span><span class="p">(</span><span class="n">load_only</span><span class="p">)</span>
+
+    <span class="c1"># load simulation name file</span>
+    <span class="k">if</span> <span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  loading simulation name file...&#39;</span><span class="p">)</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">name_file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
+
+    <span class="c1"># load TDIS file</span>
+    <span class="n">tdis_pkg</span> <span class="o">=</span> <span class="s1">&#39;tdis</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span>
+                               <span class="n">get_version_string</span><span class="p">())</span>
+    <span class="n">tdis_attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">name_file</span><span class="p">,</span> <span class="n">tdis_pkg</span><span class="p">)</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">_tdis_file</span> <span class="o">=</span> <span class="n">mftdis</span><span class="o">.</span><span class="n">ModflowTdis</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span>
+                                             <span class="n">filename</span><span class="o">=</span><span class="n">tdis_attr</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
+
+    <span class="n">instance</span><span class="o">.</span><span class="n">_tdis_file</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfdata</span><span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span> <span class="s1">&#39;timing&#39;</span><span class="p">,</span> <span class="n">tdis_pkg</span><span class="p">)]</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  loading tdis package...&#39;</span><span class="p">)</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">_tdis_file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
+
+    <span class="c1"># load models</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">model_recarray</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfdata</span><span class="p">[(</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span> <span class="s1">&#39;models&#39;</span><span class="p">,</span>
+                                                          <span class="s1">&#39;models&#39;</span><span class="p">)]</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="n">model_recarray</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">MFDataException</span> <span class="k">as</span> <span class="n">mfde</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Error occurred while loading model names from the &#39;</span> \
+                  <span class="s1">&#39;simulation name file.&#39;</span>
+        <span class="k">raise</span> <span class="n">MFDataException</span><span class="p">(</span><span class="n">mfdata_except</span><span class="o">=</span><span class="n">mfde</span><span class="p">,</span>
+                              <span class="n">model</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                              <span class="n">package</span><span class="o">=</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                              <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="c1"># resolve model working folder and name file</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">name_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># get the existing model instance</span>
+        <span class="c1"># corresponding to its entry in the simulation name file</span>
+        <span class="c1"># (in flopy the model instance is obtained from PackageContainer.model_factory below)</span>
+        <span class="n">model_obj</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">model_instances</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">namefile</span> <span class="o">==</span> <span class="n">name_file</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_obj</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;model </span><span class="si">{}</span><span class="s1"> attached to </span><span class="si">{}</span><span class="s1"> not found in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">model_instances</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="n">model_obj</span> <span class="o">=</span> <span class="n">model_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#model_obj = PackageContainer.model_factory(item[0][:-1].lower())</span>
+
+        <span class="c1"># load model</span>
+        <span class="k">if</span> <span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  loading model </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+
+        <span class="n">instance</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">flopy_mf6model_load</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">model_obj</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">model_rel_path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># original flopy code to load model</span>
+        <span class="c1">#instance._models[item[2]] = model_obj.load(</span>
+        <span class="c1">#    instance,</span>
+        <span class="c1">#    instance.structure.model_struct_objs[item[0].lower()], item[2],</span>
+        <span class="c1">#    name_file, version, exe_name, strict, path, load_only)</span>
+
+    <span class="c1"># load exchange packages and dependent packages</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">exchange_recarray</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">name_file</span><span class="o">.</span><span class="n">exchanges</span>
+        <span class="n">has_exch_data</span> <span class="o">=</span> <span class="n">exchange_recarray</span><span class="o">.</span><span class="n">has_data</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">MFDataException</span> <span class="k">as</span> <span class="n">mfde</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Error occurred while loading exchange names from the &#39;</span> \
+                  <span class="s1">&#39;simulation name file.&#39;</span>
+        <span class="k">raise</span> <span class="n">MFDataException</span><span class="p">(</span><span class="n">mfdata_except</span><span class="o">=</span><span class="n">mfde</span><span class="p">,</span>
+                              <span class="n">model</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                              <span class="n">package</span><span class="o">=</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                              <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">has_exch_data</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exch_data</span> <span class="o">=</span> <span class="n">exchange_recarray</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">MFDataException</span> <span class="k">as</span> <span class="n">mfde</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Error occurred while loading exchange names from &#39;</span> \
+                      <span class="s1">&#39;the simulation name file.&#39;</span>
+            <span class="k">raise</span> <span class="n">MFDataException</span><span class="p">(</span><span class="n">mfdata_except</span><span class="o">=</span><span class="n">mfde</span><span class="p">,</span>
+                                  <span class="n">model</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">package</span><span class="o">=</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                                  <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">exgfile</span> <span class="ow">in</span> <span class="n">exch_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">load_only</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> \
+                    <span class="n">instance</span><span class="o">.</span><span class="n">_in_pkg_list</span><span class="p">(</span><span class="n">load_only</span><span class="p">,</span> <span class="n">exgfile</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                          <span class="n">exgfile</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> \
+                        <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    skipping package </span><span class="si">{}</span><span class="s1">..&#39;</span>
+                          <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exgfile</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+                <span class="k">continue</span>
+            <span class="c1"># get exchange type by removing numbers from exgtype</span>
+            <span class="n">exchange_type</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">char</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">exgfile</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span>
+                                     <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()])</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="c1"># get exchange number for this type</span>
+            <span class="k">if</span> <span class="n">exchange_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">_exg_file_num</span><span class="p">:</span>
+                <span class="n">exchange_file_num</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">instance</span><span class="o">.</span><span class="n">_exg_file_num</span><span class="p">[</span><span class="n">exchange_type</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">exchange_file_num</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">_exg_file_num</span><span class="p">[</span><span class="n">exchange_type</span><span class="p">]</span>
+                <span class="n">instance</span><span class="o">.</span><span class="n">_exg_file_num</span><span class="p">[</span><span class="n">exchange_type</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">exchange_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_EXG_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exchange_type</span><span class="p">,</span>
+                                               <span class="n">exchange_file_num</span><span class="p">)</span>
+            <span class="c1"># find package class the corresponds to this exchange type</span>
+            <span class="n">package_obj</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">package_factory</span><span class="p">(</span>
+                <span class="n">exchange_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">package_obj</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;An error occurred while loading the &#39;</span> \
+                          <span class="s1">&#39;simulation name file.  Invalid exchange type &#39;</span> \
+                          <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot; specified.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exchange_type</span><span class="p">)</span>
+                <span class="n">type_</span><span class="p">,</span> <span class="n">value_</span><span class="p">,</span> <span class="n">traceback_</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="n">MFDataException</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;loading simulation name file&#39;</span><span class="p">,</span>
+                                      <span class="n">exchange_recarray</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                                      <span class="n">type_</span><span class="p">,</span> <span class="n">value_</span><span class="p">,</span> <span class="n">traceback_</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span>
+                                      <span class="n">instance</span><span class="o">.</span><span class="n">_simulation_data</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span>
+
+            <span class="c1"># build and load exchange package object</span>
+            <span class="n">exchange_file</span> <span class="o">=</span> <span class="n">package_obj</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">exgtype</span><span class="o">=</span><span class="n">exgfile</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                        <span class="n">exgmnamea</span><span class="o">=</span><span class="n">exgfile</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                        <span class="n">exgmnameb</span><span class="o">=</span><span class="n">exgfile</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                                        <span class="n">filename</span><span class="o">=</span><span class="n">exgfile</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">pname</span><span class="o">=</span><span class="n">exchange_name</span><span class="p">,</span>
+                                        <span class="n">loading_package</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  loading exchange package </span><span class="si">{}</span><span class="s1">..&#39;</span>
+                      <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exchange_file</span><span class="o">.</span><span class="n">_get_pname</span><span class="p">()))</span>
+            <span class="n">exchange_file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">_exchange_files</span><span class="p">[</span><span class="n">exgfile</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">exchange_file</span>
+
+    <span class="c1"># load simulation packages</span>
+    <span class="n">solution_recarray</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfdata</span><span class="p">[(</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                                                         <span class="s1">&#39;solutiongroup&#39;</span><span class="p">,</span>
+                                                         <span class="s1">&#39;solutiongroup&#39;</span>
+                                                         <span class="p">)]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">solution_group_dict</span> <span class="o">=</span> <span class="n">solution_recarray</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">MFDataException</span> <span class="k">as</span> <span class="n">mfde</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Error occurred while loading solution groups from &#39;</span> \
+                  <span class="s1">&#39;the simulation name file.&#39;</span>
+        <span class="k">raise</span> <span class="n">MFDataException</span><span class="p">(</span><span class="n">mfdata_except</span><span class="o">=</span><span class="n">mfde</span><span class="p">,</span>
+                              <span class="n">model</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                              <span class="n">package</span><span class="o">=</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                              <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">solution_group</span> <span class="ow">in</span> <span class="n">solution_group_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">solution_info</span> <span class="ow">in</span> <span class="n">solution_group</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">load_only</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> \
+                    <span class="ow">not</span> <span class="n">instance</span><span class="o">.</span><span class="n">_in_pkg_list</span><span class="p">(</span><span class="n">load_only</span><span class="p">,</span>
+                                              <span class="n">solution_info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                              <span class="n">solution_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> \
+                        <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    skipping package </span><span class="si">{}</span><span class="s1">..&#39;</span>
+                          <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">solution_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+                <span class="k">continue</span>
+            <span class="n">ims_file</span> <span class="o">=</span> <span class="n">mfims</span><span class="o">.</span><span class="n">ModflowIms</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">solution_info</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">pname</span><span class="o">=</span><span class="n">solution_info</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  loading ims package </span><span class="si">{}</span><span class="s1">..&#39;</span>
+                      <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ims_file</span><span class="o">.</span><span class="n">_get_pname</span><span class="p">()))</span>
+            <span class="n">ims_file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
+
+    <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfpath</span><span class="o">.</span><span class="n">set_last_accessed_path</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">verify_data</span><span class="p">:</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">instance</span></div>
+
+
+<div class="viewcode-block" id="flopy_mf6model_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mf6model_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mf6model_load</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">model_rel_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute the code in flopy.mf6.MFmodel.load_base on an</span>
+<span class="sd">        existing instance of MF6model.&quot;&quot;&quot;</span>
+
+    <span class="n">instance</span> <span class="o">=</span> <span class="n">model</span>
+    <span class="n">modelname</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">structure</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">structure</span>
+
+    <span class="c1"># load name file</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">name_file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
+
+    <span class="c1"># order packages</span>
+    <span class="n">vnum</span> <span class="o">=</span> <span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span><span class="n">get_version_string</span><span class="p">()</span>
+    <span class="c1"># FIX: Transport - Priority packages maybe should not be hard coded</span>
+    <span class="n">priority_packages</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dis</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vnum</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;disv</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vnum</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>
+                         <span class="s1">&#39;disu</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vnum</span><span class="p">):</span> <span class="mi">1</span><span class="p">}</span>
+    <span class="n">packages_ordered</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">package_recarray</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfdata</span><span class="p">[(</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;nam&#39;</span><span class="p">,</span>
+                                                        <span class="s1">&#39;packages&#39;</span><span class="p">,</span>
+                                                        <span class="s1">&#39;packages&#39;</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">package_recarray</span><span class="o">.</span><span class="n">get_data</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">priority_packages</span><span class="p">:</span>
+            <span class="n">packages_ordered</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">packages_ordered</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+    <span class="c1"># load packages</span>
+    <span class="n">sim_struct</span> <span class="o">=</span> <span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span><span class="n">sim_struct</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">_ftype_num_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ftype</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">packages_ordered</span><span class="p">:</span>
+        <span class="n">ftype</span> <span class="o">=</span> <span class="n">ftype</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ftype</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">package_struct_objs</span> <span class="ow">or</span> <span class="n">ftype</span> <span class="ow">in</span> \
+                <span class="n">sim_struct</span><span class="o">.</span><span class="n">utl_struct_objs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model_rel_path</span> <span class="ow">and</span> <span class="n">model_rel_path</span> <span class="o">!=</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="c1"># strip off model relative path from the file path</span>
+                <span class="n">filemgr</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfpath</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="n">filemgr</span><span class="o">.</span><span class="n">strip_model_relative_path</span><span class="p">(</span><span class="n">modelname</span><span class="p">,</span>
+                                                          <span class="n">fname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">simulation</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> \
+                    <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    loading package </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ftype</span><span class="p">))</span>
+            <span class="c1"># load package</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">load_package</span><span class="p">(</span><span class="n">ftype</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># load referenced packages</span>
+    <span class="k">if</span> <span class="n">modelname</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">referenced_files</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ref_file</span> <span class="ow">in</span> \
+                <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">referenced_files</span><span class="p">[</span><span class="n">modelname</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">package_struct_objs</span> <span class="ow">or</span>
+                <span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span> <span class="ow">in</span> <span class="n">sim_struct</span><span class="o">.</span><span class="n">utl_struct_objs</span><span class="p">)</span> <span class="ow">and</span> \
+                    <span class="ow">not</span> <span class="n">ref_file</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
+                <span class="n">instance</span><span class="o">.</span><span class="n">load_package</span><span class="p">(</span><span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span><span class="p">,</span>
+                                      <span class="n">ref_file</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span>
+                                      <span class="n">ref_file</span><span class="o">.</span><span class="n">reference_path</span><span class="p">)</span>
+                <span class="n">ref_file</span><span class="o">.</span><span class="n">loaded</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># TODO: fix jagged lists where appropriate</span>
+
+    <span class="k">return</span> <span class="n">instance</span></div>
+
+
+<div class="viewcode-block" id="which"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.which">[docs]</a><span class="k">def</span> <span class="nf">which</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check for existance of executable.</span>
+<span class="sd">    https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">is_exe</span><span class="p">(</span><span class="n">fpath</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span>
+
+    <span class="n">fpath</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fpath</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_exe</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">program</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PATH&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">):</span>
+            <span class="n">exe_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">program</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_exe</span><span class="p">(</span><span class="n">exe_file</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">exe_file</span></div>
+
+
+<div class="viewcode-block" id="exe_exists"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.exe_exists">[docs]</a><span class="k">def</span> <span class="nf">exe_exists</span><span class="p">(</span><span class="n">exe_name</span><span class="p">):</span>
+    <span class="n">exe_path</span> <span class="o">=</span> <span class="n">which</span><span class="p">(</span><span class="n">exe_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exe_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">exe_path</span><span class="p">)</span> <span class="ow">and</span> \
+               <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">which</span><span class="p">(</span><span class="n">exe_path</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read_mf6_block"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.read_mf6_block">[docs]</a><span class="k">def</span> <span class="nf">read_mf6_block</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">blockname</span><span class="p">):</span>
+    <span class="n">blockname</span> <span class="o">=</span> <span class="n">blockname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">read</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">per</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">src</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s1">&#39;begin&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">blockname</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">blockname</span> <span class="o">==</span> <span class="s1">&#39;period&#39;</span><span class="p">:</span>
+                    <span class="n">per</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">per</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">elif</span> <span class="n">blockname</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="n">fname</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">elif</span> <span class="n">blockname</span> <span class="o">==</span> <span class="s1">&#39;packagedata&#39;</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;packagedata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">blockname</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">blockname</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">read</span> <span class="o">=</span> <span class="n">blockname</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="s1">&#39;end&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">blockname</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">per</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">read</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1">#break</span>
+            <span class="k">if</span> <span class="n">read</span> <span class="o">==</span> <span class="s1">&#39;options&#39;</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">elif</span> <span class="n">read</span> <span class="o">==</span> <span class="s1">&#39;packages&#39;</span><span class="p">:</span>
+                <span class="n">pckg</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">pckg</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span>
+            <span class="k">elif</span> <span class="n">read</span> <span class="o">==</span> <span class="s1">&#39;period&#39;</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">per</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+            <span class="k">elif</span> <span class="n">read</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+            <span class="k">elif</span> <span class="n">read</span> <span class="o">==</span> <span class="s1">&#39;packagedata&#39;</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;packagedata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+            <span class="k">elif</span> <span class="n">read</span> <span class="o">==</span> <span class="n">blockname</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">blockname</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="read_lak_ggo"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.read_lak_ggo">[docs]</a><span class="k">def</span> <span class="nf">read_lak_ggo</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span>
+                 <span class="n">start_datetime</span><span class="o">=</span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">,</span>
+                 <span class="n">keep_only_last_timestep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">lake</span><span class="p">,</span> <span class="n">hydroid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">lak_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lake</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;lak&#39;</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">read_ggofile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                      <span class="n">start_datetime</span><span class="o">=</span><span class="n">start_datetime</span><span class="p">,</span>
+                      <span class="n">keep_only_last_timestep</span><span class="o">=</span><span class="n">keep_only_last_timestep</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;lake&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lak_number</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;hydroid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hydroid</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="read_ggofile"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.read_ggofile">[docs]</a><span class="k">def</span> <span class="nf">read_ggofile</span><span class="p">(</span><span class="n">gagefile</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span>
+                <span class="n">start_datetime</span><span class="o">=</span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">,</span>
+                <span class="n">keep_only_last_timestep</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gagefile</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="nb">next</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="n">namesstr</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">namesstr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;DATA:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                            <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">names</span><span class="o">=</span><span class="n">names</span>
+                            <span class="p">)</span>
+    <span class="n">kstp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">kper</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nstp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">nstp</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nstp</span><span class="p">):</span>
+            <span class="n">kstp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">kper</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">kstp</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;kstp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kstp</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;kper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kper</span>
+    <span class="k">if</span> <span class="n">keep_only_last_timestep</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;kper&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">()</span>
+
+    <span class="n">start_ts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">start_ts</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">datetime</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2021, Modflow-setup developers |.
+      <span class="lastupdated">
+        Last updated on Jan 09, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

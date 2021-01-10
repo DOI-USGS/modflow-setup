@@ -1,0 +1,578 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>mfsetup.grid module &mdash; modflow-setup 0.post203+g3dc3958 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mfsetup.tdis module" href="mfsetup.tdis.html" />
+    <link rel="prev" title="mfsetup.fileio module" href="mfsetup.fileio.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> modflow-setup
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.post203+g3dc3958
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#model-classes">Model classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#supporting-modules">Supporting modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.grid module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Code Reference</a> &raquo;</li>
+        
+      <li>mfsetup.grid module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/mfsetup.grid.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-mfsetup.grid">
+<span id="mfsetup-grid-module"></span><h1>mfsetup.grid module<a class="headerlink" href="#module-mfsetup.grid" title="Permalink to this headline">¶</a></h1>
+<p>Code for creating and working with regular (structured) grids. Focus is on the 2D representation of
+the grid in the cartesian plane. For methods involving layering (in the vertical dimension), see
+the discretization module.</p>
+<dl class="py class">
+<dt id="mfsetup.grid.MFsetupGrid">
+<em class="property">class </em><code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">MFsetupGrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">delc</span></em>, <em class="sig-param"><span class="n">delr</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">idomain</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lenuni</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proj_str</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prj</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">wkt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xoff</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">yoff</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">angrot</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.discretization.structuredgrid.html#flopy.discretization.structuredgrid.StructuredGrid" title="(in flopy Documentation v3.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.discretization.structuredgrid.StructuredGrid</span></code></a></p>
+<p>Class representing a structured grid. Extends flopy.discretization.StructuredGrid
+to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>delc</strong><span class="classifier">ndarray</span></dt><dd><p>1D numpy array of grid spacing along a column (len nrow), in CRS units.</p>
+</dd>
+<dt><strong>delr</strong><span class="classifier">ndarray</span></dt><dd><p>1D numpy array of grid spacing along a row (len ncol), in CRS units.</p>
+</dd>
+<dt><strong>top</strong><span class="classifier">ndarray</span></dt><dd><p>2D numpy array of model top elevations</p>
+</dd>
+<dt><strong>botm</strong><span class="classifier">ndarray</span></dt><dd><p>3D numpy array of model bottom elevations</p>
+</dd>
+<dt><strong>idomain</strong><span class="classifier">ndarray</span></dt><dd><p>3D numpy array of model idomain values</p>
+</dd>
+<dt><strong>lenuni</strong><span class="classifier">int, optional</span></dt><dd><p>MODFLOW length units variable. See
+<a class="reference external" href="https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?beginners_guide_to_modflow.htm">the Online Guide to MODFLOW</a></p>
+</dd>
+<dt><strong>epsg</strong><span class="classifier">int, optional</span></dt><dd><p>EPSG code for the model CRS</p>
+</dd>
+<dt><strong>proj_str</strong><span class="classifier">str, optional</span></dt><dd><p>PROJ string for model CRS. In general, a spatial reference ID
+(such as an EPSG code) or Well-Known Text (WKT) string is prefered
+over a PROJ string (see References)</p>
+</dd>
+<dt><strong>prj</strong><span class="classifier">str, optional</span></dt><dd><p>Filepath for ESRI projection file (containing wkt) describing model CRS</p>
+</dd>
+<dt><strong>wkt</strong><span class="classifier">str, optional</span></dt><dd><p>Well-known text string describing model CRS.</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
+passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code>
+Can be any of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code> class</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt><strong>xoff, yoff</strong><span class="classifier">float, float, optional</span></dt><dd><p>Model grid offset (location of lower left corner), by default 0.0, 0.0</p>
+</dd>
+<dt><strong>xul, yul</strong><span class="classifier">float, float, optional</span></dt><dd><p>Model grid offset (location of upper left corner), by default 0.0, 0.0</p>
+</dd>
+<dt><strong>angrot</strong><span class="classifier">float, optional</span></dt><dd><p>Rotation of the model grid, in degrees clockwise about the lower left corner, by default 0.0</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems</a></p>
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.bbox">
+<em class="property">property </em><code class="sig-name descname">bbox</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shapely polygon bounding box of the model grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.bounds">
+<em class="property">property </em><code class="sig-name descname">bounds</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grid bounding box in order used by shapely.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.crs">
+<em class="property">property </em><code class="sig-name descname">crs</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.crs" title="Permalink to this definition">¶</a></dt>
+<dd><p>pyproj.crs.CRS instance describing the coordinate reference system
+for the model grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.get_vertices">
+<code class="sig-name descname">get_vertices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">j</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.get_vertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.get_vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get vertices for a single cell or sequence if i, j locations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.length_multiplier">
+<em class="property">property </em><code class="sig-name descname">length_multiplier</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.length_multiplier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.polygons">
+<em class="property">property </em><code class="sig-name descname">polygons</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.polygons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vertices for grid cell polygons.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.proj_str">
+<em class="property">property </em><code class="sig-name descname">proj_str</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.proj_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.rotation">
+<em class="property">property </em><code class="sig-name descname">rotation</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.rotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.size">
+<em class="property">property </em><code class="sig-name descname">size</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.transform">
+<em class="property">property </em><code class="sig-name descname">transform</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rasterio Affine object (same as transform attribute of rasters).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.vertices">
+<em class="property">property </em><code class="sig-name descname">vertices</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vertices for grid cell polygons.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.wkt">
+<em class="property">property </em><code class="sig-name descname">wkt</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.wkt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.write_shapefile">
+<code class="sig-name descname">write_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">'grid.shp'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.write_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.write_shapefile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a shapefile of the grid with just the row and column attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.xul">
+<em class="property">property </em><code class="sig-name descname">xul</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.xul" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="mfsetup.grid.MFsetupGrid.yul">
+<em class="property">property </em><code class="sig-name descname">yul</code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.yul" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.grid.get_grid_bounding_box">
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_grid_bounding_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">modelgrid</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_grid_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_grid_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get bounding box of potentially rotated modelgrid
+as a shapely Polygon object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>modelgrid</strong><span class="classifier">flopy.discretization.StructuredGrid instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.grid.get_ij">
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_ij</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">local</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">chunksize</span><span class="o">=</span><span class="default_value">100</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_ij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_ij" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the row and column of a point or sequence of points
+in real-world coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>grid</strong><span class="classifier">flopy.discretization.StructuredGrid instance</span></dt><dd></dd>
+<dt><strong>x</strong><span class="classifier">scalar or sequence of x coordinates</span></dt><dd></dd>
+<dt><strong>y</strong><span class="classifier">scalar or sequence of y coordinates</span></dt><dd></dd>
+<dt><strong>local</strong><span class="classifier">bool</span></dt><dd><p>Flag for returning real-world or model (local) coordinates.
+(default False)</p>
+</dd>
+<dt><strong>chunksize</strong><span class="classifier">int</span></dt><dd><p>Because this function compares each x, y location to a vector
+of model grid cell locations, memory usage can quickly get
+out of hand, as it increases as the square of the number of locations.
+This can be avoided by breaking the x, y location vectors into
+chunks. Experimentation with approx. 5M points suggests
+that a chunksize of 100 provides close to optimal
+performance in terms of execution time. (default 100)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>i</strong><span class="classifier">row or sequence of rows (zero-based)</span></dt><dd></dd>
+<dt><strong>j</strong><span class="classifier">column or sequence of columns (zero-based)</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.grid.get_nearest_point_on_grid">
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_nearest_point_on_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">'center'</span></em>, <em class="sig-param"><span class="n">op</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_nearest_point_on_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_nearest_point_on_grid" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>x-coordinate of point</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>y-coordinate of point</p>
+</dd>
+<dt><strong>transform</strong><span class="classifier">Affine instance, optional</span></dt><dd><p>Affine object instance describing grid</p>
+</dd>
+<dt><strong>xul</strong><span class="classifier">float</span></dt><dd><p>x-coordinate of upper left corner of the grid</p>
+</dd>
+<dt><strong>yul</strong><span class="classifier">float</span></dt><dd><p>y-coordinate of upper left corner of the grid</p>
+</dd>
+<dt><strong>dx</strong><span class="classifier">float</span></dt><dd><p>grid spacing in the x-direction (along rows)</p>
+</dd>
+<dt><strong>dy</strong><span class="classifier">float</span></dt><dd><p>grid spacing in the y-direction (along columns)</p>
+</dd>
+<dt><strong>rotation</strong><span class="classifier">float</span></dt><dd><p>grid rotation about the upper left corner, in degrees clockwise from the x-axis</p>
+</dd>
+<dt><strong>offset</strong><span class="classifier">str, {‘center’, ‘edge’}</span></dt><dd><p>Whether the point on the grid represents a cell center or corner (edge). This
+argument is only used if xul, yul, dx, dy and rotation are supplied. If
+an Affine transform instance is supplied, it is assumed to already incorporate
+the offset.</p>
+</dd>
+<dt><strong>op</strong><span class="classifier">function, optional</span></dt><dd><p>Function to convert fractional pixels to whole numbers (np.round, np.floor, np.ceiling).
+Defaults to np.round if offset == ‘center’; otherwise defaults to np.floor.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>x_nearest, y_nearest</strong><span class="classifier">float</span></dt><dd><p>Coordinates of nearest grid cell center.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.grid.get_point_on_national_hydrogeologic_grid">
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_point_on_national_hydrogeologic_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">'edge'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_point_on_national_hydrogeologic_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_point_on_national_hydrogeologic_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an x, y location representing the upper left
+corner of a model grid, return the upper left corner
+of the cell in the National Hydrogeologic Grid that
+contains it.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.grid.rasterize">
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">rasterize</code><span class="sig-paren">(</span><em class="sig-param">feature</em>, <em class="sig-param">grid</em>, <em class="sig-param">id_column=None</em>, <em class="sig-param">include_ids=None</em>, <em class="sig-param">crs=None</em>, <em class="sig-param">epsg=None</em>, <em class="sig-param">proj4=None</em>, <em class="sig-param">dtype=&lt;class 'numpy.float32'&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rasterize a feature onto the model grid, using
+the rasterio.features.rasterize method. Features are intersected
+if they contain the cell center.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>feature</strong><span class="classifier">str (shapefile path), list of shapely objects,</span></dt><dd><p>or dataframe with geometry column</p>
+</dd>
+<dt><strong>id_column</strong><span class="classifier">str</span></dt><dd><p>Column with unique integer identifying each feature; values
+from this column will be assigned to the output raster.</p>
+</dd>
+<dt><strong>grid</strong><span class="classifier">grid.StructuredGrid instance</span></dt><dd></dd>
+<dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
+passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code>
+Can be any of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PROJ string</p></li>
+<li><p>Dictionary of PROJ parameters</p></li>
+<li><p>PROJ keyword arguments for parameters</p></li>
+<li><p>JSON string with PROJ parameters</p></li>
+<li><p>CRS WKT string</p></li>
+<li><p>An authority string [i.e. ‘epsg:4326’]</p></li>
+<li><p>An EPSG integer code [i.e. 4326]</p></li>
+<li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
+<li><p>An object with a <cite>to_wkt</cite> method.</p></li>
+<li><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code> class</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt><strong>dtype</strong><span class="classifier">dtype</span></dt><dd><p>Datatype for the output array</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier">keyword arguments to rasterio.features.rasterize()</span></dt><dd><p><a class="reference external" href="https://rasterio.readthedocs.io/en/stable/api/rasterio.features.html">https://rasterio.readthedocs.io/en/stable/api/rasterio.features.html</a></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>2D numpy array with intersected values</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.grid.setup_structured_grid">
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">setup_structured_grid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yoff</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yul</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nrow</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ncol</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nlay</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dxy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">delc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">botm</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">parent_model</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snap_to_NHG</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">features</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">features_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">id_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">include_ids</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">buffer</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">crs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_length_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grid_file</span><span class="o">=</span><span class="default_value">'grid.json'</span></em>, <em class="sig-param"><span class="n">bbox_shapefile</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="mfsetup.grid.write_bbox_shapefile">
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">write_bbox_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">modelgrid</span></em>, <em class="sig-param"><span class="n">outshp</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#write_bbox_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.write_bbox_shapefile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mfsetup.tdis.html" class="btn btn-neutral float-right" title="mfsetup.tdis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mfsetup.fileio.html" class="btn btn-neutral float-left" title="mfsetup.fileio module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2021, Modflow-setup developers |.
+      <span class="lastupdated">
+        Last updated on Jan 09, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
