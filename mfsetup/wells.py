@@ -180,11 +180,11 @@ def setup_wel_data(model, for_external_files=True):
     if model.version == 'mf6':
         inactive = model.dis.idomain.array[df.k.values,
                                            df.i.values,
-                                           df.j.values] != 1
+                                           df.j.values] < 1
     else:
         inactive = model.bas6.ibound.array[df.k.values,
                                            df.i.values,
-                                           df.j.values] != 1
+                                           df.j.values] < 1
 
     # record dropped wells in csv file
     # (which might contain wells dropped by other routines)
@@ -365,12 +365,12 @@ def assign_layers_from_screen_top_botm(data, model,
                 layer_thicknesses = sat_thickness[:, i, j]
 
             # set inactive cells to 0 thickness for the purpose or relocating wells
-            layer_thicknesses[idomain[:, i, j] != 1] = 0
+            layer_thicknesses[idomain[:, i, j] < 1] = 0
             data['idomain'] = idomain[data['k'], i, j]
             data['laythick'] = layer_thicknesses[data['k'].values,
                                                  list(range(layer_thicknesses.shape[1]))]
             # flag layers that are too thin or inactive
-            inactive = idomain[data.k, data.i, data.j] != 1
+            inactive = idomain[data.k, data.i, data.j] < 1
             invalid_open_interval = (data['laythick'] < minimum_layer_thickness) | inactive
 
             if any(invalid_open_interval):
