@@ -801,14 +801,24 @@ class MFArrayData(SourceData):
     def get_data(self):
         data = {}
 
+        # number of layers in dest. array
+        # (array3d dtype is nlay, nrow, ncol)
+        if self.datatype == 'array3d':
+            nk = self.dest_model.nlay
+        elif self.datatype == 'transient2d':
+            nk = self.dest_model.nper
+        else:
+            nk = 1
+
+        # tile 2D array to 3D
+        if isinstance(self.values, np.ndarray) and \
+                len(self.values.shape) == 2:
+            self.values = np.tile(self.values, (nk, 1, 1))
+
         # convert to dict
         if isinstance(self.values, str) or np.isscalar(self.values):
-            if self.datatype == 'array3d':
-                nk = self.dest_model.nlay
-            else:
-                nk = 1
             self.values = {k: self.values for k in range(nk)}
-        elif isinstance(self.values, list):
+        elif isinstance(self.values, list) or isinstance(self.values, np.ndarray):
             self.values = {i: val for i, val in enumerate(self.values)}
         for i, val in self.values.items():
             if isinstance(val, dict) and 'filename' in val.keys():

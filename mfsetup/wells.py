@@ -296,7 +296,6 @@ def assign_layers_from_screen_top_botm(data, model,
 
             if strt_package not in model.get_package_list():
                 warnings.warn(no_strt_msg.format(strt_package), UserWarning)
-                strt = None
                 strt2D = None
                 strt3D = None
             else:
@@ -351,12 +350,19 @@ def assign_layers_from_screen_top_botm(data, model,
             all_layers = np.zeros((model.nlay + 1, model.nrow, model.ncol))
             all_layers[0] = model.dis.top.array
             all_layers[1:] = model.dis.botm.array
+            all_layer_thicknesses = np.abs(np.diff(all_layers, axis=0))
             layer_thicknesses = -np.diff(all_layers[:, i, j], axis=0)
 
             # only include thicknesses for valid layers
             # reset thicknesses to sat. thickness
             if strt3D is not None:
-                j=2
+                sat_thickness = strt3D - model.dis.botm.array
+                # cells where the head is above the layer top
+                no_unsat = sat_thickness > all_layer_thicknesses
+                sat_thickness[no_unsat] = all_layer_thicknesses[no_unsat]
+                # cells where the head is below the cell bottom
+                sat_thickness[sat_thickness < 0] = 0
+                layer_thicknesses = sat_thickness[:, i, j]
 
             # set inactive cells to 0 thickness for the purpose or relocating wells
             layer_thicknesses[idomain[:, i, j] != 1] = 0

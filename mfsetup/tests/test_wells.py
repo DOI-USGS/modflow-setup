@@ -79,6 +79,19 @@ def test_assign_layers_from_screen_top_botm(shellmound_model_with_dis, test_data
                                                  minimum_layer_thickness=10.)
     assert results.loc[0, 'k'] == 4
 
+    # test effect of starting heads (sat. thickness) on well placement
+    model.cfg['ic']['griddata']['strt'] = model.dis.botm.array[5]
+    model.setup_ic()
+    results = assign_layers_from_screen_top_botm(welldata, model,
+                                                 flux_col='q',
+                                                 screen_top_col='screen_top',
+                                                 screen_botm_col='screen_botm',
+                                                 label_col='site_no',
+                                                 across_layers=False,
+                                                 distribute_by='thickness',
+                                                 minimum_layer_thickness=10.)
+    assert results.loc[0, 'k'] == 12
+
 
 def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
 

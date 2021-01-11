@@ -151,7 +151,7 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
                                        screen_top_col='elv_top_m',
                                        screen_botm_col='elv_botm_m',
                                        across_layers=False,
-                                       distribute_by='thickness',
+                                       distribute_by='transmissivity',
                                        minimum_layer_thickness=2.)
     #isthin = well_info.laythick < minimum_layer_thickness
     #well_info.loc[isthin, 'k'] = well_info.loc[isthin, 'ktop'].values
