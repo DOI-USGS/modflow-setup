@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.tdis &mdash; modflow-setup 0.post206+g003adad documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.post207+gb4384e0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post206+g003adad
+                0.post207+gb4384e0
               </div>
             
           
@@ -302,27 +302,24 @@
 
 
 <div class="viewcode-block" id="setup_perioddata_group"><a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.setup_perioddata_group">[docs]</a><span class="k">def</span> <span class="nf">setup_perioddata_group</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">,</span> <span class="n">end_date_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                           <span class="n">nper</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">perlen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_time_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                           <span class="n">steady</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                             <span class="mi">1</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+                           <span class="n">nper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">perlen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_time_units</span><span class="o">=</span><span class="s1">&#39;days&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">steady</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
                            <span class="n">nstp</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tsmult</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
                            <span class="n">oc_saverecord</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;save head last&#39;</span><span class="p">,</span>
-                             <span class="s1">&#39;save budget last&#39;</span><span class="p">]},</span>
+                                              <span class="s1">&#39;save budget last&#39;</span><span class="p">]},</span>
                            <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sets up time discretization for a model; outputs a DataFrame with</span>
 <span class="sd">    stress period dates/times and properties. Stress periods can be established</span>
-<span class="sd">    with an established explicitly by specifying perlen as a list of period lengths in</span>
-<span class="sd">    model units. Or, stress periods can be established using three of the</span>
-<span class="sd">    start_date, end_date_time, nper, and freq arguments, similar to the</span>
-<span class="sd">    pandas.date_range function.</span>
-<span class="sd">    (see https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html)</span>
+<span class="sd">    by explicitly specifying perlen as a list of period lengths in</span>
+<span class="sd">    model units. Or, stress periods can be generated via :func:`pandas.date_range`,</span>
+<span class="sd">    using three of the start_date_time, end_date_time, nper, and freq arguments.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    start_date_time_time : str or datetime-like</span>
-<span class="sd">        Left bound for generating stress period dates. See pandas documenation.</span>
+<span class="sd">    start_date_time : str or datetime-like</span>
+<span class="sd">        Left bound for generating stress period dates. See :func:`pandas.date_range`.</span>
 <span class="sd">    end_date_time : str or datetime-like, optional</span>
-<span class="sd">        Right bound for generating stress period dates. See pandas documenation.</span>
+<span class="sd">        Right bound for generating stress period dates. See :func:`pandas.date_range`.</span>
 <span class="sd">    nper : int, optional</span>
 <span class="sd">        Number of stress periods. Only used if perlen is None, or in combination with freq</span>
 <span class="sd">        if an end_date_time isn&#39;t specified.</span>
@@ -331,6 +328,7 @@
 <span class="sd">        specify 3 of start_date_time, end_date_time, nper and/or freq.</span>
 <span class="sd">    model_time_units : str, optional</span>
 <span class="sd">        &#39;days&#39; or &#39;seconds&#39;.</span>
+<span class="sd">        By default, &#39;days&#39;.</span>
 <span class="sd">    freq : str or DateOffset, default None</span>
 <span class="sd">        For setting up uniform stress periods between a start and end date, or of length nper.</span>
 <span class="sd">        Same as argument to pandas.date_range. Frequency strings can have multiples,</span>
@@ -356,9 +354,9 @@
 <span class="sd">        DataFrame summarizing stress period information. Data columns:</span>
 
 <span class="sd">        ==================  ================  ==============================================</span>
-<span class="sd">        **start_datetime**  pandas datetimes  start date/time of each stress period (does not include steady-state periods)</span>
-<span class="sd">        **end_datetime**    pandas datetimes  end date/time of each stress period (does not include steady-state periods)</span>
-<span class="sd">        **time**            float             cumulative MODFLOW time at end of period (includes steady-state periods)</span>
+<span class="sd">        **start_datetime**  pandas datetimes  start date/time of each stress period</span>
+<span class="sd">        **end_datetime**    pandas datetimes  end date/time of each stress period</span>
+<span class="sd">        **time**            float             cumulative MODFLOW time at end of period</span>
 <span class="sd">        **per**             int               zero-based stress period</span>
 <span class="sd">        **perlen**          float             stress period length in model time units</span>
 <span class="sd">        **nstp**            int               number of timesteps in the stress period</span>
@@ -367,37 +365,110 @@
 <span class="sd">        **oc**              dict              MODFLOW-6 output control options</span>
 <span class="sd">        ==================  ================  ==============================================</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    *Initial steady-state period*</span>
+
+<span class="sd">    If the first stress period is specified as steady-state (``steady[0] == True``),</span>
+<span class="sd">    the period length (perlen) in MODFLOW time is automatically set to 1. If subsequent</span>
+<span class="sd">    stress periods are specified, or if no end-date is specified, the end date for</span>
+<span class="sd">    the initial steady-state stress period is set equal to the start date. In the latter case,</span>
+<span class="sd">    the assumption is that the specified start date represents the start of the transient simulation,</span>
+<span class="sd">    and the initial steady-state (which is time-invarient anyways) is intended to produce a valid</span>
+<span class="sd">    starting condition. If only a single steady-state stress period is specified with an end date,</span>
+<span class="sd">    then that end date is retained.</span>
+
+<span class="sd">    *MODFLOW time vs real time*</span>
+
+<span class="sd">    The ``time`` column of the output DataFrame represents time in the MODFLOW simulation,</span>
+<span class="sd">    which cannot have zero-lengths for any period. Therefore, initial steady-state periods</span>
+<span class="sd">    are automatically assigned lengths of one (as described above), and MODFLOW time is incremented</span>
+<span class="sd">    accordingly. If the model has an initial steady-state period, this means that subsequent MODFLOW</span>
+<span class="sd">    times will be 1 time unit greater than the acutal date-times.</span>
+
+<span class="sd">    *End-dates*</span>
+
+<span class="sd">    Specified ``end_date_time`` represents the right bound of the time discretization,</span>
+<span class="sd">    or in other words, the time increment *after* the last time increment to be</span>
+<span class="sd">    simulated. For example, ``end_date_time=&#39;2019-01-01&#39;`` would mean that</span>
+<span class="sd">    ``&#39;2018-12-31&#39;`` is the last date simulated by the model</span>
+<span class="sd">    (which ends at ``2019-01-01 00:00:00``).</span>
+
+
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># todo: refactor/simplify setup_perioddata_group</span>
+    <span class="n">specified_start_datetime</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">start_date_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">specified_start_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">end_date_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If no start_datetime, must specify end_datetime&#39;</span><span class="p">)</span>
+    <span class="n">specified_end_datetime</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">end_date_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">specified_end_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">end_date_time</span><span class="p">)</span>
+
+    <span class="c1"># if times are specified by start &amp; end dates and freq,</span>
+    <span class="c1"># period is determined by pd.date_range</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">({</span><span class="n">specified_start_datetime</span><span class="p">,</span> <span class="n">specified_end_datetime</span><span class="p">,</span> <span class="n">freq</span><span class="p">}):</span>
+        <span class="n">nper</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">freq</span> <span class="o">=</span> <span class="n">convert_freq_to_period_start</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
     <span class="n">oc</span> <span class="o">=</span> <span class="n">oc_saverecord</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">steady</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">steady</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">steady</span><span class="p">)}</span>
 
+    <span class="c1"># nstp and tsmult need to be lists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">nstp</span><span class="p">):</span>
+        <span class="n">nstp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nstp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tsmult</span><span class="p">):</span>
+        <span class="n">tsmult</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tsmult</span><span class="p">)</span>
+
     <span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;Specify perlen as a list of lengths in model units, or</span><span class="se">\n</span><span class="s2">specify 3 &quot;</span> \
           <span class="s2">&quot;of start_date_time, end_date_time, nper and/or freq.&quot;</span>
+
     <span class="c1"># Explicitly specified stress period lengths</span>
+    <span class="n">start_datetime</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># datetimes at period starts</span>
+    <span class="n">end_datetime</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># datetimes at period ends</span>
     <span class="k">if</span> <span class="n">perlen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">perlen</span><span class="p">):</span>
             <span class="n">perlen</span> <span class="o">=</span> <span class="p">[</span><span class="n">perlen</span><span class="p">]</span>
-        <span class="n">datetimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)]</span>
+        <span class="n">start_datetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">specified_start_datetime</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">perlen</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-                <span class="n">datetimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datetimes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">model_time_units</span><span class="p">))</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span> <span class="c1"># time in MODFLOW units</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">perlen</span><span class="p">):</span>
+                <span class="c1"># initial steady-state period</span>
+                <span class="c1"># set perlen to 0</span>
+                <span class="c1"># and start/end dates to be equal</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">steady</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">next_start</span> <span class="o">=</span> <span class="n">start_datetime</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">next_start</span> <span class="o">=</span> <span class="n">start_datetime</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> \
+                                 <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">model_time_units</span><span class="p">)</span>
+                <span class="n">start_datetime</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_start</span><span class="p">)</span>
+            <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># single specified stress period length</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">end_datetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">specified_start_datetime</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                                    <span class="n">unit</span><span class="o">=</span><span class="n">model_time_units</span><span class="p">)]</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>  <span class="c1"># time at end of period, in MODFLOW units</span>
+
+    <span class="c1"># single steady-state period</span>
     <span class="k">elif</span> <span class="n">nper</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">steady</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
         <span class="n">perlen</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="c1">#datetimes = [pd.Timestamp(start_date_time)]</span>
+        <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">([</span><span class="n">specified_start_datetime</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">specified_end_datetime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">([</span><span class="n">specified_end_datetime</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">([</span><span class="n">specified_start_datetime</span><span class="p">])</span>
 
-    <span class="c1"># Set up datetimes based on 3 of start_date_time, end_date_time, nper and/or freq (scalar perlen)</span>
+    <span class="c1"># Set up datetimes based on 3 of start_date_time, specified_end_datetime, nper and/or freq (scalar perlen)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">nstp</span><span class="p">),</span> <span class="s2">&quot;nstp: </span><span class="si">{}</span><span class="s2">; nstp must be a scalar if perlen &quot;</span> \
                                   <span class="s2">&quot;is not specified explicitly as a list.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nstp</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tsmult</span><span class="p">),</span> <span class="s2">&quot;tsmult: </span><span class="si">{}</span><span class="s2">; tsmult must be a scalar if perlen &quot;</span> \
                                   <span class="s2">&quot;is not specified explicitly as a list.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tsmult</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
         <span class="n">periods</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">end_date_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">specified_end_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># start_date_time, periods and freq</span>
             <span class="c1"># (i.e. nper periods of length perlen starting on stat_date)</span>
             <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -405,69 +476,69 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized input for perlen: </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">perlen</span><span class="p">,</span> <span class="n">txt</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># end_date_time and freq and periods</span>
-            <span class="k">if</span> <span class="n">start_date_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># specified_end_datetime and freq and periods</span>
+            <span class="k">if</span> <span class="n">specified_start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">periods</span> <span class="o">=</span> <span class="n">nper</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="c1"># start_date_time, end_date_time and (linearly spaced) periods</span>
-            <span class="c1"># (i.e. nper periods of uniform length between start_date_time and end_date_time)</span>
+            <span class="c1"># start_date_time, specified_end_datetime and uniform periods</span>
+            <span class="c1"># (i.e. nper periods of uniform length between start_date_time and specified_end_datetime)</span>
             <span class="k">elif</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">periods</span> <span class="o">=</span> <span class="n">nper</span> <span class="c1">#-1 if steady[0] else nper</span>
-            <span class="c1"># start_date_time, end_date_time and frequency</span>
+            <span class="c1"># start_date_time, specified_end_datetime and frequency</span>
             <span class="k">elif</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">pass</span>
-        <span class="n">datetimes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">,</span> <span class="n">end_date_time</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">start_date_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">start_date_time</span> <span class="o">=</span> <span class="n">datetimes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># in case end_date_time, periods and freq were specified</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datetimes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">perlen</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">end_date_time</span><span class="p">)</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">))</span><span class="o">.</span><span class="n">days</span><span class="p">]</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>
+        <span class="n">datetimes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">specified_start_datetime</span><span class="p">,</span> <span class="n">specified_end_datetime</span><span class="p">,</span>
+                                  <span class="n">periods</span><span class="o">=</span><span class="n">periods</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
+        <span class="c1"># if end_datetime, periods and freq were specified</span>
+        <span class="k">if</span> <span class="n">specified_start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">specified_start_datetime</span> <span class="o">=</span> <span class="n">datetimes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">datetimes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">datetimes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">time_edges</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">datetimes</span> <span class="o">-</span> <span class="n">start_datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                 <span class="n">model_time_units</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">perlen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">time_edges</span><span class="p">)</span>
+            <span class="c1"># time is elapsed time at the end of each period</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">time_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># time is at the end of each stress period</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">datetimes</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)),</span> <span class="n">model_time_units</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-            <span class="c1"># get the last (end) time, if it wasn&#39;t included in datetimes</span>
-            <span class="k">if</span> <span class="n">datetimes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">end_date_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># + 1 for consistency with using date_range below</span>
-                    <span class="c1"># e.g. to end at 2019-01-01 instead of 2018-12-31</span>
-                    <span class="n">last_time</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">end_date_time</span><span class="p">)</span> <span class="o">-</span>
-                                         <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)),</span>
-                                        <span class="n">model_time_units</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">end_datetimes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">,</span>
-                                                  <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">datetimes</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                                                  <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
-                    <span class="n">last_time</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">end_datetimes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span>
-                                         <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)),</span>
-                                         <span class="n">model_time_units</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">last_time</span> <span class="o">!=</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                    <span class="n">time</span> <span class="o">+=</span> <span class="p">[</span><span class="n">last_time</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
-        <span class="n">perlen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
-        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>  <span class="c1"># == len(datetimes)</span>
+            <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">datetimes</span>
+            <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">datetimes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span>
+                                          <span class="p">[</span><span class="n">specified_end_datetime</span><span class="p">])</span>
+            <span class="c1"># Edge case of end date falling on the start date freq</span>
+            <span class="c1"># (zero-length sp at end)</span>
+            <span class="k">if</span> <span class="n">end_datetime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">start_datetime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">start_datetime</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">end_datetime</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">time_edges</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">end_datetime</span> <span class="o">-</span> <span class="n">start_datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                 <span class="n">model_time_units</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">time_edges</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">time_edges</span>
+            <span class="n">perlen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">time_edges</span><span class="p">)</span>
+            <span class="c1"># time is elapsed time at the end of each period</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">time_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="c1">#if len(datetimes) == 1:</span>
+        <span class="c1">#    perlen = [(specified_end_datetime - specified_start_datetime).days]</span>
+        <span class="c1">#    time = np.array(perlen)</span>
 
         <span class="c1"># if first period is steady-state,</span>
         <span class="c1"># insert it at the beginning of the generated range</span>
-        <span class="c1"># this should only apply to cases where nper &gt; 1</span>
+        <span class="c1"># (only do for pd.date_range -based discretization)</span>
         <span class="k">if</span> <span class="n">steady</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="c1">#datetimes = [datetimes[0]] + datetimes.tolist()  #  datetimes[:-1].tolist()</span>
+            <span class="n">start_datetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">start_datetime</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">end_datetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_datetime</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">end_datetime</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="n">perlen</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">time</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span>
-            <span class="c1">#datetimes = datetimes[:-1]</span>
-            <span class="c1">#perlen = np.diff(time).tolist()</span>
-            <span class="c1">#time = time[1:]</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nstp</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">nstp</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">nstp</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tsmult</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">tsmult</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">tsmult</span>
 
-    <span class="n">perioddata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="c1">#&#39;datetime&#39;: datetimes,</span>
-                               <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
-                               <span class="s1">&#39;per&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)),</span>
-                               <span class="s1">&#39;perlen&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
-                               <span class="s1">&#39;nstp&#39;</span><span class="p">:</span> <span class="n">nstp</span><span class="p">,</span>
-                               <span class="s1">&#39;tsmult&#39;</span><span class="p">:</span> <span class="n">tsmult</span><span class="p">,</span>
-                               <span class="p">})</span>
+    <span class="n">perioddata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;start_datetime&#39;</span><span class="p">:</span> <span class="n">start_datetime</span><span class="p">,</span>
+        <span class="s1">&#39;end_datetime&#39;</span><span class="p">:</span> <span class="n">end_datetime</span><span class="p">,</span>
+        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+        <span class="s1">&#39;per&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)),</span>
+        <span class="s1">&#39;perlen&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+        <span class="s1">&#39;nstp&#39;</span><span class="p">:</span> <span class="n">nstp</span><span class="p">,</span>
+        <span class="s1">&#39;tsmult&#39;</span><span class="p">:</span> <span class="n">tsmult</span><span class="p">,</span>
+    <span class="p">})</span>
 
     <span class="c1"># specify steady-state or transient for each period, filling empty</span>
     <span class="c1"># periods with previous state (same logic as MF6 input)</span>
@@ -482,22 +553,6 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">)):</span>
         <span class="n">oclist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">oclist</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
     <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;oc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">oclist</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-    <span class="c1"># create start and end datetime columns;</span>
-    <span class="c1"># correct the datetime to only increment for transient stress periods</span>
-    <span class="n">start_datetime</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)]</span>
-    <span class="n">end_datetime</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">steady</span><span class="p">:</span>
-            <span class="n">end_datetime</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">end_datetime</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">perlen</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">model_time_units</span><span class="p">))</span>
-        <span class="n">start_datetime</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end_datetime</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-    <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_datetime</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_datetime</span>
-    <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;oc&#39;</span><span class="p">]</span>
-    <span class="c1">#perioddata = perioddata.drop(&#39;datetime&#39;, axis=1)[cols]</span>
 
     <span class="c1"># correct nstp and tsmult to be 1 for steady-state periods</span>
     <span class="n">perioddata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">perioddata</span><span class="o">.</span><span class="n">steady</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -822,7 +877,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 11, 2021.
+        Last updated on Jan 13, 2021.
       </span>
 
     </p>

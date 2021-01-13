@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Configuration File Gallery &mdash; modflow-setup 0.post206+g003adad documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.post207+gb4384e0 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.post206+g003adad
+                0.post207+gb4384e0
               </div>
             
           
@@ -657,14 +657,14 @@
       <span class="c1"># oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default</span>
     <span class="nt">group 2</span><span class="p">:</span> <span class="c1"># single long period for spin-up of pumping</span>
       <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;1998-04-01&#39;</span>  <span class="c1"># can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.</span>
-      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2007-04-01&#39;</span>  <span class="c1"># end times are specified following pandas slice convention, which includes the specified end date</span>
+      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2007-04-01&#39;</span>  <span class="c1"># model ends at midnight on this date (2007-03-31 would be the last day simulated)</span>
       <span class="nt">nper</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
       <span class="nt">nstp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
       <span class="nt">tsmult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.5</span>
       <span class="nt">steady</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
     <span class="nt">group 3</span><span class="p">:</span>
       <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;2007-04-01&#39;</span>
-      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2015-09-30&#39;</span>  <span class="c1"># end times are specified following pandas slice convention, which includes the specified end date</span>
+      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2015-10-01&#39;</span>  <span class="c1"># model ends at midnight on this date (2015-09-30 would be the last day simulated)</span>
       <span class="nt">freq</span><span class="p">:</span> <span class="s">&#39;6MS&#39;</span> <span class="c1"># same as argument to pandas.date_range; (see &quot;Offset Aliases&quot; at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)</span>
       <span class="nt">nstp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
       <span class="nt">tsmult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.5</span>
@@ -1071,14 +1071,14 @@
       <span class="c1"># oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default</span>
     <span class="nt">group 2</span><span class="p">:</span> <span class="c1"># single long period for spin-up of pumping</span>
       <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;1998-04-01&#39;</span>  <span class="c1"># can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.</span>
-      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2007-04-01&#39;</span>  <span class="c1"># end times are specified following pandas slice convention, which includes the specified end date</span>
+      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2007-04-01&#39;</span>  <span class="c1"># model ends at midnight on this date (2007-03-31 would be the last day simulated)</span>
       <span class="nt">nper</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
       <span class="nt">nstp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
       <span class="nt">tsmult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.5</span>
       <span class="nt">steady</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
     <span class="nt">group 3</span><span class="p">:</span>
       <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;2007-04-01&#39;</span>
-      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2015-09-30&#39;</span>  <span class="c1"># end times are specified following pandas slice convention, which includes the specified end date</span>
+      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2015-09-30&#39;</span>  <span class="c1"># model ends at midnight on this date (2015-09-30 would be the last day simulated)</span>
       <span class="nt">freq</span><span class="p">:</span> <span class="s">&#39;6MS&#39;</span> <span class="c1"># same as argument to pandas.date_range; (see &quot;Offset Aliases&quot; at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)</span>
       <span class="nt">nstp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
       <span class="nt">tsmult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.5</span>
@@ -2617,7 +2617,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 11, 2021.
+        Last updated on Jan 13, 2021.
       </span>
 
     </p>

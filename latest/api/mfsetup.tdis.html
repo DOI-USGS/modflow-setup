@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.tdis module &mdash; modflow-setup 0.post206+g003adad documentation</title>
+  <title>mfsetup.tdis module &mdash; modflow-setup 0.post207+gb4384e0 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.post206+g003adad
+                0.post207+gb4384e0
               </div>
             
           
@@ -332,20 +332,18 @@ a list of groups (dicts).</p>
 
 <dl class="py function">
 <dt id="mfsetup.tdis.setup_perioddata_group">
-<code class="sig-prename descclassname">mfsetup.tdis.</code><code class="sig-name descname">setup_perioddata_group</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_date_time</span></em>, <em class="sig-param"><span class="n">end_date_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nper</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">perlen</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_time_units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">freq</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">steady</span><span class="o">=</span><span class="default_value">{0: True, 1: False}</span></em>, <em class="sig-param"><span class="n">nstp</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">tsmult</span><span class="o">=</span><span class="default_value">1.5</span></em>, <em class="sig-param"><span class="n">oc_saverecord</span><span class="o">=</span><span class="default_value">{0: ['save head last', 'save budget last']}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata_group" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.tdis.</code><code class="sig-name descname">setup_perioddata_group</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_date_time</span></em>, <em class="sig-param"><span class="n">end_date_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nper</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">perlen</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_time_units</span><span class="o">=</span><span class="default_value">'days'</span></em>, <em class="sig-param"><span class="n">freq</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">steady</span><span class="o">=</span><span class="default_value">{0: True, 1: False}</span></em>, <em class="sig-param"><span class="n">nstp</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">tsmult</span><span class="o">=</span><span class="default_value">1.5</span></em>, <em class="sig-param"><span class="n">oc_saverecord</span><span class="o">=</span><span class="default_value">{0: ['save head last', 'save budget last']}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata_group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets up time discretization for a model; outputs a DataFrame with
 stress period dates/times and properties. Stress periods can be established
-with an established explicitly by specifying perlen as a list of period lengths in
-model units. Or, stress periods can be established using three of the
-start_date, end_date_time, nper, and freq arguments, similar to the
-pandas.date_range function.
-(see <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html">https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html</a>)</p>
+by explicitly specifying perlen as a list of period lengths in
+model units. Or, stress periods can be generated via <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>,
+using three of the start_date_time, end_date_time, nper, and freq arguments.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>start_date_time_time</strong><span class="classifier">str or datetime-like</span></dt><dd><p>Left bound for generating stress period dates. See pandas documenation.</p>
+<dt><strong>start_date_time</strong><span class="classifier">str or datetime-like</span></dt><dd><p>Left bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
 </dd>
-<dt><strong>end_date_time</strong><span class="classifier">str or datetime-like, optional</span></dt><dd><p>Right bound for generating stress period dates. See pandas documenation.</p>
+<dt><strong>end_date_time</strong><span class="classifier">str or datetime-like, optional</span></dt><dd><p>Right bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
 </dd>
 <dt><strong>nper</strong><span class="classifier">int, optional</span></dt><dd><p>Number of stress periods. Only used if perlen is None, or in combination with freq
 if an end_date_time isn’t specified.</p>
@@ -353,7 +351,8 @@ if an end_date_time isn’t specified.</p>
 <dt><strong>perlen</strong><span class="classifier">sequence or None, optional</span></dt><dd><p>A list of stress period lengths in model time units. Or specify as None and
 specify 3 of start_date_time, end_date_time, nper and/or freq.</p>
 </dd>
-<dt><strong>model_time_units</strong><span class="classifier">str, optional</span></dt><dd><p>‘days’ or ‘seconds’.</p>
+<dt><strong>model_time_units</strong><span class="classifier">str, optional</span></dt><dd><p>‘days’ or ‘seconds’.
+By default, ‘days’.</p>
 </dd>
 <dt><strong>freq</strong><span class="classifier">str or DateOffset, default None</span></dt><dd><p>For setting up uniform stress periods between a start and end date, or of length nper.
 Same as argument to pandas.date_range. Frequency strings can have multiples,
@@ -380,22 +379,22 @@ continue to apply until information for another perior is specified.</p>
 <dt><strong>perrioddata</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>DataFrame summarizing stress period information. Data columns:</p>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 16%" />
-<col style="width: 14%" />
-<col style="width: 69%" />
+<col style="width: 23%" />
+<col style="width: 20%" />
+<col style="width: 58%" />
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><strong>start_datetime</strong></p></td>
 <td><p>pandas datetimes</p></td>
-<td><p>start date/time of each stress period (does not include steady-state periods)</p></td>
+<td><p>start date/time of each stress period</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>end_datetime</strong></p></td>
 <td><p>pandas datetimes</p></td>
-<td><p>end date/time of each stress period (does not include steady-state periods)</p></td>
+<td><p>end date/time of each stress period</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>time</strong></p></td>
 <td><p>float</p></td>
-<td><p>cumulative MODFLOW time at end of period (includes steady-state periods)</p></td>
+<td><p>cumulative MODFLOW time at end of period</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>per</strong></p></td>
 <td><p>int</p></td>
@@ -427,6 +426,28 @@ continue to apply until information for another perior is specified.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p><em>Initial steady-state period</em></p>
+<p>If the first stress period is specified as steady-state (<code class="docutils literal notranslate"><span class="pre">steady[0]</span> <span class="pre">==</span> <span class="pre">True</span></code>),
+the period length (perlen) in MODFLOW time is automatically set to 1. If subsequent
+stress periods are specified, or if no end-date is specified, the end date for
+the initial steady-state stress period is set equal to the start date. In the latter case,
+the assumption is that the specified start date represents the start of the transient simulation,
+and the initial steady-state (which is time-invarient anyways) is intended to produce a valid
+starting condition. If only a single steady-state stress period is specified with an end date,
+then that end date is retained.</p>
+<p><em>MODFLOW time vs real time</em></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">time</span></code> column of the output DataFrame represents time in the MODFLOW simulation,
+which cannot have zero-lengths for any period. Therefore, initial steady-state periods
+are automatically assigned lengths of one (as described above), and MODFLOW time is incremented
+accordingly. If the model has an initial steady-state period, this means that subsequent MODFLOW
+times will be 1 time unit greater than the acutal date-times.</p>
+<p><em>End-dates</em></p>
+<p>Specified <code class="docutils literal notranslate"><span class="pre">end_date_time</span></code> represents the right bound of the time discretization,
+or in other words, the time increment <em>after</em> the last time increment to be
+simulated. For example, <code class="docutils literal notranslate"><span class="pre">end_date_time='2019-01-01'</span></code> would mean that
+<code class="docutils literal notranslate"><span class="pre">'2018-12-31'</span></code> is the last date simulated by the model
+(which ends at <code class="docutils literal notranslate"><span class="pre">2019-01-01</span> <span class="pre">00:00:00</span></code>).</p>
 </dd></dl>
 
 </div>
@@ -447,7 +468,7 @@ continue to apply until information for another perior is specified.</p>
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 11, 2021.
+        Last updated on Jan 13, 2021.
       </span>
 
     </p>
