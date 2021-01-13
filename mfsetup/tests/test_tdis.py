@@ -15,7 +15,11 @@ import pytest
 
 from mfsetup.mf6model import MF6model
 from mfsetup.sourcedata import TransientTabularSourceData
-from mfsetup.tdis import aggregate_dataframe_to_stress_period, get_parent_stress_periods
+from mfsetup.tdis import (
+    aggregate_dataframe_to_stress_period,
+    get_parent_stress_periods,
+    setup_perioddata_group,
+)
 
 
 @pytest.fixture(scope='function')
@@ -97,7 +101,13 @@ def pd5(shellmound_model):
     """
     m = shellmound_model
     m.cfg['tdis']['options']['start_date_time'] = None
+    m.cfg['tdis']['perioddata']['start_date_time'] = None
     m.cfg['tdis']['perioddata']['end_date_time'] = '2008-10-12'
+    m.cfg['tdis']['perioddata']['freq'] = 'D'
+    m.cfg['tdis']['perioddata']['nper'] = 11
+    m.cfg['tdis']['perioddata']['perlen'] = None
+    m.cfg['tdis']['perioddata']['nstp'] = 5
+    m.cfg['tdis']['perioddata']['tsmult'] = 1.5
     m._perioddata = None
     pd5 = m.perioddata.copy()
     return pd5
@@ -120,11 +130,12 @@ def pd6(shellmound_model):
 
 def test_pd0_freq_last_end_date_time(shellmound_model, pd0):
     """When perioddata are set-up based on start date, end date and freq,
-    verify that the last end-date is the beginning of the next day (end of end-date)."""
+    verify that the last end-date is consistent with what was specified.
+    """
     m = shellmound_model
     assert pd0 is not None
     assert pd0['end_datetime'].iloc[-1] == \
-           pd.Timestamp(m.cfg['tdis']['perioddata']['group 3']['end_date_time']) + pd.Timedelta(1, unit='d')
+           pd.Timestamp(m.cfg['tdis']['perioddata']['group 3']['end_date_time']) #+ pd.Timedelta(1, unit='d')
 
 
 def test_pd1_explicit_perioddata_setup(pd1, shellmound_model):
@@ -139,7 +150,6 @@ def test_pd1_explicit_perioddata_setup(pd1, shellmound_model):
     assert pd1['tsmult'][0] == 1
 
 
-@pytest.mark.skip("still need to fix this; workaround in the meantime is just to specify an extra period")
 def test_pd2_start_date_freq_nper(pd1, pd2):
     """Since perlen wasn't explicitly specified,
     pd2 will have the 11 periods at freq 'D' (like pd1)
@@ -158,7 +168,6 @@ def test_pd4_start_end_dates_freq(pd1, pd4):
     assert pd4.equals(pd1)
 
 
-@pytest.mark.skip("still need to fix this")
 def test_pd5_end_date_freq_nper(pd1, pd5):
     assert pd5.iloc[:-1].equals(pd1)
 
@@ -186,6 +195,8 @@ def test_pd_date_range():
                                                 ))
 def test_get_parent_stress_periods(copy_periods, nper, basic_model_instance, request):
     m = basic_model_instance
+    if m.version != 'mf6':
+        return
     if nper == 'm.nper':
         nper = m.nper
     test_name = request.node.name.split('[')[1].strip(']')
@@ -385,3 +396,19 @@ def test_aggregate_values_with_categories(obsdata, times, category_col, dest_mod
     if category_col is not None:
         assert np.array_equal(results['n_measured'].values, [1, 2, 0, 0])
         assert np.array_equal(results['n_estimated'].values, [0, 0, 1, 3])
+
+
+def test_setup_perioddata_group():
+    other_args = {
+        'model_time_units': 'days',
+        'nper': 1, 'nstp': 5,
+        'oc_saverecord': {0: ['save head last', 'save budget last']},
+        'steady': {0: False}, 'tsmult': 1.5}
+    data = {'start_date_time': '2012-01-01',
+            'end_date_time': '2018-12-31',
+            'freq': '1MS',
+            }
+    data.update(other_args)
+    results = setup_perioddata_group(**data)
+    assert len(results) == 84
+    assert results['end_datetime'][83] == pd.Timestamp('2018-12-31')
