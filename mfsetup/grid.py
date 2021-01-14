@@ -182,7 +182,7 @@ class MFsetupGrid(StructuredGrid):
         """
         return Affine(self.delr[0], 0., self.xul,
                       0., -self.delc[0], self.yul) * \
-               Affine.rotation(self.angrot)
+               Affine.rotation(-self.angrot)
 
     @property
     def crs(self):
@@ -678,8 +678,10 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         # need to specify xul, yul in case snapping to parent
         # todo: allow snapping to parent grid on xoff, yoff
         if rotation != 0:
-            xul = None
-            yul = None
+            rotation_rads = rotation * np.pi/180
+            # note rotating around xoff,yoff not the origin!
+            xul = xoff - (height_m)*np.sin(rotation_rads)
+            yul = yoff + (height_m)*np.cos(rotation_rads)
         else:
             xul = xoff
             yul = yoff + height_m
