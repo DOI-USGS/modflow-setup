@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Pleasant Lake Example &mdash; modflow-setup 0.post207+gb4384e0 documentation</title>
+  <title>Pleasant Lake Example &mdash; modflow-setup 0.post208+gb36fc17 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.post207+gb4384e0
+                0.post208+gb36fc17
               </div>
             
           
@@ -552,9 +552,9 @@ loading parent model /home/runner/work/modflow-setup/modflow-setup/examples/data
 arguments to Modflow.load:
 model_ws: /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant
 version: mfnwt
-load_only: [wel ... dis]
+load_only: [bas6 ... upw]
 f: pleasant.nam
-finished in 0.12s
+finished in 0.11s
 
 
 arguments to MFsetupGrid:
@@ -710,13 +710,13 @@ vmin: -1e+30
 vmax: 1e+30
 resample_method: linear
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm0.tif...
-finished in 0.05s
+finished in 0.04s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm1.tif...
-finished in 0.05s
+finished in 0.04s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm2.tif...
-finished in 0.05s
+finished in 0.04s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm3.tif...
-finished in 0.05s
+finished in 0.04s
 loading original/plsnt_lgr_parent_top.dat.original, shape=(25, 25), took 0.00s
 computing cell thicknesses...
 finished in 0.02s
@@ -748,7 +748,7 @@ xorigin: 553000
 yorigin: 388000
 length_units: meters
 computing cell thicknesses...
-finished in 0.03s
+finished in 0.02s
 
 wrote original/plsnt_lgr_parent_lakarr_000.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr_001.dat, took 0.00s
@@ -808,7 +808,7 @@ finished in 0.02s
 
 loading configuration file /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr_inset.yml...
 wrote ./external/plsnt_lgr_parent_irch.dat, took 0.00s
-finished in 0.46s
+finished in 0.41s
 
 
 arguments to MFsetupGrid:
@@ -884,7 +884,7 @@ top: None
 botm: None
 wrote /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp... Done
-finished in 0.29s
+finished in 0.26s
 
 computing cell thicknesses...
 finished in 0.02s
@@ -896,7 +896,7 @@ wrote original/plsnt_lgr_parent_lakarr_003.dat, took 0.00s
 wrote original/plsnt_lgr_parent_lakarr_004.dat, took 0.00s
 loading original/plsnt_lgr_parent_top.dat.original, shape=(25, 25), took 0.00s
 computing cell thicknesses...
-finished in 0.02s
+finished in 0.01s
 
 wrote ./external/plsnt_lgr_parent_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_parent_botm_000.dat, took 0.00s
@@ -995,7 +995,7 @@ wrote ./external/plsnt_lgr_parent_strt_004.dat, took 0.00s
 
 arguments to ModflowGwfic:
 strt: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_strt_000.dat&#39;} ... {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_strt_004.dat&#39;}]
-finished in 0.08s
+finished in 0.07s
 
 
 Setting up NPF package...
@@ -1015,7 +1015,7 @@ save_flows: True
 icelltype: 1
 k: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k_000.dat&#39;} ... {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k_004.dat&#39;}]
 k33: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k33_000.dat&#39;} ... {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_k33_004.dat&#39;}]
-finished in 0.14s
+finished in 0.13s
 
 
 Setting up STO package...
@@ -1041,7 +1041,7 @@ steady_state: {0: True
 transient: {0: False
  ...
 }
-finished in 0.14s
+finished in 0.13s
 
 
 Setting up RCH package...
@@ -1100,7 +1100,7 @@ reading /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/sou
 reading /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/shps/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.08s
+load finished in 0.07s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.01s
@@ -1113,7 +1113,7 @@ SFRmaker version 0.6.2.post15+gee788c6
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.06s
+grid class created in 0.05s
 
 Model grid information
 structured grid
@@ -1177,7 +1177,7 @@ bounds: 552800.00, 388200.00, 557800.00, 393200.00
 active area defined by: isfr array
 
 
-Time to create sfr dataset: 0.17s
+Time to create sfr dataset: 0.16s
 
 running rasterstats.zonal_stats on buffered LineStrings...
 finished in 0.02s
@@ -1268,7 +1268,7 @@ writing /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/post
 finished in 0.02s
 
 wrote ./external/plsnt_lgr_parent_irch.dat, took 0.00s
-finished in 0.76s
+finished in 0.70s
 
 
 Setting up LAK package...
@@ -1297,7 +1297,7 @@ print_input: True
 print_flows: True
 save_flows: True
 boundnames: True
-finished in 0.11s
+finished in 0.10s
 
 
 Setting up OBS package...
@@ -1368,7 +1368,7 @@ stress_period_data: {0: {&#39;filename&#39;: &#39;./external/plsnt_lgr_parent_ch
 print_input: False
 print_flows: False
 save_flows: True
-finished in 0.93s
+finished in 0.84s
 
 
 Setting up DIS package...
@@ -1415,15 +1415,15 @@ vmin: -1e+30
 vmax: 1e+30
 resample_method: linear
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm0.tif...
-finished in 0.05s
+finished in 0.04s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm1.tif...
-finished in 0.05s
+finished in 0.04s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm2.tif...
 finished in 0.05s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/botm3.tif...
-finished in 0.05s
+finished in 0.04s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.21s
+finished in 0.19s
 
 arguments to shp2df:
 dest_crs: EPSG:3070
@@ -1433,12 +1433,12 @@ filtering on bounding box 554200.0, 389000.0, 557400.0, 391800.0...
 --&gt; building dataframe... (may take a while for large shapefiles)
 caching data in /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/shps/all_lakes.shp...
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.20s
+finished in 0.19s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.21s
-loading original/plsnt_lgr_inset_top.dat.original, shape=(70, 80), took 0.01s
+finished in 0.19s
+loading original/plsnt_lgr_inset_top.dat.original, shape=(70, 80), took 0.00s
 computing cell thicknesses...
-finished in 0.16s
+finished in 0.20s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm_000.dat, took 0.00s
@@ -1467,12 +1467,12 @@ xorigin: None
 yorigin: None
 length_units: meters
 computing cell thicknesses...
-finished in 0.16s
+finished in 0.14s
 
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.21s
+finished in 0.19s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.20s
+finished in 0.19s
 wrote original/plsnt_lgr_inset_lakarr_000.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_001.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_002.dat, took 0.00s
@@ -1480,7 +1480,7 @@ wrote original/plsnt_lgr_inset_lakarr_003.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_004.dat, took 0.00s
 loading original/plsnt_lgr_inset_top.dat.original, shape=(70, 80), took 0.00s
 computing cell thicknesses...
-finished in 0.21s
+finished in 0.14s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm_000.dat, took 0.00s
@@ -1541,10 +1541,10 @@ top: array: (70, 80), float64, min: 290.66, mean: 313.077, max: 348.61
 botm: array: (5, 70, 80), float64, min: 191.27, mean: 276.082, max: 338.82
 wrote /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp... Done
-finished in 0.28s
+finished in 0.26s
 
 wrote ./external/plsnt_lgr_inset_irch.dat, took 0.00s
-finished in 2.53s
+finished in 2.30s
 
 
 Setting up IC package...
@@ -1579,7 +1579,7 @@ save_flows: True
 icelltype: 1
 k: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k_000.dat&#39;} ... {&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k_004.dat&#39;}]
 k33: [{&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k33_000.dat&#39;} ... {&#39;filename&#39;: &#39;./external/plsnt_lgr_inset_k33_004.dat&#39;}]
-finished in 0.11s
+finished in 0.10s
 
 
 arguments to setup_perioddata_group:
@@ -1623,7 +1623,7 @@ steady_state: {0: True
 transient: {0: False
  ...
 }
-finished in 0.11s
+finished in 0.10s
 
 
 Setting up RCH package...
@@ -1651,7 +1651,7 @@ print_input: True
 print_flows: True
 save_flows: True
 readasarrays: True
-finished in 0.10s
+finished in 0.09s
 
 
 Setting up OC package...
@@ -1682,15 +1682,15 @@ reading /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/sou
 reading /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/shps/NHDPlusAttributes/elevslope.dbf...
 --&gt; building dataframe... (may take a while for large shapefiles)
 
-load finished in 0.08s
+load finished in 0.07s
 
 Getting routing information from NHDPlus Plusflow table...
 finished in 0.01s
 
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.21s
+finished in 0.19s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.20s
+finished in 0.19s
 
 arguments to Lines.to_sfr:
 
@@ -1699,7 +1699,7 @@ SFRmaker version 0.6.2.post15+gee788c6
 Creating sfr dataset...
 
 Creating grid class instance from flopy Grid instance...
-grid class created in 0.17s
+grid class created in 0.16s
 
 Model grid information
 structured grid
@@ -1738,7 +1738,7 @@ finished in 0.00s
 Intersecting 2 flowlines with 5,600 grid cells...
 Intersecting 2 features...
 2
-finished in 0.03s
+finished in 0.02s
 
 Setting up reach data... (may take a few minutes for large grids)
 finished in 0.01s
@@ -1763,10 +1763,10 @@ bounds: 554200.00, 389000.00, 557400.00, 391800.00
 active area defined by: isfr array
 
 
-Time to create sfr dataset: 0.33s
+Time to create sfr dataset: 0.30s
 
 running rasterstats.zonal_stats on buffered LineStrings...
-finished in 0.05s
+finished in 0.04s
 
 
 Smoothing elevations...
@@ -1788,12 +1788,12 @@ mover: True
 converting reach and segment data to package data...
 converting segment data to period data...
 computing cell thicknesses...
-finished in 0.20s
+finished in 0.14s
 
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.21s
+finished in 0.19s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.20s
+finished in 0.19s
 wrote original/plsnt_lgr_inset_lakarr_000.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_001.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_002.dat, took 0.00s
@@ -1801,7 +1801,7 @@ wrote original/plsnt_lgr_inset_lakarr_003.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_004.dat, took 0.00s
 loading original/plsnt_lgr_inset_top.dat.original, shape=(70, 80), took 0.00s
 computing cell thicknesses...
-finished in 0.16s
+finished in 0.14s
 
 wrote ./external/plsnt_lgr_inset_top.dat, took 0.00s
 wrote ./external/plsnt_lgr_inset_botm_000.dat, took 0.00s
@@ -1862,17 +1862,17 @@ top: array: (70, 80), float64, min: 290.66, mean: 313.077, max: 348.61
 botm: array: (5, 70, 80), float64, min: 191.27, mean: 276.082, max: 338.82
 wrote /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/plsnt_lgr_inset_grid.json
 writing /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/postproc/shps/plsnt_lgr_inset_bbox.shp... Done
-finished in 0.28s
+finished in 0.26s
 
 wrote ./external/plsnt_lgr_inset_irch.dat, took 0.00s
-finished in 2.48s
+finished in 2.22s
 
 
 Setting up LAK package...
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.20s
+finished in 0.19s
 reading data from /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif...
-finished in 0.20s
+finished in 0.18s
 wrote original/plsnt_lgr_inset_lakarr_000.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_001.dat, took 0.00s
 wrote original/plsnt_lgr_inset_lakarr_002.dat, took 0.00s
@@ -1932,7 +1932,7 @@ perioddata: {0: [[0, &#39;withdrawal&#39;, 0.0], [0, &#39;runoff&#39;, 0.0], [0,
 observations: {lake1.obs.csv: [(&#39;stage&#39;, &#39;stage&#39;, &#39;lake1&#39;), (&#39;inflow&#39;, &#39;inflow&#39;, &#39;lake1&#39;), (&#39;rainfall&#39;, &#39;rainfall&#39;, &#39;lake1&#39;), (&#39;runoff&#39;, &#39;runoff&#39;, &#39;lake1&#39;), (&#39;lak&#39;, &#39;lak&#39;, &#39;lake1&#39;), (&#39;withdrawal&#39;, &#39;withdrawal&#39;, &#39;lake1&#39;), (&#39;evaporation&#39;, &#39;evaporation&#39;, &#39;lake1&#39;), (&#39;storage&#39;, &#39;storage&#39;, &#39;lake1&#39;), (&#39;volume&#39;, &#39;volume&#39;, &#39;lake1&#39;), (&#39;surface-area&#39;, &#39;surface-area&#39;, &#39;lake1&#39;), (&#39;wetted-area&#39;, &#39;wetted-area&#39;, &#39;lake1&#39;), (&#39;conductance&#39;, &#39;conductance&#39;, &#39;lake1&#39;)]
  ...
 }
-finished in 0.76s
+finished in 0.68s
 
 
 Setting up WEL package...
@@ -1949,7 +1949,7 @@ finished in 0.00s
 took 0.00s
 
 computing cell thicknesses...
-finished in 0.21s
+finished in 0.14s
 
 
 arguments to shp2df:
@@ -1964,7 +1964,7 @@ finished in 0.00s
 took 0.00s
 
 computing cell thicknesses...
-finished in 0.20s
+finished in 0.14s
 
 
 Resampling pumping rates in /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/source_data/tables/master_wu.csv to model stress periods...
@@ -1980,7 +1980,7 @@ print_input: True
 print_flows: True
 save_flows: True
 boundnames: True
-finished in 0.75s
+finished in 0.59s
 
 
 Setting up OBS package...
@@ -2039,7 +2039,7 @@ print_flows: True
 modelnames: True
 maxmvr: 2
 maxpackages: 2
-packages: [(&#39;plsnt_lgr_inset&#39;, &#39;sfr_0&#39;), (&#39;plsnt_lgr_parent&#39;, &#39;sfr_0&#39;)]
+packages: [(&#39;plsnt_lgr_parent&#39;, &#39;sfr_0&#39;), (&#39;plsnt_lgr_inset&#39;, &#39;sfr_0&#39;)]
 perioddata: {0: [[&#39;plsnt_lgr_inset&#39;, &#39;sfr_0&#39;, 22, &#39;plsnt_lgr_parent&#39;, &#39;sfr_0&#39;, 7, &#39;factor&#39;, 1.0], [&#39;plsnt_lgr_inset&#39;, &#39;sfr_0&#39;, 24, &#39;plsnt_lgr_parent&#39;, &#39;sfr_0&#39;, 0, &#39;factor&#39;, 1.0]]}
 finished in 0.01s
 
@@ -2052,7 +2052,7 @@ nexg: 1378
 auxiliary: [(&#39;angldegx&#39;, &#39;cdist&#39;)]
 exchangedata: [[(0, 7, 6), (0, 0, 0), 1, 100.0, 20.0, 40.0, 0.0, 144.22205101855957] ... [(4, 21, 22), (4, 69, 79), 1, 100.0, 20.0, 40.0, 90.0, 144.22205101855957]]
 mvr_filerecord: pleasant_lgr.mvr
-finished setting up model in 11.00s
+finished setting up model in 9.85s
 
 plsnt_lgr_parent model:
 5 layer(s), 25 row(s), 25 column(s), 13 stress period(s)
@@ -2215,7 +2215,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f24a22f0760&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7ff4f54fa730&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -2367,7 +2367,7 @@ Resources Software User Rights Notice for complete use, copyright,
 and distribution information.
 
 
- Run start date and time (yyyy/mm/dd hh:mm:ss): 2021/01/13  4:07:44
+ Run start date and time (yyyy/mm/dd hh:mm:ss): 2021/01/15 17:05:51
 
  Writing simulation list file: mfsim.lst
  Using Simulation name file: mfsim.nam
@@ -2386,8 +2386,8 @@ and distribution information.
     Solving:  Stress period:    12    Time step:     1
     Solving:  Stress period:    13    Time step:     1
 
- Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/01/13  4:07:51
- Elapsed run time:  6.668 Seconds
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/01/15 17:05:57
+ Elapsed run time:  6.746 Seconds
 
  Normal termination of simulation.
 </pre></div></div>
@@ -2781,7 +2781,7 @@ writing postproc/plsnt_lgr_inset/shps/lake_connections.shp... Done
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 13, 2021.
+        Last updated on Jan 15, 2021.
       </span>
 
     </p>
