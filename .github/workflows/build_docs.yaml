@@ -42,6 +42,7 @@ jobs:
         auto-activate-base: false
         # must be false in most cases
         # https://github.com/JamesIves/github-pages-deploy-action
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
     - name: Conda info
       shell: bash -l {0}
