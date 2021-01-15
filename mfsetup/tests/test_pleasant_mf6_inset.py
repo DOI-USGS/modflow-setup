@@ -407,8 +407,6 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
     assert np.allclose(m.dis.idomain.array[:2, i, j], 0)
 
 
-@pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
-                   reason="check for chd external files fails on Appveyor but not OSX or Linux")
 def test_external_tables(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
     lak = m.setup_lak()
@@ -420,7 +418,7 @@ def test_external_tables(get_pleasant_mf6_with_dis):
 
     wel = m.setup_wel()
     wel.write()
-    for f in m.cfg['external_files']['wel_stress_period_data']:
+    for f in m.cfg['external_files']['wel_stress_period_data'].values():
         assert os.path.exists(f)
     blocks = read_mf6_block(wel.filename, 'period')
     for period, block in blocks.items():
