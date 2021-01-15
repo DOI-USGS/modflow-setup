@@ -56,8 +56,8 @@ jobs:
     - name: Conda info
       shell: bash -l {0}
       run: conda info
-    - name: Install dependencies
-      shell: bash -l {0}
+    - name: Add executables to path
+      shell: bash
       run: |
         if [[ ! -d "$HOME/.local/bin" ]]; then
             mkdir -p "$HOME/.local/bin";
@@ -73,8 +73,12 @@ jobs:
             d="unexpectedos"
             exit 1
         fi
-        echo bin/$d/. >> $GITHUB_PATH
+        cp -r bin/$d/. "$HOME/.local/bin/"
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
         echo $GITHUB_PATH
+    - name: Install Modflow-setup and ipykernel
+      shell: bash -l {0}
+      run: |
         pip install -e .
         python -m ipykernel install --user --name mfsetup_ci --display-name "mfsetup_ci"
     - name: Conda list
