@@ -1,12 +1,15 @@
 """Functions for reading and writing stuff to disk, and working with file paths.
 """
+import datetime as dt
 import inspect
 import json
 import os
+import shutil
 import sys
 import time
 from pathlib import Path
 
+import flopy
 import numpy as np
 import pandas as pd
 import yaml
@@ -15,6 +18,7 @@ from flopy.mf6.mfbase import MFDataException, VerbosityLevel
 from flopy.mf6.modflow import mfims, mftdis
 from flopy.utils import SpatialReference, TemporalReference, mfreadnam
 
+import mfsetup
 from mfsetup.grid import MFsetupGrid
 from mfsetup.utils import get_input_arguments, update
 
@@ -1109,3 +1113,68 @@ def read_ggofile(gagefile, model,
     df['datetime'] = pd.to_timedelta(df.time, unit='D') + start_ts
     df.index = df.datetime
     return df
+
+
+def add_version_to_fileheader(filename, model_info=None):
+    """Add modflow-setup, flopy and optionally model
+    version info to an existing file header denoted by
+    the comment characters ``#``, ``!``, or ``//``.
+    """
+    tempfile = str(filename) + '.temp'
+    shutil.copy(filename, tempfile)
+    with open(tempfile) as src:
+        with open(filename, 'w') as dest:
+            if model_info is None:
+                header = ''
+            else:
+                header = f'# {model_info}\n'
+            read_header = True
+            for line in src:
+                if read_header and len(line.strip()) > 0 and \
+                        line.strip()[0] in {'#', '!', '//'}:
+                    if model_info is None or model_info not in line:
+                        header += line
+                elif read_header:
+                    if 'modflow-setup' not in header:
+                        headerlist = header.strip().split('\n')
+                        if 'flopy' in header.lower():
+                            pos, flopy_info = [(i, s) for i, s in enumerate(headerlist)
+                                               if 'flopy' in s.lower()][0]
+                            #flopy_info = header.strip().split('\n')[-1]
+                            if 'version' not in flopy_info.lower():
+                                flopy_version = f'flopy version {flopy.__version__}'
+                                flopy_info = flopy_info.lower().replace('flopy',
+                                                                        flopy_version)
+                                headerlist[pos] = flopy_info
+
+                                #header = '\n'.join(header.split('\n')[:-2] +
+                                #                   [flopy_info + '\n'])
+                            mfsetup_text = '# via '
+                            pos += 1  # insert mfsetup header after flopy
+                        else:
+                            mfsetup_text = '# File created by '
+                            pos = -1  # insert mfsetup header at end
+                        mfsetup_text += 'modflow-setup version {}'.format(mfsetup.__version__)
+                        mfsetup_text += ' at {:%Y-%m-%d %H:%M:%S}'.format(dt.datetime.now())
+                        headerlist.insert(pos, mfsetup_text)
+                        header = '\n'.join(headerlist) + '\n'
+                    dest.write(header)
+                    read_header = False
+                    dest.write(line)
+                else:
+                    dest.write(line)
+    os.remove(tempfile)
+
+
+def remove_file_header(filename):
+    """Remove the header of a MODFLOW input file,
+    to allow comparison betwee files that have different
+    headers but are otherwise the same, for example."""
+    backup_file = str(filename) + '.backup'
+    shutil.copy(filename, backup_file)
+    with open(backup_file) as src:
+        with open(filename, 'w') as dest:
+            for line in src:
+                if not line.strip().startswith('#'):
+                    dest.write(line)
+    os.remove(backup_file)

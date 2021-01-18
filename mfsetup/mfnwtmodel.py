@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 
 import numpy as np
 
@@ -17,7 +18,7 @@ from mfsetup.discretization import (
     make_ibound,
 )
 from mfsetup.fileio import (
-    check_source_files,
+    add_version_to_fileheader,
     flopy_mf2005_load,
     load,
     load_cfg,
@@ -807,6 +808,17 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # gage package was already set-up and then written by Flopy
         if 'SFR' in self.get_package_list():
             self.sfrdata.write_package(write_observations_input=False)
+
+        # add version info to file headers
+        files = [self.namefile]
+        files += [p.file_name[0] for p in self.packagelist]
+        for f in files:
+            # either flopy or modflow
+            # doesn't allow headers for some packages
+            ext = Path(f).suffix
+            if ext in {'.hyd', '.gag', '.gage'}:
+                continue
+            add_version_to_fileheader(f, model_info=self.header)
 
     @staticmethod
     def _parse_model_kwargs(cfg):

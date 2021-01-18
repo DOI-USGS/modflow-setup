@@ -104,6 +104,8 @@ class MFsetupMixin():
         self._model_ws = None
         self._abs_model_ws = None
         self._model_version = None  # semantic version of model
+        self._longname = None  # long name for model (short name is self.name)
+        self._header = None  # header for files and repr
         self.inset = None  # dictionary of inset models attached to LGR parent
         self._is_lgr = False  # flag for lgr inset models
         self.lgr = None  # holds flopy Lgr utility object
@@ -123,7 +125,7 @@ class MFsetupMixin():
         self._interp_weights = None
 
     def __repr__(self):
-        header = '{} model:\n'.format(self.name)
+        header = f'{self.header}:\n'
         txt = ''
         if self.parent is not None:
             txt += 'Parent model: {}/{}\n'.format(self.parent.model_ws, self.parent.name)
@@ -323,8 +325,25 @@ class MFsetupMixin():
         """
         if self._model_version is None:
             self._model_version = get_versions(path=self.model_ws,
-                                   start_version=self.cfg['start_version'])
+                                   start_version=self.cfg['metadata']['start_version'])
         return self._model_version
+
+    @property
+    def longname(self):
+        if self._longname is None:
+            longname = self.cfg['metadata'].get('longname')
+            if longname is None:
+                longname = f'{self.name} model'
+            self._longname = longname
+        return self._longname
+
+    @property
+    def header(self):
+        if self._header is None:
+            version_str = self.model_version['version']
+            header = f'{self.longname} version {version_str}'
+            self._header = header
+        return self._header
 
     @property
     def tmpdir(self):

@@ -1,12 +1,14 @@
 import io
 import os
 import platform
+from pathlib import Path
 
 import numpy as np
 import pytest
 import yaml
 
 from mfsetup.fileio import (
+    add_version_to_fileheader,
     dump_yml,
     exe_exists,
     load,
@@ -121,3 +123,28 @@ def test_exe_exists(modflow_executable):
 def test_pyyaml_scientific_notation(data, expected):
     results = yaml.load(io.StringIO(data))
     assert results['value'] == expected
+
+
+@pytest.mark.parametrize('model_info', ('Test model version', None
+                                        ))
+def test_add_version_to_fileheader(models_with_dis, model_info):
+    m = models_with_dis
+    if m.version == 'mf6':
+        m.dis.write()
+        filepath = Path(m._abs_model_ws, m.dis.filename)
+    else:
+        m.dis.write_file()
+        filepath = Path(m._abs_model_ws, m.dis.file_name[0])
+
+    add_version_to_fileheader(filepath, model_info)
+
+    with open(filepath) as src:
+        if model_info:
+            headerline = next(src)
+            assert headerline
+        headerline = next(src)
+        if 'flopy' in headerline.lower():
+            assert 'version' in headerline
+        headerline = next(src)
+        assert 'modflow-setup' in headerline
+        assert 'version' in headerline
