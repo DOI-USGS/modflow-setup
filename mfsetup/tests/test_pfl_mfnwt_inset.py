@@ -18,7 +18,7 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MFnwtModel
 from mfsetup.checks import check_external_files_for_nans
-from mfsetup.fileio import exe_exists, load_cfg
+from mfsetup.fileio import exe_exists, load_cfg, remove_file_header
 from mfsetup.grid import MFsetupGrid, get_ij
 from mfsetup.units import convert_length_units, convert_time_units
 from mfsetup.utils import get_input_arguments
@@ -676,6 +676,9 @@ def test_remake_a_package(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):
     lak = m2.setup_lak()
     lakefile2 = lak.fn_path
     lak.write_file()
+    # scrub the headers of both files for the comparison
+    remove_file_header('lakefile1.lak')
+    remove_file_header(lakefile2)
     assert filecmp.cmp('lakefile1.lak', lakefile2)
 
 

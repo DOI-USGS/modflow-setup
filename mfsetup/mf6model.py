@@ -21,7 +21,12 @@ from mfsetup.discretization import (
     make_irch,
     make_lgr_idomain,
 )
-from mfsetup.fileio import flopy_mfsimulation_load, load, load_cfg
+from mfsetup.fileio import (
+    add_version_to_fileheader,
+    flopy_mfsimulation_load,
+    load,
+    load_cfg,
+)
 from mfsetup.lakes import (
     get_lakeperioddata,
     setup_lake_connectiondata,
@@ -1000,6 +1005,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                   self.perioddata.start_datetime,
                                   self.perioddata.end_datetime
                                   )
+        # add version info to file headers
+        files = [self.namefile]
+        files += [p.filename for p in self.packagelist]
+        files += [p.filename for k, p in self.simulation.package_key_dict.items()]
+        for f in files:
+            add_version_to_fileheader(f, model_info=self.header)
 
     @staticmethod
     def _parse_model_kwargs(cfg):

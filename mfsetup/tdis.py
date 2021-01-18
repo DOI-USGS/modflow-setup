@@ -3,6 +3,8 @@ Functions related to temporal discretization
 """
 import calendar
 import copy
+import datetime as dt
+import os
 import shutil
 
 import numpy as np
@@ -651,7 +653,8 @@ def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
 
 
 def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
-    """Add stress period start and end dates to a tdis file as comments.
+    """Add stress period start and end dates to a tdis file as comments;
+    add modflow-setup version info to tdis file header.
     """
     tempfile = tdis_file + '.temp'
     shutil.copy(tdis_file, tempfile)
@@ -665,7 +668,13 @@ def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
                     header += line
                 elif 'begin options' in ' '.join(line.lower().split()):
                     if 'modflow-setup' not in header:
-                        header += '# modflow-setup version {}\n'.format(mfsetup.__version__)
+                        if 'flopy' in header.lower():
+                            mfsetup_text = '# via '
+                        else:
+                            mfsetup_text = '# File created by '
+                        mfsetup_text += 'modflow-setup version {}'.format(mfsetup.__version__)
+                        mfsetup_text += ' at {:%Y-%m-%d %H:%M:%S}'.format(dt.datetime.now())
+                        header += mfsetup_text + '\n'
                     dest.write(header)
                     read_header = False
                     dest.write(line)
@@ -685,3 +694,4 @@ def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
                             dest.write(line)
                 else:
                     dest.write(line)
+    os.remove(tempfile)
