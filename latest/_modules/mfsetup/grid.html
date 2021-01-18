@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post208+gb36fc17 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post212+g47db8ac documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post208+gb36fc17
+                0.post212+g47db8ac
               </div>
             
           
@@ -253,7 +253,9 @@
 <span class="sd">    xul, yul : float, float, optional</span>
 <span class="sd">        Model grid offset (location of upper left corner), by default 0.0, 0.0</span>
 <span class="sd">    angrot : float, optional</span>
-<span class="sd">        Rotation of the model grid, in degrees clockwise about the lower left corner, by default 0.0</span>
+<span class="sd">        Rotation of the model grid, in degrees counter-clockwise about the lower left corner.</span>
+<span class="sd">        Non-zero rotation values require input of xoff, yoff (xul, yul not supported).</span>
+<span class="sd">        By default 0.0</span>
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -834,9 +836,11 @@
         <span class="c1"># need to specify xul, yul in case snapping to parent</span>
         <span class="c1"># todo: allow snapping to parent grid on xoff, yoff</span>
         <span class="k">if</span> <span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Rotated grids not supported.&#39;</span><span class="p">)</span>
-        <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span>
-        <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_m</span>
+            <span class="n">xul</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">yul</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span>
+            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_m</span>
 
     <span class="c1"># option 2: make grid using buffered feature bounding box</span>
     <span class="k">else</span><span class="p">:</span>
@@ -920,6 +924,7 @@
                 <span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="n">rotation</span><span class="p">,</span>
                 <span class="s1">&#39;lenuni&#39;</span><span class="p">:</span> <span class="mi">2</span>
                 <span class="p">}</span>
+
     <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
         <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;delr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;ncol&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;delr&#39;</span><span class="p">]</span>
         <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;delc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;nrow&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;delc&#39;</span><span class="p">]</span>
@@ -976,7 +981,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 15, 2021.
+        Last updated on Jan 18, 2021.
       </span>
 
     </p>
