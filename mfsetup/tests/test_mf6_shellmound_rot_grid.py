@@ -31,5 +31,5 @@ def test_rotated_grid(shellmound_cfg, shellmound_simulation):
     #m.setup_tdis()
     #m.setup_solver()
     #m.setup_packages(reset_existing=False)
-    m.write_input()
+    #m.write_input()
     j=2

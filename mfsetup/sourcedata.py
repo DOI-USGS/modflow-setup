@@ -1229,8 +1229,16 @@ def setup_array(model, package, var, data=None,
         # name of the copy:
         original_top_file = Path(model.tmpdir,
                                  f"{model.name}_{model.cfg[package]['top_filename_fmt']}.original")
-        # if the copy doesn't exist, make it
-        if not original_top_file.exists():
+
+        try:
+            top = model.load_array(original_top_file)
+            original_top_load_fail = False
+        except:
+            original_top_load_fail = True
+
+        # if the copy doesn't exist
+        # (or if the existing file is invalid), make it
+        if original_top_load_fail:
             # if remake_top is False, however,
             # there may be no preexisting top file to copy
             # first check for a preexisting top file
@@ -1246,7 +1254,7 @@ def setup_array(model, package, var, data=None,
             # copy the preexisting top file
             shutil.copy(model.cfg['intermediate_data']['top'][0],
                         original_top_file)
-        top = model.load_array(original_top_file)
+            top = model.load_array(original_top_file)
         lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
         if model.version == 'mf6':
             # reset the model top to the lake bottom
