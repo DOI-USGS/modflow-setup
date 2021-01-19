@@ -426,7 +426,7 @@ def test_external_tables(get_pleasant_mf6_with_dis):
 
     chd = m.setup_perimeter_boundary()
     chd.write()
-    for f in m.cfg['external_files']['chd_stress_period_data']:
+    for f in m.cfg['external_files']['chd_stress_period_data'].values():
         assert os.path.exists(f)
     blocks = read_mf6_block(chd.filename, 'period')
     for period, block in blocks.items():
