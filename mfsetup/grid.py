@@ -107,7 +107,7 @@ class MFsetupGrid(StructuredGrid):
         if xul is not None and yul is not None:
             xll = self._xul_to_xll(xul)
             yll = self._yul_to_yll(yul)
-            self.set_coord_info(xoff=xll, yoff=yll, epsg=epsg, proj4=proj_str)
+            self.set_coord_info(xoff=xll, yoff=yll, epsg=epsg, proj4=proj_str, angrot=angrot)
 
     def __eq__(self, other):
         if not isinstance(other, StructuredGrid):
@@ -612,40 +612,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     """"""
     print('setting up model grid...')
     t0 = time.time()
-
-    # conversions for model/parent model units to meters
-    # set regular flag for handling delc/delr
-    to_meters_inset = convert_length_units(model_length_units, 'meters')
-    regular = True
-    if dxy is not None:
-        delr_m = np.round(dxy * to_meters_inset, 4) # dxy is specified in model units
-        delc_m = delr_m
-    if delr is not None:
-        delr_m = np.round(delr * to_meters_inset, 4)  # delr is specified in model units
-        if not np.isscalar(delr_m):
-            if (set(delr_m)) == 1:
-                delr_m = delr_m[0]
-            else:
-                regular = False
-    if delc is not None:
-        delc_m = np.round(delc * to_meters_inset, 4) # delc is specified in model units
-        if not np.isscalar(delc_m):
-            if (set(delc_m)) == 1:
-                delc_m = delc_m[0]
-            else:
-                regular = False
-    if parent_model is not None:
-        to_meters_parent = convert_length_units(get_model_length_units(parent_model), 'meters')
-        # parent model grid spacing in meters
-        parent_delr_m = np.round(parent_model.dis.delr.array[0] * to_meters_parent, 4)
-        if not parent_delr_m % delr_m == 0:
-            raise ValueError('inset delr spacing of {} must be factor of parent spacing of {}'.format(delr_m,
-                                                                                                      parent_delr_m))
-        parent_delc_m = np.round(parent_model.dis.delc.array[0] * to_meters_parent, 4)
-        if not parent_delc_m % delc_m == 0:
-            raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_m,
-                                                                                                      parent_delc_m))
-
+    # make sure crs is populated, then get CRS units for the grid
     if epsg is not None:
         crs = pyproj.crs.CRS.from_epsg(epsg)
     elif crs is not None:
@@ -653,22 +620,66 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         crs = get_authority_crs(crs)
     elif parent_model is not None:
         crs = parent_model.modelgrid.crs
+        
+    grid_units = crs.axis_info[0].unit_name
+    if 'foot' in grid_units.lower() or 'feet' in grid_units.lower():
+        grid_units = 'feet'
+    elif 'metre' in grid_units.lower() or 'meter' in grid_units.lower():
+        grid_units = 'meters'
+    else:
+        raise ValueError(f'unrecognized CRS units {grid_units}: CRS must be projected in feet or meters')
+    
+    # conversions for model/parent model units to meters
+    # set regular flag for handling delc/delr
+    to_grid_units_inset = convert_length_units(model_length_units, grid_units)
+    
+    regular = True
+    if dxy is not None:
+        delr_grid = np.round(dxy * to_grid_units_inset, 4) # dxy is specified in model units
+        delc_grid = delr_grid
+    if delr is not None:
+        delr_grid = np.round(delr * to_grid_units_inset, 4)  # delr is specified in model units
+        if not np.isscalar(delr_grid):
+            if (set(delr_grid)) == 1:
+                delr_grid = delr_grid[0]
+            else:
+                regular = False
+    if delc is not None:
+        delc_grid = np.round(delc * to_grid_units_inset, 4) # delc is specified in model units
+        if not np.isscalar(delc_grid):
+            if (set(delc_grid)) == 1:
+                delc_grid = delc_grid[0]
+            else:
+                regular = False
+    if parent_model is not None:
+        to_grid_units_parent = convert_length_units(get_model_length_units(parent_model), grid_units)
+        # parent model grid spacing in meters
+        parent_delr_grid = np.round(parent_model.dis.delr.array[0] * to_grid_units_parent, 4)
+        if not parent_delr_grid % delr_grid == 0:
+            raise ValueError('inset delr spacing of {} must be factor of parent spacing of {}'.format(delr_grid,
+                                                                                                      parent_delr_grid))
+        parent_delc_grid = np.round(parent_model.dis.delc.array[0] * to_grid_units_parent, 4)
+        if not parent_delc_grid % delc_grid == 0:
+            raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_grid,
+                                                                                                      parent_delc_grid))
+
+
 
     # option 1: make grid from xoff, yoff and specified dimensions
     if xoff is not None and yoff is not None:
         assert nrow is not None and ncol is not None, \
             "Need to specify nrow and ncol if specifying xoffset and yoffset."
         if regular:
-            height_m = np.round(delc_m * nrow, 4)
-            width_m = np.round(delr_m * ncol, 4)
+            height_grid = np.round(delc_grid * nrow, 4)
+            width_grid = np.round(delr_grid * ncol, 4)
         else:
-            height_m = np.sum(delc_m)
-            width_m = np.sum(delr_m)
+            height_grid = np.sum(delc_grid)
+            width_grid = np.sum(delr_grid)
 
         # optionally align grid with national hydrologic grid
         # grids snapping to NHD must have spacings that are a factor of 1 km
         if snap_to_NHG:
-            assert regular and np.allclose(1000 % delc_m, 0, atol=1e-4)
+            assert regular and np.allclose(1000 % delc_grid, 0, atol=1e-4)
             x, y = get_point_on_national_hydrogeologic_grid(xoff, yoff,
                                                             offset='edge', op=np.floor)
             xoff = x
@@ -680,11 +691,11 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         if rotation != 0:
             rotation_rads = rotation * np.pi/180
             # note rotating around xoff,yoff not the origin!
-            xul = xoff - (height_m)*np.sin(rotation_rads)
-            yul = yoff + (height_m)*np.cos(rotation_rads)
+            xul = xoff - (height_grid)*np.sin(rotation_rads)
+            yul = yoff + (height_grid)*np.cos(rotation_rads)
         else:
             xul = xoff
-            yul = yoff + height_m
+            yul = yoff + height_grid
 
     # option 2: make grid using buffered feature bounding box
     else:
@@ -730,8 +741,8 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             L = buffer  # distance from area of interest to boundary
             xul = x1 - L
             yul = y2 + L
-            height_m = np.round(yul - (y1 - L), 4) # initial model height from buffer distance
-            width_m = np.round((x2 + L) - xul, 4)
+            height_grid = np.round(yul - (y1 - L), 4) # initial model height from buffer distance
+            width_grid = np.round((x2 + L) - xul, 4)
             rotation = 0.  # rotation not supported with this option
 
     # align model with parent grid if there is a parent model
@@ -746,13 +757,13 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         # adjust the dimensions to align remaining corners
         def roundup(number, increment):
             return int(np.ceil(number / increment) * increment)
-        height = roundup(height_m, parent_delr_m)
-        width = roundup(width_m, parent_delc_m)
+        height = roundup(height_grid, parent_delr_grid)
+        width = roundup(width_grid, parent_delc_grid)
 
         # update nrow, ncol after snapping to parent grid
         if regular:
-            nrow = int(height / delc_m) # h is in meters
-            ncol = int(width / delr_m)
+            nrow = int(height / delc_grid) # h is in meters
+            ncol = int(width / delr_grid)
 
     # set the grid configuration dictionary
     # spacing is in meters (consistent with projected CRS)
@@ -762,7 +773,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     #    yll = yul - model.height
     grid_cfg = {'nrow': int(nrow), 'ncol': int(ncol),
                 'nlay': nlay,
-                'delr': delr_m, 'delc': delc_m,
+                'delr': delr_grid, 'delc': delc_grid,
                 'xoff': xoff, 'yoff': yoff,
                 'xul': xul, 'yul': yul,
                 'rotation': rotation,
