@@ -192,6 +192,8 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
             if {'k', 'i', 'j'}.issubset(dfi.columns):
                 dfi['cellid'] = list(zip(dfi.k, dfi.i, dfi.j))
                 dfi.drop(['k', 'i', 'j'], axis=1, inplace=True)
+            if 'cellid' in dfi.columns:
+                dfi['cellid'] = dfi['cellid'].astype(str)
             dfi = dfi.set_index(names)
 
             # aggregate (sum) data to model cells
@@ -211,6 +213,7 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
             keep.append(squeezed)
         df = pd.concat(keep, axis=1)
     data_cols = df.columns.tolist()
+    df.index = [eval(s) for s in df.index]
     df['cellid'] = df.index.tolist()
     idx_cols = ['cellid']
     if isinstance(df.index.values[0], tuple):

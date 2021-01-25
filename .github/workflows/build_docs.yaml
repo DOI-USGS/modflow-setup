@@ -1,0 +1,108 @@
+# from pyproj: https://github.com/pyproj4/pyproj/blob/master/.github/workflows/build_docs.yaml
+name: Publish Docs
+
+on:
+  push:
+    branches: [ develop ]
+  release:
+    types: [ created ]
+
+jobs:
+  docs:
+    name: Publish Docs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+
+    - name: Fetch all Git tags
+      run: git fetch --prune --unshallow --tags
+
+    - name: Cache Miniconda
+      uses: actions/cache@v2.1.0
+      env:
+        # Increase this value to reset cache if environment.yml has changed
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-${{ matrix.python-version }}-${{
+             matrix.run-type }}-${{ env.CACHE_NUMBER }}-${{
+             hashFiles('ci/test_environment.yaml') }}
+
+    - name: Setup conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        activate-environment: mfsetup_ci
+        environment-file: ci/test_environment.yaml
+        python-version: '3.9'
+        auto-activate-base: false
+        # must be false in most cases
+        # https://github.com/JamesIves/github-pages-deploy-action
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
+    - name: Conda info
+      shell: bash -l {0}
+      run: conda info
+    - name: Add executables to path
+      shell: bash
+      run: |
+        if [[ ! -d "$HOME/.local/bin" ]]; then
+            mkdir -p "$HOME/.local/bin";
+        fi
+        # copy modflow bins to local dir to add to PATH later
+        if [ "$RUNNER_OS" == "Windows" ]; then
+            d="win"
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+            d="mac"
+        elif [ "$RUNNER_OS" == "Linux" ]; then
+            d="linux"
+        else
+            d="unexpectedos"
+            exit 1
+        fi
+        cp -r bin/$d/. "$HOME/.local/bin/"
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo $GITHUB_PATH
+    - name: Install Modflow-setup and ipykernel
+      shell: bash -l {0}
+      run: |
+        pip install -e .
+        python -m ipykernel install --user --name mfsetup_ci --display-name "mfsetup_ci"
+    - name: Conda list
+      shell: bash -l {0}
+      run: conda list
+
+    - name: Run tests
+      shell: bash -l {0}
+      run: |
+        pytest -v --durations=20
+
+    - name: Build docs
+      shell: bash -l {0}
+      run: |
+        set -e
+        make -C docs html
+
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      if: ${{ github.event_name == 'release' }}
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: docs/build/html
+        CLEAN: false
+        TARGET_FOLDER: ${{ github.ref }}
+
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      if: ${{ github.event_name == 'push' }}
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: docs/build/html
+        CLEAN: false
+        TARGET_FOLDER: latest

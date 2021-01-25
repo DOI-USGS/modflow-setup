@@ -74,7 +74,9 @@ class MFsetupGrid(StructuredGrid):
     xul, yul : float, float, optional
         Model grid offset (location of upper left corner), by default 0.0, 0.0
     angrot : float, optional
-        Rotation of the model grid, in degrees clockwise about the lower left corner, by default 0.0
+        Rotation of the model grid, in degrees counter-clockwise about the lower left corner.
+        Non-zero rotation values require input of xoff, yoff (xul, yul not supported).
+        By default 0.0
 
     References
     ----------
@@ -655,9 +657,11 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         # need to specify xul, yul in case snapping to parent
         # todo: allow snapping to parent grid on xoff, yoff
         if rotation != 0:
-            raise NotImplementedError('Rotated grids not supported.')
-        xul = xoff
-        yul = yoff + height_m
+            xul = None
+            yul = None
+        else:
+            xul = xoff
+            yul = yoff + height_m
 
     # option 2: make grid using buffered feature bounding box
     else:
@@ -741,6 +745,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                 'rotation': rotation,
                 'lenuni': 2
                 }
+
     if regular:
         grid_cfg['delr'] = np.ones(grid_cfg['ncol'], dtype=float) * grid_cfg['delr']
         grid_cfg['delc'] = np.ones(grid_cfg['nrow'], dtype=float) * grid_cfg['delc']

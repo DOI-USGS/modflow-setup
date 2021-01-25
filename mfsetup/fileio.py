@@ -53,7 +53,7 @@ def load(filename):
 
 def dump(filename, data):
     """Write a dictionary to a configuration file."""
-    if filename.endswith('.yml') or filename.endswith('.yaml'):
+    if str(filename).endswith('.yml') or str(filename).endswith('.yaml'):
         return dump_yml(filename, data)
     elif filename.endswith('.json'):
         return dump_json(filename, data)
@@ -172,7 +172,13 @@ def append_csv(filename, df, **kwargs):
 
 
 def load_cfg(cfgfile, verbose=False, default_file=None):
-    """
+    """This method loads a YAML or JSON configuration file,
+    applies configuration defaults from a default_file if specified,
+    adds the absolute file path of the configuration file
+    to the configuration dictionary, and converts any
+    relative paths in the configuration dictionary to
+    absolute paths, assuming the paths are relative to
+    the configuration file location.
 
     Parameters
     ----------
@@ -183,6 +189,13 @@ def load_cfg(cfgfile, verbose=False, default_file=None):
     -------
     cfg : dict
         Dictionary of configuration data
+
+    Notes
+    -----
+    This function is used by the model instance load and setup_from_yaml
+    classmethods, so that configuration defaults can be applied to the
+    simulation and model blocks before they are passed to the flopy simulation
+    constructor and the model constructor.
     """
     print('loading configuration file {}...'.format(cfgfile))
     source_path = os.path.split(__file__)[0]
@@ -194,9 +207,19 @@ def load_cfg(cfgfile, verbose=False, default_file=None):
         default_cfg = load(source_path + default_file)
         default_cfg['filename'] = source_path + default_file
 
+        # for now, only apply defaults for the model and simulation blocks
+        # which are needed for the model instance constructor
+        # other defaults are applied in _set_cfg,
+        # which is called by model.__init__
+        apply_defaults = {'simulation', 'model'}
+        default_cfg = {k: v for k, v in default_cfg.items()
+                       if k in apply_defaults}
+
     # recursively update defaults with information from yamlfile
     cfg = default_cfg.copy()
-    update(cfg, load(cfgfile))
+    user_specified_cfg = load(cfgfile)
+
+    update(cfg, user_specified_cfg)
     cfg['model'].update({'verbose': verbose})
     cfg['filename'] = os.path.abspath(cfgfile)
 

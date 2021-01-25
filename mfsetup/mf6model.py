@@ -59,7 +59,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                      'ghb', 'sfr', 'lak', 'riv',
                                      'wel', 'maw', 'obs']
         self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
-        self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
+        #self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
         self._set_cfg(cfg)   # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
@@ -655,7 +655,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             # kludge to deal with ugliness of lake package external file handling
             # (need to give path relative to model_ws, not folder that flopy is working in)
             tab_files_argument = [os.path.relpath(f) for f in tab_files]
-
+        else:
+            tab_files = None
         # todo: implement lake outlets with SFR
 
         # perioddata
@@ -696,8 +697,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         packagedata = self.lake_info[packagedata_cols]
         packagedata['lak_id'] -= 1  # convert to zero-based
         kwargs['packagedata'] = packagedata.values.tolist()
-        kwargs['ntables'] = len(tab_files)
-        kwargs['tables'] = [(i, f, 'junk', 'junk') for i, f in enumerate(tab_files)]
+        if  tab_files != None:
+            kwargs['ntables'] = len(tab_files)
+            kwargs['tables'] = [(i, f, 'junk', 'junk') for i, f in enumerate(tab_files)]
         kwargs['outlets'] = None  # not implemented
         #kwargs['outletperioddata'] = None  # not implemented
         kwargs['perioddata'] = lakeperioddata

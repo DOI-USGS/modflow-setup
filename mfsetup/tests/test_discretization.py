@@ -12,6 +12,7 @@ from mfsetup.discretization import (
     get_layer_thicknesses,
     make_ibound,
     make_idomain,
+    make_irch,
     populate_values,
     verify_minimum_layer_thickness,
     voxels_to_layers,
@@ -348,3 +349,15 @@ def test_voxels_to_layers(z_edges, model_botm):
                               model_botm=model_botm, extend_botm=True, no_data_value=0)
     assert result[-1, 0, 1] == -5  # voxel edge was reset to -5 in this location
     assert np.allclose(result[:, 0, 2], [19., 19., 19., 19.,  0.])
+
+
+def test_make_irch(shellmound_model_with_dis):
+    m = shellmound_model_with_dis
+    irch = make_irch(m.idomain)
+
+    m.setup_rch()
+    m.rch.write()
+    written_irch = np.loadtxt('external/irch.dat')
+    idm_argmax = np.argmax(m.idomain, axis=0)
+    assert np.allclose(written_irch, irch)
+    assert np.allclose(written_irch, idm_argmax + 1)

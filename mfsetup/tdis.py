@@ -123,27 +123,24 @@ def parse_perioddata_groups(perioddata_dict, defaults={}):
 
 
 def setup_perioddata_group(start_date_time, end_date_time=None,
-                           nper=1, perlen=None, model_time_units=None, freq=None,
-                           steady={0: True,
-                             1: False},
+                           nper=None, perlen=None, model_time_units='days', freq=None,
+                           steady={0: True, 1: False},
                            nstp=10, tsmult=1.5,
                            oc_saverecord={0: ['save head last',
-                             'save budget last']},
+                                              'save budget last']},
                            ):
     """Sets up time discretization for a model; outputs a DataFrame with
     stress period dates/times and properties. Stress periods can be established
-    with an established explicitly by specifying perlen as a list of period lengths in
-    model units. Or, stress periods can be established using three of the
-    start_date, end_date_time, nper, and freq arguments, similar to the
-    pandas.date_range function.
-    (see https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html)
+    by explicitly specifying perlen as a list of period lengths in
+    model units. Or, stress periods can be generated via :func:`pandas.date_range`,
+    using three of the start_date_time, end_date_time, nper, and freq arguments.
 
     Parameters
     ----------
-    start_date_time_time : str or datetime-like
-        Left bound for generating stress period dates. See pandas documenation.
+    start_date_time : str or datetime-like
+        Left bound for generating stress period dates. See :func:`pandas.date_range`.
     end_date_time : str or datetime-like, optional
-        Right bound for generating stress period dates. See pandas documenation.
+        Right bound for generating stress period dates. See :func:`pandas.date_range`.
     nper : int, optional
         Number of stress periods. Only used if perlen is None, or in combination with freq
         if an end_date_time isn't specified.
@@ -152,6 +149,7 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
         specify 3 of start_date_time, end_date_time, nper and/or freq.
     model_time_units : str, optional
         'days' or 'seconds'.
+        By default, 'days'.
     freq : str or DateOffset, default None
         For setting up uniform stress periods between a start and end date, or of length nper.
         Same as argument to pandas.date_range. Frequency strings can have multiples,
@@ -177,9 +175,9 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
         DataFrame summarizing stress period information. Data columns:
 
         ==================  ================  ==============================================
-        **start_datetime**  pandas datetimes  start date/time of each stress period (does not include steady-state periods)
-        **end_datetime**    pandas datetimes  end date/time of each stress period (does not include steady-state periods)
-        **time**            float             cumulative MODFLOW time at end of period (includes steady-state periods)
+        **start_datetime**  pandas datetimes  start date/time of each stress period
+        **end_datetime**    pandas datetimes  end date/time of each stress period
+        **time**            float             cumulative MODFLOW time at end of period
         **per**             int               zero-based stress period
         **perlen**          float             stress period length in model time units
         **nstp**            int               number of timesteps in the stress period
@@ -188,37 +186,110 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
         **oc**              dict              MODFLOW-6 output control options
         ==================  ================  ==============================================
 
+    Notes
+    -----
+    *Initial steady-state period*
+
+    If the first stress period is specified as steady-state (``steady[0] == True``),
+    the period length (perlen) in MODFLOW time is automatically set to 1. If subsequent
+    stress periods are specified, or if no end-date is specified, the end date for
+    the initial steady-state stress period is set equal to the start date. In the latter case,
+    the assumption is that the specified start date represents the start of the transient simulation,
+    and the initial steady-state (which is time-invarient anyways) is intended to produce a valid
+    starting condition. If only a single steady-state stress period is specified with an end date,
+    then that end date is retained.
+
+    *MODFLOW time vs real time*
+
+    The ``time`` column of the output DataFrame represents time in the MODFLOW simulation,
+    which cannot have zero-lengths for any period. Therefore, initial steady-state periods
+    are automatically assigned lengths of one (as described above), and MODFLOW time is incremented
+    accordingly. If the model has an initial steady-state period, this means that subsequent MODFLOW
+    times will be 1 time unit greater than the acutal date-times.
+
+    *End-dates*
+
+    Specified ``end_date_time`` represents the right bound of the time discretization,
+    or in other words, the time increment *after* the last time increment to be
+    simulated. For example, ``end_date_time='2019-01-01'`` would mean that
+    ``'2018-12-31'`` is the last date simulated by the model
+    (which ends at ``2019-01-01 00:00:00``).
+
+
+
     """
-    # todo: refactor/simplify setup_perioddata_group
+    specified_start_datetime = None
+    if start_date_time is not None:
+        specified_start_datetime = pd.Timestamp(start_date_time)
+    elif end_date_time is None:
+        raise ValueError('If no start_datetime, must specify end_datetime')
+    specified_end_datetime = None
+    if end_date_time is not None:
+        specified_end_datetime = pd.Timestamp(end_date_time)
+
+    # if times are specified by start & end dates and freq,
+    # period is determined by pd.date_range
+    if all({specified_start_datetime, specified_end_datetime, freq}):
+        nper = None
     freq = convert_freq_to_period_start(freq)
     oc = oc_saverecord
     if not isinstance(steady, dict):
         steady = {i: v for i, v in enumerate(steady)}
 
+    # nstp and tsmult need to be lists
+    if not np.isscalar(nstp):
+        nstp = list(nstp)
+    if not np.isscalar(tsmult):
+        tsmult = list(tsmult)
+
     txt = "Specify perlen as a list of lengths in model units, or\nspecify 3 " \
           "of start_date_time, end_date_time, nper and/or freq."
+
     # Explicitly specified stress period lengths
+    start_datetime = []  # datetimes at period starts
+    end_datetime = []  # datetimes at period ends
     if perlen is not None:
         if np.isscalar(perlen):
             perlen = [perlen]
-        datetimes = [pd.Timestamp(start_date_time)]
+        start_datetime = [specified_start_datetime]
         if len(perlen) > 1:
-            for i, length in enumerate(perlen[1:]):
-                datetimes.append(datetimes[i] + pd.Timedelta(length, unit=model_time_units))
-        time = np.cumsum(perlen) # time in MODFLOW units
+            for i, length in enumerate(perlen):
+                # initial steady-state period
+                # set perlen to 0
+                # and start/end dates to be equal
+                if i == 0 and steady[0]:
+                    next_start = start_datetime[i]
+                    perlen[0] == 1
+                else:
+                    next_start = start_datetime[i] + \
+                                 pd.Timedelta(length, unit=model_time_units)
+                start_datetime.append(next_start)
+            end_datetime = pd.to_datetime(start_datetime[1:])
+            start_datetime = pd.to_datetime(start_datetime[:-1])
+        # single specified stress period length
+        else:
+            end_datetime = [specified_start_datetime + pd.Timedelta(perlen[0],
+                                                                    unit=model_time_units)]
+        time = np.cumsum(perlen)  # time at end of period, in MODFLOW units
+
+    # single steady-state period
     elif nper == 1 and steady[0]:
         perlen = [1]
         time = [1]
-        #datetimes = [pd.Timestamp(start_date_time)]
+        start_datetime = pd.to_datetime([specified_start_datetime])
+        if specified_end_datetime is not None:
+            end_datetime = pd.to_datetime([specified_end_datetime])
+        else:
+            end_datetime = pd.to_datetime([specified_start_datetime])
 
-    # Set up datetimes based on 3 of start_date_time, end_date_time, nper and/or freq (scalar perlen)
+    # Set up datetimes based on 3 of start_date_time, specified_end_datetime, nper and/or freq (scalar perlen)
     else:
         assert np.isscalar(nstp), "nstp: {}; nstp must be a scalar if perlen " \
                                   "is not specified explicitly as a list.\n{}".format(nstp, txt)
         assert np.isscalar(tsmult), "tsmult: {}; tsmult must be a scalar if perlen " \
                                   "is not specified explicitly as a list.\n{}".format(tsmult, txt)
         periods = None
-        if end_date_time is None:
+        if specified_end_datetime is None:
             # start_date_time, periods and freq
             # (i.e. nper periods of length perlen starting on stat_date)
             if freq is not None:
@@ -226,69 +297,69 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
             else:
                 raise ValueError("Unrecognized input for perlen: {}.\n{}".format(perlen, txt))
         else:
-            # end_date_time and freq and periods
-            if start_date_time is None:
+            # specified_end_datetime and freq and periods
+            if specified_start_datetime is None:
                 periods = nper + 1
-            # start_date_time, end_date_time and (linearly spaced) periods
-            # (i.e. nper periods of uniform length between start_date_time and end_date_time)
+            # start_date_time, specified_end_datetime and uniform periods
+            # (i.e. nper periods of uniform length between start_date_time and specified_end_datetime)
             elif freq is None:
                 periods = nper #-1 if steady[0] else nper
-            # start_date_time, end_date_time and frequency
+            # start_date_time, specified_end_datetime and frequency
             elif freq is not None:
                 pass
-        datetimes = pd.date_range(start_date_time, end_date_time, periods=periods, freq=freq)
-        if start_date_time is None:
-            start_date_time = datetimes[0]  # in case end_date_time, periods and freq were specified
-        if len(datetimes) == 1:
-            perlen = [(pd.Timestamp(end_date_time) - pd.Timestamp(start_date_time)).days]
-            time = np.array(perlen)
+        datetimes = pd.date_range(specified_start_datetime, specified_end_datetime,
+                                  periods=periods, freq=freq)
+        # if end_datetime, periods and freq were specified
+        if specified_start_datetime is None:
+            specified_start_datetime = datetimes[0]
+            start_datetime = datetimes[:-1]
+            end_datetime = datetimes[1:]
+            time_edges = getattr((datetimes - start_datetime[0]),
+                                 model_time_units).tolist()
+            perlen = np.diff(time_edges)
+            # time is elapsed time at the end of each period
+            time = time_edges[1:]
         else:
-            # time is at the end of each stress period
-            time = getattr((datetimes - pd.Timestamp(start_date_time)), model_time_units).tolist()
-
-            # get the last (end) time, if it wasn't included in datetimes
-            if datetimes[0] == pd.Timestamp(start_date_time) and nper is None:
-                if end_date_time is not None:
-                    # + 1 for consistency with using date_range below
-                    # e.g. to end at 2019-01-01 instead of 2018-12-31
-                    last_time = getattr((pd.Timestamp(end_date_time) -
-                                         pd.Timestamp(start_date_time)),
-                                        model_time_units) + 1
-                else:
-                    end_datetimes = pd.date_range(start_date_time,
-                                                  periods=len(datetimes) + 1,
-                                                  freq=freq)
-                    last_time = getattr((end_datetimes[-1] -
-                                         pd.Timestamp(start_date_time)),
-                                         model_time_units)
-                if last_time != time[-1]:
-                    time += [last_time]
-        if time[0] != 0:
-            time = [0] + list(time)
-        perlen = np.diff(time)
-        time = np.array(time[1:])
-        assert len(perlen) == len(time)  # == len(datetimes)
+            start_datetime = datetimes
+            end_datetime = pd.to_datetime(datetimes[1:].tolist() +
+                                          [specified_end_datetime])
+            # Edge case of end date falling on the start date freq
+            # (zero-length sp at end)
+            if end_datetime[-1] == start_datetime[-1]:
+                start_datetime = start_datetime[:-1]
+                end_datetime = end_datetime[:-1]
+            time_edges = getattr((end_datetime - start_datetime[0]),
+                                 model_time_units).tolist()
+            time_edges = [0] + time_edges
+            perlen = np.diff(time_edges)
+            # time is elapsed time at the end of each period
+            time = time_edges[1:]
+        #if len(datetimes) == 1:
+        #    perlen = [(specified_end_datetime - specified_start_datetime).days]
+        #    time = np.array(perlen)
 
         # if first period is steady-state,
         # insert it at the beginning of the generated range
-        # this should only apply to cases where nper > 1
+        # (only do for pd.date_range -based discretization)
         if steady[0]:
-            #datetimes = [datetimes[0]] + datetimes.tolist()  #  datetimes[:-1].tolist()
+            start_datetime = [start_datetime[0]] + start_datetime.tolist()
+            end_datetime = [start_datetime[0]] + end_datetime.tolist()
             perlen = [1] + list(perlen)
-            time = [1] + (time + 1).tolist()
-        else:
-            pass
-            #datetimes = datetimes[:-1]
-            #perlen = np.diff(time).tolist()
-            #time = time[1:]
+            time = [1] + (np.array(time) + 1).tolist()
+            if isinstance(nstp, list):
+                nstp = [1] + nstp
+            if isinstance(tsmult, list):
+                tsmult = [1] + tsmult
 
-    perioddata = pd.DataFrame({#'datetime': datetimes,
-                               'time': time,
-                               'per': range(len(time)),
-                               'perlen': np.array(perlen).astype(float),
-                               'nstp': nstp,
-                               'tsmult': tsmult,
-                               })
+    perioddata = pd.DataFrame({
+        'start_datetime': start_datetime,
+        'end_datetime': end_datetime,
+        'time': time,
+        'per': range(len(time)),
+        'perlen': np.array(perlen).astype(float),
+        'nstp': nstp,
+        'tsmult': tsmult,
+    })
 
     # specify steady-state or transient for each period, filling empty
     # periods with previous state (same logic as MF6 input)
@@ -303,22 +374,6 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
     for i in range(len(perioddata)):
         oclist.append(oc.get(i, oclist[i]))
     perioddata['oc'] = oclist[1:]
-
-    # create start and end datetime columns;
-    # correct the datetime to only increment for transient stress periods
-    start_datetime = [pd.Timestamp(start_date_time)]
-    end_datetime = []
-    for i, r in perioddata.iterrows():
-        if r.steady:
-            end_datetime.append(start_datetime[i])
-        else:
-            end_datetime.append(start_datetime[i] + pd.Timedelta(r.perlen, unit=model_time_units))
-        start_datetime.append(end_datetime[i])
-
-    perioddata['start_datetime'] = start_datetime[:-1]
-    perioddata['end_datetime'] = end_datetime
-    cols = ['start_datetime', 'end_datetime', 'time', 'per', 'perlen', 'nstp', 'tsmult', 'steady', 'oc']
-    #perioddata = perioddata.drop('datetime', axis=1)[cols]
 
     # correct nstp and tsmult to be 1 for steady-state periods
     perioddata.loc[perioddata.steady, 'nstp'] = 1

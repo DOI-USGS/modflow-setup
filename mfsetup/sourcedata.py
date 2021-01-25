@@ -21,7 +21,7 @@ from mfsetup.discretization import (
     verify_minimum_layer_thickness,
     weighted_average_between_layers,
 )
-from mfsetup.fileio import save_array
+from mfsetup.fileio import save_array, setup_external_filepaths
 from mfsetup.grid import get_ij, rasterize
 from mfsetup.interpolate import (
     get_source_dest_model_xys,
@@ -801,14 +801,24 @@ class MFArrayData(SourceData):
     def get_data(self):
         data = {}
 
+        # number of layers in dest. array
+        # (array3d dtype is nlay, nrow, ncol)
+        if self.datatype == 'array3d':
+            nk = self.dest_model.nlay
+        elif self.datatype == 'transient2d':
+            nk = self.dest_model.nper
+        else:
+            nk = 1
+
+        # tile 2D array to 3D
+        if isinstance(self.values, np.ndarray) and \
+                len(self.values.shape) == 2:
+            self.values = np.tile(self.values, (nk, 1, 1))
+
         # convert to dict
         if isinstance(self.values, str) or np.isscalar(self.values):
-            if self.datatype == 'array3d':
-                nk = self.dest_model.nlay
-            else:
-                nk = 1
             self.values = {k: self.values for k in range(nk)}
-        elif isinstance(self.values, list):
+        elif isinstance(self.values, list) or isinstance(self.values, np.ndarray):
             self.values = {i: val for i, val in enumerate(self.values)}
         for i, val in self.values.items():
             if isinstance(val, dict) and 'filename' in val.keys():
@@ -922,13 +932,13 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         # aggregate the data from multiple files
         dfs = []
         for i, f in self.filenames.items():
-            if f.endswith('.shp') or f.endswith('.dbf'):
+            if str(f).endswith('.shp') or str(f).endswith('.dbf'):
                 # implement automatic reprojection in gis-utils
                 # maintaining backwards compatibility
                 kwargs = {'dest_crs': self.dest_model.modelgrid.crs}
                 kwargs = get_input_arguments(kwargs, shp2df)
                 df = shp2df(f, **kwargs)
-            elif f.endswith('.csv'):
+            elif str(f).endswith('.csv'):
                 df = pd.read_csv(f)
             else:
                 raise ValueError("Unsupported file type: '{}', for {}".format(f[:-4], f))
@@ -1213,14 +1223,38 @@ def setup_array(model, package, var, data=None,
     simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
     if var == 'botm':
         bathy = model.lake_bathymetry
+
         # save a copy of original top elevations
         # (prior to adjustment for lake bathymetry)
+        # name of the copy:
         original_top_file = Path(model.tmpdir,
                                  f"{model.name}_{model.cfg[package]['top_filename_fmt']}.original")
-        if not original_top_file.exists():
+
+        try:
+            top = model.load_array(original_top_file)
+            original_top_load_fail = False
+        except:
+            original_top_load_fail = True
+
+        # if the copy doesn't exist
+        # (or if the existing file is invalid), make it
+        if original_top_load_fail:
+            # if remake_top is False, however,
+            # there may be no preexisting top file to copy
+            # first check for a preexisting top file
+            # get the path and add to intermediate files dict if it's not in there
+            if 'top' not in model.cfg['intermediate_data']:
+                model.setup_external_filepaths('dis', 'top',
+                                               model.cfg['dis']['top_filename_fmt'])
+            existing_model_top_file = Path(model.cfg['intermediate_data']['top'][0])
+            if not existing_model_top_file.exists():
+                raise ValueError((f"Model top text array file {existing_model_top_file} doesn't exist.\n"
+                                  f"If remake_top is False in the dis configuration block, "
+                                 f"{existing_model_top_file} needs to have been made previously."))
+            # copy the preexisting top file
             shutil.copy(model.cfg['intermediate_data']['top'][0],
                         original_top_file)
-        top = model.load_array(original_top_file)
+            top = model.load_array(original_top_file)
         lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
         if model.version == 'mf6':
             # reset the model top to the lake bottom
@@ -1258,8 +1292,8 @@ def setup_array(model, package, var, data=None,
         # (so they won't get expanded again by fix_model_layer_conflicts)
         # only do this for mf6, where pinched out cells are allowed
         min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
-        if model.version == 'mf6':
-            botm[botm >= (top - min_thickness)] = np.nan
+#        if model.version == 'mf6':
+#            botm[botm >= (top - min_thickness)] = np.nan
 
         #for k, kbotm in enumerate(botm):
         #    inlayer = lake_botm_elevations > kbotm[bathy != 0]

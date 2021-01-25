@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -19,7 +20,7 @@ def setup_wel_data(model, for_external_files=True):
     """
     # default options for distributing fluxes vertically
     vfd_defaults = {'across_layers': False,
-                    'distribute_by': 'thickness',
+                    'distribute_by': 'transmissivity',
                     'screen_top_col': 'screen_top',
                     'screen_botm_col': 'screen_botm',
                     'minimum_layer_thickness': model.cfg['wel'].get('minimum_layer_thickness', 2.)
@@ -179,11 +180,11 @@ def setup_wel_data(model, for_external_files=True):
     if model.version == 'mf6':
         inactive = model.dis.idomain.array[df.k.values,
                                            df.i.values,
-                                           df.j.values] != 1
+                                           df.j.values] < 1
     else:
         inactive = model.bas6.ibound.array[df.k.values,
                                            df.i.values,
-                                           df.j.values] != 1
+                                           df.j.values] < 1
 
     # record dropped wells in csv file
     # (which might contain wells dropped by other routines)
@@ -231,7 +232,7 @@ def assign_layers_from_screen_top_botm(data, model,
                                        screen_botm_col='screen_botm',
                                        label_col='site_no',
                                        across_layers=False,
-                                       distribute_by='thickness',
+                                       distribute_by='transmissivity',
                                        minimum_layer_thickness=2.):
     """Assign model layers to pumping flux data based on
     open interval. Fluxes are applied to each layer proportional
@@ -271,37 +272,105 @@ def assign_layers_from_screen_top_botm(data, model,
     if across_layers:
         raise NotImplemented('Distributing fluxes to multiple layers')
     else:
-        if distribute_by == 'thickness':
+        if distribute_by in {'thickness', 'transmissivity'}:
             i, j, x, y, screen_botm, screen_top = None, None, None, None, None, None
-            if 'i' in data.columns and 'y' in data.columns:
+            if 'i' in data.columns and 'j' in data.columns:
                 i, j = data['i'].values, data['j'].values
             elif 'x' in data.columns and 'y' in data.columns:
+                raise NotImplementedError('Assigning well layers with just x, y')
                 x, y = data['x'].values, data['y'].values
             if screen_top_col in data.columns:
                 screen_top = data[screen_top_col].values
             if screen_botm_col in data.columns:
                 screen_botm = data[screen_botm_col].values
+
+            # get starting heads if available
+            no_strt_msg = (f'Well setup: distribute_by: {distribute_by} selected '
+                           'but model has no {} package for computing sat. '
+                           'thickness.\nUsing full layer thickness.')
+            strt3D = None
+            if model.version == 'mf6':
+                strt_package = 'IC'
+            else:
+                strt_package = 'BAS6'
+
+            if strt_package not in model.get_package_list():
+                warnings.warn(no_strt_msg.format(strt_package), UserWarning)
+                strt2D = None
+                strt3D = None
+            else:
+                strt = getattr(getattr(model, strt_package.lower()), 'strt')
+                strt3D = strt.array
+                strt2D = strt3D[:, i, j]
+
             thicknesses = get_open_interval_thickness(model,
+                                                      heads=strt2D,
                                                       i=i, j=j, x=x, y=y,
                                                       screen_top=screen_top,
                                                       screen_botm=screen_botm)
+            hk = np.ones_like(thicknesses)
+            if distribute_by == 'transmissivity':
+                no_k_msg = ('Well setup: distribute_by: transmissivity selected '
+                            'but model has no {} package.\nFalling back to'
+                            'distributing wells by layer thickness.')
+                if model.version == 'mf6':
+                    hk_package = 'NPF'
+                    hk_var = 'k'
+                elif model.version == 'mfnwt':
+                    hk_package = 'UPW'
+                    hk_var = 'hk'
+                else:
+                    hk_package = 'LPF'
+                    hk_var = 'hk'
+
+                if hk_package not in model.get_package_list():
+                    warnings.warn(no_k_msg.format(hk_package), UserWarning)
+                    hk = np.ones_like(thicknesses)
+                else:
+                    hk = getattr(getattr(model, hk_package.lower()), hk_var)
+                    hk = hk.array[:, i, j]
+
             # for each i, j location with a well,
-            # get the layer with highest thickness in the open interval
-            data['k'] = np.argmax(thicknesses, axis=0)
-            # get the thickness for those layers
+            # get the layer with highest transmissivity in the open interval
+            # if distribute_by == 'thickness' or no hk array,
+            # T == thicknesses
+            # round to avoid erratic floating point behavior
+            # for (nearly) equal quantities
+            T = np.round(thicknesses * hk, 2)
+
+            # to get the deepest occurance of a max value
+            # (argmax will result in the first, or shallowest)
+            # take the argmax on the reversed view of the array
+            # data['k'] = np.argmax(T, axis=0)
+            T_r = T[::-1]
+            data['k'] = len(T_r) - np.argmax(T_r, axis=0) - 1
+
+            # get thicknesses for all layers
+            # (including portions of layers outside open interval)
             all_layers = np.zeros((model.nlay + 1, model.nrow, model.ncol))
             all_layers[0] = model.dis.top.array
             all_layers[1:] = model.dis.botm.array
+            all_layer_thicknesses = np.abs(np.diff(all_layers, axis=0))
             layer_thicknesses = -np.diff(all_layers[:, i, j], axis=0)
 
             # only include thicknesses for valid layers
+            # reset thicknesses to sat. thickness
+            if strt3D is not None:
+                sat_thickness = strt3D - model.dis.botm.array
+                # cells where the head is above the layer top
+                no_unsat = sat_thickness > all_layer_thicknesses
+                sat_thickness[no_unsat] = all_layer_thicknesses[no_unsat]
+                # cells where the head is below the cell bottom
+                sat_thickness[sat_thickness < 0] = 0
+                layer_thicknesses = sat_thickness[:, i, j]
+
             # set inactive cells to 0 thickness for the purpose or relocating wells
-            layer_thicknesses[idomain[:, i, j] != 1] = 0
+            layer_thicknesses[idomain[:, i, j] < 1] = 0
             data['idomain'] = idomain[data['k'], i, j]
             data['laythick'] = layer_thicknesses[data['k'].values,
                                                  list(range(layer_thicknesses.shape[1]))]
             # flag layers that are too thin or inactive
-            inactive = idomain[data.k, data.i, data.j] != 1
+            inactive = idomain[data.k, data.i, data.j] < 1
             invalid_open_interval = (data['laythick'] < minimum_layer_thickness) | inactive
 
             if any(invalid_open_interval):
@@ -309,8 +378,17 @@ def assign_layers_from_screen_top_botm(data, model,
 
                 # move wells that are still in a thin layer to the thickest active layer
                 data['orig_layer'] = data['k']
-                thickest_layer = np.argmax(layer_thicknesses, axis=0)
-                data.loc[invalid_open_interval, 'k'] = thickest_layer[invalid_open_interval]
+                # get T for all layers
+                T_all_layers = np.round(layer_thicknesses * hk, 2)
+
+                # to get the deepest occurance of a max value
+                # (argmax will result in the first, or shallowest)
+                # take the argmax on the reversed view of the array
+                # Tmax_layer = np.argmax(T_all_layers, axis=0)
+                T_all_layers_r = T_all_layers[::-1]
+                Tmax_layer = len(T_all_layers_r) - np.argmax(T_all_layers_r, axis=0) - 1
+
+                data.loc[invalid_open_interval, 'k'] = Tmax_layer[invalid_open_interval]
                 data['laythick'] = layer_thicknesses[data['k'].values,
                                                      list(range(layer_thicknesses.shape[1]))]
                 data['idomain'] = idomain[data['k'], i, j]
@@ -359,10 +437,6 @@ def assign_layers_from_screen_top_botm(data, model,
 
                 # cull the wells that are still below the min. layer thickness
                 data = data.loc[data['laythick'] > minimum_layer_thickness].copy()
-
-        elif distribute_by == 'tranmissivity':
-            raise NotImplemented('Distributing well fluxes by layer transmissivity')
-
         else:
             raise ValueError('Unrecognized argument for distribute_by: {}'.format(distribute_by))
     return data

@@ -60,7 +60,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                                      'gag', 'hyd']
         # default configuration (different for nwt vs mf6)
         self.cfg = load(self.source_path + self.default_file) # '/mfnwt_defaults.yml')
-        self.cfg['filename'] = self.source_path + self.default_file #'/mfnwt_defaults.yml'
+        #self.cfg['filename'] = self.source_path + self.default_file #'/mfnwt_defaults.yml'
         self._set_cfg(cfg)  # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
@@ -822,12 +822,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         m = cls(cfg=cfg, **cfg['model'])
         if 'grid' not in m.cfg.keys():
-            grid_file = cfg['setup_grid']['output_files']['grid_file']
-            if os.path.exists(grid_file):
-                print('Loading model grid definition from {}'.format(grid_file))
-                m.cfg['grid'] = load(grid_file)
-            else:
-                m.setup_grid()
+            m.setup_grid()
+            #grid_file = cfg['setup_grid']['output_files']['grid_file']
+            #if os.path.exists(grid_file):
+            #    print('Loading model grid definition from {}'.format(grid_file))
+            #    m.cfg['grid'] = load(grid_file)
+            #else:
+            #    m.setup_grid()
 
         m = flopy_mf2005_load(m, load_only=load_only, forgive=forgive, check=check)
         print('finished loading model in {:.2f}s'.format(time.time() - t0))

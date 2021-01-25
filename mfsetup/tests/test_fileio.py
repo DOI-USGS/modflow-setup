@@ -80,7 +80,7 @@ def test_load_cfg(pfl_nwt_test_cfg_path):
     cfg_pathed = load_cfg(pfl_nwt_test_cfg_path, default_file='/mfnwt_defaults.yml')
     cfg = load(pfl_nwt_test_cfg_path)
     config_file_location = os.path.split(os.path.abspath(pfl_nwt_test_cfg_path))[0]
-    assert cfg_pathed['nwt']['use_existing_file'] is None
+    assert cfg_pathed['nwt'].get('use_existing_file') is None
 
     p1 = os.path.normpath(cfg_pathed['model']['model_ws'])
     p2 = os.path.normpath(os.path.join(config_file_location, cfg['model']['model_ws']))

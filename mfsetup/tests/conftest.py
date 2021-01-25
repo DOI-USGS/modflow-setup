@@ -2,6 +2,7 @@ import copy
 import os
 import platform
 import shutil
+from pathlib import Path
 
 import flopy
 import pytest
@@ -26,6 +27,14 @@ from mfsetup.utils import get_input_arguments
 def project_root_path():
     filepath = os.path.split(os.path.abspath(__file__))[0]
     return os.path.normpath(os.path.join(filepath, '../../'))
+
+
+@pytest.fixture(scope="session")
+def test_data_path(project_root_path):
+    """Root folder for the project (with setup.py),
+    two levels up from the location of this file.
+    """
+    return Path(project_root_path, 'mfsetup', 'tests', 'data')
 
 
 @pytest.fixture(scope="session", autouse=True)

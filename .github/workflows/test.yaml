@@ -1,0 +1,98 @@
+# Based on github template: https://github.com/actions/starter-workflows/blob/main/ci/python-package.yml
+
+name: Tests
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # run every Monday at 9 AM UTC (3 am PST)
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: ${{ matrix.python-version }}, ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        python-version: ['3.9', '3.8']  # ['3.8', '3.x']
+        exclude:
+          # tests with ubuntu-latest, python latest
+          # are executed by build_docs.yaml
+          - os: ubuntu-latest
+            python-version: 3.9
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+
+    - name: Fetch all Git tags
+      run: git fetch --prune --unshallow --tags
+
+    - name: Cache Miniconda
+      uses: actions/cache@v2.1.0
+      env:
+        # Increase this value to reset cache if environment.yml has changed
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-${{ matrix.python-version }}-${{
+             matrix.run-type }}-${{ env.CACHE_NUMBER }}-${{
+             hashFiles('ci/test_environment.yaml') }}
+
+    - name: Setup conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        activate-environment: mfsetup_ci
+        environment-file: ci/test_environment.yaml
+        python-version: ${{ matrix.python-version }}
+        #condarc-file: ci/example-condarc.yml
+        auto-activate-base: false
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
+    - name: Conda info
+      shell: bash -l {0}
+      run: conda info
+    - name: Add executables to path
+      shell: bash
+      run: |
+        if [[ ! -d "$HOME/.local/bin" ]]; then
+            mkdir -p "$HOME/.local/bin";
+        fi
+        # copy modflow bins to local dir to add to PATH later
+        if [ "$RUNNER_OS" == "Windows" ]; then
+            d="win"
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+            d="mac"
+        elif [ "$RUNNER_OS" == "Linux" ]; then
+            d="linux"
+        else
+            d="unexpectedos"
+            exit 1
+        fi
+        cp -r bin/$d/. "$HOME/.local/bin/"
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo $GITHUB_PATH
+    - name: Install Modflow-setup and ipykernel
+      shell: bash -l {0}
+      run: |
+        pip install -e .
+        python -m ipykernel install --user --name mfsetup_ci --display-name "mfsetup_ci"
+    - name: Conda list
+      shell: bash -l {0}
+      run: conda list
+    #- name: Lint with flake8
+    #  run: |
+    #    # stop the build if there are Python syntax errors or undefined names
+    #    flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    #    # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+    #    flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Run tests and upload coverage
+      shell: bash -l {0}
+      run: |
+        coverage run -m pytest -v --durations=20
+        coverage report -m
+        codecov

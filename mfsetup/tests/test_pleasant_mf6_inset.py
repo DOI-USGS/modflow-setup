@@ -6,6 +6,7 @@ Tests for Pleasant Lake inset case, MODFLOW-6 version
 import copy
 import glob
 import os
+import shutil
 from pathlib import Path
 
 import flopy
@@ -406,8 +407,6 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
     assert np.allclose(m.dis.idomain.array[:2, i, j], 0)
 
 
-@pytest.mark.xfail(os.environ.get('APPVEYOR') == 'True',
-                   reason="check for chd external files fails on Appveyor but not OSX or Linux")
 def test_external_tables(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
     lak = m.setup_lak()
@@ -419,7 +418,7 @@ def test_external_tables(get_pleasant_mf6_with_dis):
 
     wel = m.setup_wel()
     wel.write()
-    for f in m.cfg['external_files']['wel_stress_period_data']:
+    for f in m.cfg['external_files']['wel_stress_period_data'].values():
         assert os.path.exists(f)
     blocks = read_mf6_block(wel.filename, 'period')
     for period, block in blocks.items():
@@ -427,7 +426,7 @@ def test_external_tables(get_pleasant_mf6_with_dis):
 
     chd = m.setup_perimeter_boundary()
     chd.write()
-    for f in m.cfg['external_files']['chd_stress_period_data']:
+    for f in m.cfg['external_files']['chd_stress_period_data'].values():
         assert os.path.exists(f)
     blocks = read_mf6_block(chd.filename, 'period')
     for period, block in blocks.items():
@@ -574,6 +573,23 @@ def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
         make_lake_xsections(m, i_range=(30, 51), j_range=(30, 41),
                             bathymetry_raster=m.cfg['lak']['source_data']['bathymetry_raster']['filename'],
                             datum=298.73, outpdf=outpdf)
+
+
+@pytest.mark.parametrize('remake_top', (True,
+                                        pytest.param(False,
+                                                     marks=pytest.mark.xfail(reason="model can't be built "))
+                                        ))
+def test_setup_from_yaml_issue(project_root_path, remake_top):
+    cfg = MF6model.load_cfg(Path(project_root_path) / 'examples/pleasant_lgr_parent.yml')
+    lgr_test_path = Path(project_root_path) / 'examples/pleasant_lgr'
+    shutil.rmtree(lgr_test_path, ignore_errors=True)
+    keep_keys = {'simulation', 'model',  'parent', 'setup_grid', 'dis', 'tdis',
+                 'intermediate_data', 'postprocessing', 'filename'}
+    new_cfg = {k: v for k, v in cfg.items() if k in keep_keys}
+    new_cfg['model']['packages'] = ['dis']
+    new_cfg['dis']['remake_top'] = remake_top
+    del new_cfg['setup_grid']['lgr']
+    MF6model.setup_from_cfg(new_cfg)
 
 
 def test_check_external_files():
