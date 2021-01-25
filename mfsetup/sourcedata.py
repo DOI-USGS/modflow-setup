@@ -1292,8 +1292,8 @@ def setup_array(model, package, var, data=None,
         # (so they won't get expanded again by fix_model_layer_conflicts)
         # only do this for mf6, where pinched out cells are allowed
         min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
-        if model.version == 'mf6':
-            botm[botm >= (top - min_thickness)] = np.nan
+#        if model.version == 'mf6':
+#            botm[botm >= (top - min_thickness)] = np.nan
 
         #for k, kbotm in enumerate(botm):
         #    inlayer = lake_botm_elevations > kbotm[bathy != 0]

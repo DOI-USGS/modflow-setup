@@ -696,11 +696,31 @@ def test_idomain_above_sfr(model_with_sfr):
     # by setting all botms above streambed tops
     new_botm = m.dis.botm.array.copy()
     new_top = m.dis.top.array.copy()
-    new_botm[:, i, j] = 9999
+    new_botm[:-1, i, j] = 9999
+    new_botm[-1, i, j] = 9990
     new_top[i, j] = 9999
     np.savetxt(m.cfg['dis']['griddata']['top'][0]['filename'], new_top)
     m.dis.botm = new_botm
-    #m.dis.top = new_top
+    m.dis.top = new_top
+    # reset external files for model top
+    # (that are used to cache an original version of the model top
+    # prior to any adjustment to lake bottoms)
+    from pathlib import Path
+    original_top_file = Path(m.tmpdir,
+                             f"{m.name}_{m.cfg['dis']['top_filename_fmt']}.original")
+    original_top_file.unlink()
+    # if original_top_file is not found or invalid,
+    # the routine in sourcedata.setup_array for setting up the botm array
+    # attempts to write original_top_file from
+    # m.cfg['intermediate_data']['top']
+    # successive calls to sourcedata.setup_array
+    # in the context of setting up the bottom array
+    # then reference this "original" top,
+    # so if adjustments to lake bathymetry are made,
+    # they are only made relative to the "original" top,
+    # and not a revised top (which would keep pushing the bottoms downward)
+    np.savetxt(m.cfg['intermediate_data']['top'][0], new_top)
+
     m.remove_package(sfr)
     m._reset_bc_arrays()
     assert not np.any(m._isbc2d == 4)
