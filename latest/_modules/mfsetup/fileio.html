@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.fileio &mdash; modflow-setup 0.post214+gc980d31 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.post215+g6fd18f8 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post214+gc980d31
+                0.post215+g6fd18f8
               </div>
             
           
@@ -179,13 +179,16 @@
   <h1>Source code for mfsetup.fileio</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functions for reading and writing stuff to disk, and working with file paths.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
+<span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
@@ -194,6 +197,7 @@
 <span class="kn">from</span> <span class="nn">flopy.mf6.modflow</span> <span class="kn">import</span> <span class="n">mfims</span><span class="p">,</span> <span class="n">mftdis</span>
 <span class="kn">from</span> <span class="nn">flopy.utils</span> <span class="kn">import</span> <span class="n">SpatialReference</span><span class="p">,</span> <span class="n">TemporalReference</span><span class="p">,</span> <span class="n">mfreadnam</span>
 
+<span class="kn">import</span> <span class="nn">mfsetup</span>
 <span class="kn">from</span> <span class="nn">mfsetup.grid</span> <span class="kn">import</span> <span class="n">MFsetupGrid</span>
 <span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">update</span>
 
@@ -1288,6 +1292,71 @@
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">start_ts</span>
     <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">datetime</span>
     <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="add_version_to_fileheader"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.add_version_to_fileheader">[docs]</a><span class="k">def</span> <span class="nf">add_version_to_fileheader</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add modflow-setup, flopy and optionally model</span>
+<span class="sd">    version info to an existing file header denoted by</span>
+<span class="sd">    the comment characters ``#``, ``!``, or ``//``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tempfile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.temp&#39;</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">tempfile</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tempfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dest</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;# </span><span class="si">{</span><span class="n">model_info</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">read_header</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">src</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">read_header</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
+                        <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;!&#39;</span><span class="p">,</span> <span class="s1">&#39;//&#39;</span><span class="p">}:</span>
+                    <span class="k">if</span> <span class="n">model_info</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">model_info</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">header</span> <span class="o">+=</span> <span class="n">line</span>
+                <span class="k">elif</span> <span class="n">read_header</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;modflow-setup&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+                        <span class="n">headerlist</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s1">&#39;flopy&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                            <span class="n">pos</span><span class="p">,</span> <span class="n">flopy_info</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">headerlist</span><span class="p">)</span>
+                                               <span class="k">if</span> <span class="s1">&#39;flopy&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="c1">#flopy_info = header.strip().split(&#39;\n&#39;)[-1]</span>
+                            <span class="k">if</span> <span class="s1">&#39;version&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flopy_info</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                                <span class="n">flopy_version</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;flopy version </span><span class="si">{</span><span class="n">flopy</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span>
+                                <span class="n">flopy_info</span> <span class="o">=</span> <span class="n">flopy_info</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;flopy&#39;</span><span class="p">,</span>
+                                                                        <span class="n">flopy_version</span><span class="p">)</span>
+                                <span class="n">headerlist</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">flopy_info</span>
+
+                                <span class="c1">#header = &#39;\n&#39;.join(header.split(&#39;\n&#39;)[:-2] +</span>
+                                <span class="c1">#                   [flopy_info + &#39;\n&#39;])</span>
+                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">&#39;# via &#39;</span>
+                            <span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># insert mfsetup header after flopy</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">&#39;# File created by &#39;</span>
+                            <span class="n">pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># insert mfsetup header at end</span>
+                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">&#39;modflow-setup version </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">&#39; at {:%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+                        <span class="n">headerlist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">mfsetup_text</span><span class="p">)</span>
+                        <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headerlist</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+                    <span class="n">read_header</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tempfile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="remove_file_header"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.remove_file_header">[docs]</a><span class="k">def</span> <span class="nf">remove_file_header</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove the header of a MODFLOW input file,</span>
+<span class="sd">    to allow comparison betwee files that have different</span>
+<span class="sd">    headers but are otherwise the same, for example.&quot;&quot;&quot;</span>
+    <span class="n">backup_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.backup&#39;</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">backup_file</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">backup_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dest</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">src</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">backup_file</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -1301,7 +1370,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 25, 2021.
+        Last updated on Jan 26, 2021.
       </span>
 
     </p>

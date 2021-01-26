@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.tdis &mdash; modflow-setup 0.post214+gc980d31 documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.post215+g6fd18f8 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post214+gc980d31
+                0.post215+g6fd18f8
               </div>
             
           
@@ -182,6 +182,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">calendar</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -830,7 +832,8 @@
 
 
 <div class="viewcode-block" id="add_date_comments_to_tdis"><a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.add_date_comments_to_tdis">[docs]</a><span class="k">def</span> <span class="nf">add_date_comments_to_tdis</span><span class="p">(</span><span class="n">tdis_file</span><span class="p">,</span> <span class="n">start_dates</span><span class="p">,</span> <span class="n">end_dates</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add stress period start and end dates to a tdis file as comments.</span>
+    <span class="sd">&quot;&quot;&quot;Add stress period start and end dates to a tdis file as comments;</span>
+<span class="sd">    add modflow-setup version info to tdis file header.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">tempfile</span> <span class="o">=</span> <span class="n">tdis_file</span> <span class="o">+</span> <span class="s1">&#39;.temp&#39;</span>
     <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">tdis_file</span><span class="p">,</span> <span class="n">tempfile</span><span class="p">)</span>
@@ -844,7 +847,13 @@
                     <span class="n">header</span> <span class="o">+=</span> <span class="n">line</span>
                 <span class="k">elif</span> <span class="s1">&#39;begin options&#39;</span> <span class="ow">in</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
                     <span class="k">if</span> <span class="s1">&#39;modflow-setup&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
-                        <span class="n">header</span> <span class="o">+=</span> <span class="s1">&#39;# modflow-setup version </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s1">&#39;flopy&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">&#39;# via &#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">&#39;# File created by &#39;</span>
+                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">&#39;modflow-setup version </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">&#39; at {:%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+                        <span class="n">header</span> <span class="o">+=</span> <span class="n">mfsetup_text</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
                     <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
                     <span class="n">read_header</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
@@ -863,7 +872,8 @@
                             <span class="n">line</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
                             <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tempfile</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -877,7 +887,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 25, 2021.
+        Last updated on Jan 26, 2021.
       </span>
 
     </p>

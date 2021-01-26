@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post214+gc980d31 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post215+g6fd18f8 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post214+gc980d31
+                0.post215+g6fd18f8
               </div>
             
           
@@ -179,6 +179,7 @@
   <h1>Source code for mfsetup.mfnwtmodel</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -196,7 +197,7 @@
     <span class="n">make_ibound</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">check_source_files</span><span class="p">,</span>
+    <span class="n">add_version_to_fileheader</span><span class="p">,</span>
     <span class="n">flopy_mf2005_load</span><span class="p">,</span>
     <span class="n">load</span><span class="p">,</span>
     <span class="n">load_cfg</span><span class="p">,</span>
@@ -985,7 +986,18 @@
         <span class="c1"># write the sfr package with SFRmaker</span>
         <span class="c1"># gage package was already set-up and then written by Flopy</span>
         <span class="k">if</span> <span class="s1">&#39;SFR&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">write_observations_input</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">write_observations_input</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># add version info to file headers</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">namefile</span><span class="p">]</span>
+        <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">file_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagelist</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="c1"># either flopy or modflow</span>
+            <span class="c1"># doesn&#39;t allow headers for some packages</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;.hyd&#39;</span><span class="p">,</span> <span class="s1">&#39;.gag&#39;</span><span class="p">,</span> <span class="s1">&#39;.gage&#39;</span><span class="p">}:</span>
+                <span class="k">continue</span>
+            <span class="n">add_version_to_fileheader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
@@ -1025,7 +1037,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 25, 2021.
+        Last updated on Jan 26, 2021.
       </span>
 
     </p>

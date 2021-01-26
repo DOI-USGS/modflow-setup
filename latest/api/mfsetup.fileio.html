@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.fileio module &mdash; modflow-setup 0.post214+gc980d31 documentation</title>
+  <title>mfsetup.fileio module &mdash; modflow-setup 0.post215+g6fd18f8 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.post214+gc980d31
+                0.post215+g6fd18f8
               </div>
             
           
@@ -220,6 +220,14 @@
 <span id="mfsetup-fileio-module"></span><h1>mfsetup.fileio module<a class="headerlink" href="#module-mfsetup.fileio" title="Permalink to this headline">¶</a></h1>
 <p>Functions for reading and writing stuff to disk, and working with file paths.</p>
 <dl class="py function">
+<dt id="mfsetup.fileio.add_version_to_fileheader">
+<code class="sig-prename descclassname">mfsetup.fileio.</code><code class="sig-name descname">add_version_to_fileheader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">model_info</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#add_version_to_fileheader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.fileio.add_version_to_fileheader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add modflow-setup, flopy and optionally model
+version info to an existing file header denoted by
+the comment characters <code class="docutils literal notranslate"><span class="pre">#</span></code>, <code class="docutils literal notranslate"><span class="pre">!</span></code>, or <code class="docutils literal notranslate"><span class="pre">//</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="mfsetup.fileio.append_csv">
 <code class="sig-prename descclassname">mfsetup.fileio.</code><code class="sig-name descname">append_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#append_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.fileio.append_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data from filename,
@@ -361,6 +369,14 @@ some escaped characters.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt id="mfsetup.fileio.remove_file_header">
+<code class="sig-prename descclassname">mfsetup.fileio.</code><code class="sig-name descname">remove_file_header</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#remove_file_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.fileio.remove_file_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the header of a MODFLOW input file,
+to allow comparison betwee files that have different
+headers but are otherwise the same, for example.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="mfsetup.fileio.save_array">
 <code class="sig-prename descclassname">mfsetup.fileio.</code><code class="sig-name descname">save_array</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">nodata</span><span class="o">=</span><span class="default_value">- 9999</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#save_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.fileio.save_array" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save and array and print that it was written.</p>
@@ -436,7 +452,7 @@ layers or stress periods.</p>
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 25, 2021.
+        Last updated on Jan 26, 2021.
       </span>
 
     </p>

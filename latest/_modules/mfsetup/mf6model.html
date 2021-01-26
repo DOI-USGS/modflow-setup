@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post214+gc980d31 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post215+g6fd18f8 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post214+gc980d31
+                0.post215+g6fd18f8
               </div>
             
           
@@ -200,7 +200,12 @@
     <span class="n">make_irch</span><span class="p">,</span>
     <span class="n">make_lgr_idomain</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">flopy_mfsimulation_load</span><span class="p">,</span> <span class="n">load</span><span class="p">,</span> <span class="n">load_cfg</span>
+<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">add_version_to_fileheader</span><span class="p">,</span>
+    <span class="n">flopy_mfsimulation_load</span><span class="p">,</span>
+    <span class="n">load</span><span class="p">,</span>
+    <span class="n">load_cfg</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.lakes</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_lakeperioddata</span><span class="p">,</span>
     <span class="n">setup_lake_connectiondata</span><span class="p">,</span>
@@ -1178,7 +1183,13 @@
         <span class="n">add_date_comments_to_tdis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">tdis</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">start_datetime</span><span class="p">,</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">end_datetime</span>
-                                  <span class="p">)</span></div>
+                                  <span class="p">)</span>
+        <span class="c1"># add version info to file headers</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">namefile</span><span class="p">]</span>
+        <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagelist</span><span class="p">]</span>
+        <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">add_version_to_fileheader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
@@ -1258,7 +1269,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 25, 2021.
+        Last updated on Jan 26, 2021.
       </span>
 
     </p>
