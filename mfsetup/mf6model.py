@@ -50,21 +50,38 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     """
     default_file = '/mf6_defaults.yml'
 
-    def __init__(self, simulation, parent=None, cfg=None,
+    def __init__(self, simulation=None, parent=None, cfg=None,
                  modelname='model', exe_name='mf6',
                  version='mf6', lgr=False, **kwargs):
-        mf6.ModflowGwf.__init__(self, simulation,
-                                modelname, exe_name=exe_name, version=version,
-                                **kwargs)
+        defaults = {'simulation': simulation,
+                    'parent': parent,
+                    'modelname': modelname,
+                    'exe_name': exe_name,
+                    'version': version,
+                    'lgr': lgr}
+        # load configuration, if supplied
+        if cfg is not None:
+            if not isinstance(cfg, dict):
+                cfg = self.load_cfg(cfg)
+            cfg = self._parse_model_kwargs(cfg)
+            defaults.update(cfg['model'])
+        # otherwise, pass arguments on to flopy constructor
+        args = get_input_arguments(defaults, mf6.ModflowGwf,
+                                     exclude='packages')
+        mf6.ModflowGwf.__init__(self, **args, **kwargs)
+        #mf6.ModflowGwf.__init__(self, simulation,
+        #                        modelname, exe_name=exe_name, version=version,
+        #                        **kwargs)
         MFsetupMixin.__init__(self, parent=parent)
 
-        # default configuration
         self._is_lgr = lgr
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
                                      'ghb', 'sfr', 'lak', 'riv',
                                      'wel', 'maw', 'obs']
+        # set up the model configuration dictionary
+        # start with the defaults
         self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
-        #self.cfg['filename'] = self.source_path + self.default_file #'/mf6_defaults.yml'
+        # update defaults with user-specified config. (loaded above)
         self._set_cfg(cfg)   # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()
@@ -1053,11 +1070,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nLoading simulation in {}\n'.format(yamlfile))
         t0 = time.time()
 
-        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mf6_defaults.yml')
-        cfg = cls._parse_model_kwargs(cfg)
-        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
-                                     exclude='packages')
-        model = cls(cfg=cfg, **kwargs)
+        #cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mf6_defaults.yml')
+        #cfg = cls._parse_model_kwargs(cfg)
+        #kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+        #                             exclude='packages')
+        #model = cls(cfg=cfg, **kwargs)
+        model = cls(cfg=yamlfile)
         model._load = True
         if 'grid' not in model.cfg.keys():
             model.setup_grid()
@@ -1070,7 +1088,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # execute the flopy load code on the pre-defined simulation and model instances
         # (so that the end result is a MFsetup.MF6model instance)
         # (kludgy)
-        sim = flopy_mfsimulation_load(sim, models)
+        sim = flopy_mfsimulation_load(sim, models, load_only=load_only)
 
         # just return the parent model (inset models should be attached through the inset attribute,
         # in addition to through the .simulation flopy attribute)

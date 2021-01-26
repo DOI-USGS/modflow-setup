@@ -49,7 +49,22 @@ class MFnwtModel(MFsetupMixin, Modflow):
                  modelname='model', exe_name='mfnwt',
                  version='mfnwt', model_ws='.',
                  external_path='external/', **kwargs):
-
+        defaults = {'parent': parent,
+                    'modelname': modelname,
+                    'exe_name': exe_name,
+                    'version': version,
+                    'model_ws': model_ws,
+                    'external_path': external_path,
+                    }
+        # load configuration, if supplied
+        if cfg is not None:
+            if not isinstance(cfg, dict):
+                cfg = self.load_cfg(cfg)
+            cfg = self._parse_model_kwargs(cfg)
+            defaults.update(cfg['model'])
+        # otherwise, pass arguments on to flopy constructor
+        args = get_input_arguments(defaults, Modflow,
+                                   exclude='packages')
         Modflow.__init__(self, modelname, exe_name=exe_name, version=version,
                          model_ws=model_ws, external_path=external_path,
                          **kwargs)
@@ -59,9 +74,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
                                      'ghb', 'lak', 'sfr', 'riv', 'wel', 'mnw2',
                                      'gag', 'hyd']
-        # default configuration (different for nwt vs mf6)
-        self.cfg = load(self.source_path + self.default_file) # '/mfnwt_defaults.yml')
-        #self.cfg['filename'] = self.source_path + self.default_file #'/mfnwt_defaults.yml'
+        # set up the model configuration dictionary
+        # start with the defaults
+        self.cfg = load(self.source_path + self.default_file)  # '/mf6_defaults.yml')
+        # update defaults with user-specified config. (loaded above)
         self._set_cfg(cfg)  # set up the model configuration dictionary
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         self.model_ws = self._get_model_ws()

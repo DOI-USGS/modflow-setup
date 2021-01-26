@@ -1530,10 +1530,10 @@ class MFsetupMixin():
         """
         print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], None))
         t0 = time.time()
-        cfg = cls._parse_model_kwargs(cfg)
-        kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
-                                     exclude='packages')
-        m = cls(cfg=cfg, **kwargs)
+        #cfg = cls._parse_model_kwargs(cfg)
+        #kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+        #                             exclude='packages')
+        m = cls(cfg=cfg) #, **kwargs)
 
         # make a grid if one isn't already specified
         if 'grid' not in m.cfg.keys():
