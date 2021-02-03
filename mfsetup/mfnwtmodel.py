@@ -62,12 +62,14 @@ class MFnwtModel(MFsetupMixin, Modflow):
                 cfg = self.load_cfg(cfg)
             cfg = self._parse_model_kwargs(cfg)
             defaults.update(cfg['model'])
+            kwargs = {k: v for k, v in kwargs.items() if k not in defaults}
         # otherwise, pass arguments on to flopy constructor
         args = get_input_arguments(defaults, Modflow,
                                    exclude='packages')
-        Modflow.__init__(self, modelname, exe_name=exe_name, version=version,
-                         model_ws=model_ws, external_path=external_path,
-                         **kwargs)
+        Modflow.__init__(self, **args, **kwargs)
+        #Modflow.__init__(self, modelname, exe_name=exe_name, version=version,
+        #                 model_ws=model_ws, external_path=external_path,
+        #                 **kwargs)
         MFsetupMixin.__init__(self, parent=parent)
 
         # default configuration

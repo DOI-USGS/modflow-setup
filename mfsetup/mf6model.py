@@ -65,6 +65,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 cfg = self.load_cfg(cfg)
             cfg = self._parse_model_kwargs(cfg)
             defaults.update(cfg['model'])
+            kwargs = {k: v for k, v in kwargs.items() if k not in defaults}
         # otherwise, pass arguments on to flopy constructor
         args = get_input_arguments(defaults, mf6.ModflowGwf,
                                      exclude='packages')
@@ -130,6 +131,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         so that cells above SFR reaches are inactive.
 
         Also remakes irch for the recharge package"""
+        print('(re)setting the idomain array...')
         # loop thru LGR models and inactivate area of parent grid for each one
         lgr_idomain = np.ones(self.dis.idomain.array.shape, dtype=int)
         if isinstance(self.lgr, dict):
@@ -197,7 +199,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                 datatype='array2d',
                                 write_fmt='%d', dtype=int)
         #self.dis.irch = self.cfg['dis']['irch']
-
 
     def _update_grid_configuration_with_dis(self):
         """Update grid configuration with any information supplied to dis package
