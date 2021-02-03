@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post215+g6fd18f8 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post218+gfab5624 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post215+g6fd18f8
+                0.post218+gfab5624
               </div>
             
           
@@ -228,19 +228,37 @@
                  <span class="n">modelname</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">exe_name</span><span class="o">=</span><span class="s1">&#39;mfnwt&#39;</span><span class="p">,</span>
                  <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mfnwt&#39;</span><span class="p">,</span> <span class="n">model_ws</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
                  <span class="n">external_path</span><span class="o">=</span><span class="s1">&#39;external/&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
-        <span class="n">Modflow</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelname</span><span class="p">,</span> <span class="n">exe_name</span><span class="o">=</span><span class="n">exe_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
-                         <span class="n">model_ws</span><span class="o">=</span><span class="n">model_ws</span><span class="p">,</span> <span class="n">external_path</span><span class="o">=</span><span class="n">external_path</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span>
+                    <span class="s1">&#39;modelname&#39;</span><span class="p">:</span> <span class="n">modelname</span><span class="p">,</span>
+                    <span class="s1">&#39;exe_name&#39;</span><span class="p">:</span> <span class="n">exe_name</span><span class="p">,</span>
+                    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+                    <span class="s1">&#39;model_ws&#39;</span><span class="p">:</span> <span class="n">model_ws</span><span class="p">,</span>
+                    <span class="s1">&#39;external_path&#39;</span><span class="p">:</span> <span class="n">external_path</span><span class="p">,</span>
+                    <span class="p">}</span>
+        <span class="c1"># load configuration, if supplied</span>
+        <span class="k">if</span> <span class="n">cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+            <span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+            <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">}</span>
+        <span class="c1"># otherwise, pass arguments on to flopy constructor</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">defaults</span><span class="p">,</span> <span class="n">Modflow</span><span class="p">,</span>
+                                   <span class="n">exclude</span><span class="o">=</span><span class="s1">&#39;packages&#39;</span><span class="p">)</span>
+        <span class="n">Modflow</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1">#Modflow.__init__(self, modelname, exe_name=exe_name, version=version,</span>
+        <span class="c1">#                 model_ws=model_ws, external_path=external_path,</span>
+        <span class="c1">#                 **kwargs)</span>
         <span class="n">MFsetupMixin</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
 
         <span class="c1"># default configuration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_package_setup_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;bas6&#39;</span><span class="p">,</span> <span class="s1">&#39;upw&#39;</span><span class="p">,</span> <span class="s1">&#39;rch&#39;</span><span class="p">,</span> <span class="s1">&#39;oc&#39;</span><span class="p">,</span>
                                      <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">,</span> <span class="s1">&#39;riv&#39;</span><span class="p">,</span> <span class="s1">&#39;wel&#39;</span><span class="p">,</span> <span class="s1">&#39;mnw2&#39;</span><span class="p">,</span>
                                      <span class="s1">&#39;gag&#39;</span><span class="p">,</span> <span class="s1">&#39;hyd&#39;</span><span class="p">]</span>
-        <span class="c1"># default configuration (different for nwt vs mf6)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span><span class="p">)</span> <span class="c1"># &#39;/mfnwt_defaults.yml&#39;)</span>
-        <span class="c1">#self.cfg[&#39;filename&#39;] = self.source_path + self.default_file #&#39;/mfnwt_defaults.yml&#39;</span>
+        <span class="c1"># set up the model configuration dictionary</span>
+        <span class="c1"># start with the defaults</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span><span class="p">)</span>  <span class="c1"># &#39;/mf6_defaults.yml&#39;)</span>
+        <span class="c1"># update defaults with user-specified config. (loaded above)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>  <span class="c1"># set up the model configuration dictionary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">relative_external_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;relative_external_paths&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_ws</span><span class="p">()</span>
@@ -1037,7 +1055,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Jan 26, 2021.
+        Last updated on Feb 03, 2021.
       </span>
 
     </p>
