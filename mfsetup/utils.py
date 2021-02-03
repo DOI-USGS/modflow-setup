@@ -66,7 +66,8 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
     translations = {'continue': 'continue_'
                     }
 
-    print('\narguments to {}:'.format(function.__qualname__))
+    if verbose:
+        print('\narguments to {}:'.format(function.__qualname__))
     params = inspect.signature(function)
     if exclude is None:
         exclude = set()
@@ -81,7 +82,8 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
         k = translations.get(k, k)
         if k in params.parameters and not {k, k_original}.intersection(exclude):
             input_kwargs[k] = v
-            print_item(k, v)
+            if verbose:
+                print_item(k, v)
         else:
             not_arguments[k] = v
     if verbose and warn:

@@ -13,6 +13,7 @@ def test_just_grid_setup_mf6(cfg_file, test_data_path):
     m.setup_grid()
     j=2
 
+
 @pytest.mark.parametrize('cfg_file', ('pfl_nwt_test.yml',))
 def test_just_grid_setup_mfnwt(cfg_file, test_data_path):
     cfg_file = test_data_path / cfg_file
