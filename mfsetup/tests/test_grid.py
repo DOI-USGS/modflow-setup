@@ -49,6 +49,7 @@ def test_grid_init():
 
 
 def test_grid_write_shapefile(modelgrid, tmpdir):
+    # test writing the grid cells
     filename = os.path.join(tmpdir, 'grid.shp')
     modelgrid.write_shapefile(filename)
     with fiona.open(filename) as src:
@@ -59,6 +60,13 @@ def test_grid_write_shapefile(modelgrid, tmpdir):
     assert np.array_equal(np.arange(len(df), dtype=int), df.node.values)
     assert np.array_equal(i.ravel(), df.i.values)
     assert np.array_equal(j.ravel(), df.j.values)
+
+    # test writing the bounding box
+    bbox_filename = os.path.join(tmpdir, 'grid_bbox.shp')
+    modelgrid.write_shapefile(bbox_filename)
+    with fiona.open(filename) as src:
+        assert src.crs['init'] == 'epsg:3070'
+        assert np.allclose(src.bounds, modelgrid.bounds)
 
 
 @pytest.mark.parametrize('xul,yul,height,width,dx,dy,rotation,input,expected', ((0, 0, 3, 2, 1, -1, 45,

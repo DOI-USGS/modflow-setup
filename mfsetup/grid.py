@@ -218,6 +218,9 @@ class MFsetupGrid(StructuredGrid):
             self._set_polygons()
         return self._polygons
 
+    def write_bbox_shapefile(self, filename='grid_bbox.shp'):
+        write_bbox_shapefile(self, filename)
+
     def write_shapefile(self, filename='grid.shp'):
         i, j = np.indices((self.nrow, self.ncol))
         df = pd.DataFrame({'node': list(range(len(self.polygons))),
