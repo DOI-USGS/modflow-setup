@@ -215,7 +215,8 @@ def load_cfg(cfgfile, verbose=False, default_file=None):
         # which are needed for the model instance constructor
         # other defaults are applied in _set_cfg,
         # which is called by model.__init__
-        apply_defaults = {'simulation', 'model'}
+        # intermediate_data is needed by some tests
+        apply_defaults = {'simulation', 'model', 'intermediate_data'}
         default_cfg = {k: v for k, v in default_cfg.items()
                        if k in apply_defaults}
 

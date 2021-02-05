@@ -1,6 +1,3 @@
-intermediate_data:
-  tmpdir: 'original/'
-
 simulation:
   sim_name: 'pleasant_lgr'
   version: 'mf6'
@@ -28,10 +25,10 @@ model:
              'ims'
   ]
 
-# parent model block
+# parent model block is not needed as the pleasant_lgr_inset
+# model is set up as an LGR in the context of the pleast_lgr_parent model
 
-# parameters for setting up the pfl_nwt grid
-# using features in features_file
+# grid for LGR inset based on buffer distance around Pleasant Lake
 setup_grid:
   remake: True
   source_data:
@@ -39,16 +36,16 @@ setup_grid:
       filename: 'data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
-  dxy: 40 # m
+  dxy: 40  # grid spacing, in CRS units (meters)
   buffer: 1000 # distance from feature(s) if interest to model boundary, in meters
-  grid_file: 'grid.json' # grid info will be written to this file
-  epsg: 3070
+  epsg: 3070  # CRS (Wisconsin Transverse Mercator)
 
 dis:
   remake_top: True
   options:
     length_units: 'meters'
   dimensions:
+    # nrow and ncol are based on the buffer distance and grid spacing
     nlay: 5
   source_data:
     top:
@@ -67,43 +64,60 @@ npf:
     save_flows: True
   griddata:
     icelltype: 1 # variable sat. thickness in all layers
+  # k and k33 resampled from parent model by default
 
 sto:
   options:
     save_flows: True
   griddata:
     iconvert: 1  # convertible layers
+  # sy and ss resampled from parent model by default
 
 wel:
   source_data:
+    # custom input format for Wisconsin Dept. of Natural Resources
     wdnr_dataset:
       water_use: 'data/pleasant/source_data/tables/master_wu.csv' # monthly water use rates from WDNR
       water_use_points: 'data/pleasant/source_data/shps/csls_sources_wu_pts.shp' # point locations of wells in water_use
+      # for period 0, use average pumping rates for dates below
       period_stats: {0: ['mean', '2012-01-01', '2018-12-31'],
+                     # for subsequent periods,
+                     # average pumping rates to period start/end dates
                      1: 'resample'}
 
+# Lake Package
 lak:
   options:
     boundnames: True
     save_flows: True
     surfdep: 0.1  # undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)
   source_data:
+    # initial lakebed leakance rates
+    # for thin zone around lake perimeter
     littoral_leakance: 0.045 # 1/d
+    # for interior of lake basin
     profundal_leakance: 0.025 # 1/d
+    # polygon shapefile of lake footprints
     lakes_shapefile:
       filename: 'data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
+    # setup lake precipitation and evaporation from PRISM data
     climate:
       filenames:
         600059060: 'data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
       format: 'prism'
       period_stats:
+        # for period 0, use average precip and evap for dates below
         0: ['mean', '2012-01-01', '2018-12-31']  # average daily rate for model period for initial steady state
+        # for subsequent periods,
+        # average precip and evap to period start/end dates
         1: 'mean'  # average daily rate or value for each month
+    # bathymetry file with lake depths to subtract off model top
     bathymetry_raster:
       filename: 'data/pleasant/source_data/rasters/pleasant_bathymetry.tif'
       length_units: 'meters'
+    # bathymetry file with stage/area/volume relationship
     stage_area_volume_file:
       filename: 'data/pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
       length_units: 'meters'
@@ -121,9 +135,8 @@ sfr:
     dem:
       filename: 'data/pleasant/source_data/rasters/dem40m.tif'
       elevation_units: 'meters'
-  set_streambed_top_elevations_from_dem: True
-  output_path:
-
+  sfrmaker_options:
+    set_streambed_top_elevations_from_dem: True
 
 ims:
   options:
@@ -152,6 +165,8 @@ ims:
     preconditioner_drop_tolerance: 0.001
 
 obs:
+  # same observation data that were applied to pleasant_lgr_parent model
+  # any observations not within the LGR extent are culled
   source_data:
     filenames: ['data/pleasant/source_data/tables/nwis_heads_info_file.csv',
                 'data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod

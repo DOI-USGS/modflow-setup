@@ -34,6 +34,7 @@ Modflow-setup is intended to facilitate automated setup of MODFLOW models, from 
   :caption: Reference
 
    Code reference <api/index>
+   Configuration file defaults <config-file-defaults>
    Release History <release-history>
    Contributing to modflow-setup <contributing>
 

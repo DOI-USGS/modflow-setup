@@ -8,6 +8,8 @@ Bakker, M., Post, V., Langevin, C. D., Hughes, J. D., White, J. T., Starn, J. J.
 Scripting MODFLOW Model Development Using Python and FloPy: Groundwater, v. 54, p. 733–739,
 `doi:10.1111/gwat.12413. <https://doi.org/10.1111/gwat.12413>`_
 
+Clark, B.R., Barlow, P.M., Peterson, S.M., Hughes, J.D., Reeves, H.W., and Viger, R.J., 2018, National-scale grid to support regional groundwater availability studies and a national hydrogeologic database: U.S. Geological Survey data release, https://doi.org/10.5066/F7P84B24.
+
 Haitjema, H.M. (1995). Analytic Element Modeling of Groundwater Flow. Academic Press, Inc.
 
 Hunt, R.J. and Zheng, C. (2012), The Current State of Modeling. Groundwater, 50: 330-333.

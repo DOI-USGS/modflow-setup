@@ -125,25 +125,23 @@ class MFsetupMixin():
         self._interp_weights = None
 
     def __repr__(self):
-        header = f'{self.header}:\n'
+        header = f'{self.header}\n'
         txt = ''
         if self.parent is not None:
             txt += 'Parent model: {}/{}\n'.format(self.parent.model_ws, self.parent.name)
         if self._modelgrid is not None:
-            txt += 'CRS: {}\n'.format(self.modelgrid.proj4)
-            if self.modelgrid.epsg is not None:
-                txt += '(epsg: {})\n'.format(self.modelgrid.epsg)
-            txt += 'Bounds: {}\n'.format(self.modelgrid.extent)
-            txt += 'Grid spacing: {:.2f} {}\n'.format(self.modelgrid.delr[0],
-                                                      self.modelgrid.units)
-            txt = '{:d} layer(s), {:d} row(s), {:d} column(s), {:d} stress period(s)\n'\
-                .format(self.nlay, self.nrow, self.ncol, self.nper) + txt
+            txt += f'{self._modelgrid.__repr__()}'
         txt += 'Packages:'
         for pkg in self.get_package_list():
             txt += ' {}'.format(pkg.lower())
-        #txt += '\n'
-        #txt += '{:d} LAKE package lakes'.format(self.nlakes)
-        #txt += '\n'
+        txt += '\n'
+        txt += f'{self.nper:d} period(s):\n'
+        if self._perioddata is not None:
+            cols = ['per', 'start_datetime', 'end_datetime', 'perlen', 'steady', 'nstp']
+            txt += self.perioddata[cols].head(3).to_string(index=False)
+            txt += '\n   ...\n'
+            tail = self.perioddata[cols].tail(1).to_string(index=False)
+            txt += tail.split('\n')[1]
         txt = header + txt
         return txt
 
