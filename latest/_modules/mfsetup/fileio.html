@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.fileio &mdash; modflow-setup 0.post218+gfab5624 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.post219+g196119c documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post218+gfab5624
+                0.post219+g196119c
               </div>
             
           
@@ -105,6 +105,7 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
@@ -394,7 +395,8 @@
         <span class="c1"># which are needed for the model instance constructor</span>
         <span class="c1"># other defaults are applied in _set_cfg,</span>
         <span class="c1"># which is called by model.__init__</span>
-        <span class="n">apply_defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;simulation&#39;</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">}</span>
+        <span class="c1"># intermediate_data is needed by some tests</span>
+        <span class="n">apply_defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;simulation&#39;</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;intermediate_data&#39;</span><span class="p">}</span>
         <span class="n">default_cfg</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">default_cfg</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">apply_defaults</span><span class="p">}</span>
 
@@ -1370,7 +1372,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 03, 2021.
+        Last updated on Feb 05, 2021.
       </span>
 
     </p>

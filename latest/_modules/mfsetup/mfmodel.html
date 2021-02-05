@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post218+gfab5624 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post219+g196119c documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post218+gfab5624
+                0.post219+g196119c
               </div>
             
           
@@ -105,6 +105,7 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
@@ -304,25 +305,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="si">}</span><span class="s1">:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Parent model: </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;CRS: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">proj4</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;(epsg: </span><span class="si">{}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">epsg</span><span class="p">)</span>
-            <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Bounds: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
-            <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Grid spacing: </span><span class="si">{:.2f}</span><span class="s1"> </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                      <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
-            <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:d}</span><span class="s1"> layer(s), </span><span class="si">{:d}</span><span class="s1"> row(s), </span><span class="si">{:d}</span><span class="s1"> column(s), </span><span class="si">{:d}</span><span class="s1"> stress period(s)</span><span class="se">\n</span><span class="s1">&#39;</span>\
-                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nper</span><span class="p">)</span> <span class="o">+</span> <span class="n">txt</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Packages:&#39;</span>
         <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">():</span>
             <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pkg</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-        <span class="c1">#txt += &#39;\n&#39;</span>
-        <span class="c1">#txt += &#39;{:d} LAKE package lakes&#39;.format(self.nlakes)</span>
-        <span class="c1">#txt += &#39;\n&#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nper</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> period(s):</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">]</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">   ...</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">tail</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="n">tail</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">txt</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">txt</span>
         <span class="k">return</span> <span class="n">txt</span>
 
@@ -1755,7 +1754,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 03, 2021.
+        Last updated on Feb 05, 2021.
       </span>
 
     </p>

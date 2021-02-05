@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Configuration File Gallery &mdash; modflow-setup 0.post218+gfab5624 documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.post219+g196119c documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.post218+gfab5624
+                0.post219+g196119c
               </div>
             
           
@@ -118,6 +118,7 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
@@ -537,7 +538,37 @@
 305
 306
 307
-308</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for shellmound test case</span>
 <span class="c1">#</span>
 <span class="c1"># The MF6model.setup_from_yaml reads this in as a python dictionary (via the pyyaml package),</span>
 <span class="c1"># and attaches it to a newly created MF6model object instance (MF6model is a subclass of flopy.mf6.ModflowGwf).</span>
@@ -566,9 +597,10 @@
 <span class="c1"># input types. For example- &#39;filename&#39; indicates a file path (string), regardless</span>
 <span class="c1"># of the type of file, and &#39;filenames&#39; indicates a list or dictionary of files that</span>
 <span class="c1"># map to model layers or stress periods. Items with the &#39;_units&#39; suffix indicate</span>
-<span class="c1"># the units of the source data, allowing MFSetup to convert the values to model units</span>
+<span class="c1"># the units of the source data, allowing Modflow-setup to convert the values to model units</span>
 <span class="c1"># accordingly. &#39;_column&#39; Items indicate field names in the source data where the input can be found.</span>
 
+<span class="c1"># input for MODFLOW 6 simulation</span>
 <span class="nt">simulation</span><span class="p">:</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;mfsim&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
@@ -576,6 +608,7 @@
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">continue</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
+<span class="c1"># input for MODFLOW 6 model</span>
 <span class="nt">model</span><span class="p">:</span>
   <span class="nt">simulation</span><span class="p">:</span> <span class="s">&#39;shellmound&#39;</span>
   <span class="nt">modelname</span><span class="p">:</span> <span class="s">&#39;shellmound&#39;</span>
@@ -584,6 +617,9 @@
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">newton</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">newton_under_relaxation</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+  <span class="c1"># packages to build</span>
+  <span class="c1"># (any packages not listed or commented out will not be built,</span>
+  <span class="c1">#  event if they have an input block below)</span>
   <span class="nt">packages</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span>
              <span class="s">&#39;ic&#39;</span><span class="p p-Indicator">,</span>
              <span class="s">&#39;npf&#39;</span><span class="p p-Indicator">,</span>
@@ -596,21 +632,20 @@
              <span class="s">&#39;ims&#39;</span>
   <span class="p p-Indicator">]</span>
   <span class="nt">external_path</span><span class="p">:</span> <span class="s">&#39;external/&#39;</span>
-  <span class="nt">relative_external_filepaths</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
-<span class="nt">intermediate_data</span><span class="p">:</span>
-  <span class="nt">output_folder</span><span class="p">:</span> <span class="s">&#39;original/&#39;</span>  <span class="c1"># external arrays are read from here by flopy, and written to external_path</span>
-
+<span class="c1"># parameters for setting up the horizontal configuration of the grid</span>
+<span class="c1"># in the context of a coordinate reference system</span>
 <span class="nt">setup_grid</span><span class="p">:</span>
   <span class="nt">xoff</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">501405</span> <span class="c1"># lower left x-coordinate</span>
   <span class="nt">yoff</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1175835</span> <span class="c1"># lower left y-coordinate</span>
   <span class="nt">rotation</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.</span>
   <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5070</span>
+  <span class="c1"># snap model to the National Hydrogeologic Grid</span>
+  <span class="c1"># (Clark and others, 2018)</span>
   <span class="nt">snap_to_NHG</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
-
+<span class="c1"># Structured Discretization Package</span>
 <span class="nt">dis</span><span class="p">:</span>
-  <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
   <span class="nt">dimensions</span><span class="p">:</span>
@@ -641,6 +676,7 @@
   <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span> <span class="c1"># layers less than this thickness are converted to vertical pass-through cells</span>
   <span class="nt">drop_thin_cells</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
+<span class="c1"># Temporal Discretization Package</span>
 <span class="nt">tdis</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
@@ -670,9 +706,16 @@
       <span class="nt">tsmult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.5</span>
       <span class="nt">steady</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
 
+<span class="c1"># Initial Conditions Package</span>
+<span class="c1"># if no starting head values are specified, they are set</span>
+<span class="c1"># to the model top by default</span>
 <span class="nt">ic</span><span class="p">:</span>
+  <span class="c1"># optional format for writing external files</span>
+  <span class="c1"># e.g. (strt_001.dat)</span>
+  <span class="c1"># default is strt_{:03d}.dat</span>
   <span class="nt">strt_filename_fmt</span><span class="p">:</span> <span class="s">&quot;strt_{:03d}.dat&quot;</span>
 
+<span class="c1"># Node Property Flow Package</span>
 <span class="nt">npf</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -714,14 +757,17 @@
   <span class="nt">k_filename_fmt</span><span class="p">:</span> <span class="s">&quot;k_{:03d}.dat&quot;</span>
   <span class="nt">k33_filename_fmt</span><span class="p">:</span> <span class="s">&quot;k33_{:03d}.dat&quot;</span>
 
+<span class="c1"># Storage Package</span>
 <span class="nt">sto</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">iconvert</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># convertible layers</span>
+    <span class="c1"># initial global values for storage</span>
     <span class="nt">sy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.25</span>
     <span class="nt">ss</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-6</span>
 
+<span class="c1"># recharge package</span>
 <span class="nt">rch</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -729,6 +775,7 @@
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">readasarrays</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">source_data</span><span class="p">:</span>
+    <span class="c1"># resample recharge from NetCDF file with time-series of grids</span>
     <span class="nt">recharge</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc&#39;</span>
       <span class="nt">variable</span><span class="p">:</span> <span class="s">&#39;net_infiltration&#39;</span>
@@ -736,10 +783,15 @@
       <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
       <span class="nt">resample_method</span><span class="p">:</span> <span class="s">&#39;linear&#39;</span>
       <span class="nt">period_stats</span><span class="p">:</span>
-        <span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>  <span class="c1"># for periods 0 and 1, use the mean recharge from 2000 through 2017</span>
+        <span class="c1"># for the first two stress periods</span>
+        <span class="c1"># apply mean recharge rates for dates below</span>
+        <span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
         <span class="nt">1</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
         <span class="nt">2</span><span class="p">:</span> <span class="s">&#39;mean&#39;</span>  <span class="c1"># for periods 2 on, use the mean recharge for that period</span>
 
+<span class="c1"># Streamflow Routing Package</span>
+<span class="c1"># SFR input is created using SFRmaker</span>
+<span class="c1"># https://github.com/usgs/sfrmaker</span>
 <span class="nt">sfr</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -755,6 +807,7 @@
       <span class="nt">name_column</span><span class="p">:</span> <span class="s">&#39;GNIS_NAME&#39;</span>
       <span class="nt">attr_length_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>  <span class="c1"># units of source data</span>
       <span class="nt">attr_height_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>  <span class="c1"># units of source data</span>
+    <span class="c1"># specified inflows to SFR network</span>
     <span class="nt">inflows</span><span class="p">:</span>  <span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/tables/inflows.csv&#39;</span>
       <span class="nt">datetime_column</span><span class="p">:</span> <span class="s">&#39;datetime&#39;</span>
@@ -768,15 +821,15 @@
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/tables/routing.csv&#39;</span>
       <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;COMID&#39;</span>  <span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
       <span class="nt">routing_column</span><span class="p">:</span> <span class="s">&#39;tocomid&#39;</span>
-
   <span class="nt">sfrmaker_options</span><span class="p">:</span>
     <span class="c1"># the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker</span>
-    <span class="c1"># (see https://aleaf.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
+    <span class="c1"># (see https://usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
     <span class="c1"># or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)</span>
     <span class="c1"># or to_riv (shellmound_tmr example)</span>
     <span class="nt">one_reach_per_cell</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span> <span class="c1">#  consolidate SFR reaches to one per i, j location</span>
     <span class="nt">add_outlets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">17955371</span><span class="p p-Indicator">,</span> <span class="nv">17956213</span><span class="p p-Indicator">]</span>  <span class="c1"># add outlets at these line numbers</span>
 
+<span class="c1"># Well Package</span>
 <span class="nt">wel</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -784,9 +837,11 @@
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">source_data</span><span class="p">:</span>
     <span class="nt">csvfiles</span><span class="p">:</span>
+      <span class="c1"># pumping input from CSV files</span>
       <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
                   <span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
                   <span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
+      <span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span>
       <span class="nt">volume_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
       <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
       <span class="nt">data_column</span><span class="p">:</span> <span class="s">&#39;flux_m3&#39;</span>
@@ -801,16 +856,22 @@
       <span class="nt">vertical_flux_distribution</span><span class="p">:</span>
         <span class="nt">across_layers</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>  <span class="c1"># False to put fluxes in one layer</span>
         <span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span>
-        <span class="nt">distribute_by</span><span class="p">:</span> <span class="s">&#39;thickness&#39;</span>  <span class="c1"># thickness or transmissivity</span>
+        <span class="nt">distribute_by</span><span class="p">:</span> <span class="s">&#39;transmissivity&#39;</span>  <span class="c1"># thickness or transmissivity</span>
         <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.</span>  <span class="c1"># layers must be at 10 length units thick to have a well;</span>
         <span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span>
 
+<span class="c1"># Output Control Package</span>
 <span class="nt">oc</span><span class="p">:</span>
   <span class="nt">head_fileout_fmt</span><span class="p">:</span> <span class="s">&#39;{}.hds&#39;</span>
   <span class="nt">budget_fileout_fmt</span><span class="p">:</span> <span class="s">&#39;{}.cbc&#39;</span>
+  <span class="c1"># dictionary input similar to flopy</span>
   <span class="nt">saverecord</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">head</span><span class="p">:</span> <span class="s">&#39;last&#39;</span><span class="p p-Indicator">,</span>
 <span class="nt">                   budget</span><span class="p">:</span> <span class="s">&#39;last&#39;</span><span class="p p-Indicator">}</span>
   <span class="p p-Indicator">}</span>
+  <span class="c1"># MODFLOW 6-style text input can also be used</span>
+  <span class="c1"># e.g.</span>
+  <span class="c1"># period_options: {0: [&#39;save head last&#39;,</span>
+  <span class="c1">#                     &#39;save budget last&#39; ]</span>
 
 <span class="nt">obs</span><span class="p">:</span>
   <span class="nt">source_data</span><span class="p">:</span>
@@ -982,7 +1043,8 @@
 119
 120
 121
-122</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
+122
+123</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;sm_tmr&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
   <span class="nt">sim_ws</span><span class="p">:</span> <span class="s">&#39;../tmp/shellmound_tmr_inset&#39;</span>
@@ -1013,6 +1075,7 @@
   <span class="nt">model_ws</span><span class="p">:</span> <span class="s">&#39;shellmound/tmr_parent&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
   <span class="nt">headfile</span><span class="p">:</span> <span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span>  <span class="c1"># needed for the perimeter boundary setup</span>
+  <span class="nt">default_source_data</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>  <span class="c1"># if True, packages and variables that are omitted will be pulled from this model</span>
   <span class="nt">copy_stress_periods</span><span class="p">:</span> <span class="s">&#39;all&#39;</span>
   <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;1998-04-01&#39;</span>
   <span class="c1"># inset_layer_mapping assumed to be 1:1 if not entered</span>
@@ -1317,14 +1380,74 @@
 190
 191
 192
-193</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
-  <span class="nt">tmpdir</span><span class="p">:</span> <span class="s">&#39;original/&#39;</span>
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># starting version number for the project (optional)</span>
+<span class="c1"># version reported by modflow-setup will then be</span>
+<span class="c1"># the start_version appended by the remaining information</span>
+<span class="c1"># in a pep440-post style version tag</span>
+<span class="c1"># (e.g. most recent git commit hash for the model repository</span>
+<span class="c1"># + &quot;dirty&quot; if the model repository has uncommited changes)</span>
+<span class="c1"># see https://github.com/warner/python-versioneer/blob/master/details.md</span>
+<span class="nt">metadata</span><span class="p">:</span>
+  <span class="nt">start_version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
+  <span class="nt">longname</span><span class="p">:</span> <span class="s">&#39;Pleasant</span><span class="nv"> </span><span class="s">Lake</span><span class="nv"> </span><span class="s">test</span><span class="nv"> </span><span class="s">case&#39;</span>
 
+<span class="c1"># input for MODFLOW 6 simulation</span>
 <span class="nt">simulation</span><span class="p">:</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;pleasant_lgr&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
   <span class="nt">sim_ws</span><span class="p">:</span> <span class="s">&#39;pleasant_lgr/&#39;</span>
 
+<span class="c1"># input for MODFLOW 6 model</span>
 <span class="nt">model</span><span class="p">:</span>
   <span class="nt">simulation</span><span class="p">:</span> <span class="s">&#39;pleasant_lgr&#39;</span>
   <span class="nt">modelname</span><span class="p">:</span> <span class="s">&#39;plsnt_lgr_parent&#39;</span>
@@ -1335,6 +1458,9 @@
     <span class="nt">newton_under_relaxation</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">external_path</span><span class="p">:</span> <span class="s">&#39;external/&#39;</span>
   <span class="nt">perimeter_boundary_type</span><span class="p">:</span> <span class="s">&#39;specified</span><span class="nv"> </span><span class="s">head&#39;</span>
+  <span class="c1"># packages to build</span>
+  <span class="c1"># (any packages not listed or commented out will not be built,</span>
+  <span class="c1">#  event if they have an input block below)</span>
   <span class="nt">packages</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span>
              <span class="s">&#39;ic&#39;</span><span class="p p-Indicator">,</span>
              <span class="s">&#39;npf&#39;</span><span class="p p-Indicator">,</span>
@@ -1348,6 +1474,8 @@
              <span class="s">&#39;ims&#39;</span>
   <span class="p p-Indicator">]</span>
 
+<span class="c1"># Regional model to extract boundary conditions,</span>
+<span class="c1"># property arrays, and pumping data from</span>
 <span class="nt">parent</span><span class="p">:</span>
   <span class="c1"># argments to flopy.modflow.Modflow.load for parent model</span>
   <span class="nt">namefile</span><span class="p">:</span> <span class="s">&#39;pleasant.nam&#39;</span>
@@ -1370,8 +1498,8 @@
   <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
   <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
 
-<span class="c1"># parameters for setting up the pfl_nwt grid</span>
-<span class="c1"># using features in features_file</span>
+<span class="c1"># parameters for setting up the horizontal configuration of the grid</span>
+<span class="c1"># in the context of a coordinate reference system</span>
 <span class="nt">setup_grid</span><span class="p">:</span>
   <span class="nt">remake</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">xoff</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">553000</span> <span class="c1"># lower left x-coordinate</span>
@@ -1380,19 +1508,26 @@
   <span class="nt">nrow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">25</span>
   <span class="nt">ncol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">25</span>
   <span class="nt">dxy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">200</span> <span class="c1"># m</span>
-  <span class="nt">grid_file</span><span class="p">:</span> <span class="s">&#39;{}_grid.json&#39;</span> <span class="c1"># grid info will be written to this file</span>
-  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3070</span>
+  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3070</span>  <span class="c1"># CRS (Wisconsin Transverse Mercator)</span>
+  <span class="c1"># local-grid refinement area</span>
+  <span class="c1"># specified in another configuration file</span>
+  <span class="c1"># is set up in tandem and connected in the same MODFLOW 6 simulation</span>
   <span class="nt">lgr</span><span class="p">:</span>
     <span class="nt">pleasant_lgr_inset</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;pleasant_lgr_inset.yml&#39;</span>
       <span class="nt">layer_refinement</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># number of lgr model layers per parent model layer</span>
 
+<span class="c1"># Structured Discretization Package</span>
 <span class="nt">dis</span><span class="p">:</span>
-  <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
   <span class="nt">dimensions</span><span class="p">:</span>
+    <span class="c1"># if nrow and ncol are not specified here, the entries above in setup_grid are used</span>
     <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+  <span class="c1"># griddata:</span>
+  <span class="c1"># delr and delc are developed from information above in setup_grid</span>
+  <span class="c1"># top and botm arrays are sampled from GeoTIFF files</span>
+  <span class="c1"># idomain is developed from layer pinch-outs and boundary condition locations</span>
   <span class="nt">source_data</span><span class="p">:</span>
     <span class="nt">top</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/rasters/dem40m.tif&#39;</span> <span class="c1"># DEM file; path relative to setup script</span>
@@ -1405,6 +1540,7 @@
         <span class="nt">4</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/rasters/botm3.tif&#39;</span>  <span class="c1"># preprocessed surface for parent model layer 3 bottom</span>
   <span class="nt">drop_thin_cells</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
+<span class="c1"># Temporal Discretization Package</span>
 <span class="nt">tdis</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
@@ -1421,57 +1557,78 @@
       <span class="c1"># oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default</span>
     <span class="nt">group 2</span><span class="p">:</span> <span class="c1"># monthly stress periods</span>
       <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;2012-01-01&#39;</span>  <span class="c1"># can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.</span>
-      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2012-12-31&#39;</span>  <span class="c1"># end times are specified following pandas slice convention, which includes the specified end date</span>
+      <span class="nt">end_date_time</span><span class="p">:</span> <span class="s">&#39;2013-01-01&#39;</span>  <span class="c1"># model ends at midnight on this date (2007-03-31 would be the last day simulated)</span>
       <span class="nt">freq</span><span class="p">:</span> <span class="s">&#39;1MS&#39;</span> <span class="c1"># same as argument to pandas.date_range; (see &quot;Offset Aliases&quot; at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)</span>
       <span class="nt">nstp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
       <span class="nt">tsmult</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.5</span>
       <span class="nt">steady</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
 
+<span class="c1"># Initial Conditions Package</span>
 <span class="nt">ic</span><span class="p">:</span>
+  <span class="c1"># starting heads sampled from parent model</span>
   <span class="nt">source_data</span><span class="p">:</span>
     <span class="nt">strt</span><span class="p">:</span>
       <span class="nt">from_parent</span><span class="p">:</span>
         <span class="nt">binaryfile</span><span class="p">:</span> <span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
 
+<span class="c1"># Node Property Flow Package</span>
 <span class="nt">npf</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">icelltype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span> <span class="c1"># variable sat. thickness in all layers</span>
+  <span class="c1"># with parent: default_source_data: True,</span>
+  <span class="c1"># unspecified variables such as &quot;k&quot; and &quot;k33&quot; are resampled from parent model</span>
 
+<span class="c1"># Storage Package</span>
 <span class="nt">sto</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">iconvert</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># convertible layers</span>
+  <span class="c1"># with parent: default_source_data: True,</span>
+  <span class="c1"># unspecified variables such as &quot;sy&quot; and &quot;ss&quot; are resampled from parent model</span>
 
+      <span class="c1"># Well Package</span>
 <span class="nt">wel</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+  <span class="c1"># with parent: default_source_data: True,</span>
+  <span class="c1"># unspecified well fluxes are resampled from parent model</span>
 
+<span class="c1"># Streamflow Routing Package</span>
+<span class="c1"># SFR input is created using SFRmaker</span>
+<span class="c1"># https://github.com/usgs/sfrmaker</span>
 <span class="nt">sfr</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">source_data</span><span class="p">:</span>
     <span class="nt">flowlines</span><span class="p">:</span>
+      <span class="c1"># path to NHDPlus version 2 dataset</span>
       <span class="nt">nhdplus_paths</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;data/pleasant/source_data/shps&#39;</span><span class="p p-Indicator">]</span>
+    <span class="c1"># if a DEM is included, streambed top elevations will be sampled</span>
+    <span class="c1"># from the minimum DEM values within a 100 meter buffer around each stream reach</span>
     <span class="nt">dem</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/rasters/dem40m.tif&#39;</span>
       <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+    <span class="c1"># SFR observations can be automatically setup from a CSV file</span>
+    <span class="c1"># of x, y locations and fluxes</span>
     <span class="nt">observations</span><span class="p">:</span>  <span class="c1"># see sfrmaker.observations.add_observations for arguments</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/tables/gages.csv&#39;</span>
       <span class="nt">obstype</span><span class="p">:</span> <span class="s">&#39;downstream-flow&#39;</span>  <span class="c1"># modflow-6 observation type</span>
       <span class="nt">x_location_column</span><span class="p">:</span> <span class="s">&#39;x&#39;</span>
       <span class="nt">y_location_column</span><span class="p">:</span> <span class="s">&#39;y&#39;</span>
       <span class="nt">obsname_column</span><span class="p">:</span> <span class="s">&#39;site_no&#39;</span>
+  <span class="nt">sfrmaker_options</span><span class="p">:</span>
+    <span class="c1"># the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker</span>
+    <span class="c1"># (see https://usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
+    <span class="c1"># or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)</span>
+    <span class="c1"># or to_riv (shellmound_tmr example)</span>
+    <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
-
-  <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-  <span class="nt">output_path</span><span class="p">:</span>
-
-
+<span class="c1"># Iterative Model Solution</span>
 <span class="nt">ims</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">print_option</span><span class="p">:</span> <span class="s">&#39;all&#39;</span>
@@ -1498,8 +1655,14 @@
     <span class="nt">preconditioner_levels</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7</span>
     <span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
 
+<span class="c1"># Observation (OBS) Utility</span>
 <span class="nt">obs</span><span class="p">:</span>
   <span class="nt">source_data</span><span class="p">:</span>
+    <span class="c1"># Head observations are supplied via csv files with x, y locations and observation names</span>
+    <span class="c1"># an observation is generated in each model layer;</span>
+    <span class="c1"># observations at each location can subsequently be processed</span>
+    <span class="c1"># to represent a given screened interval</span>
+    <span class="c1"># for example, using modflow-obs (https://github.com/aleaf/modflow-obs)</span>
     <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;data/pleasant/source_data/tables/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
                 <span class="s">&#39;data/pleasant/source_data/tables/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span>  <span class="c1"># some lakes are high-k; obs need to be in hydmod</span>
                 <span class="s">&#39;data/pleasant/source_data/tables/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
@@ -1508,7 +1671,7 @@
                      <span class="p p-Indicator">]</span>
     <span class="nt">column_mappings</span><span class="p">:</span>
       <span class="nt">obsname</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span>
-  <span class="nt">drop_observations</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span>  <span class="c1"># pleasant lake; monitored via gage package</span>
+  <span class="nt">drop_observations</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span>  <span class="c1"># pleasant lake; monitored via Lake Package observations</span>
   <span class="p p-Indicator">]</span>
 </pre></div>
 </td></tr></table></div>
@@ -1679,10 +1842,22 @@
 162
 163
 164
-165</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">intermediate_data</span><span class="p">:</span>
-  <span class="nt">tmpdir</span><span class="p">:</span> <span class="s">&#39;original/&#39;</span>
-
-<span class="nt">simulation</span><span class="p">:</span>
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
   <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;pleasant_lgr&#39;</span>
   <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
   <span class="nt">sim_ws</span><span class="p">:</span> <span class="s">&#39;pleasant_lgr/&#39;</span>
@@ -1709,10 +1884,10 @@
              <span class="s">&#39;ims&#39;</span>
   <span class="p p-Indicator">]</span>
 
-<span class="c1"># parent model block</span>
+<span class="c1"># parent model block is not needed as the pleasant_lgr_inset</span>
+<span class="c1"># model is set up as an LGR in the context of the pleast_lgr_parent model</span>
 
-<span class="c1"># parameters for setting up the pfl_nwt grid</span>
-<span class="c1"># using features in features_file</span>
+<span class="c1"># grid for LGR inset based on buffer distance around Pleasant Lake</span>
 <span class="nt">setup_grid</span><span class="p">:</span>
   <span class="nt">remake</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">source_data</span><span class="p">:</span>
@@ -1720,16 +1895,16 @@
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/shps/all_lakes.shp&#39;</span>
       <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;HYDROID&#39;</span>
       <span class="nt">include_ids</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span> <span class="c1"># pleasant lake</span>
-  <span class="nt">dxy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span> <span class="c1"># m</span>
+  <span class="nt">dxy</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">40</span>  <span class="c1"># grid spacing, in CRS units (meters)</span>
   <span class="nt">buffer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span> <span class="c1"># distance from feature(s) if interest to model boundary, in meters</span>
-  <span class="nt">grid_file</span><span class="p">:</span> <span class="s">&#39;grid.json&#39;</span> <span class="c1"># grid info will be written to this file</span>
-  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3070</span>
+  <span class="nt">epsg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3070</span>  <span class="c1"># CRS (Wisconsin Transverse Mercator)</span>
 
 <span class="nt">dis</span><span class="p">:</span>
   <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
   <span class="nt">dimensions</span><span class="p">:</span>
+    <span class="c1"># nrow and ncol are based on the buffer distance and grid spacing</span>
     <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
   <span class="nt">source_data</span><span class="p">:</span>
     <span class="nt">top</span><span class="p">:</span>
@@ -1748,43 +1923,60 @@
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">icelltype</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span> <span class="c1"># variable sat. thickness in all layers</span>
+  <span class="c1"># k and k33 resampled from parent model by default</span>
 
 <span class="nt">sto</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
   <span class="nt">griddata</span><span class="p">:</span>
     <span class="nt">iconvert</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>  <span class="c1"># convertible layers</span>
+  <span class="c1"># sy and ss resampled from parent model by default</span>
 
 <span class="nt">wel</span><span class="p">:</span>
   <span class="nt">source_data</span><span class="p">:</span>
+    <span class="c1"># custom input format for Wisconsin Dept. of Natural Resources</span>
     <span class="nt">wdnr_dataset</span><span class="p">:</span>
       <span class="nt">water_use</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/tables/master_wu.csv&#39;</span> <span class="c1"># monthly water use rates from WDNR</span>
       <span class="nt">water_use_points</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/shps/csls_sources_wu_pts.shp&#39;</span> <span class="c1"># point locations of wells in water_use</span>
+      <span class="c1"># for period 0, use average pumping rates for dates below</span>
       <span class="nt">period_stats</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span>
+                     <span class="c1"># for subsequent periods,</span>
+                     <span class="c1"># average pumping rates to period start/end dates</span>
 <span class="nt">                     1</span><span class="p">:</span> <span class="s">&#39;resample&#39;</span><span class="p p-Indicator">}</span>
 
+<span class="c1"># Lake Package</span>
 <span class="nt">lak</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
     <span class="nt">boundnames</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
     <span class="nt">surfdep</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>  <span class="c1"># undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)</span>
   <span class="nt">source_data</span><span class="p">:</span>
+    <span class="c1"># initial lakebed leakance rates</span>
+    <span class="c1"># for thin zone around lake perimeter</span>
     <span class="nt">littoral_leakance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.045</span> <span class="c1"># 1/d</span>
+    <span class="c1"># for interior of lake basin</span>
     <span class="nt">profundal_leakance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.025</span> <span class="c1"># 1/d</span>
+    <span class="c1"># polygon shapefile of lake footprints</span>
     <span class="nt">lakes_shapefile</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/shps/all_lakes.shp&#39;</span>
       <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;HYDROID&#39;</span>
       <span class="nt">include_ids</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span> <span class="c1"># pleasant lake</span>
+    <span class="c1"># setup lake precipitation and evaporation from PRISM data</span>
     <span class="nt">climate</span><span class="p">:</span>
       <span class="nt">filenames</span><span class="p">:</span>
         <span class="nt">600059060</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv&#39;</span>
       <span class="nt">format</span><span class="p">:</span> <span class="s">&#39;prism&#39;</span>
       <span class="nt">period_stats</span><span class="p">:</span>
+        <span class="c1"># for period 0, use average precip and evap for dates below</span>
         <span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">]</span>  <span class="c1"># average daily rate for model period for initial steady state</span>
+        <span class="c1"># for subsequent periods,</span>
+        <span class="c1"># average precip and evap to period start/end dates</span>
         <span class="nt">1</span><span class="p">:</span> <span class="s">&#39;mean&#39;</span>  <span class="c1"># average daily rate or value for each month</span>
+    <span class="c1"># bathymetry file with lake depths to subtract off model top</span>
     <span class="nt">bathymetry_raster</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/rasters/pleasant_bathymetry.tif&#39;</span>
       <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+    <span class="c1"># bathymetry file with stage/area/volume relationship</span>
     <span class="nt">stage_area_volume_file</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/tables/area_stage_vol_Pleasant.csv&#39;</span>
       <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
@@ -1802,9 +1994,8 @@
     <span class="nt">dem</span><span class="p">:</span>
       <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;data/pleasant/source_data/rasters/dem40m.tif&#39;</span>
       <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
-  <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-  <span class="nt">output_path</span><span class="p">:</span>
-
+  <span class="nt">sfrmaker_options</span><span class="p">:</span>
+    <span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
 
 <span class="nt">ims</span><span class="p">:</span>
   <span class="nt">options</span><span class="p">:</span>
@@ -1833,6 +2024,8 @@
     <span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
 
 <span class="nt">obs</span><span class="p">:</span>
+  <span class="c1"># same observation data that were applied to pleasant_lgr_parent model</span>
+  <span class="c1"># any observations not within the LGR extent are culled</span>
   <span class="nt">source_data</span><span class="p">:</span>
     <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;data/pleasant/source_data/tables/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
                 <span class="s">&#39;data/pleasant/source_data/tables/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span>  <span class="c1"># some lakes are high-k; obs need to be in hydmod</span>
@@ -2617,7 +2810,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 03, 2021.
+        Last updated on Feb 05, 2021.
       </span>
 
     </p>

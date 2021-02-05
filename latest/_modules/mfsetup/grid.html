@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post218+gfab5624 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post219+g196119c documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post218+gfab5624
+                0.post219+g196119c
               </div>
             
           
@@ -105,6 +105,7 @@
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to modflow-setup</a></li>
 </ul>
@@ -304,6 +305,24 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">delc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delc</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> layer(s), &#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> row(s), </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> column(s)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;delr: [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">...</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">]&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;delc: [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">...</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">]&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;CRS: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;xll: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xoffset</span><span class="si">}</span><span class="s1">; yll: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">yoffset</span><span class="si">}</span><span class="s1">; rotation: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Bounds: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">txt</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">StructuredGrid</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xul</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -984,7 +1003,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 03, 2021.
+        Last updated on Feb 05, 2021.
       </span>
 
     </p>
