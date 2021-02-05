@@ -27,9 +27,10 @@
 # input types. For example- 'filename' indicates a file path (string), regardless
 # of the type of file, and 'filenames' indicates a list or dictionary of files that
 # map to model layers or stress periods. Items with the '_units' suffix indicate
-# the units of the source data, allowing MFSetup to convert the values to model units
+# the units of the source data, allowing Modflow-setup to convert the values to model units
 # accordingly. '_column' Items indicate field names in the source data where the input can be found.
 
+# input for MODFLOW 6 simulation
 simulation:
   sim_name: 'mfsim'
   version: 'mf6'
@@ -37,6 +38,7 @@ simulation:
   options:
     continue: True
 
+# input for MODFLOW 6 model
 model:
   simulation: 'shellmound'
   modelname: 'shellmound'
@@ -45,6 +47,9 @@ model:
     save_flows: True
     newton: True
     newton_under_relaxation: False
+  # packages to build
+  # (any packages not listed or commented out will not be built,
+  #  event if they have an input block below)
   packages: ['dis',
              'ic',
              'npf',
@@ -57,21 +62,20 @@ model:
              'ims'
   ]
   external_path: 'external/'
-  relative_external_filepaths: True
 
-intermediate_data:
-  output_folder: 'original/'  # external arrays are read from here by flopy, and written to external_path
-
+# parameters for setting up the horizontal configuration of the grid
+# in the context of a coordinate reference system
 setup_grid:
   xoff: 501405 # lower left x-coordinate
   yoff: 1175835 # lower left y-coordinate
   rotation: 0.
   epsg: 5070
+  # snap model to the National Hydrogeologic Grid
+  # (Clark and others, 2018)
   snap_to_NHG: True
 
-
+# Structured Discretization Package
 dis:
-  remake_top: True
   options:
     length_units: 'meters'
   dimensions:
@@ -102,6 +106,7 @@ dis:
   minimum_layer_thickness: 1 # layers less than this thickness are converted to vertical pass-through cells
   drop_thin_cells: True
 
+# Temporal Discretization Package
 tdis:
   options:
     time_units: 'days'
@@ -131,9 +136,16 @@ tdis:
       tsmult: 1.5
       steady: False
 
+# Initial Conditions Package
+# if no starting head values are specified, they are set
+# to the model top by default
 ic:
+  # optional format for writing external files
+  # e.g. (strt_001.dat)
+  # default is strt_{:03d}.dat
   strt_filename_fmt: "strt_{:03d}.dat"
 
+# Node Property Flow Package
 npf:
   options:
     save_flows: True
@@ -175,14 +187,17 @@ npf:
   k_filename_fmt: "k_{:03d}.dat"
   k33_filename_fmt: "k33_{:03d}.dat"
 
+# Storage Package
 sto:
   options:
     save_flows: True
   griddata:
     iconvert: 1  # convertible layers
+    # initial global values for storage
     sy: 0.25
     ss: 1.e-6
 
+# recharge package
 rch:
   options:
     print_input: True
@@ -190,6 +205,7 @@ rch:
     save_flows: True
     readasarrays: True
   source_data:
+    # resample recharge from NetCDF file with time-series of grids
     recharge:
       filename: 'shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc'
       variable: 'net_infiltration'
@@ -197,10 +213,15 @@ rch:
       time_units: 'days'
       resample_method: 'linear'
       period_stats:
-        0: ['mean', '2000-01-01', '2017-12-31']  # for periods 0 and 1, use the mean recharge from 2000 through 2017
+        # for the first two stress periods
+        # apply mean recharge rates for dates below
+        0: ['mean', '2000-01-01', '2017-12-31']
         1: ['mean', '2000-01-01', '2017-12-31']
         2: 'mean'  # for periods 2 on, use the mean recharge for that period
 
+# Streamflow Routing Package
+# SFR input is created using SFRmaker
+# https://github.com/usgs/sfrmaker
 sfr:
   options:
     save_flows: True
@@ -216,6 +237,7 @@ sfr:
       name_column: 'GNIS_NAME'
       attr_length_units: 'feet'  # units of source data
       attr_height_units: 'feet'  # units of source data
+    # specified inflows to SFR network
     inflows:  # see sfrmaker.data.add_to_perioddata for arguments
       filename: 'shellmound/tables/inflows.csv'
       datetime_column: 'datetime'
@@ -229,15 +251,15 @@ sfr:
       filename: 'shellmound/tables/routing.csv'
       id_column: 'COMID'  # arguments to sfrmaker.Lines.from_shapefile
       routing_column: 'tocomid'
-
   sfrmaker_options:
     # the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker
-    # (see https://aleaf.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)
+    # (see https://usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)
     # or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)
     # or to_riv (shellmound_tmr example)
     one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
     add_outlets: [17955371, 17956213]  # add outlets at these line numbers
 
+# Well Package
 wel:
   options:
     print_input: True
@@ -245,9 +267,11 @@ wel:
     save_flows: True
   source_data:
     csvfiles:
+      # pumping input from CSV files
       filenames: ['shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv',
                   'shellmound/tables/iwum_m3_6M.csv',
                   'shellmound/tables/sp69_pumping_from_meras21_m3.csv']
+      # 'x' and 'y' are the default names for x and y location columns
       volume_units: 'meters'
       time_units: 'days'
       data_column: 'flux_m3'
@@ -262,16 +286,22 @@ wel:
       vertical_flux_distribution:
         across_layers: False  # False to put fluxes in one layer
         # put wells in layer with thickest or most transmissive intersection with well open interval
-        distribute_by: 'thickness'  # thickness or transmissivity
+        distribute_by: 'transmissivity'  # thickness or transmissivity
         minimum_layer_thickness: 10.  # layers must be at 10 length units thick to have a well;
         # (any dropped wells would be recorded in shellmound_dropped_wells.csv)
 
+# Output Control Package
 oc:
   head_fileout_fmt: '{}.hds'
   budget_fileout_fmt: '{}.cbc'
+  # dictionary input similar to flopy
   saverecord: {0: {head: 'last',
                    budget: 'last'}
   }
+  # MODFLOW 6-style text input can also be used
+  # e.g.
+  # period_options: {0: ['save head last',
+  #                     'save budget last' ]
 
 obs:
   source_data:

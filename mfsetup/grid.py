@@ -126,6 +126,24 @@ class MFsetupGrid(StructuredGrid):
             return False
         return True
 
+    def __repr__(self):
+        txt = ''
+        if self.nlay is not None:
+            txt += f'{self.nlay:d} layer(s), '
+        txt += f'{self.nrow:d} row(s), {self.ncol:d} column(s)\n'
+        txt += (f'delr: [{self.delr[0]:.2f}...{self.delr[-1]:.2f}]'
+                f' {self.units}\n'
+                f'delc: [{self.delc[0]:.2f}...{self.delc[-1]:.2f}]'
+                f' {self.units}\n'
+                )
+        txt += f'CRS: {self.crs}\n'
+        txt += f'xll: {self.xoffset}; yll: {self.yoffset}; rotation: {self.rotation}\n'
+        txt += 'Bounds: {}\n'.format(self.extent)
+        return txt
+
+    def __str__(self):
+        return StructuredGrid.__repr__(self)
+
     @property
     def xul(self):
         x0 = self.xyedges[0][0]
