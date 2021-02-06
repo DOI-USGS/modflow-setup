@@ -26,6 +26,8 @@ def test_convert_flux():
 
 
 def test_convert_length_units():
+    assert np.allclose(convert_length_units('centimeters', 'inches'), 1 / 2.54)
+    assert np.allclose(convert_length_units('in', 'cm'), 2.54)
     assert np.allclose(convert_length_units(2, 1), 1/.3048)
     assert np.allclose(convert_length_units(1, 2), .3048)
     assert np.allclose(convert_length_units('meters', 'feet'), 1/.3048)
