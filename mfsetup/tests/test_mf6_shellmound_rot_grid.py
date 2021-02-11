@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from flopy import mf6
 from gisutils import get_values_at_points
+from scipy.interpolate import griddata
 
 from mfsetup import MF6model
 from mfsetup.fileio import exe_exists
@@ -81,14 +82,27 @@ def test_rotated_tmr(rotated_parent, shellmound_cfg, tmpdir, test_data_path):
     cfg['parent']['SpatialReference']['xoff'] = rotated_parent.modelgrid.xoffset
     cfg['parent']['SpatialReference']['yoff'] = rotated_parent.modelgrid.yoffset
     cfg['parent']['SpatialReference']['epsg'] = rotated_parent.modelgrid.epsg
+    cfg['parent']['SpatialReference']['rotation'] = rotated_parent.modelgrid.angrot
 
     m = MF6model.setup_from_cfg(cfg)
-    m.write_input()
-    # check a raster at which to compare all points
-    rpath = test_data_path / 'shellmound/rasters/meras_100m_dem.tif'
-    expected_dem_vals=get_values_at_points(rpath, m.modelgrid.xcellcenters.ravel(),m.modelgrid.ycellcenters.ravel(),
-                         points_crs=5070, method='linear')
-    assert np.allclose(m.dis.top.array.ravel(), expected_dem_vals, rtol=0.01)
+    # interpolate the parent model values for the last layer bottom
+    # compare to last layer bottom in tmr inset
+    # the values for the inset were sampled independently from the source raster
+    # so if the values compare, it means the rotations in the parent and inset model grid are consistent
+    parent_model_values = griddata((m.parent.modelgrid.xcellcenters.ravel(),
+                                    m.parent.modelgrid.ycellcenters.ravel()),
+                                    m.parent.dis.botm.array[-1].ravel(),
+                                   (m.modelgrid.xcellcenters, m.modelgrid.ycellcenters)
+                                    )
+    assert np.allclose(parent_model_values, m.dis.botm.array[-1], rtol=0.01)
+    # check the last layer bottom for consistency with source raster
+    # at the inset model cell centers
+    rpath = test_data_path / 'shellmound/rasters/mdwy_surf.tif'
+    source_raster_values = get_values_at_points(rpath,
+                                                m.modelgrid.xcellcenters.ravel(),
+                                                m.modelgrid.ycellcenters.ravel(),
+                                                points_crs=5070, method='linear')
+    assert np.allclose(m.dis.botm.array[-1].ravel(), source_raster_values * .3048, rtol=0.01)
 
 
 def test_rotated_grid(shellmound_cfg, shellmound_simulation, mf6_exe):
