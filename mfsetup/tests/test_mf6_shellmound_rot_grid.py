@@ -1,17 +1,19 @@
+import os
 from copy import deepcopy
 
-from flopy import mf6
-import pytest
-from mfsetup import MF6model
-import os
-from mfsetup.utils import get_input_arguments
-from mfsetup.fileio import exe_exists
-from gisutils import get_values_at_points
 import numpy as np
+import pytest
+from flopy import mf6
+from gisutils import get_values_at_points
+
+from mfsetup import MF6model
+from mfsetup.fileio import exe_exists
+from mfsetup.utils import get_input_arguments
+
 
 @pytest.fixture()
 def rotated_parent(shellmound_cfg, tmpdir, mf6_exe):
-    cfg = shellmound_cfg.copy()
+    cfg = deepcopy(shellmound_cfg)
     cfg['simulation']['sim_ws'] = os.path.join(tmpdir, 'shellmound_rotated_parent')
     kwargs = cfg['simulation'].copy()
     kwargs.update(cfg['simulation']['options'])
@@ -41,8 +43,9 @@ def rotated_parent(shellmound_cfg, tmpdir, mf6_exe):
     assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
     return m
 
+
 def test_rotated_tmr(rotated_parent, shellmound_cfg, tmpdir, test_data_path):
-    cfg = shellmound_cfg.copy()
+    cfg = deepcopy(shellmound_cfg)
     cfg['simulation']['sim_ws'] = os.path.join(tmpdir, 'shellmound_rotated_tmr')
     kwargs = cfg['simulation'].copy()
     kwargs.update(cfg['simulation']['options'])
@@ -80,7 +83,7 @@ def test_rotated_tmr(rotated_parent, shellmound_cfg, tmpdir, test_data_path):
     cfg['parent']['SpatialReference']['epsg'] = rotated_parent.modelgrid.epsg
 
     m = MF6model.setup_from_cfg(cfg)
-    w.write_input()
+    m.write_input()
     # check a raster at which to compare all points
     rpath = test_data_path / 'shellmound/rasters/meras_100m_dem.tif'
     expected_dem_vals=get_values_at_points(rpath, m.modelgrid.xcellcenters.ravel(),m.modelgrid.ycellcenters.ravel(),
