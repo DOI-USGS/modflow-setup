@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid module &mdash; modflow-setup 0.post219+g196119c documentation</title>
+  <title>mfsetup.grid module &mdash; modflow-setup 0.post220+g4a70bce documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.post219+g196119c
+                0.post220+g4a70bce
               </div>
             
           
@@ -392,7 +392,7 @@ as a shapely Polygon object.</p>
 
 <dl class="py function">
 <dt id="mfsetup.grid.get_ij">
-<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_ij</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">local</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">chunksize</span><span class="o">=</span><span class="default_value">100</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_ij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_ij" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mfsetup.grid.</code><code class="sig-name descname">get_ij</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">local</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_ij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mfsetup.grid.get_ij" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the row and column of a point or sequence of points
 in real-world coordinates.</p>
 <dl class="field-list simple">
@@ -401,16 +401,7 @@ in real-world coordinates.</p>
 <dt><strong>grid</strong><span class="classifier">flopy.discretization.StructuredGrid instance</span></dt><dd></dd>
 <dt><strong>x</strong><span class="classifier">scalar or sequence of x coordinates</span></dt><dd></dd>
 <dt><strong>y</strong><span class="classifier">scalar or sequence of y coordinates</span></dt><dd></dd>
-<dt><strong>local</strong><span class="classifier">bool</span></dt><dd><p>Flag for returning real-world or model (local) coordinates.
-(default False)</p>
-</dd>
-<dt><strong>chunksize</strong><span class="classifier">int</span></dt><dd><p>Because this function compares each x, y location to a vector
-of model grid cell locations, memory usage can quickly get
-out of hand, as it increases as the square of the number of locations.
-This can be avoided by breaking the x, y location vectors into
-chunks. Experimentation with approx. 5M points suggests
-that a chunksize of 100 provides close to optimal
-performance in terms of execution time. (default 100)</p>
+<dt><strong>local: bool (optional)</strong></dt><dd><p>If True, x and y are in local coordinates (defaults to False)</p>
 </dd>
 </dl>
 </dd>
@@ -548,7 +539,7 @@ Can be any of:</p>
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 05, 2021.
+        Last updated on Feb 12, 2021.
       </span>
 
     </p>

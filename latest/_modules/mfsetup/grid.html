@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post219+g196119c documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post220+g4a70bce documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post219+g196119c
+                0.post220+g4a70bce
               </div>
             
           
@@ -195,6 +195,7 @@
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_proj_str</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">shp2df</span>
 <span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 <span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">spatial</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Polygon</span>
 
 <span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">fileio</span> <span class="k">as</span> <span class="n">fileio</span>
@@ -287,7 +288,7 @@
         <span class="k">if</span> <span class="n">xul</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">yul</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">xll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xul_to_xll</span><span class="p">(</span><span class="n">xul</span><span class="p">)</span>
             <span class="n">yll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yul_to_yll</span><span class="p">(</span><span class="n">yul</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_coord_info</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="n">xll</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="n">yll</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj4</span><span class="o">=</span><span class="n">proj_str</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_coord_info</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="n">xll</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="n">yll</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj4</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="n">angrot</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">StructuredGrid</span><span class="p">):</span>
@@ -362,7 +363,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xul</span><span class="p">,</span>
                       <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">yul</span><span class="p">)</span> <span class="o">*</span> \
-               <span class="n">Affine</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angrot</span><span class="p">)</span>
+               <span class="n">Affine</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">angrot</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -472,7 +473,7 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="get_ij"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_ij">[docs]</a><span class="k">def</span> <span class="nf">get_ij</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="viewcode-block" id="get_ij"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_ij">[docs]</a><span class="k">def</span> <span class="nf">get_ij</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the row and column of a point or sequence of points</span>
 <span class="sd">    in real-world coordinates.</span>
 
@@ -481,48 +482,25 @@
 <span class="sd">    grid : flopy.discretization.StructuredGrid instance</span>
 <span class="sd">    x : scalar or sequence of x coordinates</span>
 <span class="sd">    y : scalar or sequence of y coordinates</span>
-<span class="sd">    local : bool</span>
-<span class="sd">        Flag for returning real-world or model (local) coordinates.</span>
-<span class="sd">        (default False)</span>
-<span class="sd">    chunksize : int</span>
-<span class="sd">        Because this function compares each x, y location to a vector</span>
-<span class="sd">        of model grid cell locations, memory usage can quickly get</span>
-<span class="sd">        out of hand, as it increases as the square of the number of locations.</span>
-<span class="sd">        This can be avoided by breaking the x, y location vectors into</span>
-<span class="sd">        chunks. Experimentation with approx. 5M points suggests</span>
-<span class="sd">        that a chunksize of 100 provides close to optimal</span>
-<span class="sd">        performance in terms of execution time. (default 100)</span>
+<span class="sd">    local: bool (optional)</span>
+<span class="sd">        If True, x and y are in local coordinates (defaults to False)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    i : row or sequence of rows (zero-based)</span>
 <span class="sd">    j : column or sequence of columns (zero-based)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">local</span><span class="p">:</span>
-        <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ycellcenters</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xyzcellcenters</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="n">j</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">yc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;getting i, j locations...&#39;</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">chunksize</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">j</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">))[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">chunk_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">chunks</span><span class="p">[</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">xcp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">])))</span>
-            <span class="n">ycp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">yc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">])))</span>
-            <span class="n">j</span> <span class="o">+=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xcp</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]))</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">i</span> <span class="o">+=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ycp</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]))</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+    <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ycellcenters</span>
+    <span class="k">if</span> <span class="n">local</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;getting i, j locations...&#39;</span><span class="p">)</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">xyc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xc</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">yc</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">pxy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">kdtree</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">KDTree</span><span class="p">(</span><span class="n">xyc</span><span class="p">)</span>
+    <span class="n">distance</span><span class="p">,</span> <span class="n">loc</span> <span class="o">=</span> <span class="n">kdtree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pxy</span><span class="p">)</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
 
 
@@ -792,40 +770,7 @@
     <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up model grid...&#39;</span><span class="p">)</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-    <span class="c1"># conversions for model/parent model units to meters</span>
-    <span class="c1"># set regular flag for handling delc/delr</span>
-    <span class="n">to_meters_inset</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">model_length_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
-    <span class="n">regular</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">dxy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">delr_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dxy</span> <span class="o">*</span> <span class="n">to_meters_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># dxy is specified in model units</span>
-        <span class="n">delc_m</span> <span class="o">=</span> <span class="n">delr_m</span>
-    <span class="k">if</span> <span class="n">delr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">delr_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delr</span> <span class="o">*</span> <span class="n">to_meters_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># delr is specified in model units</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delr_m</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delr_m</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">delr_m</span> <span class="o">=</span> <span class="n">delr_m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">regular</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">delc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">delc_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delc</span> <span class="o">*</span> <span class="n">to_meters_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># delc is specified in model units</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delc_m</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delc_m</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">delc_m</span> <span class="o">=</span> <span class="n">delc_m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">regular</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">to_meters_parent</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">get_model_length_units</span><span class="p">(</span><span class="n">parent_model</span><span class="p">),</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
-        <span class="c1"># parent model grid spacing in meters</span>
-        <span class="n">parent_delr_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">to_meters_parent</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_delr_m</span> <span class="o">%</span> <span class="n">delr_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inset delr spacing of </span><span class="si">{}</span><span class="s1"> must be factor of parent spacing of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">delr_m</span><span class="p">,</span>
-                                                                                                      <span class="n">parent_delr_m</span><span class="p">))</span>
-        <span class="n">parent_delc_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">to_meters_parent</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_delc_m</span> <span class="o">%</span> <span class="n">delc_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inset delc spacing of </span><span class="si">{}</span><span class="s1"> must be factor of parent spacing of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">delc_m</span><span class="p">,</span>
-                                                                                                      <span class="n">parent_delc_m</span><span class="p">))</span>
-
+    <span class="c1"># make sure crs is populated, then get CRS units for the grid</span>
     <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -834,21 +779,65 @@
     <span class="k">elif</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span>
 
+    <span class="n">grid_units</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
+    <span class="k">if</span> <span class="s1">&#39;foot&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;feet&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">grid_units</span> <span class="o">=</span> <span class="s1">&#39;feet&#39;</span>
+    <span class="k">elif</span> <span class="s1">&#39;metre&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;meter&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">grid_units</span> <span class="o">=</span> <span class="s1">&#39;meters&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unrecognized CRS units </span><span class="si">{</span><span class="n">grid_units</span><span class="si">}</span><span class="s1">: CRS must be projected in feet or meters&#39;</span><span class="p">)</span>
+
+    <span class="c1"># conversions for model/parent model units to meters</span>
+    <span class="c1"># set regular flag for handling delc/delr</span>
+    <span class="n">to_grid_units_inset</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">model_length_units</span><span class="p">,</span> <span class="n">grid_units</span><span class="p">)</span>
+
+    <span class="n">regular</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">dxy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dxy</span> <span class="o">*</span> <span class="n">to_grid_units_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># dxy is specified in model units</span>
+        <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">delr_grid</span>
+    <span class="k">if</span> <span class="n">delr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delr</span> <span class="o">*</span> <span class="n">to_grid_units_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># delr is specified in model units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">delr_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">regular</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">delc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delc</span> <span class="o">*</span> <span class="n">to_grid_units_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># delc is specified in model units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">delc_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">regular</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">to_grid_units_parent</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">get_model_length_units</span><span class="p">(</span><span class="n">parent_model</span><span class="p">),</span> <span class="n">grid_units</span><span class="p">)</span>
+        <span class="c1"># parent model grid spacing in meters</span>
+        <span class="n">parent_delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">to_grid_units_parent</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_delr_grid</span> <span class="o">%</span> <span class="n">delr_grid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inset delr spacing of </span><span class="si">{}</span><span class="s1"> must be factor of parent spacing of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">,</span>
+                                                                                                      <span class="n">parent_delr_grid</span><span class="p">))</span>
+        <span class="n">parent_delc_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">to_grid_units_parent</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_delc_grid</span> <span class="o">%</span> <span class="n">delc_grid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inset delc spacing of </span><span class="si">{}</span><span class="s1"> must be factor of parent spacing of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">,</span>
+                                                                                                      <span class="n">parent_delc_grid</span><span class="p">))</span>
+
+
+
     <span class="c1"># option 1: make grid from xoff, yoff and specified dimensions</span>
     <span class="k">if</span> <span class="n">xoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">yoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">nrow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ncol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> \
             <span class="s2">&quot;Need to specify nrow and ncol if specifying xoffset and yoffset.&quot;</span>
         <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
-            <span class="n">height_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delc_m</span> <span class="o">*</span> <span class="n">nrow</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-            <span class="n">width_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delr_m</span> <span class="o">*</span> <span class="n">ncol</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delc_grid</span> <span class="o">*</span> <span class="n">nrow</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delr_grid</span> <span class="o">*</span> <span class="n">ncol</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">height_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">delc_m</span><span class="p">)</span>
-            <span class="n">width_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">delr_m</span><span class="p">)</span>
+            <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">)</span>
+            <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">)</span>
 
         <span class="c1"># optionally align grid with national hydrologic grid</span>
         <span class="c1"># grids snapping to NHD must have spacings that are a factor of 1 km</span>
         <span class="k">if</span> <span class="n">snap_to_NHG</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">regular</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="mi">1000</span> <span class="o">%</span> <span class="n">delc_m</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">regular</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="mi">1000</span> <span class="o">%</span> <span class="n">delc_grid</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">get_point_on_national_hydrogeologic_grid</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="p">,</span>
                                                             <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">)</span>
             <span class="n">xoff</span> <span class="o">=</span> <span class="n">x</span>
@@ -858,11 +847,13 @@
         <span class="c1"># need to specify xul, yul in case snapping to parent</span>
         <span class="c1"># todo: allow snapping to parent grid on xoff, yoff</span>
         <span class="k">if</span> <span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">xul</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">yul</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">rotation_rads</span> <span class="o">=</span> <span class="n">rotation</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+            <span class="c1"># note rotating around xoff,yoff not the origin!</span>
+            <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span> <span class="o">-</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
+            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span>
-            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_m</span>
+            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_grid</span>
 
     <span class="c1"># option 2: make grid using buffered feature bounding box</span>
     <span class="k">else</span><span class="p">:</span>
@@ -908,8 +899,8 @@
             <span class="n">L</span> <span class="o">=</span> <span class="n">buffer</span>  <span class="c1"># distance from area of interest to boundary</span>
             <span class="n">xul</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">L</span>
             <span class="n">yul</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">L</span>
-            <span class="n">height_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">yul</span> <span class="o">-</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">L</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># initial model height from buffer distance</span>
-            <span class="n">width_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">x2</span> <span class="o">+</span> <span class="n">L</span><span class="p">)</span> <span class="o">-</span> <span class="n">xul</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">yul</span> <span class="o">-</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">L</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># initial model height from buffer distance</span>
+            <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">x2</span> <span class="o">+</span> <span class="n">L</span><span class="p">)</span> <span class="o">-</span> <span class="n">xul</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
             <span class="n">rotation</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># rotation not supported with this option</span>
 
     <span class="c1"># align model with parent grid if there is a parent model</span>
@@ -924,13 +915,13 @@
         <span class="c1"># adjust the dimensions to align remaining corners</span>
         <span class="k">def</span> <span class="nf">roundup</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">increment</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">number</span> <span class="o">/</span> <span class="n">increment</span><span class="p">)</span> <span class="o">*</span> <span class="n">increment</span><span class="p">)</span>
-        <span class="n">height</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">height_m</span><span class="p">,</span> <span class="n">parent_delr_m</span><span class="p">)</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">width_m</span><span class="p">,</span> <span class="n">parent_delc_m</span><span class="p">)</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">height_grid</span><span class="p">,</span> <span class="n">parent_delr_grid</span><span class="p">)</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">width_grid</span><span class="p">,</span> <span class="n">parent_delc_grid</span><span class="p">)</span>
 
         <span class="c1"># update nrow, ncol after snapping to parent grid</span>
         <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
-            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">delc_m</span><span class="p">)</span> <span class="c1"># h is in meters</span>
-            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="n">delr_m</span><span class="p">)</span>
+            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">)</span> <span class="c1"># h is in meters</span>
+            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">)</span>
 
     <span class="c1"># set the grid configuration dictionary</span>
     <span class="c1"># spacing is in meters (consistent with projected CRS)</span>
@@ -940,7 +931,7 @@
     <span class="c1">#    yll = yul - model.height</span>
     <span class="n">grid_cfg</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nrow&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nrow</span><span class="p">),</span> <span class="s1">&#39;ncol&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncol</span><span class="p">),</span>
                 <span class="s1">&#39;nlay&#39;</span><span class="p">:</span> <span class="n">nlay</span><span class="p">,</span>
-                <span class="s1">&#39;delr&#39;</span><span class="p">:</span> <span class="n">delr_m</span><span class="p">,</span> <span class="s1">&#39;delc&#39;</span><span class="p">:</span> <span class="n">delc_m</span><span class="p">,</span>
+                <span class="s1">&#39;delr&#39;</span><span class="p">:</span> <span class="n">delr_grid</span><span class="p">,</span> <span class="s1">&#39;delc&#39;</span><span class="p">:</span> <span class="n">delc_grid</span><span class="p">,</span>
                 <span class="s1">&#39;xoff&#39;</span><span class="p">:</span> <span class="n">xoff</span><span class="p">,</span> <span class="s1">&#39;yoff&#39;</span><span class="p">:</span> <span class="n">yoff</span><span class="p">,</span>
                 <span class="s1">&#39;xul&#39;</span><span class="p">:</span> <span class="n">xul</span><span class="p">,</span> <span class="s1">&#39;yul&#39;</span><span class="p">:</span> <span class="n">yul</span><span class="p">,</span>
                 <span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="n">rotation</span><span class="p">,</span>
@@ -1003,7 +994,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 05, 2021.
+        Last updated on Feb 12, 2021.
       </span>
 
     </p>

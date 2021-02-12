@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post219+g196119c documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post220+g4a70bce documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post219+g196119c
+                0.post220+g4a70bce
               </div>
             
           
@@ -1130,13 +1130,35 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">length_units</span> <span class="o">=</span> <span class="n">parent_units</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">lenuni</span> <span class="o">=</span> <span class="n">lenuni_values</span><span class="p">[</span><span class="n">parent_units</span><span class="p">]</span>
+
+        <span class="c1"># make sure crs is populated, then get CRS units for the grid</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">])</span>
+
+        <span class="n">parent_grid_units</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
+
+        <span class="k">if</span> <span class="s1">&#39;foot&#39;</span> <span class="ow">in</span> <span class="n">parent_grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;feet&#39;</span> <span class="ow">in</span> <span class="n">parent_grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">grid_units</span> <span class="o">=</span> <span class="s1">&#39;feet&#39;</span>
+        <span class="k">elif</span> <span class="s1">&#39;metre&#39;</span> <span class="ow">in</span> <span class="n">parent_grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;meter&#39;</span> <span class="ow">in</span> <span class="n">parent_grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">grid_units</span> <span class="o">=</span> <span class="s1">&#39;meters&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unrecognized CRS units </span><span class="si">{</span><span class="n">parent_grid_units</span><span class="si">}</span><span class="s1">: CRS must be projected in feet or meters&#39;</span><span class="p">)</span>
+
         <span class="c1"># assume that model grid is in a projected CRS of meters</span>
-        <span class="n">lmult</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">parent_units</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">)</span>
+        <span class="n">lmult</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">parent_units</span><span class="p">,</span> <span class="n">parent_grid_units</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;delr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="n">lmult</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;delc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">array</span> <span class="o">*</span> <span class="n">lmult</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;lenuni&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="c1"># renames for parent modelgrid</span>
+        <span class="n">renames</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="s1">&#39;angrot&#39;</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">renames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">MFsetupGrid</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_mg_resync</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_modelgrid</span> <span class="o">=</span> <span class="n">MFsetupGrid</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -1754,7 +1776,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 05, 2021.
+        Last updated on Feb 12, 2021.
       </span>
 
     </p>
