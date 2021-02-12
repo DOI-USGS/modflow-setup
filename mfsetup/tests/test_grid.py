@@ -10,6 +10,7 @@ from gisutils import shp2df
 from mfsetup.fileio import dump, load_modelgrid
 from mfsetup.grid import (
     MFsetupGrid,
+    get_ij,
     get_nearest_point_on_grid,
     get_point_on_national_hydrogeologic_grid,
 )
@@ -105,3 +106,31 @@ def test_load_modelgrid(tmpdir):
 
     grid2 = load_modelgrid(grid_file)
     assert grid1 == grid2
+
+
+@pytest.mark.parametrize('rotation', (0, 18,))
+def test_get_ij(rotation):
+    modelgrid = MFsetupGrid(delc=np.ones(20) * 1000,
+                            delr=np.ones(25) * 1000,
+                            xoff=509405.0, yoff=1175835.0,
+                            angrot=18,
+                            crs=5070,
+                            )
+    x = np.array([513614.26519224, 523124.83035519, 526215.00029894,
+                  516704.43513599, 513614.26519224])
+    y = np.array([1189077.77462862, 1192167.94457237, 1182657.37940942,
+                  1179567.20946567, 1189077.77462862])
+    expected_pi, expected_pj = [], []
+    for xx, yy in zip(x, y):
+       tmpi, tmpj = modelgrid.intersect(xx, yy)
+       expected_pi.append(tmpi)
+       expected_pj.append(tmpj)
+    pi, pj = get_ij(modelgrid, x, y)
+    assert np.array_equal(pi, expected_pi)
+    assert np.array_equal(pj, expected_pj)
+
+    pi0, pj0 = get_ij(modelgrid, x[0], y[0])
+    assert np.isscalar(pi0)
+    assert np.isscalar(pj0)
+    assert pi0 == pi[0]
+    assert pj0 == pj[0]

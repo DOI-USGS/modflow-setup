@@ -110,9 +110,13 @@ def test_rotated_grid(shellmound_cfg, shellmound_simulation, mf6_exe):
     #simulation = deepcopy(simulation)
     cfg['model']['simulation'] = shellmound_simulation
     cfg['setup_grid']['snap_to_NHG'] = False
-    cfg['setup_grid']['rotation'] = 18.
-    cfg['setup_grid']['xoff'] += 8000
-    cfg['dis']['dimensions']['nrow'] = 20
+    nrow, ncol = 20, 25
+    xoff, yoff = 509405, 1175835
+    rotation = 18
+    cfg['setup_grid']['xoff'] = xoff
+    cfg['setup_grid']['yoff'] = yoff
+    cfg['setup_grid']['rotation'] = rotation
+    cfg['dis']['dimensions']['nrow'] = nrow
     cfg['dis']['dimensions']['ncol'] = 25
 
     cfg = MF6model._parse_model_kwargs(cfg)
@@ -121,13 +125,17 @@ def test_rotated_grid(shellmound_cfg, shellmound_simulation, mf6_exe):
     m = MF6model(cfg=cfg, **kwargs)
     m.setup_grid()
 
+    # check that the rotation and lower left corner are consistent
     assert m.modelgrid.angrot == 18.
-    assert m.modelgrid.xoffset == cfg['setup_grid']['xoff']
-    assert m.modelgrid.yoffset == cfg['setup_grid']['yoff']
+    assert m.modelgrid.xoffset == xoff
+    assert m.modelgrid.yoffset == yoff
 
     m.setup_dis()
-    #m.setup_tdis()
-    #m.setup_solver()
-    #m.setup_packages(reset_existing=False)
-    #m.write_input()
-    j=2
+
+    # check that the model grid lower right corner is in the right place
+    xlr = m.modelgrid.xyzvertices[0][-1, -1]
+    ylr = m.modelgrid.xyzvertices[1][-1, -1]
+    expected_x = xoff + np.cos(np.radians(rotation)) * ncol * 1000
+    expected_y = yoff + np.sin(np.radians(rotation)) * ncol * 1000
+    assert np.allclose(xlr, expected_x)
+    assert np.allclose(ylr, expected_y)

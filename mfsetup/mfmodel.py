@@ -14,7 +14,7 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 import gisutils
 import sfrmaker
-from gisutils import get_proj_str, get_values_at_points, project, shp2df 
+from gisutils import get_proj_str, get_values_at_points, project, shp2df
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
@@ -388,17 +388,12 @@ class MFsetupMixin():
         Used to speed up interpolation of parent grid values onto inset model grid."""
         if self._parent_mask is None:
             x, y = np.squeeze(self.bbox.exterior.coords.xy)
-            #pi, pj = get_ij(self.parent.modelgrid, x, y)
-            pi, pj = [], []
-            for xx,yy in zip(x,y):
-                tmpi,tmpj = self.parent.modelgrid.intersect(xx,yy)
-                pi.append(tmpi)
-                pj.append(tmpj)
+            pi, pj = get_ij(self.parent.modelgrid, x, y)
             pad = 3
-            i0 = np.max([min(pi) - pad, 0])
-            i1 = np.min([max(pi) + pad + 1, self.parent.modelgrid.nrow])
-            j0 = np.max([min(pj) - pad, 0])
-            j1 = np.min([max(pj) + pad + 1, self.parent.modelgrid.ncol])
+            i0 = np.max([pi.min() - pad, 0])
+            i1 = np.min([pi.max() + pad + 1, self.parent.modelgrid.nrow])
+            j0 = np.max([pj.min() - pad, 0])
+            j1 = np.min([pj.max() + pad + 1, self.parent.modelgrid.ncol])
             mask = np.zeros((self.parent.modelgrid.nrow, self.parent.modelgrid.ncol), dtype=bool)
             mask[i0:i1, j0:j1] = True
             self._parent_mask = mask
@@ -955,23 +950,23 @@ class MFsetupMixin():
             self.parent.dis.length_units = parent_units
         else:
             self.parent.dis.lenuni = lenuni_values[parent_units]
-        
+
         # make sure crs is populated, then get CRS units for the grid
         if kwargs['epsg'] is not None:
             kwargs['crs'] = pyproj.crs.CRS.from_epsg(kwargs['epsg'])
         elif kwargs['crs'] is not None:
             from gisutils import get_authority_crs
             kwargs['crs'] = get_authority_crs(kwargs['crs'])
-        
+
         parent_grid_units = kwargs['crs'].axis_info[0].unit_name
-        
+
         if 'foot' in parent_grid_units.lower() or 'feet' in parent_grid_units.lower():
             grid_units = 'feet'
         elif 'metre' in parent_grid_units.lower() or 'meter' in parent_grid_units.lower():
             grid_units = 'meters'
         else:
-            raise ValueError(f'unrecognized CRS units {parent_grid_units}: CRS must be projected in feet or meters')    
-            
+            raise ValueError(f'unrecognized CRS units {parent_grid_units}: CRS must be projected in feet or meters')
+
         # assume that model grid is in a projected CRS of meters
         lmult = convert_length_units(parent_units, parent_grid_units)
         kwargs['delr'] = self.parent.dis.delr.array * lmult
@@ -983,7 +978,7 @@ class MFsetupMixin():
         for k, v in renames.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
-                
+
         kwargs = get_input_arguments(kwargs, MFsetupGrid, warn=False)
         self._parent._mg_resync = False
         self._parent._modelgrid = MFsetupGrid(**kwargs)
