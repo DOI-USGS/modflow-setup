@@ -950,13 +950,35 @@ class MFsetupMixin():
             self.parent.dis.length_units = parent_units
         else:
             self.parent.dis.lenuni = lenuni_values[parent_units]
+
+        # make sure crs is populated, then get CRS units for the grid
+        if kwargs['epsg'] is not None:
+            kwargs['crs'] = pyproj.crs.CRS.from_epsg(kwargs['epsg'])
+        elif kwargs['crs'] is not None:
+            from gisutils import get_authority_crs
+            kwargs['crs'] = get_authority_crs(kwargs['crs'])
+
+        parent_grid_units = kwargs['crs'].axis_info[0].unit_name
+
+        if 'foot' in parent_grid_units.lower() or 'feet' in parent_grid_units.lower():
+            grid_units = 'feet'
+        elif 'metre' in parent_grid_units.lower() or 'meter' in parent_grid_units.lower():
+            grid_units = 'meters'
+        else:
+            raise ValueError(f'unrecognized CRS units {parent_grid_units}: CRS must be projected in feet or meters')
+
         # assume that model grid is in a projected CRS of meters
-        lmult = convert_length_units(parent_units, 'meters')
+        lmult = convert_length_units(parent_units, parent_grid_units)
         kwargs['delr'] = self.parent.dis.delr.array * lmult
         kwargs['delc'] = self.parent.dis.delc.array * lmult
         kwargs['top'] = self.parent.dis.top.array
         kwargs['botm'] = self.parent.dis.botm.array
-        kwargs['lenuni'] = 2
+        # renames for parent modelgrid
+        renames = {'rotation': 'angrot'}
+        for k, v in renames.items():
+            if k in kwargs:
+                kwargs[v] = kwargs.pop(k)
+
         kwargs = get_input_arguments(kwargs, MFsetupGrid, warn=False)
         self._parent._mg_resync = False
         self._parent._modelgrid = MFsetupGrid(**kwargs)
