@@ -134,7 +134,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # include cells that are active in the existing idomain array
         # and cells inactivated on the basis of layer elevations
-        ibound = (self.bas6.ibound.array > 0) & (ibound_from_layer_elevations == 1)
+        ibound = (self.bas6.ibound.array > 0) & (ibound_from_layer_elevations >= 1)
         ibound = ibound.astype(int)
 
         # remove cells that conincide with lakes

@@ -227,7 +227,7 @@ def fill_empty_layers(array):
 def fill_cells_vertically(top, botm):
     """In MODFLOW 6, cells where idomain != 1 are excluded from the solution.
     However, in the botm array, values are needed in overlying cells to
-    compute layer thickness (cells with idomain != 1 overlying cells with idomain == 1 need
+    compute layer thickness (cells with idomain != 1 overlying cells with idomain >= 1 need
     values in botm). Given a 3D numpy array with nan values indicating excluded cells,
     fill in the nans with the overlying values. For example, given the column of cells
     [10, nan, 8, nan, nan, 5, nan, nan, nan, 1], fill the nan values to make
@@ -514,7 +514,7 @@ def get_layer_thicknesses(top, botm, idomain=None):
     top = top.copy()
     botm = botm.copy()
     if idomain is not None:
-        idomain = idomain == 1
+        idomain = idomain >= 1
         top[~idomain[0]] = np.nan
         botm[~idomain] = np.nan
     all_layers = np.stack([top] + [b for b in botm])

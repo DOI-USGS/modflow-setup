@@ -102,7 +102,7 @@ def test_make_lgr_idomain(get_pleasant_lgr_parent_with_grid):
               (m.modelgrid.ycellcenters > b) & \
               (m.modelgrid.ycellcenters < t)
     assert idomain[:, isinset].sum() == 0
-    assert np.all(idomain[:, ~isinset] == 1)
+    assert np.all(idomain[:, ~isinset] >= 1)
 
 
 def test_lgr_grid_setup(get_pleasant_lgr_parent_with_grid):
