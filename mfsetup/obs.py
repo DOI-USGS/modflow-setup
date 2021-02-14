@@ -169,7 +169,7 @@ def setup_head_observations(model, obs_info_files=None,
         df['yl'] = yl
         # drop observations located in inactive cels
         ibdn = model.bas6.ibound.array[df.klay.values, df.i.values, df.j.values]
-        active = ibdn == 1
+        active = ibdn >= 1
         df.drop(['i', 'j'], axis=1, inplace=True)
     elif format == 'obs':  # mf6 observation utility
         obstype = {'BAS': 'HEAD'}
@@ -179,7 +179,7 @@ def setup_head_observations(model, obs_info_files=None,
         df['id'] = list(zip(df.klay, df.i, df.j))
         # drop observations located in inactive cels
         idm = model.idomain[df.klay.values, df.i.values, df.j.values]
-        active = idm == 1
+        active = idm >= 1
         df.drop(['arr', 'intyp', 'i', 'j'], axis=1, inplace=True)
     df = df.loc[active].copy()
     return df

@@ -145,9 +145,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                                      tol=1e-4)
         # include cells that are active in the existing idomain array
         # and cells inactivated on the basis of layer elevations
-        idomain = (self.dis.idomain.array == 1) & \
-                  (idomain_from_layer_elevations == 1) & \
-                  (lgr_idomain == 1)
+        idomain = (self.dis.idomain.array >= 1) & \
+                  (idomain_from_layer_elevations >= 1) & \
+                  (lgr_idomain >= 1)
         idomain = idomain.astype(int)
 
         # remove cells that conincide with lakes
@@ -328,8 +328,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             # unpack the cellids and get their respective ibound values
             k1, i1, j1 = zip(*exchangedf['cellidm1'])
             k2, i2, j2 = zip(*exchangedf['cellidm2'])
-            active1 = self.idomain[k1, i1, j1] == 1
-            active2 = inset_model.idomain[k2, i2, j2] == 1
+            active1 = self.idomain[k1, i1, j1] >= 1
+            active2 = inset_model.idomain[k2, i2, j2] >= 1
 
             # screen out connections involving an inactive cell
             active_connections = active1 & active2

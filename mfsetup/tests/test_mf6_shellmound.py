@@ -323,7 +323,7 @@ def test_dis_setup(shellmound_model_with_grid):
    # test that written idomain array reflects supplied shapefile of active area
     active_area = rasterize(m.cfg['dis']['source_data']['idomain']['filename'],
                             m.modelgrid)
-    isactive = active_area == 1
+    isactive = active_area >= 1
     written_idomain = load_array(m.cfg['dis']['griddata']['idomain'])
     assert np.all(written_idomain[:, ~isactive] <= 0)
 
@@ -354,8 +354,8 @@ def test_dis_setup(shellmound_model_with_grid):
     assert m.cfg['dis']['griddata']['top'] is not None
     assert m.cfg['dis']['griddata']['botm'] is not None
     dis = m.setup_dis()
-    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array == 1],
-                          botm[m.dis.idomain.array == 1])
+    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array >= 1],
+                          botm[m.dis.idomain.array >= 1])
 
     # test recreating just the top from the external array
     m.remove_package('dis')
@@ -363,8 +363,8 @@ def test_dis_setup(shellmound_model_with_grid):
     m.cfg['dis']['griddata']['botm'] = None
     dis = m.setup_dis()
     dis.write()
-    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array == 1],
-                          botm[m.dis.idomain.array == 1])
+    assert np.array_equal(m.dis.botm.array[m.dis.idomain.array >= 1],
+                          botm[m.dis.idomain.array >= 1])
     arrayfiles = m.cfg['dis']['griddata']['top']
     for f in arrayfiles:
         assert os.path.exists(f['filename'])
@@ -375,7 +375,7 @@ def test_dis_setup(shellmound_model_with_grid):
     assert np.array_equal(m.dis.idomain.array, updated_idomain)
 
     # check that units were converted (or not)
-    assert np.allclose(dis.top.array[dis.idomain.array[0] == 1].mean(), 40, atol=10)
+    assert np.allclose(dis.top.array[dis.idomain.array[0] >= 1].mean(), 40, atol=10)
     mcaq = m.cfg['dis']['source_data']['botm']['filenames'][3]
     assert 'mcaq' in mcaq
     with rasterio.open(mcaq) as src:
