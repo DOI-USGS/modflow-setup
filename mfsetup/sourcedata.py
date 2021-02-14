@@ -283,7 +283,7 @@ class ArraySourceData(SourceData):
                  dest_model=None, source_modelgrid=None, source_array=None,
                  from_source_model_layers=None, datatype=None,
                  id_column=None, include_ids=None, column_mappings=None,
-                 resample_method='nearest',
+                 resample_method='linear',
                  vmin=-1e30, vmax=1e30, dtype=float,
                  multiplier=1.):
 
