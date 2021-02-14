@@ -506,7 +506,7 @@ class ArraySourceData(SourceData):
 
                     regridded = self.regrid_from_source_model(arr,
                                                               mask=mask,
-                                                              method='linear')
+                                                              method=self.resample_method)
 
                 assert regridded.shape == self.dest_modelgrid.shape[1:]
                 data[dest_k] = regridded * self.mult * self.unit_conversion
