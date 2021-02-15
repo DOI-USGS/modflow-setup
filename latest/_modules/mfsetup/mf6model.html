@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post220+g4a70bce documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post223+g7256fdb documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post220+g4a70bce
+                0.post223+g7256fdb
               </div>
             
           
@@ -325,9 +325,9 @@
                                                      <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
         <span class="c1"># include cells that are active in the existing idomain array</span>
         <span class="c1"># and cells inactivated on the basis of layer elevations</span>
-        <span class="n">idomain</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> \
-                  <span class="p">(</span><span class="n">idomain_from_layer_elevations</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> \
-                  <span class="p">(</span><span class="n">lgr_idomain</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">idomain</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> \
+                  <span class="p">(</span><span class="n">idomain_from_layer_elevations</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> \
+                  <span class="p">(</span><span class="n">lgr_idomain</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">idomain</span> <span class="o">=</span> <span class="n">idomain</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="c1"># remove cells that conincide with lakes</span>
@@ -508,8 +508,8 @@
             <span class="c1"># unpack the cellids and get their respective ibound values</span>
             <span class="n">k1</span><span class="p">,</span> <span class="n">i1</span><span class="p">,</span> <span class="n">j1</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">exchangedf</span><span class="p">[</span><span class="s1">&#39;cellidm1&#39;</span><span class="p">])</span>
             <span class="n">k2</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j2</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">exchangedf</span><span class="p">[</span><span class="s1">&#39;cellidm2&#39;</span><span class="p">])</span>
-            <span class="n">active1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">k1</span><span class="p">,</span> <span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-            <span class="n">active2</span> <span class="o">=</span> <span class="n">inset_model</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">k2</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="n">active1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">k1</span><span class="p">,</span> <span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+            <span class="n">active2</span> <span class="o">=</span> <span class="n">inset_model</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">k2</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">1</span>
 
             <span class="c1"># screen out connections involving an inactive cell</span>
             <span class="n">active_connections</span> <span class="o">=</span> <span class="n">active1</span> <span class="o">&amp;</span> <span class="n">active2</span>
@@ -1289,7 +1289,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 12, 2021.
+        Last updated on Feb 15, 2021.
       </span>
 
     </p>

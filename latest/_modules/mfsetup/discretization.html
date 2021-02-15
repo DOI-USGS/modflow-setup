@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.discretization &mdash; modflow-setup 0.post220+g4a70bce documentation</title>
+  <title>mfsetup.discretization &mdash; modflow-setup 0.post223+g7256fdb documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post220+g4a70bce
+                0.post223+g7256fdb
               </div>
             
           
@@ -407,7 +407,7 @@
 <div class="viewcode-block" id="fill_cells_vertically"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.fill_cells_vertically">[docs]</a><span class="k">def</span> <span class="nf">fill_cells_vertically</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;In MODFLOW 6, cells where idomain != 1 are excluded from the solution.</span>
 <span class="sd">    However, in the botm array, values are needed in overlying cells to</span>
-<span class="sd">    compute layer thickness (cells with idomain != 1 overlying cells with idomain == 1 need</span>
+<span class="sd">    compute layer thickness (cells with idomain != 1 overlying cells with idomain &gt;= 1 need</span>
 <span class="sd">    values in botm). Given a 3D numpy array with nan values indicating excluded cells,</span>
 <span class="sd">    fill in the nans with the overlying values. For example, given the column of cells</span>
 <span class="sd">    [10, nan, 8, nan, nan, 5, nan, nan, nan, 1], fill the nan values to make</span>
@@ -694,7 +694,7 @@
     <span class="n">top</span> <span class="o">=</span> <span class="n">top</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">botm</span> <span class="o">=</span> <span class="n">botm</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">idomain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">idomain</span> <span class="o">=</span> <span class="n">idomain</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">idomain</span> <span class="o">=</span> <span class="n">idomain</span> <span class="o">&gt;=</span> <span class="mi">1</span>
         <span class="n">top</span><span class="p">[</span><span class="o">~</span><span class="n">idomain</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
         <span class="n">botm</span><span class="p">[</span><span class="o">~</span><span class="n">idomain</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="n">all_layers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">top</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">botm</span><span class="p">])</span>
@@ -912,7 +912,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 12, 2021.
+        Last updated on Feb 15, 2021.
       </span>
 
     </p>
