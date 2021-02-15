@@ -728,9 +728,18 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     if parent_model is not None and not snap_to_NHG:
 
         # get location of coinciding cell in parent model for upper left
-        pi, pj = parent_model.modelgrid.intersect(xul, yul)
-        verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
-        xul, yul = verts[:, 0].min(), verts[:, 1].max()
+        # navigating the vertices of the parent cell depends on rotation angle
+        if rotation == 0:
+            pi, pj = parent_model.modelgrid.intersect(xul, yul)
+            verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
+            xul, yul = verts[:, 0].min(), verts[:, 1].max()
+        else:
+            # if there is rotation, need to make sure we locate within the actual upper left.
+            pi, pj = parent_model.modelgrid.intersect(xul + (delc_grid/100), yul)
+            verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
+            # upper left vertex has smallest x coordinate under rotation
+            
+            xul, yul = verts[np.argmin(verts[:,0])]
 
         # adjust the dimensions to align remaining corners
         def roundup(number, increment):
