@@ -728,19 +728,23 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     if parent_model is not None and not snap_to_NHG:
 
         # get location of coinciding cell in parent model for upper left
-        # navigating the vertices of the parent cell depends on rotation angle
-        if rotation == 0:
-            pi, pj = parent_model.modelgrid.intersect(xul, yul)
-            verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
-            xul, yul = verts[:, 0].min(), verts[:, 1].max()
-        else:
-            # if there is rotation, need to make sure we locate within the actual upper left.
-            pi, pj = parent_model.modelgrid.intersect(xul + (delc_grid/100), yul)
-            verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
-            # upper left vertex has smallest x coordinate under rotation
-            
-            xul, yul = verts[np.argmin(verts[:,0])]
-
+        # first make sure not sitting at the top of a cell (which can shift into wrong parent cell)
+        # move to model coords
+        xul_mod, yul_mod = parent_model.modelgrid.get_local_coords(xul, yul)
+        # move away from the edge of a cell 
+        xul_mod += (delr_grid * 0.25)
+        yul_mod -= (delc_grid * 0.25)
+        # flip back to work coords
+        xul, yul = parent_model.modelgrid.get_coords(xul_mod, yul_mod)
+        # get corresponding cell
+        pi, pj = parent_model.modelgrid.intersect(xul, yul)
+        # find the vertices of that cell
+        verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
+        # flip to model space to easily locate upper left corner
+        verts_model_space = np.array([parent_model.modelgrid.get_local_coords(x,y) for x,y in verts])
+        # finally, back to world space
+        xul,yul = parent_model.modelgrid.get_coords(verts_model_space[:,0].min(),verts_model_space[:,1].max())
+        
         # adjust the dimensions to align remaining corners
         def roundup(number, increment):
             return int(np.ceil(number / increment) * increment)
