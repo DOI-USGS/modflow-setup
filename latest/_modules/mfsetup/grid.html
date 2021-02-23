@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post224+g51375ef documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post225+gb77d1ef documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post224+g51375ef
+                0.post225+gb77d1ef
               </div>
             
           
@@ -275,14 +275,18 @@
                                           <span class="n">yoff</span><span class="p">,</span> <span class="n">angrot</span><span class="p">)</span>
 
         <span class="c1"># properties</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>  <span class="c1"># pyproj crs instance created from epsg, proj_str or prj file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span> <span class="o">=</span> <span class="n">wkt</span>  <span class="c1"># well-known text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># pass all CRS representations through pyproj.CRS.from_user_input</span>
+        <span class="c1"># to convert to pyproj.CRS instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="n">prj</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="n">wkt</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="n">proj_str</span><span class="p">)</span>
+
+        <span class="c1"># other CRS-related properties are set in the flopy Grid base class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># if no epsg, set from proj4 string if possible</span>
-        <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;epsg&#39;</span> <span class="ow">in</span> <span class="n">proj_str</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">epsg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">proj_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1">#if epsg is None and proj_str is not None and &#39;epsg&#39; in proj_str.lower():</span>
+        <span class="c1">#    self.epsg = int(proj_str.split(&#39;:&#39;)[1])</span>
 
         <span class="c1"># in case the upper left corner is known but the lower left corner is not</span>
         <span class="k">if</span> <span class="n">xul</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">yul</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -370,38 +374,48 @@
         <span class="sd">&quot;&quot;&quot;pyproj.crs.CRS instance describing the coordinate reference system</span>
 <span class="sd">        for the model grid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">crs</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsg</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prj</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                    <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">wkt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wkt</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crs</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">):</span>
-            <span class="n">crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
-        <span class="c1"># if possible, have pyproj try to find the closest</span>
-        <span class="c1"># authority name and code matching the crs</span>
-        <span class="c1"># so that input from epsg codes, proj strings, and prjfiles</span>
-        <span class="c1"># results in equal pyproj_crs instances</span>
-        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">authority</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">authority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">())</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
+
+    <span class="nd">@crs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a pyproj CRS instance from various inputs</span>
+<span class="sd">        (epsg, proj string, wkt, etc.).</span>
+
+<span class="sd">        crs : obj, optional</span>
+<span class="sd">            Coordinate reference system for model grid.</span>
+<span class="sd">            A Python int, dict, str, or pyproj.crs.CRS instance</span>
+<span class="sd">            passed to the pyproj.crs.from_user_input</span>
+<span class="sd">            See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.</span>
+<span class="sd">            Can be any of:</span>
+<span class="sd">              - PROJ string</span>
+<span class="sd">              - Dictionary of PROJ parameters</span>
+<span class="sd">              - PROJ keyword arguments for parameters</span>
+<span class="sd">              - JSON string with PROJ parameters</span>
+<span class="sd">              - CRS WKT string</span>
+<span class="sd">              - An authority string [i.e. &#39;epsg:4326&#39;]</span>
+<span class="sd">              - An EPSG integer code [i.e. 4326]</span>
+<span class="sd">              - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
+<span class="sd">              - An object with a `to_wkt` method.</span>
+<span class="sd">              - A :class:`pyproj.crs.CRS` class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">epsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">proj_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj4</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_proj4</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wkt</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">(</span><span class="n">pretty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_crs_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -471,6 +485,42 @@
     <span class="s1">&#39;dy&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="mf">0.</span>
 <span class="p">}</span>
+
+
+<div class="viewcode-block" id="get_crs"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs">[docs]</a><span class="k">def</span> <span class="nf">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get a pyproj CRS instance from various CRS representations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">prj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">prj</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+            <span class="n">wkt</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="n">wkt</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">wkt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_wkt</span><span class="p">(</span><span class="n">wkt</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">proj_str</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># crs is None</span>
+        <span class="k">return</span>
+    <span class="c1"># if possible, have pyproj try to find the closest</span>
+    <span class="c1"># authority name and code matching the crs</span>
+    <span class="c1"># so that input from epsg codes, proj strings, and prjfiles</span>
+    <span class="c1"># results in equal pyproj_crs instances</span>
+    <span class="n">authority</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">authority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="o">.</span><span class="n">to_authority</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">crs</span></div>
+
+
+<div class="viewcode-block" id="get_crs_length_units"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs_length_units">[docs]</a><span class="k">def</span> <span class="nf">get_crs_length_units</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
+    <span class="n">length_units</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
+    <span class="k">if</span> <span class="s1">&#39;foot&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;feet&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">length_units</span> <span class="o">=</span> <span class="s1">&#39;feet&#39;</span>
+    <span class="k">elif</span> <span class="s1">&#39;metre&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;meter&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">length_units</span> <span class="o">=</span> <span class="s1">&#39;meters&#39;</span>
+    <span class="k">return</span> <span class="n">length_units</span></div>
 
 
 <div class="viewcode-block" id="get_ij"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_ij">[docs]</a><span class="k">def</span> <span class="nf">get_ij</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -763,28 +813,22 @@
                           <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">snap_to_NHG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                           <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">buffer</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_length_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">buffer</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                          <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">model_length_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">grid_file</span><span class="o">=</span><span class="s1">&#39;grid.json&#39;</span><span class="p">,</span>
                           <span class="n">bbox_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up model grid...&#39;</span><span class="p">)</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
     <span class="c1"># make sure crs is populated, then get CRS units for the grid</span>
-    <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
-        <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="n">prj</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="n">wkt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span>
 
-    <span class="n">grid_units</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
-    <span class="k">if</span> <span class="s1">&#39;foot&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;feet&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-        <span class="n">grid_units</span> <span class="o">=</span> <span class="s1">&#39;feet&#39;</span>
-    <span class="k">elif</span> <span class="s1">&#39;metre&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;meter&#39;</span> <span class="ow">in</span> <span class="n">grid_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-        <span class="n">grid_units</span> <span class="o">=</span> <span class="s1">&#39;meters&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="n">grid_units</span> <span class="o">=</span> <span class="n">get_crs_length_units</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">grid_units</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;feet&#39;</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">}:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unrecognized CRS units </span><span class="si">{</span><span class="n">grid_units</span><span class="si">}</span><span class="s1">: CRS must be projected in feet or meters&#39;</span><span class="p">)</span>
 
     <span class="c1"># conversions for model/parent model units to meters</span>
@@ -820,7 +864,6 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_delc_grid</span> <span class="o">%</span> <span class="n">delc_grid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inset delc spacing of </span><span class="si">{}</span><span class="s1"> must be factor of parent spacing of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">,</span>
                                                                                                       <span class="n">parent_delc_grid</span><span class="p">))</span>
-
 
 
     <span class="c1"># option 1: make grid from xoff, yoff and specified dimensions</span>
@@ -902,6 +945,8 @@
             <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">yul</span> <span class="o">-</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">L</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># initial model height from buffer distance</span>
             <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">x2</span> <span class="o">+</span> <span class="n">L</span><span class="p">)</span> <span class="o">-</span> <span class="n">xul</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
             <span class="n">rotation</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># rotation not supported with this option</span>
+            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
+            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
 
     <span class="c1"># align model with parent grid if there is a parent model</span>
     <span class="c1"># (and not snapping to national hydrologic grid)</span>
@@ -951,16 +996,18 @@
             <span class="n">grid_cfg</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_cfg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 
     <span class="c1"># add epsg or wkt if there isn&#39;t an epsg</span>
-    <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs</span>
+    <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epsg</span>
-    <span class="k">elif</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;epsg&#39;</span> <span class="ow">in</span> <span class="n">crs</span><span class="o">.</span><span class="n">srs</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-            <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">crs</span><span class="o">.</span><span class="n">srs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;wkt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">srs</span>
+    <span class="c1">#elif crs is not None:</span>
+    <span class="c1">#    if &#39;epsg&#39; in crs.srs.lower():</span>
+    <span class="c1">#        grid_cfg[&#39;epsg&#39;] = int(crs.srs.split(&#39;:&#39;)[1])</span>
+    <span class="c1">#    else:</span>
+    <span class="c1">#        grid_cfg[&#39;wkt&#39;] = crs.srs</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No coordinate system reference provided for model grid!&#39;</span>
-                      <span class="s1">&#39;Model input data may not be mapped correctly.&#39;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">((</span><span class="s2">&quot;Coordinate Reference System information must be supplied via&quot;</span>
+                      <span class="s2">&quot;the &#39;crs&#39;&#39; argument.&quot;</span><span class="p">))</span>
 
     <span class="c1"># set up the model grid instance</span>
     <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top</span>
@@ -975,6 +1022,13 @@
     <span class="c1"># (just for horizontal disc.)</span>
     <span class="k">del</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>
     <span class="k">del</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
+
+    <span class="c1"># crs needs to be cast to epsg or wkt to be serialized</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">):</span>
+        <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;wkt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span>
 
     <span class="n">fileio</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">grid_file</span><span class="p">,</span> <span class="n">grid_cfg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bbox_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -994,7 +1048,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 19, 2021.
+        Last updated on Feb 23, 2021.
       </span>
 
     </p>
