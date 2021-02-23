@@ -82,10 +82,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # set up the model configuration dictionary
         # start with the defaults
         self.cfg = load(self.source_path + self.default_file) #'/mf6_defaults.yml')
+        self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
+        # set the model workspace and change working directory to there
+        self.model_ws = self._get_model_ws(cfg=cfg)
         # update defaults with user-specified config. (loaded above)
         self._set_cfg(cfg)   # set up the model configuration dictionary
-        self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
-        self.model_ws = self._get_model_ws()
 
         # property attributes
         self._idomain = None

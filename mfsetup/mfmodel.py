@@ -674,11 +674,13 @@ class MFsetupMixin():
                                         filename_format, file_numbers=file_numbers,
                                         relative_external_paths=self.relative_external_paths)
 
-    def _get_model_ws(self):
+    def _get_model_ws(self, cfg=None):
+        if cfg is None:
+            cfg = self.cfg
         if self.version == 'mf6':
-            abspath = os.path.abspath(self.cfg.get('simulation', {}).get('sim_ws', '.'))
+            abspath = os.path.abspath(cfg.get('simulation', {}).get('sim_ws', '.'))
         else:
-            abspath = os.path.abspath(self.cfg.get('model', {}).get('model_ws', '.'))
+            abspath = os.path.abspath(cfg.get('model', {}).get('model_ws', '.'))
         if not os.path.exists(abspath):
             os.makedirs(abspath)
         self._abs_model_ws = os.path.normpath(abspath)
@@ -713,12 +715,13 @@ class MFsetupMixin():
 
         if isinstance(user_specified_cfg, str) or \
                 isinstance(user_specified_cfg, Path):
+            raise ValueError("Configuration should have already been loaded")
             # convert to an absolute path
-            user_specified_cfg = Path(user_specified_cfg).resolve()
-            assert user_specified_cfg.exists(), \
-                "config file {} not found".format(user_specified_cfg)
-            updates = load(user_specified_cfg)
-            updates['filename'] = user_specified_cfg
+            #user_specified_cfg = Path(user_specified_cfg).resolve()
+            #assert user_specified_cfg.exists(), \
+            #    "config file {} not found".format(user_specified_cfg)
+            #updates = load(user_specified_cfg)
+            #updates['filename'] = user_specified_cfg
         elif isinstance(user_specified_cfg, dict):
             updates = user_specified_cfg.copy()
         elif user_specified_cfg is None:
@@ -776,7 +779,7 @@ class MFsetupMixin():
             setattr(self, '_{}_path'.format(name), folder_path)
 
         # absolute path to config file
-        self._config_path = os.path.split(os.path.abspath(self.cfg['filename']))[0]
+        self._config_path = os.path.split(os.path.abspath(str(self.cfg['filename'])))[0]
 
         # set package keys to default dicts
         for pkg in self._package_setup_order:

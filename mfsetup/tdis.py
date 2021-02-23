@@ -450,7 +450,7 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
         and end time are specified in period_stat, the last time in datetime_column is used.
         By default, None.
     period_stat : str, list, or NoneType
-        Method for aggregating data.
+        Method for aggregating data. By default, 'mean'.
 
         * Strings will be passed to DataFrame.groupby
           as the aggregation method. For example, ``'mean'`` would result in DataFrame.groupby().mean().
