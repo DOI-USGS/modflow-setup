@@ -5,8 +5,10 @@ import fiona
 import numpy as np
 import pyproj
 import pytest
-from gisutils import shp2df
+from flopy import mf6
+from gisutils import get_authority_crs, shp2df
 
+from mfsetup import MF6model
 from mfsetup.fileio import dump, load_modelgrid
 from mfsetup.grid import (
     MFsetupGrid,
@@ -15,6 +17,8 @@ from mfsetup.grid import (
     get_point_on_national_hydrogeologic_grid,
 )
 from mfsetup.testing import point_is_on_nhg
+from mfsetup.units import convert_length_units
+from mfsetup.utils import get_input_arguments
 
 # TODO: add tests for grid.py
 
@@ -134,3 +138,41 @@ def test_get_ij(rotation):
     assert np.isscalar(pj0)
     assert pi0 == pi[0]
     assert pj0 == pj[0]
+
+
+@pytest.mark.parametrize('model_units', ('meters', 'feet'))
+@pytest.mark.parametrize('crs,expected_crs_units', ((3696, 'feet'),
+                                                    (3070, 'meters'),
+                                                    ))
+def test_grid_crs_units(crs, model_units, expected_crs_units,
+                        pleasant_mf6_cfg):
+    cfg = {}
+    cfg['simulation'] = pleasant_mf6_cfg['simulation'].copy()
+    cfg['model'] = pleasant_mf6_cfg['model'].copy()
+    cfg['setup_grid'] = pleasant_mf6_cfg['setup_grid'].copy()
+    cfg['setup_grid']['buffer'] = cfg['setup_grid']['buffer'] * \
+                                  convert_length_units('meters', expected_crs_units)
+    cfg['setup_grid']['crs'] = crs
+    # if the CRS is the same as the parent,
+    # set the parent up to so that the DIS package can be set up
+    # and conversion of delr/delc between feet/meters can be tested
+    # for now, parent model in different CRS not supported
+    if crs == 3070:
+        cfg['parent'] = pleasant_mf6_cfg['parent'].copy()
+        cfg['dis'] = pleasant_mf6_cfg['dis'].copy()
+    cfg = MF6model._parse_model_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
+                                 exclude='packages')
+    m = MF6model(cfg=cfg, **kwargs)
+    m.setup_grid()
+    # this also tests whether crs argument
+    # overrides epsg argument (in this case, 3070)
+    assert m.modelgrid.crs == get_authority_crs(crs)
+    assert m.modelgrid.length_units == expected_crs_units
+    # Note: for this test case, need parent to set up DIS
+    # can't set up parent in different CRS, so can only test delr for 3070
+    if crs == 3070:
+        m.setup_dis()
+        to_model_units = convert_length_units(m.modelgrid.length_units, m.length_units)
+        assert np.allclose(m.modelgrid.delr * to_model_units, m.dis.delr.array)
+        assert np.allclose(m.modelgrid.delc * to_model_units, m.dis.delc.array)

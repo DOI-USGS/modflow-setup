@@ -95,14 +95,18 @@ class MFsetupGrid(StructuredGrid):
                                           yoff, angrot)
 
         # properties
-        self._crs = crs  # pyproj crs instance created from epsg, proj_str or prj file
-        self._wkt = wkt  # well-known text
+        self._crs = None
+        # pass all CRS representations through pyproj.CRS.from_user_input
+        # to convert to pyproj.CRS instance
+        self.crs = get_crs(crs=crs, epsg=epsg, prj=prj, wkt=wkt, proj_str=proj_str)
+
+        # other CRS-related properties are set in the flopy Grid base class
         self._vertices = None
         self._polygons = None
 
         # if no epsg, set from proj4 string if possible
-        if epsg is None and proj_str is not None and 'epsg' in proj_str.lower():
-            self.epsg = int(proj_str.split(':')[1])
+        #if epsg is None and proj_str is not None and 'epsg' in proj_str.lower():
+        #    self.epsg = int(proj_str.split(':')[1])
 
         # in case the upper left corner is known but the lower left corner is not
         if xul is not None and yul is not None:
@@ -190,38 +194,48 @@ class MFsetupGrid(StructuredGrid):
         """pyproj.crs.CRS instance describing the coordinate reference system
         for the model grid.
         """
-        crs = None
-        if self._crs is None:
-            if self.epsg is not None:
-                crs = pyproj.CRS.from_epsg(self.epsg)
-            elif self.prj is not None:
-                with open(self.prj) as src:
-                    self._wkt = src.read()
-                    crs = pyproj.CRS.from_wkt(self._wkt)
-            elif self.wkt is not None:
-                crs = pyproj.CRS.from_wkt(self.wkt)
-            elif self.proj_str is not None:
-                crs = pyproj.CRS.from_string(self.proj_str)
-        elif not isinstance(self._crs, pyproj.crs.CRS):
-            crs = self._crs
-        # if possible, have pyproj try to find the closest
-        # authority name and code matching the crs
-        # so that input from epsg codes, proj strings, and prjfiles
-        # results in equal pyproj_crs instances
-        if crs is not None:
-            authority = crs.to_authority()
-            if authority is not None:
-                crs = pyproj.CRS.from_user_input(crs.to_authority())
-            self._crs = crs
         return self._crs
+
+    @crs.setter
+    def crs(self, crs):
+        """Get a pyproj CRS instance from various inputs
+        (epsg, proj string, wkt, etc.).
+
+        crs : obj, optional
+            Coordinate reference system for model grid.
+            A Python int, dict, str, or pyproj.crs.CRS instance
+            passed to the pyproj.crs.from_user_input
+            See http://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input.
+            Can be any of:
+              - PROJ string
+              - Dictionary of PROJ parameters
+              - PROJ keyword arguments for parameters
+              - JSON string with PROJ parameters
+              - CRS WKT string
+              - An authority string [i.e. 'epsg:4326']
+              - An EPSG integer code [i.e. 4326]
+              - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
+              - An object with a `to_wkt` method.
+              - A :class:`pyproj.crs.CRS` class
+        """
+        crs = get_crs(crs=crs)
+        self._crs = crs
+
+    @property
+    def epsg(self):
+        return self.crs.to_epsg()
 
     @property
     def proj_str(self):
-        return self.proj4
+        return self.crs.to_proj4()
 
     @property
     def wkt(self):
-        return self._wkt
+        return self.crs.to_wkt(pretty=True)
+
+    @property
+    def length_units(self):
+        return get_crs_length_units(self.crs)
 
     @property
     def vertices(self):
@@ -291,6 +305,42 @@ national_hydrogeologic_grid_parameters = {
     'dy': 1000,
     'rotation': 0.
 }
+
+
+def get_crs(crs=None, epsg=None, prj=None, wkt=None, proj_str=None):
+    """Get a pyproj CRS instance from various CRS representations.
+    """
+    if crs is not None:
+        crs = pyproj.CRS.from_user_input(crs)
+    elif epsg is not None:
+        crs = pyproj.CRS.from_epsg(epsg)
+    elif prj is not None:
+        with open(prj) as src:
+            wkt = src.read()
+            crs = pyproj.CRS.from_wkt(wkt)
+    elif wkt is not None:
+        crs = pyproj.CRS.from_wkt(wkt)
+    elif proj_str is not None:
+        crs = pyproj.CRS.from_string(proj_str)
+    else: # crs is None
+        return
+    # if possible, have pyproj try to find the closest
+    # authority name and code matching the crs
+    # so that input from epsg codes, proj strings, and prjfiles
+    # results in equal pyproj_crs instances
+    authority = crs.to_authority()
+    if authority is not None:
+        crs = pyproj.CRS.from_user_input(crs.to_authority())
+    return crs
+
+
+def get_crs_length_units(crs):
+    length_units = crs.axis_info[0].unit_name
+    if 'foot' in length_units.lower() or 'feet' in length_units.lower():
+        length_units = 'feet'
+    elif 'metre' in length_units.lower() or 'meter' in length_units.lower():
+        length_units = 'meters'
+    return length_units
 
 
 def get_ij(grid, x, y, local=False):
@@ -583,28 +633,22 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           parent_model=None, snap_to_NHG=False,
                           features=None, features_shapefile=None,
                           id_column=None, include_ids=None,
-                          buffer=1000, crs=None,
-                          epsg=None, model_length_units=None,
+                          buffer=1000,
+                          crs=None, epsg=None, prj=None, wkt=None,
+                          model_length_units=None,
                           grid_file='grid.json',
                           bbox_shapefile=None, **kwargs):
     """"""
     print('setting up model grid...')
     t0 = time.time()
+
     # make sure crs is populated, then get CRS units for the grid
-    if epsg is not None:
-        crs = pyproj.crs.CRS.from_epsg(epsg)
-    elif crs is not None:
-        from gisutils import get_authority_crs
-        crs = get_authority_crs(crs)
-    elif parent_model is not None:
+    crs = get_crs(crs=crs, epsg=epsg, prj=prj, wkt=wkt)
+    if crs is None and parent_model is not None:
         crs = parent_model.modelgrid.crs
 
-    grid_units = crs.axis_info[0].unit_name
-    if 'foot' in grid_units.lower() or 'feet' in grid_units.lower():
-        grid_units = 'feet'
-    elif 'metre' in grid_units.lower() or 'meter' in grid_units.lower():
-        grid_units = 'meters'
-    else:
+    grid_units = get_crs_length_units(crs)
+    if grid_units not in {'feet', 'meters'}:
         raise ValueError(f'unrecognized CRS units {grid_units}: CRS must be projected in feet or meters')
 
     # conversions for model/parent model units to meters
@@ -640,7 +684,6 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         if not parent_delc_grid % delc_grid == 0:
             raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_grid,
                                                                                                       parent_delc_grid))
-
 
 
     # option 1: make grid from xoff, yoff and specified dimensions
@@ -722,6 +765,8 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             height_grid = np.round(yul - (y1 - L), 4) # initial model height from buffer distance
             width_grid = np.round((x2 + L) - xul, 4)
             rotation = 0.  # rotation not supported with this option
+            nrow = int(np.ceil(height_grid / delc_grid))
+            ncol = int(np.ceil(width_grid / delr_grid))
 
     # align model with parent grid if there is a parent model
     # (and not snapping to national hydrologic grid)
@@ -771,16 +816,18 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             grid_cfg[v] = grid_cfg.pop(k)
 
     # add epsg or wkt if there isn't an epsg
-    if epsg is not None:
+    if crs is not None:
+        grid_cfg['crs'] = crs
+    elif epsg is not None:
         grid_cfg['epsg'] = epsg
-    elif crs is not None:
-        if 'epsg' in crs.srs.lower():
-            grid_cfg['epsg'] = int(crs.srs.split(':')[1])
-        else:
-            grid_cfg['wkt'] = crs.srs
+    #elif crs is not None:
+    #    if 'epsg' in crs.srs.lower():
+    #        grid_cfg['epsg'] = int(crs.srs.split(':')[1])
+    #    else:
+    #        grid_cfg['wkt'] = crs.srs
     else:
-        warnings.warn('No coordinate system reference provided for model grid!'
-                      'Model input data may not be mapped correctly.')
+        warnings.warn(("Coordinate Reference System information must be supplied via"
+                      "the 'crs'' argument."))
 
     # set up the model grid instance
     grid_cfg['top'] = top
@@ -795,6 +842,13 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     # (just for horizontal disc.)
     del grid_cfg['top']
     del grid_cfg['botm']
+
+    # crs needs to be cast to epsg or wkt to be serialized
+    if isinstance(crs, pyproj.CRS):
+        grid_cfg['epsg'] = grid_cfg['crs'].to_epsg()
+        if grid_cfg['epsg'] is None:
+            grid_cfg['wkt'] = grid_cfg['crs'].to_wkt()
+        del grid_cfg['crs']
 
     fileio.dump(grid_file, grid_cfg)
     if bbox_shapefile is not None:
