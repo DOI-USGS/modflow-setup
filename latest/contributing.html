@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Contributing to modflow-setup &mdash; modflow-setup 0.post225+gb77d1ef documentation</title>
+  <title>Contributing to modflow-setup &mdash; modflow-setup 0.post228+g83489af documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.post225+gb77d1ef
+                0.post228+g83489af
               </div>
             
           
@@ -358,7 +358,7 @@ version (which you may break while playing with code) in another.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">cd</span></code> to the <em>modflow-setup*</em> source directory</p></li>
 </ul>
 <p>Tell conda to create a new environment, named <code class="docutils literal notranslate"><span class="pre">modflow-setup_dev</span></code>, that has all of the python packages needed to contribute to modflow-setup. Note that in the <a class="reference external" href="https://geopandas.org/contributing.html">geopandas instructions</a>, this step is broken into two parts- 2) creating the environment, and 3) installing the dependencies. By using a yaml file that includes the environment name and package requirements, these two steps can be combined:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">yml</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">requirements</span><span class="o">-</span><span class="n">dev</span><span class="o">.</span><span class="n">yml</span>
 </pre></div>
 </div>
 <p>This will create the new environment, and not touch any of your existing environments,
@@ -383,9 +383,13 @@ indicate you are in the new development environment.</p>
 </div>
 <div class="section" id="installing-the-modflow-setup-source-code">
 <h2>4) Installing the modflow-setup source code<a class="headerlink" href="#installing-the-modflow-setup-source-code" title="Permalink to this headline">¶</a></h2>
-<p>Once dependencies are in place, install the modflow-setup source code by navigating to the gitclone of the <em>modflow-setup</em> repository and (with the <code class="docutils literal notranslate"><span class="pre">modflow-setup_dev</span></code> environment activated) running:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+<p>Once dependencies are in place, install the modflow-setup source code by navigating to the git clone of the <em>modflow-setup</em> repository and (with the <code class="docutils literal notranslate"><span class="pre">modflow-setup_dev</span></code> environment activated) running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Don’t forget the <code class="docutils literal notranslate"><span class="pre">.</span></code> after <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span></code>!</p>
 </div>
 </div>
 <div class="section" id="making-changes-and-writing-tests">
@@ -479,7 +483,7 @@ can be done by installing <code class="docutils literal notranslate"><span class
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 23, 2021.
+        Last updated on Feb 24, 2021.
       </span>
 
     </p>

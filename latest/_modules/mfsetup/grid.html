@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post225+gb77d1ef documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post228+g83489af documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post225+gb77d1ef
+                0.post228+g83489af
               </div>
             
           
@@ -865,7 +865,6 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;inset delc spacing of </span><span class="si">{}</span><span class="s1"> must be factor of parent spacing of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">,</span>
                                                                                                       <span class="n">parent_delc_grid</span><span class="p">))</span>
 
-
     <span class="c1"># option 1: make grid from xoff, yoff and specified dimensions</span>
     <span class="k">if</span> <span class="n">xoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">yoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">nrow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ncol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> \
@@ -892,8 +891,8 @@
         <span class="k">if</span> <span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">rotation_rads</span> <span class="o">=</span> <span class="n">rotation</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
             <span class="c1"># note rotating around xoff,yoff not the origin!</span>
-            <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span> <span class="o">-</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
-            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
+            <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span> <span class="o">-</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
+            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span>
             <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_grid</span>
@@ -953,21 +952,38 @@
     <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">snap_to_NHG</span><span class="p">:</span>
 
         <span class="c1"># get location of coinciding cell in parent model for upper left</span>
+        <span class="c1"># first make sure not sitting at the top of a cell (which can shift into wrong parent cell)</span>
+        <span class="c1"># move to model coords</span>
+        <span class="n">xul_mod</span><span class="p">,</span> <span class="n">yul_mod</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_local_coords</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
+        <span class="c1"># move away from the edge of a cell</span>
+        <span class="n">xul_mod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">delr_grid</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span>
+        <span class="n">yul_mod</span> <span class="o">-=</span> <span class="p">(</span><span class="n">delc_grid</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span>
+        <span class="c1"># flip back to work coords</span>
+        <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">xul_mod</span><span class="p">,</span> <span class="n">yul_mod</span><span class="p">)</span>
+        <span class="c1"># get corresponding cell</span>
         <span class="n">pi</span><span class="p">,</span> <span class="n">pj</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
+        <span class="c1"># find the vertices of that cell</span>
         <span class="n">verts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_cell_vertices</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="n">pj</span><span class="p">))</span>
-        <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">verts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">verts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="c1"># flip to model space to easily locate upper left corner</span>
+        <span class="n">verts_model_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_local_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">verts</span><span class="p">])</span>
+        <span class="c1"># finally, back to world space</span>
+        <span class="n">xul</span><span class="p">,</span><span class="n">yul</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">verts_model_space</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">verts_model_space</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
         <span class="c1"># adjust the dimensions to align remaining corners</span>
         <span class="k">def</span> <span class="nf">roundup</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">increment</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">number</span> <span class="o">/</span> <span class="n">increment</span><span class="p">)</span> <span class="o">*</span> <span class="n">increment</span><span class="p">)</span>
-        <span class="n">height</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">height_grid</span><span class="p">,</span> <span class="n">parent_delr_grid</span><span class="p">)</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">width_grid</span><span class="p">,</span> <span class="n">parent_delc_grid</span><span class="p">)</span>
+        <span class="n">height_grid</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">height_grid</span><span class="p">,</span> <span class="n">parent_delr_grid</span><span class="p">)</span>
+        <span class="n">width_grid</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">width_grid</span><span class="p">,</span> <span class="n">parent_delc_grid</span><span class="p">)</span>
 
         <span class="c1"># update nrow, ncol after snapping to parent grid</span>
         <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
-            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">)</span> <span class="c1"># h is in meters</span>
-            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">)</span>
+            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">)</span> <span class="c1"># h is in meters</span>
+            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">xoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xoff</span> <span class="o">=</span> <span class="n">xul</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation</span><span class="p">))</span> <span class="o">*</span> <span class="n">height_grid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">yoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">yoff</span> <span class="o">=</span> <span class="n">yul</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation</span><span class="p">))</span> <span class="o">*</span> <span class="n">height_grid</span><span class="p">)</span>
     <span class="c1"># set the grid configuration dictionary</span>
     <span class="c1"># spacing is in meters (consistent with projected CRS)</span>
     <span class="c1"># (modelgrid object will be updated automatically from this dictionary)</span>
@@ -1048,7 +1064,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Feb 23, 2021.
+        Last updated on Feb 24, 2021.
       </span>
 
     </p>
