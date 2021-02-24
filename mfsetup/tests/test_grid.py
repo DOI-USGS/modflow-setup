@@ -6,10 +6,11 @@ import numpy as np
 import pyproj
 import pytest
 from flopy import mf6
+from flopy.utils.mfreadnam import attribs_from_namfile_header
 from gisutils import get_authority_crs, shp2df
 
 from mfsetup import MF6model
-from mfsetup.fileio import dump, load_modelgrid
+from mfsetup.fileio import dump, load, load_modelgrid
 from mfsetup.grid import (
     MFsetupGrid,
     get_ij,
@@ -20,7 +21,6 @@ from mfsetup.testing import point_is_on_nhg
 from mfsetup.units import convert_length_units
 from mfsetup.utils import get_input_arguments
 
-# TODO: add tests for grid.py
 
 @pytest.fixture(scope='module')
 def modelgrid():
@@ -176,3 +176,62 @@ def test_grid_crs_units(crs, model_units, expected_crs_units,
         to_model_units = convert_length_units(m.modelgrid.length_units, m.length_units)
         assert np.allclose(m.modelgrid.delr * to_model_units, m.dis.delr.array)
         assert np.allclose(m.modelgrid.delc * to_model_units, m.dis.delc.array)
+
+
+def check_grid(m):
+    xll = m.modelgrid.xyzvertices[0][-1][0]
+    xul = m.modelgrid.xyzvertices[0][0][0]
+    yll = m.modelgrid.xyzvertices[1][-1][0]
+    yul = m.modelgrid.xyzvertices[1][0][0]
+    if m.modelgrid.rotation == 0:
+        l, b, r, t = m.modelgrid.bounds
+        assert xll == l == xul
+        assert yll == b
+        assert yul == t
+        assert m.modelgrid.xyzvertices[0][-1][-1] == r
+    assert m.modelgrid.xoffset == xll
+    assert m.modelgrid.yoffset == yll
+    assert m.modelgrid.xul == xul
+    assert m.modelgrid.yul == yul
+    gridjson = load(m.cfg['setup_grid']['grid_file'])
+    assert gridjson['xoff'] == xll
+    assert gridjson['yoff'] == yll
+    assert gridjson['xul'] == xul
+    assert gridjson['yul'] == yul
+    fp_info = attribs_from_namfile_header(m.namefile)
+    if fp_info['xll'] is not None:
+        assert fp_info['xll'] == xll
+        assert fp_info['yll'] == yll
+    if fp_info['xul'] is not None:
+        assert fp_info['xul'] == xul
+        assert fp_info['yul'] == yul
+
+
+def test_grid_corners(basic_model_instance, project_root_path):
+    """Test grid corner locations with plainfield nwt,
+    pleasant nwt and pleasnt mf6 test cases. All have model
+    grids based on a buffer around feature of interest,
+    snapped to parent model grid.
+    """
+    m = basic_model_instance
+    os.chdir(m._abs_model_ws)
+    m.setup_grid()
+    if m.version == 'mf6':
+        m.setup_tdis()
+        m.write_input()
+    else:
+        m.write_name_file()
+    check_grid(m)
+    os.chdir(project_root_path)
+
+
+def test_grid_corners_sm(shellmound_model_with_grid):
+    """Test model grid corner locations for shellmound model,
+    which is different from basic_model_instance models in that
+    it has no parent, grid is specified from xoff, yoff
+    and is snapped to NHG.
+    """
+    m = shellmound_model_with_grid
+    m.setup_tdis()
+    m.write_input()
+    check_grid(m)

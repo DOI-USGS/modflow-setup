@@ -685,7 +685,6 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_grid,
                                                                                                       parent_delc_grid))
 
-
     # option 1: make grid from xoff, yoff and specified dimensions
     if xoff is not None and yoff is not None:
         assert nrow is not None and ncol is not None, \
@@ -712,8 +711,8 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         if rotation != 0:
             rotation_rads = rotation * np.pi/180
             # note rotating around xoff,yoff not the origin!
-            xul = xoff - (height_grid)*np.sin(rotation_rads)
-            yul = yoff + (height_grid)*np.cos(rotation_rads)
+            xul = xoff - (height_grid) * np.sin(rotation_rads)
+            yul = yoff + (height_grid) * np.cos(rotation_rads)
         else:
             xul = xoff
             yul = yoff + height_grid
@@ -776,7 +775,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         # first make sure not sitting at the top of a cell (which can shift into wrong parent cell)
         # move to model coords
         xul_mod, yul_mod = parent_model.modelgrid.get_local_coords(xul, yul)
-        # move away from the edge of a cell 
+        # move away from the edge of a cell
         xul_mod += (delr_grid * 0.25)
         yul_mod -= (delc_grid * 0.25)
         # flip back to work coords
@@ -789,18 +788,22 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         verts_model_space = np.array([parent_model.modelgrid.get_local_coords(x,y) for x,y in verts])
         # finally, back to world space
         xul,yul = parent_model.modelgrid.get_coords(verts_model_space[:,0].min(),verts_model_space[:,1].max())
-        
+
         # adjust the dimensions to align remaining corners
         def roundup(number, increment):
             return int(np.ceil(number / increment) * increment)
-        height = roundup(height_grid, parent_delr_grid)
-        width = roundup(width_grid, parent_delc_grid)
+        height_grid = roundup(height_grid, parent_delr_grid)
+        width_grid = roundup(width_grid, parent_delc_grid)
 
         # update nrow, ncol after snapping to parent grid
         if regular:
-            nrow = int(height / delc_grid) # h is in meters
-            ncol = int(width / delr_grid)
+            nrow = int(height_grid / delc_grid) # h is in meters
+            ncol = int(width_grid / delr_grid)
 
+    if xoff is None:
+        xoff = xul + (np.sin(np.radians(rotation)) * height_grid)
+    if yoff is None:
+        yoff = yul - (np.cos(np.radians(rotation)) * height_grid)
     # set the grid configuration dictionary
     # spacing is in meters (consistent with projected CRS)
     # (modelgrid object will be updated automatically from this dictionary)
