@@ -147,9 +147,15 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     # verify that the first reaches are headwaters
     outreaches = set(m.sfrdata.reach_data.outreach)
     assert not any(set(to_parent.values()).intersection(outreaches))
-    # this is overly specific,
-    # and will break if the sfr package (inset extent, grid spacing, etc.) changes
-    assert to_parent == {23: 8, 25: 1}
+    # the to_parent == {inset_reach: parent_reach, ...}
+    # will break if the sfr package (inset extent, grid spacing, etc.) changes
+    # if the grid changes and breaks this test
+    # to figure out if to_parent is right,
+    # run the test, then from the project root folder, go to
+    # examples/pleasant_lgr/postproc/shps
+    # plot the shapefiles in a GIS environment to verify the connections in to_parent
+    # {inset_reach: parent_reach, ...}
+    assert to_parent == {23: 10, 25: 1}
 
 
 def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
