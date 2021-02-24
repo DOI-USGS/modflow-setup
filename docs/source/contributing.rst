@@ -158,7 +158,7 @@ An easy way to create a *modflow-setup* development environment is as follows:
 
 Tell conda to create a new environment, named ``modflow-setup_dev``, that has all of the python packages needed to contribute to modflow-setup. Note that in the `geopandas instructions <https://geopandas.org/contributing.html>`_, this step is broken into two parts- 2) creating the environment, and 3) installing the dependencies. By using a yaml file that includes the environment name and package requirements, these two steps can be combined::
 
-      conda env create -f environment-dev.yml
+      conda env create -f requirements-dev.yml
 
 This will create the new environment, and not touch any of your existing environments,
 nor any existing python installation.
@@ -187,10 +187,12 @@ At this point you can easily do a *development* install, as detailed in the next
 4) Installing the modflow-setup source code
 ------------------------------------------------------
 
-Once dependencies are in place, install the modflow-setup source code by navigating to the gitclone of the *modflow-setup* repository and (with the ``modflow-setup_dev`` environment activated) running::
+Once dependencies are in place, install the modflow-setup source code by navigating to the git clone of the *modflow-setup* repository and (with the ``modflow-setup_dev`` environment activated) running::
 
-    python install -e .
+    pip install -e .
 
+.. note::
+    Don't forget the ``.`` after ``pip install -e``!
 
 5) Making changes and writing tests
 -------------------------------------
