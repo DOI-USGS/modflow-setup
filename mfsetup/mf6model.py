@@ -1029,7 +1029,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         files += [p.filename for p in self.packagelist]
         files += [p.filename for k, p in self.simulation.package_key_dict.items()]
         for f in files:
-            add_version_to_fileheader(f, model_info=self.header)
+            add_version_to_fileheader(os.path.join(self.cfg['simulation']['sim_ws'],f), model_info=self.header)
 
     @staticmethod
     def _parse_model_kwargs(cfg):
