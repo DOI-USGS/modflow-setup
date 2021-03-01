@@ -882,7 +882,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
             ext = Path(f).suffix
             if ext in {'.hyd', '.gag', '.gage'}:
                 continue
-            add_version_to_fileheader(f, model_info=self.header)
+            add_version_to_fileheader(os.path.join(self.cfg['simulation']['sim_ws'],f), model_info=self.header)
 
     @staticmethod
     def _parse_model_kwargs(cfg):
