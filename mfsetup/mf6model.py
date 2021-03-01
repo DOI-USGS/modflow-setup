@@ -1020,7 +1020,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # label stress periods in tdis file with comments
         self.perioddata.sort_values(by='per', inplace=True)
-        add_date_comments_to_tdis(self.simulation.tdis.filename,
+        add_date_comments_to_tdis(os.path.join(self.cfg['simulation']['sim_ws'],
+                                               self.simulation.tdis.filename),
                                   self.perioddata.start_datetime,
                                   self.perioddata.end_datetime
                                   )
@@ -1029,7 +1030,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         files += [p.filename for p in self.packagelist]
         files += [p.filename for k, p in self.simulation.package_key_dict.items()]
         for f in files:
-            add_version_to_fileheader(f, model_info=self.header)
+            add_version_to_fileheader(os.path.join(self.cfg['simulation']['sim_ws'],f), model_info=self.header)
 
     @staticmethod
     def _parse_model_kwargs(cfg):
