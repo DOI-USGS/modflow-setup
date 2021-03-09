@@ -3,7 +3,6 @@ model:
   model_ws: '../tmp/pfl_inset/'
   exe_name: 'mfnwt'
   external_path: 'external/'
-  perimeter_boundary_type: 'specified head'
   # list file path is relative to model_ws
   list_filename_fmt: 'external/{}.list'
   packages: ['dis',
@@ -16,14 +15,14 @@ model:
              'mnw2',
              'hyd',
              'gag',
-             'nwt'
+             'nwt',
+             'chd'
   ]
 
 parent:
   namefile: 'pfl.nam'
   model_ws: 'plainfieldlakes/'
   version: 'mfnwt'
-  headfile: 'plainfieldlakes/pfl.hds'
   hiKlakes_value: 1.e4
   copy_stress_periods: 'all'
 
@@ -189,3 +188,7 @@ hyd:
                 'plainfieldlakes/source_data/uwsp_heads.csv'
                 ]
     name_column:
+
+chd:
+  perimeter_boundary:
+    parent_head_file: 'plainfieldlakes/pfl.hds'

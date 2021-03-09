@@ -12,6 +12,7 @@ mf6 = flopy.mf6
 from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
 
+from mfsetup.bcs import setup_flopy_stress_period_data
 from mfsetup.discretization import (
     ModflowGwfdis,
     create_vertical_pass_through_cells,
@@ -77,7 +78,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         self._is_lgr = lgr
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
-                                     'ghb', 'sfr', 'lak', 'riv',
+                                     'chd', 'ghb', 'sfr', 'lak', 'riv',
                                      'wel', 'maw', 'obs']
         # set up the model configuration dictionary
         # start with the defaults
@@ -795,6 +796,69 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return riv
 
+    def setup_chd(self):
+        """
+        Sets up the CHD package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'chd'
+        print('\nSetting up {} package...'.format(package.upper()))
+        t0 = time.time()
+        package_config = self.cfg[package]
+
+        # option to write stress_period_data to external files
+        external_files = package_config['external_files']
+
+        # perimeter boundary
+        if 'perimeter_boundary' in package_config:
+            perimeter_cfg = package_config['perimeter_boundary']
+            perimeter_cfg['boundary_type'] = 'head'
+            if 'inset_parent_period_mapping' not in perimeter_cfg:
+                perimeter_cfg['inset_parent_period_mapping'] = self.parent_stress_periods
+            if 'parent_start_time' not in perimeter_cfg:
+                perimeter_cfg['parent_start_date_time'] = self.parent.perioddata['start_datetime'][0]
+            self.tmr = TmrNew(self.parent, self, **perimeter_cfg)
+            perimeter_df = self.tmr.get_inset_boundary_values()
+
+            # add boundname to allow boundary flux to be tracked as observation
+            perimeter_df['boundname'] = 'perimeter-heads'
+
+            # get the stress period data
+            # this also sets up the external file paths
+            spd = setup_flopy_stress_period_data(self, package, perimeter_df,
+                                                 flopy_package_class=mf6.ModflowGwfchd,
+                                                 variable_column='head',
+                                                 external_files=external_files,
+                                                 external_filename_fmt=package_config['external_filename_fmt'])
+
+        # placeholder for setting up user-specified CHD cells from CSV data
+        # todo: support for non-perimeter chd cells
+        df = pd.DataFrame()  # insert function here to get csv data into dataframe
+        if len(df) == 0:
+            print('No other CHD input specified')
+            if 'perimeter_boundary' not in package_config:
+                return
+
+        kwargs = self.cfg[package].copy()
+        kwargs.update(self.cfg[package]['options'])
+        if not external_files:
+            kwargs['stress_period_data'] = spd
+
+        # add observation for flux thru perimeter heads
+        if 'perimeter_boundary' in package_config:
+            kwargs['observations'] = {f'{self.name}.chd.obs.output.csv':
+                                          [('perimeter-heads', 'chd', 'perimeter-heads')]}
+        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfchd)
+        chd = mf6.ModflowGwfchd(self, **kwargs)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return chd
+
     def setup_obs(self):
         """
         Sets up the OBS utility.
@@ -933,56 +997,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 return mvr
         else:
             print("no packages with mover information\n")
-
-    def setup_perimeter_boundary(self):
-        """Set up constant head package for perimeter boundary.
-        TODO: integrate perimeter boundary with wel package setup
-        """
-        package = 'chd'
-        print('setting up specified head perimeter boundary with CHD package...')
-        t0 = time.time()
-
-        # option to write stress_period_data to external files
-        external_files = self.cfg[package]['external_files']
-
-        tmr = TmrNew(self.parent, self,
-                     parent_head_file=self.cfg['parent']['headfile'],
-                     #inset_parent_layer_mapping=self.parent_layers,
-                     inset_parent_period_mapping=self.parent_stress_periods)
-
-        df = tmr.get_inset_boundary_values(for_external_files=external_files)
-        #df = tmr.get_inset_boundary_heads(for_external_files=external_files)
-
-        if external_files:
-            # get the file path (allowing for different external file locations, specified name format, etc.)
-            filename_format = package + '_{:03d}.dat'  # stress period suffix
-            filepaths = self.setup_external_filepaths(package, 'stress_period_data',
-                                                      filename_format=filename_format,
-                                                      file_numbers=sorted(df.per.unique().tolist()))
-
-        spd = {}
-        by_period = df.groupby('per')
-        for kper, df_per in by_period:
-            if external_files:
-                df_per.rename(columns={'bhead': 'head'}, inplace=True)
-                df_per.drop('per', axis=1, inplace=True)
-                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
-                # make a copy for the intermediate data folder, for consistency with mf-2005
-                shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
-            else:
-                maxbound = len(df_per)
-                spd[kper] = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=maxbound)[0]
-                spd[kper]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
-                spd[kper]['head'] = df_per['bhead']
-
-        kwargs = self.cfg['chd']
-        kwargs.update(self.cfg['chd']['options'])
-        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfchd)
-        if not external_files:
-            kwargs['stress_period_data'] = spd
-        chd = mf6.ModflowGwfchd(self, **kwargs)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
-        return chd
 
     def write_input(self):
         """Write the model input.

@@ -1,10 +1,13 @@
 import os
+from pathlib import Path
 
 import flopy
 import numpy as np
 import pandas as pd
 import pytest
 from flopy import mf6 as mf6
+from flopy.utils import binaryfile as bf
+from scipy.interpolate import griddata
 
 from mfsetup import MF6model
 from mfsetup.fileio import exe_exists, load_array, load_cfg
@@ -104,10 +107,57 @@ def shellmound_tmr_model_setup_and_run(shellmound_tmr_model_setup, mf6_exe):
     return m
 
 
-def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis):
+def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):
     m = shellmound_tmr_model_with_dis
-    chd = m.setup_perimeter_boundary()
-    j=2
+    chd = m.setup_chd()
+
+    ra = chd.stress_period_data.array[0]
+    kh, ih, jh = zip(*ra['cellid'])
+    # all specified heads should be active
+    assert np.all(m.idomain[kh, ih, jh] > 0)
+    assert len(set(ra['cellid'])) == len(ra)
+
+    bcells = m.tmr.inset_boundary_cells.copy()
+    k, i, j = bcells.k.values, bcells.i.values, bcells.j.values
+    bcells['idomain'] = m.idomain[k, i, j]
+    bcells['botm'] = m.dis.botm.array[k, i, j]
+
+    # get the parent head values
+    hdsobj = bf.HeadFile(m.tmr.parent_head_file, precision='double')
+    parent_heads = hdsobj.get_data(kstpkper=(0, 0))
+
+    # x, y, z locations of parent model head values
+    px, py, pz = m.tmr.parent_xyzcellcenters
+
+    # x, y, z locations of inset model boundary cells
+    x, y, z = bcells[['x', 'y', 'z']].T.values
+
+    # interpolate inset boundary heads from 3D parent head solution
+    bheads = griddata((px, py, pz), parent_heads.ravel(),
+                      (x, y, z), method='linear')
+    bcells['bhead'] = bheads
+    # only include valid heads, for cells that are active and not above the water table
+    valid = (bcells['bhead'] < 1e10) & (bcells['bhead'] > -1e10) & \
+            (bcells['idomain'] > 0) & (bcells['bhead'] > bcells['botm'])
+
+    # valid bcells derived above should have same collection of cell numbers
+    # as recarray in constant head package
+    assert len(set(bcells.loc[valid, 'cellid'])) == len(ra)
+
+    # additional code to generate layers for visual comparison in a GIS environment
+    export_layers = False
+    if export_layers:
+        from mfexport import export, export_array
+        export(m, m.modelgrid, 'chd', pdfs=False, output_path=tmpdir)
+        export(m, m.modelgrid, 'dis', 'idomain', pdfs=False, output_path=tmpdir)
+        max_extent = np.sum(m.idomain == 1, axis=0) > 0
+        rpath = Path(tmpdir, 'shellmound_tmr_inset/rasters')
+        rpath.mkdir(parents=True, exist_ok=True)
+        export_array(rpath / 'max_idm_extent.tif',
+                     max_extent, modelgrid=m.modelgrid)
+        parent_max_extent = np.sum(m.parent.dis.idomain.array == 1, axis=0) > 0
+        export_array(rpath / 'parent_max_idm_extent.tif',
+                     parent_max_extent, modelgrid=m.parent.modelgrid)
 
 
 def test_set_parent_model(shellmound_tmr_model_with_dis):
@@ -132,9 +182,10 @@ def test_sfr_riv_setup(shellmound_tmr_model_with_dis):
     assert 'Yazoo River' in rivdata.name.unique()
 
 
+@pytest.mark.skip(reason="still working on this one")
 def test_perimeter_boundary(shellmound_tmr_model_with_dis):
     m = shellmound_tmr_model_with_dis
-    m.setup_perimeter_boundary()
+    m.setup_chd()
 
 
 def test_model_setup(shellmound_tmr_model_setup):

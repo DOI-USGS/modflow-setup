@@ -1,11 +1,14 @@
 import os
 import time
+from pathlib import Path
 
 import flopy
+import geopandas as gp
+import numpy as np
 import pandas as pd
+from shapely.geometry import MultiLineString
 
 fm = flopy.modflow
-import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
 from scipy.interpolate import griddata
@@ -681,18 +684,18 @@ class Tmr:
 
             # drop heads in dry cells, but only in mf6
             # too much trouble with interpolated heads in mf2005
-            bhead = regridded[k, i, j]
+            head = regridded[k, i, j]
             if self.inset.version == 'mf6':
-                wet = bhead > self.inset.dis.botm.array[k, i, j]
+                wet = head > self.inset.dis.botm.array[k, i, j]
             else:
-                wet = np.ones(len(bhead)).astype(bool)
+                wet = np.ones(len(head)).astype(bool)
 
             # make a DataFrame of regridded heads at perimeter cell locations
             df = pd.DataFrame({'per': inset_per,
                                'k': k[wet],
                                'i': i[wet],
                                'j': j[wet],
-                               'bhead': bhead[wet]
+                               'head': head[wet]
                                })
             dfs.append(df)
         df = pd.concat(dfs)
@@ -889,17 +892,22 @@ class TmrNew:
     def __init__(self, parent_model, inset_model,
                  parent_head_file=None, parent_cell_budget_file=None,
                  boundary_type=None, inset_parent_period_mapping=None,
-                 define_connections_by='max_active_extent'
+                 parent_start_date_time=None,
+                 define_connections_by='max_active_extent',
+                 shapefile=None,
                  ):
         self.parent = parent_model
         self.inset = inset_model
         self.parent_head_file = parent_head_file
         self.parent_cell_budget_file = parent_cell_budget_file
         self.define_connections_by = define_connections_by
+        self.shapefile = shapefile
+        self.boundary_type = boundary_type
         if boundary_type is None and parent_head_file is not None:
             self.boundary_type = 'head'
         elif boundary_type is None and parent_cell_budget_file is not None:
             self.boundary_type = 'flux'
+        self.parent_start_date_time = parent_start_date_time
 
         # properties
         self._idomain = None
@@ -953,7 +961,7 @@ class TmrNew:
         py = np.tile(py.ravel(), nlay)
         return px, py, pz.ravel()
 
-    def get_inset_boundary_cells(self, by_layer=False):
+    def get_inset_boundary_cells(self, by_layer=False, shapefile=None):
         """Get a dataframe of connection information for
         horizontal boundary cells.
 
@@ -967,6 +975,42 @@ class TmrNew:
             (including all cell locations with at least one layer that
             is active).
         """
+        if shapefile:
+            perimeter = gp.read_file(shapefile)
+            # reproject the perimeter shapefile to the model CRS if needed
+            if perimeter.crs != self.inset.modelgrid.crs:
+                perimeter.to_crs(self.inset.modelgrid.crs, inplace=True)
+            # convert polygons to linear rings
+            # (so just the cells along the polygon exterior are selected)
+            geoms = []
+            for g in perimeter.geometry:
+                if g.type == 'MultiPolygon':
+                    g = MultiLineString([p.exterior for p in g.geoms])
+                elif g.type == 'Polygon':
+                    g = g.exterior
+                geoms.append(g)
+            # add a buffer of 1 cell width so that cells aren't missed
+            # extra cells will get culled later
+            # when only cells along the outer perimeter (max idomain extent)
+            # are selected
+            buffer_dist = np.mean([self.inset.modelgrid.delr.mean(),
+                                   self.inset.modelgrid.delc.mean()])
+            perimeter['geometry'] = [g.buffer(buffer_dist * 0.5) for g in geoms]
+            grid_df = self.inset.modelgrid.get_dataframe(layers=False)
+            df = gp.sjoin(grid_df, perimeter, op='intersects', how='inner')
+            # add layers
+            dfs = []
+            for k in range(self.inset.nlay):
+                kdf = df.copy()
+                kdf['k'] = k
+                dfs.append(kdf)
+            specified_bcells = pd.concat(dfs)
+            # get the active extent in each layer
+            # and the cell faces along the edge
+            # apply those cell faces to specified_bcells
+            by_layer = True
+        else:
+            specified_bcells = None
         if not by_layer:
             max_active_area = np.sum(self.idomain == 1, axis=0) > 0
             max_active_area = max_active_area.astype(int)
@@ -979,9 +1023,6 @@ class TmrNew:
             # so that they reflect positions in the non-padded array
             df['i'] -= 1
             df['j'] -= 1
-            # drop inactive cells
-            isactive = self.idomain[df.k, df.i, df.j] == 1
-            df = df.loc[isactive]
         else:
             dfs = []
             for k, layer_idomain in enumerate(self.idomain):
@@ -1007,14 +1048,42 @@ class TmrNew:
                 dfs.append(df)
             df = pd.concat(dfs)
 
-        # add layer top and bottom information
+            # cull the boundary cells identified above
+            # with the sobel filter on the outer perimeter
+            # to just the cells specified in the shapefile
+            if specified_bcells is not None:
+                df['cellid'] = list(zip(df.k, df.i, df.j))
+                specified_bcells['cellid'] = list(zip(specified_bcells.k, specified_bcells.i, specified_bcells.j))
+                df = df.loc[df.cellid.isin(specified_bcells.cellid)]
+
+        # add layer top and bottom and idomain information
         layer_tops = np.stack([self.inset.dis.top.array] +
                               [l for l in self.inset.dis.botm.array])[:-1]
         df['top'] = layer_tops[df.k, df.i, df.j]
         df['botm'] = self.inset.dis.botm.array[df.k, df.i, df.j]
+        df['idomain'] = 1
+        if self.inset.version == 'mf6':
+            df['idomain'] = self.inset.dis.idomain.array[df.k, df.i, df.j]
+        elif 'BAS6' in self.inset.get_package_list():
+            df['idomain'] = self.inset.bas6.ibound.array[df.k, df.i, df.j]
+        df = df[['k', 'i', 'j', 'cellface', 'top', 'botm', 'idomain']]
+        # drop inactive cells
+        df = df.loc[df['idomain'] > 0]
+
+        # get cell polygons from modelgrid
+        # write shapefile of boundary cells with face information
+        grid_df = self.inset.modelgrid.dataframe.copy()
+        grid_df['cellid'] = list(zip(grid_df.k, grid_df.i, grid_df.j))
+        geoms = dict(zip(grid_df['cellid'], grid_df['geometry']))
+        if 'cellid' not in df.columns:
+            df['cellid'] = list(zip(df.k, df.i, df.j))
+        df['geometry'] = [geoms[cellid] for cellid in df.cellid]
+        df = gp.GeoDataFrame(df, crs=self.inset.modelgrid.crs)
+        outshp = Path(self.inset._tables_path, 'boundary_cells.shp')
+        df.drop('cellid', axis=1).to_file(outshp)
         return df
 
-    def get_inset_boundary_values(self, for_external_files=True):
+    def get_inset_boundary_values(self, for_external_files=False):
 
         if self.boundary_type == 'head':
             check_source_files([self.parent_head_file])
@@ -1042,17 +1111,20 @@ class TmrNew:
                 x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
 
                 # interpolate inset boundary heads from 3D parent head solution
-                bheads = griddata((px, py, pz), parent_heads.ravel(),
+                heads = griddata((px, py, pz), parent_heads.ravel(),
                                   (x, y, z), method='linear')
 
                 # make a DataFrame of interpolated heads at perimeter cell locations
                 df = self.inset_boundary_cells.copy()
                 df['per'] = inset_per
-                df['bhead'] = bheads
+                df['head'] = heads
                 # boundary heads must be greater than the cell bottom
-                df = df.loc[df['bhead'] > df['botm']]
+                # and idomain > 0
+                loc = (df['head'] > df['botm']) & (df['idomain'] > 0)
+                df = df.loc[loc]
                 # drop invalid heads (most likely due to dry cells)
-                df = df.loc[df['bhead'] < 1e10]
+                valid = (df['head'] < 1e10) & (df['head'] > -1e10)
+                df = df.loc[valid]
                 dfs.append(df)
             df = pd.concat(dfs)
 
@@ -1061,7 +1133,7 @@ class TmrNew:
             #  and therefore would be listed twice)
             df['cellid'] = list(zip(df.per, df.k, df.i, df.j))
             duplicates = df.duplicated(subset='cellid')
-            df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'bhead']]
+            df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'head']]
 
         # convert to one-based and comment out header if df will be written straight to external file
         if for_external_files:
