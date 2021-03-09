@@ -110,6 +110,7 @@ class MFsetupMixin():
         self.inset = None  # dictionary of inset models attached to LGR parent
         self._is_lgr = False  # flag for lgr inset models
         self.lgr = None  # holds flopy Lgr utility object
+        self.tmr = None  # holds TMR class instance for TMR-type perimeter boundaries
         self._load = False  # whether model is being made or loaded from existing files
         self.lake_info = None
         self.lake_fluxes = None
@@ -1574,10 +1575,6 @@ class MFsetupMixin():
 
         # set up all of the packages specified in the config file
         m.setup_packages(reset_existing=False)
-
-        # perimter boundary for TMR model
-        if m.perimeter_bc_type == 'head':
-            chd = m.setup_perimeter_boundary()
 
         # LGR inset model(s)
         if m.inset is not None:

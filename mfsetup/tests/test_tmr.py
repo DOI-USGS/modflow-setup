@@ -1,3 +1,11 @@
+"""
+Tests for the tmr.py module
+
+Notes
+-----
+Some relevant tests are also in the following modules
+test_mf6_tmr_shellmound.py
+"""
 from pathlib import Path
 
 import numpy as np
@@ -7,6 +15,15 @@ from flopy.utils import binaryfile as bf
 from mfsetup.discretization import get_layer
 from mfsetup.grid import get_ij
 from mfsetup.tmr import Tmr, TmrNew
+
+from .test_mf6_tmr_shellmound import (
+    shellmound_tmr_cfg,
+    shellmound_tmr_cfg_path,
+    shellmound_tmr_model,
+    shellmound_tmr_model_with_dis,
+    shellmound_tmr_model_with_grid,
+    shellmound_tmr_simulation,
+)
 
 
 # fixture to feed multiple model fixtures to a test
@@ -102,3 +119,44 @@ def test_tmr_new(pleasant_model):
                   ['#k', 'i', 'j', 'per', 'bhead'])
     # indices should be one-based (written directly to external files)
     assert results['#k'].min() == 1
+
+
+def test_get_boundary_cells_shapefile(shellmound_tmr_model_with_dis, test_data_path, tmpdir):
+    m = shellmound_tmr_model_with_dis
+
+    from mfexport import export
+    export(m, m.modelgrid, 'dis', 'idomain', pdfs=False, output_path=tmpdir)
+    boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    tmr = TmrNew(m.parent, m,
+                 inset_parent_period_mapping=m.parent_stress_periods,
+                 boundary_type='head')
+    df = tmr.get_inset_boundary_cells(shapefile=boundary_shapefile)
+    assert np.all(df.columns == ['k', 'i', 'j', 'cellface', 'top', 'botm', 'idomain',
+                                 'cellid', 'geometry'])
+    # option to write a shapefile of boundary cells for visual inspection
+    write_shapefile = False
+    if write_shapefile:
+        out_shp = Path(tmpdir, 'shps/bcells.shp')
+        df.drop('cellid', axis=1).to_file(out_shp)
+
+
+def test_get_boundary_heads(shellmound_tmr_model_with_dis, test_data_path):
+    m = shellmound_tmr_model_with_dis
+    boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    tmr = TmrNew(m.parent, m,
+                 inset_parent_period_mapping=m.parent_stress_periods,
+                 boundary_type='head')
+
+    # get parent model elapsed time at start of each inset model stress period
+    offset = m.perioddata.start_datetime[0] - m.tmr.parent_start_date_time
+    inset_times_parent = pd.to_timedelta(m.perioddata.time, unit=m.time_units) + offset
+    inset_times_parent = [0] + inset_times_parent.dt.days.tolist()[:-1]
+
+    # apply the parent model times to each bcell in the inset
+    dfs = []
+    for i, r in m.perioddata.iterrows():
+        perdata = bcells.copy()
+        perdata['per'] = r.per
+        perdata['parent_time'] = inset_times_parent[r.per]
+        dfs.append(perdata)
+    all_bcells = pd.concat(dfs)

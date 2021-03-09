@@ -25,7 +25,6 @@ model:
     newton: True
     newton_under_relaxation: True
   external_path: 'external/'
-  perimeter_boundary_type: 'specified head'
   # packages to build
   # (any packages not listed or commented out will not be built,
   #  event if they have an input block below)
@@ -39,7 +38,8 @@ model:
              'lak',
              'obs',
              'wel',
-             'ims'
+             'ims',
+             'chd'
   ]
 
 # Regional model to extract boundary conditions,
@@ -52,7 +52,6 @@ parent:
   # information for modflow-setup
   # note: parent model is geo-located in namfile header
   # (only works if length_units='meters')
-  headfile: 'data/pleasant/pleasant.hds'
   hiKlakes_value: 1.e4 # unfortunately python yaml currently requires a dot to parse exp notation as float
   default_source_data: True  # if True, packages and variables that are omitted will be pulled from this model
   copy_stress_periods: 'all'
@@ -241,3 +240,7 @@ obs:
       obsname: ['obsprefix', 'obsnme', 'common_name']
   drop_observations: ['10019209_lk'  # pleasant lake; monitored via Lake Package observations
   ]
+
+chd:
+  perimeter_boundary:
+    parent_head_file: 'data/pleasant/pleasant.hds'  # needed for the perimeter boundary setup

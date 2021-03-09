@@ -11,7 +11,7 @@ import pandas as pd
 fm = flopy.modflow
 from flopy.modflow import Modflow
 
-from mfsetup.bcs import setup_ghb_data
+from mfsetup.bcs import setup_flopy_stress_period_data, setup_ghb_data
 from mfsetup.discretization import (
     deactivate_idomain_above,
     find_remove_isolated_cells,
@@ -779,55 +779,59 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return gag
 
-    def setup_perimeter_boundary(self):
-        """Set up constant head package for perimeter boundary.
-        TODO: integrate perimeter boundary with wel package setup
+    def setup_chd(self):
         """
-        print('setting up specified head perimeter boundary with CHD package...')
+        Sets up the CHD package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'chd'
+        print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
+        package_config = self.cfg[package]
 
-        #tmr = Tmr(self.parent, self,
-        #          parent_head_file=self.cfg['parent']['headfile'],
-        #          inset_parent_layer_mapping=self.parent_layers,
-        #          inset_parent_period_mapping=self.parent_stress_periods)
-#
-        #df = tmr.get_inset_boundary_heads(for_external_files=False)
-        tmr = TmrNew(self.parent, self,
-                     parent_head_file=self.cfg['parent']['headfile'],
-                     inset_parent_period_mapping=self.parent_stress_periods)
+        # option to write stress_period_data to external files
+        external_files = False  # not yet supported for MODFLOW-NWT
+        external_filename_fmt = package_config.get('external_filename_fmt')
 
-        df = tmr.get_inset_boundary_values(for_external_files=False)
+        # perimeter boundary
+        if 'perimeter_boundary' in package_config:
+            perimeter_cfg = package_config['perimeter_boundary']
+            perimeter_cfg['boundary_type'] = 'head'
+            if 'inset_parent_period_mapping' not in perimeter_cfg:
+                perimeter_cfg['inset_parent_period_mapping'] = self.parent_stress_periods
+            if 'parent_start_time' not in perimeter_cfg:
+                perimeter_cfg['parent_start_date_time'] = self.parent.perioddata['start_datetime'][0]
+            self.tmr = TmrNew(self.parent, self, **perimeter_cfg)
+            perimeter_df = self.tmr.get_inset_boundary_values()
 
-        spd = {}
-        by_period = df.groupby('per')
+            # get the stress period data
+            # this also sets up the external file paths
+            spd = setup_flopy_stress_period_data(self, package, perimeter_df,
+                                                 flopy_package_class=fm.ModflowChd,
+                                                 variable_column='head',
+                                                 external_files=external_files,
+                                                 external_filename_fmt=external_filename_fmt)
 
-        for per, df_per in by_period:
-            spd[per] = fm.ModflowChd.get_empty(len(df_per))
-            #spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
-            spd[per]['k'] = df_per['k']
-            spd[per]['i'] = df_per['i']
-            spd[per]['j'] = df_per['j']
-            # assign starting and ending head values for each period
-            # starting chd is parent values for previous period
-            # ending chd is parent values for that period
-            if per == 0:
-                spd[per]['shead'] = df_per['bhead']
-                spd[per]['ehead'] = df_per['bhead']
-            else:
-                spd[per]['ehead'] = df_per['bhead']
-                # populate sheads with eheads from the same cells
-                # if the cell didn't exist previously
-                # set shead == bhead
-                # dict of ending heads from last stress period, but (k,i,j) location
-                previous_inds = spd[per-1][['k', 'i', 'j']].tolist()
-                previous_ehead = dict(zip(previous_inds, spd[per-1]['ehead']))
-                current_inds = spd[per][['k', 'i', 'j']].tolist()
-                sheads = np.array([previous_ehead.get((k, i, j), np.nan)
-                                   for (k, i, j) in current_inds])
-                sheads[np.isnan(sheads)] = spd[per]['ehead'][np.isnan(sheads)]
-                spd[per]['shead'] = sheads
+        # placeholder for setting up user-specified CHD cells from CSV data
+        # todo: support for non-perimeter chd cells
+        df = pd.DataFrame()  # insert function here to get csv data into dataframe
+        if len(df) == 0:
+            print('No other CHD input specified')
+            if 'perimeter_boundary' not in package_config:
+                return
 
-        chd = fm.ModflowChd(self, stress_period_data=spd)
+        kwargs = self.cfg[package].copy()
+        if not external_files:
+            kwargs['stress_period_data'] = spd
+
+        kwargs = get_input_arguments(kwargs, fm.ModflowChd)
+        chd = fm.ModflowChd(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return chd
 

@@ -424,7 +424,7 @@ def test_external_tables(get_pleasant_mf6_with_dis):
     for period, block in blocks.items():
         assert block[0].strip().split()[1].strip('\'') in m.cfg['external_files']['wel_stress_period_data'].values()
 
-    chd = m.setup_perimeter_boundary()
+    chd = m.setup_chd()
     chd.write()
     for f in m.cfg['external_files']['chd_stress_period_data'].values():
         assert os.path.exists(f)
@@ -530,7 +530,7 @@ def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
 
     m = get_pleasant_mf6_with_dis  #deepcopy(pfl_nwt_with_dis)
     m.cfg['chd']['external_files'] = False
-    chd = m.setup_perimeter_boundary()
+    chd = m.setup_chd()
     chd.write()
     assert os.path.exists(os.path.join(m.model_ws, chd.filename))
     assert len(chd.stress_period_data.array) == len(set(m.cfg['parent']['copy_stress_periods']))
