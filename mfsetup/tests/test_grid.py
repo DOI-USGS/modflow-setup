@@ -52,6 +52,12 @@ def test_grid_init():
     assert isinstance(grid.crs, pyproj.crs.CRS)
     assert grid.crs.srs == 'EPSG:5070'
 
+    assert np.all(grid.dataframe.columns == ['i', 'j', 'geometry'])
+    kwargs['botm'] = np.ones((1, nrow, ncol)) * 1
+    kwargs['top'] = np.ones((nrow, ncol)) * 2
+    grid = MFsetupGrid(**kwargs)
+    assert np.all(grid.dataframe.columns == ['k', 'i', 'j', 'geometry'])
+
 
 def test_grid_write_shapefile(modelgrid, tmpdir):
     # test writing the grid cells
