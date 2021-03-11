@@ -1163,13 +1163,14 @@ def setup_array(model, package, var, data=None,
                 # the botm array has to be handled differently
                 # because dest. layers may be interpolated between
                 # model top and first botm
-                if source_variable == 'botm':
+                if source_variable == 'botm' and \
+                        from_source_model_layers is not None and \
+                        from_source_model_layers[0] < 0:
                     nlay, nrow, ncol = source_model.dis.botm.array.shape
                     source_array = np.zeros((nlay+1, nrow, ncol))
                     source_array[0] = source_model.dis.top.array
                     source_array[1:] = source_model.dis.botm.array
-                    if from_source_model_layers is not None:
-                        from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
+                    from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
                 else:
                     source_array = getattr(source_model, source_package).__dict__[source_variable].array
 
