@@ -205,7 +205,7 @@ def test_dis_setup(pfl_nwt_with_grid):
     del m.cfg['setup_grid']['botm']
     m.cfg['dis']['remake_top'] = True
     m.cfg['dis']['lenuni'] = 1 # feet
-    m.cfg['setup_grid']['dxy'] = 20/.3048
+    m.cfg['setup_grid']['dxy'] = 20  # in CRS units
     m.remove_package('DIS')
     m.setup_grid()
     #m._reset_bc_arrays()

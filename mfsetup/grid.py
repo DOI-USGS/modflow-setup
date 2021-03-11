@@ -658,7 +658,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
 
     regular = True
     if dxy is not None:
-        delr_grid = np.round(dxy * to_grid_units_inset, 4) # dxy is specified in model units
+        delr_grid = np.round(dxy, 4) # dxy is specified in CRS units
         delc_grid = delr_grid
     if delr is not None:
         delr_grid = np.round(delr * to_grid_units_inset, 4)  # delr is specified in model units
