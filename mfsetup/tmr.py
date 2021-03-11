@@ -8,6 +8,7 @@ fm = flopy.modflow
 import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
+
 from mfsetup.discretization import weighted_average_between_layers
 #from mfsetup.export import get_surface_bc_flux
 from mfsetup.fileio import check_source_files
@@ -82,14 +83,14 @@ class Tmr:
         self._inset_parent_period_mapping = inset_parent_period_mapping
         self.hpth = None  # path to parent heads output file
         self.cpth = None  # path to parent cell budget output file
-        
+
         self.pi0 = None
         self.pj0 = None
         self.pi1 = None
         self.pj1 = None
         self.pi_list = None
         self.pj_list = None
-        
+
         if parent_length_units is None:
             parent_length_units = self.inset.cfg['parent']['length_units']
         if inset_length_units is None:
@@ -118,15 +119,15 @@ class Tmr:
 
         # get bounding cells in parent model for pfl_nwt model
         irregular_domain = False
-        
+
         # see if irregular domain
         irregbound_cfg = self.inset.cfg['perimeter_boundary'].get('source_data',{}).get('irregular_boundary')
         if irregbound_cfg is not None:
             irregular_domain = True
             irregbound_cfg['variable'] = 'perimeter_boundary'
             irregbound_cfg['dest_model'] = self.inset
-            
-            
+
+
             sd = ArraySourceData.from_config(irregbound_cfg)
             data = sd.get_data()
             idm_outline = data[0]
@@ -145,13 +146,19 @@ class Tmr:
             self.parent_nrow_in_inset = self.pi1 - self.pi0 + 1
             self.parent_ncol_in_inset = self.pj1 - self.pj0 + 1
 
-        # check for an even number of pfl_nwt cells per parent cell in x and y directions
-        x_refinment = self.parent.modelgrid.delr[0] / self.inset.modelgrid.delr[0]
-        y_refinment = self.parent.modelgrid.delc[0] / self.inset.modelgrid.delc[0]
-        assert int(x_refinment) == x_refinment, "pfl_nwt delr must be factor of parent delr"
-        assert int(y_refinment) == y_refinment, "pfl_nwt delc must be factor of parent delc"
-        assert x_refinment == y_refinment, "grid must have same x and y discretization"
-        self.refinement = int(x_refinment)
+        # check for an even number of inset cells per parent cell in x and y directions
+        x_refinement = self.parent.modelgrid.delr[0] / self.inset.modelgrid.delr[0]
+        y_refinement = self.parent.modelgrid.delc[0] / self.inset.modelgrid.delc[0]
+        msg = "inset {0} of {1:.2f} {2} must be factor of parent {0} of {3:.2f} {4}"
+        if not int(x_refinement) == np.round(x_refinement, 2):
+            raise ValueError(msg.format('delr', self.inset.modelgrid.delr[0], self.inset.modelgrid.length_units,
+                                        self.parent.modelgrid.delr[0], self.parent.modelgrid.length_units))
+        if not int(y_refinement) == np.round(y_refinement, 2):
+            raise ValueError(msg.format('delc', self.inset.modelgrid.delc[0], self.inset.modelgrid.length_units,
+                                        self.parent.modelgrid.delc[0], self.parent.modelgrid.length_units))
+        if not np.allclose(x_refinement, y_refinement):
+            raise ValueError("grid must have same x and y discretization")
+        self.refinement = int(x_refinement)
 
     @property
     def inset_parent_layer_mapping(self):
@@ -615,13 +622,13 @@ class Tmr:
                 ktmp += list(clay*np.ones(len(self.pi_list)).astype(int))
             itmp = self.inset.nlay * self.pi_list
             jtmp = self.inset.nlay * self.pj_list
-            
+
             # get rid of cells that are inactive
             wh = np.where(self.inset.dis.idomain.array >0)
             activecells = set([(i,j,k) for i,j,k in zip(wh[0],wh[1],wh[2])])
             chdcells = set([(kk,ii,jj) for ii,jj,kk in zip(itmp,jtmp,ktmp)])
             active_chd_cells = list(set(chdcells).intersection(activecells))
-            
+
             # unpack back to lists, then convert to numpy arrays
             k, i, j = zip(*active_chd_cells)
             k = np.array(k)

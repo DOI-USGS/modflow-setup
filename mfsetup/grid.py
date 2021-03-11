@@ -142,6 +142,7 @@ class MFsetupGrid(StructuredGrid):
                 f' {self.units}\n'
                 )
         txt += f'CRS: {self.crs}\n'
+        txt += f'length units: {self.length_units}\n'
         txt += f'xll: {self.xoffset}; yll: {self.yoffset}; rotation: {self.rotation}\n'
         txt += 'Bounds: {}\n'.format(self.extent)
         return txt

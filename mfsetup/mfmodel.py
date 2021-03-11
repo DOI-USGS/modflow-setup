@@ -964,9 +964,9 @@ class MFsetupMixin():
         parent_grid_units = kwargs['crs'].axis_info[0].unit_name
 
         if 'foot' in parent_grid_units.lower() or 'feet' in parent_grid_units.lower():
-            grid_units = 'feet'
+            parent_grid_units = 'feet'
         elif 'metre' in parent_grid_units.lower() or 'meter' in parent_grid_units.lower():
-            grid_units = 'meters'
+            parent_grid_units = 'meters'
         else:
             raise ValueError(f'unrecognized CRS units {parent_grid_units}: CRS must be projected in feet or meters')
 
