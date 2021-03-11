@@ -255,7 +255,8 @@ class MFsetupMixin():
             elif isinstance(botm_source_data, dict) and 'from_parent' in botm_source_data:
                 parent_layers = botm_source_data.get('from_parent')
             else:
-                parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
+                #parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
+                parent_layers = None
             self._parent_layers = parent_layers
         return self._parent_layers
 
@@ -1556,7 +1557,11 @@ class MFsetupMixin():
         -------
         m : model instance
         """
-        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], None))
+        cfg_filename = Path(cfg.get('filename', '')).name
+        msg = f"\nSetting up {cfg['model']['modelname']} model"
+        if len(cfg_filename) > 0:
+            msg += f" from configuration in {cfg_filename}"
+        print(msg)
         t0 = time.time()
         #cfg = cls._parse_model_kwargs(cfg)
         #kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,

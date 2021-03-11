@@ -13,8 +13,10 @@ from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
 from scipy.interpolate import griddata
 
-from mfsetup.discretization import weighted_average_between_layers
-#from mfsetup.export import get_surface_bc_flux
+from mfsetup.discretization import (
+    find_remove_isolated_cells,
+    weighted_average_between_layers,
+)
 from mfsetup.fileio import check_source_files
 from mfsetup.grid import get_ij
 from mfsetup.interpolate import (
@@ -892,7 +894,7 @@ class TmrNew:
     def __init__(self, parent_model, inset_model,
                  parent_head_file=None, parent_cell_budget_file=None,
                  boundary_type=None, inset_parent_period_mapping=None,
-                 parent_start_date_time=None,
+                 parent_start_date_time=None, source_mask=None,
                  define_connections_by='max_active_extent',
                  shapefile=None,
                  ):
@@ -913,6 +915,8 @@ class TmrNew:
         self._idomain = None
         self._inset_boundary_cells = None
         self._inset_parent_period_mapping = inset_parent_period_mapping
+        self._interp_weights = None
+        self._source_mask = source_mask
 
 
     @property
@@ -936,6 +940,7 @@ class TmrNew:
             df['y'] = y[df.i, df.j]
             df['z'] = z[df.k, df.i, df.j]
             self._inset_boundary_cells = df
+            self._interp_weights = None
         return self._inset_boundary_cells
 
     @property
@@ -954,12 +959,62 @@ class TmrNew:
         self._inset_parent_period_mapping = inset_parent_period_mapping
 
     @property
+    def interp_weights(self):
+        """For a given parent, only calculate interpolation weights
+        once to speed up re-gridding of arrays to pfl_nwt."""
+        if self._interp_weights is None:
+
+            # x, y, z locations of parent model head values
+            px, py, pz = self.parent_xyzcellcenters
+
+            # x, y, z locations of inset model boundary cells
+            x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
+
+            self._interp_weights = interp_weights((px, py, pz), (x, y, z), d=3)
+            assert not np.any(np.isnan(self._interp_weights[1]))
+        return self._interp_weights
+
+    @property
     def parent_xyzcellcenters(self):
+        """Get x, y, z locations of parent cells in a buffered area
+        (defined by the _source_grid_mask property) around the
+        inset model."""
         px, py, pz = self.parent.modelgrid.xyzcellcenters
         nlay, nrow, ncol = pz.shape
-        px = np.tile(px.ravel(), nlay)
-        py = np.tile(py.ravel(), nlay)
-        return px, py, pz.ravel()
+        px = np.tile(px, (nlay, 1, 1))
+        py = np.tile(py, (nlay, 1, 1))
+        mask = self._source_grid_mask
+        px = px[mask]
+        py = py[mask]
+        pz = pz[mask]
+        return px, py, pz
+
+    @property
+    def _source_grid_mask(self):
+        """Boolean array indicating window in parent model grid (subset of cells)
+        that encompass the pfl_nwt model domain. Used to speed up interpolation
+        of parent grid values onto pfl_nwt grid."""
+        if self._source_mask is None:
+            mask = np.zeros((self.parent.modelgrid.nrow,
+                             self.parent.modelgrid.ncol), dtype=bool)
+            if self.inset.parent_mask.shape == self.parent.modelgrid.xcellcenters.shape:
+                mask = self.inset.parent_mask
+            else:
+                x, y = np.squeeze(self.inset.bbox.exterior.coords.xy)
+                pi, pj = get_ij(self.parent.modelgrid, x, y)
+                pad = 3
+                i0 = np.max([pi.min() - pad, 0])
+                i1 = np.min([pi.max() + pad + 1, self.parent.modelgrid.nrow])
+                j0 = np.max([pj.min() - pad, 0])
+                j1 = np.min([pj.max() + pad + 1, self.parent.modelgrid.ncol])
+                mask[i0:i1, j0:j1] = True
+            # make the mask 3D
+            mask3d = np.tile(mask, (self.parent.modelgrid.nlay, 1, 1))
+            self._source_mask = mask3d
+        elif len(self._source_mask.shape) == 2:
+            mask3d = np.tile(self._source_mask, (self.parent.modelgrid.nlay, 1, 1))
+            self._source_mask = mask3d
+        return self._source_mask
 
     def get_inset_boundary_cells(self, by_layer=False, shapefile=None):
         """Get a dataframe of connection information for
@@ -975,8 +1030,13 @@ class TmrNew:
             (including all cell locations with at least one layer that
             is active).
         """
+        print('\ngetting perimeter cells...')
+        t0 = time.time()
+        if shapefile is None:
+            shapefile = self.shapefile
         if shapefile:
             perimeter = gp.read_file(shapefile)
+            perimeter = perimeter[['geometry']]
             # reproject the perimeter shapefile to the model CRS if needed
             if perimeter.crs != self.inset.modelgrid.crs:
                 perimeter.to_crs(self.inset.modelgrid.crs, inplace=True)
@@ -1012,8 +1072,18 @@ class TmrNew:
         else:
             specified_bcells = None
         if not by_layer:
+            # get the max footprint of active cells
             max_active_area = np.sum(self.idomain == 1, axis=0) > 0
-            max_active_area = max_active_area.astype(int)
+            # fill any holes within the max footprint
+            # including any LGR areas (that are inactive in this model)
+            # set min cluster size to 1 greater than number of inactive cells
+            # (to not allow any holes)
+            minimum_cluster_size = np.sum(max_active_area == 0) + 1
+            # find_remove_isolated_cells fills clusters of 1s with 0s
+            # to fill holes, we want to look for clusters of 0s and fill with 1s
+            # invert the result to get True values for active cells and filled areas
+            filled = ~find_remove_isolated_cells(~max_active_area, minimum_cluster_size)
+            max_active_area = filled.astype(int)
             # pad filled idomain array with zeros around the edge
             # so that perimeter connections are identified
             filled = np.pad(max_active_area, 1, constant_values=0)
@@ -1081,6 +1151,8 @@ class TmrNew:
         df = gp.GeoDataFrame(df, crs=self.inset.modelgrid.crs)
         outshp = Path(self.inset._tables_path, 'boundary_cells.shp')
         df.drop('cellid', axis=1).to_file(outshp)
+        print(f"wrote {outshp}")
+        print("perimeter cells took {:.2f}s\n".format(time.time() - t0))
         return df
 
     def get_inset_boundary_values(self, for_external_files=False):
@@ -1092,9 +1164,16 @@ class TmrNew:
 
             last_steps = {kper: kstp for kstp, kper in all_kstpkper}
 
+            # get the perimeter cells and calculate the weights
+            _ = self.interp_weights
+
+            print('\ngetting perimeter heads...')
+            t0 = time.time()
             dfs = []
             parent_periods = []
             for inset_per, parent_per in self.inset_parent_period_mapping.items():
+                print(f'for stress period {inset_per}', end=', ')
+                t1 = time.time()
                 # skip getting data if parent period is already represented
                 # (heads will be reused)
                 if parent_per in parent_periods:
@@ -1104,20 +1183,16 @@ class TmrNew:
                 parent_kstpkper = last_steps[parent_per], parent_per
                 parent_heads = hdsobj.get_data(kstpkper=parent_kstpkper)
 
-                # x, y, z locations of parent model head values
-                px, py, pz = self.parent_xyzcellcenters
-
-                # x, y, z locations of inset model boundary cells
-                x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
-
                 # interpolate inset boundary heads from 3D parent head solution
-                heads = griddata((px, py, pz), parent_heads.ravel(),
-                                  (x, y, z), method='linear')
+                heads = self.interpolate_values(parent_heads, method='linear')
+                #heads = griddata((px, py, pz), parent_heads.ravel(),
+                #                  (x, y, z), method='linear')
 
                 # make a DataFrame of interpolated heads at perimeter cell locations
                 df = self.inset_boundary_cells.copy()
                 df['per'] = inset_per
                 df['head'] = heads
+
                 # boundary heads must be greater than the cell bottom
                 # and idomain > 0
                 loc = (df['head'] > df['botm']) & (df['idomain'] > 0)
@@ -1126,6 +1201,7 @@ class TmrNew:
                 valid = (df['head'] < 1e10) & (df['head'] > -1e10)
                 df = df.loc[valid]
                 dfs.append(df)
+                print("took {:.2f}s".format(time.time() - t1))
             df = pd.concat(dfs)
 
             # drop duplicate cells
@@ -1134,6 +1210,7 @@ class TmrNew:
             df['cellid'] = list(zip(df.per, df.k, df.i, df.j))
             duplicates = df.duplicated(subset='cellid')
             df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'head']]
+            print("getting perimeter heads took {:.2f}s\n".format(time.time() - t0))
 
         # convert to one-based and comment out header if df will be written straight to external file
         if for_external_files:
@@ -1142,3 +1219,33 @@ class TmrNew:
             df['i'] += 1
             df['j'] += 1
         return df
+
+    def interpolate_values(self, source_array, method='linear'):
+        """Interpolate values in source array onto
+        the destination model grid, using modelgrid instances
+        attached to the source and destination models.
+
+        Parameters
+        ----------
+        source_array : ndarray
+            Values from source model to be interpolated to destination grid.
+            3D numpy array of same shape as the source model.
+        method : str ('linear', 'nearest')
+            Interpolation method.
+
+        Returns
+        -------
+        interpolated : ndarray
+            3D array of interpolated values at the inset model grid locations.
+        """
+        parent_values = source_array.flatten()[self._source_grid_mask.flatten()]
+        if method == 'linear':
+            interpolated = interpolate(parent_values, *self.interp_weights)
+        elif method == 'nearest':
+            # x, y, z locations of parent model head values
+            px, py, pz = self.parent_xyzcellcenters
+            # x, y, z locations of inset model boundary cells
+            x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
+            interpolated = griddata((px, py, pz), parent_values,
+                                    (x, y, z), method=method)
+        return interpolated

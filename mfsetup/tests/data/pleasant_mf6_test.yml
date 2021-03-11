@@ -53,7 +53,7 @@ setup_grid:
       filename: '../../../examples/data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
-  dxy: 40 # m
+  dxy: 40  # in CRS units of meters
   buffer: 1000 # distance from feature(s) if interest to model boundary, in meters
   grid_file: 'grid.json' # grid info will be written to this file
   epsg: 3070
@@ -102,6 +102,7 @@ ic:
     strt:
       from_parent:
         binaryfile: '../../../examples/data/pleasant/pleasant.hds'
+        stress_period: 0
 
 npf:
   options:

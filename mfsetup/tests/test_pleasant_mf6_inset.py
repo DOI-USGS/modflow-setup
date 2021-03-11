@@ -202,13 +202,21 @@ def test_idomain(get_pleasant_mf6_with_dis):
     assert m.idomain.sum() == m.dis.idomain.array.sum()
 
 
-def test_ic_setup(get_pleasant_mf6_with_dis):
-    m = get_pleasant_mf6_with_dis
+@pytest.mark.parametrize('from_binary', (False, True))
+def test_ic_setup(get_pleasant_mf6_with_dis, from_binary):
+    """Test starting heads setup from parent model strt array or parent model head solution
+    (MODFLOW binary output)."""
+    m = copy.deepcopy(get_pleasant_mf6_with_dis)
+    if not from_binary:
+        m.cfg['ic']['source_data']['strt'] = None
     ic = m.setup_ic()
     ic.write()
     assert os.path.exists(os.path.join(m.model_ws, ic.filename))
     assert isinstance(ic, mf6.ModflowGwfic)
     assert ic.strt.array.shape == m.dis.botm.array.shape
+
+    assert m.ic.strt.array[m.dis.idomain.array > 0].min() > 250
+    assert m.ic.strt.array[m.dis.idomain.array > 0].max() < 350
 
 
 @pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
@@ -556,9 +564,10 @@ def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
     assert 'ims' in m.simulation.package_key_dict
     assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR_0', 'LAK_0',
                                          'WEL_0',
-                                         'OBS_0',  # lak obs todo: specify names of mf6 packages with multiple instances
+                                         'OBS_1',  # lak obs todo: specify names of mf6 packages with multiple instances
                                          'CHD_0',
-                                         'OBS_1'  # head obs
+                                         'OBS_0',  # chd obs
+                                         'OBS_2'  # head obs
                                          }
     external_path = os.path.join(m.model_ws, 'external')
     external_files = glob.glob(external_path + '/*')

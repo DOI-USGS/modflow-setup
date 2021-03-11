@@ -158,7 +158,7 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     assert to_parent == {23: 10, 25: 1}
 
 
-def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
+def test_lgr_model_setup(pleasant_lgr_setup_from_yaml, tmpdir):
     m = pleasant_lgr_setup_from_yaml
     assert isinstance(m.inset, dict)
     assert len(m.simulation._models) > 1
@@ -183,6 +183,7 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml):
         if 'stage_area_volume' in f:
             continue
         assert m.name in f or 'plsnt_lgr_inset' in f
+
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
 
@@ -239,7 +240,7 @@ def test_lgr_load(pleasant_lgr_setup_from_yaml,
     m2 = MF6model.load(pleasant_lgr_test_cfg_path)
     assert m2.inset['plsnt_lgr_inset'].simulation is m2.simulation
 
-    assert set(m2.get_package_list()).difference(m.get_package_list()) == {'SFR_OBS'}
+    assert set(m2.get_package_list()).difference(m.get_package_list()) == {'SFR_OBS', 'CHD_OBS'}
     # can't compare equality if sfr obs was added by SFRmaker, because it won't be listed in m.get_package_list()
     # but will be listed in m2.get_package_list()
     #assert m == m2

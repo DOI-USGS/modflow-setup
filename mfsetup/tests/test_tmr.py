@@ -9,6 +9,7 @@ test_mf6_tmr_shellmound.py
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import pytest
 from flopy.utils import binaryfile as bf
 
@@ -41,7 +42,7 @@ def pleasant_model(request,
 def tmr(pleasant_model):
     m = pleasant_model
     tmr = Tmr(m.parent, m,
-              parent_head_file=m.cfg['parent']['headfile'],
+              parent_head_file=m.cfg['chd']['perimeter_boundary']['parent_head_file'],
               inset_parent_layer_mapping=m.parent_layers,
               inset_parent_period_mapping=m.parent_stress_periods)
     return tmr
@@ -89,7 +90,7 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
 
 def test_tmr_new(pleasant_model):
     m = pleasant_model
-    parent_headfile = Path(m.cfg['parent']['headfile'])
+    parent_headfile = Path(m.cfg['chd']['perimeter_boundary']['parent_head_file'])
     parent_cellbudgetfile = parent_headfile.with_suffix('.cbc')
 
     tmr = TmrNew(m.parent, m,
@@ -97,14 +98,14 @@ def test_tmr_new(pleasant_model):
 
     results = tmr.get_inset_boundary_values(for_external_files=False)
     assert np.all(results.columns ==
-                  ['k', 'i', 'j', 'per', 'bhead'])
+                  ['k', 'i', 'j', 'per', 'head'])
     # indices should be zero-based
     assert results['k'].min() == 0
     # non NaN heads
-    assert not results.bhead.isna().any()
+    assert not results['head'].isna().any()
     # no heads below cell bottoms
     cell_botms = m.dis.botm.array[results['k'], results['i'], results['j']]
-    assert not np.any(results['bhead'] < cell_botms)
+    assert not np.any(results['head'] < cell_botms)
     # no duplicate heads
     results['cellid'] = list(zip(results.per, results.k, results.i, results.j))
     assert not results.cellid.duplicated().any()
@@ -112,11 +113,12 @@ def test_tmr_new(pleasant_model):
     # test external files case
     # and with connections defined by layer
     tmr.define_connections_by = 'by_layer'
-    tmr._inset_boundary_cells = None  # reset property
+    tmr._inset_boundary_cells = None   # reset properties
+    tmr._interp_weights = None
     results = tmr.get_inset_boundary_values(for_external_files=True)
     # '#k' required for header row
     assert np.all(results.columns ==
-                  ['#k', 'i', 'j', 'per', 'bhead'])
+                  ['#k', 'i', 'j', 'per', 'head'])
     # indices should be one-based (written directly to external files)
     assert results['#k'].min() == 1
 

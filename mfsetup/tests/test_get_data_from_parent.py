@@ -16,7 +16,8 @@ def get_model(basic_model_instance, parent_stress_period_input):
     return m
 
 
-@pytest.mark.parametrize('input', ('all',
+@pytest.mark.parametrize('input',
+           ('all',
             [0],  # repeat parent stress period 0
             [2],  # repeat parent stress period 2
             [1, 2]  # include parent stress periods 1 and 2, repeating 2
