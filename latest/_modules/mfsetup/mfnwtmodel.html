@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post229+g22f0e03 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post229+g22f0e03
+                0.post234+g4726ee3
               </div>
             
           
@@ -263,7 +263,8 @@
         <span class="c1"># set the model workspace and change working directory to there</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_ws</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
         <span class="c1"># update defaults with user-specified config. (loaded above)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>  <span class="c1"># set up the model configuration dictionary</span>
+        <span class="c1"># set up and validate the model configuration dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 
         <span class="c1"># set the list file path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;list_filename_fmt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>

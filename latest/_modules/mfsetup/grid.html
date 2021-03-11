@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post229+g22f0e03 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.post229+g22f0e03
+                0.post234+g4726ee3
               </div>
             
           
@@ -322,6 +322,7 @@
                 <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
         <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;CRS: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;length units: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">length_units</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;xll: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xoffset</span><span class="si">}</span><span class="s1">; yll: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">yoffset</span><span class="si">}</span><span class="s1">; rotation: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Bounds: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">txt</span>
@@ -837,7 +838,7 @@
 
     <span class="n">regular</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">dxy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dxy</span> <span class="o">*</span> <span class="n">to_grid_units_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># dxy is specified in model units</span>
+        <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dxy</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># dxy is specified in CRS units</span>
         <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">delr_grid</span>
     <span class="k">if</span> <span class="n">delr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delr</span> <span class="o">*</span> <span class="n">to_grid_units_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># delr is specified in model units</span>
