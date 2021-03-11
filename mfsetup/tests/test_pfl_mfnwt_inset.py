@@ -593,7 +593,7 @@ def test_lake_gag_setup(pfl_nwt_with_dis):
 def test_perimeter_boundary_setup(pfl_nwt_with_dis_bas6):
 
     m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)
-    chd = m.setup_perimeter_boundary()
+    chd = m.setup_chd()
     chd.write_file()
     assert os.path.exists(chd.fn_path)
     assert len(chd.stress_period_data.data.keys()) == len(set(m.cfg['parent']['copy_stress_periods']))

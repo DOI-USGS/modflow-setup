@@ -28,6 +28,7 @@ from mfsetup.fileio import (
     load,
     load_cfg,
 )
+from mfsetup.ic import setup_strt
 from mfsetup.lakes import (
     get_lakeperioddata,
     setup_lake_connectiondata,
@@ -454,14 +455,15 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
-        # make the starting heads array
-        self._setup_array(package, 'strt', datatype='array3d',
-                          resample_method='linear',
-                          write_fmt='%.2f')
+        kwargs = self.cfg[package]
+        kwargs.update(self.cfg[package]['griddata'])
+        kwargs['source_data_config'] = kwargs['source_data']
+        kwargs['filename_fmt'] = kwargs['strt_filename_fmt']
 
-        kwargs = self.cfg[package]['griddata'].copy()
-        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfic)
-        ic = mf6.ModflowGwfic(self, **kwargs)
+        # make the starting heads array
+        strt = setup_strt(self, package, **kwargs)
+
+        ic = mf6.ModflowGwfic(self, strt=strt)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ic
 
@@ -856,7 +858,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                           [('perimeter-heads', 'chd', 'perimeter-heads')]}
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfchd)
         chd = mf6.ModflowGwfchd(self, **kwargs)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
+        print("setup of chd took {:.2f}s\n".format(time.time() - t0))
         return chd
 
     def setup_obs(self):

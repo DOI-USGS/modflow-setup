@@ -1,3 +1,4 @@
+import copy
 import os
 from pathlib import Path
 
@@ -105,6 +106,27 @@ def shellmound_tmr_model_setup_and_run(shellmound_tmr_model_setup, mf6_exe):
                 list_output = src.read()
     assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
     return m
+
+
+@pytest.mark.parametrize('from_binary', (False, True))
+def test_ic_setup(shellmound_tmr_model_with_dis, from_binary):
+    """Test starting heads setup from model top or parent model head solution
+    (MODFLOW binary output)."""
+    m = copy.deepcopy(shellmound_tmr_model_with_dis)
+    binaryfile = m.cfg['chd']['perimeter_boundary']['parent_head_file']
+    if from_binary:
+        config = {'strt': {'from_parent': {'binaryfile': binaryfile,
+                                           'period': 0
+                                           }}}
+        m.cfg['ic']['source_data'] = config
+    ic = m.setup_ic()
+    ic.write()
+    assert os.path.exists(os.path.join(m.model_ws, ic.filename))
+    assert isinstance(ic, mf6.ModflowGwfic)
+    assert ic.strt.array.shape == m.dis.botm.array.shape
+
+    assert m.ic.strt.array[m.dis.idomain.array > 0].min() > 0
+    assert m.ic.strt.array[m.dis.idomain.array > 0].max() < 50
 
 
 def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):

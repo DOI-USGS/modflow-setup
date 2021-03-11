@@ -47,10 +47,12 @@ def interp_weights(xyz, uvw, d=2):
 
     Parameters
     ----------
-    xyz : ndarray of shape n source points x ndims
-        x, y, (z) locations of source data.
-    uvw : ndarray of shape n destination points x ndims
-        x, y, (z) locations of where source data will be interpolated
+    xyz : ndarray or tuple
+        x, y, z, ... locations of source data.
+        (shape n source points x ndims)
+    uvw : ndarray or tuple
+        x, y, z, ... locations of where source data will be interpolated
+        (shape n destination points x ndims)
 
     Returns
     -------
@@ -61,7 +63,14 @@ def interp_weights(xyz, uvw, d=2):
         in indices. Weights in each row sum to 1
         across the 3 columns.
     """
-    print('Calculating interpolation weights...')
+    print(f'Calculating {d}D interpolation weights...')
+    # convert input to ndarrays of the right shape
+    uvw = np.array(uvw)
+    if uvw.shape[-1] != d:
+        uvw = uvw.T
+    xyz = np.array(xyz)
+    if xyz.shape[-1] != d:
+        xyz = xyz.T
     t0 = time.time()
     tri = qhull.Delaunay(xyz)
     simplex = tri.find_simplex(uvw)
@@ -161,6 +170,98 @@ def regrid(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
     #    arr2[fill] = nodataval
     if arr2.min() < 0:
         j=2
+    return arr2
+
+
+def regrid3d(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
+    """Interpolate array values from one model grid to another,
+    using scipy.interpolate.griddata.
+
+    Parameters
+    ----------
+    arr : 3D numpy array
+        Source data
+    grid : flopy.discretization.StructuredGrid instance
+        Source grid
+    grid2 : flopy.discretization.StructuredGrid instance
+        Destination grid (to interpolate onto)
+    mask1 : boolean array
+        mask for source grid. Areas that are masked will be converted to
+        nans, and not included in the interpolation.
+    mask2 : boolean array
+        mask denoting active area for destination grid.
+        The mean value will be applied to inactive areas if linear interpolation
+        is used (not for integer/categorical arrays).
+    method : str
+        interpolation method ('nearest', 'linear', or 'cubic')
+
+    Returns
+    -------
+    arr : 3D numpy array
+        Interpolated values at the x, y, z locations in grid2.
+    """
+    try:
+        from scipy.interpolate import griddata
+    except:
+        print('scipy not installed\ntry pip install scipy')
+        return None
+
+    assert len(arr.shape) == 3, "input array must be 3d"
+    if grid2.botm is None:
+        raise ValueError('regrid3d: grid2.botm is None; grid2 must have cell bottom elevations')
+
+    # source model grid points
+    px, py, pz = grid.xyzcellcenters
+    nlay, nrow, ncol = pz.shape
+    px = np.tile(px, (nlay, 1, 1))
+    py = np.tile(py, (nlay, 1, 1))
+
+    # apply the mask
+    if mask1 is not None:
+        mask1 = mask1.astype(bool)
+        # tile the mask to nlay x nrow x ncol
+        if len(mask1.shape) == 2:
+            mask1 = np.tile(mask1, (nlay, 1, 1))
+        arr = arr[mask1]
+        px = px[mask1]
+        py = py[mask1]
+        pz = pz[mask1]
+
+    # dest modelgrid points
+    x, y, z = grid2.xyzcellcenters
+    try:
+        nlay, nrow, ncol = z.shape
+    except:
+        j=2
+    x = np.tile(x, (nlay, 1, 1))
+    y = np.tile(y, (nlay, 1, 1))
+
+    # interpolate inset boundary heads from 3D parent head solution
+    arr2 = griddata((px, py, pz), arr,
+                     (x, y, z), method='linear')
+    # get the locations of any bad values
+    bk, bi, bj = np.where(np.isnan(arr2))
+    bx = x[bk, bi, bj]
+    by = y[bk, bi, bj]
+    bz = z[bk, bi, bj]
+    # tweak the result slightly to resolve any apparent triangulation errors
+    fixed = griddata((px, py, pz), arr,
+                     (bx, by, bz+0.0001), method='linear')
+    arr2[bk, bi, bj] = fixed
+
+    # fill any remaining areas that are nan
+    # (new active area includes some areas not in uwsp model)
+    fill = np.isnan(arr2)
+
+    # if new active area is supplied, fill areas outside of that too
+    if mask2 is not None:
+        mask2 = mask2.astype(bool)
+        fill = ~mask2 | fill
+
+    # only fill with mean value if linear interpolation used
+    # (floating point arrays)
+    if method == 'linear':
+        arr2[fill] = np.nanmean(arr2[~fill])
     return arr2
 
 

@@ -24,6 +24,7 @@ from mfsetup.fileio import (
     load_cfg,
     save_array,
 )
+from mfsetup.ic import setup_strt
 from mfsetup.lakes import (
     make_bdlknc2d,
     make_bdlknc_zones,
@@ -74,7 +75,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # default configuration
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
-                                     'ghb', 'lak', 'sfr', 'riv', 'wel', 'mnw2',
+                                     'chd', 'ghb', 'lak', 'sfr', 'riv', 'wel', 'mnw2',
                                      'gag', 'hyd']
         # set up the model configuration dictionary
         # start with the defaults
@@ -294,10 +295,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
-        # make the strt array
-        self._setup_array(package, 'strt', datatype='array3d',
-                          resample_method='linear',
-                          write_fmt='%.2f')
+        kwargs = self.cfg[package]
+        kwargs['source_data_config'] = kwargs['source_data']
+        kwargs['filename_fmt'] = kwargs['strt_filename_fmt']
+        kwargs['write_fmt'] = kwargs['strt_write_fmt']
+
+        # make the starting heads array
+        strt = setup_strt(self, package, **kwargs)
 
         # initial ibound input for creating a bas6 package instance
         self._setup_array(package, 'ibound', datatype='array3d', write_fmt='%d',
@@ -305,6 +309,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                           dtype=int)
 
         kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
+        kwargs['strt'] = strt
         bas = fm.ModflowBas(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         self._set_ibound()
@@ -832,7 +837,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         kwargs = get_input_arguments(kwargs, fm.ModflowChd)
         chd = fm.ModflowChd(self, **kwargs)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
+        print("setup of chd took {:.2f}s\n".format(time.time() - t0))
         return chd
 
     def write_input(self):
