@@ -56,7 +56,7 @@ class SourceData:
     datatype :
     dest_model :
     """
-    def __init__(self, filenames=None, values=None, length_units='unknown',
+    def __init__(self, filenames=None, values=None, variable=None, length_units='unknown',
                  time_units='unknown',
                  area_units=None, volume_units=None,
                  datatype=None,
@@ -66,6 +66,7 @@ class SourceData:
         """
         self.filenames = filenames
         self.values = values
+        self.variable = variable
         self.length_units = length_units
         self.area_units = area_units
         self.volume_units = volume_units
@@ -76,6 +77,14 @@ class SourceData:
 
     @property
     def unit_conversion(self):
+        try:
+            if np.issubdtype(sd.source_array.dtype, np.integer):
+                return 1.0
+        except:
+            pass
+        # non-comprehensive list of dimensionless variables
+        if self.variable in {'ibound', 'idomain', 'ss', 'sy', 'irch', 'iconvert', 'lkarr'}:
+            return 1.0
         return self.length_unit_conversion * self.time_unit_conversion
 
     @property
@@ -288,11 +297,11 @@ class ArraySourceData(SourceData):
                  multiplier=1.):
 
         SourceData.__init__(self, filenames=filenames, values=values,
+                            variable=variable,
                             length_units=length_units, time_units=time_units,
                             datatype=datatype,
                             dest_model=dest_model)
 
-        self.variable = variable
         self.source_modelgrid = source_modelgrid
         self._source_mask = None
         if from_source_model_layers == {}:
