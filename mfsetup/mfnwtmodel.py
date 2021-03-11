@@ -83,7 +83,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # set the model workspace and change working directory to there
         self.model_ws = self._get_model_ws(cfg=cfg)
         # update defaults with user-specified config. (loaded above)
-        self._set_cfg(cfg)  # set up the model configuration dictionary
+        # set up and validate the model configuration dictionary
+        self._set_cfg(cfg)
 
         # set the list file path
         self.lst.file_name = [self.cfg['model']['list_filename_fmt'].format(self.name)]

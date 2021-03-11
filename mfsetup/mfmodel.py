@@ -19,6 +19,7 @@ from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
 from mfsetup.bcs import get_bc_package_cells
+from mfsetup.config import validate_configuration
 from mfsetup.fileio import (
     check_source_files,
     load,
@@ -787,6 +788,9 @@ class MFsetupMixin():
 
         # other variables
         self.cfg['external_files'] = {}
+
+        # validate the configuration
+        validate_configuration(self.cfg)
 
     def _get_high_k_lakes(self):
         """Get the i, j locations of any high-k lakes within the model grid.
