@@ -226,6 +226,30 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
     return df
 
 
+def remove_inactive_bcs(pckg):
+    """Remove boundary conditions from cells that are inactive.
+
+    Parameters
+    ----------
+    model : flopy model instance
+    pckg : flopy package instance
+    """
+    model = pckg.parent
+    if model.version == 'mf6':
+        active = model.dis.idomain.array > 0
+    else:
+        active = model.bas6.ibound.array > 0
+    spd = pckg.stress_period_data.data
+
+    new_spd = {}
+    for per, rec in spd.items():
+        if 'cellid' in rec.dtype.names:
+            k, i, j = zip(*rec['cellid'])
+        else:
+            k, i, j = zip(*rec[['k', 'i', 'j']])
+        new_spd[per] = rec[active[k, i, j]]
+    pckg.stress_period_data = new_spd
+
 def squeeze_columns(df, fillna=0.):
     """Drop columns where the forward difference
     (along axis 1, the column axis) is 0 in all rows.
