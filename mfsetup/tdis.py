@@ -687,7 +687,7 @@ def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
                             dest.write(line)
                             break
                         else:
-                            line = 2*' ' + line.strip() + f'  # {start_dates[i]:%Y-%m-%d}'
+                            line = 2*' ' + line.strip() + f'  # period {i+1}: {start_dates[i]:%Y-%m-%d}'
                             if end_dates is not None:
                                 line += f' to {end_dates[i]:%Y-%m-%d}'
                             line += '\n'
