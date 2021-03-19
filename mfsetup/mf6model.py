@@ -12,7 +12,7 @@ mf6 = flopy.mf6
 from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
 
-from mfsetup.bcs import setup_flopy_stress_period_data
+from mfsetup.bcs import remove_inactive_bcs, setup_flopy_stress_period_data
 from mfsetup.discretization import (
     ModflowGwfdis,
     create_vertical_pass_through_cells,
@@ -1003,6 +1003,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def write_input(self):
         """Write the model input.
         """
+        # prior to writing output
+        # remove any BCs in inactive cells
+        pckgs = ['CHD']
+        for pckg in pckgs:
+            remove_inactive_bcs(pckg)
+
         # write the model with flopy
         # but skip the sfr package
         # by monkey-patching the write method

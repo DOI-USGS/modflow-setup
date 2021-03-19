@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from mfsetup.bcs import get_bc_package_cells
+from mfsetup.bcs import get_bc_package_cells, remove_inactive_bcs
 from mfsetup.testing import dtypeisinteger
 
 
@@ -87,3 +87,32 @@ def test_ghb_sfr_overlap(pleasant_nwt_with_dis_bas6, project_root_path):
     sfr_cells = set(zip(m.sfrdata.reach_data.i.values,
                     m.sfrdata.reach_data.j.values))
     assert len(ghb_cells.intersection(sfr_cells)) == 0
+
+
+def test_remove_inactive_bcs(basic_model_instance):
+    m = basic_model_instance
+    wd = m._abs_model_ws
+    m.setup_dis()
+    if m.version != 'mf6':
+        m.setup_bas6()
+    else:
+        m.setup_tdis()
+    m.setup_chd()
+    if m.version != 'mf6':
+        idm = m.bas6.ibound.array
+        idm[:, :, 0] = 0
+        m.bas6.ibound = idm
+        k, i, j = zip(*m.chd.stress_period_data.data[0][['k', 'i', 'j']])
+        assert any(m.bas6.ibound.array[k, i, j] == 0)
+    else:
+        idm = m.dis.idomain.array
+        idm[:, :, 0] = 0
+        m.dis.idomain = idm
+        k, i, j = zip(*m.chd.stress_period_data.data[0]['cellid'])
+        assert any(m.dis.idomain.array[k, i, j] == 0)
+    remove_inactive_bcs(m.chd)
+    if m.version != 'mf6':
+        k, i, j = zip(*m.chd.stress_period_data.data[0][['k', 'i', 'j']])
+    else:
+        k, i, j = zip(*m.chd.stress_period_data.data[0]['cellid'])
+    assert np.all(idm[k, i, j] == 1)
