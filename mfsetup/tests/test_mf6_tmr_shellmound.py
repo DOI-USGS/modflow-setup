@@ -148,23 +148,32 @@ def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):
     hdsobj = bf.HeadFile(m.tmr.parent_head_file, precision='double')
     parent_heads = hdsobj.get_data(kstpkper=(0, 0))
 
+
+    # interpolate inset boundary heads using interpolate method in Tmr class
+    # apparently we can't just use griddata to do this because
+    # 'linear' leaves out some values (presumably due to weights that
+    # don't exactly sum to 1 because of floating point error)
+    # and 'nearest' leaves in too many values (presumably due to extrapolation)
+    # todo: should probably look into a method that is friendlier
+    #  to interpolating data from regular grids (the parent model),
+    # such as interpn (which xarray uses) although regular grid methods
+    # wouldn't work for 3 or 4D interpolation because z is irregular
+    bheads_tmr = m.tmr.interpolate_values(parent_heads.ravel(), method='linear')
+
     # x, y, z locations of parent model head values
     px, py, pz = m.tmr.parent_xyzcellcenters
 
     # x, y, z locations of inset model boundary cells
     x, y, z = bcells[['x', 'y', 'z']].T.values
 
-    # interpolate inset boundary heads from 3D parent head solution
-    bheads = griddata((px, py, pz), parent_heads.ravel(),
-                      (x, y, z), method='linear')
-    bcells['bhead'] = bheads
+    bcells['bhead_tmr'] = bheads_tmr
     # only include valid heads, for cells that are active and not above the water table
-    valid = (bcells['bhead'] < 1e10) & (bcells['bhead'] > -1e10) & \
-            (bcells['idomain'] > 0) & (bcells['bhead'] > bcells['botm'])
+    valid_tmr = (bcells['bhead_tmr'] < 1e10) & (bcells['bhead_tmr'] > -1e10) & \
+            (bcells['idomain'] > 0) & (bcells['bhead_tmr'] > bcells['botm'])
 
     # valid bcells derived above should have same collection of cell numbers
     # as recarray in constant head package
-    assert len(set(bcells.loc[valid, 'cellid'])) == len(ra)
+    assert len(set(bcells.loc[valid_tmr, 'cellid'])) == len(ra)
 
     # additional code to generate layers for visual comparison in a GIS environment
     export_layers = False
@@ -180,6 +189,27 @@ def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):
         parent_max_extent = np.sum(m.parent.dis.idomain.array == 1, axis=0) > 0
         export_array(rpath / 'parent_max_idm_extent.tif',
                      parent_max_extent, modelgrid=m.parent.modelgrid)
+
+        # and for comparison plot of different interpolation results
+        # nearest neighbor (can extrapolate)
+        bheads_nearest = griddata((px, py, pz), parent_heads.ravel(),
+                                  (x, y, z), method='nearest')
+        bheads_nearest[(bheads_nearest > 1e10) | (bheads_nearest < -1e10)] = np.nan
+        # linear method with griddata
+        # (apparently prone to some spurious values that are rectified
+        # by computing the weights manually and then rounding them)
+        bheads_griddata_linear = griddata((px, py, pz), parent_heads.ravel(),
+                                          (x, y, z), method='linear')
+        bheads_griddata_linear[(bheads_griddata_linear > 1e10) | \
+                               (bheads_griddata_linear < -1e10)] = np.nan
+        bheads_tmr[(bheads_tmr > 1e10) | (bheads_tmr < -1e10)] = np.nan
+        from matplotlib import pyplot as plt
+        plt.plot(bheads_nearest, label='bheads_nearest')
+        plt.plot(bheads_tmr, label='bheads_tmr')
+        plt.plot(bheads_griddata_linear, label='bheads_linear')
+        ax = plt.gca()
+        #ax.set_ylim(33, 33.6); ax.set_xlim(0, 350)
+        ax.legend()
 
 
 def test_set_parent_model(shellmound_tmr_model_with_dis):

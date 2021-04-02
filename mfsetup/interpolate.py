@@ -79,7 +79,12 @@ def interp_weights(xyz, uvw, d=2):
     delta = uvw - temp[:, d]
     bary = np.einsum('njk,nk->nj', temp[:, :d, :], delta)
     print("finished in {:.2f}s\n".format(time.time() - t0))
-    return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
+    weights = np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
+    # round the weights,
+    # so that the weights for each simplex sum to 1
+    # sums not exactly == 1 seem to cause spurious values
+    weights = np.round(weights, 6)
+    return vertices, weights
 
 
 def interpolate(values, vtx, wts, fill_value='mean'):

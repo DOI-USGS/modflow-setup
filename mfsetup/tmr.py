@@ -1202,13 +1202,13 @@ class TmrNew:
                 df = df.loc[valid]
                 dfs.append(df)
                 print("took {:.2f}s".format(time.time() - t1))
-            df = pd.concat(dfs)
 
-            # drop duplicate cells
+            df = pd.concat(dfs)
+            # drop duplicate cells (accounting for stress periods)
             # (that may have connections in the x and y directions,
             #  and therefore would be listed twice)
             df['cellid'] = list(zip(df.per, df.k, df.i, df.j))
-            duplicates = df.duplicated(subset='cellid')
+            duplicates = df.duplicated(subset=['cellid'])
             df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'head']]
             print("getting perimeter heads took {:.2f}s\n".format(time.time() - t0))
 

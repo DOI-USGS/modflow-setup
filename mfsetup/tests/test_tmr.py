@@ -142,6 +142,7 @@ def test_get_boundary_cells_shapefile(shellmound_tmr_model_with_dis, test_data_p
         df.drop('cellid', axis=1).to_file(out_shp)
 
 
+@pytest.mark.skip(reason="still working on this test")
 def test_get_boundary_heads(shellmound_tmr_model_with_dis, test_data_path):
     m = shellmound_tmr_model_with_dis
     boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
