@@ -27,6 +27,7 @@ Modflow-setup is intended to facilitate automated setup of MODFLOW models, from 
 
    Basic program structure and usage <structure>
    The configuration file <config-file>
+   Concepts and Methods <concepts/index.rst>
 
 
 .. toctree::

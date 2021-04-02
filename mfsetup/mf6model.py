@@ -1007,7 +1007,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # remove any BCs in inactive cells
         pckgs = ['CHD']
         for pckg in pckgs:
-            remove_inactive_bcs(pckg)
+            package_instance = getattr(self, pckg.lower(), None)
+            if package_instance is not None:
+                remove_inactive_bcs(package_instance)
 
         # write the model with flopy
         # but skip the sfr package

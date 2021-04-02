@@ -11,7 +11,11 @@ import pandas as pd
 fm = flopy.modflow
 from flopy.modflow import Modflow
 
-from mfsetup.bcs import setup_flopy_stress_period_data, setup_ghb_data
+from mfsetup.bcs import (
+    remove_inactive_bcs,
+    setup_flopy_stress_period_data,
+    setup_ghb_data,
+)
 from mfsetup.discretization import (
     deactivate_idomain_above,
     find_remove_isolated_cells,
@@ -843,6 +847,14 @@ class MFnwtModel(MFsetupMixin, Modflow):
     def write_input(self):
         """Write the model input.
         """
+        # prior to writing output
+        # remove any BCs in inactive cells
+        pckgs = ['CHD']
+        for pckg in pckgs:
+            package_instance = getattr(self, pckg.lower(), None)
+            if package_instance is not None:
+                remove_inactive_bcs(package_instance)
+
         # write the model with flopy
         # but skip the sfr package
         # by monkey-patching the write method

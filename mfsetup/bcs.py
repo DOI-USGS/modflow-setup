@@ -250,6 +250,7 @@ def remove_inactive_bcs(pckg):
         new_spd[per] = rec[active[k, i, j]]
     pckg.stress_period_data = new_spd
 
+
 def squeeze_columns(df, fillna=0.):
     """Drop columns where the forward difference
     (along axis 1, the column axis) is 0 in all rows.

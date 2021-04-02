@@ -155,9 +155,11 @@ def test_tdis_setup(get_pleasant_mf6):
     m.write_input()
     results = read_mf6_block(m.simulation.tdis.filename, 'perioddata')
     for i, line in enumerate(results['perioddata'][1:]):
-        start_date, end_date = line.split('#')[1].strip().split('to')
-        assert pd.Timestamp(start_date) == m.perioddata.start_datetime[i]
-        assert pd.Timestamp(end_date) == m.perioddata.end_datetime[i]
+        start_date, end_date = line.split(':')[1].strip().split('to')
+        expected_start_date = pd.Timestamp(m.perioddata.start_datetime[i])
+        expected_end_date = pd.Timestamp(m.perioddata.end_datetime[i])
+        assert pd.Timestamp(start_date) == expected_start_date
+        assert pd.Timestamp(end_date) == expected_end_date
 
 
 def test_dis_setup(get_pleasant_mf6_with_grid):
