@@ -1009,7 +1009,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         for pckg in pckgs:
             package_instance = getattr(self, pckg.lower(), None)
             if package_instance is not None:
-                remove_inactive_bcs(package_instance)
+                external_files = self.cfg[pckg.lower()]['stress_period_data']
+                remove_inactive_bcs(package_instance,
+                                    external_files=external_files)
 
         # write the model with flopy
         # but skip the sfr package

@@ -226,7 +226,7 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
     return df
 
 
-def remove_inactive_bcs(pckg):
+def remove_inactive_bcs(pckg, external_files=False):
     """Remove boundary conditions from cells that are inactive.
 
     Parameters
@@ -248,7 +248,26 @@ def remove_inactive_bcs(pckg):
         else:
             k, i, j = zip(*rec[['k', 'i', 'j']])
         new_spd[per] = rec[active[k, i, j]]
-    pckg.stress_period_data = new_spd
+
+    if external_files:
+        if model.version == 'mf6':
+            spd_input = {}
+            for per, filename in external_files.items():
+                df = pd.DataFrame(new_spd[per])
+                df['#k'], df['i'], df['j'] = zip(*df['cellid'])
+                df[['#k', 'i', 'j']] += 1  # convert to 1-based for external file
+                cols = ['#k', 'i', 'j'] + list(new_spd[per].dtype.names[1:])
+                if isinstance(filename, dict):
+                    filename = filename['filename']
+                df[cols].to_csv(filename, index=False, sep=' ', float_format='%g')
+                spd_input[per] = {'filename': filename}
+                # make a copy for the intermediate data folder, for consistency with mf-2005
+                #shutil.copy(file_entry['filename'], model.cfg['intermediate_data']['output_folder'])
+            pckg.stress_period_data = spd_input
+        else:
+            raise NotImplementedError('External file input for MODFLOW-2005-style list-type data.')
+    else:
+        pckg.stress_period_data = new_spd
 
 
 def squeeze_columns(df, fillna=0.):
