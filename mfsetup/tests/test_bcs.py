@@ -3,6 +3,7 @@ import os
 import numpy as np
 
 from mfsetup.bcs import get_bc_package_cells, remove_inactive_bcs
+from mfsetup.fileio import read_mf6_block
 from mfsetup.testing import dtypeisinteger
 
 
@@ -110,9 +111,17 @@ def test_remove_inactive_bcs(basic_model_instance):
         m.dis.idomain = idm
         k, i, j = zip(*m.chd.stress_period_data.data[0]['cellid'])
         assert any(m.dis.idomain.array[k, i, j] == 0)
-    remove_inactive_bcs(m.chd)
+    external_files = m.cfg['chd']['stress_period_data']
+    remove_inactive_bcs(m.chd, external_files=external_files)
     if m.version != 'mf6':
         k, i, j = zip(*m.chd.stress_period_data.data[0][['k', 'i', 'j']])
     else:
         k, i, j = zip(*m.chd.stress_period_data.data[0]['cellid'])
     assert np.all(idm[k, i, j] == 1)
+
+    # test that package still writes external files
+    if external_files:
+        m.chd.write()
+        perioddata = read_mf6_block(m.chd.filename, 'period')
+        for per, data in perioddata.items():
+            assert data[0].split()[0].strip() == 'open/close'
