@@ -110,7 +110,8 @@ def interpolate(values, vtx, wts, fill_value='mean'):
     # and for an unknown reason on the Appveyor Windows environment
     if fill_value == 'mean':
         fill_value = np.nanmean(result)
-    result[np.any(wts < 0, axis=1)] = fill_value
+    if fill_value is not None:
+        result[np.any(wts < 0, axis=1)] = fill_value
     return result
 
 
