@@ -980,10 +980,27 @@ class TmrNew:
         (defined by the _source_grid_mask property) around the
         inset model."""
         px, py, pz = self.parent.modelgrid.xyzcellcenters
+
+        # add an extra layer on the top and bottom
+        # for inset model cells above or below
+        # the last cell center in the vert. direction
+        # pad top by top layer thickness
+        b1 = self.parent.modelgrid.top - self.parent.modelgrid.botm[0]
+        top = pz[0] + b1
+        # pad botm by botm layer thickness
+        if self.parent.modelgrid.shape[0] > 1:
+            b2 = -np.diff(self.parent.modelgrid.botm[-2:], axis=0)[0]
+        else:
+            b2 = b1
+        botm = pz[-1] - b2
+        pz = np.vstack([[top], pz, [botm]])
+
         nlay, nrow, ncol = pz.shape
         px = np.tile(px, (nlay, 1, 1))
         py = np.tile(py, (nlay, 1, 1))
         mask = self._source_grid_mask
+        # mask already has extra top/botm layers
+        # (_source_grid_mask property)
         px = px[mask]
         py = py[mask]
         pz = pz[mask]
@@ -1009,10 +1026,11 @@ class TmrNew:
                 j1 = np.min([pj.max() + pad + 1, self.parent.modelgrid.ncol])
                 mask[i0:i1, j0:j1] = True
             # make the mask 3D
-            mask3d = np.tile(mask, (self.parent.modelgrid.nlay, 1, 1))
+            # include extra layer for top and bottom edges of model
+            mask3d = np.tile(mask, (self.parent.modelgrid.nlay + 2, 1, 1))
             self._source_mask = mask3d
         elif len(self._source_mask.shape) == 2:
-            mask3d = np.tile(self._source_mask, (self.parent.modelgrid.nlay, 1, 1))
+            mask3d = np.tile(self._source_mask, (self.parent.modelgrid.nlay + 2, 1, 1))
             self._source_mask = mask3d
         return self._source_mask
 
@@ -1182,6 +1200,11 @@ class TmrNew:
                     parent_periods.append(parent_per)
                 parent_kstpkper = last_steps[parent_per], parent_per
                 parent_heads = hdsobj.get_data(kstpkper=parent_kstpkper)
+                # pad the parent heads on the top and bottom
+                # so that inset cells above and below the top/bottom cell centers
+                # will be within the interpolation space
+                # (parent x, y, z locations already contain this pad; parent_xyzcellcenters)
+                parent_heads = np.pad(parent_heads, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
 
                 # interpolate inset boundary heads from 3D parent head solution
                 heads = self.interpolate_values(parent_heads, method='linear')
@@ -1240,7 +1263,8 @@ class TmrNew:
         """
         parent_values = source_array.flatten()[self._source_grid_mask.flatten()]
         if method == 'linear':
-            interpolated = interpolate(parent_values, *self.interp_weights)
+            interpolated = interpolate(parent_values, *self.interp_weights,
+                                       fill_value=None)
         elif method == 'nearest':
             # x, y, z locations of parent model head values
             px, py, pz = self.parent_xyzcellcenters

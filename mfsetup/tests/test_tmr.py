@@ -142,8 +142,28 @@ def test_get_boundary_cells_shapefile(shellmound_tmr_model_with_dis, test_data_p
         df.drop('cellid', axis=1).to_file(out_shp)
 
 
-@pytest.mark.skip(reason="still working on this test")
 def test_get_boundary_heads(shellmound_tmr_model_with_dis, test_data_path):
+    m = shellmound_tmr_model_with_dis
+    boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    parent_head_file = test_data_path / 'shellmound/tmr_parent/shellmound.hds'
+    tmr = TmrNew(m.parent, m, parent_head_file=parent_head_file,
+                 inset_parent_period_mapping=m.parent_stress_periods,
+                 boundary_type='head',
+                 shapefile=boundary_shapefile)
+    perimeter_df = tmr.get_inset_boundary_values()
+    m.setup_chd()
+    dfs = []
+    for per, data in m.chd.stress_period_data.data.items():
+        df = pd.DataFrame(data)
+        df['per'] = per
+        dfs.append(df)
+    df = pd.concat(dfs)
+    df['k'], df['i'], df['j'] = list(zip(*df['cellid']))
+    j=2
+
+
+@pytest.mark.skip(reason="still working on this test")
+def test_get_boundary_heads_transient(shellmound_tmr_model_with_dis, test_data_path):
     m = shellmound_tmr_model_with_dis
     boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
     tmr = TmrNew(m.parent, m,
