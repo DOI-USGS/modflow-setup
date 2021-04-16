@@ -662,6 +662,37 @@ def test_sfr_setup(model_with_sfr):
         assert m.sfrdata.reach_data.loc[m.sfrdata.reach_data.line_id == outlet_id,
                                         'outseg'].sum() == 0
 
+    # check that adding runoff works
+    runoff_period_data = m.sfrdata.period_data.dropna(subset=['runoff'], axis=0)
+    # only compare periods 2-7 (2007-04-01 to 2010-04-01)
+    runoff_period_data = runoff_period_data.loc[2:].copy()
+    runoff_period_data['line_id_in_model'] = runoff_period_data['line_id_in_model'].astype(int)
+    # sum runoff by line id for each period
+    runoff_period_comid_sums = runoff_period_data.groupby(['per', 'line_id_in_model']).sum()
+    # then take the mean for each line id across periods
+    mean_period_data_runoff_by_comid = runoff_period_comid_sums.groupby('line_id_in_model').mean()
+    # read in the input values
+    df = pd.read_csv('../../data/shellmound/tables/swb_runoff_by_nhdplus_comid_m3d.csv')
+    df = df.loc['2007-04-01':]
+    mean_input_runoff_by_comid = df.groupby('comid').mean()
+
+    # compare
+    mean_input_runoff_by_comid['in_model'] = mean_period_data_runoff_by_comid['runoff']
+    mean_input_runoff_by_comid.dropna(inplace=True)
+    mean_input_runoff_by_comid['diff'] = mean_input_runoff_by_comid['in_model'] - \
+                                         mean_input_runoff_by_comid['runoff_m3d']
+    # compute the absolute relative diff between input and sfr package
+    mean_input_runoff_by_comid['abs_pct'] = np.abs(mean_input_runoff_by_comid['diff']/ \
+                                                   mean_input_runoff_by_comid['runoff_m3d'])
+    # for lines where the model has less runoff, the difference should mostly be small
+    # (due to mismatch in averaging 6-month model stress periods vs. monthly input data)
+    mean_input_runoff_by_comid.loc[mean_input_runoff_by_comid['diff'] < 0, 'abs_pct'].mean() < 0.05
+    # the input data include all catchments (for all NHDPlus lines)
+    # the model only includes NHDPlus lines with > 20k arbolate sum
+    # SFRmaker routes all runoff from missing upstream catchments to the first downstream catchment
+    # that is in the model. So any catchment in the model that is not a headwater in NHDPlus
+    # will have runoff greater than the input data.
+
 
 def test_sfr_inflows_from_csv(model_with_sfr):
     m = model_with_sfr
