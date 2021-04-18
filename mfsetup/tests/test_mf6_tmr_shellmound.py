@@ -148,6 +148,9 @@ def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):
     hdsobj = bf.HeadFile(m.tmr.parent_head_file, precision='double')
     parent_heads = hdsobj.get_data(kstpkper=(0, 0))
 
+    # pad the parent heads on the top and bottom
+    # (as in tmr.get_inset_boundary_values())
+    parent_heads = np.pad(parent_heads, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
 
     # interpolate inset boundary heads using interpolate method in Tmr class
     # apparently we can't just use griddata to do this because

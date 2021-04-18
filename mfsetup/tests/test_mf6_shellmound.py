@@ -701,7 +701,8 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     inflow_input = pd.read_csv(m.cfg['sfr']['source_data']['inflows']['filename'])
     inflow_input['start_datetime'] = pd.to_datetime(inflow_input['datetime'])
     inflow_input.index = inflow_input['start_datetime']
-    sfr_pd = m.sfrdata.period_data.dropna(axis=1)
+    #sfr_pd = m.sfrdata.period_data.dropna(axis=1)
+    sfr_pd = m.sfrdata.period_data.dropna(subset=['inflow'], axis=0).reset_index()
     sfr_pd.index = sfr_pd.start_datetime
 
     line_id = 18021542
