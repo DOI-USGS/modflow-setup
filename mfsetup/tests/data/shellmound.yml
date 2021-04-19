@@ -56,7 +56,7 @@ model:
              'oc',
              'sto',
              'rch',
-             #'sfr',
+             'sfr',
              'obs',
              'wel',
              'ims'
@@ -244,6 +244,12 @@ sfr:
       line_id_column: 'line_id'
       data_column: 'flow_m3d'  # flows are already in cubic meters/day; can therefore skip unit input
       category_column: 'category'
+    observations:  # see sfrmaker.observations.add_observations for arguments
+      filename: shellmound/tables/observations.csv
+      obstype: [downstream-flow, 'stage']  # modflow-6 observation type
+      x_location_column: x  # observation locations, in CRS coordinates
+      y_location_column: y
+      obsname_column: site_no  # column for naming observations
     # specified runoff
     # that has been reprocessed to units of m3/day per line ID
     runoff:  # see sfrmaker.data.add_to_perioddata for arguments
