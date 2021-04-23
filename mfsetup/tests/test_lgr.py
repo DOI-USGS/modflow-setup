@@ -113,8 +113,10 @@ def test_lgr_grid_setup(get_pleasant_lgr_parent_with_grid):
     assert inset_model.parent is m
     assert isinstance(m.lgr[inset_model.name], flopy.utils.lgrutil.Lgr)
     if os.environ.get('CI', 'false').lower() != 'true':
-        m.modelgrid.write_shapefile('../../../modflow-setup-dirty/pleasant_mf6_postproc/shps/pleasant_lgr_parent_grid.shp')
-        inset_model.modelgrid.write_shapefile('../../../modflow-setup-dirty/pleasant_mf6_postproc/shps/pleasant_lgr_inset_grid.shp')
+        outfolder = Path(m._shapefiles_path)
+        output_shapefile = 'pleasant_lgr_parent_grid.shp'
+        m.modelgrid.write_shapefile(outfolder / 'pleasant_lgr_parent_grid.shp')
+        inset_model.modelgrid.write_shapefile(outfolder / 'pleasant_lgr_inset_grid.shp')
 
     # verify that lgr area was removed from parent idomain
     lgr_idomain = make_lgr_idomain(m.modelgrid, inset_model.modelgrid)
