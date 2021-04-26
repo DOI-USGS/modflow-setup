@@ -673,8 +673,22 @@ def test_sfr_setup(model_with_sfr):
     mean_period_data_runoff_by_comid = runoff_period_comid_sums.groupby('line_id_in_model').mean()
     # read in the input values
     df = pd.read_csv('../../data/shellmound/tables/swb_runoff_by_nhdplus_comid_m3d.csv')
+    df['time'] = pd.to_datetime(df['time'])
     df = df.loc['2007-04-01':]
     mean_input_runoff_by_comid = df.groupby('comid').mean()
+
+    # todo: compare mean annual runoff between input and model period_data
+    # ONLY the input that is in the model
+    # something like
+    # runoff_period_data.groupby(runoff_period_data.start_datetime.dt.year)['runoff'].sum().mean()
+    # df.groupby(df.time.dt.year)['runoff_m3d'].sum().mean()
+    # can't easily do this currently because just have comid in the input csv (no x, y info)
+    mean_annual_roff = runoff_period_data.groupby(runoff_period_data.start_datetime.dt.year)\
+        ['runoff'].sum().mean()
+    # with just supplied flowlines, mean_annual_roff is ~386,829
+    # with full routing info (including culled flowlines; in flowline_routing.csv),
+    # mean_annual_roff is ~839,144
+    assert mean_annual_roff > 8e5
 
     # compare
     mean_input_runoff_by_comid['in_model'] = mean_period_data_runoff_by_comid['runoff']

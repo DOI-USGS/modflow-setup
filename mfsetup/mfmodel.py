@@ -1419,6 +1419,9 @@ class MFsetupMixin():
             # to 0 (outlet condition)
             routing = {k: v if v in routing.keys() else 0
                        for k, v in routing.items()}
+        # use _original_routing attached to Lines instance as default
+        else:
+            routing = lines._original_routing
 
         # add inflows
         inflows_input = self.cfg['sfr'].get('source_data', {}).get('inflows')
@@ -1431,19 +1434,12 @@ class MFsetupMixin():
 
             # check if all inflow sites are included in sfr network
             missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
-                                difference(lines._original_routing.keys())
+                                difference(routing.keys())
+            # if there are missing sites, try using the supplied routing
             if any(missing_sites):
-                if routing_input is None:
-                    raise KeyError(('inflow sites {} are not within the model sfr network. '
-                                   'Please supply an inflows_routing source_data block '
-                                    '(see shellmound example config file)'.format(missing_sites)))
-                else:
-                    routing = lines._original_routing
-                missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
-                                    difference(routing.keys())
-                if any(missing_sites):
-                    raise KeyError(('Inflow sites {} not found in {}'.format(missing_sites,
-                                                                            routing_input['filename'])))
+                raise KeyError(('inflow sites {} are not within the model sfr network. '
+                                'Please supply an inflows_routing source_data block '
+                                '(see shellmound example config file)'.format(missing_sites)))
 
             # add resampled inflows to SFR package
             inflows_input['data'] = inflows_by_stress_period
@@ -1466,16 +1462,14 @@ class MFsetupMixin():
                                                         dest_model=self)
             runoff_by_stress_period = sd.get_data()
 
-            # check if all inflow sites are included in sfr network
+            # check if all sites are included in sfr network
             missing_sites = set(runoff_by_stress_period[runoff_input['id_column']]). \
-                                difference(lines._original_routing.keys())
+                                difference(routing.keys())
             if any(missing_sites):
-                if routing_input is None:
-                    raise KeyError(('inflow sites {} are not within the model sfr network. '
-                                   'Please supply an inflows_routing source_data block '
-                                    '(see shellmound example config file)'.format(missing_sites)))
-                else:
-                    routing = lines._original_routing
+                warnings.warn(('runoff sites {} are not within the model sfr network. '
+                               'Please supply an inflows_routing source_data block '
+                               '(see shellmound example config file)'.format(missing_sites)),
+                               UserWarning)
 
             # add resampled inflows to SFR package
             runoff_input['data'] = runoff_by_stress_period
