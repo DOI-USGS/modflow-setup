@@ -151,7 +151,17 @@ class MFsetupMixin():
         """Test for equality to another model object."""
         if not isinstance(other, self.__class__):
             return False
-        if sorted(other.get_package_list()) != sorted(self.get_package_list()):
+        # kludge: exclude SFR_OBS package from comparison
+        # (which is handled by SFRmaker instead of Flopy;
+        # a loaded version of a model might have SFR_OBS,
+        # where a freshly made version may not (even though SFRmaker will write it)
+        # )
+        exceptions = {'SFR_OBS'}
+        other_packages = [s for s in sorted(other.get_package_list())
+                          if s not in exceptions]
+        packages = [s for s in sorted(self.get_package_list())
+                    if s not in exceptions]
+        if other_packages != packages:
             return False
         if other.modelgrid != self.modelgrid:
             return False
@@ -202,6 +212,8 @@ class MFsetupMixin():
     @property
     def modelgrid(self):
         if self._modelgrid is None:
+            self.setup_grid()
+        elif self._modelgrid.nlay is None:
             self.setup_grid()
         return self._modelgrid
 
