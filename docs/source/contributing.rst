@@ -5,24 +5,73 @@ Contributing to modflow-setup
 which has similar guidelines to `pandas <http://pandas.pydata.org/pandas-docs/stable/contributing.html>`_
 and `xarray <http://xarray.pydata.org/en/stable/>`_.)
 
-Overview
---------
+Getting started
+----------------
+All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. If an issue that interests you isn't already listed in the `Issues tab`_, consider `filing an issue`_.
 
-Contributions to modflow-setup are very welcome.  They are likely to
-be accepted more quickly if they follow these guidelines.
+Bug reports and enhancement requests
+------------------------------------------------
+Bug reports are an important part of improving Modflow-setup. Having a complete bug report
+will allow others to reproduce the bug and provide insight into fixing. See
+`this stackoverflow article <https://stackoverflow.com/help/mcve>`_ and
+`this blogpost <https://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports>`_
+for tips on writing a good bug report.
 
-In general, modflow-setup follows the conventions of the pandas project
-where applicable.
+Trying the bug-producing code out on the *develop* branch is often a worthwhile exercise
+to confirm the bug still exists. It is also worth searching existing bug reports and pull requests
+to see if the issue has already been reported and/or fixed.
+
+To file a bug report or enhancement request, from the issues tab on the `Modflow-setup GitHub page <https://github.com/aleaf/modflow-setup>`_, select "New Issue".
+
+Bug reports must:
+
+#. Include a short, self-contained Python snippet reproducing the problem, along with the contents of your configuration file and the full error traceback.
+   You can format the code nicely by using `GitHub Flavored Markdown
+   <https://github.github.com/github-flavored-markdown/>`_::
+
+      ```python
+      >>> import mfsetup
+      >>> m = MF6model.setup_from_yaml('pleasant_lgr_parent.yml')
+      ```
+
+   e.g.::
+
+      ```yaml
+      <paste configuration file contents here>
+      ```
+
+      ```python
+      <paste error traceback here>
+      ```
+
+#. Include the version of Modflow-setup that you are running, which can be obtained with:
+
+   .. code-block:: python
+
+       import mfsetup
+       mfsetup.__version__
+
+   Depending on the issue, it may also be helpful to include information about the version(s)
+   of python, key dependencies (e.g. numpy, pandas, etc) and operating system. You can get the versions of packages in a conda python environment with::
+
+        conda list
+
+#. Explain why the current behavior is wrong/not desired and what you expect instead.
+
+The issue will then be visible on the `Issues tab`_ and open to comments/ideas from others.
+
+
+Code contributions
+------------------------------
+Code contributions to Modflow-setup to fix bugs, implement new features or improve existing code are encouraged. Regardless of the context, consider `filing an issue`_ first to make others aware of the problem and allow for discussion on potential approaches to addressing it.
+
+In general, Modflow-setup trys to follow the conventions of the pandas project where applicable. Contributions to Modflow-setup are likely to be accepted more quickly if they follow these guidelines.
 
 In particular, when submitting a pull request:
 
 - All existing tests should pass.  Please make sure that the test
   suite passes, both locally and on
-  `Travis CI <https://travis-ci.org/modflow-setup/modflow-setup>`_.  Status on
-  Travis will be visible on a pull request.  If you want to enable
-  Travis CI on your own fork, please read the pandas guidelines link
-  above or the
-  `getting started docs <https://docs.travis-ci.com/user/tutorial/>`_.
+  `GitHub Actions <https://github.com/aleaf/modflow-setup/actions>`_. Status with GitHub Actions will be visible on a pull request.
 
 - New functionality should include tests.  Please write reasonable
   tests for your code and make sure that they pass on your pull request.
@@ -283,3 +332,6 @@ From the root of the modflow-setup repository, you should then install the
    $ pre-commit install
 
 Then ``isort`` will be run automatically each time you commit changes. You can skip these checks with ``git commit --no-verify``.
+
+.. _filing an issue: https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/creating-an-issue
+.. _Issues tab: https://github.com/aleaf/modflow-setup/issues
