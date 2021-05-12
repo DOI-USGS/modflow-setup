@@ -61,8 +61,8 @@ def test_rotated_tmr(rotated_parent, shellmound_cfg, tmpdir, test_data_path):
     cfg['setup_grid']['xoff'] = 517425
     cfg['setup_grid']['yoff'] = 1178441
     cfg['setup_grid']['dxy'] = 250
-    cfg['dis']['dimensions']['nrow'] = 10
-    cfg['dis']['dimensions']['ncol'] = 10
+    cfg['dis']['dimensions']['nrow'] = 15
+    cfg['dis']['dimensions']['ncol'] = 15
 
     # make parent block
     cfg['parent'] = {}

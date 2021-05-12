@@ -719,7 +719,7 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     sfr_pd = m.sfrdata.period_data.dropna(subset=['inflow'], axis=0).reset_index()
     sfr_pd.index = sfr_pd.start_datetime
 
-    line_id = 18021542
+    line_id = inflow_input['line_id'].unique()[0]
     left = inflow_input.loc[inflow_input.line_id == line_id].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
     lookup = dict(zip(sfr_pd.specified_line_id, sfr_pd.rno))
     rno = lookup[line_id]
