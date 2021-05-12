@@ -650,6 +650,8 @@ def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_d
     model_botm = model_botm.copy()
     if len(model_botm.shape) == 2:
         model_botm = np.reshape(model_botm, (1, *model_botm.shape))
+    if np.any(np.isnan(z_edges)):
+        raise NotImplementedError("Nan values in z_edges array not allowed!")
     z_values = np.array(z_edges)[1:]
 
     # convert nodata values to nans
