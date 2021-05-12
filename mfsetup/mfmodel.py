@@ -213,7 +213,7 @@ class MFsetupMixin():
     def modelgrid(self):
         if self._modelgrid is None:
             self.setup_grid()
-        elif self._modelgrid.nlay is None:
+        elif self._modelgrid.nlay is None and 'DIS' in self.get_package_list():
             self.setup_grid()
         return self._modelgrid
 
