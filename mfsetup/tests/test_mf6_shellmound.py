@@ -487,15 +487,19 @@ def test_obs_setup(shellmound_model_with_dis, config):
                 break
 
 
-@pytest.mark.parametrize('options', [{'saverecord': {0: {'head': 'last',
-                                                         'budget': 'last'}}},
-                                     {'period_options': {0: ['save head last',
-                                                             'save budget last']}}
+@pytest.mark.parametrize('input', [
+    # flopy-style input
+    {'saverecord': {0: {'head': 'last', 'budget': 'last'}}},
+    # MODFLOW 6-style input
+    {'period_options': {0: ['save head last', 'save budget last']}},
+    # blank period to skip subsequent periods
+    {'period_options': {0: ['save head last', 'save budget last'],
+                        1: []}}
                                         ])
-def test_oc_setup(shellmound_model_with_dis, options):
+def test_oc_setup(shellmound_model_with_dis, input):
     cfg = {'head_fileout_fmt': '{}.hds',
            'budget_fileout_fmt': '{}.cbc'}
-    cfg.update(options)
+    cfg.update(input)
     m = shellmound_model_with_dis  # deepcopy(model)
     m.cfg['oc'] = cfg
     oc = m.setup_oc()
@@ -506,10 +510,15 @@ def test_oc_setup(shellmound_model_with_dis, options):
     options = read_mf6_block(ocfile, 'options')
     options = {k: ' '.join(v).lower() for k, v in options.items()}
     perioddata = read_mf6_block(ocfile, 'period')
+    # convert back to zero-based
+    perioddata = {k-1:v for k, v in perioddata.items()}
     assert 'fileout' in options['budget'] and '.cbc' in options['budget']
     assert 'fileout' in options['head'] and '.hds' in options['head']
-    assert 'save head last' in perioddata[1]
-    assert 'save budget last' in perioddata[1]
+    if 'saverecord' in input:
+        assert 'save head last' in perioddata[0]
+        assert 'save budget last' in perioddata[0]
+    else:
+        assert perioddata == input['period_options']
 
 
 def test_rch_setup(shellmound_model_with_dis):
@@ -728,7 +737,7 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     pd.testing.assert_series_equal(left, right, check_names=False, check_freq=False)
 
 
-#@pytest.mark.xfail(reason='flopy remove_package() issue')
+@pytest.mark.xfail(reason='flopy remove_package() issue')
 def test_idomain_above_sfr(model_with_sfr):
     m = model_with_sfr
     sfr = m.sfr

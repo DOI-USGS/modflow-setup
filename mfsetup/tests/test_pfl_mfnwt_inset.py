@@ -515,7 +515,6 @@ def test_lak_setup(pfl_nwt_with_dis):
 
 
 def test_nwt_setup(pfl_nwt, project_root_path):
-
     m = pfl_nwt  #deepcopy(pfl_nwt)
     m.cfg['nwt']['use_existing_file'] = project_root_path + '/mfsetup/tests/data/RGN_rjh_3_23_18.NWT'
     nwt = m.setup_nwt()
@@ -525,12 +524,23 @@ def test_nwt_setup(pfl_nwt, project_root_path):
     nwt.write_file()
 
 
-def test_oc_setup(pfl_nwt):
+@pytest.mark.parametrize('input,expected', [
+    # MODFLOW 6-style input
+    ({'period_options': {0: ['save head last', 'save budget last'],
+                         1: []}},
+     {'stress_period_data': {(0, 0): ['save head', 'save budget'],
+                            (0, 1): []}}),
+    # MODFLOW 2005-style input
+    ({'stress_period_data': {(0, 0): ['save head', 'save budget'],
+                            (0, 1): []}},
+     {'stress_period_data': {(0, 0): ['save head', 'save budget'],
+                            (0, 1): []}})
+])
+def test_oc_setup(pfl_nwt, input, expected):
     m = pfl_nwt
+    m.cfg['oc'].update(input)
     oc = m.setup_oc()
-    for (kper, kstp), words in oc.stress_period_data.items():
-        assert kstp == m.perioddata.loc[kper, 'nstp'] - 1
-        assert words == m.perioddata.loc[kper, 'oc']
+    assert oc.stress_period_data == expected['stress_period_data']
 
     # TODO: add datetime comments to OC file
 

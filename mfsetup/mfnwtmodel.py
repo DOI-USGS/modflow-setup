@@ -38,6 +38,7 @@ from mfsetup.lakes import (
 )
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.obs import read_observation_data, setup_head_observations
+from mfsetup.oc import parse_oc_period_input
 from mfsetup.tdis import get_parent_stress_periods, setup_perioddata_group
 from mfsetup.tmr import TmrNew
 from mfsetup.units import convert_length_units, itmuni_text, lenuni_text
@@ -324,12 +325,18 @@ class MFnwtModel(MFsetupMixin, Modflow):
         package = 'oc'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        stress_period_data = {}
-        for i, r in self.perioddata.iterrows():
-            stress_period_data[(r.per, r.nstp -1)] = r.oc
+        #stress_period_data = {}
+        #for i, r in self.perioddata.iterrows():
+        #    stress_period_data[(r.per, r.nstp -1)] = r.oc
 
+        # use stress_period_data if supplied
+        # (instead of period_input defaults)
+        if 'stress_period_data' in self.cfg['oc']:
+            del self.cfg['oc']['period_options']
         kwargs = self.cfg['oc']
-        kwargs['stress_period_data'] = stress_period_data
+        period_input = parse_oc_period_input(kwargs, nstp=self.perioddata.nstp,
+                                             output_fmt='mfnwt')
+        kwargs.update(period_input)
         kwargs = get_input_arguments(kwargs, fm.ModflowOc)
         oc = fm.ModflowOc(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
