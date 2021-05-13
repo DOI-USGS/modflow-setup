@@ -169,7 +169,7 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
     oc_saverecord : dict
         Dictionary with zero-based stress periods as keys and output control options as values.
         Similar to MODFLOW-6 input, the information specified for a period will
-        continue to apply until information for another perior is specified.
+        continue to apply until information for another period is specified.
 
     Returns
     -------

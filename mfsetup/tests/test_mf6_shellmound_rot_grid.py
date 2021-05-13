@@ -117,7 +117,7 @@ def test_rotated_grid(shellmound_cfg, shellmound_simulation, mf6_exe):
     cfg['setup_grid']['yoff'] = yoff
     cfg['setup_grid']['rotation'] = rotation
     cfg['dis']['dimensions']['nrow'] = nrow
-    cfg['dis']['dimensions']['ncol'] = 25
+    cfg['dis']['dimensions']['ncol'] = ncol
 
     cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,

@@ -40,6 +40,7 @@ from mfsetup.lakes import (
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.mover import get_mover_sfr_package_input
 from mfsetup.obs import setup_head_observations
+from mfsetup.oc import parse_oc_period_input
 from mfsetup.tdis import add_date_comments_to_tdis
 from mfsetup.tmr import TmrNew
 from mfsetup.units import convert_time_units
@@ -911,25 +912,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs = self.cfg[package]
         kwargs['budget_filerecord'] = self.cfg[package]['budget_fileout_fmt'].format(self.name)
         kwargs['head_filerecord'] = self.cfg[package]['head_fileout_fmt'].format(self.name)
-        # parse both flopy and mf6-style input into flopy input
-        for rec in ['printrecord', 'saverecord']:
-            if rec in kwargs:
-                data = kwargs[rec]
-                mf6_input = {}
-                for kper, words in data.items():
-                    mf6_input[kper] = []
-                    for var, instruction in words.items():
-                        mf6_input[kper].append((var, instruction))
-                kwargs[rec] = mf6_input
-            elif 'period_options' in kwargs:
-                mf6_input = defaultdict(list)
-                for kper, options in kwargs['period_options'].items():
-                    for words in options:
-                        type, var, instruction = words.split()
-                        if type == rec.replace('record', ''):
-                            mf6_input[kper].append((var, instruction))
-                if len(mf6_input) > 0:
-                    kwargs[rec] = mf6_input
+
+        period_input = parse_oc_period_input(kwargs)
+        kwargs.update(period_input)
 
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfoc)
         oc = mf6.ModflowGwfoc(self, **kwargs)
