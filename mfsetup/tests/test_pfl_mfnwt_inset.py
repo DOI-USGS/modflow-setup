@@ -529,12 +529,12 @@ def test_nwt_setup(pfl_nwt, project_root_path):
     ({'period_options': {0: ['save head last', 'save budget last'],
                          1: []}},
      {'stress_period_data': {(0, 0): ['save head', 'save budget'],
-                            (0, 1): []}}),
+                            (1, 0): []}}),
     # MODFLOW 2005-style input
     ({'stress_period_data': {(0, 0): ['save head', 'save budget'],
-                            (0, 1): []}},
+                            (1, 0): []}},
      {'stress_period_data': {(0, 0): ['save head', 'save budget'],
-                            (0, 1): []}})
+                            (1, 0): []}})
 ])
 def test_oc_setup(pfl_nwt, input, expected):
     m = pfl_nwt

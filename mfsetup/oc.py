@@ -29,6 +29,7 @@ def parse_oc_period_input(period_input, nstp=None, output_fmt='mf6'):
     """
     if nstp is not None:
         nstp = list(nstp)
+        nper = len(nstp)
 
     flopy_input = {}
     mf6_flopy_input = {}
@@ -64,6 +65,7 @@ def parse_oc_period_input(period_input, nstp=None, output_fmt='mf6'):
                                     raise ValueError("MODFLOW 2005-style OC input requires "
                                                         "timestep information.")
                                 # parse MF6-style instructions
+                                # into MF2005 style input
                                 kstp = 0
                                 nstep_idx = kper if kper < len(nstp) else -1
                                 instruction, *values = instruction
@@ -93,9 +95,9 @@ def parse_oc_period_input(period_input, nstp=None, output_fmt='mf6'):
                                 else:
                                     raise ValueError("mfsetup.oc.parse_oc: instruction "
                                                     f"'{instruction}' not understood")
-            if len(mf6_record_input) > 0:
+            if len(mf6_record_input) > 0 and output_fmt == 'mf6':
                 mf6_flopy_input[rec] = dict(mf6_record_input)
-            if len(mf_record_input) > 0:
+            elif len(mf_record_input) > 0:
                 mf_record_input = fill_oc_stress_period_data(mf_record_input, nper=len(nstp))
                 flopy_input['stress_period_data'] = dict(mf_record_input)
     if output_fmt == 'mf6':
