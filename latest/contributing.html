@@ -7,12 +7,15 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Contributing to modflow-setup &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
+  <title>Contributing to modflow-setup &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
 
   
@@ -30,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -67,7 +71,7 @@
             
             
               <div class="version">
-                0.post234+g4726ee3
+                0.post258+g2de0f7d
               </div>
             
           
@@ -103,6 +107,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -110,7 +117,9 @@
 <li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Contributing to modflow-setup</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bug-reports-and-enhancement-requests">Bug reports and enhancement requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-contributions">Code contributions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#seven-steps-for-contributing">Seven Steps for Contributing</a></li>
 </ul>
 </li>
@@ -232,21 +241,66 @@
 <p>(Note: much of this page was cribbed from the <a class="reference external" href="https://geopandas.org/">geopandas</a> project,
 which has similar guidelines to <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/contributing.html">pandas</a>
 and <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a>.)</p>
-<div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>Contributions to modflow-setup are very welcome.  They are likely to
-be accepted more quickly if they follow these guidelines.</p>
-<p>In general, modflow-setup follows the conventions of the pandas project
-where applicable.</p>
+<div class="section" id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. If an issue that interests you isn’t already listed in the <a class="reference external" href="https://github.com/aleaf/modflow-setup/issues">Issues tab</a>, consider <a class="reference external" href="https://docs.github.com/en/free-pro-team&#64;latest/github/managing-your-work-on-github/creating-an-issue">filing an issue</a>.</p>
+</div>
+<div class="section" id="bug-reports-and-enhancement-requests">
+<h2>Bug reports and enhancement requests<a class="headerlink" href="#bug-reports-and-enhancement-requests" title="Permalink to this headline">¶</a></h2>
+<p>Bug reports are an important part of improving Modflow-setup. Having a complete bug report
+will allow others to reproduce the bug and provide insight into fixing. See
+<a class="reference external" href="https://stackoverflow.com/help/mcve">this stackoverflow article</a> and
+<a class="reference external" href="https://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports">this blogpost</a>
+for tips on writing a good bug report.</p>
+<p>Trying the bug-producing code out on the <em>develop</em> branch is often a worthwhile exercise
+to confirm the bug still exists. It is also worth searching existing bug reports and pull requests
+to see if the issue has already been reported and/or fixed.</p>
+<p>To file a bug report or enhancement request, from the issues tab on the <a class="reference external" href="https://github.com/aleaf/modflow-setup">Modflow-setup GitHub page</a>, select “New Issue”.</p>
+<p>Bug reports must:</p>
+<ol class="arabic">
+<li><p>Include a short, self-contained Python snippet reproducing the problem, along with the contents of your configuration file and the full error traceback.
+You can format the code nicely by using <a class="reference external" href="https://github.github.com/github-flavored-markdown/">GitHub Flavored Markdown</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>```python
+&gt;&gt;&gt; import mfsetup
+&gt;&gt;&gt; m = MF6model.setup_from_yaml(&#39;pleasant_lgr_parent.yml&#39;)
+```
+</pre></div>
+</div>
+<p>e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>```yaml
+&lt;paste configuration file contents here&gt;
+```
+
+```python
+&lt;paste error traceback here&gt;
+```
+</pre></div>
+</div>
+</li>
+<li><p>Include the version of Modflow-setup that you are running, which can be obtained with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mfsetup</span>
+<span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+<p>Depending on the issue, it may also be helpful to include information about the version(s)
+of python, key dependencies (e.g. numpy, pandas, etc) and operating system. You can get the versions of packages in a conda python environment with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+<li><p>Explain why the current behavior is wrong/not desired and what you expect instead.</p></li>
+</ol>
+<p>The issue will then be visible on the <a class="reference external" href="https://github.com/aleaf/modflow-setup/issues">Issues tab</a> and open to comments/ideas from others.</p>
+</div>
+<div class="section" id="code-contributions">
+<h2>Code contributions<a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
+<p>Code contributions to Modflow-setup to fix bugs, implement new features or improve existing code are encouraged. Regardless of the context, consider <a class="reference external" href="https://docs.github.com/en/free-pro-team&#64;latest/github/managing-your-work-on-github/creating-an-issue">filing an issue</a> first to make others aware of the problem and allow for discussion on potential approaches to addressing it.</p>
+<p>In general, Modflow-setup trys to follow the conventions of the pandas project where applicable. Contributions to Modflow-setup are likely to be accepted more quickly if they follow these guidelines.</p>
 <p>In particular, when submitting a pull request:</p>
 <ul class="simple">
 <li><p>All existing tests should pass.  Please make sure that the test
 suite passes, both locally and on
-<a class="reference external" href="https://travis-ci.org/modflow-setup/modflow-setup">Travis CI</a>.  Status on
-Travis will be visible on a pull request.  If you want to enable
-Travis CI on your own fork, please read the pandas guidelines link
-above or the
-<a class="reference external" href="https://docs.travis-ci.com/user/tutorial/">getting started docs</a>.</p></li>
+<a class="reference external" href="https://github.com/aleaf/modflow-setup/actions">GitHub Actions</a>. Status with GitHub Actions will be visible on a pull request.</p></li>
 <li><p>New functionality should include tests.  Please write reasonable
 tests for your code and make sure that they pass on your pull request.</p></li>
 <li><p>Classes, methods, functions, etc. should have docstrings.  The first
@@ -483,7 +537,7 @@ can be done by installing <code class="docutils literal notranslate"><span class
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Mar 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

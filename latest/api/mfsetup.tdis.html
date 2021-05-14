@@ -7,12 +7,15 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.tdis module &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
+  <title>mfsetup.tdis module &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
   
@@ -30,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -42,7 +46,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Configuration defaults" href="../config-file-defaults.html" />
+    <link rel="next" title="mfsetup.tmr module" href="mfsetup.tmr.html" />
     <link rel="prev" title="mfsetup.grid module" href="mfsetup.grid.html" /> 
 </head>
 
@@ -67,7 +71,7 @@
             
             
               <div class="version">
-                0.post234+g4726ee3
+                0.post258+g2de0f7d
               </div>
             
           
@@ -103,6 +107,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -113,6 +120,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.tdis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.tmr.html">mfsetup.tmr module</a></li>
 </ul>
 </li>
 </ul>
@@ -221,15 +229,15 @@
 <span id="mfsetup-tdis-module"></span><h1>mfsetup.tdis module<a class="headerlink" href="#module-mfsetup.tdis" title="Permalink to this headline">¶</a></h1>
 <p>Functions related to temporal discretization</p>
 <dl class="py function">
-<dt id="mfsetup.tdis.add_date_comments_to_tdis">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">add_date_comments_to_tdis</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tdis_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_dates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#add_date_comments_to_tdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.add_date_comments_to_tdis" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.add_date_comments_to_tdis">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">add_date_comments_to_tdis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tdis_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_dates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#add_date_comments_to_tdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.add_date_comments_to_tdis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add stress period start and end dates to a tdis file as comments;
 add modflow-setup version info to tdis file header.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.aggregate_dataframe_to_stress_period">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">aggregate_dataframe_to_stress_period</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'datetime'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolve_duplicates_with</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raise</span> <span class="pre">error'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_dataframe_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_dataframe_to_stress_period" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.aggregate_dataframe_to_stress_period">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">aggregate_dataframe_to_stress_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'datetime'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolve_duplicates_with</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raise</span> <span class="pre">error'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_dataframe_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_dataframe_to_stress_period" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate time-series data in a DataFrame to a single value representing
 a period defined by a start and end date.</p>
 <dl class="field-list simple">
@@ -297,55 +305,55 @@ their start dates (as opposed to midpoint dates or end dates).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.aggregate_xarray_to_stress_period">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">aggregate_xarray_to_stress_period</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_xarray_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_xarray_to_stress_period" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.aggregate_xarray_to_stress_period">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">aggregate_xarray_to_stress_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_xarray_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_xarray_to_stress_period" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.concat_periodata_groups">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">concat_periodata_groups</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#concat_periodata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.concat_periodata_groups" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.concat_periodata_groups">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">concat_periodata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#concat_periodata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.concat_periodata_groups" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenate multiple perioddata DataFrames, but sort
 result on (absolute) datetimes and increment model time and stress period
 numbers accordingly.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.convert_freq_to_period_start">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">convert_freq_to_period_start</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#convert_freq_to_period_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.convert_freq_to_period_start" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.convert_freq_to_period_start">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">convert_freq_to_period_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#convert_freq_to_period_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.convert_freq_to_period_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert pandas frequency to period start</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.get_parent_stress_periods">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">get_parent_stress_periods</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_stress_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#get_parent_stress_periods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.get_parent_stress_periods" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.get_parent_stress_periods">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">get_parent_stress_periods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_stress_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#get_parent_stress_periods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.get_parent_stress_periods" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.parse_perioddata_groups">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">parse_perioddata_groups</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#parse_perioddata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.parse_perioddata_groups" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.parse_perioddata_groups">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">parse_perioddata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#parse_perioddata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.parse_perioddata_groups" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reorganize input in perioddata dict into
 a list of groups (dicts).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.setup_perioddata">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">setup_perioddata</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.setup_perioddata">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">setup_perioddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.tdis.setup_perioddata_group">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></code><code class="sig-name descname"><span class="pre">setup_perioddata_group</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perlen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steady</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{0:</span> <span class="pre">True,</span> <span class="pre">1:</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsmult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oc_saverecord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{0:</span> <span class="pre">['save</span> <span class="pre">head</span> <span class="pre">last',</span> <span class="pre">'save</span> <span class="pre">budget</span> <span class="pre">last']}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata_group" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.tdis.setup_perioddata_group">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">setup_perioddata_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perlen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steady</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{0:</span> <span class="pre">True,</span> <span class="pre">1:</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsmult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oc_saverecord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{0:</span> <span class="pre">['save</span> <span class="pre">head</span> <span class="pre">last',</span> <span class="pre">'save</span> <span class="pre">budget</span> <span class="pre">last']}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata_group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets up time discretization for a model; outputs a DataFrame with
 stress period dates/times and properties. Stress periods can be established
 by explicitly specifying perlen as a list of period lengths in
-model units. Or, stress periods can be generated via <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>,
+model units. Or, stress periods can be generated via <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>,
 using three of the start_date_time, end_date_time, nper, and freq arguments.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>start_date_time</strong><span class="classifier">str or datetime-like</span></dt><dd><p>Left bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
+<dt><strong>start_date_time</strong><span class="classifier">str or datetime-like</span></dt><dd><p>Left bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
 </dd>
-<dt><strong>end_date_time</strong><span class="classifier">str or datetime-like, optional</span></dt><dd><p>Right bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
+<dt><strong>end_date_time</strong><span class="classifier">str or datetime-like, optional</span></dt><dd><p>Right bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v1.2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
 </dd>
 <dt><strong>nper</strong><span class="classifier">int, optional</span></dt><dd><p>Number of stress periods. Only used if perlen is None, or in combination with freq
 if an end_date_time isn’t specified.</p>
@@ -372,7 +380,7 @@ information for another period is specified.</p>
 </dd>
 <dt><strong>oc_saverecord</strong><span class="classifier">dict</span></dt><dd><p>Dictionary with zero-based stress periods as keys and output control options as values.
 Similar to MODFLOW-6 input, the information specified for a period will
-continue to apply until information for another perior is specified.</p>
+continue to apply until information for another period is specified.</p>
 </dd>
 </dl>
 </dd>
@@ -460,7 +468,7 @@ simulated. For example, <code class="docutils literal notranslate"><span class="
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../config-file-defaults.html" class="btn btn-neutral float-right" title="Configuration defaults" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mfsetup.tmr.html" class="btn btn-neutral float-right" title="mfsetup.tmr module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="mfsetup.grid.html" class="btn btn-neutral float-left" title="mfsetup.grid module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
@@ -470,7 +478,7 @@ simulated. For example, <code class="docutils literal notranslate"><span class="
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Mar 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

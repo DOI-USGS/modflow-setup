@@ -7,12 +7,15 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
   
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
@@ -30,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
@@ -65,7 +69,7 @@
             
             
               <div class="version">
-                0.post234+g4726ee3
+                0.post258+g2de0f7d
               </div>
             
           
@@ -101,6 +105,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
@@ -187,6 +194,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gp</span>
 <span class="kn">import</span> <span class="nn">gisutils</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -283,6 +291,7 @@
         <span class="c1"># other CRS-related properties are set in the flopy Grid base class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># if no epsg, set from proj4 string if possible</span>
         <span class="c1">#if epsg is None and proj_str is not None and &#39;epsg&#39; in proj_str.lower():</span>
@@ -431,6 +440,48 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_polygons</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pandas DataFrame of grid cell polygons</span>
+<span class="sd">        with i, j locations.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span>
+
+<div class="viewcode-block" id="MFsetupGrid.get_dataframe"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a pandas DataFrame of grid cell polygons</span>
+<span class="sd">        with i, j locations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        layers : bool</span>
+<span class="sd">            If True, return a row for each k, i, j location</span>
+<span class="sd">            and a &#39;k&#39; column; if False, only return i, j</span>
+<span class="sd">            locations with no &#39;k&#39; column. By default, True</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        layers : DataFrame</span>
+<span class="sd">            Pandas Dataframe with k, i, j and geometry column</span>
+<span class="sd">            with a shapely polygon representation of each model cell.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get dataframe of model grid cells</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
+        <span class="n">geoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                              <span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                              <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">geoms</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="mi">5070</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">layers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># add layer information</span>
+            <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">):</span>
+                <span class="n">layer_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">layer_df</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+                <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_df</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="MFsetupGrid.write_bbox_shapefile"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_bbox_shapefile">[docs]</a>    <span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid_bbox.shp&#39;</span><span class="p">):</span>
         <span class="n">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
@@ -1065,7 +1116,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Mar 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

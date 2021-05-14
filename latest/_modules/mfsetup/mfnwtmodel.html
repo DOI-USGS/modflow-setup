@@ -7,12 +7,15 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
   
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
@@ -30,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
@@ -65,7 +69,7 @@
             
             
               <div class="version">
-                0.post234+g4726ee3
+                0.post258+g2de0f7d
               </div>
             
           
@@ -101,6 +105,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
@@ -191,7 +198,11 @@
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
 <span class="kn">from</span> <span class="nn">flopy.modflow</span> <span class="kn">import</span> <span class="n">Modflow</span>
 
-<span class="kn">from</span> <span class="nn">mfsetup.bcs</span> <span class="kn">import</span> <span class="n">setup_ghb_data</span>
+<span class="kn">from</span> <span class="nn">mfsetup.bcs</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">remove_inactive_bcs</span><span class="p">,</span>
+    <span class="n">setup_flopy_stress_period_data</span><span class="p">,</span>
+    <span class="n">setup_ghb_data</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.discretization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">deactivate_idomain_above</span><span class="p">,</span>
     <span class="n">find_remove_isolated_cells</span><span class="p">,</span>
@@ -204,6 +215,7 @@
     <span class="n">load_cfg</span><span class="p">,</span>
     <span class="n">save_array</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mfsetup.ic</span> <span class="kn">import</span> <span class="n">setup_strt</span>
 <span class="kn">from</span> <span class="nn">mfsetup.lakes</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">make_bdlknc2d</span><span class="p">,</span>
     <span class="n">make_bdlknc_zones</span><span class="p">,</span>
@@ -213,8 +225,9 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
 <span class="kn">from</span> <span class="nn">mfsetup.obs</span> <span class="kn">import</span> <span class="n">read_observation_data</span><span class="p">,</span> <span class="n">setup_head_observations</span>
+<span class="kn">from</span> <span class="nn">mfsetup.oc</span> <span class="kn">import</span> <span class="n">parse_oc_period_input</span>
 <span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="n">get_parent_stress_periods</span><span class="p">,</span> <span class="n">setup_perioddata_group</span>
-<span class="kn">from</span> <span class="nn">mfsetup.tmr</span> <span class="kn">import</span> <span class="n">Tmr</span>
+<span class="kn">from</span> <span class="nn">mfsetup.tmr</span> <span class="kn">import</span> <span class="n">TmrNew</span>
 <span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">itmuni_text</span><span class="p">,</span> <span class="n">lenuni_text</span>
 <span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span>
 
@@ -254,7 +267,7 @@
 
         <span class="c1"># default configuration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_package_setup_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;bas6&#39;</span><span class="p">,</span> <span class="s1">&#39;upw&#39;</span><span class="p">,</span> <span class="s1">&#39;rch&#39;</span><span class="p">,</span> <span class="s1">&#39;oc&#39;</span><span class="p">,</span>
-                                     <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">,</span> <span class="s1">&#39;riv&#39;</span><span class="p">,</span> <span class="s1">&#39;wel&#39;</span><span class="p">,</span> <span class="s1">&#39;mnw2&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;chd&#39;</span><span class="p">,</span> <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;lak&#39;</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">,</span> <span class="s1">&#39;riv&#39;</span><span class="p">,</span> <span class="s1">&#39;wel&#39;</span><span class="p">,</span> <span class="s1">&#39;mnw2&#39;</span><span class="p">,</span>
                                      <span class="s1">&#39;gag&#39;</span><span class="p">,</span> <span class="s1">&#39;hyd&#39;</span><span class="p">]</span>
         <span class="c1"># set up the model configuration dictionary</span>
         <span class="c1"># start with the defaults</span>
@@ -474,10 +487,13 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="c1"># make the strt array</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;strt&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span>
-                          <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
-                          <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data_config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">]</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;filename_fmt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;strt_filename_fmt&#39;</span><span class="p">]</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;write_fmt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;strt_write_fmt&#39;</span><span class="p">]</span>
+
+        <span class="c1"># make the starting heads array</span>
+        <span class="n">strt</span> <span class="o">=</span> <span class="n">setup_strt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># initial ibound input for creating a bas6 package instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;ibound&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>
@@ -485,6 +501,7 @@
                           <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;bas6&#39;</span><span class="p">],</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowBas</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;strt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strt</span>
         <span class="n">bas</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowBas</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_ibound</span><span class="p">()</span>
@@ -495,12 +512,18 @@
         <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;oc&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="n">stress_period_data</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-            <span class="n">stress_period_data</span><span class="p">[(</span><span class="n">r</span><span class="o">.</span><span class="n">per</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">nstp</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">oc</span>
+        <span class="c1">#stress_period_data = {}</span>
+        <span class="c1">#for i, r in self.perioddata.iterrows():</span>
+        <span class="c1">#    stress_period_data[(r.per, r.nstp -1)] = r.oc</span>
 
+        <span class="c1"># use stress_period_data if supplied</span>
+        <span class="c1"># (instead of period_input defaults)</span>
+        <span class="k">if</span> <span class="s1">&#39;stress_period_data&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;oc&#39;</span><span class="p">]:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;oc&#39;</span><span class="p">][</span><span class="s1">&#39;period_options&#39;</span><span class="p">]</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;oc&#39;</span><span class="p">]</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stress_period_data</span>
+        <span class="n">period_input</span> <span class="o">=</span> <span class="n">parse_oc_period_input</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">nstp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">nstp</span><span class="p">,</span>
+                                             <span class="n">output_fmt</span><span class="o">=</span><span class="s1">&#39;mfnwt&#39;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">period_input</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowOc</span><span class="p">)</span>
         <span class="n">oc</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowOc</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
@@ -687,7 +710,7 @@
                                                      <span class="n">wells</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
             <span class="k">if</span> <span class="s1">&#39;depth&#39;</span> <span class="ow">in</span> <span class="n">wells</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                 <span class="n">wellhead_elevations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">wells</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">wells</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-                <span class="n">ztop</span> <span class="o">=</span> <span class="n">wellhead_elevations</span> <span class="o">-</span> <span class="p">(</span><span class="mi">5</span><span class="o">*.</span><span class="mi">3048</span><span class="p">)</span> <span class="c1"># 5 ft casing</span>
+                <span class="n">ztop</span> <span class="o">=</span> <span class="n">wellhead_elevations</span> <span class="o">-</span> <span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="mf">.3048</span><span class="p">)</span> <span class="c1"># 5 ft casing</span>
                 <span class="n">zbotm</span> <span class="o">=</span> <span class="n">wellhead_elevations</span> <span class="o">-</span> <span class="n">wells</span><span class="o">.</span><span class="n">depth</span>
                 <span class="n">zpump</span> <span class="o">=</span> <span class="n">zbotm</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># 1 meter off bottom</span>
             <span class="k">elif</span> <span class="s1">&#39;ztop&#39;</span> <span class="ow">in</span> <span class="n">wells</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="s1">&#39;zbotm&#39;</span> <span class="ow">in</span> <span class="n">wells</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -959,45 +982,73 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">gag</span>
 
-<div class="viewcode-block" id="MFnwtModel.setup_perimeter_boundary"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_perimeter_boundary">[docs]</a>    <span class="k">def</span> <span class="nf">setup_perimeter_boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up constant head package for perimeter boundary.</span>
-<span class="sd">        TODO: integrate perimeter boundary with wel package setup</span>
+<div class="viewcode-block" id="MFnwtModel.setup_chd"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_chd">[docs]</a>    <span class="k">def</span> <span class="nf">setup_chd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets up the CHD package.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up specified head perimeter boundary with CHD package...&#39;</span><span class="p">)</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;chd&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">package_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span>
 
-        <span class="n">tmr</span> <span class="o">=</span> <span class="n">Tmr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
-                  <span class="n">parent_head_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;headfile&#39;</span><span class="p">],</span>
-                  <span class="n">inset_parent_layer_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_layers</span><span class="p">,</span>
-                  <span class="n">inset_parent_period_mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_stress_periods</span><span class="p">)</span>
+        <span class="c1"># option to write stress_period_data to external files</span>
+        <span class="n">external_files</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># not yet supported for MODFLOW-NWT</span>
+        <span class="n">external_filename_fmt</span> <span class="o">=</span> <span class="n">package_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external_filename_fmt&#39;</span><span class="p">)</span>
 
-        <span class="n">df</span> <span class="o">=</span> <span class="n">tmr</span><span class="o">.</span><span class="n">get_inset_boundary_heads</span><span class="p">(</span><span class="n">for_external_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># perimeter boundary</span>
+        <span class="k">if</span> <span class="s1">&#39;perimeter_boundary&#39;</span> <span class="ow">in</span> <span class="n">package_config</span><span class="p">:</span>
+            <span class="n">perimeter_cfg</span> <span class="o">=</span> <span class="n">package_config</span><span class="p">[</span><span class="s1">&#39;perimeter_boundary&#39;</span><span class="p">]</span>
+            <span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;boundary_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;head&#39;</span>
+            <span class="k">if</span> <span class="s1">&#39;inset_parent_period_mapping&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">perimeter_cfg</span><span class="p">:</span>
+                <span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;inset_parent_period_mapping&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_stress_periods</span>
+            <span class="k">if</span> <span class="s1">&#39;parent_start_time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">perimeter_cfg</span><span class="p">:</span>
+                <span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;parent_start_date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tmr</span> <span class="o">=</span> <span class="n">TmrNew</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">perimeter_cfg</span><span class="p">)</span>
+            <span class="n">perimeter_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmr</span><span class="o">.</span><span class="n">get_inset_boundary_values</span><span class="p">()</span>
 
-        <span class="n">spd</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">by_period</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;per&#39;</span><span class="p">)</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowChd</span><span class="o">.</span><span class="n">get_empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">by_period</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
-        <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">df_per</span> <span class="ow">in</span> <span class="n">by_period</span><span class="p">:</span>
-            <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># need to make a copy otherwise they&#39;ll all be the same!!</span>
-            <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span>
-            <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>
-            <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;j&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]</span>
-            <span class="c1"># assign starting and ending head values for each period</span>
-            <span class="c1"># starting chd is parent values for previous period</span>
-            <span class="c1"># ending chd is parent values for that period</span>
-            <span class="k">if</span> <span class="n">per</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;shead&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;bhead&#39;</span><span class="p">]</span>
-                <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;ehead&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;bhead&#39;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;shead&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">by_period</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">per</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)[</span><span class="s1">&#39;bhead&#39;</span><span class="p">]</span>
-                <span class="n">spd</span><span class="p">[</span><span class="n">per</span><span class="p">][</span><span class="s1">&#39;ehead&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_per</span><span class="p">[</span><span class="s1">&#39;bhead&#39;</span><span class="p">]</span>
+            <span class="c1"># get the stress period data</span>
+            <span class="c1"># this also sets up the external file paths</span>
+            <span class="n">spd</span> <span class="o">=</span> <span class="n">setup_flopy_stress_period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">perimeter_df</span><span class="p">,</span>
+                                                 <span class="n">flopy_package_class</span><span class="o">=</span><span class="n">fm</span><span class="o">.</span><span class="n">ModflowChd</span><span class="p">,</span>
+                                                 <span class="n">variable_column</span><span class="o">=</span><span class="s1">&#39;head&#39;</span><span class="p">,</span>
+                                                 <span class="n">external_files</span><span class="o">=</span><span class="n">external_files</span><span class="p">,</span>
+                                                 <span class="n">external_filename_fmt</span><span class="o">=</span><span class="n">external_filename_fmt</span><span class="p">)</span>
 
-        <span class="n">chd</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowChd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stress_period_data</span><span class="o">=</span><span class="n">spd</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+        <span class="c1"># placeholder for setting up user-specified CHD cells from CSV data</span>
+        <span class="c1"># todo: support for non-perimeter chd cells</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>  <span class="c1"># insert function here to get csv data into dataframe</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No other CHD input specified&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;perimeter_boundary&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">package_config</span><span class="p">:</span>
+                <span class="k">return</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowChd</span><span class="p">)</span>
+        <span class="n">chd</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowChd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;setup of chd took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">chd</span></div>
 
 <div class="viewcode-block" id="MFnwtModel.write_input"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.write_input">[docs]</a>    <span class="k">def</span> <span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write the model input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># prior to writing output</span>
+        <span class="c1"># remove any BCs in inactive cells</span>
+        <span class="n">pckgs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CHD&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">pckg</span> <span class="ow">in</span> <span class="n">pckgs</span><span class="p">:</span>
+            <span class="n">package_instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pckg</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">package_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">remove_inactive_bcs</span><span class="p">(</span><span class="n">package_instance</span><span class="p">)</span>
+
         <span class="c1"># write the model with flopy</span>
         <span class="c1"># but skip the sfr package</span>
         <span class="c1"># by monkey-patching the write method</span>
@@ -1058,7 +1109,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Mar 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

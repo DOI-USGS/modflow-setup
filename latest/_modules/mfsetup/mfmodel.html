@@ -7,12 +7,15 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
   
 
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
 
   
@@ -30,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
@@ -65,7 +69,7 @@
             
             
               <div class="version">
-                0.post234+g4726ee3
+                0.post258+g2de0f7d
               </div>
             
           
@@ -101,6 +105,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
@@ -290,6 +297,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inset</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># dictionary of inset models attached to LGR parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_lgr</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># flag for lgr inset models</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># holds flopy Lgr utility object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># holds TMR class instance for TMR-type perimeter boundaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether model is being made or loaded from existing files</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lake_fluxes</span> <span class="o">=</span> <span class="kc">None</span>
@@ -330,7 +338,17 @@
         <span class="sd">&quot;&quot;&quot;Test for equality to another model object.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">()):</span>
+        <span class="c1"># kludge: exclude SFR_OBS package from comparison</span>
+        <span class="c1"># (which is handled by SFRmaker instead of Flopy;</span>
+        <span class="c1"># a loaded version of a model might have SFR_OBS,</span>
+        <span class="c1"># where a freshly made version may not (even though SFRmaker will write it)</span>
+        <span class="c1"># )</span>
+        <span class="n">exceptions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SFR_OBS&#39;</span><span class="p">}</span>
+        <span class="n">other_packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">())</span>
+                          <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="p">]</span>
+        <span class="n">packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">other_packages</span> <span class="o">!=</span> <span class="n">packages</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">modelgrid</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -381,6 +399,8 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">modelgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span><span class="o">.</span><span class="n">nlay</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;DIS&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span>
 
@@ -434,7 +454,8 @@
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">botm_source_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;from_parent&#39;</span> <span class="ow">in</span> <span class="n">botm_source_data</span><span class="p">:</span>
                 <span class="n">parent_layers</span> <span class="o">=</span> <span class="n">botm_source_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_parent&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">parent_layers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">)))</span>
+                <span class="c1">#parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))</span>
+                <span class="n">parent_layers</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parent_layers</span> <span class="o">=</span> <span class="n">parent_layers</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_layers</span>
 
@@ -1582,6 +1603,25 @@
             <span class="n">rivdata</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="p">,</span> <span class="n">rivdata_filename</span><span class="p">))</span>
             <span class="n">rivdata</span><span class="o">.</span><span class="n">write_shapefiles</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shapefiles_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
+        <span class="c1"># optional routing input</span>
+        <span class="c1"># (for a complete representation of a larger or more detailed</span>
+        <span class="c1">#  stream network that may be culled in SFR package)</span>
+        <span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">routing_input_key</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sd</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;routing&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]</span>
+        <span class="n">routing_input</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">routing_input_key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">routing_input</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">routing_input_key</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">routing</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">routing_input</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
+            <span class="n">routing</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">routing</span><span class="p">[</span><span class="n">routing_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]],</span>
+                               <span class="n">routing</span><span class="p">[</span><span class="n">routing_input</span><span class="p">[</span><span class="s1">&#39;routing_column&#39;</span><span class="p">]]))</span>
+            <span class="c1"># set any values (downstream lines) not in keys (upstream lines)</span>
+            <span class="c1"># to 0 (outlet condition)</span>
+            <span class="n">routing</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span>
+                       <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">routing</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="c1"># use _original_routing attached to Lines instance as default</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">routing</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">_original_routing</span>
+
         <span class="c1"># add inflows</span>
         <span class="n">inflows_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inflows&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">inflows_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1593,23 +1633,12 @@
 
             <span class="c1"># check if all inflow sites are included in sfr network</span>
             <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
-                                <span class="n">difference</span><span class="p">(</span><span class="n">lines</span><span class="o">.</span><span class="n">_original_routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                                <span class="n">difference</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="c1"># if there are missing sites, try using the supplied routing</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">):</span>
-                <span class="n">inflows_routing_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inflows_routing&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">inflows_routing_input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">((</span><span class="s1">&#39;inflow sites </span><span class="si">{}</span><span class="s1"> are not within the model sfr network. &#39;</span>
-                                   <span class="s1">&#39;Please supply an inflows_routing source_data block &#39;</span>
-                                    <span class="s1">&#39;(see shellmound example config file)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">)))</span>
-                <span class="n">routing</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">inflows_routing_input</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
-                <span class="n">routing</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">routing</span><span class="p">[</span><span class="n">inflows_routing_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]],</span>
-                                   <span class="n">routing</span><span class="p">[</span><span class="n">inflows_routing_input</span><span class="p">[</span><span class="s1">&#39;routing_column&#39;</span><span class="p">]]))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">routing</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">_original_routing</span>
-            <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
-                                <span class="n">difference</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span>
-            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">((</span><span class="s1">&#39;Inflow sites </span><span class="si">{}</span><span class="s1"> not found in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">,</span>
-                                                                         <span class="n">inflows_routing_input</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])))</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">((</span><span class="s1">&#39;inflow sites </span><span class="si">{}</span><span class="s1"> are not within the model sfr network. &#39;</span>
+                                <span class="s1">&#39;Please supply an inflows_routing source_data block &#39;</span>
+                                <span class="s1">&#39;(see shellmound example config file)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">)))</span>
 
             <span class="c1"># add resampled inflows to SFR package</span>
             <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inflows_by_stress_period</span>
@@ -1618,8 +1647,39 @@
                 <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;inflow&#39;</span>
                 <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_perioddata</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;flow&#39;</span>
                 <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_segment_data</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">inflows_input</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">method</span><span class="p">)</span>
+            <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># add runoff</span>
+        <span class="n">runoff_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;runoff&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">runoff_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># resample inflows to model stress periods</span>
+            <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;line_id_column&#39;</span><span class="p">]</span>
+            <span class="n">sd</span> <span class="o">=</span> <span class="n">TransientTabularSourceData</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">runoff_input</span><span class="p">,</span>
+                                                        <span class="n">dest_model</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">runoff_by_stress_period</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+            <span class="c1"># check if all sites are included in sfr network</span>
+            <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">runoff_by_stress_period</span><span class="p">[</span><span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
+                                <span class="n">difference</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">((</span><span class="s1">&#39;runoff sites </span><span class="si">{}</span><span class="s1"> are not within the model sfr network. &#39;</span>
+                               <span class="s1">&#39;Please supply an inflows_routing source_data block &#39;</span>
+                               <span class="s1">&#39;(see shellmound example config file)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">)),</span>
+                               <span class="ne">UserWarning</span><span class="p">)</span>
+
+            <span class="c1"># add resampled inflows to SFR package</span>
+            <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">runoff_by_stress_period</span>
+            <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;flowline_routing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">routing</span>
+            <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;runoff&#39;</span>
+            <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;distribute_flows_to_reaches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_perioddata</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_segment_data</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">runoff_input</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">method</span><span class="p">)</span>
             <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># add observations</span>
@@ -1735,7 +1795,11 @@
 <span class="sd">        -------</span>
 <span class="sd">        m : model instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> model from data in </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;modelname&#39;</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">cfg_filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Setting up </span><span class="si">{</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;modelname&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> model&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfg_filename</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; from configuration in </span><span class="si">{</span><span class="n">cfg_filename</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="c1">#cfg = cls._parse_model_kwargs(cfg)</span>
         <span class="c1">#kwargs = get_input_arguments(cfg[&#39;model&#39;], mf6.ModflowGwf,</span>
@@ -1754,10 +1818,6 @@
 
         <span class="c1"># set up all of the packages specified in the config file</span>
         <span class="n">m</span><span class="o">.</span><span class="n">setup_packages</span><span class="p">(</span><span class="n">reset_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-        <span class="c1"># perimter boundary for TMR model</span>
-        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">perimeter_bc_type</span> <span class="o">==</span> <span class="s1">&#39;head&#39;</span><span class="p">:</span>
-            <span class="n">chd</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">setup_perimeter_boundary</span><span class="p">()</span>
 
         <span class="c1"># LGR inset model(s)</span>
         <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">inset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1783,7 +1843,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Mar 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

@@ -7,12 +7,15 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.grid module &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
+  <title>mfsetup.grid module &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
   
@@ -30,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -67,7 +71,7 @@
             
             
               <div class="version">
-                0.post234+g4726ee3
+                0.post258+g2de0f7d
               </div>
             
           
@@ -103,6 +107,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -113,6 +120,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.grid module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.tmr.html">mfsetup.tmr module</a></li>
 </ul>
 </li>
 </ul>
@@ -223,8 +231,8 @@
 the grid in the cartesian plane. For methods involving layering (in the vertical dimension), see
 the discretization module.</p>
 <dl class="py class">
-<dt id="mfsetup.grid.MFsetupGrid">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">MFsetupGrid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenuni</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angrot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">MFsetupGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenuni</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angrot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.discretization.structuredgrid.html#flopy.discretization.structuredgrid.StructuredGrid" title="(in flopy Documentation v3.3.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.discretization.structuredgrid.StructuredGrid</span></code></a></p>
 <p>Class representing a structured grid. Extends flopy.discretization.StructuredGrid
 to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).</p>
@@ -255,7 +263,7 @@ over a PROJ string (see References)</p>
 <dt><strong>wkt</strong><span class="classifier">str, optional</span></dt><dd><p>Well-known text string describing model CRS.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
-passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code>
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 Can be any of:</p>
 <blockquote>
 <div><ul class="simple">
@@ -268,7 +276,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -285,121 +293,152 @@ By default 0.0</p>
 </dl>
 <p class="rubric">References</p>
 <p><a class="reference external" href="https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems">https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems</a></p>
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.bbox">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">bbox</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bbox" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.bbox">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">bbox</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bbox" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shapely polygon bounding box of the model grid.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.bounds">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">bounds</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bounds" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.bounds">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">bounds</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Grid bounding box in order used by shapely.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.crs">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">crs</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.crs" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.crs">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">crs</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.crs" title="Permalink to this definition">¶</a></dt>
 <dd><p>pyproj.crs.CRS instance describing the coordinate reference system
 for the model grid.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.epsg">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">epsg</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.epsg" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.dataframe">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dataframe</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pandas DataFrame of grid cell polygons
+with i, j locations.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.epsg">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">epsg</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.epsg" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.get_vertices">
-<code class="sig-name descname"><span class="pre">get_vertices</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.get_vertices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.get_vertices" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.get_dataframe">
+<span class="sig-name descname"><span class="pre">get_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.get_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.get_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pandas DataFrame of grid cell polygons
+with i, j locations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>layers</strong><span class="classifier">bool</span></dt><dd><p>If True, return a row for each k, i, j location
+and a ‘k’ column; if False, only return i, j
+locations with no ‘k’ column. By default, True</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>layers</strong><span class="classifier">DataFrame</span></dt><dd><p>Pandas Dataframe with k, i, j and geometry column
+with a shapely polygon representation of each model cell.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.get_vertices">
+<span class="sig-name descname"><span class="pre">get_vertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.get_vertices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.get_vertices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get vertices for a single cell or sequence if i, j locations.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.length_multiplier">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">length_multiplier</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.length_multiplier" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.length_multiplier">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">length_multiplier</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.length_multiplier" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.length_units">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">length_units</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.length_units" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.length_units">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">length_units</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.length_units" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.polygons">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">polygons</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.polygons" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.polygons">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">polygons</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.polygons" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vertices for grid cell polygons.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.proj_str">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">proj_str</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.proj_str" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.proj_str">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">proj_str</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.proj_str" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.rotation">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">rotation</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.rotation" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.rotation">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">rotation</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.rotation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.size">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">size</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.size" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.size">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.size" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.transform">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">transform</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.transform" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.transform">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">transform</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rasterio Affine object (same as transform attribute of rasters).</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.vertices">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vertices</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.vertices" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.vertices">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">vertices</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.vertices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vertices for grid cell polygons.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.wkt">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">wkt</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.wkt" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.wkt">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">wkt</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.wkt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.write_bbox_shapefile">
-<code class="sig-name descname"><span class="pre">write_bbox_shapefile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid_bbox.shp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.write_bbox_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.write_bbox_shapefile" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.write_bbox_shapefile">
+<span class="sig-name descname"><span class="pre">write_bbox_shapefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid_bbox.shp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.write_bbox_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.write_bbox_shapefile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.write_shapefile">
-<code class="sig-name descname"><span class="pre">write_shapefile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid.shp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.write_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.write_shapefile" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.write_shapefile">
+<span class="sig-name descname"><span class="pre">write_shapefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid.shp'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid.write_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.write_shapefile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a shapefile of the grid with just the row and column attributes.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.xul">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">xul</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.xul" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.xul">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">xul</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.xul" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.grid.MFsetupGrid.yul">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">yul</span></code><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.yul" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid.yul">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">yul</span></span><a class="headerlink" href="#mfsetup.grid.MFsetupGrid.yul" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.get_crs">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">get_crs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_crs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_crs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.get_crs">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">get_crs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_crs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_crs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a pyproj CRS instance from various CRS representations.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.get_crs_length_units">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">get_crs_length_units</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_crs_length_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_crs_length_units" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.get_crs_length_units">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">get_crs_length_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_crs_length_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_crs_length_units" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.get_grid_bounding_box">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">get_grid_bounding_box</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_grid_bounding_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_grid_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.get_grid_bounding_box">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">get_grid_bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_grid_bounding_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_grid_bounding_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get bounding box of potentially rotated modelgrid
 as a shapely Polygon object.</p>
 <dl class="field-list simple">
@@ -412,8 +451,8 @@ as a shapely Polygon object.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.get_ij">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">get_ij</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_ij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_ij" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.get_ij">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">get_ij</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_ij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_ij" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the row and column of a point or sequence of points
 in real-world coordinates.</p>
 <dl class="field-list simple">
@@ -436,8 +475,8 @@ in real-world coordinates.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.get_nearest_point_on_grid">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">get_nearest_point_on_grid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_nearest_point_on_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_nearest_point_on_grid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.get_nearest_point_on_grid">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">get_nearest_point_on_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_nearest_point_on_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_nearest_point_on_grid" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -477,8 +516,8 @@ Defaults to np.round if offset == ‘center’; otherwise defaults to np.floor.<
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.get_point_on_national_hydrogeologic_grid">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">get_point_on_national_hydrogeologic_grid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'edge'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_point_on_national_hydrogeologic_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_point_on_national_hydrogeologic_grid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.get_point_on_national_hydrogeologic_grid">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">get_point_on_national_hydrogeologic_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'edge'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_point_on_national_hydrogeologic_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_point_on_national_hydrogeologic_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an x, y location representing the upper left
 corner of a model grid, return the upper left corner
 of the cell in the National Hydrogeologic Grid that
@@ -486,8 +525,8 @@ contains it.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.rasterize">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">rasterize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">feature</span></em>, <em class="sig-param"><span class="pre">grid</span></em>, <em class="sig-param"><span class="pre">id_column=None</span></em>, <em class="sig-param"><span class="pre">include_ids=None</span></em>, <em class="sig-param"><span class="pre">crs=None</span></em>, <em class="sig-param"><span class="pre">epsg=None</span></em>, <em class="sig-param"><span class="pre">proj4=None</span></em>, <em class="sig-param"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.rasterize">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">rasterize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">feature</span></em>, <em class="sig-param"><span class="pre">grid</span></em>, <em class="sig-param"><span class="pre">id_column=None</span></em>, <em class="sig-param"><span class="pre">include_ids=None</span></em>, <em class="sig-param"><span class="pre">crs=None</span></em>, <em class="sig-param"><span class="pre">epsg=None</span></em>, <em class="sig-param"><span class="pre">proj4=None</span></em>, <em class="sig-param"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rasterize a feature onto the model grid, using
 the rasterio.features.rasterize method. Features are intersected
 if they contain the cell center.</p>
@@ -501,7 +540,7 @@ from this column will be assigned to the output raster.</p>
 </dd>
 <dt><strong>grid</strong><span class="classifier">grid.StructuredGrid instance</span></dt><dd></dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
-passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code>
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.0.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 Can be any of:</p>
 <blockquote>
 <div><ul class="simple">
@@ -514,7 +553,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -533,13 +572,13 @@ Can be any of:</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.setup_structured_grid">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">setup_structured_grid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_to_NHG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.setup_structured_grid">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">setup_structured_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_to_NHG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="mfsetup.grid.write_bbox_shapefile">
-<code class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></code><code class="sig-name descname"><span class="pre">write_bbox_shapefile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outshp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#write_bbox_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.write_bbox_shapefile" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.grid.write_bbox_shapefile">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">write_bbox_shapefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outshp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#write_bbox_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.write_bbox_shapefile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -560,7 +599,7 @@ Can be any of:</p>
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Mar 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>

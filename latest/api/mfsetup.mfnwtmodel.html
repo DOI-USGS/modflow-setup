@@ -7,12 +7,15 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>MFnwtModel class &mdash; modflow-setup 0.post234+g4726ee3 documentation</title>
+  <title>MFnwtModel class &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
   <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
 
   
@@ -30,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -67,7 +71,7 @@
             
             
               <div class="version">
-                0.post234+g4726ee3
+                0.post258+g2de0f7d
               </div>
             
           
@@ -103,6 +107,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -219,64 +226,63 @@
 <div class="section" id="module-mfsetup.mfnwtmodel">
 <span id="mfnwtmodel-class"></span><h1>MFnwtModel class<a class="headerlink" href="#module-mfsetup.mfnwtmodel" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mfsetup.mfnwtmodel.</span></code><code class="sig-name descname"><span class="pre">MFnwtModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exe_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mfnwt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mfnwt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'external/'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mfsetup.mfnwtmodel.</span></span><span class="sig-name descname"><span class="pre">MFnwtModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exe_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mfnwt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mfnwt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'external/'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin" title="mfsetup.mfmodel.MFsetupMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">mfsetup.mfmodel.MFsetupMixin</span></code></a>, <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mf.html#flopy.modflow.mf.Modflow" title="(in flopy Documentation v3.3.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.mf.Modflow</span></code></a></p>
 <p>Class representing a MODFLOW-NWT model</p>
-<dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.ibound">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">ibound</span></code><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.ibound" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.ibound">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">ibound</span></span><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.ibound" title="Permalink to this definition">¶</a></dt>
 <dd><p>3D array indicating which cells will be included in the simulation.
 Made a property so that it can be easily updated when any packages
 it depends on change.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.ipakcb">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">ipakcb</span></code><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.ipakcb" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.ipakcb">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">ipakcb</span></span><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.ipakcb" title="Permalink to this definition">¶</a></dt>
 <dd><p>By default write everything to one cell budget file.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.load">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">load</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forgive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.load" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.load">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forgive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a model from a config file and set of MODFLOW files.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.setup_ghb">
-<code class="sig-name descname"><span class="pre">setup_ghb</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_ghb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_ghb" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.setup_chd">
+<span class="sig-name descname"><span class="pre">setup_chd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_chd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_chd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets up the CHD package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.setup_ghb">
+<span class="sig-name descname"><span class="pre">setup_ghb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_ghb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_ghb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up the GHB package</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.setup_hyd">
-<code class="sig-name descname"><span class="pre">setup_hyd</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_hyd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_hyd" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.setup_hyd">
+<span class="sig-name descname"><span class="pre">setup_hyd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_hyd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_hyd" title="Permalink to this definition">¶</a></dt>
 <dd><p>TODO: generalize hydmod setup with specific input requirements</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.setup_perimeter_boundary">
-<code class="sig-name descname"><span class="pre">setup_perimeter_boundary</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_perimeter_boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_perimeter_boundary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set up constant head package for perimeter boundary.
-TODO: integrate perimeter boundary with wel package setup</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.setup_tdis">
-<code class="sig-name descname"><span class="pre">setup_tdis</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_tdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_tdis" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.setup_tdis">
+<span class="sig-name descname"><span class="pre">setup_tdis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_tdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_tdis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calls the _set_perioddata, to establish time discretization. Only purpose
 is to conform to same syntax as mf6 for MFsetupMixin.setup_from_yaml()</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.setup_upw">
-<code class="sig-name descname"><span class="pre">setup_upw</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_upw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_upw" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.setup_upw">
+<span class="sig-name descname"><span class="pre">setup_upw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_upw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_upw" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.setup_wel">
-<code class="sig-name descname"><span class="pre">setup_wel</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_wel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_wel" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.setup_wel">
+<span class="sig-name descname"><span class="pre">setup_wel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.setup_wel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.setup_wel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup the WEL package, including boundary fluxes and any pumping.</p>
 <p>This will need some additional customization if pumping is mixed with
 the perimeter fluxes.</p>
@@ -284,8 +290,8 @@ the perimeter fluxes.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mfsetup.mfnwtmodel.MFnwtModel.write_input">
-<code class="sig-name descname"><span class="pre">write_input</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.write_input" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mfsetup.mfnwtmodel.MFnwtModel.write_input">
+<span class="sig-name descname"><span class="pre">write_input</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfnwtmodel.html#MFnwtModel.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfnwtmodel.MFnwtModel.write_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the model input.</p>
 </dd></dl>
 
@@ -309,7 +315,7 @@ the perimeter fluxes.</p>
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on Mar 11, 2021.
+        Last updated on May 14, 2021.
       </span>
 
     </p>
