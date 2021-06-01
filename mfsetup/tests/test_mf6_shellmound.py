@@ -718,8 +718,8 @@ def test_sfr_setup(model_with_sfr
     # will have runoff greater than the input data.
 
     # check minimum slope
-    assert np.allclose(m.sfr.packagedata.array['rgrd'].min(), \
-        m.cfg['sfr']['sfrmaker_options']['minimum_slope'])
+    assert np.allclose(np.round(m.sfr.packagedata.array['rgrd'].min(), 6), \
+                       np.round(m.cfg['sfr']['sfrmaker_options']['minimum_slope'], 6))
 
 
 def test_sfr_inflows_from_csv(model_with_sfr):
