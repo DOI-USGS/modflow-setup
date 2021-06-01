@@ -774,7 +774,7 @@ class MFsetupMixin():
         if self.version == 'mf6':
             kwargs = self.cfg['simulation'].copy()
             kwargs.update(self.cfg['simulation']['options'])
-            if os.path.exists('{}.nam'.format(kwargs['sim_name'])):
+            if os.path.exists('{}.nam'.format(kwargs['sim_name'])) and self._load:
                 try:
                     kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
                     self._sim = mf6.MFSimulation.load(**kwargs)
@@ -782,6 +782,10 @@ class MFsetupMixin():
                     # create simulation
                     kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
                     self._sim = mf6.MFSimulation(**kwargs)
+            else:
+                # create simulation
+                kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
+                self._sim = mf6.MFSimulation(**kwargs)
 
         # load the parent model (skip if already attached)
         if 'namefile' in self.cfg.get('parent', {}).keys():
@@ -1356,7 +1360,7 @@ class MFsetupMixin():
         # create an sfrmaker.sfrdata instance from the lines instance
         to_sfr_kwargs = self.cfg['sfr'].copy()
         to_sfr_kwargs.update(self.cfg['sfr'].get('sfrmaker_options', {}))
-        to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)
+        #to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)
         sfr = lines.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,

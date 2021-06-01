@@ -638,7 +638,8 @@ def test_wel_setup(shellmound_model_with_dis):
     assert np.allclose(sums, sums2, rtol=0.01)
 
 
-def test_sfr_setup(model_with_sfr):
+def test_sfr_setup(model_with_sfr
+                   ):
     m = model_with_sfr
     m.sfr.write()
     assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
@@ -715,6 +716,10 @@ def test_sfr_setup(model_with_sfr):
     # SFRmaker routes all runoff from missing upstream catchments to the first downstream catchment
     # that is in the model. So any catchment in the model that is not a headwater in NHDPlus
     # will have runoff greater than the input data.
+
+    # check minimum slope
+    assert np.allclose(m.sfr.packagedata.array['rgrd'].min(), \
+        m.cfg['sfr']['sfrmaker_options']['minimum_slope'])
 
 
 def test_sfr_inflows_from_csv(model_with_sfr):
