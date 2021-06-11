@@ -86,7 +86,7 @@ class SourceData:
         # non-comprehensive list of dimensionless variables
         if self.variable in {'ibound', 'idomain', 'ss', 'sy', 'irch', 'iconvert', 'lkarr'}:
             return 1.0
-        return self.length_unit_conversion * self.time_unit_conversion
+        return self.length_unit_conversion / self.time_unit_conversion
 
     @property
     def length_unit_conversion(self):

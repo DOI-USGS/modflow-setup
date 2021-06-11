@@ -59,7 +59,7 @@ itmuni_values = {"unknown": 0,
                  "minute": 2,
                  "hour": 3,
                  "day": 4,
-                 "year": 4,
+                 "year": 5,
                  "s": 1,
                  "m": 2,
                  "h": 3,
@@ -129,7 +129,12 @@ def convert_time_units(itmuni1, itmuni2):
         itmuni2 = itmuni_values.get(itmuni2.lower(), 0)
 
     yearlen = 365.25
-    mults = {(1, 2): 1/60,
+    # "seconds": 1,
+    # "minutes": 2,
+    # "hours": 3,
+    # "days": 4,
+    # "years": 5,
+    mults = {(1, 2): 1/60,   # seconds to minutes
              (1, 3): 1/3600,
              (1, 4): 1/86400,
              (1, 5): 1/(86400 * yearlen),
@@ -138,7 +143,7 @@ def convert_time_units(itmuni1, itmuni2):
              (2, 5): 1/(1440 * yearlen),
              (3, 4): 1/24,
              (3, 5): 1/(24 * yearlen),
-             (4, 5): yearlen}
+             (4, 5): 1/yearlen}  # days to years
     convert_time_units = np.ones((6, 6), dtype=float)
     for (u0, u1), mult in mults.items():
         convert_time_units[u0, u1] = mult
@@ -255,7 +260,7 @@ def convert_flux_units(input_length_units, input_time_units,
 
     lmult = convert_length_units(input_length_units, output_length_units)
     tmult = convert_time_units(input_time_units, output_time_units)
-    return lmult * tmult
+    return lmult / tmult
 
 
 def parse_length_units(text, text_output=True):

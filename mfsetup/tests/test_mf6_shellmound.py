@@ -430,7 +430,11 @@ def test_sto_setup(shellmound_model_with_dis):
 
 
 def test_npf_setup(shellmound_model_with_dis):
-    m = shellmound_model_with_dis
+    m = deepcopy(shellmound_model_with_dis)
+
+    # check time unit conversion
+    m.cfg['npf']['source_data']['k']['time_units'] = 'seconds'
+
     npf = m.setup_npf()
     npf.write()
     assert os.path.exists(os.path.join(m.model_ws, npf.filename))
@@ -441,7 +445,7 @@ def test_npf_setup(shellmound_model_with_dis):
     with rasterio.open(k3tif) as src:
         data = src.read(1)
         data[data == src.meta['nodata']] = np.nan
-    assert np.allclose(npf.k.array[3].mean() / .3048, np.nanmean(data), atol=5)
+    assert np.allclose(npf.k.array[3].mean() / (0.3048 * 86400), np.nanmean(data), atol=5)
 
     # TODO: add tests that Ks got distributed properly considering input and pinched layers
 

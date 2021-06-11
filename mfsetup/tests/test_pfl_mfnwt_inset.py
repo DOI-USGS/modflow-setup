@@ -255,8 +255,8 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path, simulate_high_k_lakes):
     m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     # test intermediate array creation from rech specified as scalars
     m.cfg['rch']['rech'] = [0.001, 0.002]
-    m.cfg['rch']['rech_length_units'] = 'meters'
-    m.cfg['rch']['rech_time_units'] = 'days'
+    #m.cfg['rch']['rech_length_units'] = 'meters'
+    #m.cfg['rch']['rech_time_units'] = 'days'
     rch = m.setup_rch()
     arrayfiles = m.cfg['intermediate_data']['rech']
     assert len(arrayfiles) == len(m.cfg['rch']['rech'])
@@ -278,7 +278,7 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path, simulate_high_k_lakes):
     rch = m.setup_rch()
 
     # spatial mean recharge in model should approx. match the GeoTiff (which covers a larger area)
-    avg_in_yr = rch.rech.array[0, 0, :, :].mean() * convert_length_units('meters', 'inches') * \
+    avg_in_yr = rch.rech.array[0, 0, :, :].mean() * convert_length_units('meters', 'inches') / \
         convert_time_units('days', 'years')
     assert np.allclose(avg_in_yr, inf_values.mean() * m.cfg['rch']['source_data']['rech']['mult'], rtol=0.25)
     arrayfiles = m.cfg['intermediate_data']['rech']

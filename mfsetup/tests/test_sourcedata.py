@@ -148,7 +148,7 @@ def test_parse_source_data(source_data_cases,
                                      variable=var,
                                      dest_model=model)
     assert isinstance(sd.filenames, dict)
-    assert sd.unit_conversion == convert_length_units('inches', 'meters') *\
+    assert sd.unit_conversion == convert_length_units('inches', 'meters') /\
         convert_time_units('years', 'days')
     data = sd.get_data()
     assert isinstance(data, dict)
