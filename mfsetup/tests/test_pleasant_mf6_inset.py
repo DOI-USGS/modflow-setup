@@ -564,7 +564,7 @@ def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
     assert isinstance(m, MF6model)
     assert 'tdis' in m.simulation.package_key_dict
     assert 'ims' in m.simulation.package_key_dict
-    assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR_0', 'LAK_0',
+    assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA_0', 'OC', 'SFR_0', 'LAK_0',
                                          'WEL_0',
                                          'OBS_1',  # lak obs todo: specify names of mf6 packages with multiple instances
                                          'CHD_0',
