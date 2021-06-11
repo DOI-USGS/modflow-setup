@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.post262+g62d3d84 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.post258+g2de0f7d
+                0.post262+g62d3d84
               </div>
             
           
@@ -209,12 +209,10 @@
     <span class="n">make_irch</span><span class="p">,</span>
     <span class="n">make_lgr_idomain</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">add_version_to_fileheader</span><span class="p">,</span>
-    <span class="n">flopy_mfsimulation_load</span><span class="p">,</span>
-    <span class="n">load</span><span class="p">,</span>
-    <span class="n">load_cfg</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">add_version_to_fileheader</span><span class="p">,</span> <span class="n">flopy_mfsimulation_load</span>
+<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">load</span>
+<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">load_config</span>
+<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">load_cfg</span>
 <span class="kn">from</span> <span class="nn">mfsetup.ic</span> <span class="kn">import</span> <span class="n">setup_strt</span>
 <span class="kn">from</span> <span class="nn">mfsetup.lakes</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_lakeperioddata</span><span class="p">,</span>
@@ -241,7 +239,7 @@
     <span class="n">default_file</span> <span class="o">=</span> <span class="s1">&#39;/mf6_defaults.yml&#39;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">modelname</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">exe_name</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
+                 <span class="n">modelname</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">exe_name</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span> <span class="n">lgr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;simulation&#39;</span><span class="p">:</span> <span class="n">simulation</span><span class="p">,</span>
                     <span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="n">parent</span><span class="p">,</span>
@@ -271,12 +269,13 @@
                                      <span class="s1">&#39;wel&#39;</span><span class="p">,</span> <span class="s1">&#39;maw&#39;</span><span class="p">,</span> <span class="s1">&#39;obs&#39;</span><span class="p">]</span>
         <span class="c1"># set up the model configuration dictionary</span>
         <span class="c1"># start with the defaults</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span><span class="p">)</span> <span class="c1">#&#39;/mf6_defaults.yml&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_file</span><span class="p">)</span> <span class="c1">#&#39;/mf6_defaults.yml&#39;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">relative_external_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;relative_external_paths&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="c1"># set the model workspace and change working directory to there</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_ws</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
         <span class="c1"># update defaults with user-specified config. (loaded above)</span>
         <span class="c1"># set up and validate the model configuration dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load</span> <span class="o">=</span> <span class="n">load</span>  <span class="c1"># whether the model is being created or loaded</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 
         <span class="c1"># property attributes</span>
@@ -484,8 +483,8 @@
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">inset_cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">],</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwf</span><span class="p">,</span>
                                          <span class="n">exclude</span><span class="o">=</span><span class="s1">&#39;packages&#39;</span><span class="p">)</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>  <span class="c1"># otherwise will try to load parent model</span>
-            <span class="n">inset_model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">inset_cfg</span><span class="p">,</span> <span class="n">lgr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">inset_model</span><span class="o">.</span><span class="n">_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span>  <span class="c1"># whether model is being made or loaded from existing files</span>
+            <span class="n">inset_model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">inset_cfg</span><span class="p">,</span> <span class="n">lgr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1">#inset_model._load = self._load  # whether model is being made or loaded from existing files</span>
             <span class="n">inset_model</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
             <span class="k">del</span> <span class="n">inset_model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;ims&#39;</span><span class="p">]</span>
             <span class="n">inset_model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">]</span>
@@ -1278,8 +1277,7 @@
         <span class="c1">#kwargs = get_input_arguments(cfg[&#39;model&#39;], mf6.ModflowGwf,</span>
         <span class="c1">#                             exclude=&#39;packages&#39;)</span>
         <span class="c1">#model = cls(cfg=cfg, **kwargs)</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">yamlfile</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">_load</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">yamlfile</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="s1">&#39;grid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">model</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
         <span class="n">sim</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;simulation&#39;</span><span class="p">]</span>  <span class="c1"># should be a flopy.mf6.MFSimulation instance</span>
@@ -1311,7 +1309,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on May 14, 2021.
+        Last updated on Jun 11, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Configuration File Gallery &mdash; modflow-setup 0.post258+g2de0f7d documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.post262+g62d3d84 documentation</title>
   
 
   
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.post258+g2de0f7d
+                0.post262+g62d3d84
               </div>
             
           
@@ -515,84 +515,85 @@
 <span class="linenos">275</span>    <span class="c1"># or to_riv (shellmound_tmr example)</span>
 <span class="linenos">276</span>    <span class="nt">one_reach_per_cell</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span> <span class="c1">#  consolidate SFR reaches to one per i, j location</span>
 <span class="linenos">277</span>    <span class="nt">add_outlets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">17955371</span><span class="p p-Indicator">,</span> <span class="nv">17956213</span><span class="p p-Indicator">]</span>  <span class="c1"># add outlets at these line numbers</span>
-<span class="linenos">278</span>
-<span class="linenos">279</span><span class="c1"># Well Package</span>
-<span class="linenos">280</span><span class="nt">wel</span><span class="p">:</span>
-<span class="linenos">281</span>  <span class="nt">options</span><span class="p">:</span>
-<span class="linenos">282</span>    <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">283</span>    <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">284</span>    <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">285</span>  <span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">286</span>    <span class="nt">csvfiles</span><span class="p">:</span>
-<span class="linenos">287</span>      <span class="c1"># pumping input from CSV files</span>
-<span class="linenos">288</span>      <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">289</span>                  <span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">290</span>                  <span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">291</span>      <span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span>
-<span class="linenos">292</span>      <span class="nt">volume_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
-<span class="linenos">293</span>      <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
-<span class="linenos">294</span>      <span class="nt">data_column</span><span class="p">:</span> <span class="s">&#39;flux_m3&#39;</span>
-<span class="linenos">295</span>      <span class="nt">datetime_column</span><span class="p">:</span> <span class="s">&#39;start_datetime&#39;</span>
-<span class="linenos">296</span>      <span class="c1"># end datetimes only for input data that needs upsampling;</span>
-<span class="linenos">297</span>      <span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span>
-<span class="linenos">298</span>      <span class="nt">end_datetime_column</span><span class="p">:</span> <span class="s">&#39;end_datetime&#39;</span>
-<span class="linenos">299</span>      <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;node&#39;</span>
-<span class="linenos">300</span>      <span class="nt">period_stats</span><span class="p">:</span>  <span class="c1"># how fluxes will be distributed across model stress periods</span>
-<span class="linenos">301</span>        <span class="nt">0</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">none</span>  <span class="c1"># no wells simulated in initial period</span>
-<span class="linenos">302</span>        <span class="nt">1</span><span class="p">:</span> <span class="s">&#39;mean&#39;</span>  <span class="c1"># mean pumping rate for period 1 and subsequent periods</span>
-<span class="linenos">303</span>      <span class="nt">vertical_flux_distribution</span><span class="p">:</span>
-<span class="linenos">304</span>        <span class="nt">across_layers</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>  <span class="c1"># False to put fluxes in one layer</span>
-<span class="linenos">305</span>        <span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span>
-<span class="linenos">306</span>        <span class="nt">distribute_by</span><span class="p">:</span> <span class="s">&#39;transmissivity&#39;</span>  <span class="c1"># thickness or transmissivity</span>
-<span class="linenos">307</span>        <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.</span>  <span class="c1"># layers must be at 10 length units thick to have a well;</span>
-<span class="linenos">308</span>        <span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span>
-<span class="linenos">309</span>
-<span class="linenos">310</span><span class="c1"># Output Control Package</span>
-<span class="linenos">311</span><span class="nt">oc</span><span class="p">:</span>
-<span class="linenos">312</span>  <span class="nt">head_fileout_fmt</span><span class="p">:</span> <span class="s">&#39;{}.hds&#39;</span>
-<span class="linenos">313</span>  <span class="nt">budget_fileout_fmt</span><span class="p">:</span> <span class="s">&#39;{}.cbc&#39;</span>
-<span class="linenos">314</span>  <span class="c1"># dictionary input similar to flopy</span>
-<span class="linenos">315</span>  <span class="nt">saverecord</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">head</span><span class="p">:</span> <span class="s">&#39;last&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">316</span><span class="nt">                   budget</span><span class="p">:</span> <span class="s">&#39;last&#39;</span><span class="p p-Indicator">}</span>
-<span class="linenos">317</span>  <span class="p p-Indicator">}</span>
-<span class="linenos">318</span>  <span class="c1"># MODFLOW 6-style text input can also be used</span>
-<span class="linenos">319</span>  <span class="c1"># e.g.</span>
-<span class="linenos">320</span>  <span class="c1"># period_options: {0: [&#39;save head last&#39;,</span>
-<span class="linenos">321</span>  <span class="c1">#              &#39;save budget last&#39; ]</span>
-<span class="linenos">322</span>
-<span class="linenos">323</span><span class="nt">obs</span><span class="p">:</span>
-<span class="linenos">324</span>  <span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">325</span>    <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/preprocessed_head_obs_info.csv&#39;</span>
-<span class="linenos">326</span>    <span class="p p-Indicator">]</span>
-<span class="linenos">327</span>    <span class="nt">column_mappings</span><span class="p">:</span>
-<span class="linenos">328</span>      <span class="nt">obsname</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">329</span>
+<span class="linenos">278</span>    <span class="nt">minimum_slope</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-5</span>
+<span class="linenos">279</span>
+<span class="linenos">280</span><span class="c1"># Well Package</span>
+<span class="linenos">281</span><span class="nt">wel</span><span class="p">:</span>
+<span class="linenos">282</span>  <span class="nt">options</span><span class="p">:</span>
+<span class="linenos">283</span>    <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">284</span>    <span class="nt">print_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">285</span>    <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">286</span>  <span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">287</span>    <span class="nt">csvfiles</span><span class="p">:</span>
+<span class="linenos">288</span>      <span class="c1"># pumping input from CSV files</span>
+<span class="linenos">289</span>      <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">290</span>                  <span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">291</span>                  <span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">292</span>      <span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span>
+<span class="linenos">293</span>      <span class="nt">volume_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
+<span class="linenos">294</span>      <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
+<span class="linenos">295</span>      <span class="nt">data_column</span><span class="p">:</span> <span class="s">&#39;flux_m3&#39;</span>
+<span class="linenos">296</span>      <span class="nt">datetime_column</span><span class="p">:</span> <span class="s">&#39;start_datetime&#39;</span>
+<span class="linenos">297</span>      <span class="c1"># end datetimes only for input data that needs upsampling;</span>
+<span class="linenos">298</span>      <span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span>
+<span class="linenos">299</span>      <span class="nt">end_datetime_column</span><span class="p">:</span> <span class="s">&#39;end_datetime&#39;</span>
+<span class="linenos">300</span>      <span class="nt">id_column</span><span class="p">:</span> <span class="s">&#39;node&#39;</span>
+<span class="linenos">301</span>      <span class="nt">period_stats</span><span class="p">:</span>  <span class="c1"># how fluxes will be distributed across model stress periods</span>
+<span class="linenos">302</span>        <span class="nt">0</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">none</span>  <span class="c1"># no wells simulated in initial period</span>
+<span class="linenos">303</span>        <span class="nt">1</span><span class="p">:</span> <span class="s">&#39;mean&#39;</span>  <span class="c1"># mean pumping rate for period 1 and subsequent periods</span>
+<span class="linenos">304</span>      <span class="nt">vertical_flux_distribution</span><span class="p">:</span>
+<span class="linenos">305</span>        <span class="nt">across_layers</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>  <span class="c1"># False to put fluxes in one layer</span>
+<span class="linenos">306</span>        <span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span>
+<span class="linenos">307</span>        <span class="nt">distribute_by</span><span class="p">:</span> <span class="s">&#39;transmissivity&#39;</span>  <span class="c1"># thickness or transmissivity</span>
+<span class="linenos">308</span>        <span class="nt">minimum_layer_thickness</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.</span>  <span class="c1"># layers must be at 10 length units thick to have a well;</span>
+<span class="linenos">309</span>        <span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span>
+<span class="linenos">310</span>
+<span class="linenos">311</span><span class="c1"># Output Control Package</span>
+<span class="linenos">312</span><span class="nt">oc</span><span class="p">:</span>
+<span class="linenos">313</span>  <span class="nt">head_fileout_fmt</span><span class="p">:</span> <span class="s">&#39;{}.hds&#39;</span>
+<span class="linenos">314</span>  <span class="nt">budget_fileout_fmt</span><span class="p">:</span> <span class="s">&#39;{}.cbc&#39;</span>
+<span class="linenos">315</span>  <span class="c1"># dictionary input similar to flopy</span>
+<span class="linenos">316</span>  <span class="nt">saverecord</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span> <span class="p p-Indicator">{</span><span class="nt">head</span><span class="p">:</span> <span class="s">&#39;last&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">317</span><span class="nt">                   budget</span><span class="p">:</span> <span class="s">&#39;last&#39;</span><span class="p p-Indicator">}</span>
+<span class="linenos">318</span>  <span class="p p-Indicator">}</span>
+<span class="linenos">319</span>  <span class="c1"># MODFLOW 6-style text input can also be used</span>
+<span class="linenos">320</span>  <span class="c1"># e.g.</span>
+<span class="linenos">321</span>  <span class="c1"># period_options: {0: [&#39;save head last&#39;,</span>
+<span class="linenos">322</span>  <span class="c1">#              &#39;save budget last&#39; ]</span>
+<span class="linenos">323</span>
+<span class="linenos">324</span><span class="nt">obs</span><span class="p">:</span>
+<span class="linenos">325</span>  <span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">326</span>    <span class="nt">filenames</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/preprocessed_head_obs_info.csv&#39;</span>
+<span class="linenos">327</span>    <span class="p p-Indicator">]</span>
+<span class="linenos">328</span>    <span class="nt">column_mappings</span><span class="p">:</span>
+<span class="linenos">329</span>      <span class="nt">obsname</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">]</span>
 <span class="linenos">330</span>
-<span class="linenos">331</span><span class="nt">ims</span><span class="p">:</span>
-<span class="linenos">332</span>  <span class="nt">options</span><span class="p">:</span>
-<span class="linenos">333</span>    <span class="nt">print_option</span><span class="p">:</span> <span class="s">&#39;all&#39;</span>
-<span class="linenos">334</span>    <span class="nt">complexity</span><span class="p">:</span> <span class="s">&#39;moderate&#39;</span>
-<span class="linenos">335</span>    <span class="s">&#39;csv_output</span><span class="nv"> </span><span class="s">fileout&#39;</span><span class="p p-Indicator">:</span> <span class="s">&#39;solver_out.csv&#39;</span>
-<span class="linenos">336</span>  <span class="nt">nonlinear</span><span class="p">:</span>
-<span class="linenos">337</span>    <span class="nt">outer_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
-<span class="linenos">338</span>    <span class="nt">outer_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">200</span>
-<span class="linenos">339</span>    <span class="nt">under_relaxation</span><span class="p">:</span>  <span class="s">&#39;dbd&#39;</span>
-<span class="linenos">340</span>    <span class="nt">under_relaxation_theta</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.7</span>
-<span class="linenos">341</span>    <span class="nt">under_relaxation_kappa</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="linenos">342</span>    <span class="nt">under_relaxation_gamma</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
-<span class="linenos">343</span>    <span class="nt">under_relaxation_momentum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
-<span class="linenos">344</span>    <span class="nt">backtracking_number</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos">345</span>  <span class="nt">linear</span><span class="p">:</span>
-<span class="linenos">346</span>    <span class="nt">inner_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="linenos">347</span>    <span class="nt">inner_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
-<span class="linenos">348</span>    <span class="nt">rcloserecord</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span> <span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">349</span>    <span class="nt">linear_acceleration</span><span class="p">:</span> <span class="s">&#39;bicgstab&#39;</span>
-<span class="linenos">350</span>    <span class="nt">scaling_method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">351</span>    <span class="nt">reordering_method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">352</span>    <span class="nt">relaxation_factor</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>  <span class="c1"># either ILU(0) or ILUT preconditioning</span>
-<span class="linenos">353</span>    <span class="nt">number_orthogonalizations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos">354</span>    <span class="nt">preconditioner_levels</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7</span>
-<span class="linenos">355</span>    <span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="linenos">331</span>
+<span class="linenos">332</span><span class="nt">ims</span><span class="p">:</span>
+<span class="linenos">333</span>  <span class="nt">options</span><span class="p">:</span>
+<span class="linenos">334</span>    <span class="nt">print_option</span><span class="p">:</span> <span class="s">&#39;all&#39;</span>
+<span class="linenos">335</span>    <span class="nt">complexity</span><span class="p">:</span> <span class="s">&#39;moderate&#39;</span>
+<span class="linenos">336</span>    <span class="s">&#39;csv_output</span><span class="nv"> </span><span class="s">fileout&#39;</span><span class="p p-Indicator">:</span> <span class="s">&#39;solver_out.csv&#39;</span>
+<span class="linenos">337</span>  <span class="nt">nonlinear</span><span class="p">:</span>
+<span class="linenos">338</span>    <span class="nt">outer_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
+<span class="linenos">339</span>    <span class="nt">outer_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="linenos">340</span>    <span class="nt">under_relaxation</span><span class="p">:</span>  <span class="s">&#39;dbd&#39;</span>
+<span class="linenos">341</span>    <span class="nt">under_relaxation_theta</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="linenos">342</span>    <span class="nt">under_relaxation_kappa</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="linenos">343</span>    <span class="nt">under_relaxation_gamma</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="linenos">344</span>    <span class="nt">under_relaxation_momentum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="linenos">345</span>    <span class="nt">backtracking_number</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos">346</span>  <span class="nt">linear</span><span class="p">:</span>
+<span class="linenos">347</span>    <span class="nt">inner_maximum</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">348</span>    <span class="nt">inner_dvclose</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
+<span class="linenos">349</span>    <span class="nt">rcloserecord</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span> <span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">350</span>    <span class="nt">linear_acceleration</span><span class="p">:</span> <span class="s">&#39;bicgstab&#39;</span>
+<span class="linenos">351</span>    <span class="nt">scaling_method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">352</span>    <span class="nt">reordering_method</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">353</span>    <span class="nt">relaxation_factor</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0</span>  <span class="c1"># either ILU(0) or ILUT preconditioning</span>
+<span class="linenos">354</span>    <span class="nt">number_orthogonalizations</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos">355</span>    <span class="nt">preconditioner_levels</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="linenos">356</span>    <span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
 </pre></div>
 </div>
 </div>
@@ -1610,7 +1611,7 @@
     <p>
         &#169; Copyright 2019-2021, Modflow-setup developers |.
       <span class="lastupdated">
-        Last updated on May 14, 2021.
+        Last updated on Jun 11, 2021.
       </span>
 
     </p>
