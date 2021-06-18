@@ -33,8 +33,7 @@ def check_source_files(fileslist):
             raise IOError('Cannot find {}'.format(f))
 
 def load_array_np(filename, shape=None):
-
-    """Load an array, ensuring the correct shape."""
+   """Load an array, ensuring the correct shape."""
     t0 = time.time()
     arr = np.loadtxt(filename)
     if shape is not None:
@@ -83,7 +82,6 @@ def load_array(filename, shape=None, nodata=-9999):
         array[array == nodata] = np.nan
     print("took {:.2f}s".format(time.time() - t0))
     return array
-
 
 def load(filename):
     """Load a configuration file."""
