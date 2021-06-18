@@ -111,8 +111,8 @@ def source_data_from_model_cases(pfl_nwt):
 
 def test_parse_source_data(source_data_cases,
                            source_data_from_model_cases,
-                           pfl_nwt_with_grid, project_root_path):
-    model = pfl_nwt_with_grid
+                           pfl_nwt_with_dis, project_root_path):
+    model = pfl_nwt_with_dis
     cases = source_data_cases + source_data_from_model_cases
     results = []
 
@@ -148,7 +148,7 @@ def test_parse_source_data(source_data_cases,
                                      variable=var,
                                      dest_model=model)
     assert isinstance(sd.filenames, dict)
-    assert sd.unit_conversion == convert_length_units('inches', 'meters') *\
+    assert sd.unit_conversion == convert_length_units('inches', 'meters') /\
         convert_time_units('years', 'days')
     data = sd.get_data()
     assert isinstance(data, dict)
@@ -180,27 +180,42 @@ def test_parse_source_data(source_data_cases,
 
     # TODO: write test for multiplier intermediate layers
 
-    # test mapping of layers from binary file;
-    # based on layer bottom mapping
+    # test regridding of heads from binary file;
+    # based on layer mapping
     filename = source_data_from_model_cases[2]['from_parent']['binaryfile']
-    source_model = pfl_nwt_with_grid.parent
+    source_model = pfl_nwt_with_dis.parent
     modelname = 'parent'
-    pfl_nwt_with_grid._parent_layers = {0: -0.5, 1: 0, 2: 1, 3: 2, 4: 3}
     sd = MFBinaryArraySourceData(variable='strt', filename=filename,
                                  dest_model=model,
                                  source_modelgrid=source_model.modelgrid,
-                                 from_source_model_layers={},
+                                 from_source_model_layers={0: 0, 1: 0, 2: 1, 3: 2, 4: 3},
                                  length_units=model.cfg[modelname]['length_units'],
                                  time_units=model.cfg[modelname]['time_units'])
     data = sd.get_data()
-    # first two layers in dest model should both be from parent layer 0
+
     mask = sd._source_grid_mask
     arr0 = sd.regrid_from_source_model(sd.source_array[0],
                                        mask=mask,
                                        method='linear')
+    # with explicit layer mapping,
+    # first two layers in dest model should both be from parent layer 0
     assert np.array_equal(data[0], data[1])
     assert np.array_equal(arr0, data[0])
-    pfl_nwt_with_grid._parent_layers = None # reset
+    pfl_nwt_with_dis._parent_layers = None # reset
+
+    # test regridding of heads from binary file;
+    # based on 3d interpolation
+    sd = MFBinaryArraySourceData(variable='strt', filename=filename,
+                                 dest_model=model,
+                                 source_modelgrid=source_model.modelgrid,
+                                 from_source_model_layers=None,
+                                 length_units=model.cfg[modelname]['length_units'],
+                                 time_units=model.cfg[modelname]['time_units'])
+    data = sd.get_data()
+    # layers 0 and 1 should not be exactly equal
+    assert not np.array_equal(data[0], data[1])
+    # but similar
+    assert np.allclose(data[0], data[1], rtol=0.01)
 
 
 @pytest.mark.parametrize('values, length_units, time_units, mult, expected',

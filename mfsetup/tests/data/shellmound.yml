@@ -56,7 +56,7 @@ model:
              'oc',
              'sto',
              'rch',
-             #'sfr',
+             'sfr',
              'obs',
              'wel',
              'ims'
@@ -244,13 +244,30 @@ sfr:
       line_id_column: 'line_id'
       data_column: 'flow_m3d'  # flows are already in cubic meters/day; can therefore skip unit input
       category_column: 'category'
-    # modflow-setup will try to locate the inflows using the routing information in the flowlines shapefile
+    observations:  # see sfrmaker.observations.add_observations for arguments
+      filename: shellmound/tables/observations.csv
+      obstype: [downstream-flow, 'stage']  # modflow-6 observation type
+      x_location_column: x  # observation locations, in CRS coordinates
+      y_location_column: y
+      obsname_column: site_no  # column for naming observations
+    # specified runoff
+    # that has been reprocessed to units of m3/day per line ID
+    runoff:  # see sfrmaker.data.add_to_perioddata for arguments
+      filename: 'shellmound/tables/swb_runoff_by_nhdplus_comid_m3d.csv'
+      datetime_column: 'time'
+      line_id_column: 'comid'
+      data_column: 'runoff_m3d'
+    # modflow-setup will try to locate the inflows or runoff values
+    # using the routing information in the flowlines shapefile
     # however, in some cases an inflow location might be just outside of the flowlines that are provided
     # (for example, if they were clipped to the model grid, or if they are outside of the model bounding box)
-    inflows_routing:
-      filename: 'shellmound/tables/routing.csv'
-      id_column: 'COMID'  # arguments to sfrmaker.Lines.from_shapefile
-      routing_column: 'tocomid'
+    # or a runoff value might be assigned to a line that was culled from the preprocessed flowlines
+    # the routing option allows complete routing of the original data to be supplied,
+    # so that values associated with missing lines can be assigned to the next existing downstream line
+    routing:
+      filename: 'shellmound/tables/flowline_routing.csv'
+      id_column: 'FROMCOMID'  # arguments to sfrmaker.Lines.from_shapefile
+      routing_column: 'TOCOMID'
   sfrmaker_options:
     # the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker
     # (see https://usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)
@@ -258,6 +275,7 @@ sfr:
     # or to_riv (shellmound_tmr example)
     one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
     add_outlets: [17955371, 17956213]  # add outlets at these line numbers
+    minimum_slope: 1.e-5
 
 # Well Package
 wel:
@@ -301,7 +319,7 @@ oc:
   # MODFLOW 6-style text input can also be used
   # e.g.
   # period_options: {0: ['save head last',
-  #                     'save budget last' ]
+  #              'save budget last' ]
 
 obs:
   source_data:

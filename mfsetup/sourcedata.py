@@ -28,6 +28,7 @@ from mfsetup.interpolate import (
     interp_weights,
     interpolate,
     regrid,
+    regrid3d,
 )
 from mfsetup.mf5to6 import get_variable_name, get_variable_package_name
 from mfsetup.tdis import (
@@ -56,7 +57,7 @@ class SourceData:
     datatype :
     dest_model :
     """
-    def __init__(self, filenames=None, values=None, length_units='unknown',
+    def __init__(self, filenames=None, values=None, variable=None, length_units='unknown',
                  time_units='unknown',
                  area_units=None, volume_units=None,
                  datatype=None,
@@ -66,6 +67,7 @@ class SourceData:
         """
         self.filenames = filenames
         self.values = values
+        self.variable = variable
         self.length_units = length_units
         self.area_units = area_units
         self.volume_units = volume_units
@@ -76,7 +78,15 @@ class SourceData:
 
     @property
     def unit_conversion(self):
-        return self.length_unit_conversion * self.time_unit_conversion
+        try:
+            if np.issubdtype(self.source_array.dtype, np.integer):
+                return 1.0
+        except:
+            pass
+        # non-comprehensive list of dimensionless variables
+        if self.variable in {'ibound', 'idomain', 'ss', 'sy', 'irch', 'iconvert', 'lkarr'}:
+            return 1.0
+        return self.length_unit_conversion / self.time_unit_conversion
 
     @property
     def length_unit_conversion(self):
@@ -288,11 +298,11 @@ class ArraySourceData(SourceData):
                  multiplier=1.):
 
         SourceData.__init__(self, filenames=filenames, values=values,
+                            variable=variable,
                             length_units=length_units, time_units=time_units,
                             datatype=datatype,
                             dest_model=dest_model)
 
-        self.variable = variable
         self.source_modelgrid = source_modelgrid
         self._source_mask = None
         if from_source_model_layers == {}:
@@ -321,6 +331,13 @@ class ArraySourceData(SourceData):
     def dest_source_layer_mapping(self):
         nlay = self.dest_model.nlay
         if self.from_source_model_layers is None:
+            if self.datatype == 'array2d':
+                return {0: 0}
+            # if no layer mapping is provided
+            # can't interpolate botm elevations (as they are the z values)
+            # assume 1:1 layer mapping
+            elif self.variable == 'botm':
+                return dict(zip(range(self.source_modelgrid.nlay), range(nlay)))
             return self.dest_model.parent_layers
         elif self.from_source_model_layers is not None:
             nspecified = len(self.from_source_model_layers)
@@ -412,7 +429,7 @@ class ArraySourceData(SourceData):
         elif isinstance(f, str):
             # sample "source_data" that may not be on same grid
             # TODO: add bilinear and zonal statistics methods
-            if f.endswith(".asc") or f.endswith(".tif"):
+            if any([f.lower().endswith(i) for i in ['asc', 'tif', 'tiff', 'geotiff', 'gtiff']]):
                 arr = get_values_at_points(f,
                                            self.dest_model.modelgrid.xcellcenters.ravel(),
                                            self.dest_model.modelgrid.ycellcenters.ravel(),
@@ -473,43 +490,55 @@ class ArraySourceData(SourceData):
         # regrid source data from another model
         elif self.source_array is not None:
 
-            for dest_k, source_k in self.dest_source_layer_mapping.items():
-                if source_k >= self.source_array.shape[0]:
-                    continue
-                # destination model layers copied from source model layers
-                # if source_array has an extra layer, assume layer 0 is the model top
-                # (only included for weighted average)
-                # could use a better approach
-                # check source_k is a whole number to 4 decimal places
-                # and if is a layer in source_array
-                if np.round(source_k, 4) in range(self.source_array.shape[0]):
-                    if self.source_array.shape[0] - self.dest_model.nlay == 1:
-                        source_k +=1
-                    source_k = int(np.round(source_k, 4))
-                    arr = self.source_array[source_k]
-                # destination model layers that are a weighted average
-                # of consecutive source model layers
-                else:
-                    weight0 = source_k - np.floor(source_k)
-                    source_k0 = int(np.floor(source_k))
-                    # first layer in the average can't be negative
-                    source_k0 = 0 if source_k0 < 0 else source_k0
-                    source_k1 = int(np.ceil(source_k))
-                    arr = weighted_average_between_layers(self.source_array[source_k0],
-                                                          self.source_array[source_k1],
-                                                          weight0=weight0)
-                # interpolate from source model using source model grid
-                # otherwise assume the grids are the same
-                if self.source_modelgrid is not None:
-                    # exclude invalid values in interpolation from parent model
-                    mask = self._source_grid_mask & (arr > self.vmin) & (arr < self.vmax)
+            # interpolate by layer, using the layer mapping specified by the user
+            #if self.from_source_model_layers is not None or self.datatype == 'array2d':
+            if self.dest_source_layer_mapping is not None:
+                for dest_k, source_k in self.dest_source_layer_mapping.items():
+                    if source_k >= self.source_array.shape[0]:
+                        continue
+                    # destination model layers copied from source model layers
+                    # if source_array has an extra layer, assume layer 0 is the model top
+                    # (only included for weighted average)
+                    # could use a better approach
+                    # check source_k is a whole number to 4 decimal places
+                    # and if is a layer in source_array
+                    if np.round(source_k, 4) in range(self.source_array.shape[0]):
+                        if self.source_array.shape[0] - self.dest_model.nlay == 1:
+                            source_k +=1
+                        source_k = int(np.round(source_k, 4))
+                        arr = self.source_array[source_k]
+                    # destination model layers that are a weighted average
+                    # of consecutive source model layers
+                    else:
+                        weight0 = source_k - np.floor(source_k)
+                        source_k0 = int(np.floor(source_k))
+                        # first layer in the average can't be negative
+                        source_k0 = 0 if source_k0 < 0 else source_k0
+                        source_k1 = int(np.ceil(source_k))
+                        arr = weighted_average_between_layers(self.source_array[source_k0],
+                                                              self.source_array[source_k1],
+                                                              weight0=weight0)
+                    # interpolate from source model using source model grid
+                    # otherwise assume the grids are the same
+                    if self.source_modelgrid is not None:
+                        # exclude invalid values in interpolation from parent model
+                        mask = self._source_grid_mask & (arr > self.vmin) & (arr < self.vmax)
 
-                    regridded = self.regrid_from_source_model(arr,
-                                                              mask=mask,
-                                                              method=self.resample_method)
+                        regridded = self.regrid_from_source_model(arr,
+                                                                  mask=mask,
+                                                                  method=self.resample_method)
 
-                assert regridded.shape == self.dest_modelgrid.shape[1:]
-                data[dest_k] = regridded * self.mult * self.unit_conversion
+                    assert regridded.shape == self.dest_modelgrid.shape[1:]
+                    data[dest_k] = regridded * self.mult * self.unit_conversion
+            # general 3D interpolation based on the location of parent and inset model cells
+            else:
+                # tile the mask to nlay x nrow x ncol
+                in_window = np.tile(self._source_grid_mask, (self.source_modelgrid.nlay, 1, 1))
+                valid = (self.source_array > self.vmin) & (self.source_array < self.vmax)
+                mask = valid & in_window
+                heads = regrid3d(self.source_array, self.source_modelgrid, self.dest_modelgrid,
+                                 mask1=mask, method='linear')
+                data = {k: heads2d for k, heads2d in enumerate(heads)}
 
         # no files or source array provided
         else:
@@ -685,7 +714,8 @@ class MFBinaryArraySourceData(ArraySourceData):
     def __init__(self, variable, filename=None,
                  length_units='unknown', time_units='unknown',
                  dest_model=None, source_modelgrid=None,
-                 from_source_model_layers=None, datatype='transient3d',
+                 from_source_model_layers=None, stress_period=0,
+                 datatype='transient3d',
                  resample_method='nearest', vmin=-1e30, vmax=1e30
                  ):
 
@@ -697,6 +727,7 @@ class MFBinaryArraySourceData(ArraySourceData):
                                  resample_method=resample_method, vmin=vmin, vmax=vmax)
 
         self.filename = filename
+        self.stress_period = stress_period
 
     @property
     def dest_source_layer_mapping(self):
@@ -714,6 +745,26 @@ class MFBinaryArraySourceData(ArraySourceData):
                                 "but only {} are specified: {}"
                                 .format(nlay, nspecified, self.from_source_model_layers))
             return self.from_source_model_layers
+
+    @property
+    def kstpkper(self):
+        """Currently this class is only intended to produce a single 3D array
+        for a given timestep/stress period. Find the last timestep
+        associated with the period argument (to __init__) and return the
+        a (kstp, kper) tuple for getting the binary data.
+        """
+        if self.filename.endswith('hds'):
+            bfobj = bf.HeadFile(self.filename)
+            kstpkpers = bfobj.get_kstpkper()
+            for kstp, kper in kstpkpers:
+                if kper == self.stress_period:
+                    kstpkper = kstp, kper
+                if kper > self.stress_period:
+                    break
+            return kstpkper
+
+        elif self.filename[:-4] in {'.cbb', '.cbc'}:
+            raise NotImplementedError('Cell Budget files not supported yet.')
 
     def get_data(self, **kwargs):
         """Get array data from binary file for a single time;
@@ -733,44 +784,55 @@ class MFBinaryArraySourceData(ArraySourceData):
 
         if self.filename.endswith('hds'):
             bfobj = bf.HeadFile(self.filename)
-            self.source_array = bfobj.get_data(**kwargs)
+            self.source_array = bfobj.get_data(kstpkper=self.kstpkper)
 
         elif self.filename[:-4] in {'.cbb', '.cbc'}:
             raise NotImplementedError('Cell Budget files not supported yet.')
 
         data = {}
-        for dest_k, source_k in self.dest_source_layer_mapping.items():
+        # interpolate by layer, using the layer mapping specified by the user
+        if self.from_source_model_layers is not None:
+            for dest_k, source_k in self.dest_source_layer_mapping.items():
 
-            # destination model layers copied from source model layers
-            if source_k <= 0:
-                arr = self.source_array[0]
-            elif np.round(source_k, 4) in range(self.source_array.shape[0]):
-                source_k = int(np.round(source_k, 4))
-                arr = self.source_array[source_k]
-            # destination model layers that are a weighted average
-            # of consecutive source model layers
-            # TODO: add transmissivity-based weighting if upw exists
-            else:
-                weight0 = source_k - np.floor(source_k)
-                source_k0 = int(np.floor(source_k))
-                # first layer in the average can't be negative
-                source_k0 = 0 if source_k0 < 0 else source_k0
-                source_k1 = int(np.ceil(source_k))
-                arr = weighted_average_between_layers(self.source_array[source_k0],
-                                                      self.source_array[source_k1],
-                                                      weight0=weight0)
-            # interpolate from source model using source model grid
-            # otherwise assume the grids are the same
-            if self.source_modelgrid is not None:
-                # exclude invalid values in interpolation from parent model
-                mask = self._source_grid_mask & (arr > self.vmin) & (arr < self.vmax)
+                # destination model layers copied from source model layers
+                if source_k <= 0:
+                    arr = self.source_array[0]
+                elif np.round(source_k, 4) in range(self.source_array.shape[0]):
+                    source_k = int(np.round(source_k, 4))
+                    arr = self.source_array[source_k]
+                # destination model layers that are a weighted average
+                # of consecutive source model layers
+                # TODO: add transmissivity-based weighting if upw exists
+                else:
+                    weight0 = source_k - np.floor(source_k)
+                    source_k0 = int(np.floor(source_k))
+                    # first layer in the average can't be negative
+                    source_k0 = 0 if source_k0 < 0 else source_k0
+                    source_k1 = int(np.ceil(source_k))
+                    arr = weighted_average_between_layers(self.source_array[source_k0],
+                                                          self.source_array[source_k1],
+                                                          weight0=weight0)
+                # interpolate from source model using source model grid
+                # otherwise assume the grids are the same
+                if self.source_modelgrid is not None:
+                    # exclude invalid values in interpolation from parent model
+                    mask = self._source_grid_mask & (arr > self.vmin) & (arr < self.vmax)
 
-                arr = self.regrid_from_source_model(arr,
-                                                    mask=mask,
-                                                    method='linear')
+                    arr = self.regrid_from_source_model(arr,
+                                                        mask=mask,
+                                                        method='linear')
 
-            assert arr.shape == self.dest_modelgrid.shape[1:]
-            data[dest_k] = arr * self.mult * self.unit_conversion
+                assert arr.shape == self.dest_modelgrid.shape[1:]
+                data[dest_k] = arr * self.mult * self.unit_conversion
+        # general 3D interpolation based on the location of parent and inset model cells
+        else:
+            # tile the mask to nlay x nrow x ncol
+            in_window = np.tile(self._source_grid_mask, (self.source_modelgrid.nlay, 1, 1))
+            valid = (self.source_array > self.vmin) & (self.source_array < self.vmax)
+            mask = valid & in_window
+            heads = regrid3d(self.source_array, self.source_modelgrid, self.dest_modelgrid,
+                             mask1=mask, method='linear')
+            data = {k: heads2d for k, heads2d in enumerate(heads)}
 
         self.data = data
         return data
@@ -1163,13 +1225,14 @@ def setup_array(model, package, var, data=None,
                 # the botm array has to be handled differently
                 # because dest. layers may be interpolated between
                 # model top and first botm
-                if source_variable == 'botm':
+                if source_variable == 'botm' and \
+                        from_source_model_layers is not None and \
+                        from_source_model_layers[0] < 0:
                     nlay, nrow, ncol = source_model.dis.botm.array.shape
                     source_array = np.zeros((nlay+1, nrow, ncol))
                     source_array[0] = source_model.dis.top.array
                     source_array[1:] = source_model.dis.botm.array
-                    if from_source_model_layers is not None:
-                        from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
+                    from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
                 else:
                     source_array = getattr(source_model, source_package).__dict__[source_variable].array
 

@@ -61,8 +61,8 @@ def test_rotated_tmr(rotated_parent, shellmound_cfg, tmpdir, test_data_path):
     cfg['setup_grid']['xoff'] = 517425
     cfg['setup_grid']['yoff'] = 1178441
     cfg['setup_grid']['dxy'] = 250
-    cfg['dis']['dimensions']['nrow'] = 10
-    cfg['dis']['dimensions']['ncol'] = 10
+    cfg['dis']['dimensions']['nrow'] = 15
+    cfg['dis']['dimensions']['ncol'] = 15
 
     # make parent block
     cfg['parent'] = {}
@@ -117,7 +117,7 @@ def test_rotated_grid(shellmound_cfg, shellmound_simulation, mf6_exe):
     cfg['setup_grid']['yoff'] = yoff
     cfg['setup_grid']['rotation'] = rotation
     cfg['dis']['dimensions']['nrow'] = nrow
-    cfg['dis']['dimensions']['ncol'] = 25
+    cfg['dis']['dimensions']['ncol'] = ncol
 
     cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,

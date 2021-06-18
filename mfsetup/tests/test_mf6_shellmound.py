@@ -430,7 +430,11 @@ def test_sto_setup(shellmound_model_with_dis):
 
 
 def test_npf_setup(shellmound_model_with_dis):
-    m = shellmound_model_with_dis
+    m = deepcopy(shellmound_model_with_dis)
+
+    # check time unit conversion
+    m.cfg['npf']['source_data']['k']['time_units'] = 'seconds'
+
     npf = m.setup_npf()
     npf.write()
     assert os.path.exists(os.path.join(m.model_ws, npf.filename))
@@ -441,7 +445,7 @@ def test_npf_setup(shellmound_model_with_dis):
     with rasterio.open(k3tif) as src:
         data = src.read(1)
         data[data == src.meta['nodata']] = np.nan
-    assert np.allclose(npf.k.array[3].mean() / .3048, np.nanmean(data), atol=5)
+    assert np.allclose(npf.k.array[3].mean() / (0.3048 * 86400), np.nanmean(data), atol=5)
 
     # TODO: add tests that Ks got distributed properly considering input and pinched layers
 
@@ -487,15 +491,19 @@ def test_obs_setup(shellmound_model_with_dis, config):
                 break
 
 
-@pytest.mark.parametrize('options', [{'saverecord': {0: {'head': 'last',
-                                                         'budget': 'last'}}},
-                                     {'period_options': {0: ['save head last',
-                                                             'save budget last']}}
+@pytest.mark.parametrize('input', [
+    # flopy-style input
+    {'saverecord': {0: {'head': 'last', 'budget': 'last'}}},
+    # MODFLOW 6-style input
+    {'period_options': {0: ['save head last', 'save budget last']}},
+    # blank period to skip subsequent periods
+    {'period_options': {0: ['save head last', 'save budget last'],
+                        1: []}}
                                         ])
-def test_oc_setup(shellmound_model_with_dis, options):
+def test_oc_setup(shellmound_model_with_dis, input):
     cfg = {'head_fileout_fmt': '{}.hds',
            'budget_fileout_fmt': '{}.cbc'}
-    cfg.update(options)
+    cfg.update(input)
     m = shellmound_model_with_dis  # deepcopy(model)
     m.cfg['oc'] = cfg
     oc = m.setup_oc()
@@ -506,10 +514,15 @@ def test_oc_setup(shellmound_model_with_dis, options):
     options = read_mf6_block(ocfile, 'options')
     options = {k: ' '.join(v).lower() for k, v in options.items()}
     perioddata = read_mf6_block(ocfile, 'period')
+    # convert back to zero-based
+    perioddata = {k-1:v for k, v in perioddata.items()}
     assert 'fileout' in options['budget'] and '.cbc' in options['budget']
     assert 'fileout' in options['head'] and '.hds' in options['head']
-    assert 'save head last' in perioddata[1]
-    assert 'save budget last' in perioddata[1]
+    if 'saverecord' in input:
+        assert 'save head last' in perioddata[0]
+        assert 'save budget last' in perioddata[0]
+    else:
+        assert perioddata == input['period_options']
 
 
 def test_rch_setup(shellmound_model_with_dis):
@@ -629,7 +642,8 @@ def test_wel_setup(shellmound_model_with_dis):
     assert np.allclose(sums, sums2, rtol=0.01)
 
 
-def test_sfr_setup(model_with_sfr):
+def test_sfr_setup(model_with_sfr
+                   ):
     m = model_with_sfr
     m.sfr.write()
     assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
@@ -662,6 +676,55 @@ def test_sfr_setup(model_with_sfr):
         assert m.sfrdata.reach_data.loc[m.sfrdata.reach_data.line_id == outlet_id,
                                         'outseg'].sum() == 0
 
+    # check that adding runoff works
+    runoff_period_data = m.sfrdata.period_data.dropna(subset=['runoff'], axis=0)
+    # only compare periods 2-7 (2007-04-01 to 2010-04-01)
+    runoff_period_data = runoff_period_data.loc[2:].copy()
+    runoff_period_data['line_id_in_model'] = runoff_period_data['line_id_in_model'].astype(int)
+    # sum runoff by line id for each period
+    runoff_period_comid_sums = runoff_period_data.groupby(['per', 'line_id_in_model']).sum()
+    # then take the mean for each line id across periods
+    mean_period_data_runoff_by_comid = runoff_period_comid_sums.groupby('line_id_in_model').mean()
+    # read in the input values
+    df = pd.read_csv('../../data/shellmound/tables/swb_runoff_by_nhdplus_comid_m3d.csv')
+    df['time'] = pd.to_datetime(df['time'])
+    df = df.loc['2007-04-01':]
+    mean_input_runoff_by_comid = df.groupby('comid').mean()
+
+    # todo: compare mean annual runoff between input and model period_data
+    # ONLY the input that is in the model
+    # something like
+    # runoff_period_data.groupby(runoff_period_data.start_datetime.dt.year)['runoff'].sum().mean()
+    # df.groupby(df.time.dt.year)['runoff_m3d'].sum().mean()
+    # can't easily do this currently because just have comid in the input csv (no x, y info)
+    mean_annual_roff = runoff_period_data.groupby(runoff_period_data.start_datetime.dt.year)\
+        ['runoff'].sum().mean()
+    # with just supplied flowlines, mean_annual_roff is ~386,829
+    # with full routing info (including culled flowlines; in flowline_routing.csv),
+    # mean_annual_roff is ~839,144
+    assert mean_annual_roff > 8e5
+
+    # compare
+    mean_input_runoff_by_comid['in_model'] = mean_period_data_runoff_by_comid['runoff']
+    mean_input_runoff_by_comid.dropna(inplace=True)
+    mean_input_runoff_by_comid['diff'] = mean_input_runoff_by_comid['in_model'] - \
+                                         mean_input_runoff_by_comid['runoff_m3d']
+    # compute the absolute relative diff between input and sfr package
+    mean_input_runoff_by_comid['abs_pct'] = np.abs(mean_input_runoff_by_comid['diff']/ \
+                                                   mean_input_runoff_by_comid['runoff_m3d'])
+    # for lines where the model has less runoff, the difference should mostly be small
+    # (due to mismatch in averaging 6-month model stress periods vs. monthly input data)
+    mean_input_runoff_by_comid.loc[mean_input_runoff_by_comid['diff'] < 0, 'abs_pct'].mean() < 0.05
+    # the input data include all catchments (for all NHDPlus lines)
+    # the model only includes NHDPlus lines with > 20k arbolate sum
+    # SFRmaker routes all runoff from missing upstream catchments to the first downstream catchment
+    # that is in the model. So any catchment in the model that is not a headwater in NHDPlus
+    # will have runoff greater than the input data.
+
+    # check minimum slope
+    assert np.allclose(np.round(m.sfr.packagedata.array['rgrd'].min(), 6), \
+                       np.round(m.cfg['sfr']['sfrmaker_options']['minimum_slope'], 6))
+
 
 def test_sfr_inflows_from_csv(model_with_sfr):
     m = model_with_sfr
@@ -670,10 +733,11 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     inflow_input = pd.read_csv(m.cfg['sfr']['source_data']['inflows']['filename'])
     inflow_input['start_datetime'] = pd.to_datetime(inflow_input['datetime'])
     inflow_input.index = inflow_input['start_datetime']
-    sfr_pd = m.sfrdata.period_data.dropna(axis=1)
+    #sfr_pd = m.sfrdata.period_data.dropna(axis=1)
+    sfr_pd = m.sfrdata.period_data.dropna(subset=['inflow'], axis=0).reset_index()
     sfr_pd.index = sfr_pd.start_datetime
 
-    line_id = 18021542
+    line_id = inflow_input['line_id'].unique()[0]
     left = inflow_input.loc[inflow_input.line_id == line_id].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
     lookup = dict(zip(sfr_pd.specified_line_id, sfr_pd.rno))
     rno = lookup[line_id]
@@ -682,7 +746,7 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     pd.testing.assert_series_equal(left, right, check_names=False, check_freq=False)
 
 
-#@pytest.mark.xfail(reason='flopy remove_package() issue')
+@pytest.mark.xfail(reason='flopy remove_package() issue')
 def test_idomain_above_sfr(model_with_sfr):
     m = model_with_sfr
     sfr = m.sfr

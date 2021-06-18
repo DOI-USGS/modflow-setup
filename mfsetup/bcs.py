@@ -1,6 +1,8 @@
 """
 Functions for simple MODFLOW boundary conditions such as ghb, drain, etc.
 """
+import shutil
+
 import flopy
 import numpy as np
 import pandas as pd
@@ -224,6 +226,50 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
     return df
 
 
+def remove_inactive_bcs(pckg, external_files=False):
+    """Remove boundary conditions from cells that are inactive.
+
+    Parameters
+    ----------
+    model : flopy model instance
+    pckg : flopy package instance
+    """
+    model = pckg.parent
+    if model.version == 'mf6':
+        active = model.dis.idomain.array > 0
+    else:
+        active = model.bas6.ibound.array > 0
+    spd = pckg.stress_period_data.data
+
+    new_spd = {}
+    for per, rec in spd.items():
+        if 'cellid' in rec.dtype.names:
+            k, i, j = zip(*rec['cellid'])
+        else:
+            k, i, j = zip(*rec[['k', 'i', 'j']])
+        new_spd[per] = rec[active[k, i, j]]
+
+    if external_files:
+        if model.version == 'mf6':
+            spd_input = {}
+            for per, filename in external_files.items():
+                df = pd.DataFrame(new_spd[per])
+                df['#k'], df['i'], df['j'] = zip(*df['cellid'])
+                df[['#k', 'i', 'j']] += 1  # convert to 1-based for external file
+                cols = ['#k', 'i', 'j'] + list(new_spd[per].dtype.names[1:])
+                if isinstance(filename, dict):
+                    filename = filename['filename']
+                df[cols].to_csv(filename, index=False, sep=' ', float_format='%g')
+                spd_input[per] = {'filename': filename}
+                # make a copy for the intermediate data folder, for consistency with mf-2005
+                #shutil.copy(file_entry['filename'], model.cfg['intermediate_data']['output_folder'])
+            pckg.stress_period_data = spd_input
+        else:
+            raise NotImplementedError('External file input for MODFLOW-2005-style list-type data.')
+    else:
+        pckg.stress_period_data = new_spd
+
+
 def squeeze_columns(df, fillna=0.):
     """Drop columns where the forward difference
     (along axis 1, the column axis) is 0 in all rows.
@@ -248,3 +294,111 @@ def squeeze_columns(df, fillna=0.):
     changed = diff.sum(axis=0) != 0
     squeezed = df.loc[:, changed.index[changed]]
     return squeezed
+
+
+def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
+                                   variable_column='q', external_files=True,
+                                   external_filename_fmt="{}_{:03d}.dat"):
+    """Set up stress period data input for flopy, from a DataFrame
+    of stress period data information.
+
+    Parameters
+    ----------
+    package : str
+        Flopy package abbreviation (e.g. 'chd')
+    data : DataFrame
+        Pandas DataFrame of stress period data with the following columns:
+
+        ================= ==============================
+        per               zero-based model stress period
+        k                 zero-based model layer
+        i                 zero-based model row
+        j                 zero-based model column
+        <variable_column> stress period input values
+        boundname         modflow-6 boundname (optional)
+        ================= ==============================
+
+    external_files : bool
+        Whether or not to set up external files
+    external_filename_fmt : format str
+        Format for external file names. For example, "{}_{:03d}.dat"
+        would produce "wel_000.dat" for the package='wel' and stress period 0.
+
+    Returns
+    -------
+    spd : dict
+        If external_files=False, spd is populated with numpy recarrays of the
+        stress period data. With external files, the data are written to external
+        files, which are then passed to flopy via the model configuration (cfg)
+        dictonary, and spd is empty.
+    """
+
+    df = data
+    # set up stress_period_data
+    if external_files:
+        # get the file path (allowing for different external file locations, specified name format, etc.)
+        filepaths = model.setup_external_filepaths(package, 'stress_period_data',
+                                                   filename_format=external_filename_fmt,
+                                                   file_numbers=sorted(df.per.unique().tolist()))
+        # convert to one-based
+        df.rename(columns={'k': '#k'}, inplace=True)
+        df['#k'] += 1
+        df['i'] += 1
+        df['j'] += 1
+
+    spd = {}
+    period_groups = df.groupby('per')
+    for kper in range(model.nper):
+        if kper in period_groups.groups:
+            group = period_groups.get_group(kper)
+            group.drop('per', axis=1, inplace=True)
+            if external_files:
+                if model.version == 'mf6':
+                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
+                    # make a copy for the intermediate data folder, for consistency with mf-2005
+                    shutil.copy(filepaths[kper]['filename'], model.cfg['intermediate_data']['output_folder'])
+                else:
+                    group.to_csv(filepaths[kper], index=False, sep=' ', float_format='%g')
+
+            else:
+                if model.version == 'mf6':
+                    kspd = flopy_package_class.stress_period_data.empty(model,
+                                                                        len(group),
+                                                                        boundnames=True)[0]
+                    kspd['cellid'] = list(zip(group.k, group.i, group.j))
+                    kspd[variable_column] = group[variable_column]
+                    if 'boundname' in group.columns:
+                        kspd['boundname'] = group['boundname']
+                else:
+                    kspd = flopy_package_class.get_empty(len(group))
+                    kspd['k'] = group['k']
+                    kspd['i'] = group['i']
+                    kspd['j'] = group['j']
+
+                    # special case of start and end values for MODFLOW-2005 CHDs
+                    # assign starting and ending head values for each period
+                    # starting chd is parent values for previous period
+                    # ending chd is parent values for that period
+                    if package.lower() == 'chd':
+                        if kper == 0:
+                            kspd['shead'] = group[variable_column]
+                            kspd['ehead'] = group[variable_column]
+                        else:
+                            kspd['ehead'] = group[variable_column]
+                            # populate sheads with eheads from the same cells
+                            # if the cell didn't exist previously
+                            # set shead == ehead
+                            # dict of ending heads from last stress period, but (k,i,j) location
+                            previous_inds = spd[kper - 1][['k', 'i', 'j']].tolist()
+                            previous_ehead = dict(zip(previous_inds, spd[kper - 1]['ehead']))
+                            current_inds = kspd[['k', 'i', 'j']].tolist()
+                            sheads = np.array([previous_ehead.get((k, i, j), np.nan)
+                                               for (k, i, j) in current_inds])
+                            sheads[np.isnan(sheads)] = kspd['ehead'][np.isnan(sheads)]
+                            kspd['shead'] = sheads
+                    else:
+                        kspd[variable_column] = group[variable_column]
+                spd[kper] = kspd
+        else:
+            pass  # spd[kper] = None
+    return spd

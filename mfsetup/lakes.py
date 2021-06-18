@@ -1,5 +1,6 @@
 import os
 import time
+import warnings
 
 import flopy
 import numpy as np
@@ -372,7 +373,11 @@ def setup_lake_connectiondata(model, for_external_file=True,
 
     if include_horizontal_connections:
         for lake_id in range(1, model.nlakes + 1):
-            lake_extent = model.lakarr == lake_id
+            # make an array where the cells for the lake are zero,
+            # and all other cells are one
+            # get_horizontal_connections will find the cells == 1
+            # that connect (share faces) with cells == 0
+            lake_extent = model.lakarr != lake_id
             horizontal_connections = get_horizontal_connections(lake_extent,
                                                                 connection_info=True,
                                                                 layer_elevations=layer_elevations,
@@ -499,12 +504,14 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
         With ones indicating an area interest. get_horizontal_connections
         will return connection information between cells == 1 and
         any neighboring cells == 0 that share a face (no diagonal connections).
-    inside : bool
-        Option to return the cells along the inside edge of the area(s) defined
-        by ``extent``. In other words, the cells along the edge == 1. By default,
-        the cells along the outside edge of the connection are returned (inside=False).
+        The resulting connections will be located within the area of cells == 1
+        (inside of the perimeter between 1s and 0s). In practice, this means that
+        for finding horizontal lake connections, the lake cells should be == 0,
+        and the active model cells should be == 1. For finding perimeter boundary
+        cells, the active model cells should be == 1; inactive areas beyond should
+        be == 0.
     connection_info : bool
-        Option to return the top and bottom elevation, length, width, cell face, and
+        Option to return the top and bottom elevation, length, width, and
         bdlknc value of each connection (i.e., as needed for the MODFLOW-6 lake package).
         By default, False.
     layer_elevations : np.ndarray
@@ -526,13 +533,17 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
     df : DataFrame
         Table of horizontal cell connections
         Columns:
-        k, i, j;
+        k, i, j, cellface;
         optionally (if connection_info == True):
         claktype, bedleak, belev, telev, connlen, connwidth
         (see MODFLOW-6 io guide for an explanation or the Connectiondata
         input block)
 
     """
+    if inside:
+        warnings.warn(('The "inside" argument is deprecated. '
+                       'Cell connections are now always located along the inside'
+                      'edge of the perimeter of cells == 1 in the extent array.'))
     extent = extent.astype(float)
     if len(extent.shape) != 3:
         extent = np.expand_dims(extent, axis=0)
@@ -546,16 +557,23 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
     connlen = []
     connwidth = []
     cellface = []
-    for klay, lake_extent_k in enumerate(extent):
-        sobel_x = sobel(lake_extent_k, axis=1, mode='constant', cval=0.)
-        sobel_x[lake_extent_k == 1] = 10
-        sobel_y = sobel(lake_extent_k, axis=0, mode='constant', cval=0.)
-        sobel_y[lake_extent_k == 1] = 10
+    for klay, extent_k in enumerate(extent):
+        sobel_x = sobel(extent_k, axis=1, mode='reflect') #, cval=cval)
+        sobel_x[extent_k == 0] = 10
+        sobel_y = sobel(extent_k, axis=0, mode='reflect') #, cval=cval)
+        sobel_y[extent_k == 0] = 10
 
         # right face connections
+        # (i.e. through the right face of an interior cell)
+        # orthagonal connections have a value of -2
+        # diagonal connections have a value of -1
+        # the sobel filter sums the connections for each cell
+        # so a cell with 2 diagonal and 1 orthagonal connections will be -4;
+        # cells with an orthagonal right-face connection will range from -2 to -4
+        # https://en.wikipedia.org/wiki/Sobel_operator
         i, j = np.where((sobel_x <= -2) & (sobel_x >= -4))
-        if inside:
-            j -= 1
+        #if inside:
+        #    j -= 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
         if connection_info:
@@ -564,12 +582,13 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
             telev += list(layer_elevations[k, i, j])
             connlen += list(0.5 * delr[j - 1] + 0.5 * delr[j])
             connwidth += list(delc[i])
-            cellface += ['right'] * len(i)
+        cellface += ['right'] * len(i)
 
         # left face connections
+        # (i.e. through the left face of an interior cell)
         i, j = np.where((sobel_x >= 2) & (sobel_x <= 4))
-        if inside:
-            j += 1
+        #if inside:
+        #    j += 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
         if connection_info:
@@ -578,12 +597,13 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
             telev += list(layer_elevations[k, i, j])
             connlen += list(0.5 * delr[j + 1] + 0.5 * delr[j])
             connwidth += list(delc[i])
-            cellface += ['left'] * len(i)
+        cellface += ['left'] * len(i)
 
         # bottom face connections
+        # (i.e. through the bottom face of an interior cell)
         i, j = np.where((sobel_y <= -2) & (sobel_y >= -4))
-        if inside:
-            i -= 1
+        #if inside:
+        #    i -= 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
         if connection_info:
@@ -592,12 +612,12 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
             telev += list(layer_elevations[k, i, j])
             connlen += list(0.5 * delc[i-1] + 0.5 * delc[i])
             connwidth += list(delr[j])
-            cellface += ['bottom'] * len(i)
+        cellface += ['bottom'] * len(i)
 
         # top face connections
         i, j = np.where((sobel_y >= 2) & (sobel_y <= 4))
-        if inside:
-            i += 1
+        #if inside:
+        #    i += 1
         k = np.ones(len(i), dtype=int) * klay
         cellid += list(zip(k, i, j))
         if connection_info:
@@ -606,12 +626,15 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
             telev += list(layer_elevations[k, i, j])
             connlen += list(0.5 * delc[i + 1] + 0.5 * delc[i])
             connwidth += list(delr[j])
-            cellface += ['top'] * len(i)
-
-    k, i, j = zip(*cellid)
+        cellface += ['top'] * len(i)
+    try:
+        k, i, j = zip(*cellid)
+    except:
+        j=2
     data = {'k': k,
             'i': i,
-            'j': j
+            'j': j,
+            'cellface': cellface
             }
     if connection_info:
         data.update({'claktype': 'horizontal',
@@ -620,7 +643,6 @@ def get_horizontal_connections(extent, inside=False, connection_info=False,
                      'telev': telev,
                      'connlen': connlen,
                      'connwidth': connwidth,
-                     'cellface': cellface
                     })
     df = pd.DataFrame(data)
     return df

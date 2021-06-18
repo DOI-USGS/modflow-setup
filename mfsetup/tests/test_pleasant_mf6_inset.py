@@ -155,9 +155,11 @@ def test_tdis_setup(get_pleasant_mf6):
     m.write_input()
     results = read_mf6_block(m.simulation.tdis.filename, 'perioddata')
     for i, line in enumerate(results['perioddata'][1:]):
-        start_date, end_date = line.split('#')[1].strip().split('to')
-        assert pd.Timestamp(start_date) == m.perioddata.start_datetime[i]
-        assert pd.Timestamp(end_date) == m.perioddata.end_datetime[i]
+        start_date, end_date = line.split(':')[1].strip().split('to')
+        expected_start_date = pd.Timestamp(m.perioddata.start_datetime[i])
+        expected_end_date = pd.Timestamp(m.perioddata.end_datetime[i])
+        assert pd.Timestamp(start_date) == expected_start_date
+        assert pd.Timestamp(end_date) == expected_end_date
 
 
 def test_dis_setup(get_pleasant_mf6_with_grid):
@@ -202,13 +204,21 @@ def test_idomain(get_pleasant_mf6_with_dis):
     assert m.idomain.sum() == m.dis.idomain.array.sum()
 
 
-def test_ic_setup(get_pleasant_mf6_with_dis):
-    m = get_pleasant_mf6_with_dis
+@pytest.mark.parametrize('from_binary', (False, True))
+def test_ic_setup(get_pleasant_mf6_with_dis, from_binary):
+    """Test starting heads setup from parent model strt array or parent model head solution
+    (MODFLOW binary output)."""
+    m = copy.deepcopy(get_pleasant_mf6_with_dis)
+    if not from_binary:
+        m.cfg['ic']['source_data']['strt'] = None
     ic = m.setup_ic()
     ic.write()
     assert os.path.exists(os.path.join(m.model_ws, ic.filename))
     assert isinstance(ic, mf6.ModflowGwfic)
     assert ic.strt.array.shape == m.dis.botm.array.shape
+
+    assert m.ic.strt.array[m.dis.idomain.array > 0].min() > 250
+    assert m.ic.strt.array[m.dis.idomain.array > 0].max() < 350
 
 
 @pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
@@ -424,7 +434,7 @@ def test_external_tables(get_pleasant_mf6_with_dis):
     for period, block in blocks.items():
         assert block[0].strip().split()[1].strip('\'') in m.cfg['external_files']['wel_stress_period_data'].values()
 
-    chd = m.setup_perimeter_boundary()
+    chd = m.setup_chd()
     chd.write()
     for f in m.cfg['external_files']['chd_stress_period_data'].values():
         assert os.path.exists(f)
@@ -530,14 +540,14 @@ def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
 
     m = get_pleasant_mf6_with_dis  #deepcopy(pfl_nwt_with_dis)
     m.cfg['chd']['external_files'] = False
-    chd = m.setup_perimeter_boundary()
+    chd = m.setup_chd()
     chd.write()
     assert os.path.exists(os.path.join(m.model_ws, chd.filename))
     assert len(chd.stress_period_data.array) == len(set(m.cfg['parent']['copy_stress_periods']))
     assert len(m.get_boundary_cells()[0]) == (m.nrow*2 + m.ncol*2 - 4) * m.nlay  # total number of boundary cells
     # number of boundary heads;
     # can be less than number of active boundary cells if the (parent) water table is not always in (inset) layer 1
-    assert len(chd.stress_period_data.array[0]) <= np.sum(m.idomain[m.get_boundary_cells()] == 1)
+    #assert len(chd.stress_period_data.array[0]) <= np.sum(m.idomain[m.get_boundary_cells()] == 1)
 
     # check for inactive cells
     spd0 = chd.stress_period_data.array[0]
@@ -554,11 +564,12 @@ def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
     assert isinstance(m, MF6model)
     assert 'tdis' in m.simulation.package_key_dict
     assert 'ims' in m.simulation.package_key_dict
-    assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA', 'OC', 'SFR_0', 'LAK_0',
+    assert set(m.get_package_list()) == {'DIS', 'IC', 'NPF', 'STO', 'RCHA_0', 'OC', 'SFR_0', 'LAK_0',
                                          'WEL_0',
-                                         'OBS_0',  # lak obs todo: specify names of mf6 packages with multiple instances
+                                         'OBS_1',  # lak obs todo: specify names of mf6 packages with multiple instances
                                          'CHD_0',
-                                         'OBS_1'  # head obs
+                                         'OBS_0',  # chd obs
+                                         'OBS_2'  # head obs
                                          }
     external_path = os.path.join(m.model_ws, 'external')
     external_files = glob.glob(external_path + '/*')

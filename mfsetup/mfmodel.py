@@ -19,6 +19,7 @@ from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
 from mfsetup.bcs import get_bc_package_cells
+from mfsetup.config import validate_configuration
 from mfsetup.fileio import (
     check_source_files,
     load,
@@ -109,6 +110,7 @@ class MFsetupMixin():
         self.inset = None  # dictionary of inset models attached to LGR parent
         self._is_lgr = False  # flag for lgr inset models
         self.lgr = None  # holds flopy Lgr utility object
+        self.tmr = None  # holds TMR class instance for TMR-type perimeter boundaries
         self._load = False  # whether model is being made or loaded from existing files
         self.lake_info = None
         self.lake_fluxes = None
@@ -149,7 +151,17 @@ class MFsetupMixin():
         """Test for equality to another model object."""
         if not isinstance(other, self.__class__):
             return False
-        if sorted(other.get_package_list()) != sorted(self.get_package_list()):
+        # kludge: exclude SFR_OBS package from comparison
+        # (which is handled by SFRmaker instead of Flopy;
+        # a loaded version of a model might have SFR_OBS,
+        # where a freshly made version may not (even though SFRmaker will write it)
+        # )
+        exceptions = {'SFR_OBS'}
+        other_packages = [s for s in sorted(other.get_package_list())
+                          if s not in exceptions]
+        packages = [s for s in sorted(self.get_package_list())
+                    if s not in exceptions]
+        if other_packages != packages:
             return False
         if other.modelgrid != self.modelgrid:
             return False
@@ -200,6 +212,8 @@ class MFsetupMixin():
     @property
     def modelgrid(self):
         if self._modelgrid is None:
+            self.setup_grid()
+        elif self._modelgrid.nlay is None and 'DIS' in self.get_package_list():
             self.setup_grid()
         return self._modelgrid
 
@@ -253,7 +267,8 @@ class MFsetupMixin():
             elif isinstance(botm_source_data, dict) and 'from_parent' in botm_source_data:
                 parent_layers = botm_source_data.get('from_parent')
             else:
-                parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
+                #parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
+                parent_layers = None
             self._parent_layers = parent_layers
         return self._parent_layers
 
@@ -759,7 +774,7 @@ class MFsetupMixin():
         if self.version == 'mf6':
             kwargs = self.cfg['simulation'].copy()
             kwargs.update(self.cfg['simulation']['options'])
-            if os.path.exists('{}.nam'.format(kwargs['sim_name'])):
+            if os.path.exists('{}.nam'.format(kwargs['sim_name'])) and self._load:
                 try:
                     kwargs = get_input_arguments(kwargs, mf6.MFSimulation.load, warn=False)
                     self._sim = mf6.MFSimulation.load(**kwargs)
@@ -767,6 +782,10 @@ class MFsetupMixin():
                     # create simulation
                     kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
                     self._sim = mf6.MFSimulation(**kwargs)
+            else:
+                # create simulation
+                kwargs = get_input_arguments(kwargs, mf6.MFSimulation, warn=False)
+                self._sim = mf6.MFSimulation(**kwargs)
 
         # load the parent model (skip if already attached)
         if 'namefile' in self.cfg.get('parent', {}).keys():
@@ -787,6 +806,9 @@ class MFsetupMixin():
 
         # other variables
         self.cfg['external_files'] = {}
+
+        # validate the configuration
+        validate_configuration(self.cfg)
 
     def _get_high_k_lakes(self):
         """Get the i, j locations of any high-k lakes within the model grid.
@@ -964,9 +986,9 @@ class MFsetupMixin():
         parent_grid_units = kwargs['crs'].axis_info[0].unit_name
 
         if 'foot' in parent_grid_units.lower() or 'feet' in parent_grid_units.lower():
-            grid_units = 'feet'
+            parent_grid_units = 'feet'
         elif 'metre' in parent_grid_units.lower() or 'meter' in parent_grid_units.lower():
-            grid_units = 'meters'
+            parent_grid_units = 'meters'
         else:
             raise ValueError(f'unrecognized CRS units {parent_grid_units}: CRS must be projected in feet or meters')
 
@@ -1338,7 +1360,7 @@ class MFsetupMixin():
         # create an sfrmaker.sfrdata instance from the lines instance
         to_sfr_kwargs = self.cfg['sfr'].copy()
         to_sfr_kwargs.update(self.cfg['sfr'].get('sfrmaker_options', {}))
-        to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)
+        #to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)
         sfr = lines.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
                          model=self,
@@ -1398,6 +1420,25 @@ class MFsetupMixin():
             rivdata.write_table(os.path.join(self._tables_path, rivdata_filename))
             rivdata.write_shapefiles('{}/{}'.format(self._shapefiles_path, self.name))
 
+        # optional routing input
+        # (for a complete representation of a larger or more detailed
+        #  stream network that may be culled in SFR package)
+        sd = self.cfg['sfr'].get('source_data', {})
+        routing_input_key = [k for k in sd.keys() if 'routing' in k]
+        routing_input = None
+        if len(routing_input_key) > 0:
+            routing_input = sd.get(routing_input_key[0])
+            routing = pd.read_csv(routing_input['filename'])
+            routing = dict(zip(routing[routing_input['id_column']],
+                               routing[routing_input['routing_column']]))
+            # set any values (downstream lines) not in keys (upstream lines)
+            # to 0 (outlet condition)
+            routing = {k: v if v in routing.keys() else 0
+                       for k, v in routing.items()}
+        # use _original_routing attached to Lines instance as default
+        else:
+            routing = lines._original_routing
+
         # add inflows
         inflows_input = self.cfg['sfr'].get('source_data', {}).get('inflows')
         if inflows_input is not None:
@@ -1409,23 +1450,12 @@ class MFsetupMixin():
 
             # check if all inflow sites are included in sfr network
             missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
-                                difference(lines._original_routing.keys())
+                                difference(routing.keys())
+            # if there are missing sites, try using the supplied routing
             if any(missing_sites):
-                inflows_routing_input = self.cfg['sfr'].get('source_data', {}).get('inflows_routing')
-                if inflows_routing_input is None:
-                    raise KeyError(('inflow sites {} are not within the model sfr network. '
-                                   'Please supply an inflows_routing source_data block '
-                                    '(see shellmound example config file)'.format(missing_sites)))
-                routing = pd.read_csv(inflows_routing_input['filename'])
-                routing = dict(zip(routing[inflows_routing_input['id_column']],
-                                   routing[inflows_routing_input['routing_column']]))
-            else:
-                routing = lines._original_routing
-            missing_sites = any(set(inflows_by_stress_period[inflows_input['id_column']]). \
-                                difference(routing.keys())),
-            if any(missing_sites):
-                raise KeyError(('Inflow sites {} not found in {}'.format(missing_sites,
-                                                                         inflows_routing_input['filename'])))
+                raise KeyError(('inflow sites {} are not within the model sfr network. '
+                                'Please supply an inflows_routing source_data block '
+                                '(see shellmound example config file)'.format(missing_sites)))
 
             # add resampled inflows to SFR package
             inflows_input['data'] = inflows_by_stress_period
@@ -1434,8 +1464,39 @@ class MFsetupMixin():
                 inflows_input['variable'] = 'inflow'
                 method = sfr.add_to_perioddata
             else:
+                inflows_input['variable'] = 'flow'
                 method = sfr.add_to_segment_data
             kwargs = get_input_arguments(inflows_input.copy(), method)
+            method(**kwargs)
+
+        # add runoff
+        runoff_input = self.cfg['sfr'].get('source_data', {}).get('runoff')
+        if runoff_input is not None:
+            # resample inflows to model stress periods
+            runoff_input['id_column'] = runoff_input['line_id_column']
+            sd = TransientTabularSourceData.from_config(runoff_input,
+                                                        dest_model=self)
+            runoff_by_stress_period = sd.get_data()
+
+            # check if all sites are included in sfr network
+            missing_sites = set(runoff_by_stress_period[runoff_input['id_column']]). \
+                                difference(routing.keys())
+            if any(missing_sites):
+                warnings.warn(('runoff sites {} are not within the model sfr network. '
+                               'Please supply an inflows_routing source_data block '
+                               '(see shellmound example config file)'.format(missing_sites)),
+                               UserWarning)
+
+            # add resampled inflows to SFR package
+            runoff_input['data'] = runoff_by_stress_period
+            runoff_input['flowline_routing'] = routing
+            runoff_input['variable'] = 'runoff'
+            runoff_input['distribute_flows_to_reaches'] = True
+            if self.version == 'mf6':
+                method = sfr.add_to_perioddata
+            else:
+                method = sfr.add_to_segment_data
+            kwargs = get_input_arguments(runoff_input.copy(), method)
             method(**kwargs)
 
         # add observations
@@ -1551,7 +1612,11 @@ class MFsetupMixin():
         -------
         m : model instance
         """
-        print('\nSetting up {} model from data in {}\n'.format(cfg['model']['modelname'], None))
+        cfg_filename = Path(cfg.get('filename', '')).name
+        msg = f"\nSetting up {cfg['model']['modelname']} model"
+        if len(cfg_filename) > 0:
+            msg += f" from configuration in {cfg_filename}"
+        print(msg)
         t0 = time.time()
         #cfg = cls._parse_model_kwargs(cfg)
         #kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
@@ -1570,10 +1635,6 @@ class MFsetupMixin():
 
         # set up all of the packages specified in the config file
         m.setup_packages(reset_existing=False)
-
-        # perimter boundary for TMR model
-        if m.perimeter_bc_type == 'head':
-            chd = m.setup_perimeter_boundary()
 
         # LGR inset model(s)
         if m.inset is not None:

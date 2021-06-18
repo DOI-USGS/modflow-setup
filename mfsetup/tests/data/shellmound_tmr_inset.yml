@@ -18,17 +18,16 @@ model:
              'rch',
              'sfr',
              'wel',
+             'chd'
   ]
   external_path: 'external/'
   relative_external_filepaths: True
-  perimeter_boundary_type: 'specified head'
 
 parent:
   # argments to flopy.modflow.Modflow.load for parent model
   namefile: 'shellmound.nam'
   model_ws: 'shellmound/tmr_parent'
   version: 'mf6'
-  headfile: 'shellmound/tmr_parent/shellmound.hds'  # needed for the perimeter boundary setup
   default_source_data: True  # if True, packages and variables that are omitted will be pulled from this model
   copy_stress_periods: 'all'
   start_date_time: '1998-04-01'
@@ -63,14 +62,10 @@ dis:
   source_data:
     top: from_parent
     botm: from_parent
-    #idomain: from_parent
+    idomain:
+      filename: 'shellmound/tmr_parent/gis/irregular_boundary.shp'
   minimum_layer_thickness: 1 # layers less than this thickness are converted to vertical pass-through cells
   drop_thin_cells: True
-
-perimeter_boundary:
-  source_data:
-    irregular_boundary:
-      filename: 'shellmound/tmr_parent/gis/irregular_boundary.shp'
 
 tdis:
   options:
@@ -120,4 +115,9 @@ sfr:
     # convert reaches corresponding to these LineString identifiers
     # (in the flowlines id_column), and all downstream reaches
     # to the MODFLOW River package
-    to_riv: [18046670]
+    to_riv: [18047212]
+
+chd:
+  perimeter_boundary:
+    shapefile: 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    parent_head_file: 'shellmound/tmr_parent/shellmound.hds'  # needed for the perimeter boundary setup

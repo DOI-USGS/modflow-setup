@@ -267,6 +267,7 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
     # add additional paths by looking for source_data
     # within these input blocks, convert file paths to absolute
     look_for_files_in = ['source_data',
+                         'perimeter_boundary',
                          'lgr'
                          ]
     for pckgname, pckg in cfg.items():

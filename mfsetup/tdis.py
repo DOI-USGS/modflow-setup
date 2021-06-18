@@ -169,7 +169,7 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
     oc_saverecord : dict
         Dictionary with zero-based stress periods as keys and output control options as values.
         Similar to MODFLOW-6 input, the information specified for a period will
-        continue to apply until information for another perior is specified.
+        continue to apply until information for another period is specified.
 
     Returns
     -------
@@ -687,7 +687,7 @@ def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
                             dest.write(line)
                             break
                         else:
-                            line = 2*' ' + line.strip() + f'  # {start_dates[i]:%Y-%m-%d}'
+                            line = 2*' ' + line.strip() + f'  # period {i+1}: {start_dates[i]:%Y-%m-%d}'
                             if end_dates is not None:
                                 line += f' to {end_dates[i]:%Y-%m-%d}'
                             line += '\n'

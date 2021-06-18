@@ -7,6 +7,7 @@ import collections
 import time
 import warnings
 
+import geopandas as gp
 import gisutils
 import numpy as np
 import pandas as pd
@@ -103,6 +104,7 @@ class MFsetupGrid(StructuredGrid):
         # other CRS-related properties are set in the flopy Grid base class
         self._vertices = None
         self._polygons = None
+        self._dataframe = None
 
         # if no epsg, set from proj4 string if possible
         #if epsg is None and proj_str is not None and 'epsg' in proj_str.lower():
@@ -142,6 +144,7 @@ class MFsetupGrid(StructuredGrid):
                 f' {self.units}\n'
                 )
         txt += f'CRS: {self.crs}\n'
+        txt += f'length units: {self.length_units}\n'
         txt += f'xll: {self.xoffset}; yll: {self.yoffset}; rotation: {self.rotation}\n'
         txt += 'Bounds: {}\n'.format(self.extent)
         return txt
@@ -250,6 +253,48 @@ class MFsetupGrid(StructuredGrid):
         if self._polygons is None:
             self._set_polygons()
         return self._polygons
+
+    @property
+    def dataframe(self):
+        """Pandas DataFrame of grid cell polygons
+        with i, j locations."""
+        if self._dataframe is None:
+            self._dataframe = self.get_dataframe(layers=True)
+        return self._dataframe
+
+    def get_dataframe(self, layers=True):
+        """Get a pandas DataFrame of grid cell polygons
+        with i, j locations.
+
+        Parameters
+        ----------
+        layers : bool
+            If True, return a row for each k, i, j location
+            and a 'k' column; if False, only return i, j
+            locations with no 'k' column. By default, True
+
+        Returns
+        -------
+        layers : DataFrame
+            Pandas Dataframe with k, i, j and geometry column
+            with a shapely polygon representation of each model cell.
+        """
+        # get dataframe of model grid cells
+        i, j = np.indices((self.nrow, self.ncol))
+        geoms = self.polygons
+        df = gp.GeoDataFrame({'i': i.ravel(),
+                              'j': j.ravel(),
+                              'geometry': geoms}, crs=5070)
+        if layers and self.nlay is not None:
+            # add layer information
+            dfs = []
+            for k in range(self.nlay):
+                layer_df = df.copy()
+                layer_df['k'] = k
+                dfs.append(layer_df)
+            df = pd.concat(dfs)
+            df = df[['k', 'i', 'j', 'geometry']].copy()
+        return df
 
     def write_bbox_shapefile(self, filename='grid_bbox.shp'):
         write_bbox_shapefile(self, filename)
@@ -657,7 +702,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
 
     regular = True
     if dxy is not None:
-        delr_grid = np.round(dxy * to_grid_units_inset, 4) # dxy is specified in model units
+        delr_grid = np.round(dxy, 4) # dxy is specified in CRS units
         delc_grid = delr_grid
     if delr is not None:
         delr_grid = np.round(delr * to_grid_units_inset, 4)  # delr is specified in model units

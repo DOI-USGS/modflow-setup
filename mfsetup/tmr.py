@@ -1,15 +1,22 @@
 import os
 import time
+from pathlib import Path
 
 import flopy
+import geopandas as gp
+import numpy as np
 import pandas as pd
+from shapely.geometry import MultiLineString
 
 fm = flopy.modflow
-import numpy as np
 from flopy.utils import binaryfile as bf
 from flopy.utils.postprocessing import get_water_table
-from mfsetup.discretization import weighted_average_between_layers
-#from mfsetup.export import get_surface_bc_flux
+from scipy.interpolate import griddata
+
+from mfsetup.discretization import (
+    find_remove_isolated_cells,
+    weighted_average_between_layers,
+)
 from mfsetup.fileio import check_source_files
 from mfsetup.grid import get_ij
 from mfsetup.interpolate import (
@@ -82,14 +89,14 @@ class Tmr:
         self._inset_parent_period_mapping = inset_parent_period_mapping
         self.hpth = None  # path to parent heads output file
         self.cpth = None  # path to parent cell budget output file
-        
+
         self.pi0 = None
         self.pj0 = None
         self.pi1 = None
         self.pj1 = None
         self.pi_list = None
         self.pj_list = None
-        
+
         if parent_length_units is None:
             parent_length_units = self.inset.cfg['parent']['length_units']
         if inset_length_units is None:
@@ -118,15 +125,15 @@ class Tmr:
 
         # get bounding cells in parent model for pfl_nwt model
         irregular_domain = False
-        
+
         # see if irregular domain
         irregbound_cfg = self.inset.cfg['perimeter_boundary'].get('source_data',{}).get('irregular_boundary')
         if irregbound_cfg is not None:
             irregular_domain = True
             irregbound_cfg['variable'] = 'perimeter_boundary'
             irregbound_cfg['dest_model'] = self.inset
-            
-            
+
+
             sd = ArraySourceData.from_config(irregbound_cfg)
             data = sd.get_data()
             idm_outline = data[0]
@@ -145,13 +152,19 @@ class Tmr:
             self.parent_nrow_in_inset = self.pi1 - self.pi0 + 1
             self.parent_ncol_in_inset = self.pj1 - self.pj0 + 1
 
-        # check for an even number of pfl_nwt cells per parent cell in x and y directions
-        x_refinment = self.parent.modelgrid.delr[0] / self.inset.modelgrid.delr[0]
-        y_refinment = self.parent.modelgrid.delc[0] / self.inset.modelgrid.delc[0]
-        assert int(x_refinment) == x_refinment, "pfl_nwt delr must be factor of parent delr"
-        assert int(y_refinment) == y_refinment, "pfl_nwt delc must be factor of parent delc"
-        assert x_refinment == y_refinment, "grid must have same x and y discretization"
-        self.refinement = int(x_refinment)
+        # check for an even number of inset cells per parent cell in x and y directions
+        x_refinement = self.parent.modelgrid.delr[0] / self.inset.modelgrid.delr[0]
+        y_refinement = self.parent.modelgrid.delc[0] / self.inset.modelgrid.delc[0]
+        msg = "inset {0} of {1:.2f} {2} must be factor of parent {0} of {3:.2f} {4}"
+        if not int(x_refinement) == np.round(x_refinement, 2):
+            raise ValueError(msg.format('delr', self.inset.modelgrid.delr[0], self.inset.modelgrid.length_units,
+                                        self.parent.modelgrid.delr[0], self.parent.modelgrid.length_units))
+        if not int(y_refinement) == np.round(y_refinement, 2):
+            raise ValueError(msg.format('delc', self.inset.modelgrid.delc[0], self.inset.modelgrid.length_units,
+                                        self.parent.modelgrid.delc[0], self.parent.modelgrid.length_units))
+        if not np.allclose(x_refinement, y_refinement):
+            raise ValueError("grid must have same x and y discretization")
+        self.refinement = int(x_refinement)
 
     @property
     def inset_parent_layer_mapping(self):
@@ -615,19 +628,19 @@ class Tmr:
                 ktmp += list(clay*np.ones(len(self.pi_list)).astype(int))
             itmp = self.inset.nlay * self.pi_list
             jtmp = self.inset.nlay * self.pj_list
-            
+
             # get rid of cells that are inactive
             wh = np.where(self.inset.dis.idomain.array >0)
             activecells = set([(i,j,k) for i,j,k in zip(wh[0],wh[1],wh[2])])
             chdcells = set([(kk,ii,jj) for ii,jj,kk in zip(itmp,jtmp,ktmp)])
             active_chd_cells = list(set(chdcells).intersection(activecells))
-            
+
             # unpack back to lists, then convert to numpy arrays
             k, i, j = zip(*active_chd_cells)
             k = np.array(k)
             i = np.array(i)
             j = np.array(j)
-        # get heads from parent model
+            # get heads from parent model
         # TODO: generalize head extraction from parent model using 3D interpolation
 
         dfs = []
@@ -673,18 +686,18 @@ class Tmr:
 
             # drop heads in dry cells, but only in mf6
             # too much trouble with interpolated heads in mf2005
-            bhead = regridded[k, i, j]
+            head = regridded[k, i, j]
             if self.inset.version == 'mf6':
-                wet = bhead > self.inset.dis.botm.array[k, i, j]
+                wet = head > self.inset.dis.botm.array[k, i, j]
             else:
-                wet = np.ones(len(bhead)).astype(bool)
+                wet = np.ones(len(head)).astype(bool)
 
             # make a DataFrame of regridded heads at perimeter cell locations
             df = pd.DataFrame({'per': inset_per,
                                'k': k[wet],
                                'i': i[wet],
                                'j': j[wet],
-                               'bhead': bhead[wet]
+                               'head': head[wet]
                                })
             dfs.append(df)
         df = pd.concat(dfs)
@@ -846,14 +859,417 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
     return np.array(Q_inset)
 
 
-if __name__ == '__main__':
-    parent_head_file = '../csls100_nwt/csls100.hds'
-    parent_cell_budget_file = '../csls100_nwt/csls100.cbc'
-    kstpkper = (0, 0)
+class TmrNew:
+    """
+    Class for general telescopic mesh refinement of a MODFLOW model. Head or
+    flux fields from parent model are interpolated to boundary cells of
+    inset model, which may be in any configuration (jagged, rotated, etc.).
 
-    parent = fm.Modflow.load('csls100.nam', model_ws='../csls100_nwt/',
-                             load_only=['dis'], check=False)
-    inset = fm.Modflow.load('pfl10.nam', model_ws='../plainfield_inset/',
-                            load_only=['dis', 'upw'], check=False)
-    tmr = Tmr(parent, inset)
-    df = tmr.get_inset_boundary_fluxes(kstpkper=kstpkper)
+    Parameters
+    ----------
+    parent_model : flopy model instance instance of parent model
+        Must have a valid, attached ModelGrid (modelgrid) attribute.
+    inset_model : flopy model instance instance of inset model
+        Must have a valid, attached ModelGrid (modelgrid) attribute.
+    parent_head_file : filepath
+        MODFLOW binary head output
+    parent_cell_budget_file : filepath
+        MODFLOW binary cell budget output
+    define_connections : str, {'max_active_extent', 'by_layer'}
+        Method for defining perimeter cells where the TMR boundary
+        condition will be applied. If 'max_active_extent', the
+        maximum footprint of the active area (including all cell
+        locations with at least one layer that is active) will be used.
+        If 'by_layer', the perimeter of the active area in each layer will be used
+        (excluding any interior clusters of active cells). The 'by_layer'
+        option is potentially problematic if some layers have substantial
+        areas of pinched-out (idomain != 1) cells, which may result
+        in perimeter boundary condition cells getting placed too close
+        to the area of interest. By default, 'max_active_extent'.
+
+    Notes
+    -----
+    """
+
+    def __init__(self, parent_model, inset_model,
+                 parent_head_file=None, parent_cell_budget_file=None,
+                 boundary_type=None, inset_parent_period_mapping=None,
+                 parent_start_date_time=None, source_mask=None,
+                 define_connections_by='max_active_extent',
+                 shapefile=None,
+                 ):
+        self.parent = parent_model
+        self.inset = inset_model
+        self.parent_head_file = parent_head_file
+        self.parent_cell_budget_file = parent_cell_budget_file
+        self.define_connections_by = define_connections_by
+        self.shapefile = shapefile
+        self.boundary_type = boundary_type
+        if boundary_type is None and parent_head_file is not None:
+            self.boundary_type = 'head'
+        elif boundary_type is None and parent_cell_budget_file is not None:
+            self.boundary_type = 'flux'
+        self.parent_start_date_time = parent_start_date_time
+
+        # properties
+        self._idomain = None
+        self._inset_boundary_cells = None
+        self._inset_parent_period_mapping = inset_parent_period_mapping
+        self._interp_weights = None
+        self._source_mask = source_mask
+
+
+    @property
+    def idomain(self):
+        """Active area of the inset model.
+        """
+        if self._idomain is None:
+            if self.inset.version == 'mf6':
+                self._idomain = self.inset.dis.idomain.array
+            else:
+                self._idomain = self.inset.bas6.ibound.array
+        return self._idomain
+
+    @property
+    def inset_boundary_cells(self):
+        if self._inset_boundary_cells is None:
+            by_layer = self.define_connections_by == 'by_layer'
+            df = self.get_inset_boundary_cells(by_layer=by_layer)
+            x, y, z = self.inset.modelgrid.xyzcellcenters
+            df['x'] = x[df.i, df.j]
+            df['y'] = y[df.i, df.j]
+            df['z'] = z[df.k, df.i, df.j]
+            self._inset_boundary_cells = df
+            self._interp_weights = None
+        return self._inset_boundary_cells
+
+    @property
+    def inset_parent_period_mapping(self):
+        nper = self.inset.nper
+        # if mapping between source and dest model periods isn't specified
+        # assume one to one mapping of stress periods between models
+        if self._inset_parent_period_mapping is None:
+            parent_periods = list(range(self.parent.nper))
+            self._inset_parent_period_mapping = {i: parent_periods[i]
+            if i < self.parent.nper else parent_periods[-1] for i in range(nper)}
+        return self._inset_parent_period_mapping
+
+    @inset_parent_period_mapping.setter
+    def inset_parent_period_mapping(self, inset_parent_period_mapping):
+        self._inset_parent_period_mapping = inset_parent_period_mapping
+
+    @property
+    def interp_weights(self):
+        """For a given parent, only calculate interpolation weights
+        once to speed up re-gridding of arrays to pfl_nwt."""
+        if self._interp_weights is None:
+
+            # x, y, z locations of parent model head values
+            px, py, pz = self.parent_xyzcellcenters
+
+            # x, y, z locations of inset model boundary cells
+            x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
+
+            self._interp_weights = interp_weights((px, py, pz), (x, y, z), d=3)
+            assert not np.any(np.isnan(self._interp_weights[1]))
+        return self._interp_weights
+
+    @property
+    def parent_xyzcellcenters(self):
+        """Get x, y, z locations of parent cells in a buffered area
+        (defined by the _source_grid_mask property) around the
+        inset model."""
+        px, py, pz = self.parent.modelgrid.xyzcellcenters
+
+        # add an extra layer on the top and bottom
+        # for inset model cells above or below
+        # the last cell center in the vert. direction
+        # pad top by top layer thickness
+        b1 = self.parent.modelgrid.top - self.parent.modelgrid.botm[0]
+        top = pz[0] + b1
+        # pad botm by botm layer thickness
+        if self.parent.modelgrid.shape[0] > 1:
+            b2 = -np.diff(self.parent.modelgrid.botm[-2:], axis=0)[0]
+        else:
+            b2 = b1
+        botm = pz[-1] - b2
+        pz = np.vstack([[top], pz, [botm]])
+
+        nlay, nrow, ncol = pz.shape
+        px = np.tile(px, (nlay, 1, 1))
+        py = np.tile(py, (nlay, 1, 1))
+        mask = self._source_grid_mask
+        # mask already has extra top/botm layers
+        # (_source_grid_mask property)
+        px = px[mask]
+        py = py[mask]
+        pz = pz[mask]
+        return px, py, pz
+
+    @property
+    def _source_grid_mask(self):
+        """Boolean array indicating window in parent model grid (subset of cells)
+        that encompass the pfl_nwt model domain. Used to speed up interpolation
+        of parent grid values onto pfl_nwt grid."""
+        if self._source_mask is None:
+            mask = np.zeros((self.parent.modelgrid.nrow,
+                             self.parent.modelgrid.ncol), dtype=bool)
+            if self.inset.parent_mask.shape == self.parent.modelgrid.xcellcenters.shape:
+                mask = self.inset.parent_mask
+            else:
+                x, y = np.squeeze(self.inset.bbox.exterior.coords.xy)
+                pi, pj = get_ij(self.parent.modelgrid, x, y)
+                pad = 3
+                i0 = np.max([pi.min() - pad, 0])
+                i1 = np.min([pi.max() + pad + 1, self.parent.modelgrid.nrow])
+                j0 = np.max([pj.min() - pad, 0])
+                j1 = np.min([pj.max() + pad + 1, self.parent.modelgrid.ncol])
+                mask[i0:i1, j0:j1] = True
+            # make the mask 3D
+            # include extra layer for top and bottom edges of model
+            mask3d = np.tile(mask, (self.parent.modelgrid.nlay + 2, 1, 1))
+            self._source_mask = mask3d
+        elif len(self._source_mask.shape) == 2:
+            mask3d = np.tile(self._source_mask, (self.parent.modelgrid.nlay + 2, 1, 1))
+            self._source_mask = mask3d
+        return self._source_mask
+
+    def get_inset_boundary_cells(self, by_layer=False, shapefile=None):
+        """Get a dataframe of connection information for
+        horizontal boundary cells.
+
+        Parameters
+        ----------
+        by_layer : bool
+            Controls how boundary cells will be defined. If True,
+            the perimeter of the active area in each layer will be used
+            (excluding any interior clusters of active cells). If
+            False, the maximum footprint of the active area
+            (including all cell locations with at least one layer that
+            is active).
+        """
+        print('\ngetting perimeter cells...')
+        t0 = time.time()
+        if shapefile is None:
+            shapefile = self.shapefile
+        if shapefile:
+            perimeter = gp.read_file(shapefile)
+            perimeter = perimeter[['geometry']]
+            # reproject the perimeter shapefile to the model CRS if needed
+            if perimeter.crs != self.inset.modelgrid.crs:
+                perimeter.to_crs(self.inset.modelgrid.crs, inplace=True)
+            # convert polygons to linear rings
+            # (so just the cells along the polygon exterior are selected)
+            geoms = []
+            for g in perimeter.geometry:
+                if g.type == 'MultiPolygon':
+                    g = MultiLineString([p.exterior for p in g.geoms])
+                elif g.type == 'Polygon':
+                    g = g.exterior
+                geoms.append(g)
+            # add a buffer of 1 cell width so that cells aren't missed
+            # extra cells will get culled later
+            # when only cells along the outer perimeter (max idomain extent)
+            # are selected
+            buffer_dist = np.mean([self.inset.modelgrid.delr.mean(),
+                                   self.inset.modelgrid.delc.mean()])
+            perimeter['geometry'] = [g.buffer(buffer_dist * 0.5) for g in geoms]
+            grid_df = self.inset.modelgrid.get_dataframe(layers=False)
+            df = gp.sjoin(grid_df, perimeter, op='intersects', how='inner')
+            # add layers
+            dfs = []
+            for k in range(self.inset.nlay):
+                kdf = df.copy()
+                kdf['k'] = k
+                dfs.append(kdf)
+            specified_bcells = pd.concat(dfs)
+            # get the active extent in each layer
+            # and the cell faces along the edge
+            # apply those cell faces to specified_bcells
+            by_layer = True
+        else:
+            specified_bcells = None
+        if not by_layer:
+            # get the max footprint of active cells
+            max_active_area = np.sum(self.idomain == 1, axis=0) > 0
+            # fill any holes within the max footprint
+            # including any LGR areas (that are inactive in this model)
+            # set min cluster size to 1 greater than number of inactive cells
+            # (to not allow any holes)
+            minimum_cluster_size = np.sum(max_active_area == 0) + 1
+            # find_remove_isolated_cells fills clusters of 1s with 0s
+            # to fill holes, we want to look for clusters of 0s and fill with 1s
+            # invert the result to get True values for active cells and filled areas
+            filled = ~find_remove_isolated_cells(~max_active_area, minimum_cluster_size)
+            max_active_area = filled.astype(int)
+            # pad filled idomain array with zeros around the edge
+            # so that perimeter connections are identified
+            filled = np.pad(max_active_area, 1, constant_values=0)
+            filled3d = np.tile(filled, (self.idomain.shape[0], 1, 1))
+            df = get_horizontal_connections(filled3d, connection_info=False)
+            # deincrement rows and columns
+            # so that they reflect positions in the non-padded array
+            df['i'] -= 1
+            df['j'] -= 1
+        else:
+            dfs = []
+            for k, layer_idomain in enumerate(self.idomain):
+
+                # just get the perimeter of inactive cells
+                # (exclude any interior active cells)
+                # start by filling any interior active cells
+                from scipy.ndimage import binary_fill_holes
+                binary_idm = layer_idomain > 0
+                filled = binary_fill_holes(binary_idm)
+                # pad filled idomain array with zeros around the edge
+                # so that perimeter connections are identified
+                filled = np.pad(filled, 1, constant_values=0)
+                # get the cells along the inside edge
+                # of the model active area perimeter,
+                # via a sobel filter
+                df = get_horizontal_connections(filled, connection_info=False)
+                df['k'] = k
+                # deincrement rows and columns
+                # so that they reflect positions in the non-padded array
+                df['i'] -= 1
+                df['j'] -= 1
+                dfs.append(df)
+            df = pd.concat(dfs)
+
+            # cull the boundary cells identified above
+            # with the sobel filter on the outer perimeter
+            # to just the cells specified in the shapefile
+            if specified_bcells is not None:
+                df['cellid'] = list(zip(df.k, df.i, df.j))
+                specified_bcells['cellid'] = list(zip(specified_bcells.k, specified_bcells.i, specified_bcells.j))
+                df = df.loc[df.cellid.isin(specified_bcells.cellid)]
+
+        # add layer top and bottom and idomain information
+        layer_tops = np.stack([self.inset.dis.top.array] +
+                              [l for l in self.inset.dis.botm.array])[:-1]
+        df['top'] = layer_tops[df.k, df.i, df.j]
+        df['botm'] = self.inset.dis.botm.array[df.k, df.i, df.j]
+        df['idomain'] = 1
+        if self.inset.version == 'mf6':
+            df['idomain'] = self.inset.dis.idomain.array[df.k, df.i, df.j]
+        elif 'BAS6' in self.inset.get_package_list():
+            df['idomain'] = self.inset.bas6.ibound.array[df.k, df.i, df.j]
+        df = df[['k', 'i', 'j', 'cellface', 'top', 'botm', 'idomain']]
+        # drop inactive cells
+        df = df.loc[df['idomain'] > 0]
+
+        # get cell polygons from modelgrid
+        # write shapefile of boundary cells with face information
+        grid_df = self.inset.modelgrid.dataframe.copy()
+        grid_df['cellid'] = list(zip(grid_df.k, grid_df.i, grid_df.j))
+        geoms = dict(zip(grid_df['cellid'], grid_df['geometry']))
+        if 'cellid' not in df.columns:
+            df['cellid'] = list(zip(df.k, df.i, df.j))
+        df['geometry'] = [geoms[cellid] for cellid in df.cellid]
+        df = gp.GeoDataFrame(df, crs=self.inset.modelgrid.crs)
+        outshp = Path(self.inset._tables_path, 'boundary_cells.shp')
+        df.drop('cellid', axis=1).to_file(outshp)
+        print(f"wrote {outshp}")
+        print("perimeter cells took {:.2f}s\n".format(time.time() - t0))
+        return df
+
+    def get_inset_boundary_values(self, for_external_files=False):
+
+        if self.boundary_type == 'head':
+            check_source_files([self.parent_head_file])
+            hdsobj = bf.HeadFile(self.parent_head_file)  # , precision='single')
+            all_kstpkper = hdsobj.get_kstpkper()
+
+            last_steps = {kper: kstp for kstp, kper in all_kstpkper}
+
+            # get the perimeter cells and calculate the weights
+            _ = self.interp_weights
+
+            print('\ngetting perimeter heads...')
+            t0 = time.time()
+            dfs = []
+            parent_periods = []
+            for inset_per, parent_per in self.inset_parent_period_mapping.items():
+                print(f'for stress period {inset_per}', end=', ')
+                t1 = time.time()
+                # skip getting data if parent period is already represented
+                # (heads will be reused)
+                if parent_per in parent_periods:
+                    continue
+                else:
+                    parent_periods.append(parent_per)
+                parent_kstpkper = last_steps[parent_per], parent_per
+                parent_heads = hdsobj.get_data(kstpkper=parent_kstpkper)
+                # pad the parent heads on the top and bottom
+                # so that inset cells above and below the top/bottom cell centers
+                # will be within the interpolation space
+                # (parent x, y, z locations already contain this pad; parent_xyzcellcenters)
+                parent_heads = np.pad(parent_heads, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
+
+                # interpolate inset boundary heads from 3D parent head solution
+                heads = self.interpolate_values(parent_heads, method='linear')
+                #heads = griddata((px, py, pz), parent_heads.ravel(),
+                #                  (x, y, z), method='linear')
+
+                # make a DataFrame of interpolated heads at perimeter cell locations
+                df = self.inset_boundary_cells.copy()
+                df['per'] = inset_per
+                df['head'] = heads
+
+                # boundary heads must be greater than the cell bottom
+                # and idomain > 0
+                loc = (df['head'] > df['botm']) & (df['idomain'] > 0)
+                df = df.loc[loc]
+                # drop invalid heads (most likely due to dry cells)
+                valid = (df['head'] < 1e10) & (df['head'] > -1e10)
+                df = df.loc[valid]
+                dfs.append(df)
+                print("took {:.2f}s".format(time.time() - t1))
+
+            df = pd.concat(dfs)
+            # drop duplicate cells (accounting for stress periods)
+            # (that may have connections in the x and y directions,
+            #  and therefore would be listed twice)
+            df['cellid'] = list(zip(df.per, df.k, df.i, df.j))
+            duplicates = df.duplicated(subset=['cellid'])
+            df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'head']]
+            print("getting perimeter heads took {:.2f}s\n".format(time.time() - t0))
+
+        # convert to one-based and comment out header if df will be written straight to external file
+        if for_external_files:
+            df.rename(columns={'k': '#k'}, inplace=True)
+            df['#k'] += 1
+            df['i'] += 1
+            df['j'] += 1
+        return df
+
+    def interpolate_values(self, source_array, method='linear'):
+        """Interpolate values in source array onto
+        the destination model grid, using modelgrid instances
+        attached to the source and destination models.
+
+        Parameters
+        ----------
+        source_array : ndarray
+            Values from source model to be interpolated to destination grid.
+            3D numpy array of same shape as the source model.
+        method : str ('linear', 'nearest')
+            Interpolation method.
+
+        Returns
+        -------
+        interpolated : ndarray
+            3D array of interpolated values at the inset model grid locations.
+        """
+        parent_values = source_array.flatten()[self._source_grid_mask.flatten()]
+        if method == 'linear':
+            interpolated = interpolate(parent_values, *self.interp_weights,
+                                       fill_value=None)
+        elif method == 'nearest':
+            # x, y, z locations of parent model head values
+            px, py, pz = self.parent_xyzcellcenters
+            # x, y, z locations of inset model boundary cells
+            x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
+            interpolated = griddata((px, py, pz), parent_values,
+                                    (x, y, z), method=method)
+        return interpolated

@@ -1,9 +1,30 @@
+"""
+Tests for the tmr.py module
+
+Notes
+-----
+Some relevant tests are also in the following modules
+test_mf6_tmr_shellmound.py
+"""
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
 import pytest
 from flopy.utils import binaryfile as bf
 
 from mfsetup.discretization import get_layer
 from mfsetup.grid import get_ij
-from mfsetup.tmr import Tmr
+from mfsetup.tmr import Tmr, TmrNew
+
+from .test_mf6_tmr_shellmound import (
+    shellmound_tmr_cfg,
+    shellmound_tmr_cfg_path,
+    shellmound_tmr_model,
+    shellmound_tmr_model_with_dis,
+    shellmound_tmr_model_with_grid,
+    shellmound_tmr_simulation,
+)
 
 
 # fixture to feed multiple model fixtures to a test
@@ -21,7 +42,7 @@ def pleasant_model(request,
 def tmr(pleasant_model):
     m = pleasant_model
     tmr = Tmr(m.parent, m,
-              parent_head_file=m.cfg['parent']['headfile'],
+              parent_head_file=m.cfg['chd']['perimeter_boundary']['parent_head_file'],
               inset_parent_layer_mapping=m.parent_layers,
               inset_parent_period_mapping=m.parent_stress_periods)
     return tmr
@@ -65,3 +86,100 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
 
         # error between parent heads and inset heads
         # todo: interpolate parent head solution to inset points for comparison
+
+
+def test_tmr_new(pleasant_model):
+    m = pleasant_model
+    parent_headfile = Path(m.cfg['chd']['perimeter_boundary']['parent_head_file'])
+    parent_cellbudgetfile = parent_headfile.with_suffix('.cbc')
+
+    tmr = TmrNew(m.parent, m,
+                 parent_head_file=parent_headfile)
+
+    results = tmr.get_inset_boundary_values(for_external_files=False)
+    assert np.all(results.columns ==
+                  ['k', 'i', 'j', 'per', 'head'])
+    # indices should be zero-based
+    assert results['k'].min() == 0
+    # non NaN heads
+    assert not results['head'].isna().any()
+    # no heads below cell bottoms
+    cell_botms = m.dis.botm.array[results['k'], results['i'], results['j']]
+    assert not np.any(results['head'] < cell_botms)
+    # no duplicate heads
+    results['cellid'] = list(zip(results.per, results.k, results.i, results.j))
+    assert not results.cellid.duplicated().any()
+
+    # test external files case
+    # and with connections defined by layer
+    tmr.define_connections_by = 'by_layer'
+    tmr._inset_boundary_cells = None   # reset properties
+    tmr._interp_weights = None
+    results = tmr.get_inset_boundary_values(for_external_files=True)
+    # '#k' required for header row
+    assert np.all(results.columns ==
+                  ['#k', 'i', 'j', 'per', 'head'])
+    # indices should be one-based (written directly to external files)
+    assert results['#k'].min() == 1
+
+
+def test_get_boundary_cells_shapefile(shellmound_tmr_model_with_dis, test_data_path, tmpdir):
+    m = shellmound_tmr_model_with_dis
+
+    from mfexport import export
+    export(m, m.modelgrid, 'dis', 'idomain', pdfs=False, output_path=tmpdir)
+    boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    tmr = TmrNew(m.parent, m,
+                 inset_parent_period_mapping=m.parent_stress_periods,
+                 boundary_type='head')
+    df = tmr.get_inset_boundary_cells(shapefile=boundary_shapefile)
+    assert np.all(df.columns == ['k', 'i', 'j', 'cellface', 'top', 'botm', 'idomain',
+                                 'cellid', 'geometry'])
+    # option to write a shapefile of boundary cells for visual inspection
+    write_shapefile = False
+    if write_shapefile:
+        out_shp = Path(tmpdir, 'shps/bcells.shp')
+        df.drop('cellid', axis=1).to_file(out_shp)
+
+
+def test_get_boundary_heads(shellmound_tmr_model_with_dis, test_data_path):
+    m = shellmound_tmr_model_with_dis
+    boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    parent_head_file = test_data_path / 'shellmound/tmr_parent/shellmound.hds'
+    tmr = TmrNew(m.parent, m, parent_head_file=parent_head_file,
+                 inset_parent_period_mapping=m.parent_stress_periods,
+                 boundary_type='head',
+                 shapefile=boundary_shapefile)
+    perimeter_df = tmr.get_inset_boundary_values()
+    m.setup_chd()
+    dfs = []
+    for per, data in m.chd.stress_period_data.data.items():
+        df = pd.DataFrame(data)
+        df['per'] = per
+        dfs.append(df)
+    df = pd.concat(dfs)
+    df['k'], df['i'], df['j'] = list(zip(*df['cellid']))
+    j=2
+
+
+@pytest.mark.skip(reason="still working on this test")
+def test_get_boundary_heads_transient(shellmound_tmr_model_with_dis, test_data_path):
+    m = shellmound_tmr_model_with_dis
+    boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    tmr = TmrNew(m.parent, m,
+                 inset_parent_period_mapping=m.parent_stress_periods,
+                 boundary_type='head')
+
+    # get parent model elapsed time at start of each inset model stress period
+    offset = m.perioddata.start_datetime[0] - m.tmr.parent_start_date_time
+    inset_times_parent = pd.to_timedelta(m.perioddata.time, unit=m.time_units) + offset
+    inset_times_parent = [0] + inset_times_parent.dt.days.tolist()[:-1]
+
+    # apply the parent model times to each bcell in the inset
+    dfs = []
+    for i, r in m.perioddata.iterrows():
+        perdata = bcells.copy()
+        perdata['per'] = r.per
+        perdata['parent_time'] = inset_times_parent[r.per]
+        dfs.append(perdata)
+    all_bcells = pd.concat(dfs)

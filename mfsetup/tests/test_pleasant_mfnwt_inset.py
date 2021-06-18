@@ -103,6 +103,12 @@ def test_wel_setup(get_pleasant_nwt_with_dis_bas6):
         assert len(spd) >= nwells0 + n_added_wels
 
 
+def test_oc_setup(get_pleasant_nwt_with_dis_bas6):
+    m = get_pleasant_nwt_with_dis_bas6  # deepcopy(model)
+    oc = m.setup_oc()
+    # oc stress period data should be filled
+    assert len(oc.stress_period_data) == m.nper
+
 def test_model_setup(full_pleasant_nwt):
     m = full_pleasant_nwt
     assert isinstance(m, MFnwtModel)

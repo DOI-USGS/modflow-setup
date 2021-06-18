@@ -3,7 +3,6 @@ model:
   model_ws: '../tmp/pfl_inset/'
   exe_name: 'mfnwt'
   external_path: 'external/'
-  perimeter_boundary_type: 'specified head'
   # list file path is relative to model_ws
   list_filename_fmt: 'external/{}.list'
   packages: ['dis',
@@ -16,14 +15,14 @@ model:
              'mnw2',
              'hyd',
              'gag',
-             'nwt'
+             'nwt',
+             'chd'
   ]
 
 parent:
   namefile: 'pfl.nam'
   model_ws: 'plainfieldlakes/'
   version: 'mfnwt'
-  headfile: 'plainfieldlakes/pfl.hds'
   hiKlakes_value: 1.e4
   copy_stress_periods: 'all'
 
@@ -31,7 +30,7 @@ parent:
 # using features in features_file
 setup_grid:
   remake: True
-  dxy: 20 # m
+  dxy: 20 #  in CRS units of meters
   buffer: 350 # distance from feature(s) if interest to model boundary, in meters
   epsg: 3070
   source_data:
@@ -70,6 +69,7 @@ bas6:
     strt:
       from_parent:
         binaryfile: 'plainfieldlakes/pfl.hds'
+        stress_period: 0
 
 upw:
   ipakcb: 53 # unit for writing cell budget output
@@ -189,3 +189,7 @@ hyd:
                 'plainfieldlakes/source_data/uwsp_heads.csv'
                 ]
     name_column:
+
+chd:
+  perimeter_boundary:
+    parent_head_file: 'plainfieldlakes/pfl.hds'

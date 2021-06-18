@@ -205,7 +205,7 @@ def test_dis_setup(pfl_nwt_with_grid):
     del m.cfg['setup_grid']['botm']
     m.cfg['dis']['remake_top'] = True
     m.cfg['dis']['lenuni'] = 1 # feet
-    m.cfg['setup_grid']['dxy'] = 20/.3048
+    m.cfg['setup_grid']['dxy'] = 20  # in CRS units
     m.remove_package('DIS')
     m.setup_grid()
     #m._reset_bc_arrays()
@@ -255,8 +255,8 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path, simulate_high_k_lakes):
     m.cfg['high_k_lakes']['simulate_high_k_lakes'] = simulate_high_k_lakes
     # test intermediate array creation from rech specified as scalars
     m.cfg['rch']['rech'] = [0.001, 0.002]
-    m.cfg['rch']['rech_length_units'] = 'meters'
-    m.cfg['rch']['rech_time_units'] = 'days'
+    #m.cfg['rch']['rech_length_units'] = 'meters'
+    #m.cfg['rch']['rech_time_units'] = 'days'
     rch = m.setup_rch()
     arrayfiles = m.cfg['intermediate_data']['rech']
     assert len(arrayfiles) == len(m.cfg['rch']['rech'])
@@ -278,7 +278,7 @@ def test_rch_setup(pfl_nwt_with_dis, project_root_path, simulate_high_k_lakes):
     rch = m.setup_rch()
 
     # spatial mean recharge in model should approx. match the GeoTiff (which covers a larger area)
-    avg_in_yr = rch.rech.array[0, 0, :, :].mean() * convert_length_units('meters', 'inches') * \
+    avg_in_yr = rch.rech.array[0, 0, :, :].mean() * convert_length_units('meters', 'inches') / \
         convert_time_units('days', 'years')
     assert np.allclose(avg_in_yr, inf_values.mean() * m.cfg['rch']['source_data']['rech']['mult'], rtol=0.25)
     arrayfiles = m.cfg['intermediate_data']['rech']
@@ -515,7 +515,6 @@ def test_lak_setup(pfl_nwt_with_dis):
 
 
 def test_nwt_setup(pfl_nwt, project_root_path):
-
     m = pfl_nwt  #deepcopy(pfl_nwt)
     m.cfg['nwt']['use_existing_file'] = project_root_path + '/mfsetup/tests/data/RGN_rjh_3_23_18.NWT'
     nwt = m.setup_nwt()
@@ -525,12 +524,23 @@ def test_nwt_setup(pfl_nwt, project_root_path):
     nwt.write_file()
 
 
-def test_oc_setup(pfl_nwt):
+@pytest.mark.parametrize('input,expected', [
+    # MODFLOW 6-style input
+    ({'period_options': {0: ['save head last', 'save budget last'],
+                         1: []}},
+     {'stress_period_data': {(0, 0): ['save head', 'save budget'],
+                            (1, 0): []}}),
+    # MODFLOW 2005-style input
+    ({'stress_period_data': {(0, 0): ['save head', 'save budget'],
+                            (1, 0): []}},
+     {'stress_period_data': {(0, 0): ['save head', 'save budget'],
+                            (1, 0): []}})
+])
+def test_oc_setup(pfl_nwt, input, expected):
     m = pfl_nwt
+    m.cfg['oc'].update(input)
     oc = m.setup_oc()
-    for (kper, kstp), words in oc.stress_period_data.items():
-        assert kstp == m.perioddata.loc[kper, 'nstp'] - 1
-        assert words == m.perioddata.loc[kper, 'oc']
+    assert oc.stress_period_data == expected['stress_period_data']
 
     # TODO: add datetime comments to OC file
 
@@ -593,7 +603,7 @@ def test_lake_gag_setup(pfl_nwt_with_dis):
 def test_perimeter_boundary_setup(pfl_nwt_with_dis_bas6):
 
     m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)
-    chd = m.setup_perimeter_boundary()
+    chd = m.setup_chd()
     chd.write_file()
     assert os.path.exists(chd.fn_path)
     assert len(chd.stress_period_data.data.keys()) == len(set(m.cfg['parent']['copy_stress_periods']))

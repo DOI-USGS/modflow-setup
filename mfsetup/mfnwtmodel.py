@@ -11,7 +11,11 @@ import pandas as pd
 fm = flopy.modflow
 from flopy.modflow import Modflow
 
-from mfsetup.bcs import setup_ghb_data
+from mfsetup.bcs import (
+    remove_inactive_bcs,
+    setup_flopy_stress_period_data,
+    setup_ghb_data,
+)
 from mfsetup.discretization import (
     deactivate_idomain_above,
     find_remove_isolated_cells,
@@ -24,6 +28,7 @@ from mfsetup.fileio import (
     load_cfg,
     save_array,
 )
+from mfsetup.ic import setup_strt
 from mfsetup.lakes import (
     make_bdlknc2d,
     make_bdlknc_zones,
@@ -33,8 +38,9 @@ from mfsetup.lakes import (
 )
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.obs import read_observation_data, setup_head_observations
+from mfsetup.oc import parse_oc_period_input
 from mfsetup.tdis import get_parent_stress_periods, setup_perioddata_group
-from mfsetup.tmr import Tmr
+from mfsetup.tmr import TmrNew
 from mfsetup.units import convert_length_units, itmuni_text, lenuni_text
 from mfsetup.utils import get_input_arguments, get_packages
 
@@ -74,7 +80,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # default configuration
         self._package_setup_order = ['dis', 'bas6', 'upw', 'rch', 'oc',
-                                     'ghb', 'lak', 'sfr', 'riv', 'wel', 'mnw2',
+                                     'chd', 'ghb', 'lak', 'sfr', 'riv', 'wel', 'mnw2',
                                      'gag', 'hyd']
         # set up the model configuration dictionary
         # start with the defaults
@@ -83,7 +89,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # set the model workspace and change working directory to there
         self.model_ws = self._get_model_ws(cfg=cfg)
         # update defaults with user-specified config. (loaded above)
-        self._set_cfg(cfg)  # set up the model configuration dictionary
+        # set up and validate the model configuration dictionary
+        self._set_cfg(cfg)
 
         # set the list file path
         self.lst.file_name = [self.cfg['model']['list_filename_fmt'].format(self.name)]
@@ -293,10 +300,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
-        # make the strt array
-        self._setup_array(package, 'strt', datatype='array3d',
-                          resample_method='linear',
-                          write_fmt='%.2f')
+        kwargs = self.cfg[package]
+        kwargs['source_data_config'] = kwargs['source_data']
+        kwargs['filename_fmt'] = kwargs['strt_filename_fmt']
+        kwargs['write_fmt'] = kwargs['strt_write_fmt']
+
+        # make the starting heads array
+        strt = setup_strt(self, package, **kwargs)
 
         # initial ibound input for creating a bas6 package instance
         self._setup_array(package, 'ibound', datatype='array3d', write_fmt='%d',
@@ -304,6 +314,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                           dtype=int)
 
         kwargs = get_input_arguments(self.cfg['bas6'], fm.ModflowBas)
+        kwargs['strt'] = strt
         bas = fm.ModflowBas(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         self._set_ibound()
@@ -314,12 +325,18 @@ class MFnwtModel(MFsetupMixin, Modflow):
         package = 'oc'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
-        stress_period_data = {}
-        for i, r in self.perioddata.iterrows():
-            stress_period_data[(r.per, r.nstp -1)] = r.oc
+        #stress_period_data = {}
+        #for i, r in self.perioddata.iterrows():
+        #    stress_period_data[(r.per, r.nstp -1)] = r.oc
 
+        # use stress_period_data if supplied
+        # (instead of period_input defaults)
+        if 'stress_period_data' in self.cfg['oc']:
+            del self.cfg['oc']['period_options']
         kwargs = self.cfg['oc']
-        kwargs['stress_period_data'] = stress_period_data
+        period_input = parse_oc_period_input(kwargs, nstp=self.perioddata.nstp,
+                                             output_fmt='mfnwt')
+        kwargs.update(period_input)
         kwargs = get_input_arguments(kwargs, fm.ModflowOc)
         oc = fm.ModflowOc(model=self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
@@ -778,45 +795,73 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return gag
 
-    def setup_perimeter_boundary(self):
-        """Set up constant head package for perimeter boundary.
-        TODO: integrate perimeter boundary with wel package setup
+    def setup_chd(self):
         """
-        print('setting up specified head perimeter boundary with CHD package...')
+        Sets up the CHD package.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        """
+        package = 'chd'
+        print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
+        package_config = self.cfg[package]
 
-        tmr = Tmr(self.parent, self,
-                  parent_head_file=self.cfg['parent']['headfile'],
-                  inset_parent_layer_mapping=self.parent_layers,
-                  inset_parent_period_mapping=self.parent_stress_periods)
+        # option to write stress_period_data to external files
+        external_files = False  # not yet supported for MODFLOW-NWT
+        external_filename_fmt = package_config.get('external_filename_fmt')
 
-        df = tmr.get_inset_boundary_heads(for_external_files=False)
+        # perimeter boundary
+        if 'perimeter_boundary' in package_config:
+            perimeter_cfg = package_config['perimeter_boundary']
+            perimeter_cfg['boundary_type'] = 'head'
+            if 'inset_parent_period_mapping' not in perimeter_cfg:
+                perimeter_cfg['inset_parent_period_mapping'] = self.parent_stress_periods
+            if 'parent_start_time' not in perimeter_cfg:
+                perimeter_cfg['parent_start_date_time'] = self.parent.perioddata['start_datetime'][0]
+            self.tmr = TmrNew(self.parent, self, **perimeter_cfg)
+            perimeter_df = self.tmr.get_inset_boundary_values()
 
-        spd = {}
-        by_period = df.groupby('per')
-        tmp = fm.ModflowChd.get_empty(len(by_period.get_group(0)))
-        for per, df_per in by_period:
-            spd[per] = tmp.copy() # need to make a copy otherwise they'll all be the same!!
-            spd[per]['k'] = df_per['k']
-            spd[per]['i'] = df_per['i']
-            spd[per]['j'] = df_per['j']
-            # assign starting and ending head values for each period
-            # starting chd is parent values for previous period
-            # ending chd is parent values for that period
-            if per == 0:
-                spd[per]['shead'] = df_per['bhead']
-                spd[per]['ehead'] = df_per['bhead']
-            else:
-                spd[per]['shead'] = by_period.get_group(per - 1)['bhead']
-                spd[per]['ehead'] = df_per['bhead']
+            # get the stress period data
+            # this also sets up the external file paths
+            spd = setup_flopy_stress_period_data(self, package, perimeter_df,
+                                                 flopy_package_class=fm.ModflowChd,
+                                                 variable_column='head',
+                                                 external_files=external_files,
+                                                 external_filename_fmt=external_filename_fmt)
 
-        chd = fm.ModflowChd(self, stress_period_data=spd)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
+        # placeholder for setting up user-specified CHD cells from CSV data
+        # todo: support for non-perimeter chd cells
+        df = pd.DataFrame()  # insert function here to get csv data into dataframe
+        if len(df) == 0:
+            print('No other CHD input specified')
+            if 'perimeter_boundary' not in package_config:
+                return
+
+        kwargs = self.cfg[package].copy()
+        if not external_files:
+            kwargs['stress_period_data'] = spd
+
+        kwargs = get_input_arguments(kwargs, fm.ModflowChd)
+        chd = fm.ModflowChd(self, **kwargs)
+        print("setup of chd took {:.2f}s\n".format(time.time() - t0))
         return chd
 
     def write_input(self):
         """Write the model input.
         """
+        # prior to writing output
+        # remove any BCs in inactive cells
+        pckgs = ['CHD']
+        for pckg in pckgs:
+            package_instance = getattr(self, pckg.lower(), None)
+            if package_instance is not None:
+                remove_inactive_bcs(package_instance)
+
         # write the model with flopy
         # but skip the sfr package
         # by monkey-patching the write method
