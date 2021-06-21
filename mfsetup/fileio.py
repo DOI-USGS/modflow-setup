@@ -32,9 +32,9 @@ def check_source_files(fileslist):
         if not os.path.exists(f):
             raise IOError('Cannot find {}'.format(f))
 
-
-def load_array(filename, shape=None):
+def load_array_np(filename, shape=None):
     """Load an array, ensuring the correct shape."""
+    t0 = time.time()
     arr = np.loadtxt(filename)
     if shape is not None:
         if arr.shape != shape:
@@ -43,8 +43,8 @@ def load_array(filename, shape=None):
             else:
                 raise ValueError("Data in {} have size {}; should be {}"
                                  .format(filename, arr.shape, shape))
+    print("took {:.2f}s".format(time.time() - t0))
     return arr
-
 
 def load(filename):
     """Load a configuration file."""
@@ -119,7 +119,8 @@ def dump_yml(yml_file, data):
 
 
 def load_array(filename, shape=None, nodata=-9999):
-    """Load an array, ensuring the correct shape."""
+    """Load an array, ensuring the correct shape.
+    From aleaf's modflow-setup."""
     t0 = time.time()
     if not isinstance(filename, list):
         filename = [filename]
@@ -137,7 +138,10 @@ def load_array(filename, shape=None, nodata=-9999):
         print(txt, end=', ')
         # arr = np.loadtxt
         # pd.read_csv is >3x faster than np.load_txt
+        # this results in some nans
         arr = pd.read_csv(f, delim_whitespace=True, header=None).values
+        # drop the nans
+        arr = arr[~np.isnan(arr)]        
         if shape2d is not None:
             if arr.shape != shape2d:
                 if arr.size == np.prod(shape2d):
