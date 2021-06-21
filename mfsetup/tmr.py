@@ -1331,11 +1331,23 @@ class TmrNew:
                     df = get_flowja_face(fileobj,
                                          binary_grid_file=self.parent_binary_grid_file,
                                          kstpkper=parent_kstpkper)
-                    # export the vertical fluxes as rasters
-                    # (in the downward direction; so fluxes between 2 layers
-                    # would be represented in the upper layer)
+                    if df is None:
+                        raise ValueError('No fluxes returned by get_flowja_face')
+
+                    # todo:
+                    # * make cell id column of tuples in df
+                    # subset df to boundary cells
+                    # get x and y direction fluxes separately
+                    # do same for vertical fluxes
+                    # for MF-2005 case, would slice arrays returned by flopy binary utility to boundary cells
+                    # (so that mf6 and mf2005 come out the same)
+                    # x-direction fluxes
+
+
                     j=2
-                    if df is not None and 'kn' in df.columns and np.any(df['kn'] < df['km']):
+
+                    # Get the vertical fluxes
+                    if 'kn' in df.columns and np.any(df['kn'] < df['km']):
                         vflux = df.loc[(df['kn'] < df['km'])]
                         nlay = vflux['km'].max()
                         _, nrow, ncol = grid.shape
