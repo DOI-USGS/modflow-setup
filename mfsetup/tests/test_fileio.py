@@ -61,7 +61,10 @@ def test_dump_yml(data, tmpdir):
 
 def test_load_array(tmpdir):
     nodata = -9999
-    size = (100, 100)
+    # renamed np based load_array to load_array_np
+    # fixed the pandas version, this tests pandas version
+    # false positive if size happens to align with output formatting
+    size = (1234, 123)
     a = np.random.randn(*size)
     a_nodata = a.copy()
     a[0:2, 0:2] = np.nan
