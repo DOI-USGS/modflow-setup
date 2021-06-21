@@ -162,6 +162,31 @@ def test_get_boundary_heads(shellmound_tmr_model_with_dis, test_data_path):
     j=2
 
 
+def test_get_boundary_fluxes(shellmound_tmr_model_with_dis, test_data_path):
+    """Test mapping cell by cell fluxes from a parent model to well package
+    fluxes around the perimeter of an inset model."""
+    m = shellmound_tmr_model_with_dis
+    #boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    parent_budget_file = test_data_path / 'shellmound/tmr_parent/shellmound.cbc'
+    parent_binary_grid_file = test_data_path / 'shellmound/tmr_parent/shellmound.dis.grb'
+    tmr = TmrNew(m.parent, m, parent_cell_budget_file=parent_budget_file,
+                 inset_parent_period_mapping=m.parent_stress_periods,
+                 parent_binary_grid_file=parent_binary_grid_file,
+                 #shapefile=boundary_shapefile
+                 )
+    perimeter_df = tmr.get_inset_boundary_values()
+    m.setup_wel()
+    dfs = []
+    for per, data in m.wel.stress_period_data.data.items():
+        df = pd.DataFrame(data)
+        df['per'] = per
+        dfs.append(df)
+    df = pd.concat(dfs)
+    df['k'], df['i'], df['j'] = list(zip(*df['cellid']))
+
+    # todo: add checks on the results
+
+
 @pytest.mark.skip(reason="still working on this test")
 def test_get_boundary_heads_transient(shellmound_tmr_model_with_dis, test_data_path):
     m = shellmound_tmr_model_with_dis
