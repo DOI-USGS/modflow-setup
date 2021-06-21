@@ -9,7 +9,9 @@ import pandas as pd
 from shapely.geometry import MultiLineString
 
 fm = flopy.modflow
+from flopy.discretization import StructuredGrid
 from flopy.utils import binaryfile as bf
+from flopy.utils.mfgrdfile import MfGrdFile
 from flopy.utils.postprocessing import get_water_table
 from scipy.interpolate import griddata
 
@@ -859,6 +861,66 @@ def distribute_parent_fluxes_to_inset(Q_parent, botm_parent, top_parent,
     return np.array(Q_inset)
 
 
+def get_kij_from_node3d(node3d, nrow, ncol):
+    """For a consecutive cell number in row-major order
+    (row, column, layer), get the zero-based row, column position.
+    """
+    node2d = node3d % (nrow * ncol)
+    k = node3d // (nrow * ncol)
+    i = node2d // ncol
+    j = node2d % ncol
+    return k, i, j
+
+
+def get_intercell_connections(ia, ja, flowja):
+    print('Making DataFrame of intercell connections...')
+    ta = time.time()
+    all_n = []
+    m = []
+    q = []
+    for n in range(len(ia)-1):
+        for ipos in range(ia[n] + 1, ia[n+1]):
+            all_n.append(n)
+            m.append(ja[ipos])  # m is the cell that n connects to
+            q.append(flowja[ipos])  # flow across the connection
+    df = pd.DataFrame({'n': all_n, 'm': m, 'q': q})
+    et = time.time() - ta
+    print("finished in {:.2f}s\n".format(et))
+    return df
+
+
+def get_flowja_face(cell_budget_file, binary_grid_file, kstpkper=(0, 0)):
+    """Get FLOW-JA-FACE (cell by cell flows) from MODFLOW 6 budget
+    output and binary grid file.
+    TODO: need test for extracted flowja fluxes
+    """
+    cbb = cell_budget_file
+    if binary_grid_file is None:
+        print("Couldn't get FLOW-JA-FACE, need binary grid file for connection information.")
+        return
+    bgf = MfGrdFile(binary_grid_file)
+    # IA array maps cell number to connection number
+    # (one-based index number of first connection at each cell)?
+    # taking the forward difference then yields nconnections per cell
+    ia = bgf._datadict['IA'] - 1
+    # Connections in the JA array correspond directly with the
+    # FLOW-JA-FACE record that is written to the budget file.
+    ja = bgf._datadict['JA'] - 1  # cell connections
+    flowja = cbb.get_data(text='FLOW-JA-FACE', kstpkper=kstpkper)[0][0, 0, :]
+    df = get_intercell_connections(ia, ja, flowja)
+    cols = ['n', 'm', 'q']
+
+    # get the k, i, j locations for plotting the connections
+    if isinstance(bgf.mg, StructuredGrid):
+        nlay, nrow, ncol = bgf.mg.nlay, bgf.mg.nrow, bgf.mg.ncol
+        k, i, j = get_kij_from_node3d(df['n'].values, nrow, ncol)
+        df['kn'], df['in'], df['jn'] = k, i, j
+        k, i, j = get_kij_from_node3d(df['m'].values, nrow, ncol)
+        df['km'], df['im'], df['jm'] = k, i, j
+        df.reset_index()
+        cols += ['kn', 'in', 'jn', 'km', 'im', 'jm']
+    return df[cols].copy()
+
 class TmrNew:
     """
     Class for general telescopic mesh refinement of a MODFLOW model. Head or
@@ -875,6 +937,8 @@ class TmrNew:
         MODFLOW binary head output
     parent_cell_budget_file : filepath
         MODFLOW binary cell budget output
+    parent_binary_grid_file : filepath
+        MODFLOW 6 binary grid file (*.grb)
     define_connections : str, {'max_active_extent', 'by_layer'}
         Method for defining perimeter cells where the TMR boundary
         condition will be applied. If 'max_active_extent', the
@@ -893,6 +957,7 @@ class TmrNew:
 
     def __init__(self, parent_model, inset_model,
                  parent_head_file=None, parent_cell_budget_file=None,
+                 parent_binary_grid_file=None,
                  boundary_type=None, inset_parent_period_mapping=None,
                  parent_start_date_time=None, source_mask=None,
                  define_connections_by='max_active_extent',
@@ -902,6 +967,7 @@ class TmrNew:
         self.inset = inset_model
         self.parent_head_file = parent_head_file
         self.parent_cell_budget_file = parent_cell_budget_file
+        self.parent_binary_grid_file = parent_binary_grid_file
         self.define_connections_by = define_connections_by
         self.shapefile = shapefile
         self.boundary_type = boundary_type
@@ -1200,6 +1266,88 @@ class TmrNew:
                     parent_periods.append(parent_per)
                 parent_kstpkper = last_steps[parent_per], parent_per
                 parent_heads = hdsobj.get_data(kstpkper=parent_kstpkper)
+                # pad the parent heads on the top and bottom
+                # so that inset cells above and below the top/bottom cell centers
+                # will be within the interpolation space
+                # (parent x, y, z locations already contain this pad; parent_xyzcellcenters)
+                parent_heads = np.pad(parent_heads, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
+
+                # interpolate inset boundary heads from 3D parent head solution
+                heads = self.interpolate_values(parent_heads, method='linear')
+                #heads = griddata((px, py, pz), parent_heads.ravel(),
+                #                  (x, y, z), method='linear')
+
+                # make a DataFrame of interpolated heads at perimeter cell locations
+                df = self.inset_boundary_cells.copy()
+                df['per'] = inset_per
+                df['head'] = heads
+
+                # boundary heads must be greater than the cell bottom
+                # and idomain > 0
+                loc = (df['head'] > df['botm']) & (df['idomain'] > 0)
+                df = df.loc[loc]
+                # drop invalid heads (most likely due to dry cells)
+                valid = (df['head'] < 1e10) & (df['head'] > -1e10)
+                df = df.loc[valid]
+                dfs.append(df)
+                print("took {:.2f}s".format(time.time() - t1))
+
+            df = pd.concat(dfs)
+            # drop duplicate cells (accounting for stress periods)
+            # (that may have connections in the x and y directions,
+            #  and therefore would be listed twice)
+            df['cellid'] = list(zip(df.per, df.k, df.i, df.j))
+            duplicates = df.duplicated(subset=['cellid'])
+            df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'head']]
+            print("getting perimeter heads took {:.2f}s\n".format(time.time() - t0))
+
+
+        elif self.boundary_type == 'flux':
+            check_source_files([self.parent_cell_budget_file])
+            fileobj = bf.CellBudgetFile(self.parent_cell_budget_file)  # , precision='single')
+            all_kstpkper = fileobj.get_kstpkper()
+
+            last_steps = {kper: kstp for kstp, kper in all_kstpkper}
+
+            # get the perimeter cells and calculate the weights
+            _ = self.interp_weights
+
+            print('\ngetting perimeter fluxes...')
+            t0 = time.time()
+            dfs = []
+            parent_periods = []
+            for inset_per, parent_per in self.inset_parent_period_mapping.items():
+                print(f'for stress period {inset_per}', end=', ')
+                t1 = time.time()
+                # skip getting data if parent period is already represented
+                # (heads will be reused)
+                if parent_per in parent_periods:
+                    continue
+                else:
+                    parent_periods.append(parent_per)
+                parent_kstpkper = last_steps[parent_per], parent_per
+
+                if self.parent.version == 'mf6':
+                    df = get_flowja_face(fileobj,
+                                         binary_grid_file=self.parent_binary_grid_file,
+                                         kstpkper=parent_kstpkper)
+                    # export the vertical fluxes as rasters
+                    # (in the downward direction; so fluxes between 2 layers
+                    # would be represented in the upper layer)
+                    j=2
+                    if df is not None and 'kn' in df.columns and np.any(df['kn'] < df['km']):
+                        vflux = df.loc[(df['kn'] < df['km'])]
+                        nlay = vflux['km'].max()
+                        _, nrow, ncol = grid.shape
+                        vflux_array = np.zeros((nlay, nrow, ncol))
+                        vflux_array[vflux['kn'].values,
+                                    vflux['in'].values,
+                                    vflux['jn'].values] = vflux.q.values
+                        data = vflux_array
+                else:
+                    raise NotImplementedError('MODFLOW-2005 fluxes not yet supported')
+
+                parent_fluxes = fileobj.get_data(kstpkper=parent_kstpkper)
                 # pad the parent heads on the top and bottom
                 # so that inset cells above and below the top/bottom cell centers
                 # will be within the interpolation space
