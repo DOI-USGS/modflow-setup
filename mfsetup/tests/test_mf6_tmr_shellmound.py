@@ -60,6 +60,26 @@ def shellmound_tmr_model_with_grid(shellmound_tmr_model):
 
 
 @pytest.fixture(scope="function")
+def shellmound_tmr_model_with_refined_dis(shellmound_tmr_cfg, shellmound_tmr_simulation):
+    print('pytest fixture model_with_refined_dis')
+    cfg = shellmound_tmr_cfg.copy()
+    cfg['model']['simulation'] = shellmound_tmr_simulation
+    # cut the delr and delc in half
+    cfg['dis']['griddata']['delr'] /= 2
+    cfg['dis']['griddata']['delc'] /= 2
+    cfg['dis']['dimensions']['nrow'] *= 2
+    cfg['dis']['dimensions']['ncol'] *= 2
+    
+    cfg = MF6model._parse_model_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
+    m = MF6model(cfg=cfg, **kwargs)
+    m.setup_grid()
+    m.setup_tdis()
+    m.cfg['dis']['remake_top'] = True
+    dis = m.setup_dis()
+    return m
+
+@pytest.fixture(scope="function")
 def shellmound_tmr_model_with_dis(shellmound_tmr_model_with_grid):
     print('pytest fixture model_with_grid')
     m = shellmound_tmr_model_with_grid  #deepcopy(pfl_nwt_with_grid)
