@@ -24,6 +24,7 @@ from .test_mf6_tmr_shellmound import (
     shellmound_tmr_model_with_dis,
     shellmound_tmr_model_with_grid,
     shellmound_tmr_simulation,
+    shellmound_tmr_model_with_refined_dis
 )
 
 
@@ -162,17 +163,17 @@ def test_get_boundary_heads(shellmound_tmr_model_with_dis, test_data_path):
     j=2
 
 
-def test_get_boundary_fluxes(shellmound_tmr_model_with_dis, test_data_path):
+def test_get_boundary_fluxes(shellmound_tmr_model_with_refined_dis, test_data_path):
     """Test mapping cell by cell fluxes from a parent model to well package
     fluxes around the perimeter of an inset model."""
-    m = shellmound_tmr_model_with_dis
-    #boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+    m = shellmound_tmr_model_with_refined_dis
+    boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
     parent_budget_file = test_data_path / 'shellmound/tmr_parent/shellmound.cbc'
     parent_binary_grid_file = test_data_path / 'shellmound/tmr_parent/shellmound.dis.grb'
     tmr = TmrNew(m.parent, m, parent_cell_budget_file=parent_budget_file,
                  inset_parent_period_mapping=m.parent_stress_periods,
                  parent_binary_grid_file=parent_binary_grid_file,
-                 #shapefile=boundary_shapefile
+                 shapefile=boundary_shapefile
                  )
     perimeter_df = tmr.get_inset_boundary_values()
     m.setup_wel()
