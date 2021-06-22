@@ -1335,27 +1335,49 @@ class TmrNew:
                         raise ValueError('No fluxes returned by get_flowja_face')
 
                     # todo:
-                    # * make cell id column of tuples in df
-                    # subset df to boundary cells
-                    # get x and y direction fluxes separately
-                    # do same for vertical fluxes
+                    # * make cell id column of tuples in df 
+                    # subset df to boundary cells  -- not possible a priori
+                    # get x and y direction fluxes separately -- DONE
+                    # do same for vertical fluxes -- DONE
+                    # * normalize by cell face area to make specific discharge
+                    # * use meshgrid to locate all the cell face locations in the parent (hello xyedges from grid!)
+                    # * interpolate using meshgrid-derived lox and arrays of fluxes to inset correct faces
+                    # * multiply by inset face area 
+                    # * ---- verify direciton of q coming from CBC file (e.g. always m --> n???)
                     # for MF-2005 case, would slice arrays returned by flopy binary utility to boundary cells
                     # (so that mf6 and mf2005 come out the same)
                     # x-direction fluxes
 
 
                     j=2
-
+                    
+                    nlay, nrow, ncol = self.parent.modelgrid.shape
                     # Get the vertical fluxes
                     if 'kn' in df.columns and np.any(df['kn'] < df['km']):
                         vflux = df.loc[(df['kn'] < df['km'])]
-                        nlay = vflux['km'].max()
-                        _, nrow, ncol = grid.shape
-                        vflux_array = np.zeros((nlay, nrow, ncol))
+                        vflux_array = np.zeros((vflux['km'].max(), nrow, ncol))
                         vflux_array[vflux['kn'].values,
                                     vflux['in'].values,
                                     vflux['jn'].values] = vflux.q.values
-                        data = vflux_array
+                        vdata = vflux_array
+                    # get modelgrid row-wise (i-direction) fluxes
+                    if 'in' in df.columns and np.any(df['in'] < df['im']):
+                        iflux = df.loc[(df['in'] < df['im'])]
+                        iflux_array = np.zeros((nlay, nrow+1, ncol+1))
+                        iflux_array[iflux['kn'].values,
+                                    iflux['in'].values+1,
+                                    iflux['jn'].values+1] = iflux.q.values
+                        idata = iflux_array
+
+                    # get modelgrid row-wise (i-direction) fluxes
+                    if 'jn' in df.columns and np.any(df['jn'] < df['jm']):
+                        jflux = df.loc[(df['jn'] < df['jm'])]
+                        jflux_array = np.zeros((nlay, nrow+1, ncol+1))
+                        jflux_array[jflux['kn'].values,
+                                    jflux['in'].values+1,
+                                    jflux['jn'].values+1] = jflux.q.values
+                        jdata = jflux_array
+                    
                 else:
                     raise NotImplementedError('MODFLOW-2005 fluxes not yet supported')
 
