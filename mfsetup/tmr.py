@@ -1334,49 +1334,115 @@ class TmrNew:
                     if df is None:
                         raise ValueError('No fluxes returned by get_flowja_face')
 
-                    # todo:
+                    # TODO: flux BCs
                     # * make cell id column of tuples in df 
                     # subset df to boundary cells  -- not possible a priori
                     # get x and y direction fluxes separately -- DONE
                     # do same for vertical fluxes -- DONE
-                    # * normalize by cell face area to make specific discharge
-                    # * use meshgrid to locate all the cell face locations in the parent (hello xyedges from grid!)
-                    # * interpolate using meshgrid-derived lox and arrays of fluxes to inset correct faces
+                    # * normalize by cell face area to make specific discharge -- DONE
+                    # * use meshgrid to locate all the cell face locations in the parent (hello xyedges from grid!) -- DONE
+                    # * need to set up inset xyz locations to interpolate to
+                    # * interpolate using meshgrid-derived lox and arrays of fluxes to inset correct faces 
+                    # * consider correct face interpolation weights precalculation
                     # * multiply by inset face area 
                     # * ---- verify direciton of q coming from CBC file (e.g. always m --> n???)
+                    # * verify that all the xy locating works with rotated grid (!)
                     # for MF-2005 case, would slice arrays returned by flopy binary utility to boundary cells
                     # (so that mf6 and mf2005 come out the same)
                     # x-direction fluxes
 
 
+
                     j=2
                     
                     nlay, nrow, ncol = self.parent.modelgrid.shape
+                    # TODO: implement vertical fluxes
                     # Get the vertical fluxes
-                    if 'kn' in df.columns and np.any(df['kn'] < df['km']):
+                    '''if 'kn' in df.columns and np.any(df['kn'] < df['km']):
                         vflux = df.loc[(df['kn'] < df['km'])]
                         vflux_array = np.zeros((vflux['km'].max(), nrow, ncol))
                         vflux_array[vflux['kn'].values,
                                     vflux['in'].values,
                                     vflux['jn'].values] = vflux.q.values
-                        vdata = vflux_array
+                    '''
                     # get modelgrid row-wise (i-direction) fluxes
                     if 'in' in df.columns and np.any(df['in'] < df['im']):
                         iflux = df.loc[(df['in'] < df['im'])]
-                        iflux_array = np.zeros((nlay, nrow+1, ncol+1))
+                        iflux_array = np.zeros((nlay, nrow-1, ncol))
                         iflux_array[iflux['kn'].values,
-                                    iflux['in'].values+1,
-                                    iflux['jn'].values+1] = iflux.q.values
-                        idata = iflux_array
+                                    iflux['in'].values,
+                                    iflux['jn'].values] = iflux.q.values
 
-                    # get modelgrid row-wise (i-direction) fluxes
+                    # get modelgrid column-wise (j-direction) fluxes
                     if 'jn' in df.columns and np.any(df['jn'] < df['jm']):
                         jflux = df.loc[(df['jn'] < df['jm'])]
-                        jflux_array = np.zeros((nlay, nrow+1, ncol+1))
+                        jflux_array = np.zeros((nlay, nrow, ncol-1))
                         jflux_array[jflux['kn'].values,
-                                    jflux['in'].values+1,
-                                    jflux['jn'].values+1] = jflux.q.values
-                        jdata = jflux_array
+                                    jflux['in'].values,
+                                    jflux['jn'].values] = jflux.q.values
+                    
+                    # get cell face areas
+
+                    # first thicknesses (at cell centers)
+                    parent_thick = np.diff(self.parent.modelgrid.top_botm, axis=0)
+
+                    # make matrices of the row and column spacings
+                    # NB --> trying to preserve the always seemingly 
+                    # backwards delr/delc definitions
+                    # also note - for now, taking average thickness at a connected face
+                    # TODO: confirm thickness averaging is a valid approach
+                    delr_grid, delc_grid = np.meshgrid(self.parent.modelgrid.delr,
+                                                        self.parent.modelgrid.delc)
+
+                    parent_iface_areas = np.tile(delc_grid[:-1,:], (nlay,1,1)) * \
+                                            ((parent_thick[:,:-1,:]+parent_thick[:,1:,:])/2)
+                    parent_jface_areas = np.tile(delr_grid[:,:-1], (nlay,1,1)) * \
+                                            ((parent_thick[:,:,:-1]+parent_thick[:,:,1:])/2)
+
+                    # TODO: implement vertical fluxes
+                    '''
+                    parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \
+                                            np.tile(delr_grid, (nlay,1,1)) 
+                    '''
+                    # divide the flux by the area to find specific discharge along faces
+                    # NB --> padding on the top and left top ensure zeros surround
+                    q_iface = (iflux_array / parent_iface_areas).ravel()
+                    q_jface = (jflux_array / parent_jface_areas).ravel()
+                    
+                    # need XYZ locations of the center of each face for 
+                    # iface and jface edges (faces)
+                    xloc_edge, yloc_edge = self.parent.modelgrid.xyedges
+                    # throw out the left and top edges, respectively
+                    xloc_edge=xloc_edge[1:]
+                    yloc_edge=yloc_edge[1:]
+                    # tile out to full dimensions of the grid
+                    xloc_edge = np.tile(np.atleast_2d(xloc_edge),(nlay,nrow,1))
+                    yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay,1,ncol))
+                    
+                    # need XYZ locations of the center of each cell 
+                    # iface and jface centroids
+                    xloc_center, yloc_center = self.parent.modelgrid.xycenters
+
+                    # tile out to full dimensions of the grid
+                    xloc_center = np.tile(np.atleast_2d(xloc_center),(nlay,nrow,1))
+                    yloc_center = np.tile(np.atleast_2d(yloc_center).T,(nlay,1,ncol))
+
+                    # get the vertical centroids initially at cell centroids
+                    zloc = (self.parent.modelgrid.top_botm[:-1,:,:] + 
+                        self.parent.modelgrid.top_botm[1:,:,:] ) / 2
+
+                    # for iface, all cols, nrow-1 rows
+                    x_iface = xloc_center[:,:-1,:].ravel()
+                    y_iface = yloc_edge[:,:-1,:].ravel()
+                    # need to calculate the average z location along rows
+                    z_iface = ((zloc[:,:-1,:]+zloc[:,1:,:]) / 2).ravel()
+                    
+                    # for jface, all rows, ncol-1 cols
+                    x_jface = xloc_edge[:,:,:-1].ravel()
+                    y_jface = yloc_center[:,:,:-1].ravel()
+                    # need to calculate the average z location along columns
+                    z_jface = ((zloc[:,:,:-1]+zloc[:,:,1:]) / 2).ravel()
+                    
                     
                 else:
                     raise NotImplementedError('MODFLOW-2005 fluxes not yet supported')
