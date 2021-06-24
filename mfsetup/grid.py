@@ -844,7 +844,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         # move away from the edge of a cell
         xul_mod += (delr_grid * 0.25)
         yul_mod -= (delc_grid * 0.25)
-        # flip back to work coords
+        # flip back to world coords
         xul, yul = parent_model.modelgrid.get_coords(xul_mod, yul_mod)
         # get corresponding cell
         pi, pj = parent_model.modelgrid.intersect(xul, yul)
