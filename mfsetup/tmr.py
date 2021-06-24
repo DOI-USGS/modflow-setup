@@ -1316,6 +1316,107 @@ class TmrNew:
             t0 = time.time()
             dfs = []
             parent_periods = []
+
+            # TODO: consider refactoring to move this into its own function
+            # * handle vertical fluxes
+            # * possibly handle rotated inset with differnt angle than parent - now assuming colinear
+
+            #
+            # Handle the geometry issues for the inset
+            #
+            # need to locate edge faces (x,y,z) based on which faces is out (e.g. left, right, up, down)
+
+            # make a dataframe to store these
+            inset_boundary_cell_faces = self.inset_boundary_cells.copy()
+            # renaming columns to be clear now x,y,z, is for the outer cell face
+            inset_boundary_cell_faces.rename(columns={'x':'xface','y':'yface','z':'z_face'}, inplace=True)
+            # calculate the thickness to later get teh area
+            inset_boundary_cell_faces['thickness'] = inset_boundary_cell_faces.top - inset_boundary_cell_faces.botm
+            # pre-seed the area as thickness to later mult by width
+            inset_boundary_cell_faces['face_area'] = inset_boundary_cell_faces['thickness'].values
+            # make a grid of the spacings
+            delr_gridi, delc_gridi = np.meshgrid(self.inset.modelgrid.delr, self.inset.modelgrid.delc)
+
+            for cn in inset_boundary_cell_faces.cellface.unique():
+                curri = inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn].i
+                currj = inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn].j
+                curr_delc = delc_gridi[curri, currj]
+                curr_delr = delr_gridi[curri, currj]
+                if cn == 'top':
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'yface'] += curr_delc/2
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr 
+                elif cn == 'bottom':
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'yface'] -= curr_delc/2
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr 
+                if cn == 'right':
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'xface'] += curr_delr/2
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
+                elif cn == 'left':
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'xface'] -= curr_delr/2
+                    inset_boundary_cell_faces.loc[inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
+
+            #       
+            # Now handle the geometry issues for the parent
+            #
+            # first thicknesses (at cell centers)
+            parent_thick = np.diff(self.parent.modelgrid.top_botm, axis=0)
+
+            # make matrices of the row and column spacings
+            # NB --> trying to preserve the always seemingly 
+            # backwards delr/delc definitions
+            # also note - for now, taking average thickness at a connected face
+            # TODO: confirm thickness averaging is a valid approach
+            delr_gridp, delc_gridp = np.meshgrid(self.parent.modelgrid.delr,
+                                                self.parent.modelgrid.delc)
+            
+            nlay, nrow, ncol = self.parent.modelgrid.shape
+
+            parent_iface_areas = np.tile(delc_gridp[:-1,:], (nlay,1,1)) * \
+                                    ((parent_thick[:,:-1,:]+parent_thick[:,1:,:])/2)
+            parent_jface_areas = np.tile(delr_gridp[:,:-1], (nlay,1,1)) * \
+                                    ((parent_thick[:,:,:-1]+parent_thick[:,:,1:])/2)
+
+            # TODO: implement vertical fluxes
+            '''
+            parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \
+                                    np.tile(delr_grid, (nlay,1,1)) 
+            '''
+            # need XYZ locations of the center of each face for 
+            # iface and jface edges (faces)
+            # NB edges are returned in model coordinates - need to convert to world coords (spatial coords)
+            xloc_edge, yloc_edge = self.parent.modelgrid.xyedges
+
+            # throw out the left and top edges, respectively
+            xloc_edge=xloc_edge[1:]
+            yloc_edge=yloc_edge[1:]
+            # tile out to full dimensions of the grid
+            xloc_edge = np.tile(np.atleast_2d(xloc_edge),(nlay,nrow,1))
+            yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay,1,ncol))
+            
+            # need XYZ locations of the center of each cell 
+            # iface and jface centroids
+            xloc_center, yloc_center = self.parent.modelgrid.xycenters
+
+            # tile out to full dimensions of the grid
+            xloc_center = np.tile(np.atleast_2d(xloc_center),(nlay,nrow,1))
+            yloc_center = np.tile(np.atleast_2d(yloc_center).T,(nlay,1,ncol))
+
+            # get the vertical centroids initially at cell centroids
+            zloc = (self.parent.modelgrid.top_botm[:-1,:,:] + 
+                self.parent.modelgrid.top_botm[1:,:,:] ) / 2
+
+            # for iface, all cols, nrow-1 rows
+            x_iface = xloc_center[:,:-1,:].ravel()
+            y_iface = yloc_edge[:,:-1,:].ravel()
+            # need to calculate the average z location along rows
+            z_iface = ((zloc[:,:-1,:]+zloc[:,1:,:]) / 2).ravel()
+            
+            # for jface, all rows, ncol-1 cols
+            x_jface = xloc_edge[:,:,:-1].ravel()
+            y_jface = yloc_center[:,:,:-1].ravel()
+            # need to calculate the average z location along columns
+            z_jface = ((zloc[:,:,:-1]+zloc[:,:,1:]) / 2).ravel()
+
             for inset_per, parent_per in self.inset_parent_period_mapping.items():
                 print(f'for stress period {inset_per}', end=', ')
                 t1 = time.time()
@@ -1341,7 +1442,8 @@ class TmrNew:
                     # do same for vertical fluxes -- DONE
                     # * normalize by cell face area to make specific discharge -- DONE
                     # * use meshgrid to locate all the cell face locations in the parent (hello xyedges from grid!) -- DONE
-                    # * need to set up inset xyz locations to interpolate to
+                    # * need to set up inset xyz locations to interpolate to -- DONE
+                    # * branch the geometry stuff above for MF6 vs. MF2005 parent (does it matter for modelgrid object??)
                     # * interpolate using meshgrid-derived lox and arrays of fluxes to inset correct faces 
                     # * consider correct face interpolation weights precalculation
                     # * multiply by inset face area 
@@ -1355,7 +1457,6 @@ class TmrNew:
 
                     j=2
                     
-                    nlay, nrow, ncol = self.parent.modelgrid.shape
                     # TODO: implement vertical fluxes
                     # Get the vertical fluxes
                     '''if 'kn' in df.columns and np.any(df['kn'] < df['km']):
@@ -1381,73 +1482,23 @@ class TmrNew:
                                     jflux['in'].values,
                                     jflux['jn'].values] = jflux.q.values
                     
-                    # get cell face areas
-
-                    # first thicknesses (at cell centers)
-                    parent_thick = np.diff(self.parent.modelgrid.top_botm, axis=0)
-
-                    # make matrices of the row and column spacings
-                    # NB --> trying to preserve the always seemingly 
-                    # backwards delr/delc definitions
-                    # also note - for now, taking average thickness at a connected face
-                    # TODO: confirm thickness averaging is a valid approach
-                    delr_grid, delc_grid = np.meshgrid(self.parent.modelgrid.delr,
-                                                        self.parent.modelgrid.delc)
-
-                    parent_iface_areas = np.tile(delc_grid[:-1,:], (nlay,1,1)) * \
-                                            ((parent_thick[:,:-1,:]+parent_thick[:,1:,:])/2)
-                    parent_jface_areas = np.tile(delr_grid[:,:-1], (nlay,1,1)) * \
-                                            ((parent_thick[:,:,:-1]+parent_thick[:,:,1:])/2)
-
-                    # TODO: implement vertical fluxes
-                    '''
-                    parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \
-                                            np.tile(delr_grid, (nlay,1,1)) 
-                    '''
+                    
                     # divide the flux by the area to find specific discharge along faces
                     # NB --> padding on the top and left top ensure zeros surround
                     q_iface = (iflux_array / parent_iface_areas).ravel()
-                    q_jface = (jflux_array / parent_jface_areas).ravel()
-                    
-                    # need XYZ locations of the center of each face for 
-                    # iface and jface edges (faces)
-                    xloc_edge, yloc_edge = self.parent.modelgrid.xyedges
-                    # throw out the left and top edges, respectively
-                    xloc_edge=xloc_edge[1:]
-                    yloc_edge=yloc_edge[1:]
-                    # tile out to full dimensions of the grid
-                    xloc_edge = np.tile(np.atleast_2d(xloc_edge),(nlay,nrow,1))
-                    yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay,1,ncol))
-                    
-                    # need XYZ locations of the center of each cell 
-                    # iface and jface centroids
-                    xloc_center, yloc_center = self.parent.modelgrid.xycenters
-
-                    # tile out to full dimensions of the grid
-                    xloc_center = np.tile(np.atleast_2d(xloc_center),(nlay,nrow,1))
-                    yloc_center = np.tile(np.atleast_2d(yloc_center).T,(nlay,1,ncol))
-
-                    # get the vertical centroids initially at cell centroids
-                    zloc = (self.parent.modelgrid.top_botm[:-1,:,:] + 
-                        self.parent.modelgrid.top_botm[1:,:,:] ) / 2
-
-                    # for iface, all cols, nrow-1 rows
-                    x_iface = xloc_center[:,:-1,:].ravel()
-                    y_iface = yloc_edge[:,:-1,:].ravel()
-                    # need to calculate the average z location along rows
-                    z_iface = ((zloc[:,:-1,:]+zloc[:,1:,:]) / 2).ravel()
-                    
-                    # for jface, all rows, ncol-1 cols
-                    x_jface = xloc_edge[:,:,:-1].ravel()
-                    y_jface = yloc_center[:,:,:-1].ravel()
-                    # need to calculate the average z location along columns
-                    z_jface = ((zloc[:,:,:-1]+zloc[:,:,1:]) / 2).ravel()
-                    
+                    q_jface = (jflux_array / parent_jface_areas).ravel()            
                     
                 else:
                     raise NotImplementedError('MODFLOW-2005 fluxes not yet supported')
+                    # TODO: implement MF2005
+                    #  *create i, j, and v face xyzq vectorsas with MF6 above
+                    #   x_iface, y_iface, z_iface, q_iface .... etc.
 
-                parent_fluxes = fileobj.get_data(kstpkper=parent_kstpkper)
+                
+                
+                
+                
+                
                 # pad the parent heads on the top and bottom
                 # so that inset cells above and below the top/bottom cell centers
                 # will be within the interpolation space
