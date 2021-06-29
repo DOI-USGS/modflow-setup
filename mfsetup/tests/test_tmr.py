@@ -185,7 +185,8 @@ def test_get_boundary_fluxes(shellmound_tmr_model_with_refined_dis, test_data_pa
     df = pd.concat(dfs)
     df['k'], df['i'], df['j'] = list(zip(*df['cellid']))
 
-    # todo: add checks on the results
+    # TODO: add checks on the results
+    # this should include zonebudget on the parent
 
 
 @pytest.mark.skip(reason="still working on this test")
