@@ -728,7 +728,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs['packagedata'] = packagedata.values.tolist()
         if  tab_files != None:
             kwargs['ntables'] = len(tab_files)
-            kwargs['tables'] = [(i, f, 'junk', 'junk') for i, f in enumerate(tab_files)]
+            kwargs['tables'] = [(i, f)  #, 'junk', 'junk')
+                                for i, f in enumerate(tab_files)]
         kwargs['outlets'] = None  # not implemented
         #kwargs['outletperioddata'] = None  # not implemented
         kwargs['perioddata'] = lakeperioddata
