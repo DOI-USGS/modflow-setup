@@ -16,7 +16,8 @@ import yaml
 from flopy.mf6.data import mfstructure
 from flopy.mf6.mfbase import MFDataException, VerbosityLevel
 from flopy.mf6.modflow import mfims, mftdis
-from flopy.utils import SpatialReference, TemporalReference, mfreadnam
+from flopy.modflow.mf import ModflowGlobal
+from flopy.utils import TemporalReference, mfreadnam
 
 import mfsetup
 from mfsetup.grid import MFsetupGrid
@@ -75,16 +76,6 @@ def dump_json(jsonfile, data):
     with open(jsonfile, 'w') as output:
         json.dump(data, output, indent=4, sort_keys=True)
     print('wrote {}'.format(jsonfile))
-
-
-def load_sr(filename):
-    """Create a SpatialReference instance from model config json file."""
-    cfg = load(filename)
-    return SpatialReference(delr=np.ones(cfg['ncol'])* cfg['delr'],
-                            delc=np.ones(cfg['nrow']) * cfg['delc'],
-                            xul=cfg['xul'], yul=cfg['yul'],
-                            epsg=cfg['epsg']
-                              )
 
 
 def load_modelgrid(filename):
@@ -568,7 +559,9 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
     files_not_loaded = []
 
     # set the reference information
-    ref_attributes = SpatialReference.load(namefile_path)
+    attribs = mfreadnam.attribs_from_namfile_header(namefile_path)
+
+    #ref_attributes = SpatialReference.load(namefile_path)
 
     # read name file
     ext_unit_dict = mfreadnam.parsenamefile(
@@ -580,8 +573,32 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
     # create a dict where key is the package name, value is unitnumber
     ext_pkg_d = {v.filetype: k for (k, v) in ext_unit_dict.items()}
 
-    # version is assumed to be mfnwt
+    # reset version based on packages in the name file
+    if "NWT" in ext_pkg_d or "UPW" in ext_pkg_d:
+        version = "mfnwt"
+    if "GLOBAL" in ext_pkg_d:
+        if version != "mf2k":
+            m.glo = ModflowGlobal(m)
+        version = "mf2k"
+    if "SMS" in ext_pkg_d:
+        version = "mfusg"
+    if "DISU" in ext_pkg_d:
+        version = "mfusg"
+        m.structured = False
+    # update the modflow version
     m.set_version(version)
+
+    # reset unit number for glo file
+    if version == "mf2k":
+        if "GLOBAL" in ext_pkg_d:
+            unitnumber = ext_pkg_d["GLOBAL"]
+            filepth = os.path.basename(ext_unit_dict[unitnumber].filename)
+            m.glo.unit_number = [unitnumber]
+            m.glo.file_name = [filepth]
+        else:
+            # TODO: is this necessary? it's not done for LIST.
+            m.glo.unit_number = [0]
+            m.glo.file_name = [""]
 
     # reset unit number for list file
     if 'LIST' in ext_pkg_d:
@@ -617,10 +634,10 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
         print('   {:4s} package load...success'.format(dis.name[0]))
     m.setup_grid()  # reset model grid now that DIS package is loaded
     assert m.pop_key_list.pop() == dis_key
-    ext_unit_dict.pop(dis_key)
-    start_datetime = ref_attributes.pop("start_datetime", "01-01-1970")
-    itmuni = ref_attributes.pop("itmuni", 4)
-    ref_source = ref_attributes.pop("source", "defaults")
+    ext_unit_dict.pop(dis_key)  #.filehandle.close()
+    start_datetime = attribs.pop("start_datetime", "01-01-1970")
+    itmuni = attribs.pop("itmuni", 4)
+    ref_source = attribs.pop("source", "defaults")
     # if m.structured:
     #    # get model units from usgs.model.reference, if provided
     #    if ref_source == 'usgs.model.reference':
@@ -653,6 +670,17 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
             raise KeyError(
                 "the following load_only entries were not found "
                 "in the ext_unit_dict: " + str(not_found))
+
+    # zone, mult, pval
+    if "PVAL" in ext_pkg_d:
+        m.mfpar.set_pval(m, ext_unit_dict)
+        assert m.pop_key_list.pop() == ext_pkg_d.get("PVAL")
+    if "ZONE" in ext_pkg_d:
+        m.mfpar.set_zone(m, ext_unit_dict)
+        assert m.pop_key_list.pop() == ext_pkg_d.get("ZONE")
+    if "MULT" in ext_pkg_d:
+        m.mfpar.set_mult(m, ext_unit_dict)
+        assert m.pop_key_list.pop() == ext_pkg_d.get("MULT")
 
     # try loading packages in ext_unit_dict
     for key, item in ext_unit_dict.items():

@@ -373,7 +373,7 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
     assert isinstance(lak, mf6.ModflowGwflak)
     package_filename = os.path.join(m.model_ws, lak.filename)
     assert os.path.exists(package_filename)
-    for f in lak.tables.array['tab6']:
+    for f in lak.tables.array['tab6_filename']:
         assert os.path.exists(f)
     options = read_mf6_block(package_filename, 'options')
     for var in ['boundnames', 'save_flows', 'obs6', 'surfdep',
