@@ -131,7 +131,7 @@ def test_ic_setup(shellmound_tmr_model_with_dis, from_binary):
 
 def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):
     m = shellmound_tmr_model_with_dis
-    chd = m.setup_chd()
+    chd = m.setup_chd(**m.cfg['chd'], **m.cfg['chd']['mfsetup_options'])
 
     ra = chd.stress_period_data.array[0]
     kh, ih, jh = zip(*ra['cellid'])
@@ -245,7 +245,7 @@ def test_sfr_riv_setup(shellmound_tmr_model_with_dis):
 @pytest.mark.skip(reason="still working on this one")
 def test_perimeter_boundary(shellmound_tmr_model_with_dis):
     m = shellmound_tmr_model_with_dis
-    m.setup_chd()
+    m.setup_chd(**m.cfg['chd'], **m.cfg['chd']['mfsetup_options'])
 
 
 def test_model_setup(shellmound_tmr_model_setup):

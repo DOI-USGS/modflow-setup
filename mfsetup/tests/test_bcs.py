@@ -98,7 +98,7 @@ def test_remove_inactive_bcs(basic_model_instance):
         m.setup_bas6()
     else:
         m.setup_tdis()
-    m.setup_chd()
+    m.setup_chd(**m.cfg['chd'], **m.cfg['chd']['mfsetup_options'])
     if m.version != 'mf6':
         idm = m.bas6.ibound.array
         idm[:, :, 0] = 0

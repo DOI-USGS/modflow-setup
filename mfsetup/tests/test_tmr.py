@@ -151,7 +151,7 @@ def test_get_boundary_heads(shellmound_tmr_model_with_dis, test_data_path):
                  boundary_type='head',
                  shapefile=boundary_shapefile)
     perimeter_df = tmr.get_inset_boundary_values()
-    m.setup_chd()
+    m.setup_chd(**m.cfg['chd'], **m.cfg['chd']['mfsetup_options'])
     dfs = []
     for per, data in m.chd.stress_period_data.data.items():
         df = pd.DataFrame(data)

@@ -154,12 +154,15 @@ class MFsetupMixin():
         """Test for equality to another model object."""
         if not isinstance(other, self.__class__):
             return False
-        # kludge: exclude SFR_OBS package from comparison
-        # (which is handled by SFRmaker instead of Flopy;
+        # kludge: skip obs packages for now
+        # - obs packages aren't read in with same name under which they were created
+        # - also SFR_OBS package is handled by SFRmaker instead of Flopy;
         # a loaded version of a model might have SFR_OBS,
         # where a freshly made version may not (even though SFRmaker will write it)
-        # )
-        exceptions = {'SFR_OBS'}
+        #
+        all_packages = set(self.get_package_list()).union(other.get_package_list())
+        exceptions = {p for p in all_packages if p.lower().startswith('obs')
+                      or p.lower().endswith('obs')}
         other_packages = [s for s in sorted(other.get_package_list())
                           if s not in exceptions]
         packages = [s for s in sorted(self.get_package_list())
@@ -1309,7 +1312,7 @@ class MFsetupMixin():
         print('Loading model grid information from {}'.format(gridfile))
         self.cfg['grid'] = load(gridfile)
 
-    def setup_sfr(self):
+    def setup_sfr(self, **kwargs):
         package = 'sfr'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
@@ -1452,7 +1455,11 @@ class MFsetupMixin():
         if self.cfg['sfr'].get('sfrmaker_options', {}).get('to_riv'):
             rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['sfrmaker_options']['to_riv'],
                                  drop_in_sfr=True)
-            self.setup_riv(rivdata)
+            # setup of RIV package from SFRmaker-derived RIVdata
+            # and any user input
+            # do this instead of 2 seperate packages
+            # to avoid having two sets of external files
+            self.setup_riv(rivdata, **self.cfg['riv'], **self.cfg['riv']['mfsetup_options'])
             rivdata_filename = self.cfg['riv']['output_files']['rivdata_file'].format(self.name)
             rivdata.write_table(os.path.join(self._tables_path, rivdata_filename))
             rivdata.write_shapefiles('{}/{}'.format(self._shapefiles_path, self.name))
@@ -1593,14 +1600,17 @@ class MFsetupMixin():
         if not reset_existing:
             package_list = [p for p in package_list if p.upper() not in self.get_package_list()]
         for pkg in package_list:
-            setup_method_name = 'setup_{}'.format(pkg)
+            setup_method_name = f'setup_{pkg}'
             package_setup = getattr(self, setup_method_name, None)
             if package_setup is None:
                 print('{} package not supported for MODFLOW version={}'.format(pkg.upper(), self.version))
                 continue
             if not callable(package_setup):
                 package_setup = getattr(MFsetupMixin, 'setup_{}'.format(pkg.strip('6')))
-            package_setup()
+            # avoid multiple package instances for now, except for obs
+            if self.version != 'mf6' or pkg == 'obs' or not hasattr(self, pkg):
+                package_setup(**self.cfg[pkg], **self.cfg[pkg]['mfsetup_options'])
+
 
     @classmethod
     def load_cfg(cls, yamlfile, verbose=False):

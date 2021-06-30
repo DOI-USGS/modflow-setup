@@ -255,7 +255,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
             if param in self.cfg['dis']:
                 self.cfg['setup_grid'][param] = self.cfg['dis'][param]
 
-    def setup_dis(self):
+    def setup_dis(self, **kwargs):
         """"""
         package = 'dis'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -298,13 +298,13 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return dis
 
-    def setup_tdis(self):
+    def setup_tdis(self, **kwargs):
         """Calls the _set_perioddata, to establish time discretization. Only purpose
         is to conform to same syntax as mf6 for MFsetupMixin.setup_from_yaml()
         """
         self._set_perioddata()
 
-    def setup_bas6(self):
+    def setup_bas6(self, **kwargs):
         """"""
         package = 'bas6'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -330,7 +330,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         self._set_ibound()
         return bas
 
-    def setup_oc(self):
+    def setup_oc(self, **kwargs):
 
         package = 'oc'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -352,7 +352,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return oc
 
-    def setup_rch(self):
+    def setup_rch(self, **kwargs):
         package = 'rch'
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
@@ -371,7 +371,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return rch
 
-    def setup_upw(self):
+    def setup_upw(self, **kwargs):
         """
         """
         package = 'upw'
@@ -430,7 +430,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return upw
 
-    def setup_wel(self):
+    def setup_wel(self, **kwargs):
         """
         Setup the WEL package, including boundary fluxes and any pumping.
 
@@ -469,7 +469,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return wel
 
-    def setup_ghb(self):
+    def setup_ghb(self, **kwargs):
         """
         Set up the GHB package
         """
@@ -498,7 +498,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ghb
 
-    def setup_mnw2(self):
+    def setup_mnw2(self, **kwargs):
 
         print('setting up MNW2 package...')
         t0 = time.time()
@@ -586,7 +586,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
             print('No wells specified in configuration file!\n')
             return None
 
-    def setup_lak(self):
+    def setup_lak(self, **kwargs):
 
         print('setting up LAKE package...')
         t0 = time.time()
@@ -682,7 +682,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return lak
 
-    def setup_nwt(self):
+    def setup_nwt(self, **kwargs):
 
         print('setting up NWT package...')
         t0 = time.time()
@@ -701,7 +701,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return nwt
 
-    def setup_hyd(self):
+    def setup_hyd(self, **kwargs):
         """TODO: generalize hydmod setup with specific input requirements"""
         package = 'hyd'
         print('setting up HYDMOD package...')
@@ -721,7 +721,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return hyd
 
-    def setup_gag(self):
+    def setup_gag(self, **kwargs):
 
         print('setting up GAGE package...')
         t0 = time.time()
@@ -805,7 +805,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return gag
 
-    def setup_chd(self):
+    def setup_chd(self, **kwargs):
         """
         Sets up the CHD package.
         """
@@ -833,7 +833,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
             # this also sets up the external file paths
             spd = setup_flopy_stress_period_data(self, package, perimeter_df,
                                                  flopy_package_class=fm.ModflowChd,
-                                                 variable_column='head',
+                                                 variable_columns=['head'],
                                                  external_files=external_files,
                                                  external_filename_fmt=external_filename_fmt)
 

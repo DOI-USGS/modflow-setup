@@ -57,6 +57,10 @@ model:
              'sto',
              'rch',
              'sfr',
+             'chd',
+             'drn',
+             'ghb',
+             'riv',
              'obs',
              'wel',
              'ims'
@@ -276,6 +280,81 @@ sfr:
     one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
     add_outlets: [17955371, 17956213]  # add outlets at these line numbers
     minimum_slope: 1.e-5
+    to_riv: [18047206] # convert this line and all downstream lines to the RIV package
+
+# Constant Head Package
+chd:
+  options:
+    save_flows: True
+  source_data:
+    shapefile:
+      filename: '../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'
+      id_column: 'COMID' # shapefile attribute field with include_ids:
+      include_ids: [18046162] # features used to form the boundary
+      boundname_col: 'GNIS_NAME'
+    head:
+      filename: 'shellmound/rasters/meras_100m_dem.tif'
+      elevation_units: 'feet'
+
+# Drain Package
+drn:
+  options:
+    save_flows: True
+  source_data:
+    shapefile:
+      filename: '../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'
+      id_column: 'COMID'
+      # Note: to include all features in a shapefile,
+      # simply omit the include_ids: key
+      # id_column: can also be omitted
+      include_ids: [18047154, 18046236]
+    elev:
+      filename: 'shellmound/rasters/meras_100m_dem.tif'
+      elevation_units: 'feet'
+    cond: 1.e+3  # in model units
+
+# General Head Boundary Package
+ghb:
+  options:
+    save_flows: True
+  source_data:
+    shapefile:
+      filename: '../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'
+      id_column: 'COMID'
+      # Note: to include all features in a shapefile,
+      # simply omit the include_ids: key
+      include_ids: [18046230]
+      # argument to rasterio.features.rasterize
+      # if true, all grid cells touching the feature(s)
+      # in the shapefile will be assigned BCs, if False
+      # only the cells with centers inside the polygon
+      # will be included
+      all_touched: True
+    bhead:
+      filename: 'shellmound/rasters/meras_100m_dem.tif'
+      elevation_units: 'feet'
+    cond: 1.e+3
+
+# River Package
+riv:
+  options:
+    save_flows: True
+  source_data:
+    shapefile:
+      filename: '../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'
+      id_column: 'COMID'
+      include_ids: [17953939]
+      # option to include feature names from the shapefile
+      # as Modflow boundnames
+      boundname_col: 'GNIS_NAME'
+    stage:
+      filename: 'shellmound/rasters/meras_100m_dem.tif'
+      elevation_units: 'feet'
+      # zonal statistic to use in sampling elevations in above GeoTIFF to grid
+      stat: 'min'
+    cond: 1.e+3
+  mfsetup_options:
+    default_rbot_thickness: 1.
 
 # Well Package
 wel:

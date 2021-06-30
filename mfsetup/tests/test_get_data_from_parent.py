@@ -34,8 +34,8 @@ def test_get_perimeter_heads_from_parent(input, basic_model_instance, request, p
     # perimeter heads
     # kind of cheesy because it doesn't test the actual values, only differences
     if m.version == 'mf6':
-        m.cfg['chd']['external_files'] = False
-    chd = m.setup_chd()
+        m.cfg['chd']['mfsetup_options']['external_files'] = False
+    chd = m.setup_chd(**m.cfg['chd'], **m.cfg['chd']['mfsetup_options'])
     data = chd.stress_period_data.data
 
     if m.version != 'mf6':

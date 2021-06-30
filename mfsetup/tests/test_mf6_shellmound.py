@@ -580,6 +580,52 @@ def test_rch_setup(shellmound_model_with_dis):
     assert np.allclose(m.rch.recharge.array[0, 0].ravel(), rech0.ravel())
 
 
+def test_direct_rch_setup(shellmound_model_with_dis):
+    m = shellmound_model_with_dis
+    del m.cfg['rch']['source_data']
+    m.cfg['rch']['recharge'] = 1
+    m.setup_rch()
+    assert np.all(m.rch.recharge.array == 1)
+    m.remove_package('rch')
+    m.cfg['rch']['recharge'] = {0: 0, 1:1}
+    m.setup_rch()
+    assert m.rch.recharge.array[0].sum() == 0
+    assert np.all(m.rch.recharge.array[1:] == 1)
+
+
+@pytest.mark.parametrize('pckg_abbrv,head_variables,boundnames',
+                         (('chd', ['head'], False),
+                          ('drn', ['elev'], False),
+                          ('ghb', ['bhead'], False),
+                          ('riv', ['stage'], {'"lake henry"'}),
+                          )
+                         )
+def test_basic_stress_package_setup(shellmound_model_with_dis, pckg_abbrv,
+                                    head_variables, boundnames):
+    flopy_package = getattr(mf6, f'ModflowGwf{pckg_abbrv}')
+    m = shellmound_model_with_dis  # deepcopy(model)
+    setup_method = getattr(m, f'setup_{pckg_abbrv}')
+    pckg = setup_method(**m.cfg[pckg_abbrv], **m.cfg[pckg_abbrv]['mfsetup_options'])
+    pckg.write()
+    assert os.path.exists(os.path.join(m.model_ws, pckg.filename))
+    assert isinstance(pckg, flopy_package)
+    assert hasattr(m, pckg_abbrv)
+    assert pckg.stress_period_data is not None
+    df = pd.DataFrame(pckg.stress_period_data.data[0])
+    assert len(df) > 0
+    k, i, j = zip(*df['cellid'])
+    cell_bottoms = m.dis.botm.array[k, i, j]
+    for var in head_variables:
+        assert np.all(df[var] > cell_bottoms)
+    if pckg_abbrv == 'riv':
+        assert np.all(df['stage'] > df['rbot'])
+    if pckg_abbrv != 'chd':
+        assert np.all(df['cond'] == m.cfg[pckg_abbrv]['source_data']['cond'])
+    if boundnames:
+        assert 'boundname_col' in m.cfg[pckg_abbrv]['source_data']['shapefile']
+        assert not set(df['boundname']).symmetric_difference(boundnames)
+
+
 def test_wel_setup(shellmound_model_with_dis):
     m = shellmound_model_with_dis  # deepcopy(model)
     m.cfg['wel']['external_files'] = False
@@ -706,7 +752,8 @@ def test_sfr_setup(model_with_sfr
     # with just supplied flowlines, mean_annual_roff is ~386,829
     # with full routing info (including culled flowlines; in flowline_routing.csv),
     # mean_annual_roff is ~839,144
-    assert mean_annual_roff > 8e5
+    # ~776,577 without the Tallahatchie
+    assert mean_annual_roff > 7.7e5
 
     # compare
     mean_input_runoff_by_comid['in_model'] = mean_period_data_runoff_by_comid['runoff']
@@ -731,7 +778,7 @@ def test_sfr_setup(model_with_sfr
     # check that no observations were placed in cells with SFR
     m.setup_obs()
     sfr_cells = set(m.sfr.packagedata.array['cellid'])
-    obs_cells = set(m.obs.continuous.data['shellmound.head.obs']['id'])
+    obs_cells = set(m.obs[1].continuous.data['shellmound.head.obs']['id'])
     assert not any(obs_cells.intersection(sfr_cells))
 
 
@@ -858,6 +905,18 @@ def test_model_setup_no_nans(model_setup):
     # verify that "continue" option was successfully translated
     # to flopy sim constructor arg "continue_"
     assert m.simulation.name_file.continue_.array
+
+    # verify that basic stress packages were built
+    # and that there is only on RIV package
+    package_list = m.get_package_list()
+    for pckg in 'CHD_0', 'DRN_0', 'GHB_0', 'RIV_0':
+        assert pckg in package_list
+    assert 'RIV_1' not in package_list
+    m.write_input()
+    df = pd.read_csv(m.model_ws / 'external/riv_000.dat', delim_whitespace=True)
+    # single RIV external file should have Lake Henry (from riv: block)
+    # and Tallahatchie/Yazoo (via SFRmaker to_riv:)
+    assert set(df.boundname) == {'Lake Henry', 'Yazoo River', 'Tallahatchie River'}
 
 
 def test_model_setup_and_run(model_setup_and_run):

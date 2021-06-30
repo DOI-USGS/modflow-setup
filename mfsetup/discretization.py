@@ -2,6 +2,7 @@
 Functions related to the Discretization Package.
 """
 import time
+from re import L
 
 import flopy
 import numpy as np
@@ -326,10 +327,12 @@ def get_layer(botm_array, i, j, elev):
         zero-based layer index
     """
     def to_array(arg):
-        if not isinstance(arg, np.ndarray):
-            return np.array([arg])
+        if np.isscalar(arg):
+            np.array([arg])
+        #if not isinstance(arg, np.ndarray):
+        #    return np.array([arg])
         else:
-            return arg
+            return np.array(arg)
 
     i = to_array(i)
     j = to_array(j)

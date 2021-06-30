@@ -553,7 +553,7 @@ def write_bbox_shapefile(modelgrid, outshp):
 
 
 def rasterize(feature, grid, id_column=None,
-              include_ids=None,
+              include_ids=None, names_column=None,
               crs=None,
               dtype=np.float32, **kwargs):
     """Rasterize a feature onto the model grid, using
@@ -567,6 +567,13 @@ def rasterize(feature, grid, id_column=None,
     id_column : str
         Column with unique integer identifying each feature; values
         from this column will be assigned to the output raster.
+    include_ids : sequence
+        Subset of IDs in id_column to include
+    names_column : str, optional
+        By default, the IDs in id_column, or sequential integers
+        are returned. This option allows another column of strings
+        to be specified (i.e. feature names); in which case
+        an array of the strings will be returned.
     grid : grid.StructuredGrid instance
     crs : obj
         A Python int, dict, str, or pyproj.crs.CRS instance
@@ -662,8 +669,13 @@ def rasterize(feature, grid, id_column=None,
     geoms = list(zip(df.geometry, numbers))
     result = features.rasterize(geoms,
                                 out_shape=(grid.nrow, grid.ncol),
-                                transform=trans)
+                                transform=trans, **kwargs)
     assert result.sum(axis=(0, 1)) != 0, "Nothing was intersected!"
+    if names_column is not None:
+        names_lookup = dict(zip(numbers, df[names_column]))
+        result = [names_lookup.get(n, '') for n in result.flat]
+        result = np.reshape(result, (grid.nrow, grid.ncol))
+        dtype = object
     return result.astype(dtype)
 
 

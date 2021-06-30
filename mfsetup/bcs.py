@@ -1,7 +1,9 @@
 """
 Functions for simple MODFLOW boundary conditions such as ghb, drain, etc.
 """
+import numbers
 import shutil
+from pathlib import Path
 
 import flopy
 import numpy as np
@@ -17,6 +19,165 @@ from shapely.geometry import Polygon
 from mfsetup.discretization import cellids_to_kij, get_layer
 from mfsetup.grid import rasterize
 from mfsetup.units import convert_length_units
+
+
+def setup_basic_stress_data(model, shapefile=None, csvfile=None,
+                            head=None, elev=None, bhead=None, stage=None,
+                            cond=None, rbot=None, default_rbot_thickness=1,
+                            all_touched=True,
+                            **kwargs):
+
+    m = model
+
+    # get the BC cells
+    # todo: generalize more of the GHB setup code and move it somewhere else
+    bc_cells = None
+    if shapefile is not None:
+        shapefile = shapefile.copy()
+        key = [k for k in shapefile.keys() if 'filename' in k.lower()]
+        if key:
+            shapefile_name = shapefile.pop(key[0])
+            if 'all_touched' in shapefile:
+                all_touched = shapefile['all_touched']
+                if 'boundname_col' in shapefile:
+                    shapefile['names_column'] = shapefile.pop('boundname_col')
+            bc_cells = rasterize(shapefile_name, m.modelgrid, **shapefile)
+    if csvfile is not None:
+        raise NotImplementedError('Time-varying (CSV) file input not yet supported for this package.')
+    if bc_cells is None:
+        return
+
+    # create polygons of model grid cells
+    if bc_cells.dtype == object:
+        cells_with_bc = bc_cells.flat != ''
+    else:
+        cells_with_bc = bc_cells.flat > 0
+    vertices = np.array(m.modelgrid.vertices)[cells_with_bc, :, :]
+    polygons = [Polygon(vrts) for vrts in vertices]
+
+    # setup DataFrame for MODFLOW input
+    i, j = np.indices((m.nrow, m.ncol))
+    df = pd.DataFrame({'per': 0,
+                       'k': 0,
+                       'i': i.flat,
+                       'j': j.flat})
+    # add the boundnames
+    if bc_cells.dtype == object:
+        df['boundname'] = bc_cells.flat
+        df.loc[df.boundname.isna(), 'boundname'] = 'unnamed'
+
+    variables = {'head': head, 'elev': elev, 'bhead': bhead,
+                 'stage': stage, 'cond': cond, 'rbot': rbot}
+    for var, entry in variables.items():
+        if entry is not None:
+            # Raster of variable values supplied
+            if isinstance(entry, dict):
+                key = [k for k in entry.keys() if 'filename' in k.lower()][0]
+                filename = entry[key]
+                with rasterio.open(filename) as src:
+                    meta = src.meta
+
+                # reproject the polygons to the dem crs if needed
+                try:
+                    from gisutils import get_authority_crs
+                    raster_crs = get_authority_crs(src.crs)
+                except:
+                    raster_crs = pyproj.crs.CRS.from_user_input(src.crs)
+                if raster_crs != m.modelgrid.crs:
+                    polygons = project(polygons, m.modelgrid.crs, raster_crs)
+
+                # all_touched arg for rasterstats.zonal_stats
+                all_touched = False
+                if meta['transform'][0] > m.modelgrid.delr[0]:
+                    all_touched = True
+                stat = entry['stat']
+                results = zonal_stats(polygons, filename, stats=stat,
+                                    all_touched=all_touched)
+                values = np.ones((m.nrow * m.ncol), dtype=float) * np.nan
+                values[cells_with_bc] = np.array([r[stat] for r in results])
+                units_key = [k for k in entry if 'units' in k]
+                if len(units_key) > 0:
+                    values *= convert_length_units(entry[units_key[0]],
+                                                    model.length_units)
+                values = np.reshape(values, (m.nrow, m.ncol))
+
+                # add the layer and the values to the Modflow input DataFrame
+                # assign layers so that the elevation is above the cell bottoms
+                if var in ['head', 'elev', 'bhead']:
+                    df['k'] = get_layer(model.dis.botm.array, df.i, df.j, values.flat)
+                df[var] = values.flat
+            # single global value specified
+            elif isinstance(entry, numbers.Number):
+                df[var] = entry
+            else:
+                raise ValueError(f"Unrecognized input for {var}:\n{entry}. "
+                                 "If this is from a YAML format configuration file, "
+                                 "check that the number is formatted correctly "
+                                 "(i.e. 1.e+3 for 1e3)")
+
+    # drop cells that don't include this boundary condition
+    df.dropna(axis=0, inplace=True)
+
+    # special handling of rbot for RIV package
+    if 'stage' in df.columns and 'rbot' not in df.columns:
+        df['rbot'] = df['stage'] - default_rbot_thickness
+        df['k'] = get_layer(model.dis.botm.array, df.i, df.j, df['rbot'])
+
+    # remove BC cells from places where the specified head is below the model
+    for var in ['head', 'elev', 'bhead', 'rbot']:
+        if var in df.columns:
+            below_bottom_of_model = df[var] < model.dis.botm.array[-1, df.i, df.j] + 0.01
+            df = df.loc[~below_bottom_of_model].copy()
+
+    # exclude inactive cells
+    k, i, j = df.k, df.i, df.j
+    if model.version == 'mf6':
+        active_cells = model.idomain[k, i, j] >= 1
+    else:
+        active_cells = model.ibound[k, i, j] >= 1
+    df = df.loc[active_cells]
+
+    # sort the columns
+    col_order = ['per', 'k', 'i', 'j', 'head', 'elev', 'bhead', 'stage',
+                 'cond', 'rbot', 'boundname']
+    cols = [c for c in col_order if c in df.columns]
+    df = df[cols].copy()
+    return df
+
+
+#def setup_stress_period_data(data, model, flopy_package,
+#                             filepaths=None,
+#                             external_files_folder=None):
+#    """Setup basic stress package stress_period_data for Flopy or Modflow,
+#    either as external files or a dictionary of recarrays.
+#
+#    Parameters
+#    ----------
+#    data : DataFrame
+#
+#    """
+#
+#    spd = {}
+#    by_period = data.groupby('per')
+#    for kper, df_per in by_period:
+#        if filepaths is not None:
+#            df_per = df_per.copy()
+#            df_per.drop('per', axis=1, inplace=True)
+#            df_per.rename(columns={'k': '#k'}, inplace=True)
+#            for col in '#k', 'i', 'j':
+#                df_per[col] += 1
+#            df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
+#            # make a copy for the intermediate data folder, for consistency with mf-2005
+#            shutil.copy(filepaths[kper]['filename'], external_files_folder)
+#        else:
+#            maxbound = len(df_per)
+#            spd[kper] = flopy_package.stress_period_data.empty(model, maxbound=maxbound,
+#                                                                boundnames=True)[0]
+#            spd[kper]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
+#            for col in 'cond', 'stage', 'rbot':
+#                spd[kper][col] = df_per[col]
+#            spd[kper]['boundname'] = ["'{}'".format(s) for s in df_per['name']]
+#            return spd
 
 
 def setup_ghb_data(model):
@@ -170,6 +331,10 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
     # find relevant variable names
     # may have to iterate over the first stress period
     #for per in range(data.model.nper):
+    try:
+        data.data
+    except:
+        j=2
     for per, spd in data.data.items():
         if spd is not None and hasattr(spd, 'dtype'):
             varnames = list([n for n in spd.dtype.names
@@ -297,7 +462,7 @@ def squeeze_columns(df, fillna=0.):
 
 
 def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
-                                   variable_column='q', external_files=True,
+                                   variable_columns=None, external_files=True,
                                    external_filename_fmt="{}_{:03d}.dat"):
     """Set up stress period data input for flopy, from a DataFrame
     of stress period data information.
@@ -333,7 +498,7 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
         dictonary, and spd is empty.
     """
 
-    df = data
+    df = data.copy()
     # set up stress_period_data
     if external_files:
         # get the file path (allowing for different external file locations, specified name format, etc.)
@@ -345,6 +510,11 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
         df['#k'] += 1
         df['i'] += 1
         df['j'] += 1
+        cols = ['per', '#k', 'i', 'j'] + variable_columns + ['boundname']
+    else:
+        cols = ['per', 'k', 'i', 'j'] + variable_columns + ['boundname']
+    cols = [c for c in cols if c in df.columns]
+    df = df[cols].copy()
 
     spd = {}
     period_groups = df.groupby('per')
@@ -366,7 +536,8 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
                                                                         len(group),
                                                                         boundnames=True)[0]
                     kspd['cellid'] = list(zip(group.k, group.i, group.j))
-                    kspd[variable_column] = group[variable_column]
+                    for col in variable_columns:
+                        kspd[col] = group[col]
                     if 'boundname' in group.columns:
                         kspd['boundname'] = group['boundname']
                 else:
@@ -381,10 +552,10 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
                     # ending chd is parent values for that period
                     if package.lower() == 'chd':
                         if kper == 0:
-                            kspd['shead'] = group[variable_column]
-                            kspd['ehead'] = group[variable_column]
+                            kspd['shead'] = group['head']
+                            kspd['ehead'] = group['head']
                         else:
-                            kspd['ehead'] = group[variable_column]
+                            kspd['ehead'] = group['head']
                             # populate sheads with eheads from the same cells
                             # if the cell didn't exist previously
                             # set shead == ehead
@@ -397,7 +568,10 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
                             sheads[np.isnan(sheads)] = kspd['ehead'][np.isnan(sheads)]
                             kspd['shead'] = sheads
                     else:
-                        kspd[variable_column] = group[variable_column]
+                        for col in variable_columns:
+                            kspd[col] = group[col]
+                        if 'boundname' in group.columns:
+                            kspd['boundname'] = group['boundname']
                 spd[kper] = kspd
         else:
             pass  # spd[kper] = None

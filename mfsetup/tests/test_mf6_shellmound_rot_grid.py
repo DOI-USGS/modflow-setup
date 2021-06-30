@@ -32,6 +32,8 @@ def rotated_parent(shellmound_cfg, tmpdir, mf6_exe):
     cfg['dis']['dimensions']['nrow'] = 20
     cfg['dis']['dimensions']['ncol'] = 25
 
+    del cfg['sfr']['sfrmaker_options']['to_riv']
+
     m = MF6model.setup_from_cfg(cfg)
     m.write_input()
     success = False
@@ -64,12 +66,15 @@ def test_rotated_tmr(rotated_parent, shellmound_cfg, tmpdir, test_data_path):
     cfg['dis']['dimensions']['nrow'] = 15
     cfg['dis']['dimensions']['ncol'] = 15
 
+    cfg['chd'] = {'perimeter_boundary': {
+        'parent_head_file':  '../tmp/shellmound_rotated_parent/shellmound.hds'
+    }
+        }
     # make parent block
     cfg['parent'] = {}
     cfg['parent']['namefile'] = 'shellmound.nam'
     cfg['parent']['model_ws'] = '../tmp/shellmound_rotated_parent'
     cfg['parent']['version'] = 'mf6'
-    cfg['parent']['headfile'] = '../tmp/shellmound_rotated_parent/shellmound.hds'  # needed for the perimeter boundary setup
     cfg['parent']['default_source_data'] = True  # if True, packages and variables that are omitted will be pulled from this model
     cfg['parent']['copy_stress_periods'] = 'all'
     cfg['parent']['start_date_time'] = '1998-04-01'
@@ -83,6 +88,8 @@ def test_rotated_tmr(rotated_parent, shellmound_cfg, tmpdir, test_data_path):
     cfg['parent']['SpatialReference']['yoff'] = rotated_parent.modelgrid.yoffset
     cfg['parent']['SpatialReference']['epsg'] = rotated_parent.modelgrid.epsg
     cfg['parent']['SpatialReference']['rotation'] = rotated_parent.modelgrid.angrot
+
+    del cfg['sfr']['sfrmaker_options']['to_riv']
 
     m = MF6model.setup_from_cfg(cfg)
     # interpolate the parent model values for the last layer bottom

@@ -234,4 +234,5 @@ intersphinx_mapping = {
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
     'pyproj': ('https://pyproj4.github.io/pyproj/stable/', None),
     'matplotlib': ('https://matplotlib.org/stable/', None),
+    'rasterio': ('https://rasterio.readthedocs.io/en/latest/', None)
 }

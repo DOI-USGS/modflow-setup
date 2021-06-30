@@ -14,3 +14,5 @@ Haitjema, H.M. (1995). Analytic Element Modeling of Groundwater Flow. Academic P
 
 Hunt, R.J. and Zheng, C. (2012), The Current State of Modeling. Groundwater, 50: 330-333.
 `doi:10.1111/j.1745-6584.2012.00936.x <https://doi.org/10.1111/j.1745-6584.2012.00936.x>`_
+
+Langevin, C.D., Hughes, J.D., Banta, E.R., Niswonger, R.G., Panday, Sorab, and Provost, A.M., 2017, Documentation for the MODFLOW 6 Groundwater Flow Model: U.S. Geological Survey Techniques and Methods, book 6, chap. A55, 197 p., https://doi.org/10.3133/tm6A55.

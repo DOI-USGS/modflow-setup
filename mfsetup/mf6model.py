@@ -2,6 +2,7 @@ import os
 import shutil
 import time
 from collections import defaultdict
+from locale import D_FMT
 
 import flopy
 import numpy as np
@@ -12,7 +13,11 @@ mf6 = flopy.mf6
 from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
 
-from mfsetup.bcs import remove_inactive_bcs, setup_flopy_stress_period_data
+from mfsetup.bcs import (
+    remove_inactive_bcs,
+    setup_basic_stress_data,
+    setup_flopy_stress_period_data,
+)
 from mfsetup.discretization import (
     ModflowGwfdis,
     create_vertical_pass_through_cells,
@@ -78,7 +83,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         self._is_lgr = lgr
         self._package_setup_order = ['tdis', 'dis', 'ic', 'npf', 'sto', 'rch', 'oc',
-                                     'chd', 'ghb', 'sfr', 'lak', 'riv',
+                                     'chd', 'drn', 'ghb', 'sfr', 'lak', 'riv',
                                      'wel', 'maw', 'obs']
         # set up the model configuration dictionary
         # start with the defaults
@@ -365,7 +370,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             kwargs = get_input_arguments(kwargs, mf6.ModflowGwfgwf)
             gwfe = mf6.ModflowGwfgwf(self.simulation, **kwargs)
 
-    def setup_dis(self):
+    def setup_dis(self, **kwargs):
         """"""
         package = 'dis'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -438,7 +443,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return tdis
 
-    def setup_ic(self):
+    def setup_ic(self, **kwargs):
         """
         Sets up the IC package.
         """
@@ -458,7 +463,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ic
 
-    def setup_npf(self):
+    def setup_npf(self, **kwargs):
         """
         Sets up the NPF package.
         """
@@ -484,7 +489,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return npf
 
-    def setup_sto(self):
+    def setup_sto(self, **kwargs):
         """
         Sets up the STO package.
         """
@@ -516,7 +521,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return sto
 
-    def setup_rch(self):
+    def setup_rch(self, **kwargs):
         """
         Sets up the RCH package.
         """
@@ -545,7 +550,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return rch
 
-    def setup_wel(self):
+    def setup_wel(self, **kwargs):
         """
         Sets up the WEL package.
         """
@@ -599,7 +604,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return wel
 
-    def setup_lak(self):
+    def setup_lak(self, **kwargs):
         """
         Sets up the Lake package.
         """
@@ -698,56 +703,54 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return lak
 
-    def setup_riv(self, rivdata=None):
-        """Set up River package.
-        TODO: riv package input through configuration file
+    def setup_riv_old(self, rivdata=None, **kwargs):
+        """Set up River Package.
         """
         package = 'riv'
-        print('\nSetting up {} package...'.format(package.upper()))
+        print(f'\nSetting up {package.upper()} package...')
         t0 = time.time()
 
-        if rivdata is None:
-            raise NotImplementedError("River package input through configuration file;"
-                                      "currently only supported through to_riv option"
-                                      "in sfr configuration block.")
-        df = rivdata.stress_period_data
+        # RIV package from user input
+        if rivdata is None and 'source_data' in kwargs:
+            df = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs['mfsetup_options'])
+
+        else:
+            raise NotImplementedError(f"{package.upper()} package configuration file input "
+                                      "not understood. See the Configuration "
+                                      "File Gallery in the online docs for example input "
+                                      "Note that direct input to basic stress period packages "
+                                      "is currently not supported.")
         if len(df) == 0:
             print('No input specified or streams not in model.')
             return
 
         # option to write stress_period_data to external files
         external_files = self.cfg[package].get('external_files', True)
+        external_filename_fmt = self.cfg[package]['mfsetup_options']['external_filename_fmt']
+        spd = setup_flopy_stress_period_data(self, package, df,
+                                                 flopy_package_class=mf6.ModflowGwfriv,
+                                                 variable_columns=['stage', 'cond', 'rbot'],
+                                                 external_files=external_files,
+                                                 external_filename_fmt=external_filename_fmt)
 
-        if external_files:
-            # get the file path (allowing for different external file locations, specified name format, etc.)
-            filename_format = package + '_{:03d}.dat'  # stress period suffix
-            filepaths = self.setup_external_filepaths(package, 'stress_period_data',
-                                                      filename_format=filename_format,
-                                                      file_numbers=sorted(df.per.unique().tolist()))
+        #if external_files:
+        #    # get the file path (allowing for different external file locations, specified name format, etc.)
+        #    filename_format = package + '_{:03d}.dat'  # stress period suffix
+        #    filepaths = self.setup_external_filepaths(package, 'stress_period_data',
+        #                                              filename_format=filename_format,
+        #                                              file_numbers=sorted(df.per.unique().tolist()))
+        #else:
+        #    filepaths = None
+        #
+        ## Setup basic stress package stress_period_data for Flopy or Modflow,
+        ## either as external files or a dictionary of recarrays.
+        #spd = setup_stress_period_data(df, self, mf6.ModflowGwfriv,
+        #                               filepaths=filepaths,
+        #                               external_files_folder=self.cfg['intermediate_data']['output_folder'])
 
-        spd = {}
-        by_period = df.groupby('per')
-        for kper, df_per in by_period:
-            if external_files:
-                df_per = df_per[['k', 'i', 'j', 'stage', 'cond', 'rbot']].copy()
-                for col in 'k', 'i', 'j':
-                    df_per[col] += 1
-                df_per.rename(columns={'k': '#k'}, inplace=True)
-                df_per.to_csv(filepaths[kper]['filename'], index=False, sep=' ')
-                # make a copy for the intermediate data folder, for consistency with mf-2005
-                shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
-            else:
-                maxbound = len(df_per)
-                spd[kper] = mf6.ModflowGwfchd.stress_period_data.empty(self, maxbound=maxbound,
-                                                                       boundnames=True)[0]
-                spd[kper]['cellid'] = list(zip(df_per['k'], df_per['i'], df_per['j']))
-                for col in 'cond', 'stage', 'rbot':
-                    spd[kper][col] = df_per[col]
-                spd[kper]['boundname'] = ["'{}'".format(s) for s in df_per['name']]
-
-        kwargs = self.cfg['riv']
+        kwargs = self.cfg[package]
         # need default options from rivdata instance or cfg defaults
-        kwargs.update(self.cfg['riv']['options'])
+        kwargs.update(self.cfg[package]['options'])
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfriv)
         if not external_files:
             kwargs['stress_period_data'] = spd
@@ -755,63 +758,135 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return riv
 
-    def setup_chd(self):
+
+    def setup_chd(self, **kwargs):
+        """Set up the CHD Package.
         """
-        Sets up the CHD package.
+        return self._setup_basic_stress_package(
+            'chd', mf6.ModflowGwfchd, ['head'], **kwargs)
+
+
+    def setup_drn(self, **kwargs):
+        """Set up the Drain Package.
         """
-        package = 'chd'
-        print('\nSetting up {} package...'.format(package.upper()))
+        return self._setup_basic_stress_package(
+            'drn', mf6.ModflowGwfdrn, ['elev', 'cond'], **kwargs)
+
+
+    def setup_ghb(self, **kwargs):
+        """Set up the General Head Boundary Package.
+        """
+        return self._setup_basic_stress_package(
+            'ghb', mf6.ModflowGwfghb, ['bhead', 'cond'], **kwargs)
+
+
+    def setup_riv(self, rivdata=None, **kwargs):
+        """Set up the River Package.
+        """
+        return self._setup_basic_stress_package(
+            'riv', mf6.ModflowGwfriv, ['stage', 'cond', 'rbot'],
+            rivdata=rivdata, **kwargs)
+
+
+    def _setup_basic_stress_package(self, package, flopy_package_class,
+                                    variable_columns, rivdata=None,
+                                    **kwargs):
+        print(f'\nSetting up {package.upper()} package...')
         t0 = time.time()
-        package_config = self.cfg[package]
 
-        # option to write stress_period_data to external files
-        external_files = package_config['external_files']
+        # possible future support to
+        # handle filenames of multiple packages
+        # leave this out for now because of additional complexity
+        # from multiple sets of external files
+        #existing_packages = getattr(self, package, None)
+        #filename = f"{self.name}.{package}"
+        #if existing_packages is not None:
+        #    try:
+        #        len(existing_packages)
+        #        suffix = len(existing_packages) + 1
+        #    except:
+        #        suffix = 1
+        #    filename = f"{self.name}-{suffix}.{package}"
 
-        # perimeter boundary
-        if 'perimeter_boundary' in package_config:
-            perimeter_cfg = package_config['perimeter_boundary']
-            perimeter_cfg['boundary_type'] = 'head'
+        # perimeter boundary (CHD or WEL)
+        dfs = []
+        if 'perimeter_boundary' in kwargs:
+            perimeter_cfg = kwargs['perimeter_boundary']
+            if package == 'chd':
+                perimeter_cfg['boundary_type'] = 'head'
+            elif package == 'wel':
+                perimeter_cfg['boundary_type'] = 'flux'
+            else:
+                raise ValueError(f'Unsupported package for perimeter_boundary: {package.upper()}')
             if 'inset_parent_period_mapping' not in perimeter_cfg:
                 perimeter_cfg['inset_parent_period_mapping'] = self.parent_stress_periods
             if 'parent_start_time' not in perimeter_cfg:
                 perimeter_cfg['parent_start_date_time'] = self.parent.perioddata['start_datetime'][0]
             self.tmr = TmrNew(self.parent, self, **perimeter_cfg)
-            perimeter_df = self.tmr.get_inset_boundary_values()
+            df = self.tmr.get_inset_boundary_values()
 
             # add boundname to allow boundary flux to be tracked as observation
-            perimeter_df['boundname'] = 'perimeter-heads'
+            df['boundname'] = 'perimeter-heads'
+            dfs.append(df)
 
-            # get the stress period data
-            # this also sets up the external file paths
-            spd = setup_flopy_stress_period_data(self, package, perimeter_df,
-                                                 flopy_package_class=mf6.ModflowGwfchd,
-                                                 variable_column='head',
+        # RIV package converted from SFR input
+        elif rivdata is not None:
+            if 'name' in rivdata.stress_period_data.columns:
+                rivdata.stress_period_data['boundname'] = rivdata.stress_period_data['name']
+            dfs.append(rivdata.stress_period_data)
+
+        # set up package from user input
+        if 'source_data' in kwargs:
+            df_sd = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs['mfsetup_options'])
+            if df_sd is not None:
+                dfs.append(df_sd)
+
+        if len(dfs) == 0:
+            print(f"{package.upper()} package:\n"
+                  "No input specified or package configuration file input "
+                  "not understood. See the Configuration "
+                  "File Gallery in the online docs for example input "
+                  "Note that direct input to basic stress period packages "
+                  "is currently not supported.")
+            return
+        else:
+            df = pd.concat(dfs, axis=0)
+
+        # option to write stress_period_data to external files
+        external_files = self.cfg[package].get('external_files', True)
+        external_filename_fmt = self.cfg[package]['mfsetup_options']['external_filename_fmt']
+        spd = setup_flopy_stress_period_data(self, package, df,
+                                                 flopy_package_class=flopy_package_class,
+                                                 variable_columns=variable_columns,
                                                  external_files=external_files,
-                                                 external_filename_fmt=package_config['external_filename_fmt'])
+                                                 external_filename_fmt=external_filename_fmt)
 
-        # placeholder for setting up user-specified CHD cells from CSV data
-        # todo: support for non-perimeter chd cells
-        df = pd.DataFrame()  # insert function here to get csv data into dataframe
-        if len(df) == 0:
-            print('No other CHD input specified')
-            if 'perimeter_boundary' not in package_config:
-                return
-
-        kwargs = self.cfg[package].copy()
+        kwargs = self.cfg[package]
         kwargs.update(self.cfg[package]['options'])
+        #kwargs['filename'] = filename
+        # add observation for perimeter BCs
+        # and any user input with a boundname col
+        obslist = []
+        obsfile = f'{self.name}.{package}.obs.output.csv'
+        if 'perimeter_boundary' in kwargs:
+            perimeter_btype = f"perimeter-{perimeter_cfg['boundary_type']}"
+            obslist.append((perimeter_btype, package, perimeter_btype))
+        if 'boundname' in df.columns:
+            unique_boundnames = df['boundname'].unique()
+            for bname in unique_boundnames:
+                obslist.append((bname, package, bname))
+        if len(obslist) > 0:
+            kwargs['observations'] = {obsfile: obslist}
+
+        kwargs = get_input_arguments(kwargs, flopy_package_class)
         if not external_files:
             kwargs['stress_period_data'] = spd
+        pckg = flopy_package_class(self, **kwargs)
+        print("finished in {:.2f}s\n".format(time.time() - t0))
+        return pckg
 
-        # add observation for flux thru perimeter heads
-        if 'perimeter_boundary' in package_config:
-            kwargs['observations'] = {f'{self.name}.chd.obs.output.csv':
-                                          [('perimeter-heads', 'chd', 'perimeter-heads')]}
-        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfchd)
-        chd = mf6.ModflowGwfchd(self, **kwargs)
-        print("setup of chd took {:.2f}s\n".format(time.time() - t0))
-        return chd
 
-    def setup_obs(self):
+    def setup_obs(self, **kwargs):
         """
         Sets up the OBS utility.
         """
@@ -837,7 +912,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return obs
 
-    def setup_oc(self):
+    def setup_oc(self, **kwargs):
         """
         Sets up the OC package.
         """
