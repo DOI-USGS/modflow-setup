@@ -984,7 +984,7 @@ class TmrNew:
         self._interp_weights_heads = None
         self._interp_weights_flux = None
         self._source_mask = source_mask
-
+        self._inset_zone_within_parent = None
 
     @property
     def idomain(self):
@@ -1043,9 +1043,9 @@ class TmrNew:
 
     @property
     def interp_weights_flux(self):
-        """For the two main directions of flux (i, j) and the four orientations of 
+        """For the two main directions of flux (i, j) and the four orientations of
         inset faces to interpolate to (right.left,top,bottom
-        we can precalulate the interpolation weights of the combinations to speed up 
+        we can precalulate the interpolation weights of the combinations to speed up
         interpolation"""
         if self._interp_weights_flux is None:
             self._interp_weights_flux = dict() # we need four flux directions for the insets
@@ -1053,9 +1053,9 @@ class TmrNew:
             ipx, ipy, ipz = self.x_iface_parent, self.y_iface_parent, self.z_iface_parent
             # x, y, z locations of parent model head values for j faces
             jpx, jpy, jpz = self.x_jface_parent, self.y_jface_parent, self.z_jface_parent
-            
+
             for fluxdir in ['left', 'right', 'top', 'bottom']:
-                x,y,z = self.inset_boundary_cell_faces.loc[ 
+                x,y,z = self.inset_boundary_cell_faces.loc[
                     self.inset_boundary_cell_faces.cellface==fluxdir][['xface','yface','zface']].T.values
                 if fluxdir in ['top','bottom']:
                     # these are the i-direction fluxes
@@ -1063,7 +1063,7 @@ class TmrNew:
                 if fluxdir in ['left','right']:
                     # these are the i-direction fluxes
                     self._interp_weights_flux[fluxdir] = interp_weights((jpx, jpy, jpz), (x, y, z), d=3)
-                
+
 
                 assert not np.any(np.isnan(self._interp_weights_flux[fluxdir][1]))
         return self._interp_weights_flux
@@ -1101,10 +1101,55 @@ class TmrNew:
         return px, py, pz
 
     @property
+    def _inset_max_active_area(self):
+        """The maximum (2D) footprint of the active area within the inset
+        model grid, where each i, j location has at least 1 active cell
+        vertically, excluding any inactive holes that are surrounded by
+        active cells.
+        """
+        # get the max footprint of active cells
+        max_active_area = np.sum(self.idomain > 0, axis=0) > 0
+        # fill any holes within the max footprint
+        # including any LGR areas (that are inactive in this model)
+        # set min cluster size to 1 greater than number of inactive cells
+        # (to not allow any holes)
+        minimum_cluster_size = np.sum(max_active_area == 0) + 1
+        # find_remove_isolated_cells fills clusters of 1s with 0s
+        # to fill holes, we want to look for clusters of 0s and fill with 1s
+        to_fill = ~max_active_area
+        # pad the array to fill so that exterior inactive cells
+        # (outside the active area perimeter) aren't included
+        to_fill = np.pad(to_fill, pad_width=1, mode='reflect')
+        # invert the result to get True values for active cells and filled areas
+        filled = ~find_remove_isolated_cells(to_fill, minimum_cluster_size)
+        # de-pad the result
+        filled = filled[1:-1, 1:-1]
+        max_active_area = filled
+        return max_active_area
+
+    @property
+    def inset_zone_within_parent(self):
+        """The footprint of the inset model maximum active area footprint
+        (``TmrNew._inset_max_active_area``) within the parentmodel grid.
+        In other words, all parent cells containing one or inset
+        model cell centers within ``TmrNew._inset_max_active_area`` (ones).
+        Zeros indicate parent cells with no inset cells.
+        """
+        # get the locations of the inset model cells within _inset_max_active_area
+        x, y, z = self.inset.modelgrid.xyzcellcenters
+        x = x[self._inset_max_active_area]
+        y = y[self._inset_max_active_area]
+        pi, pj = get_ij(self.parent.modelgrid, x, y)
+        inset_zone_within_parent = np.zeros((self.parent.modelgrid.nrow,
+                                             self.parent.modelgrid.ncol), dtype=bool)
+        inset_zone_within_parent[pi, pj] = True
+        return inset_zone_within_parent
+
+    @property
     def _source_grid_mask(self):
         """Boolean array indicating window in parent model grid (subset of cells)
-        that encompass the pfl_nwt model domain. Used to speed up interpolation
-        of parent grid values onto pfl_nwt grid."""
+        that encompass the inset model domain. Used to speed up interpolation
+        of parent grid values onto inset grid."""
         if self._source_mask is None:
             mask = np.zeros((self.parent.modelgrid.nrow,
                              self.parent.modelgrid.ncol), dtype=bool)
@@ -1184,18 +1229,10 @@ class TmrNew:
         else:
             specified_bcells = None
         if not by_layer:
-            # get the max footprint of active cells
-            max_active_area = np.sum(self.idomain == 1, axis=0) > 0
-            # fill any holes within the max footprint
-            # including any LGR areas (that are inactive in this model)
-            # set min cluster size to 1 greater than number of inactive cells
-            # (to not allow any holes)
-            minimum_cluster_size = np.sum(max_active_area == 0) + 1
-            # find_remove_isolated_cells fills clusters of 1s with 0s
-            # to fill holes, we want to look for clusters of 0s and fill with 1s
-            # invert the result to get True values for active cells and filled areas
-            filled = ~find_remove_isolated_cells(~max_active_area, minimum_cluster_size)
-            max_active_area = filled.astype(int)
+
+            # attached the filled array as an attribute
+            max_active_area = self._inset_max_active_area
+
             # pad filled idomain array with zeros around the edge
             # so that perimeter connections are identified
             filled = np.pad(max_active_area, 1, constant_values=0)
@@ -1301,7 +1338,7 @@ class TmrNew:
                 parent_heads = np.pad(parent_heads, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
 
                 # interpolate inset boundary heads from 3D parent head solution
-                heads = self.interpolate_head_values(parent_heads, method='linear')
+                heads = self.interpolate_values(parent_heads, method='linear')
                 #heads = griddata((px, py, pz), parent_heads.ravel(),
                 #                  (x, y, z), method='linear')
 
@@ -1366,7 +1403,7 @@ class TmrNew:
             self.inset_boundary_cell_faces['q_interp'] = np.nan
             # placeholder for flux to well package
             self.inset_boundary_cell_faces['Q'] = np.nan
-            
+
             # make a grid of the spacings
             delr_gridi, delc_gridi = np.meshgrid(self.inset.modelgrid.delr, self.inset.modelgrid.delc)
 
@@ -1377,10 +1414,10 @@ class TmrNew:
                 curr_delr = delr_gridi[curri, currj]
                 if cn == 'top':
                     self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] += curr_delc/2
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr 
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr
                 elif cn == 'bottom':
                     self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] -= curr_delc/2
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr 
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr
                 if cn == 'right':
                     self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] += curr_delr/2
                     self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
@@ -1388,7 +1425,7 @@ class TmrNew:
                     self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] -= curr_delr/2
                     self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
 
-            #       
+            #
             # Now handle the geometry issues for the parent
             #
             # first thicknesses (at cell centers)
@@ -1396,13 +1433,13 @@ class TmrNew:
             # TODO: refactor to use updated modelgrid object sat thickness calcs
 
             # make matrices of the row and column spacings
-            # NB --> trying to preserve the always seemingly 
+            # NB --> trying to preserve the always seemingly
             # backwards delr/delc definitions
             # also note - for now, taking average thickness at a connected face
             # TODO: confirm thickness averaging is a valid approach
             delr_gridp, delc_gridp = np.meshgrid(self.parent.modelgrid.delr,
                                                 self.parent.modelgrid.delc)
-            
+
             nlay, nrow, ncol = self.parent.modelgrid.shape
 
             parent_iface_areas = np.tile(delc_gridp[:-1,:], (nlay,1,1)) * \
@@ -1413,9 +1450,9 @@ class TmrNew:
             # TODO: implement vertical fluxes
             '''
             parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \
-                                    np.tile(delr_grid, (nlay,1,1)) 
+                                    np.tile(delr_grid, (nlay,1,1))
             '''
-            # need XYZ locations of the center of each face for 
+            # need XYZ locations of the center of each face for
             # iface and jface edges (faces)
             # NB edges are returned in model coordinates
             xloc_edge, yloc_edge = self.parent.modelgrid.xyedges
@@ -1426,8 +1463,8 @@ class TmrNew:
             # tile out to full dimensions of the grid
             xloc_edge = np.tile(np.atleast_2d(xloc_edge),(nlay+2,nrow,1))
             yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay+2,1,ncol))
-            
-            # need XYZ locations of the center of each cell 
+
+            # need XYZ locations of the center of each cell
             # iface and jface centroids
             xloc_center, yloc_center = self.parent.modelgrid.xycenters
 
@@ -1436,7 +1473,7 @@ class TmrNew:
             yloc_center = np.tile(np.atleast_2d(yloc_center).T,(nlay+2,1,ncol))
 
             # get the vertical centroids initially at cell centroids
-            zloc = (self.parent.modelgrid.top_botm[:-1,:,:] + 
+            zloc = (self.parent.modelgrid.top_botm[:-1,:,:] +
                 self.parent.modelgrid.top_botm[1:,:,:] ) / 2
 
             # pad in the vertical above and below the model
@@ -1450,7 +1487,7 @@ class TmrNew:
             self.y_iface_parent = yloc_edge[:,:-1,:].ravel()
             # need to calculate the average z location along rows
             self.z_iface_parent = ((zloc[:,:-1,:]+zloc[:,1:,:]) / 2).ravel()
-            
+
             # for jface, all rows, ncol-1 cols
             self.x_jface_parent = xloc_edge[:,:,:-1].ravel()
             self.y_jface_parent = yloc_center[:,:,:-1].ravel()
@@ -1491,14 +1528,14 @@ class TmrNew:
                     # * consider correct face interpolation weights precalculation -- DONE
                     # * multiply by inset face area -- DONE
                     # * ---- verify direciton of q coming from CBC file (e.g. always m --> n???) -- yes, it's n-centric. e.g. + is into n
-                    # * verify the interpolation scheme - getting NaNs 
+                    # * verify the interpolation scheme - getting NaNs
                     # * verify that flipping sign of q_interp below is correct (e.g. only flip left and top?)
                     # * verify that all the xy locating works with rotated grid (!) -- DONE (working only in model coords)
                     # for MF-2005 case, would slice arrays returned by flopy binary utility to boundary cells
                     #    (so that mf6 and mf2005 come out the same)
                     # *  refactor to use updated modelgrid object sat thickness calcs
 
-                    #                     
+                    #
                     # TODO: implement vertical fluxes
                     # Get the vertical fluxes
                     '''if 'kn' in df.columns and np.any(df['kn'] < df['km']):
@@ -1523,26 +1560,26 @@ class TmrNew:
                         jflux_array[jflux['kn'].values,
                                     jflux['in'].values,
                                     jflux['jn'].values] = jflux.q.values
-                    
-                    
+
+
                     # divide the flux by the area to find specific discharge along faces
                     # NB --> padding on the top and left top ensure zeros surround
                     q_iface = (iflux_array / parent_iface_areas)
                     q_jface = (jflux_array / parent_jface_areas)
-                    
+
                 else:
                     raise NotImplementedError('MODFLOW-2005 fluxes not yet supported')
                     # TODO: implement MF2005
                     #  *create i, j, and v face xyzq vectors as with MF6 above
                     #   x_iface, y_iface, z_iface, q_iface .... etc.
-                        
+
                 # pad the two parent flux arrays on the top and bottom
                 # so that inset cells above and below the top/bottom cell centers
                 # will be within the interpolation space
                 # (parent x, y, z locations already contain this pad - see zloc above)
                 q_iface = np.pad(q_iface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()
                 q_jface = np.pad(q_jface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()
-                
+
                 # interpolate q at the four different face orientations (e.g. fluxdir)
                 for fluxdir in ['top','bottom','left','right']:
                     if fluxdir in ['top','bottom']:
@@ -1551,23 +1588,23 @@ class TmrNew:
                     if fluxdir in ['left','right']:
                         self.inset_boundary_cell_faces.loc[ self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = \
                             self.interpolate_flux_values(q_jface, fluxdir)
-                        
+
                 # flip the sign for flux counter to the CBB convention directions of right and bottom
                 self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='left', 'q_interp'] -= 1
                 self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='top', 'q_interp'] -= 1
 
                 # convert specific discharge in inset cells to Q
-                self.inset_boundary_cell_faces['Q'] = \
+                self.inset_boundary_cell_faces['q'] = \
                     self.inset_boundary_cell_faces['q_interp'] * self.inset_boundary_cell_faces['face_area']
 
 
                 # make a DataFrame of interpolated heads at perimeter cell locations
-                df = self.inset_boundary_cell_faces[['k','i','j','idomain','Q']].copy()
+                df = self.inset_boundary_cell_faces[['k','i','j','idomain','q']].copy()
                 df['per'] = inset_per
 
                 # boundary heads must be greater than the cell bottom
                 # and idomain > 0
-                loc = (df['Q'].abs() > 0) & (df['idomain'] > 0)
+                loc = (df['q'].abs() > 0) & (df['idomain'] > 0)
                 df = df.loc[loc]
                 dfs.append(df)
                 print("took {:.2f}s".format(time.time() - t1))
@@ -1578,7 +1615,7 @@ class TmrNew:
             #  and therefore would be listed twice)
             df['cellid'] = list(zip(df.per, df.k, df.i, df.j))
             duplicates = df.duplicated(subset=['cellid'])
-            df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'head']]
+            df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'q']]
             print("getting perimeter fluxes took {:.2f}s\n".format(time.time() - t0))
 
         # convert to one-based and comment out header if df will be written straight to external file
@@ -1589,7 +1626,7 @@ class TmrNew:
             df['j'] += 1
         return df
 
-    def interpolate_head_values(self, source_array, method='linear'):
+    def interpolate_values(self, source_array, method='linear'):
         """Interpolate values in source array onto
         the destination model grid, using modelgrid instances
         attached to the source and destination models.
@@ -1630,7 +1667,7 @@ class TmrNew:
         source_array : 1d-array
             Flux values from parent model to be interpolated to destination grid.
             1D numpy array of same shape as the Tmr properties of parent xyz
-        fluxdir: str ('top','bottom','left','right') 
+        fluxdir: str ('top','bottom','left','right')
             inset face at which flux is applied
         method : str ('linear', 'nearest')
             Interpolation method.
@@ -1641,7 +1678,7 @@ class TmrNew:
             3D array of interpolated values at the inset model grid locations.
         """
 
-                
+
         if method == 'linear':
             interpolated = interpolate(source_array, *self.interp_weights_flux[fluxdir],
                                        fill_value=None)

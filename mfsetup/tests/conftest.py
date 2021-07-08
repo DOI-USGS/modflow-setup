@@ -83,6 +83,15 @@ def mf6_exe(bin_path):
 
 
 @pytest.fixture(scope="session")
+def zbud6_exe(bin_path):
+    _, version = os.path.split(bin_path)
+    exe_name = 'zbud6'
+    if version == "win":
+        exe_name += '.exe'
+    return os.path.join(bin_path, exe_name)
+
+
+@pytest.fixture(scope="session")
 def mfnwt_exe(bin_path):
     _, version = os.path.split(bin_path)
     exe_name = 'mfnwt'
