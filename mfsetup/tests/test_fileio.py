@@ -13,6 +13,7 @@ from mfsetup.fileio import (
     exe_exists,
     load,
     load_array,
+    load_array_fmt,
     load_cfg,
     load_modelgrid,
     load_yml,
@@ -66,9 +67,33 @@ def test_load_array(tmpdir):
     a_nodata = a.copy()
     a[0:2, 0:2] = np.nan
     a_nodata[0:2, 0:2] = nodata
-    f = '{}/junk.txt'.format(tmpdir)
-    np.savetxt(f, a_nodata)
-    b = load_array(f, nodata=nodata)
+    fpth = '{}/junk.txt'.format(tmpdir)
+    np.savetxt(fpth, a_nodata)
+    b = load_array(fpth, shape=a.shape, nodata=nodata)
+    np.testing.assert_allclose(a, b)
+    
+    
+def test_load_array_fmt(tmpdir):
+    """load_array_fmt handles arrays formatted to have ncols!=a.shape[-1]
+    so load_array_fmt must include array shape tuple"""
+    nodata = -9999
+    size = (123, 123)
+    a = np.random.randn(*size)
+    a_nodata = a.copy()
+    a[0:2, 0:2] = np.nan
+    a_nodata[0:2, 0:2] = nodata
+    fpth = '{}/junk.txt'.format(tmpdir)
+    # write w ncols, total junk formatting
+    a_nodata=a_nodata.flatten()
+    ncol=13
+    nrow=int(np.ceil(len(a_nodata)/ncol))
+    with open(fpth,'w+') as f:
+        for r in range(0,nrow):
+            for c in range(0,ncol):
+                if (r*ncol+c)<len(a_nodata):
+                    f.write(str(a_nodata[r*ncol+c])+' ')
+            f.write('\n')    
+    b = load_array_fmt(fpth, shape=a.shape, nodata=nodata)
     np.testing.assert_allclose(a, b)
 
 

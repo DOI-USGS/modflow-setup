@@ -34,16 +34,17 @@ def check_source_files(fileslist):
             raise IOError('Cannot find {}'.format(f))
 
 
-def load_array(filename, shape=None):
-    """Load an array, ensuring the correct shape."""
+def load_array(filename, shape= None, nodata=-9999):
+    """Load an array, assuming the file is written with correct shape."""
     arr = np.loadtxt(filename)
     if shape is not None:
-        if arr.shape != shape:
+        if arr.shape != shape: # only works if all rows have same number of columns
             if arr.size == np.prod(shape):
                 arr = np.reshape(arr, shape)
             else:
                 raise ValueError("Data in {} have size {}; should be {}"
                                  .format(filename, arr.shape, shape))
+    arr[arr==nodata]=np.nan
     return arr
 
 
@@ -109,9 +110,9 @@ def dump_yml(yml_file, data):
     print('wrote {}'.format(yml_file))
 
 
-def load_array(filename, shape=None, nodata=-9999):
-    """Load an array, ensuring the correct shape."""
-    t0 = time.time()
+def load_array_fmt(filename, shape=None, nodata=-9999):
+    """Load an array, written with ncols!=a.shape[-1]
+    read as pandas dataframe, drops nans, reshape"""
     if not isinstance(filename, list):
         filename = [filename]
     shape2d = shape
@@ -126,9 +127,9 @@ def load_array(filename, shape=None, nodata=-9999):
         if shape2d is not None:
             txt += ', shape={}'.format(shape2d)
         print(txt, end=', ')
-        # arr = np.loadtxt
-        # pd.read_csv is >3x faster than np.load_txt
         arr = pd.read_csv(f, delim_whitespace=True, header=None).values
+        # drop the nans that result from partial lines
+        arr = arr[~np.isnan(arr)]
         if shape2d is not None:
             if arr.shape != shape2d:
                 if arr.size == np.prod(shape2d):
@@ -140,7 +141,6 @@ def load_array(filename, shape=None, nodata=-9999):
     array = np.squeeze(arraylist)
     if issubclass(array.dtype.type, np.floating):
         array[array == nodata] = np.nan
-    print("took {:.2f}s".format(time.time() - t0))
     return array
 
 
