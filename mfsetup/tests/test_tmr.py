@@ -201,6 +201,8 @@ def test_get_boundary_fluxes(shellmound_tmr_model_with_refined_dis, test_data_pa
     stdout, stderr = process.communicate()
     assert process.returncode == 0
 
+    j=2
+
 
 @pytest.mark.skip(reason="still working on this test")
 def test_get_boundary_heads_transient(shellmound_tmr_model_with_dis, test_data_path):
