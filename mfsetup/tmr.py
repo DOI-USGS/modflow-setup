@@ -938,7 +938,7 @@ class TmrNew:
     parent_cell_budget_file : filepath
         MODFLOW binary cell budget output
     parent_binary_grid_file : filepath
-        MODFLOW 6 binary grid file (*.grb)
+        MODFLOW 6 binary grid file (``*.grb``)
     define_connections : str, {'max_active_extent', 'by_layer'}
         Method for defining perimeter cells where the TMR boundary
         condition will be applied. If 'max_active_extent', the
@@ -977,6 +977,14 @@ class TmrNew:
             self.boundary_type = 'flux'
         self.parent_start_date_time = parent_start_date_time
 
+        # Path for writing auxilliary output tables
+        # (boundary_cells.shp, etc.)
+        if hasattr(self.inset, '_tables_path'):
+            self._tables_path = Path(self.inset._tables_path)
+        else:
+            self._tables_path = Path(self.inset.model_ws) / 'tables'
+        self._tables_path.mkdir(exist_ok=True, parents=True)
+
         # properties
         self._idomain = None
         self._inset_boundary_cells = None
@@ -992,9 +1000,12 @@ class TmrNew:
         """
         if self._idomain is None:
             if self.inset.version == 'mf6':
-                self._idomain = self.inset.dis.idomain.array
+                idomain = self.inset.dis.idomain.array
+                if idomain is None:
+                    idomain = np.ones_like(self.inset.dis.botm.array, dtype=int)
             else:
-                self._idomain = self.inset.bas6.ibound.array
+                idomain = self.inset.bas6.ibound.array
+            self._idomain = idomain
         return self._idomain
 
     @property
@@ -1145,6 +1156,7 @@ class TmrNew:
         inset_zone_within_parent[pi, pj] = True
         return inset_zone_within_parent
 
+
     @property
     def _source_grid_mask(self):
         """Boolean array indicating window in parent model grid (subset of cells)
@@ -1153,10 +1165,11 @@ class TmrNew:
         if self._source_mask is None:
             mask = np.zeros((self.parent.modelgrid.nrow,
                              self.parent.modelgrid.ncol), dtype=bool)
-            if self.inset.parent_mask.shape == self.parent.modelgrid.xcellcenters.shape:
+            if hasattr(self.inset, 'parent_mask') and \
+                (self.inset.parent_mask.shape == self.parent.modelgrid.xcellcenters.shape):
                 mask = self.inset.parent_mask
             else:
-                x, y = np.squeeze(self.inset.bbox.exterior.coords.xy)
+                x, y = np.squeeze(self.inset.modelgrid.bbox.exterior.coords.xy)
                 pi, pj = get_ij(self.parent.modelgrid, x, y)
                 pad = 3
                 i0 = np.max([pi.min() - pad, 0])
@@ -1282,7 +1295,7 @@ class TmrNew:
         df['botm'] = self.inset.dis.botm.array[df.k, df.i, df.j]
         df['idomain'] = 1
         if self.inset.version == 'mf6':
-            df['idomain'] = self.inset.dis.idomain.array[df.k, df.i, df.j]
+            df['idomain'] = self.idomain[df.k, df.i, df.j]
         elif 'BAS6' in self.inset.get_package_list():
             df['idomain'] = self.inset.bas6.ibound.array[df.k, df.i, df.j]
         df = df[['k', 'i', 'j', 'cellface', 'top', 'botm', 'idomain']]
@@ -1298,7 +1311,7 @@ class TmrNew:
             df['cellid'] = list(zip(df.k, df.i, df.j))
         df['geometry'] = [geoms[cellid] for cellid in df.cellid]
         df = gp.GeoDataFrame(df, crs=self.inset.modelgrid.crs)
-        outshp = Path(self.inset._tables_path, 'boundary_cells.shp')
+        outshp = Path(self._tables_path, 'boundary_cells.shp')
         df.drop('cellid', axis=1).to_file(outshp)
         print(f"wrote {outshp}")
         print("perimeter cells took {:.2f}s\n".format(time.time() - t0))
@@ -1345,7 +1358,10 @@ class TmrNew:
                 # make a DataFrame of interpolated heads at perimeter cell locations
                 df = self.inset_boundary_cells.copy()
                 df['per'] = inset_per
-                df['head'] = heads
+                try:
+                    df['head'] = heads
+                except:
+                    j=2
 
                 # boundary heads must be greater than the cell bottom
                 # and idomain > 0
@@ -1369,6 +1385,9 @@ class TmrNew:
 
         elif self.boundary_type == 'flux':
             check_source_files([self.parent_cell_budget_file])
+            if self.parent_binary_grid_file is None:
+                raise ValueError('Specified flux perimeter boundary requires a parent_binary_grid_file')
+            check_source_files([self.parent_binary_grid_file])
             fileobj = bf.CellBudgetFile(self.parent_cell_budget_file)  # , precision='single')
             all_kstpkper = fileobj.get_kstpkper()
 

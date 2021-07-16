@@ -69,7 +69,10 @@ def shellmound_tmr_model_with_refined_dis(shellmound_tmr_cfg, shellmound_tmr_sim
     cfg['dis']['griddata']['delc'] /= 2
     cfg['dis']['dimensions']['nrow'] *= 2
     cfg['dis']['dimensions']['ncol'] *= 2
-    
+
+    # use all SFR, like parent model (for accurate comparison)
+    del cfg['sfr']['sfrmaker_options']['to_riv']
+
     cfg = MF6model._parse_model_kwargs(cfg)
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
@@ -78,6 +81,39 @@ def shellmound_tmr_model_with_refined_dis(shellmound_tmr_cfg, shellmound_tmr_sim
     m.cfg['dis']['remake_top'] = True
     dis = m.setup_dis()
     return m
+
+
+@pytest.fixture(scope="function")
+def shellmound_tmr_small_rectangular_inset(shellmound_tmr_cfg, shellmound_tmr_simulation):
+    cfg = shellmound_tmr_cfg.copy()
+    cfg['model']['simulation'] = shellmound_tmr_simulation
+
+    # create small rectangular domain in middle of parent model
+    # that exactly aligns with parent cells
+    spacing = 50
+    # pad the inset model so that constant head cells are outside of the window in the parent
+    cfg['setup_grid']['xoff'] = 521955.0 #- spacing
+    cfg['setup_grid']['yoff'] = 1187285 #- spacing
+    cfg['dis']['griddata']['delr'] = spacing
+    cfg['dis']['griddata']['delc'] = spacing
+    # pad the inset model so that constant head cells are outside of the window in the parent
+    cfg['dis']['dimensions']['nrow'] = int(1000 * 5 / spacing) #+ 2
+    cfg['dis']['dimensions']['ncol'] = int(1000 * 5 / spacing) #+ 2
+
+    # use all SFR, like parent model (for accurate comparison)
+    del cfg['sfr']['sfrmaker_options']['to_riv']
+    # remove existing perimeter CHD setup
+    del cfg['chd']
+
+    cfg = MF6model._parse_model_kwargs(cfg)
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
+    m = MF6model(cfg=cfg, **kwargs)
+    m.setup_grid()
+    m.setup_tdis()
+    #m.cfg['dis']['remake_top'] = True
+    dis = m.setup_dis()
+    return m
+
 
 @pytest.fixture(scope="function")
 def shellmound_tmr_model_with_dis(shellmound_tmr_model_with_grid):
