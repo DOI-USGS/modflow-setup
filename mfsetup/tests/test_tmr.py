@@ -19,7 +19,7 @@ from flopy.utils import binaryfile as bf
 from mfsetup.discretization import get_layer
 from mfsetup.fileio import exe_exists
 from mfsetup.grid import MFsetupGrid, get_ij
-from mfsetup.tmr import Tmr, TmrNew
+from mfsetup.tmr import Tmr, TmrNew, get_qx_qy_qz
 from mfsetup.zbud import write_zonebudget6_input
 
 from .test_mf6_tmr_shellmound import (
@@ -96,6 +96,29 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
         # todo: interpolate parent head solution to inset points for comparison
 
 
+@pytest.mark.parametrize('specific_discharge',(False, True))
+@pytest.mark.parametrize('version', ('mf6', 'mfnwt'))
+def test_get_qx_qy_qz(test_data_path, version, specific_discharge):
+    if version == 'mf6':
+        cell_budget_file = test_data_path / 'shellmound/tmr_parent/shellmound.cbc'
+        binary_grid_file = test_data_path / 'shellmound/tmr_parent/shellmound.dis.grb'
+        model_top = None
+        model_bottom_array = None
+    else:
+        cell_budget_file = test_data_path / 'plainfieldlakes/pfl.cbc'
+        model_top = np.loadtxt(test_data_path / 'plainfieldlakes/external/top.dat')
+        botms = []
+        for i in range(4):
+            arr = np.loadtxt(test_data_path / f'plainfieldlakes/external/botm{i}.dat')
+            botms.append(arr)
+        model_bottom_array = np.array(botms)
+    qx, qy, qz = get_qx_qy_qz(cell_budget_file, binary_grid_file=binary_grid_file,
+                              version=version,
+                              model_top=model_top, model_bottom_array=model_bottom_array,
+                              specific_discharge=specific_discharge)
+    j=2
+
+
 def test_tmr_new(pleasant_model):
     m = pleasant_model
     parent_headfile = Path(m.cfg['chd']['perimeter_boundary']['parent_head_file'])
@@ -150,7 +173,7 @@ def test_get_boundary_cells_shapefile(shellmound_tmr_model_with_dis, test_data_p
         df.drop('cellid', axis=1).to_file(out_shp)
 
 @pytest.fixture
-def parent_model(tmpdir, mf6_exe):
+def parent_model_mf6(tmpdir, mf6_exe):
     """Make a simpmle parent model for TMR perimeter boundary tests,
     with inflow from west that curves to outflow to the north.
     """
@@ -216,7 +239,7 @@ def parent_model(tmpdir, mf6_exe):
 
 
 @pytest.fixture
-def inset_model(tmpdir, mf6_exe):
+def inset_model_mf6(tmpdir, mf6_exe):
     """Make a simple inset model to go in parent model
     """
     name = 'tmr_inset'
@@ -251,6 +274,138 @@ def inset_model(tmpdir, mf6_exe):
     model._mg_resync = False
     assert hasattr(model, 'modelgrid'), "something went wrong setting the modelgrid attribute"
     return model
+
+
+@pytest.fixture
+def parent_model_nwt(tmpdir, mf6_exe):
+    """Make a simpmle parent model for TMR perimeter boundary tests,
+    with inflow from west that curves to outflow to the north.
+
+    TODO : convert this to NWT model
+    """
+    # set up simulation
+    name = 'tmr_parent'
+    model_ws = Path(tmpdir) / 'perimeter_bc_demo/parent'
+    model_ws.mkdir(exist_ok=True, parents=True)
+
+    sim = flopy.mf6.MFSimulation(sim_name=name, sim_ws=str(model_ws))
+    tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
+                                perioddata=[(1.0, 1, 1.0)])
+    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="SIMPLE")
+    # create model instance
+    model = flopy.mf6.ModflowGwf(sim, modelname=name)
+
+    ncells_side = 30
+    dis = flopy.mf6.ModflowGwfdis(model, nlay=3, nrow=ncells_side, ncol=ncells_side,
+                                delr=100, delc=100,
+                                top=30., botm=[20.,10.,0.]
+                                )
+    start = 30. * np.ones_like(dis.botm.array)
+    ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
+    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1., save_flows=True)
+    # set up CHD boundaries
+    # for eastward flow through the west boundary
+    # curving to northward flow through the north boundary
+    chd_start_pos = int(ncells_side / 2)
+    nchd_side = ncells_side - chd_start_pos
+    w_heads = list(np.ones((nchd_side)) * 29.)
+    w_heads_i = list(range(chd_start_pos, ncells_side))
+    w_heads_j = [0] * len(w_heads)
+    n_heads = list(np.array(w_heads) - 2.)
+    n_heads_i = [0] * len(n_heads)
+    n_heads_j = w_heads_i
+    perim_chd = pd.DataFrame({'k': 0,
+                            'i': w_heads_i + n_heads_i,
+                            'j': w_heads_j + n_heads_j,
+                            'head': w_heads + n_heads
+                            })
+    perim_chd['cellid'] = list(zip(perim_chd['k'], perim_chd['i'], perim_chd['j']))
+    perim_chd_rec = perim_chd[['cellid', 'head']].to_records(index=False)
+
+    chd = flopy.mf6.ModflowGwfchd(model, maxbound=len(perim_chd_rec),
+                                stress_period_data=perim_chd_rec,
+                                save_flows=True)
+    oc = flopy.mf6.ModflowGwfoc(model,
+                                saverecord=[("HEAD", "ALL"), ("BUDGET", "ALL")],
+                                head_filerecord=f"{name}.hds",
+                                budget_filerecord=f"{name}.cbc",
+                                )
+    sim.write_simulation()
+    # run the model
+    sim.exe_name = mf6_exe
+    success = False
+    if exe_exists(mf6_exe):
+        success, buff = sim.run_simulation()
+        if not success:
+            list_file = model.name_file.list.array
+            with open(list_file) as src:
+                list_output = src.read()
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+    return model
+
+
+@pytest.fixture
+def inset_model_nwt(tmpdir, mf6_exe):
+    """Make a simple inset model to go in parent model
+
+    TODO: convert this to MODFLOW NWT model
+    """
+    name = 'tmr_inset'
+    model_ws = Path(tmpdir) / 'perimeter_bc_demo/inset'
+    model_ws.mkdir(exist_ok=True, parents=True)
+
+    sim = flopy.mf6.MFSimulation(sim_name=name, exe_name='mf6',
+                    sim_ws=str(model_ws))
+    tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
+                                perioddata=[(1.0, 1, 1.0)])
+    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="SIMPLE")
+    # create model instance
+    model = flopy.mf6.ModflowGwf(sim, modelname=name)
+
+    ncells_side = 100
+    dis = flopy.mf6.ModflowGwfdis(model, nlay=3, nrow=ncells_side, ncol=ncells_side,
+                                delr=10, delc=10,
+                                top=30., botm=[20.,10.,0.]
+                                )
+    start = 30. * np.ones_like(dis.botm.array)
+    ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
+    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1., save_flows=True)
+
+    oc = flopy.mf6.ModflowGwfoc(model,
+                                saverecord=[("HEAD", "ALL"), ("BUDGET", "ALL")],
+                                head_filerecord=f"{name}.hds",
+                                budget_filerecord=f"{name}.cbc",
+                                )
+    model._modelgrid = MFsetupGrid(delc=model.dis.delc.array, delr=model.dis.delr.array,
+                                  top=model.dis.top.array, botm=model.dis.botm.array,
+                                  xoff=1000, yoff=1000)
+    model._mg_resync = False
+    assert hasattr(model, 'modelgrid'), "something went wrong setting the modelgrid attribute"
+    return model
+
+
+# fixture to feed multiple model fixtures to a test
+# https://github.com/pytest-dev/pytest/issues/349
+@pytest.fixture(params=['parent_model_mf6',
+                        'parent_model_nwt'])
+def parent_model(request,
+                   parent_model_mf6,
+                   parent_model_nwt):
+    """MODFLOW-NWT and MODFLOW-6 versions of the test case parent model."""
+    return {'parent_model_mf6': parent_model_mf6,
+            'parent_model_nwt': parent_model_nwt}[request.param]
+
+
+# fixture to feed multiple model fixtures to a test
+# https://github.com/pytest-dev/pytest/issues/349
+@pytest.fixture(params=['inset_model_mf6',
+                        'inset_model_nwt'])
+def parent_model(request,
+                 inset_model_mf6,
+                 inset_model_nwt):
+    """MODFLOW-NWT and MODFLOW-6 versions of the test case inset model."""
+    return {'inset_model_mf6': inset_model_mf6,
+            'inset_model_nwt': inset_model_nwt}[request.param]
 
 
 def test_get_boundary_heads(parent_model, inset_model,
@@ -367,7 +522,7 @@ def test_get_boundary_heads(parent_model, inset_model,
                        perimeter_df['head'].values)
 
 
-def test_get_boundary_fluxes(parent_model, inset_model,
+def test_get_boundary_fluxes(parent_model_mf6, inset_model_mf6,
                             project_root_path,
                             mf6_exe, zbud6_exe):
     """Test getting perimeter boundary flux values from a parent model,
@@ -382,6 +537,8 @@ def test_get_boundary_fluxes(parent_model, inset_model,
     mf6_exe : Modflow 6 executable from pytest fixture
     zbud6_exe : Zonebudget 6 executable from pytest fixture
     """
+    # TODO : change parent_model_mf6 and inset_model_mf6 fixtures to
+    # parent_model and inset_model to run MODFLOW-NWT version as well
     project_root_path = Path(project_root_path)
 
     #m = get_pleasant_mf6_with_dis
