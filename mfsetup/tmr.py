@@ -889,12 +889,42 @@ def get_intercell_connections(ia, ja, flowja):
     return df
 
 
-def get_flowja_face(cell_budget_file, binary_grid_file, kstpkper=(0, 0)):
-    """Get FLOW-JA-FACE (cell by cell flows) from MODFLOW 6 budget
-    output and binary grid file.
-    TODO: need test for extracted flowja fluxes
+def get_flowja_face(cell_budget_file, binary_grid_file,
+                    kstpkper=(0, 0),
+                    specific_discharge=False):
+    """Get DataFrame of FLOW-JA-FACE (cell by cell flow connections)
+    from MODFLOW 6 budget output and binary grid file.
+
+    Parameters
+    ----------
+    cell_budget_file : str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile
+        File path or pointer to MODFLOW 6 cell budget file.
+    binary_grid_file : str or pathlike
+        File path to MODFLOW 6 binary grid (``*.dis.grb``) file
+    kstpkper : tuple
+        zero-based (time step, stress period)
+    specific_discharge : bool
+        Option to return arrays of specific discharge (1D vector components)
+        instead of volumetric fluxes.
+        By default, False
+
+    Returns
+    -------
+    df : DataFrame
+        DataFrame with one connection per row, with the following columns
+
+        =================== ===================================================================
+        n                   zero-based from: cell number
+        m                   zero-based to: cell number
+        q                   volumetric flux or specific discharge
+        kn, in, jn          zero-based layer, row, column location of n cell (structured grids)
+        km, im, jm          zero-based layer, row, column location of m cell (structured grids)
+        =================== ===================================================================
     """
-    cbb = cell_budget_file
+    if isinstance(cell_budget_file, str) or isinstance(cell_budget_file, Path):
+        cbb = bf.CellBudgetFile(cell_budget_file)
+    else:
+        cbb = cell_budget_file
     if binary_grid_file is None:
         print("Couldn't get FLOW-JA-FACE, need binary grid file for connection information.")
         return
@@ -920,6 +950,98 @@ def get_flowja_face(cell_budget_file, binary_grid_file, kstpkper=(0, 0)):
         df.reset_index()
         cols += ['kn', 'in', 'jn', 'km', 'im', 'jm']
     return df[cols].copy()
+
+
+def get_qx_qy_qz(cell_budget_file, binary_grid_file,
+                 version='mf6',
+                 model_top=None, model_bottom_array=None,
+                 kstpkper=(0, 0),
+                 specific_discharge=False):
+    """Get 2 or 3D arrays of cell by cell flows across the cell faces
+    (for structured grid models).
+
+    Parameters
+    ----------
+    cell_budget_file : str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile
+        File path or pointer to MODFLOW 6 cell budget file.
+    binary_grid_file : str or pathlike
+        File path to MODFLOW 6 binary grid (``*.dis.grb``) file
+    version : str
+        MODFLOW version- 'mf6' or other. If not 'mf6', the cell budget output is assumed to
+        be formatted similar to a MODFLOW 2005 style model.
+    model_top : 2D numpy array of shape (nrow, ncol)
+        Model top elevations (only needed for modflow 2005 style models without a binary grid file)
+    model_bottom_array : 3D numpy array of shape (nlay, nrow, ncol)
+        Model bottom elevations (only needed for modflow 2005 style models without a binary grid file)
+    kstpkper : tuple
+        zero-based (time step, stress period)
+    specific_discharge : bool
+        Option to return arrays of specific discharge (1D vector components)
+        instead of volumetric fluxes.
+        By default, False
+
+    Returns
+    -------
+    Qx, Qy, Qz : tuple of 2 or 3D numpy arrays
+        Volumetric or specific discharge fluxes across cell faces.
+    """
+
+    if version == 'mf6':
+        # get dataframe of flow at each n to m cell connection
+        df = get_flowja_face(cell_budget_file, binary_grid_file=binary_grid_file,
+                            kstpkper=kstpkper, specific_discharge=specific_discharge)
+
+        # get grid info
+        bgf = MfGrdFile(binary_grid_file)
+        nlay, nrow, ncol = bgf.modelgrid.nlay, bgf.modelgrid.nrow, bgf.modelgrid.ncol
+
+        # get arrays of flow through cell faces
+        # Qx (right face; TODO: confirm direction)
+        rf = df.loc[(df['jn'] < df['jm'])]
+        nlay = rf['km'].max() + 1
+        qx = np.zeros((nlay, nrow, ncol))
+        qx[rf['kn'].values, rf['in'].values, rf['jn'].values] = -rf.q.values
+
+        # Qy (front face; TODO: confirm direction)
+        ff = df.loc[(df['in'] < df['im'])]
+        qy = np.zeros((nlay, nrow, ncol))
+        qy[ff['kn'].values, ff['in'].values, ff['jn'].values] = -ff.q.values
+
+        # Qz (bottom face; TODO: confirm that this is downward positive)
+        bf = df.loc[(df['kn'] < df['km'])]
+        qz = np.zeros((nlay, nrow, ncol))
+        qz[bf['kn'].values, bf['in'].values, bf['jn'].values] = -bf.q.values
+
+        # get 3D array of cell tops and bottoms
+        if specific_discharge:
+            top_botm = np.vstack([[bgf.top], bgf.bot])
+
+    else:
+        if isinstance(cell_budget_file, str) or isinstance(cell_budget_file, Path):
+            cbb = bf.CellBudgetFile(cell_budget_file)
+        else:
+            cbb = cell_budget_file
+        qx = cbb.get_data(text="flow right face", kstpkper=kstpkper)[0]
+        qy = cbb.get_data(text="flow front face", kstpkper=kstpkper)[0]
+        qz = cbb.get_data(text="flow lower face", kstpkper=kstpkper)[0]
+
+        # get 3D array of cell tops and bottoms
+        if specific_discharge:
+            if model_top is None or model_bottom_array is None:
+                raise ValueError('specific_discharge option for MODFLOW 2005 '
+                                 'style models requests model top and bottoms')
+            top_botm = np.vstack([[model_top], model_bottom_array])
+
+    # optionally get specific discharge
+    if specific_discharge:
+        # TODO : add option to use saturated thickness with head solution
+        thicknesses = -np.diff(top_botm, axis=0)
+        # TODO : compute thicknesses at right and front faces
+        # return array of specific discharge quantities
+        # (same shape as qx, qy, qz, but normalized to cross sectional area)
+        raise NotImplementedError("specific_discharge option")
+
+    return qx, qy, qz
 
 class TmrNew:
     """
