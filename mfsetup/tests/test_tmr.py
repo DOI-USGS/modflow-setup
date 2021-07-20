@@ -277,35 +277,26 @@ def inset_model_mf6(tmpdir, mf6_exe):
 
 
 @pytest.fixture
-def parent_model_nwt(tmpdir, mf6_exe):
-    """Make a simpmle parent model for TMR perimeter boundary tests,
+def parent_model_nwt(tmpdir, mnwt_exe):
+    """Make a simpmle MFNWT parent model for TMR perimeter boundary tests,
     with inflow from west that curves to outflow to the north.
-
-    TODO : convert this to NWT model
+    
+    TODO: create mnwt_exe in conftest.py
     """
     # set up simulation
-    name = 'tmr_parent'
-    model_ws = Path(tmpdir) / 'perimeter_bc_demo/parent'
+    name = 'tmr_parent_nwt'
+    model_ws = Path(tmpdir) / 'perimeter_bc_demo/parent_nwt'
     model_ws.mkdir(exist_ok=True, parents=True)
 
-    sim = flopy.mf6.MFSimulation(sim_name=name, sim_ws=str(model_ws))
-    tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
-                                perioddata=[(1.0, 1, 1.0)])
-    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="SIMPLE")
-    # create model instance
-    model = flopy.mf6.ModflowGwf(sim, modelname=name)
+    mf = flopy.modflow.Modflow(name, model_ws=str(model_ws), version='mfnwt')
 
     ncells_side = 30
-    dis = flopy.mf6.ModflowGwfdis(model, nlay=3, nrow=ncells_side, ncol=ncells_side,
+    dis = flopy.modflow.ModflowDis(mf, nlay=3, nrow=ncells_side, ncol=ncells_side,
                                 delr=100, delc=100,
                                 top=30., botm=[20.,10.,0.]
                                 )
     start = 30. * np.ones_like(dis.botm.array)
-    ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
-    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1., save_flows=True)
-    # set up CHD boundaries
-    # for eastward flow through the west boundary
-    # curving to northward flow through the north boundary
+
     chd_start_pos = int(ncells_side / 2)
     nchd_side = ncells_side - chd_start_pos
     w_heads = list(np.ones((nchd_side)) * 29.)
@@ -314,74 +305,63 @@ def parent_model_nwt(tmpdir, mf6_exe):
     n_heads = list(np.array(w_heads) - 2.)
     n_heads_i = [0] * len(n_heads)
     n_heads_j = w_heads_i
-    perim_chd = pd.DataFrame({'k': 0,
-                            'i': w_heads_i + n_heads_i,
-                            'j': w_heads_j + n_heads_j,
-                            'head': w_heads + n_heads
-                            })
-    perim_chd['cellid'] = list(zip(perim_chd['k'], perim_chd['i'], perim_chd['j']))
-    perim_chd_rec = perim_chd[['cellid', 'head']].to_records(index=False)
 
-    chd = flopy.mf6.ModflowGwfchd(model, maxbound=len(perim_chd_rec),
-                                stress_period_data=perim_chd_rec,
-                                save_flows=True)
-    oc = flopy.mf6.ModflowGwfoc(model,
-                                saverecord=[("HEAD", "ALL"), ("BUDGET", "ALL")],
-                                head_filerecord=f"{name}.hds",
-                                budget_filerecord=f"{name}.cbc",
-                                )
-    sim.write_simulation()
-    # run the model
-    sim.exe_name = mf6_exe
+    start[0, w_heads_i, w_heads_j] = w_heads
+    start[0, n_heads_i, n_heads_j] = n_heads
+
+    ibnd = np.ones([3, ncells_side, ncells_side])
+    ibnd[0, w_heads_i, w_heads_j] = -1
+    ibnd[0, n_heads_i, n_heads_j] = -1
+
+    bas = flopy.modflow.ModflowBas(mf, ibound=ibnd, strt=start)
+    upw = flopy.modflow.ModflowUpw(mf, hk=1., vka=1.0)
+    oc = flopy.modflow.ModflowOc(mf,
+                                stress_period_data={(0, 0): ['save head','save budget']})
+    nwt = flopy.modflow.ModflowNwt(mf)
+    mf.write_input()
+
+    mf.exe_name = mfnwt_exe
     success = False
-    if exe_exists(mf6_exe):
-        success, buff = sim.run_simulation()
+    if exe_exists(mfnwt_exe):
+        success, buff = mf.run_model()
         if not success:
-            list_file = model.name_file.list.array
+            list_file = mf.name_file.list.array
             with open(list_file) as src:
                 list_output = src.read()
     assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
-    return model
+    return mf
 
 
 @pytest.fixture
-def inset_model_nwt(tmpdir, mf6_exe):
-    """Make a simple inset model to go in parent model
+def inset_model_nwt(tmpdir):
+    """Make a simple inset model to go in MFNWT parent model
 
-    TODO: convert this to MODFLOW NWT model
     """
-    name = 'tmr_inset'
-    model_ws = Path(tmpdir) / 'perimeter_bc_demo/inset'
+    name = 'tmr_inset_nwt'
+    model_ws = Path(tmpdir) / 'perimeter_bc_demo/inset_nwt'
     model_ws.mkdir(exist_ok=True, parents=True)
 
-    sim = flopy.mf6.MFSimulation(sim_name=name, exe_name='mf6',
-                    sim_ws=str(model_ws))
-    tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
-                                perioddata=[(1.0, 1, 1.0)])
-    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="SIMPLE")
-    # create model instance
-    model = flopy.mf6.ModflowGwf(sim, modelname=name)
+    mf = flopy.modflow.Modflow(name, model_ws=str(model_ws), version='mfnwt')
 
     ncells_side = 100
-    dis = flopy.mf6.ModflowGwfdis(model, nlay=3, nrow=ncells_side, ncol=ncells_side,
+    dis = flopy.modflow.ModflowDis(mf, nlay=3, nrow=ncells_side, ncol=ncells_side,
                                 delr=10, delc=10,
                                 top=30., botm=[20.,10.,0.]
                                 )
     start = 30. * np.ones_like(dis.botm.array)
-    ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
-    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1., save_flows=True)
 
-    oc = flopy.mf6.ModflowGwfoc(model,
-                                saverecord=[("HEAD", "ALL"), ("BUDGET", "ALL")],
-                                head_filerecord=f"{name}.hds",
-                                budget_filerecord=f"{name}.cbc",
-                                )
-    model._modelgrid = MFsetupGrid(delc=model.dis.delc.array, delr=model.dis.delr.array,
-                                  top=model.dis.top.array, botm=model.dis.botm.array,
-                                  xoff=1000, yoff=1000)
-    model._mg_resync = False
-    assert hasattr(model, 'modelgrid'), "something went wrong setting the modelgrid attribute"
-    return model
+    bas = flopy.modflow.ModflowBas(mf, strt=start)
+    upw = flopy.modflow.ModflowUpw(mf, hk=1., vka=1.0)
+    oc = flopy.modflow.ModflowOc(mf,
+                                stress_period_data={(0, 0): ['save head','save budget']})
+    nwt = flopy.modflow.ModflowNwt(mf)
+
+    mf._modelgrid = MFsetupGrid(delc=mf.dis.delc.array, delr=mf.dis.delr.array,
+                                top=mf.dis.top.array, botm=mf.dis.botm.array,
+                                xoff=1000, yoff=1000)
+    mf._mg_resync = False
+    assert hasattr(mf, 'modelgrid'), "something went wrong setting the modelgrid attribute"
+    return mf
 
 
 # fixture to feed multiple model fixtures to a test
