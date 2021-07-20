@@ -22,6 +22,7 @@ from mfsetup.discretization import (
 from mfsetup.fileio import check_source_files
 from mfsetup.grid import get_ij
 from mfsetup.interpolate import (
+    Interpolator,
     get_source_dest_model_xys,
     interp_weights,
     interpolate,
@@ -1158,21 +1159,7 @@ class TmrNew:
     def inset_parent_period_mapping(self, inset_parent_period_mapping):
         self._inset_parent_period_mapping = inset_parent_period_mapping
 
-    @property
-    def interp_weights_heads(self):
-        """For a given parent, only calculate interpolation weights
-        once to speed up re-gridding of arrays to pfl_nwt."""
-        if self._interp_weights_heads is None:
 
-            # x, y, z locations of parent model head values
-            px, py, pz = self.parent_xyzcellcenters
-
-            # x, y, z locations of inset model boundary cells
-            x, y, z = self.inset_boundary_cells[['x', 'y', 'z']].T.values
-
-            self._interp_weights_heads = interp_weights((px, py, pz), (x, y, z), d=3)
-            assert not np.any(np.isnan(self._interp_weights_heads[1]))
-        return self._interp_weights_heads
 
     @property
     def interp_weights_flux(self):
@@ -1448,8 +1435,13 @@ class TmrNew:
 
             last_steps = {kper: kstp for kstp, kper in all_kstpkper}
 
-            # get the perimeter cells and calculate the weights
-            _ = self.interp_weights_heads
+            # create an interpolator instance
+            cell_centers_interp = Interpolator(self.parent_xyzcellcenters,
+                                               self.inset_boundary_cells[['x', 'y', 'z']].T.values,
+                                               d=3,
+                                               source_values_mask=self._source_grid_mask)
+            # compute the weights
+            _ = cell_centers_interp.interp_weights
 
             print('\ngetting perimeter heads...')
             t0 = time.time()
@@ -1473,17 +1465,14 @@ class TmrNew:
                 parent_heads = np.pad(parent_heads, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
 
                 # interpolate inset boundary heads from 3D parent head solution
-                heads = self.interpolate_values(parent_heads, method='linear')
+                heads = cell_centers_interp.interpolate(parent_heads, method='linear')
                 #heads = griddata((px, py, pz), parent_heads.ravel(),
                 #                  (x, y, z), method='linear')
 
                 # make a DataFrame of interpolated heads at perimeter cell locations
                 df = self.inset_boundary_cells.copy()
                 df['per'] = inset_per
-                try:
-                    df['head'] = heads
-                except:
-                    j=2
+                df['head'] = heads
 
                 # boundary heads must be greater than the cell bottom
                 # and idomain > 0

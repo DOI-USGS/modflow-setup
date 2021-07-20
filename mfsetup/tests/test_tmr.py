@@ -408,7 +408,7 @@ def parent_model(request,
             'inset_model_nwt': inset_model_nwt}[request.param]
 
 
-def test_get_boundary_heads(parent_model, inset_model,
+def test_get_boundary_heads(parent_model_mf6, inset_model_mf6,
                             project_root_path,
                             mf6_exe, zbud6_exe):
     """Test getting perimeter boundary head values from a parent model,
@@ -427,7 +427,8 @@ def test_get_boundary_heads(parent_model, inset_model,
 
     #m = get_pleasant_mf6_with_dis
     #parent_ws = project_root_path / 'examples/data/pleasant/'
-    m = inset_model
+    parent_model = parent_model_mf6
+    m = inset_model_mf6
     parent_ws = Path(parent_model.model_ws)
     #boundary_shapefile = parent_ws / 'gis/irregular_boundary.shp'
     parent_budget_file = parent_ws / f'{parent_model.name}.cbc'
@@ -447,11 +448,11 @@ def test_get_boundary_heads(parent_model, inset_model,
         spd[per] = data[['cellid', 'head']].to_records(index=False)
         if len(data) > maxbound:
             maxbound = len(data)
-    chd = flopy.mf6.ModflowGwfchd(inset_model, maxbound=maxbound,
+    chd = flopy.mf6.ModflowGwfchd(m, maxbound=maxbound,
                                   stress_period_data=spd,
                                   save_flows=True)
     # not sure why this needs to be done again to retain modelgrid attribute
-    inset_model._mg_resync = False
+    m._mg_resync = False
 
     # write the inset model input files
     m.simulation.write_simulation()
