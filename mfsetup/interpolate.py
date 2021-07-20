@@ -3,7 +3,7 @@ import time
 
 import flopy
 import numpy as np
-from scipy import interpolate as spint
+from scipy.interpolate import griddata
 from scipy.spatial import qhull as qhull
 
 
@@ -40,7 +40,7 @@ def get_source_dest_model_xys(source_model, dest_model,
     return source_model_xy, dest_model_xy
 
 
-def interp_weights(xyz, uvw, d=2):
+def interp_weights(xyz, uvw, d=2, mask=None):
     """Speed up interpolation vs scipy.interpolate.griddata (method='linear'),
     by only computing the weights once:
     https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids
@@ -53,6 +53,8 @@ def interp_weights(xyz, uvw, d=2):
     uvw : ndarray or tuple
         x, y, z, ... locations of where source data will be interpolated
         (shape n destination points x ndims)
+    d : int
+        Number of dimensions (2 for 2D, 3 for 3D, etc.)
 
     Returns
     -------
@@ -78,12 +80,12 @@ def interp_weights(xyz, uvw, d=2):
     temp = np.take(tri.transform, simplex, axis=0)
     delta = uvw - temp[:, d]
     bary = np.einsum('njk,nk->nj', temp[:, :d, :], delta)
-    print("finished in {:.2f}s\n".format(time.time() - t0))
     weights = np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
     # round the weights,
     # so that the weights for each simplex sum to 1
     # sums not exactly == 1 seem to cause spurious values
     weights = np.round(weights, 6)
+    print("finished in {:.2f}s\n".format(time.time() - t0))
     return vertices, weights
 
 
@@ -271,8 +273,97 @@ def regrid3d(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
     return arr2
 
 
+class Interpolator:
+    """Speed up barycentric interpolation similar to scipy.interpolate.griddata
+    (method='linear'), by computing the weights once and then re-using them for
+    successive interpolation with the same source and destination points.
+
+    Parameters
+    ----------
+    xyz : ndarray or tuple
+        x, y, z, ... locations of source data.
+        (shape n source points x ndims)
+    uvw : ndarray or tuple
+        x, y, z, ... locations of where source data will be interpolated
+        (shape n destination points x ndims)
+    d : int
+        Number of dimensions (2 for 2D, 3 for 3D, etc.)
+    source_values_mask : boolean array
+        Boolean array of same structure as the `source_values` array
+        input to the :meth:`~mfsetup.interpolate.Interpolator.interpolate` method,
+        with the same number of active values as the size of `xyz`.
+
+    Notes
+    -----
+    The methods employed are based on this Stack Overflow post:
+    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids
+
+    """
+    def __init__(self, xyz, uvw, d=2, source_values_mask=None):
+
+        self.xyz = xyz
+        self.uvw = uvw
+        self.d = d
+
+        # properties
+        self._interp_weights = None
+        self._source_values_mask = None
+        self.source_values_mask = source_values_mask
+
+    @property
+    def interp_weights(self):
+        """Calculate the interpolation weights."""
+        if self._interp_weights is None:
+            self._interp_weights = interp_weights(self.xyz, self.uvw, self.d)
+        return self._interp_weights
+
+    @property
+    def source_values_mask(self):
+        return self._source_values_mask
+
+    @source_values_mask.setter
+    def source_values_mask(self, source_values_mask):
+        if source_values_mask is not None and \
+            np.sum(source_values_mask) != len(self.xyz[0]):
+            raise ValueError('source_values_mask must contain the same number '
+                             'of True (active) values as there are source (xyz) points')
+        self._source_values_mask = source_values_mask
+
+    def interpolate(self, source_values, method='linear'):
+        """Interpolate values in source_values to the destination points in the *uvw* attribute.
+        using modelgrid instances
+        attached to the source and destination models.
+
+        Parameters
+        ----------
+        source_values : ndarray
+            Values to be interpolated to destination points. Array must be the same size as
+            the number of source points, or the number of active points within source points,
+            as defined by the `source_values_mask` array input to the :class:`~mfsetup.interpolate.Interpolator`.
+        method : str ('linear', 'nearest')
+            Interpolation method. With 'linear' a triangular mesh is discretized around
+            the source points, and barycentric weights representing the influence of the *d* +1
+            source points on each destination point (where *d* is the number of dimensions),
+            are computed. With 'nearest', the input is simply passed to :meth:`scipy.interpolate.griddata`.
+
+        Returns
+        -------
+        interpolated : 1D numpy array
+            Array of interpolated values at the destination locations.
+        """
+        if self.source_values_mask is not None:
+            source_values = source_values.flatten()[self.source_values_mask.flatten()]
+        if method == 'linear':
+            interpolated = interpolate(source_values, *self.interp_weights,
+                                       fill_value=None)
+        elif method == 'nearest':
+            interpolated = griddata(self.xyz, source_values,
+                                    self.uvw, method=method)
+        return interpolated
+
+
 if __name__ == '__main__':
-    """Exampmle from stack overflow. In this example, both
+    """Example from stack overflow. In this example, both
     xyz and uvw have points in 3 dimensions. (npoints x ndim)"""
     m, n, d = int(3.5e4), int(3e3), 3
     # make sure no new grid point is extrapolated
@@ -285,4 +376,4 @@ if __name__ == '__main__':
 
     vtx, wts = interp_weights(xyz, uvw)
 
-    np.allclose(interpolate(f, vtx, wts), spint.griddata(xyz, f, uvw))
+    np.allclose(interpolate(f, vtx, wts), griddata(xyz, f, uvw))

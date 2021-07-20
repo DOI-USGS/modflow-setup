@@ -7,7 +7,7 @@ from scipy.interpolate import griddata, interpn
 
 import xarray as xr
 from mfsetup.grid import MFsetupGrid
-from mfsetup.interpolate import get_source_dest_model_xys, interp_weights
+from mfsetup.interpolate import Interpolator, get_source_dest_model_xys, interp_weights
 from mfsetup.testing import compare_float_arrays
 
 
@@ -40,6 +40,7 @@ def modelgrid(dem_DataArray):
     return MFsetupGrid(**kwargs)
 
 
+@pytest.mark.skip(reason="incomplete")
 def test_interp(dem_DataArray, modelgrid):
 
     da = dem_DataArray
@@ -78,6 +79,28 @@ def test_interp_weights(pfl_nwt_with_grid):
                                                     m)
     inds, weights = interp_weights(parent_xy, inset_xy)
     assert np.all(weights >= 0), print(np.where(weights < 0))
+
+
+def test_interpolator(dem_DataArray, modelgrid):
+
+    da = dem_DataArray
+    mg = modelgrid
+    x = mg.xcellcenters.ravel()
+    y = mg.ycellcenters.ravel()
+
+    X, Y = np.meshgrid(da.x.values, da.y.values)
+    X = X.ravel()
+    Y = Y.ravel()
+    xyz = np.array([X, Y]).transpose() # source data points are xarray datapoints
+    uvw = np.array([x, y]).transpose()
+
+    for method in 'linear', 'nearest':
+        gdi = griddata(xyz, da.values.ravel(), uvw, method=method)
+
+        interp = Interpolator(xyz, uvw, d=2)
+        results = interp.interpolate(da.values.ravel(), method=method)
+
+        assert np.allclose(gdi[~np.isnan(gdi)], results[~np.isnan(results)])
 
 
 # even though test runs locally on Windows 10, and on Travis
