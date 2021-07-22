@@ -228,8 +228,7 @@ def parent_model_mf6(tmpdir, mf6_exe):
                                 top=30., botm=[20.,10.,0.]
                                 )
 
-    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=0, k=1.0, k33=1.0, 
-            alternative_cell_averaging='amt-lmk', save_flows=True)
+    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=0, k=1.0, k33=1.0, save_flows=True)
     # set up CHD boundaries
     # for eastward flow through the west boundary
     # curving to northward flow through the north boundary
