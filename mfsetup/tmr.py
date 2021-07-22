@@ -953,7 +953,7 @@ def get_flowja_face(cell_budget_file, binary_grid_file,
     return df[cols].copy()
 
 
-def get_qx_qy_qz(cell_budget_file, binary_grid_file,
+def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
                  version='mf6',
                  model_top=None, model_bottom_array=None,
                  kstpkper=(0, 0),
@@ -966,7 +966,7 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file,
     cell_budget_file : str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile
         File path or pointer to MODFLOW 6 cell budget file.
     binary_grid_file : str or pathlike
-        File path to MODFLOW 6 binary grid (``*.dis.grb``) file
+        File path to MODFLOW 6 binary grid (``*.dis.grb``) file. Not needed for MFNWT
     version : str
         MODFLOW version- 'mf6' or other. If not 'mf6', the cell budget output is assumed to
         be formatted similar to a MODFLOW 2005 style model.
@@ -988,6 +988,7 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file,
     """
 
     if version == 'mf6':
+        assert binary_grid_file is not None, 'Must specify mf6 binary grid file'
         # get dataframe of flow at each n to m cell connection
         df = get_flowja_face(cell_budget_file, binary_grid_file=binary_grid_file,
                             kstpkper=kstpkper, specific_discharge=specific_discharge)
@@ -998,20 +999,20 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file,
 
         # get arrays of flow through cell faces
         # Qx (right face; TODO: confirm direction)
-        rf = df.loc[(df['jn'] < df['jm'])]
-        nlay = rf['km'].max() + 1
+        rfdf = df.loc[(df['jn'] < df['jm'])]
+        nlay = rfdf['km'].max() + 1
         qx = np.zeros((nlay, nrow, ncol))
-        qx[rf['kn'].values, rf['in'].values, rf['jn'].values] = -rf.q.values
+        qx[rfdf['kn'].values, rfdf['in'].values, rfdf['jn'].values] = -rfdf.q.values
 
         # Qy (front face; TODO: confirm direction)
-        ff = df.loc[(df['in'] < df['im'])]
+        ffdf = df.loc[(df['in'] < df['im'])]
         qy = np.zeros((nlay, nrow, ncol))
-        qy[ff['kn'].values, ff['in'].values, ff['jn'].values] = -ff.q.values
+        qy[ffdf['kn'].values, ffdf['in'].values, ffdf['jn'].values] = -ffdf.q.values
 
         # Qz (bottom face; TODO: confirm that this is downward positive)
-        bf = df.loc[(df['kn'] < df['km'])]
+        bfdf = df.loc[(df['kn'] < df['km'])]
         qz = np.zeros((nlay, nrow, ncol))
-        qz[bf['kn'].values, bf['in'].values, bf['jn'].values] = -bf.q.values
+        qz[bfdf['kn'].values, bfdf['in'].values, bfdf['jn'].values] = -bfdf.q.values
 
         # get 3D array of cell tops and bottoms
         if specific_discharge:
