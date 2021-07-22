@@ -97,27 +97,60 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
 
 
 @pytest.mark.parametrize('specific_discharge',(False, True))
-@pytest.mark.parametrize('version', ('mf6', 'mfnwt'))
-def test_get_qx_qy_qz(test_data_path, version, specific_discharge):
-    if version == 'mf6':
-        cell_budget_file = test_data_path / 'shellmound/tmr_parent/shellmound.cbc'
-        binary_grid_file = test_data_path / 'shellmound/tmr_parent/shellmound.dis.grb'
-        model_top = None
-        model_bottom_array = None
-    else:
-        cell_budget_file = test_data_path / 'plainfieldlakes/pfl.cbc'
-        model_top = np.loadtxt(test_data_path / 'plainfieldlakes/external/top.dat')
-        botms = []
-        for i in range(4):
-            arr = np.loadtxt(test_data_path / f'plainfieldlakes/external/botm{i}.dat')
-            botms.append(arr)
-        model_bottom_array = np.array(botms)
-    qx, qy, qz = get_qx_qy_qz(cell_budget_file, binary_grid_file=binary_grid_file,
-                              version=version,
-                              model_top=model_top, model_bottom_array=model_bottom_array,
-                              specific_discharge=specific_discharge)
-    j=2
+def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_discharge):
+    '''    if version == 'mf6':
+            cell_budget_file = test_data_path / 'shellmound/tmr_parent/shellmound.cbc'
+            binary_grid_file = test_data_path / 'shellmound/tmr_parent/shellmound.dis.grb'
+            model_top = None
+            model_bottom_array = None
+        else:
+            cell_budget_file = test_data_path / 'plainfieldlakes/pfl.cbc'
+            model_top = np.loadtxt(test_data_path / 'plainfieldlakes/external/top.dat')
+            botms = []
+            for i in range(4):
+                arr = np.loadtxt(test_data_path / f'plainfieldlakes/external/botm{i}.dat')
+                botms.append(arr)
+            model_bottom_array = np.array(botms)
+        qx, qy, qz = get_qx_qy_qz(cell_budget_file, binary_grid_file=binary_grid_file,
+                                version=version,
+                                model_top=model_top, model_bottom_array=model_bottom_array,
+                                specific_discharge=specific_discharge)
+        j=2
+    '''
+    """[summary]
 
+    Args:
+        parent_model_mf6 ([type]): [description]
+        parent_model_nwt ([type]): [description]
+    """
+    mf6_ws = Path(tmpdir) / 'perimeter_bc_demo/parent'
+
+    # get results for MF6
+    m6 = parent_model_mf6
+    qx6, qy6, qz6 = get_qx_qy_qz(mf6_ws / 'tmr_parent.cbc', binary_grid_file=mf6_ws / 'tmr_parent.dis.grb',
+                                version='mf6',
+                                model_top=m6.dis.top.array, 
+                                model_bottom_array=m6.dis.botm.array,
+                                specific_discharge=specific_discharge)
+    
+    
+    # get results for MFNWT
+    mfnwt_ws = Path(tmpdir) / 'perimeter_bc_demo/parent_nwt'
+
+    mnwt = parent_model_nwt
+    qxnwt, qynwt, qznwt = get_qx_qy_qz(mfnwt_ws / 'tmr_parent_nwt.cbc',
+                                       version='mfnwt',
+                                       model_top=mnwt.dis.top.array, 
+                                       model_bottom_array=mnwt.dis.botm.array,
+                                       specific_discharge=specific_discharge)
+    # compare results for max flux in each direction with tolerance 1e-2
+    assert np.isclose(np.max(qx6),np.max(qxnwt), atol=1e-2)
+    assert np.isclose(np.max(qy6),np.max(qynwt), atol=1e-2)
+    assert np.isclose(np.max(qz6),np.max(qznwt), atol=1e-2)
+    # then compare that ALL the values are that close
+    assert np.allclose(qx6,qxnwt,atol=1e-2)
+    assert np.allclose(qy6,qynwt,atol=1e-2)
+    assert np.allclose(qz6,qznwt,atol=1e-2)
 
 def test_tmr_new(pleasant_model):
     m = pleasant_model
@@ -185,18 +218,18 @@ def parent_model_mf6(tmpdir, mf6_exe):
     sim = flopy.mf6.MFSimulation(sim_name=name, sim_ws=str(model_ws))
     tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
                                 perioddata=[(1.0, 1, 1.0)])
-    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="SIMPLE")
+    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="MODERATE", outer_dvclose=1e-4)
     # create model instance
-    model = flopy.mf6.ModflowGwf(sim, modelname=name)
+    model = flopy.mf6.ModflowGwf(sim, modelname=name, newtonoptions='newton')
 
     ncells_side = 30
     dis = flopy.mf6.ModflowGwfdis(model, nlay=3, nrow=ncells_side, ncol=ncells_side,
                                 delr=100, delc=100,
                                 top=30., botm=[20.,10.,0.]
                                 )
-    start = 30. * np.ones_like(dis.botm.array)
-    ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
-    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1., save_flows=True)
+
+    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=0, k=1.0, k33=1.0, 
+            alternative_cell_averaging='amt-lmk', save_flows=True)
     # set up CHD boundaries
     # for eastward flow through the west boundary
     # curving to northward flow through the north boundary
@@ -215,6 +248,11 @@ def parent_model_mf6(tmpdir, mf6_exe):
                             })
     perim_chd['cellid'] = list(zip(perim_chd['k'], perim_chd['i'], perim_chd['j']))
     perim_chd_rec = perim_chd[['cellid', 'head']].to_records(index=False)
+    
+    start = 30. * np.ones_like(dis.botm.array)
+    start[0, w_heads_i, w_heads_j] = w_heads
+    start[0, n_heads_i, n_heads_j] = n_heads
+    ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
 
     chd = flopy.mf6.ModflowGwfchd(model, maxbound=len(perim_chd_rec),
                                 stress_period_data=perim_chd_rec,
@@ -277,7 +315,7 @@ def inset_model_mf6(tmpdir, mf6_exe):
 
 
 @pytest.fixture
-def parent_model_nwt(tmpdir, mnwt_exe):
+def parent_model_nwt(tmpdir, mfnwt_exe):
     """Make a simpmle MFNWT parent model for TMR perimeter boundary tests,
     with inflow from west that curves to outflow to the north.
     
@@ -314,10 +352,10 @@ def parent_model_nwt(tmpdir, mnwt_exe):
     ibnd[0, n_heads_i, n_heads_j] = -1
 
     bas = flopy.modflow.ModflowBas(mf, ibound=ibnd, strt=start)
-    upw = flopy.modflow.ModflowUpw(mf, hk=1., vka=1.0)
+    upw = flopy.modflow.ModflowUpw(mf, hk=1., vka=1.0, ipakcb=53)
     oc = flopy.modflow.ModflowOc(mf,
                                 stress_period_data={(0, 0): ['save head','save budget']})
-    nwt = flopy.modflow.ModflowNwt(mf)
+    nwt = flopy.modflow.ModflowNwt(mf, headtol=1e-4)
     mf.write_input()
 
     mf.exe_name = mfnwt_exe
