@@ -131,7 +131,9 @@ def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_disch
                                 version='mf6',
                                 model_top=m6.dis.top.array, 
                                 model_bottom_array=m6.dis.botm.array,
-                                specific_discharge=specific_discharge)
+                                specific_discharge=specific_discharge,
+                                modelgrid=m6.modelgrid,
+                                headfile=mf6_ws / 'tmr_parent.hds')
     
     
     # get results for MFNWT
@@ -142,15 +144,28 @@ def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_disch
                                        version='mfnwt',
                                        model_top=mnwt.dis.top.array, 
                                        model_bottom_array=mnwt.dis.botm.array,
-                                       specific_discharge=specific_discharge)
-    # compare results for max flux in each direction with tolerance 1e-2
-    assert np.isclose(np.max(qx6),np.max(qxnwt), atol=1e-2)
-    assert np.isclose(np.max(qy6),np.max(qynwt), atol=1e-2)
-    assert np.isclose(np.max(qz6),np.max(qznwt), atol=1e-2)
-    # then compare that ALL the values are that close
-    assert np.allclose(qx6,qxnwt,atol=1e-2)
-    assert np.allclose(qy6,qynwt,atol=1e-2)
-    assert np.allclose(qz6,qznwt,atol=1e-2)
+                                       specific_discharge=specific_discharge,
+                                       modelgrid=mnwt.modelgrid,
+                                       headfile=mfnwt_ws / 'tmr_parent_nwt.hds')
+    if specific_discharge:
+        # compare results for max flux in each direction with 
+        # tolerance 1e-8 (specific discharge is smaller!)
+        assert np.isclose(np.max(qx6),np.max(qxnwt), atol=1e-8)
+        assert np.isclose(np.max(qy6),np.max(qynwt), atol=1e-8)
+        assert np.isclose(np.max(qz6),np.max(qznwt), atol=1e-8)
+        # then compare that ALL the values are that close
+        assert np.allclose(qx6,qxnwt,atol=1e-8)
+        assert np.allclose(qy6,qynwt,atol=1e-8)
+        assert np.allclose(qz6,qznwt,atol=1e-8)
+    else:
+        # compare results for max flux in each direction with tolerance 1e-2
+        assert np.isclose(np.max(qx6),np.max(qxnwt), atol=1e-2)
+        assert np.isclose(np.max(qy6),np.max(qynwt), atol=1e-2)
+        assert np.isclose(np.max(qz6),np.max(qznwt), atol=1e-2)
+        # then compare that ALL the values are that close
+        assert np.allclose(qx6,qxnwt,atol=1e-2)
+        assert np.allclose(qy6,qynwt,atol=1e-2)
+        assert np.allclose(qz6,qznwt,atol=1e-2)
 
 def test_tmr_new(pleasant_model):
     m = pleasant_model
@@ -228,7 +243,7 @@ def parent_model_mf6(tmpdir, mf6_exe):
                                 top=30., botm=[20.,10.,0.]
                                 )
 
-    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=0, k=1.0, k33=1.0, save_flows=True)
+    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1.0, k33=1.0, save_flows=True)
     # set up CHD boundaries
     # for eastward flow through the west boundary
     # curving to northward flow through the north boundary
@@ -351,7 +366,7 @@ def parent_model_nwt(tmpdir, mfnwt_exe):
     ibnd[0, n_heads_i, n_heads_j] = -1
 
     bas = flopy.modflow.ModflowBas(mf, ibound=ibnd, strt=start)
-    upw = flopy.modflow.ModflowUpw(mf, hk=1., vka=1.0, ipakcb=53)
+    upw = flopy.modflow.ModflowUpw(mf,laytyp=1, hk=1., vka=1.0, ipakcb=53)
     oc = flopy.modflow.ModflowOc(mf,
                                 stress_period_data={(0, 0): ['save head','save budget']})
     nwt = flopy.modflow.ModflowNwt(mf, headtol=1e-4)
