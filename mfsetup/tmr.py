@@ -1033,123 +1033,6 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
         qy = cbb.get_data(text="flow front face", kstpkper=kstpkper)[0]
         qz = cbb.get_data(text="flow lower face", kstpkper=kstpkper)[0]
 
-    '''
-    #
-    # G A R B A G E  vvvvvvvvv
-    #
-    # TODO: consider refactoring to move this into its own function
-            # * handle vertical fluxes
-            # * possibly handle rotated inset with differnt angle than parent - now assuming colinear
-
-            #
-            # Handle the geometry issues for the inset
-            #
-            # need to locate edge faces (x,y,z) based on which faces is out (e.g. left, right, up, down)
-
-            # make a dataframe to store these
-            self.inset_boundary_cell_faces = self.inset_boundary_cells.copy()
-            # renaming columns to be clear now x,y,z, is for the outer cell face
-            self.inset_boundary_cell_faces.rename(columns={'x':'xface','y':'yface','z':'zface'}, inplace=True)
-            # convert x,y coordinates to model coords from world coords
-            self.inset_boundary_cell_faces.xface, self.inset_boundary_cell_faces.yface = \
-                    self.inset.modelgrid.get_local_coords(self.inset_boundary_cell_faces.xface, self.inset_boundary_cell_faces.yface)
-            # calculate the thickness to later get the area
-            self.inset_boundary_cell_faces['thickness'] = self.inset_boundary_cell_faces.top - self.inset_boundary_cell_faces.botm
-            # pre-seed the area as thickness to later mult by width
-            self.inset_boundary_cell_faces['face_area'] = self.inset_boundary_cell_faces['thickness'].values
-            # placeholder for interpolated values
-            self.inset_boundary_cell_faces['q_interp'] = np.nan
-            # placeholder for flux to well package
-            self.inset_boundary_cell_faces['Q'] = np.nan
-
-            # make a grid of the spacings
-            delr_gridi, delc_gridi = np.meshgrid(self.inset.modelgrid.delr, self.inset.modelgrid.delc)
-
-            for cn in self.inset_boundary_cell_faces.cellface.unique():
-                curri = self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn].i
-                currj = self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn].j
-                curr_delc = delc_gridi[curri, currj]
-                curr_delr = delr_gridi[curri, currj]
-                if cn == 'top':
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] += curr_delc/2
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr
-                elif cn == 'bottom':
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] -= curr_delc/2
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr
-                if cn == 'right':
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] += curr_delr/2
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
-                elif cn == 'left':
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] -= curr_delr/2
-                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
-
-            #
-            # Now handle the geometry issues for the parent
-            #
-            # first thicknesses (at cell centers)
-            parent_thick = -np.diff(self.parent.modelgrid.top_botm, axis=0)
-            # TODO: refactor to use updated modelgrid object sat thickness calcs
-
-            # make matrices of the row and column spacings
-            # NB --> trying to preserve the always seemingly
-            # backwards delr/delc definitions
-            # also note - for now, taking average thickness at a connected face
-            # TODO: confirm thickness averaging is a valid approach
-
-
-            # TODO: implement vertical fluxes
-            
-            parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \
-                                    np.tile(delr_grid, (nlay,1,1))
-            
-            # need XYZ locations of the center of each face for
-            # iface and jface edges (faces)
-            # NB edges are returned in model coordinates
-            xloc_edge, yloc_edge = self.parent.modelgrid.xyedges
-
-            # throw out the left and top edges, respectively
-            xloc_edge=xloc_edge[1:]
-            yloc_edge=yloc_edge[1:]
-            # tile out to full dimensions of the grid
-            xloc_edge = np.tile(np.atleast_2d(xloc_edge),(nlay+2,nrow,1))
-            yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay+2,1,ncol))
-
-            # need XYZ locations of the center of each cell
-            # iface and jface centroids
-            xloc_center, yloc_center = self.parent.modelgrid.xycenters
-
-            # tile out to full dimensions of the grid
-            xloc_center = np.tile(np.atleast_2d(xloc_center),(nlay+2,nrow,1))
-            yloc_center = np.tile(np.atleast_2d(yloc_center).T,(nlay+2,1,ncol))
-
-            # get the vertical centroids initially at cell centroids
-            zloc = (self.parent.modelgrid.top_botm[:-1,:,:] +
-                self.parent.modelgrid.top_botm[1:,:,:] ) / 2
-
-            # pad in the vertical above and below the model
-            zpadtop = np.expand_dims(self.parent.modelgrid.top_botm[0,:,:] + parent_thick[0], axis=0)
-            zpadbotm = np.expand_dims(self.parent.modelgrid.top_botm[-1,:,:] - parent_thick[-1], axis=0)
-            zloc=np.vstack([zpadtop,zloc,zpadbotm])
-
-
-            # for iface, all cols, nrow-1 rows
-            self.x_iface_parent = xloc_center[:,:-1,:].ravel()
-            self.y_iface_parent = yloc_edge[:,:-1,:].ravel()
-            # need to calculate the average z location along rows
-            self.z_iface_parent = ((zloc[:,:-1,:]+zloc[:,1:,:]) / 2).ravel()
-
-            # for jface, all rows, ncol-1 cols
-            self.x_jface_parent = xloc_edge[:,:,:-1].ravel()
-            self.y_jface_parent = yloc_center[:,:,:-1].ravel()
-            # need to calculate the average z location along columns
-            self.z_jface_parent = ((zloc[:,:,:-1]+zloc[:,:,1:]) / 2).ravel()
-
-
-    #
-    # G A R B A G E  ^ ^ ^ ^ 
-    #
-    '''
-
     # optionally get specific discharge
     if specific_discharge:
         if modelgrid is None:
@@ -1325,18 +1208,21 @@ class TmrNew:
             # x, y, z locations of parent model head values for j faces
             jpx, jpy, jpz = self.x_jface_parent, self.y_jface_parent, self.z_jface_parent
 
-            for fluxdir in ['left', 'right', 'top', 'bottom']:
-                x,y,z = self.inset_boundary_cell_faces.loc[
-                    self.inset_boundary_cell_faces.cellface==fluxdir][['xface','yface','zface']].T.values
-                if fluxdir in ['top','bottom']:
-                    # these are the i-direction fluxes
-                    self._interp_weights_flux[fluxdir] = interp_weights((ipx, ipy, ipz), (x, y, z), d=3)
-                if fluxdir in ['left','right']:
-                    # these are the i-direction fluxes
-                    self._interp_weights_flux[fluxdir] = interp_weights((jpx, jpy, jpz), (x, y, z), d=3)
+            
+            # these are the i-direction fluxes
+            x,y,z = self.inset_boundary_cell_faces.loc[
+                self.inset_boundary_cell_faces.cellface.isin(['top','bottom'])][['xface','yface','zface']].T.values
+            self._interp_weights_flux['iface'] = interp_weights((ipx, ipy, ipz), (x, y, z), d=3)
+            assert not np.any(np.isnan(self._interp_weights_flux['iface'][1]))
+
+            # these are the j-direction fluxes
+            x,y,z = self.inset_boundary_cell_faces.loc[
+                self.inset_boundary_cell_faces.cellface.isin(['left','right'])][['xface','yface','zface']].T.values
+                
+            self._interp_weights_flux['jface'] = interp_weights((jpx, jpy, jpz), (x, y, z), d=3)
+            assert not np.any(np.isnan(self._interp_weights_flux['jface'][1]))
 
 
-                assert not np.any(np.isnan(self._interp_weights_flux[fluxdir][1]))
         return self._interp_weights_flux
 
     @property
@@ -1647,8 +1533,9 @@ class TmrNew:
 
         elif self.boundary_type == 'flux':
             check_source_files([self.parent_cell_budget_file])
-            if self.parent_binary_grid_file is None:
-                raise ValueError('Specified flux perimeter boundary requires a parent_binary_grid_file')
+            if self.parent.version == 'mf6':
+                if self.parent_binary_grid_file is None:
+                    raise ValueError('Specified flux perimeter boundary requires a parent_binary_grid_file if parent is MF6')
             check_source_files([self.parent_binary_grid_file])
             fileobj = bf.CellBudgetFile(self.parent_cell_budget_file)  # , precision='single')
             all_kstpkper = fileobj.get_kstpkper()
@@ -1659,6 +1546,115 @@ class TmrNew:
             t0 = time.time()
             dfs = []
             parent_periods = []
+
+
+            # TODO: consider refactoring to move this into its own function
+            # * handle vertical fluxes
+            # * possibly handle rotated inset with differnt angle than parent - now assuming colinear
+
+            #
+            # Handle the geometry issues for the inset
+            #
+            # need to locate edge faces (x,y,z) based on which faces is out (e.g. left, right, up, down)
+
+            # make a dataframe to store these
+            self.inset_boundary_cell_faces = self.inset_boundary_cells.copy()
+            # renaming columns to be clear now x,y,z, is for the outer cell face
+            self.inset_boundary_cell_faces.rename(columns={'x':'xface','y':'yface','z':'zface'}, inplace=True)
+            # convert x,y coordinates to model coords from world coords
+            self.inset_boundary_cell_faces.xface, self.inset_boundary_cell_faces.yface = \
+                    self.inset.modelgrid.get_local_coords(self.inset_boundary_cell_faces.xface, self.inset_boundary_cell_faces.yface)
+            # calculate the thickness to later get the area
+            self.inset_boundary_cell_faces['thickness'] = self.inset_boundary_cell_faces.top - self.inset_boundary_cell_faces.botm
+            # TODO: consider saturated thickness instead, but this would require interpolating parent heads to inset cell locations
+            # pre-seed the area as thickness to later mult by width
+            self.inset_boundary_cell_faces['face_area'] = self.inset_boundary_cell_faces['thickness'].values
+            # placeholder for interpolated values
+            self.inset_boundary_cell_faces['q_interp'] = np.nan
+            # placeholder for flux to well package
+            self.inset_boundary_cell_faces['Q'] = np.nan
+
+            # make a grid of the spacings
+            delr_gridi, delc_gridi = np.meshgrid(self.inset.modelgrid.delr, self.inset.modelgrid.delc)
+
+            for cn in self.inset_boundary_cell_faces.cellface.unique():
+                curri = self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn].i
+                currj = self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn].j
+                curr_delc = delc_gridi[curri, currj]
+                curr_delr = delr_gridi[curri, currj]
+                if cn == 'top':
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] += curr_delc/2
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr
+                elif cn == 'bottom':
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] -= curr_delc/2
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr
+                if cn == 'right':
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] += curr_delr/2
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
+                elif cn == 'left':
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] -= curr_delr/2
+                    self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc
+
+            #
+            # Now handle the geometry issues for the parent
+            #
+            # first thicknesses (at cell centers)
+
+            parent_thick = self.parent.modelgrid.thick
+
+           
+            # make matrices of the row and column spacings
+            # NB --> trying to preserve the always seemingly
+            # backwards delr/delc definitions
+            # also note - for now, taking average thickness at a connected face
+
+
+            
+            # need XYZ locations of the center of each face for
+            # iface and jface edges (faces)
+            # NB edges are returned in model coordinates
+            xloc_edge, yloc_edge = self.parent.modelgrid.xyedges
+            nlay = self.parent.modelgrid.nlay
+            nrow = self.parent.modelgrid.nrow
+            ncol = self.parent.modelgrid.ncol
+            # throw out the left and top edges, respectively
+            xloc_edge=xloc_edge[1:]
+            yloc_edge=yloc_edge[1:]            
+            # tile out to full dimensions of the grid
+            xloc_edge = np.tile(np.atleast_2d(xloc_edge),(nlay+2,nrow,1))
+            yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay+2,1,ncol))
+
+            # TODO: implement vertical fluxes
+            ''' parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \
+                                np.tile(delr_grid, (nlay,1,1))
+            '''
+            xloc_center, yloc_center = self.parent.modelgrid.xycenters
+            
+            # tile out to full dimensions of the grid
+            
+            xloc_center = np.tile(np.atleast_2d(xloc_center),(nlay+2,nrow,1))
+            yloc_center = np.tile(np.atleast_2d(yloc_center).T,(nlay+2,1,ncol))
+
+            # get the vertical centroids initially at cell centroids
+            zloc = (self.parent.modelgrid.top_botm[:-1,:,:] +
+                self.parent.modelgrid.top_botm[1:,:,:] ) / 2
+
+            # pad in the vertical above and below the model
+            zpadtop = np.expand_dims(self.parent.modelgrid.top_botm[0,:,:] + parent_thick[0], axis=0)
+            zpadbotm = np.expand_dims(self.parent.modelgrid.top_botm[-1,:,:] - parent_thick[-1], axis=0)
+            zloc=np.vstack([zpadtop,zloc,zpadbotm])
+            
+            # for iface, all cols, nrow-1 rows
+            self.x_iface_parent = xloc_center[:,:-1,:].ravel()
+            self.y_iface_parent = yloc_edge[:,:,:-1].ravel()
+            # need to calculate the average z location along rows
+            self.z_iface_parent = ((zloc[:,:-1,:]+zloc[:,1:,:]) / 2).ravel()
+            # for jface, all rows, ncol-1 cols
+            self.x_jface_parent = xloc_edge[:,:-1,:].ravel()
+            self.y_jface_parent = yloc_center[:,:,:-1].ravel()
+            # need to calculate the average z location along columns
+            self.z_jface_parent = ((zloc[:,:,:-1]+zloc[:,:,1:]) / 2).ravel()
+
 
             # get the perimeter cells and calculate the weights
             _ = self.interp_weights_flux
@@ -1702,7 +1698,7 @@ class TmrNew:
                     # *  refactor to use updated modelgrid object sat thickness calcs
 
                     #
-                    # TODO: implement vertical fluxes
+                    # TODO: REPLACE THIS WITH get_qx_qy_qz
                     # Get the vertical fluxes
                     '''if 'kn' in df.columns and np.any(df['kn'] < df['km']):
                         vflux = df.loc[(df['kn'] < df['km'])]
@@ -1738,14 +1734,19 @@ class TmrNew:
                     # TODO: implement MF2005
                     #  *create i, j, and v face xyzq vectors as with MF6 above
                     #   x_iface, y_iface, z_iface, q_iface .... etc.
+                # TODO: REPLACE THE ABOVE WITH get_qx_qy_qz
+
 
                 # pad the two parent flux arrays on the top and bottom
                 # so that inset cells above and below the top/bottom cell centers
                 # will be within the interpolation space
+                # TODO: consider padding or not on top, left, and "top (row-wise)"
                 # (parent x, y, z locations already contain this pad - see zloc above)
                 q_iface = np.pad(q_iface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()
                 q_jface = np.pad(q_jface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()
 
+
+                # TODO: refactor interpolation to use the new interpolator object
                 # interpolate q at the four different face orientations (e.g. fluxdir)
                 for fluxdir in ['top','bottom','left','right']:
                     if fluxdir in ['top','bottom']:
