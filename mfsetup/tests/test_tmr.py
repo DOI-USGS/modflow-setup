@@ -98,30 +98,13 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
 
 @pytest.mark.parametrize('specific_discharge',(False, True))
 def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_discharge):
-    '''    if version == 'mf6':
-            cell_budget_file = test_data_path / 'shellmound/tmr_parent/shellmound.cbc'
-            binary_grid_file = test_data_path / 'shellmound/tmr_parent/shellmound.dis.grb'
-            model_top = None
-            model_bottom_array = None
-        else:
-            cell_budget_file = test_data_path / 'plainfieldlakes/pfl.cbc'
-            model_top = np.loadtxt(test_data_path / 'plainfieldlakes/external/top.dat')
-            botms = []
-            for i in range(4):
-                arr = np.loadtxt(test_data_path / f'plainfieldlakes/external/botm{i}.dat')
-                botms.append(arr)
-            model_bottom_array = np.array(botms)
-        qx, qy, qz = get_qx_qy_qz(cell_budget_file, binary_grid_file=binary_grid_file,
-                                version=version,
-                                model_top=model_top, model_bottom_array=model_bottom_array,
-                                specific_discharge=specific_discharge)
-        j=2
-    '''
     """[summary]
 
     Args:
+        tmpdir ([type]): [description]
         parent_model_mf6 ([type]): [description]
         parent_model_nwt ([type]): [description]
+        specific_discharge ([type]): [description]
     """
     mf6_ws = Path(tmpdir) / 'perimeter_bc_demo/parent'
 
@@ -147,25 +130,10 @@ def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_disch
                                        specific_discharge=specific_discharge,
                                        modelgrid=mnwt.modelgrid,
                                        headfile=mfnwt_ws / 'tmr_parent_nwt.hds')
-    if specific_discharge:
-        # compare results for max flux in each direction with 
-        # tolerance 1e-8 (specific discharge is smaller!)
-        assert np.isclose(np.max(qx6),np.max(qxnwt), atol=1e-8)
-        assert np.isclose(np.max(qy6),np.max(qynwt), atol=1e-8)
-        assert np.isclose(np.max(qz6),np.max(qznwt), atol=1e-8)
-        # then compare that ALL the values are that close
-        assert np.allclose(qx6,qxnwt,atol=1e-8)
-        assert np.allclose(qy6,qynwt,atol=1e-8)
-        assert np.allclose(qz6,qznwt,atol=1e-8)
-    else:
-        # compare results for max flux in each direction with tolerance 1e-2
-        assert np.isclose(np.max(qx6),np.max(qxnwt), atol=1e-2)
-        assert np.isclose(np.max(qy6),np.max(qynwt), atol=1e-2)
-        assert np.isclose(np.max(qz6),np.max(qznwt), atol=1e-2)
-        # then compare that ALL the values are that close
-        assert np.allclose(qx6,qxnwt,atol=1e-2)
-        assert np.allclose(qy6,qynwt,atol=1e-2)
-        assert np.allclose(qz6,qznwt,atol=1e-2)
+
+    assert np.allclose(qx6,qxnwt,atol=1e-2)
+    assert np.allclose(qy6,qynwt,atol=1e-2)
+    assert np.allclose(qz6,qznwt,atol=1e-2)
 
 def test_tmr_new(pleasant_model):
     m = pleasant_model
@@ -576,14 +544,15 @@ def test_get_boundary_fluxes(parent_model_mf6, inset_model_mf6,
 
     #m = get_pleasant_mf6_with_dis
     #parent_ws = project_root_path / 'examples/data/pleasant/'
-    m = inset_model
-    parent_ws = Path(parent_model.model_ws)
+    m = inset_model_mf6
+    parent_ws = Path(parent_model_mf6.model_ws)
     #boundary_shapefile = parent_ws / 'gis/irregular_boundary.shp'
-    parent_budget_file = parent_ws / f'{parent_model.name}.cbc'
-    parent_head_file = parent_ws / f'{parent_model.name}.hds'
-    parent_binary_grid_file = parent_ws / f'{parent_model.name}.dis.grb'
-    tmr = TmrNew(parent_model, m, parent_cell_budget_file=parent_budget_file,
+    parent_budget_file = parent_ws / f'{parent_model_mf6.name}.cbc'
+    parent_head_file = parent_ws / f'{parent_model_mf6.name}.hds'
+    parent_binary_grid_file = parent_ws / f'{parent_model_mf6.name}.dis.grb'
+    tmr = TmrNew(parent_model_mf6, m, parent_cell_budget_file=parent_budget_file,
                  parent_binary_grid_file=parent_binary_grid_file,
+                 parent_head_file=parent_head_file,
                  boundary_type='flux',
                  )
     perimeter_df = tmr.get_inset_boundary_values()
