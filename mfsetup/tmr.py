@@ -1073,8 +1073,8 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
 
         # divide by the areas resulting in normalized, specific discharge 
         qx /= qx_face_areas
-        qz /= qy_face_areas
-        qx /= qz_face_areas
+        qy /= qy_face_areas
+        qz /= qz_face_areas
         
     return qx, qy, qz
 
@@ -1547,15 +1547,11 @@ class TmrNew:
             dfs = []
             parent_periods = []
 
-
             # TODO: consider refactoring to move this into its own function
             # * handle vertical fluxes
             # * possibly handle rotated inset with differnt angle than parent - now assuming colinear
-
-            #
-            # Handle the geometry issues for the inset
-            #
-            # need to locate edge faces (x,y,z) based on which faces is out (e.g. left, right, up, down)
+            # * Handle the geometry issues for the inset
+            # * need to locate edge faces (x,y,z) based on which faces is out (e.g. left, right, up, down)
 
             # make a dataframe to store these
             self.inset_boundary_cell_faces = self.inset_boundary_cells.copy()
@@ -1572,7 +1568,7 @@ class TmrNew:
             # placeholder for interpolated values
             self.inset_boundary_cell_faces['q_interp'] = np.nan
             # placeholder for flux to well package
-            self.inset_boundary_cell_faces['Q'] = np.nan
+            # self.inset_boundary_cell_faces['Q'] = np.nan
 
             # make a grid of the spacings
             delr_gridi, delc_gridi = np.meshgrid(self.inset.modelgrid.delr, self.inset.modelgrid.delc)
@@ -1597,18 +1593,14 @@ class TmrNew:
 
             #
             # Now handle the geometry issues for the parent
-            #
             # first thicknesses (at cell centers)
 
             parent_thick = self.parent.modelgrid.thick
 
-           
             # make matrices of the row and column spacings
             # NB --> trying to preserve the always seemingly
             # backwards delr/delc definitions
             # also note - for now, taking average thickness at a connected face
-
-
             
             # need XYZ locations of the center of each face for
             # iface and jface edges (faces)
@@ -1654,10 +1646,34 @@ class TmrNew:
             self.y_jface_parent = yloc_center[:,:,:-1].ravel()
             # need to calculate the average z location along columns
             self.z_jface_parent = ((zloc[:,:,:-1]+zloc[:,:,1:]) / 2).ravel()
+            # for kface, all cols, all rows
+            self.x_kface_parent = xloc_center.ravel()
+            self.y_kface_parent = yloc_center.ravel()
+            #  for zlocations, -1 layers
+            self.z_kface_parent = zloc.ravel()
 
-
+            '''
             # get the perimeter cells and calculate the weights
             _ = self.interp_weights_flux
+            '''
+
+            # create x, y, and z an interpolator instances
+            iface_interp = Interpolator((self.x_iface_parent, self.y_iface_parent, self.z_iface_parent),
+                                        self.inset_boundary_cells[['x', 'y', 'z']].T.values,
+                                        d=3)
+            _ = iface_interp.interp_weights
+
+            jface_interp = Interpolator((self.x_jface_parent, self.y_jface_parent, self.z_jface_parent),
+                                        self.inset_boundary_cells[['x', 'y', 'z']].T.values,
+                                        d=3)
+            _ = jface_interp.interp_weights
+
+            '''
+            kface_interp = Interpolator((self.x_kface_parent, self.y_kface_parent, self.z_kface_parent),
+                                        self.inset_boundary_cells[['x', 'y', 'z']].T.values,
+                                        d=3)
+            _ = kface_interp.interp_weights
+            '''
 
 
             for inset_per, parent_per in self.inset_parent_period_mapping.items():
@@ -1699,14 +1715,15 @@ class TmrNew:
 
                     #
                     # TODO: REPLACE THIS WITH get_qx_qy_qz
+                    '''
                     # Get the vertical fluxes
-                    '''if 'kn' in df.columns and np.any(df['kn'] < df['km']):
+                    if 'kn' in df.columns and np.any(df['kn'] < df['km']):
                         vflux = df.loc[(df['kn'] < df['km'])]
                         vflux_array = np.zeros((vflux['km'].max(), nrow, ncol))
                         vflux_array[vflux['kn'].values,
                                     vflux['in'].values,
                                     vflux['jn'].values] = vflux.q.values
-                    '''
+                    
                     # get modelgrid row-wise (i-direction) fluxes
                     if 'in' in df.columns and np.any(df['in'] < df['im']):
                         iflux = df.loc[(df['in'] < df['im'])]
@@ -1728,39 +1745,71 @@ class TmrNew:
                     # NB --> padding on the top and left top ensure zeros surround
                     q_iface = (iflux_array / parent_iface_areas)
                     q_jface = (jflux_array / parent_jface_areas)
+                    '''
+                    # mf6 specific discharge
+                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file, 
+                                              self.parent_binary_grid_file,
+                                              version='mf6',
+                                              model_top=self.parent.modelgrid.top, 
+                                              model_bottom_array=self.parent.modelgrid.botm,
+                                              kstpkper=parent_kstpkper,
+                                              specific_discharge=True,
+                                              modelgrid=self.parent.modelgrid,
+                                              headfile=self.parent_head_file)
 
                 else:
-                    raise NotImplementedError('MODFLOW-2005 fluxes not yet supported')
-                    # TODO: implement MF2005
-                    #  *create i, j, and v face xyzq vectors as with MF6 above
-                    #   x_iface, y_iface, z_iface, q_iface .... etc.
-                # TODO: REPLACE THE ABOVE WITH get_qx_qy_qz
-
+                    # MFNWT specific discharge
+                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file, 
+                                              self.parent_binary_grid_file,
+                                              version='other', # this argument can be anything besides `mf6`
+                                              model_top=self.parent.modelgrid.top, 
+                                              model_bottom_array=self.parent.modelgrid.botm,
+                                              kstpkper=parent_kstpkper,
+                                              specific_discharge=True,
+                                              modelgrid=self.parent.modelgrid,
+                                              headfile=self.parent_head_file)
 
                 # pad the two parent flux arrays on the top and bottom
                 # so that inset cells above and below the top/bottom cell centers
                 # will be within the interpolation space
+                qx = np.pad(qx, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
+                qy = np.pad(qy, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
+                qz = np.pad(qz, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
+                
+                
                 # TODO: consider padding or not on top, left, and "top (row-wise)"
                 # (parent x, y, z locations already contain this pad - see zloc above)
+                '''
                 q_iface = np.pad(q_iface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()
                 q_jface = np.pad(q_jface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()
+                '''
 
 
-                # TODO: refactor interpolation to use the new interpolator object
+                # TODO: refactor interpolation to use the new interpolator object - DONE: see above
                 # interpolate q at the four different face orientations (e.g. fluxdir)
+
+                # interpolate inset boundary heads from 3D parent head solution
+                y_flux = iface_interp.interpolate(qy, method='linear')
+                x_flux = jface_interp.interpolate(qx, method='linear')  
+                # v_flux = kface_interp.interpolate(qz, method='linear')
+                
+                self.inset_boundary_cell_faces = self.inset_boundary_cell_faces.assign(
+                    qx_interp=x_flux,
+                    qy_interp=y_flux)#,
+                    #qz_interp=v_flux)
+
+                # assign q values and flip the sign for flux counter to the CBB convention directions of right and bottom
                 for fluxdir in ['top','bottom','left','right']:
-                    if fluxdir in ['top','bottom']:
-                        self.inset_boundary_cell_faces.loc[ self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = \
-                            self.interpolate_flux_values(q_iface, fluxdir)
-                    if fluxdir in ['left','right']:
-                        self.inset_boundary_cell_faces.loc[ self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = \
-                            self.interpolate_flux_values(q_jface, fluxdir)
+                    if fluxdir == 'top':
+                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qy_interp 
+                    if fluxdir == 'bottom':
+                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qy_interp * -1
+                    if fluxdir == 'left':
+                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qx_interp 
+                    if fluxdir == 'right':
+                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qx_interp * -1          
 
-                # flip the sign for flux counter to the CBB convention directions of right and bottom
-                self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='left', 'q_interp'] -= 1
-                self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='top', 'q_interp'] -= 1
-
-                # convert specific discharge in inset cells to Q
+                # convert specific discharge in inset cells to Q -- flux for well package
                 self.inset_boundary_cell_faces['q'] = \
                     self.inset_boundary_cell_faces['q_interp'] * self.inset_boundary_cell_faces['face_area']
 
