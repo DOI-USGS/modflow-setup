@@ -98,13 +98,7 @@ def test_get_inset_boundary_heads(tmr, parent_heads):
 
 @pytest.mark.parametrize('specific_discharge',(False, True))
 def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_discharge):
-    """[summary]
-
-    Args:
-        tmpdir ([type]): [description]
-        parent_model_mf6 ([type]): [description]
-        parent_model_nwt ([type]): [description]
-        specific_discharge ([type]): [description]
+    """Compare get_qx_qy_qz results between mf6 and nwt
     """
     mf6_ws = Path(tmpdir) / 'perimeter_bc_demo/parent'
 
@@ -201,7 +195,9 @@ def parent_model_mf6(tmpdir, mf6_exe):
     sim = flopy.mf6.MFSimulation(sim_name=name, sim_ws=str(model_ws))
     tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
                                 perioddata=[(1.0, 1, 1.0)])
-    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="MODERATE", outer_dvclose=1e-4)
+    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="MODERATE", 
+                    outer_dvclose=1e-4,
+                    inner_dvclose=1e-4)
     # create model instance
     model = flopy.mf6.ModflowGwf(sim, modelname=name, newtonoptions='newton')
 
@@ -223,10 +219,12 @@ def parent_model_mf6(tmpdir, mf6_exe):
     n_heads = list(np.array(w_heads) - 2.)
     n_heads_i = [0] * len(n_heads)
     n_heads_j = w_heads_i
+    ins_heads_i, ins_heads_j = np.meshgrid(np.arange(14,16),np.arange(14,16))
+
     perim_chd = pd.DataFrame({'k': 0,
-                            'i': w_heads_i + n_heads_i,
-                            'j': w_heads_j + n_heads_j,
-                            'head': w_heads + n_heads
+                            'i': w_heads_i + n_heads_i + list(ins_heads_i.ravel()),
+                            'j': w_heads_j + n_heads_j + list(ins_heads_j.ravel()),
+                            'head': w_heads + n_heads + ([28] * len(ins_heads_j.ravel()))
                             })
     perim_chd['cellid'] = list(zip(perim_chd['k'], perim_chd['i'], perim_chd['j']))
     perim_chd_rec = perim_chd[['cellid', 'head']].to_records(index=False)
@@ -244,6 +242,8 @@ def parent_model_mf6(tmpdir, mf6_exe):
                                 head_filerecord=f"{name}.hds",
                                 budget_filerecord=f"{name}.cbc",
                                 )
+    # rcha = flopy.mf6.ModflowGwfrcha(model, recharge=5.e-06)
+
     sim.write_simulation()
     # run the model
     sim.exe_name = mf6_exe
@@ -270,9 +270,13 @@ def inset_model_mf6(tmpdir, mf6_exe):
                     sim_ws=str(model_ws))
     tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
                                 perioddata=[(1.0, 1, 1.0)])
-    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="SIMPLE")
+    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="MODERATE", 
+                    outer_dvclose=1e-4,
+                    outer_maximum=150,
+                    inner_dvclose=1e-6, 
+                    inner_maximum=100)
     # create model instance
-    model = flopy.mf6.ModflowGwf(sim, modelname=name)
+    model = flopy.mf6.ModflowGwf(sim, modelname=name, newtonoptions='newton')
 
     ncells_side = 100
     dis = flopy.mf6.ModflowGwfdis(model, nlay=3, nrow=ncells_side, ncol=ncells_side,
@@ -282,6 +286,22 @@ def inset_model_mf6(tmpdir, mf6_exe):
     start = 30. * np.ones_like(dis.botm.array)
     ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
     npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1., save_flows=True)
+    # rcha = flopy.mf6.ModflowGwfrcha(model, recharge=5.e-06)
+
+    i, j = np.meshgrid(np.arange(45,55), np.arange(45,55))
+
+    one_cell_chd = pd.DataFrame({'k': 0,
+                            'i': i.ravel(),
+                            'j': j.ravel(),
+                            'head': 28
+                            })
+    one_cell_chd['cellid'] = list(zip(one_cell_chd['k'], one_cell_chd['i'], one_cell_chd['j']))
+    one_cell_chd_rec = one_cell_chd[['cellid', 'head']].to_records(index=False)
+
+    chd = flopy.mf6.ModflowGwfchd(model, maxbound=len(one_cell_chd_rec),
+                                stress_period_data=one_cell_chd_rec,
+                                save_flows=True)
+
 
     oc = flopy.mf6.ModflowGwfoc(model,
                                 saverecord=[("HEAD", "ALL"), ("BUDGET", "ALL")],
@@ -338,6 +358,8 @@ def parent_model_nwt(tmpdir, mfnwt_exe):
     oc = flopy.modflow.ModflowOc(mf,
                                 stress_period_data={(0, 0): ['save head','save budget']})
     nwt = flopy.modflow.ModflowNwt(mf, headtol=1e-4)
+    rch = flopy.modflow.ModflowRch(mf, rech=5.e-06)
+
     mf.write_input()
 
     mf.exe_name = mfnwt_exe
@@ -375,7 +397,7 @@ def inset_model_nwt(tmpdir):
     oc = flopy.modflow.ModflowOc(mf,
                                 stress_period_data={(0, 0): ['save head','save budget']})
     nwt = flopy.modflow.ModflowNwt(mf)
-
+    rch = flopy.modflow.ModflowRch(mf, recharge=5.e-06)
     mf._modelgrid = MFsetupGrid(delc=mf.dis.delc.array, delr=mf.dis.delr.array,
                                 top=mf.dis.top.array, botm=mf.dis.botm.array,
                                 xoff=1000, yoff=1000)
@@ -566,11 +588,11 @@ def test_get_boundary_fluxes(parent_model_mf6, inset_model_mf6,
         spd[per] = data[['cellid', 'q']].to_records(index=False)
         if len(data) > maxbound:
             maxbound = len(data)
-    wel = flopy.mf6.ModflowGwfwel(inset_model, maxbound=maxbound,
+    wel = flopy.mf6.ModflowGwfwel(inset_model_mf6, maxbound=maxbound,
                                   stress_period_data=spd,
                                   save_flows=True)
     # not sure why this needs to be done again to retain modelgrid attribute
-    inset_model._mg_resync = False
+    inset_model_mf6._mg_resync = False
 
     # write the inset model input files
     m.simulation.write_simulation()
@@ -586,6 +608,7 @@ def test_get_boundary_fluxes(parent_model_mf6, inset_model_mf6,
                  stdout=PIPE, stderr=PIPE)
     stdout, stderr = process.communicate()
     assert process.returncode == 0
+
     # read the zone budget output
     zb_results = pd.read_csv(output_budget_name.with_suffix('.zbud.csv'))
     zb_results['net_flux'] = zb_results['FROM ZONE 0'] - zb_results['TO ZONE 0']
