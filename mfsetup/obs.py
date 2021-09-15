@@ -121,12 +121,22 @@ def setup_head_observations(model, obs_info_files=None,
     within = [g.within(self.bbox) for g in df.geometry]
     df = df.loc[within].copy()
 
-    print('Dropping head observations that coincide with Lake Package Lakes...')
+    print('Dropping head observations that coincide with boundary conditions...')
     i, j = get_ij(self.modelgrid, df.x.values, df.y.values)
-    islak = self.lakarr[0, i, j] != 0
-
     df['i'], df['j'] = i, j
-    df = df.loc[~islak].copy()
+
+    #islak = self.lakarr[0, i, j] != 0
+    # for now, discard any head observations in same (i, j) column of cells
+    # as a non-well boundary condition
+    # lake package lakes
+    has_lak = np.any(self.isbc[:, i, j] == 1, axis=0)
+    # non lake, non well BCs
+    # (high-K lakes are excluded, since we may want head obs at those locations,
+    #  to serve as pseudo lake stage observations)
+    has_bc = has_lak | np.any(self.isbc[:, i, j] > 2, axis=0)
+    if any(has_bc):
+        print(f'dropped {np.sum(has_bc)} of {len(df)} observations in cells with bcs.')
+    df = df.loc[~has_bc].copy()
 
     drop_obs = self.cfg[package].get('drop_observations', [])
     if len(drop_obs) > 0:

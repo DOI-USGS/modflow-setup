@@ -489,6 +489,7 @@ def test_obs_setup(shellmound_model_with_dis, config):
                 _, _, _, fname = line.strip().split()
                 assert fname == m.cfg['obs']['filename_fmt'].format(m.name)
                 break
+    j=2
 
 
 @pytest.mark.parametrize('input', [
@@ -724,6 +725,11 @@ def test_sfr_setup(model_with_sfr
     # check minimum slope
     assert np.allclose(np.round(m.sfr.packagedata.array['rgrd'].min(), 6), \
                        np.round(m.cfg['sfr']['sfrmaker_options']['minimum_slope'], 6))
+    # check that no observations were placed in cells with SFR
+    m.setup_obs()
+    sfr_cells = set(m.sfr.packagedata.array['cellid'])
+    obs_cells = set(m.obs.continuous.data['shellmound.head.obs']['id'])
+    assert not any(obs_cells.intersection(sfr_cells))
 
 
 def test_sfr_inflows_from_csv(model_with_sfr):

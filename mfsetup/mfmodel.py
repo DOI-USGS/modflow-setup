@@ -80,6 +80,7 @@ class MFsetupMixin():
                   'high-k lake': 2,
                   'ghb': 3,
                   'sfr': 4,
+                  'riv': 5
                   }
 
     def __init__(self, parent):
@@ -453,7 +454,11 @@ class MFsetupMixin():
         0 : no lake
         1 : lak package lake (lakarr > 0)
         2 : high-k lake
-        3 : sfr
+        3 : ghb
+        4 : sfr
+        5 : riv
+
+        see also the .bc_numbers attibute
         """
         if self._isbc_2d is None:
             self._set_isbc2d()
@@ -468,6 +473,7 @@ class MFsetupMixin():
         2 : high-k lake
         3 : ghb
         4 : sfr
+        5 : riv
 
         see also the .bc_numbers attibute
         """

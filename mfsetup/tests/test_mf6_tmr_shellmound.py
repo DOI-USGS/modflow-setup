@@ -235,6 +235,11 @@ def test_sfr_riv_setup(shellmound_tmr_model_with_dis):
         assert line_id not in m.sfrdata.reach_data.line_id.values
         assert line_id in rivdata.line_id.values
     assert 'Yazoo River' in rivdata.name.unique()
+    # BCs array should include 4 (SFR) and 5 (RIV)
+    assert set(list(np.unique(m.isbc))) == {0, 4, 5}
+    # riv cells should all be in isbc array as 5s
+    k, i, j = zip(*m.riv.stress_period_data.array[0]['cellid'])
+    assert set(m.isbc[k, i, j]) == {5}
 
 
 @pytest.mark.skip(reason="still working on this one")
