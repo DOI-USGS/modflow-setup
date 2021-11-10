@@ -6,13 +6,15 @@ the discretization module.
 import collections
 import time
 import warnings
+from pathlib import Path
 
-import geopandas as gp
+import geopandas as gpd
 import gisutils
 import numpy as np
 import pandas as pd
 import pyproj
 from flopy.discretization import StructuredGrid
+from geopandas.geodataframe import GeoDataFrame
 from gisutils import df2shp, get_proj_str, project, shp2df
 from packaging import version
 from rasterio import Affine
@@ -282,7 +284,7 @@ class MFsetupGrid(StructuredGrid):
         # get dataframe of model grid cells
         i, j = np.indices((self.nrow, self.ncol))
         geoms = self.polygons
-        df = gp.GeoDataFrame({'i': i.ravel(),
+        df = gpd.GeoDataFrame({'i': i.ravel(),
                               'j': j.ravel(),
                               'geometry': geoms}, crs=5070)
         if layers and self.nlay is not None:
@@ -543,7 +545,7 @@ def write_bbox_shapefile(modelgrid, outshp):
 
 def rasterize(feature, grid, id_column=None,
               include_ids=None,
-              crs=None, epsg=None, proj4=None,
+              crs=None,
               dtype=np.float32, **kwargs):
     """Rasterize a feature onto the model grid, using
     the rasterio.features.rasterize method. Features are intersected
@@ -589,62 +591,39 @@ def rasterize(feature, grid, id_column=None,
         print('This method requires rasterio.')
         return
 
-    if epsg is not None:
-        warnings.warn("The epsg argument is deprecated. Use crs instead, "
-                      "which requires gisutils >= 0.2",
-                      DeprecationWarning)
-    if proj4 is not None:
-        warnings.warn("The epsg argument is deprecated. Use crs instead, "
-                      "which requires gisutils >= 0.2",
-                      DeprecationWarning)
     if crs is not None:
         if version.parse(gisutils.__version__) < version.parse('0.2.0'):
-            raise ValueError("The crs argument requires gisutils >= 0.2")
+            raise ValueError("The rasterize function requires gisutils >= 0.2")
         from gisutils import get_authority_crs
         crs = get_authority_crs(crs)
 
     trans = grid.transform
 
-    kwargs = {}
-    if isinstance(feature, str):
-        proj4 = get_proj_str(feature)
-        kwargs = {'dest_crs': grid.crs}
-        kwargs = get_input_arguments(kwargs, shp2df)
-        df = shp2df(feature, **kwargs)
+    if isinstance(feature, str) or isinstance(feature, Path):
+        df = gpd.read_file(feature)
     elif isinstance(feature, pd.DataFrame):
         df = feature.copy()
+        df = gpd.GeoDataFrame(df, crs=crs)
     elif isinstance(feature, collections.Iterable):
         # list of shapefiles
-        if isinstance(feature[0], str):
-            proj4 = get_proj_str(feature[0])
-            kwargs = {'dest_crs': grid.crs}
-            kwargs = get_input_arguments(kwargs, shp2df)
-            df = shp2df(feature, **kwargs)
+        if isinstance(feature[0], str) or isinstance(feature[0], Path):
+            # use shp2df to read multiple shapefiles
+            # then convert to gdf
+            df = shp2df(feature, dest_crs=grid.crs)
+            df = gpd.GeoDataFrame(df, crs=grid.crs)
         else:
             df = pd.DataFrame({'geometry': feature})
+            df = gpd.GeoDataFrame(df, crs=crs)
     elif not isinstance(feature, collections.Iterable):
         df = pd.DataFrame({'geometry': [feature]})
+        df = gpd.GeoDataFrame(df, crs=crs)
     else:
         print('unrecognized feature input')
         return
 
-    # handle shapefiles in different CRS than model grid
-    if 'dest_crs' not in kwargs:
-        reproject = False
-        # todo: consolidate rasterize reprojection to just use crs
-        if crs is not None:
-            if crs != grid.crs:
-                df['geometry'] = project(df.geometry.values, crs, grid.crs)
-        if proj4 is not None:
-            if proj4 != grid.proj_str:
-                reproject = True
-        elif epsg is not None and grid.epsg is not None:
-            if epsg != grid.epsg:
-                reproject = True
-                from fiona.crs import from_epsg, to_string
-                proj4 = to_string(from_epsg(epsg))
-        if reproject:
-            df['geometry'] = project(df.geometry.values, proj4, grid.proj_str)
+    # reproject to grid crs
+    if df.crs is not None:
+        df.to_crs(grid.crs, inplace=True)
 
     # subset to include_ids
     if id_column is not None and include_ids is not None:
