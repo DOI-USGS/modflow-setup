@@ -359,7 +359,8 @@ def resample_pumping_rates(wu_file, wu_points, model,
         if dropna:
             site_period_data = sitedata.reindex(perioddata.start_datetime).dropna(axis=1)
         else:
-            site_period_data = sitedata.reindex(perioddata.start_datetime, fill_value=na_fill_value)
+            site_period_data = sitedata.reindex(perioddata.start_datetime)
+            site_period_data.fillna(0, inplace=True)
             isna = site_period_data['site_no'] == 0.
             if np.any(isna):
                 if verbose:
