@@ -863,7 +863,7 @@ def test_model_setup_and_run(model_setup_and_run):
 
 def test_load(model_setup, shellmound_cfg_path):
     m = model_setup  #deepcopy(pfl_nwt_setup_from_yaml)
-    m2 = MF6model.load(shellmound_cfg_path)
+    m2 = MF6model.load_from_config(shellmound_cfg_path)
     assert m == m2
 
 

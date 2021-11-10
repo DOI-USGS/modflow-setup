@@ -1079,9 +1079,26 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         cfg['model'].update(cfg['model']['options'])
         return cfg
 
+
     @classmethod
-    def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
-        """Load a model from a config file and set of MODFLOW files.
+    def load_from_config(cls, yamlfile, load_only=None):
+        """Load a model from a configuration file and set of MODFLOW files.
+
+        Parameters
+        ----------
+        yamlfile : pathlike
+            Modflow setup YAML format configuration file
+        load_only : list
+            List of package abbreviations or package names corresponding to
+            packages that flopy will load. default is None, which loads all
+            packages. the discretization packages will load regardless of this
+            setting. subpackages, like time series and observations, will also
+            load regardless of this setting.
+            example list: ['ic', 'maw', 'npf', 'oc', 'ims', 'gwf6-gwf6']
+
+        Returns
+        -------
+        m : mfsetup.MF6model instance
         """
         print('\nLoading simulation in {}\n'.format(yamlfile))
         t0 = time.time()

@@ -237,7 +237,7 @@ def test_lgr_model_run(pleasant_lgr_stand_alone_parent, pleasant_lgr_setup_from_
 def test_lgr_load(pleasant_lgr_setup_from_yaml,
                   pleasant_lgr_test_cfg_path):
     m = pleasant_lgr_setup_from_yaml  #deepcopy(pfl_nwt_setup_from_yaml)
-    m2 = MF6model.load(pleasant_lgr_test_cfg_path)
+    m2 = MF6model.load_from_config(pleasant_lgr_test_cfg_path)
     assert m2.inset['plsnt_lgr_inset'].simulation is m2.simulation
 
     assert set(m2.get_package_list()).difference(m.get_package_list()) == {'SFR_OBS', 'CHD_OBS'}
