@@ -7,6 +7,12 @@ import numpy as np
 import pytest
 import yaml
 
+try:
+    from yaml import CDumper as Dumper
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader, Dumper
+
 from mfsetup.fileio import (
     add_version_to_fileheader,
     dump_yml,
@@ -121,7 +127,7 @@ def test_exe_exists(modflow_executable):
                                            ('value: 1e10', '1e10'),
                                            ))
 def test_pyyaml_scientific_notation(data, expected):
-    results = yaml.load(io.StringIO(data))
+    results = yaml.load(io.StringIO(data), Loader=Loader)
     assert results['value'] == expected
 
 
