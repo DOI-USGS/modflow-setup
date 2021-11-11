@@ -1,4 +1,7 @@
 # TODO: tests for functions in wells.py
+import platform
+import sys
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -113,6 +116,8 @@ def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
     # TODO: test with partially penetrating wells
 
 
+@pytest.mark.skipif((sys.version_info < (3,9)) & ('macos' in platform.platform().lower()),
+                    reason='obscure decode issue with pfl nwt model top external file')
 def test_get_package_stress_period_data(models_with_dis):
     m = models_with_dis
     m.cfg['wel']['external_files'] = False
