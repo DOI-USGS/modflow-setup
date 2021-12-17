@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post270+g2b6b59d documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post271+g9c9735b documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post270+g2b6b59d
+                0.post271+g9c9735b
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -1461,7 +1461,9 @@
 
         <span class="c1"># create an sfrmaker.sfrdata instance from the lines instance</span>
         <span class="n">to_sfr_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">to_sfr_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">to_sfr_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">])</span>
         <span class="c1">#to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)</span>
         <span class="n">sfr</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">to_sfr</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
                          <span class="n">isfr</span><span class="o">=</span><span class="n">isfr</span><span class="p">,</span>
@@ -1471,13 +1473,19 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;sfr: set_streambed_top_elevations_from_dem option is now under sfr: sfrmaker_options&#39;</span><span class="p">,</span>
                           <span class="ne">DeprecationWarning</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">][</span><span class="s1">&#39;set_streambed_top_elevations_from_dem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;set_streambed_top_elevations_from_dem&#39;</span><span class="p">):</span>
-            <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;If set_streambed_top_elevations_from_dem=True, &quot;</span>
-                         <span class="s2">&quot;need a dem block in source_data for SFR package.&quot;</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="s1">&#39;dem&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">error_msg</span>
-            <span class="n">elevation_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;source_data&#39;</span><span class="p">][</span><span class="s1">&#39;dem&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;elevation_units&#39;</span><span class="p">)</span>
-            <span class="n">sfr</span><span class="o">.</span><span class="n">set_streambed_top_elevations_from_dem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;source_data&#39;</span><span class="p">][</span><span class="s1">&#39;dem&#39;</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span>
-                                                      <span class="n">dem_z_units</span><span class="o">=</span><span class="n">elevation_units</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;set_streambed_top_elevations_from_dem&#39;</span><span class="p">):</span>
+            <span class="n">dem_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;set_streambed_top_elevations_from_dem&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dem_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">dem_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;If set_streambed_top_elevations_from_dem=True, &quot;</span>
+                    <span class="s2">&quot;need a dem block in source_data for SFR package. &quot;</span>
+                    <span class="s2">&quot;Otherwise set_streambed_top_elevations_from_dem should be&quot;</span>
+                    <span class="s2">&quot;a block with arguments to &quot;</span>
+                    <span class="s2">&quot;sfrmaker.SFRData.set_streambed_top_elevations_from_dem&quot;</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="s1">&#39;dem&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">error_msg</span>
+                <span class="n">dem_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;source_data&#39;</span><span class="p">][</span><span class="s1">&#39;dem&#39;</span><span class="p">])</span>
+            <span class="n">sfr</span><span class="o">.</span><span class="n">set_streambed_top_elevations_from_dem</span><span class="p">(</span><span class="o">**</span><span class="n">dem_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sfr</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;strtop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">interpolate_to_reaches</span><span class="p">(</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span> <span class="s1">&#39;elevdn&#39;</span><span class="p">)</span>
 
@@ -1626,7 +1634,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># pass options kwargs through to mf6 constructor</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span>
-                              <span class="p">{</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="s1">&#39;flowlines&#39;</span><span class="p">,</span> <span class="s1">&#39;inflows&#39;</span><span class="p">,</span> <span class="s1">&#39;observations&#39;</span><span class="p">,</span> <span class="s1">&#39;inflows_routing&#39;</span><span class="p">,</span> <span class="s1">&#39;dem&#39;</span><span class="p">}})</span>
+                              <span class="p">{</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="s1">&#39;flowlines&#39;</span><span class="p">,</span> <span class="s1">&#39;inflows&#39;</span><span class="p">,</span> <span class="s1">&#39;observations&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;inflows_routing&#39;</span><span class="p">,</span> <span class="s1">&#39;dem&#39;</span><span class="p">,</span> <span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">}})</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfsfr</span><span class="p">)</span>
             <span class="n">sfr_package</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">create_mf6sfr</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># monkey patch ModflowGwfsfr instance to behave like ModflowSfr2</span>
@@ -1759,7 +1768,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2021, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 11, 2021.
+      <span class="lastupdated">Last updated on Dec 17, 2021.
       </span></p>
   </div>
 
