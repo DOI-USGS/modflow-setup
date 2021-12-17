@@ -259,7 +259,8 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
     # within these input blocks, convert file paths to absolute
     look_for_files_in = ['source_data',
                          'perimeter_boundary',
-                         'lgr'
+                         'lgr',
+                         'sfrmaker_options'
                          ]
     for pckgname, pckg in cfg.items():
         if isinstance(pckg, dict):

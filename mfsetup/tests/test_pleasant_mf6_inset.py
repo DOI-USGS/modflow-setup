@@ -504,6 +504,10 @@ def test_sfr_setup(get_pleasant_mf6_with_sfr):
         assert os.path.exists(f)
     assert m.sfrdata.model == m
 
+    # verify that DEM was sampled
+    # cheesy test for DEM-based value
+    assert np.allclose(m.sfrdata.reach_data.loc[2, 'strtop'], 297, atol=0.05)
+
 
 def test_write_sfr(get_pleasant_mf6_with_sfr):
     m = get_pleasant_mf6_with_sfr

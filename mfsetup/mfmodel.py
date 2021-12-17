@@ -1365,7 +1365,9 @@ class MFsetupMixin():
 
         # create an sfrmaker.sfrdata instance from the lines instance
         to_sfr_kwargs = self.cfg['sfr'].copy()
-        to_sfr_kwargs.update(self.cfg['sfr'].get('sfrmaker_options', {}))
+        if not self.cfg['sfr'].get('sfrmaker_options'):
+            self.cfg['sfr']['sfrmaker_options'] = {}
+        to_sfr_kwargs.update(self.cfg['sfr']['sfrmaker_options'])
         #to_sfr_kwargs = get_input_arguments(to_sfr_kwargs, Lines.to_sfr)
         sfr = lines.to_sfr(grid=self.modelgrid,
                          isfr=isfr,
@@ -1375,13 +1377,19 @@ class MFsetupMixin():
             warnings.warn('sfr: set_streambed_top_elevations_from_dem option is now under sfr: sfrmaker_options',
                           DeprecationWarning)
             self.cfg['sfr']['sfrmaker_options']['set_streambed_top_elevations_from_dem'] = True
-        if self.cfg['sfr'].get('sfrmaker_options', {}).get('set_streambed_top_elevations_from_dem'):
-            error_msg = ("If set_streambed_top_elevations_from_dem=True, "
-                         "need a dem block in source_data for SFR package.")
-            assert 'dem' in self.cfg['sfr'].get('source_data', {}), error_msg
-            elevation_units = self.cfg['sfr']['source_data']['dem'].get('elevation_units')
-            sfr.set_streambed_top_elevations_from_dem(self.cfg['sfr']['source_data']['dem']['filename'],
-                                                      dem_z_units=elevation_units)
+        if self.cfg['sfr']['sfrmaker_options'].get('set_streambed_top_elevations_from_dem'):
+            dem_kwargs = self.cfg['sfr']['sfrmaker_options'].get('set_streambed_top_elevations_from_dem')
+            if not isinstance(dem_kwargs, dict):
+                dem_kwargs = {}
+                error_msg = (
+                    "If set_streambed_top_elevations_from_dem=True, "
+                    "need a dem block in source_data for SFR package. "
+                    "Otherwise set_streambed_top_elevations_from_dem should be"
+                    "a block with arguments to "
+                    "sfrmaker.SFRData.set_streambed_top_elevations_from_dem")
+                assert 'dem' in self.cfg['sfr'].get('source_data', {}), error_msg
+                dem_kwargs.update(self.cfg['sfr']['source_data']['dem'])
+            sfr.set_streambed_top_elevations_from_dem(**dem_kwargs)
         else:
             sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')
 
@@ -1530,7 +1538,8 @@ class MFsetupMixin():
         else:
             # pass options kwargs through to mf6 constructor
             kwargs = flatten({k:v for k, v in self.cfg[package].items() if k not in
-                              {'source_data', 'flowlines', 'inflows', 'observations', 'inflows_routing', 'dem'}})
+                              {'source_data', 'flowlines', 'inflows', 'observations',
+                               'inflows_routing', 'dem', 'sfrmaker_options'}})
             kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsfr)
             sfr_package = sfr.create_mf6sfr(model=self, **kwargs)
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2
