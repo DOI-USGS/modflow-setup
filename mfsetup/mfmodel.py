@@ -1004,6 +1004,7 @@ class MFsetupMixin():
         kwargs['delc'] = self.parent.dis.delc.array * lmult
         kwargs['top'] = self.parent.dis.top.array
         kwargs['botm'] = self.parent.dis.botm.array
+        kwargs['laycbd'] = self.parent.dis.laycbd.array
         # renames for parent modelgrid
         renames = {'rotation': 'angrot'}
         for k, v in renames.items():

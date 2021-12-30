@@ -44,6 +44,13 @@ class MFsetupGrid(StructuredGrid):
         3D numpy array of model bottom elevations
     idomain : ndarray
         3D numpy array of model idomain values
+    laycbd : ndarray
+        (Modflow 2005 and earlier style models only):
+        LAYCBD—is a flag, with one value for each model layer,
+        that indicates whether or not a layer has a Quasi-3D
+        confining bed below it. 0 indicates no confining bed,
+        and not zero indicates a confining bed.
+        LAYCBD for the bottom layer must be 0.
     lenuni : int, optional
         MODFLOW length units variable. See
         `the Online Guide to MODFLOW <https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?beginners_guide_to_modflow.htm>`_
@@ -89,13 +96,15 @@ class MFsetupGrid(StructuredGrid):
     """
 
     def __init__(self, delc, delr, top=None, botm=None, idomain=None,
-                 lenuni=None,
+                 laycbd=None, lenuni=None,
                  epsg=None, proj_str=None, prj=None, wkt=None, crs=None,
                  xoff=0.0, yoff=0.0, xul=None, yul=None, angrot=0.0):
-        super(MFsetupGrid, self).__init__(np.array(delc), np.array(delr),
-                                          top, botm, idomain,
-                                          lenuni, epsg, proj_str, prj, xoff,
-                                          yoff, angrot)
+        super(MFsetupGrid, self).__init__(delc=np.array(delc), delr=np.array(delr),
+                                          top=top, botm=botm, idomain=idomain,
+                                          laycbd=laycbd, lenuni=lenuni,
+                                          epsg=epsg, proj4=proj_str, prj=prj,
+                                          xoff=xoff, yoff=yoff, angrot=angrot
+                                          )
 
         # properties
         self._crs = None

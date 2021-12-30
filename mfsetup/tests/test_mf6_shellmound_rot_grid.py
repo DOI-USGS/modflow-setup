@@ -132,6 +132,7 @@ def test_rotated_grid(shellmound_cfg, shellmound_simulation, mf6_exe):
 
     m.setup_dis()
 
+    # rotation should be positive in the counter-clockwise direction
     # check that the model grid lower right corner is in the right place
     xlr = m.modelgrid.xyzvertices[0][-1, -1]
     ylr = m.modelgrid.xyzvertices[1][-1, -1]
