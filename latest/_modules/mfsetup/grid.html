@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.post272+g4d33098 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post275+gf366cc7 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post272+g4d33098
+                0.post275+gf366cc7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -140,6 +140,13 @@
 <span class="sd">        3D numpy array of model bottom elevations</span>
 <span class="sd">    idomain : ndarray</span>
 <span class="sd">        3D numpy array of model idomain values</span>
+<span class="sd">    laycbd : ndarray</span>
+<span class="sd">        (Modflow 2005 and earlier style models only):</span>
+<span class="sd">        LAYCBD—is a flag, with one value for each model layer,</span>
+<span class="sd">        that indicates whether or not a layer has a Quasi-3D</span>
+<span class="sd">        confining bed below it. 0 indicates no confining bed,</span>
+<span class="sd">        and not zero indicates a confining bed.</span>
+<span class="sd">        LAYCBD for the bottom layer must be 0.</span>
 <span class="sd">    lenuni : int, optional</span>
 <span class="sd">        MODFLOW length units variable. See</span>
 <span class="sd">        `the Online Guide to MODFLOW &lt;https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?beginners_guide_to_modflow.htm&gt;`_</span>
@@ -185,13 +192,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delc</span><span class="p">,</span> <span class="n">delr</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">lenuni</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">laycbd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenuni</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">xoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MFsetupGrid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delc</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delr</span><span class="p">),</span>
-                                          <span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="p">,</span>
-                                          <span class="n">lenuni</span><span class="p">,</span> <span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="p">,</span> <span class="n">prj</span><span class="p">,</span> <span class="n">xoff</span><span class="p">,</span>
-                                          <span class="n">yoff</span><span class="p">,</span> <span class="n">angrot</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MFsetupGrid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">delc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delc</span><span class="p">),</span> <span class="n">delr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delr</span><span class="p">),</span>
+                                          <span class="n">top</span><span class="o">=</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="n">idomain</span><span class="p">,</span>
+                                          <span class="n">laycbd</span><span class="o">=</span><span class="n">laycbd</span><span class="p">,</span> <span class="n">lenuni</span><span class="o">=</span><span class="n">lenuni</span><span class="p">,</span>
+                                          <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj4</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="n">prj</span><span class="p">,</span>
+                                          <span class="n">xoff</span><span class="o">=</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="n">yoff</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="n">angrot</span>
+                                          <span class="p">)</span>
 
         <span class="c1"># properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1001,7 +1010,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2021, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Dec 17, 2021.
+      <span class="lastupdated">Last updated on Dec 31, 2021.
       </span></p>
   </div>
 
