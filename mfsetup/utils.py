@@ -1,6 +1,6 @@
-import collections
 import inspect
 import pprint
+from collections.abc import Mapping
 
 import numpy as np
 import pandas as pd
@@ -31,8 +31,8 @@ def update(d, u):
     from: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
     """
     for k, v in u.items():
-        if isinstance(d, collections.Mapping):
-            if isinstance(v, collections.Mapping):
+        if isinstance(d, Mapping):
+            if isinstance(v, Mapping):
                 d[k] = update(d.get(k, {}), v)
             else:
                 d[k] = v
