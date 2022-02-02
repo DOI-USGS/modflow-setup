@@ -418,13 +418,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_tdis(self):
         """
         Sets up the TDIS package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'tdis'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -443,13 +436,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_ic(self):
         """
         Sets up the IC package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'ic'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -470,13 +456,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_npf(self):
         """
         Sets up the NPF package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'npf'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -503,13 +482,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_sto(self):
         """
         Sets up the STO package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
 
         if np.all(self.perioddata['steady']):
@@ -542,13 +514,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_rch(self):
         """
         Sets up the RCH package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'rch'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -578,13 +543,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_wel(self):
         """
         Sets up the WEL package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'wel'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -639,13 +597,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_lak(self):
         """
         Sets up the Lake package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'lak'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -802,13 +753,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_chd(self):
         """
         Sets up the CHD package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'chd'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -865,13 +809,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_obs(self):
         """
         Sets up the OBS utility.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'obs'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -898,13 +835,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_oc(self):
         """
         Sets up the OC package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'oc'
         print('\nSetting up {} package...'.format(package.upper()))
@@ -924,13 +854,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def setup_ims(self):
         """
         Sets up the IMS package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'ims'
         print('\nSetting up {} package...'.format(package.upper()))

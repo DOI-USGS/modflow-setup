@@ -798,13 +798,6 @@ class MFnwtModel(MFsetupMixin, Modflow):
     def setup_chd(self):
         """
         Sets up the CHD package.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-
         """
         package = 'chd'
         print('\nSetting up {} package...'.format(package.upper()))
