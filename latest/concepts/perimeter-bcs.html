@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.post275+gf366cc7 documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.post277+geb1f10b documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post275+gf366cc7
+                0.post277+geb1f10b
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -151,14 +151,14 @@
 <li><p>The <code class="docutils literal notranslate"><span class="pre">parent:</span></code> model block, in which a parent or source model can be specified. Currently only a single parent or source model is supported. The parent or source model can be used for other properties (e.g. hydraulic conductivity) and stresses (e.g. recharge) in addition to the perimeter boundary.</p>
 <blockquote>
 <div><p>Input example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parent</span><span class="p">:</span>
-  <span class="nt">namefile</span><span class="p">:</span> <span class="s">&#39;pleasant.nam&#39;</span>
-  <span class="nt">model_ws</span><span class="p">:</span> <span class="s">&#39;data/pleasant/&#39;</span>
-  <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mfnwt&#39;</span>
-  <span class="nt">copy_stress_periods</span><span class="p">:</span> <span class="s">&#39;all&#39;</span>
-  <span class="nt">start_date_time</span><span class="p">:</span> <span class="s">&#39;2012-01-01&#39;</span>
-  <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
-  <span class="nt">time_units</span><span class="p">:</span> <span class="s">&#39;days&#39;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parent</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant.nam&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mfnwt&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">copy_stress_periods</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -166,9 +166,9 @@
 <li><p>In a <code class="docutils literal notranslate"><span class="pre">perimeter_boundary:</span></code> sub-block for the relevant package (only specified heads via CHD are currently supported).</p>
 <blockquote>
 <div><p>Input example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
-  <span class="nt">perimeter_boundary</span><span class="p">:</span>
-      <span class="nt">parent_head_file</span><span class="p">:</span> <span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -178,10 +178,10 @@
 <section id="time-discretization">
 <h2>Time discretization<a class="headerlink" href="#time-discretization" title="Permalink to this headline">¶</a></h2>
 <p>By default, inset model stress period 0 is assumed to align with parent model stress period zero (<code class="docutils literal notranslate"><span class="pre">copy_stress_periods:</span> <span class="pre">'all'</span></code> in the <a class="reference internal" href="../config-file.html#the-configuration-file"><span class="std std-ref">configuration file</span></a> parent block, which is the default). Alternatively, stress periods can be mapped explicitly using a dictionary. For example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">copy_stress_periods</span><span class="p">:</span>
-  <span class="nt">0</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
-  <span class="nt">1</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
-  <span class="nt">2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">copy_stress_periods</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">  </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">0:</span> <span class="pre">1</span></code> indicates that the first stress period in the inset model aligns with the second stress period in the parent model (stress period 1), etc.</p>
@@ -192,29 +192,29 @@
 <p><strong>1) No specification of where the perimeter boundary should be applied</strong> (e.g. a shapefile) and <code class="docutils literal notranslate"><span class="pre">by_layer=False:</span></code> (the default). Perimeter BC cells are applied to active cells that coincide with the edge of the maximum areal footprint of the active model area. In places where the edge of the active area is inside of the max active footprint, no perimeter cells are applied.</p>
 <blockquote>
 <div><p>Input example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
-    <span class="nt">perimeter_boundary</span><span class="p">:</span>
-      <span class="nt">parent_head_file</span><span class="p">:</span> <span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
 <p><strong>2) No specification of where the perimeter boundary should be applied and ``by_layer=True:``</strong>. This is the same as option 1), but the active footprint is defined by layer from the idomain array. This option is generally not recommended, as it may often lead to boundary cells being included in the model interior (along layer pinch-outs, for example). Users of this option should check the results carefully by inspecting the</p>
 <blockquote>
 <div><p>Input example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
-    <span class="nt">perimeter_boundary</span><span class="p">:</span>
-      <span class="nt">parent_head_file</span><span class="p">:</span> <span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
-      <span class="nt">by_layer</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">by_layer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
 <p><strong>3) Specification of perimeter boundary cells with a shapefile</strong>. The locations of perimeter cells can be explicitly specified this way, but they still must coincide with the edge of the active extent in each layer (Modflow-setup will not put perimeter cells in the model interior). (Open) Polyline or Polygon shapefiles can be used; in either case a buffer is used to align the supplied features with the active area edge, which is determined using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/reference/generated/scipy.ndimage.sobel.html#scipy.ndimage.sobel" title="(in SciPy v1.7.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">Sobel</span> <span class="pre">edge</span> <span class="pre">detection</span> <span class="pre">filter</span> <span class="pre">in</span> <span class="pre">Scipy</span></code></a>.</p>
 <blockquote>
 <div><p>Input example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
-    <span class="nt">perimeter_boundary</span><span class="p">:</span>
-      <span class="nt">shapefile</span><span class="p">:</span> <span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
-      <span class="nt">parent_head_file</span><span class="p">:</span> <span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -232,8 +232,8 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2021, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Dec 31, 2021.
+    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Feb 02, 2022.
       </span></p>
   </div>
 

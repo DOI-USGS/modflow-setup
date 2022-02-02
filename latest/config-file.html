@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The configuration file &mdash; modflow-setup 0.post275+gf366cc7 documentation</title>
+  <title>The configuration file &mdash; modflow-setup 0.post277+geb1f10b documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post275+gf366cc7
+                0.post277+geb1f10b
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -144,10 +144,10 @@
 <section id="package-blocks">
 <h3>Package blocks<a class="headerlink" href="#package-blocks" title="Permalink to this headline">¶</a></h3>
 <p>The modflow-setup configuration file is divided into blocks, which represent sub-dictionaries within the <code class="docutils literal notranslate"><span class="pre">cfg</span></code> dictionary represented by the whole configuration file. The blocks are generally organized as input to individual object classes in Flopy, or features specific to MODFLOW-setup. For example, this block would represent input to the <a class="reference external" href="https://github.com/modflowpy/flopy/blob/develop/flopy/mf6/modflow/mfsimulation.py">Simulation class</a> for MODFLOW-6:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span>
-  <span class="nt">sim_name</span><span class="p">:</span> <span class="s">&#39;mfsim&#39;</span>
-  <span class="nt">version</span><span class="p">:</span> <span class="s">&#39;mf6&#39;</span>
-  <span class="nt">sim_ws</span><span class="p">:</span> <span class="s">&#39;../tmp/shellmound&#39;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">simulation</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mfsim&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../tmp/shellmound&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>and would be loaded into the configuration dictionary as:</p>
@@ -162,27 +162,27 @@
 <section id="sub-blocks">
 <h3>Sub-blocks<a class="headerlink" href="#sub-blocks" title="Permalink to this headline">¶</a></h3>
 <p>Sub-blocks (nested dictionaries) with blocks are used to denote either input to MODFLOW-6 package blocks or input to modflow-setup features. For example, the options block below represents input to the options block for the MODFLOW-6 name file:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
-  <span class="nt">simulation</span><span class="p">:</span> <span class="s">&#39;shellmound&#39;</span>
-  <span class="nt">modelname</span><span class="p">:</span> <span class="s">&#39;shellmound&#39;</span>
-  <span class="nt">options</span><span class="p">:</span>
-    <span class="nt">print_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-    <span class="nt">save_flows</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-    <span class="nt">newton</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-    <span class="nt">newton_under_relaxation</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
-  <span class="nt">packages</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;ic&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;npf&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;oc&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;sto&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;rch&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;sfr&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;obs&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;wel&#39;</span><span class="p p-Indicator">,</span>
-             <span class="s">&#39;ims&#39;</span>
-             <span class="p p-Indicator">]</span>
-  <span class="nt">external_path</span><span class="p">:</span> <span class="s">&#39;external/&#39;</span>
-  <span class="nt">relative_external_filepaths</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">newton</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">newton_under_relaxation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="w">  </span><span class="nt">packages</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;ic&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;npf&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;oc&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;sto&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;rch&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;sfr&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;obs&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;wel&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">             </span><span class="s">&#39;ims&#39;</span><span class="w"></span>
+<span class="w">             </span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">  </span><span class="nt">external_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;external/&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">relative_external_filepaths</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Note that some items in the model block above do not represent flopy
@@ -191,54 +191,54 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
 <section id="directly-specifying-modflow-input">
 <h3>Directly specifying MODFLOW input<a class="headerlink" href="#directly-specifying-modflow-input" title="Permalink to this headline">¶</a></h3>
 <p>MODFLOW input can be specified directly in the configuration file using the appropriate variables described in the <a class="reference external" href="https://water.usgs.gov/water-resources/software/MODFLOW-6/mf6io_6.1.0.pdf">MODFLOW-6 input instructions</a> and <a class="reference external" href="https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/">MODFLOW-NWT Online Guide</a>. For example, in the block below, the dimensions and griddata sub-blocks would be fed directly to the <a class="reference external" href="https://github.com/modflowpy/flopy/blob/develop/flopy/mf6/modflow/mfgwfdis.py">ModflowGwfdis</a> constructor in Flopy:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
-  <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-  <span class="nt">options</span><span class="p">:</span>
-    <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
-  <span class="nt">dimensions</span><span class="p">:</span>
-    <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
-    <span class="nt">nrow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30</span>
-    <span class="nt">ncol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">35</span>
-  <span class="nt">griddata</span><span class="p">:</span>
-    <span class="nt">delr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
-    <span class="nt">delc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
-    <span class="nt">top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2.</span>
-    <span class="nt">botm</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">35</span><span class="w"></span>
+<span class="w">  </span><span class="nt">griddata</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">delr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">botm</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">]</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="source-data-sub-blocks">
 <h3>Source_data sub-blocks<a class="headerlink" href="#source-data-sub-blocks" title="Permalink to this headline">¶</a></h3>
 <p>Alternatively, <code class="docutils literal notranslate"><span class="pre">source_data</span></code> subblocks indicate input from general file formats (shapefiles, csvs, rasters, etc.) that needs to be mapped to the model space and time discretization. The <code class="docutils literal notranslate"><span class="pre">source_data</span></code> blocks are intended to be general across input types. For example- <code class="docutils literal notranslate"><span class="pre">filename</span></code> indicates a file path (string), regardless of the type of file, and <code class="docutils literal notranslate"><span class="pre">filenames</span></code> indicates a list or dictionary of files that map to model layers or stress periods. Items with the ‘_units’ suffix indicate the units of the source data, allowing modflow-setup to convert the values to model units accordingly. In the example below, the model top would be read from the specified <a class="reference external" href="https://en.wikipedia.org/wiki/GeoTIFF">GeoTiff</a> and mapped onto the model grid via linear interpolation (the default method for model layer elevations) using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html">scipy.interpolate.griddata</a> method. The model botm elevations would be read similarly, with missing layers sub-divided evenly between the specified layers. For example, the layer 7 bottom elevations would be set halfway between the layer 6 and 8 bottoms. Finally, supplying a shapefile as input to idomain instructs modflow-setup to intersect the shapefile with the model grid (using <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html">rasterio.features.rastersize</a>), and limit the active cells to the intersected area.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
-  <span class="nt">remake_top</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">True</span>
-  <span class="nt">options</span><span class="p">:</span>
-    <span class="nt">length_units</span><span class="p">:</span> <span class="s">&#39;meters&#39;</span>
-  <span class="nt">dimensions</span><span class="p">:</span>
-    <span class="nt">nlay</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">13</span>
-    <span class="nt">nrow</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30</span>
-    <span class="nt">ncol</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">35</span>
-  <span class="nt">griddata</span><span class="p">:</span>
-    <span class="nt">delr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
-    <span class="nt">delc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000.</span>
-  <span class="nt">source_data</span><span class="p">:</span>
-    <span class="nt">top</span><span class="p">:</span>
-      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span> <span class="c1"># DEM file; path relative to setup script</span>
-      <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>
-    <span class="nt">botm</span><span class="p">:</span>
-      <span class="nt">filenames</span><span class="p">:</span>
-        <span class="nt">0</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/vkbg_surf.tif&#39;</span> <span class="c1"># Vicksburg-Jackson Group (top)</span>
-        <span class="nt">1</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/ucaq_surf.tif&#39;</span> <span class="c1"># Upper Claiborne aquifer (top)</span>
-        <span class="nt">2</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mccu_surf.tif&#39;</span> <span class="c1"># Middle Claiborne confining unit (top)</span>
-        <span class="nt">3</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mcaq_surf.tif&#39;</span> <span class="c1"># Middle Claiborne aquifer (top)</span>
-        <span class="nt">6</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/lccu_surf.tif&#39;</span> <span class="c1"># Lower Claiborne confining unit (top)</span>
-        <span class="nt">8</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/lcaq_surf.tif&#39;</span> <span class="c1"># Lower Claiborne aquifer (top)</span>
-        <span class="nt">9</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mwaq_surf.tif&#39;</span> <span class="c1"># Middle Wilcox aquifer (top)</span>
-        <span class="nt">10</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/lwaq_surf.tif&#39;</span> <span class="c1"># Lower Wilcox aquifer (top)</span>
-        <span class="nt">12</span><span class="p">:</span> <span class="s">&#39;shellmound/rasters/mdwy_surf.tif&#39;</span> <span class="c1"># Midway confining unit (top)</span>
-      <span class="nt">elevation_units</span><span class="p">:</span> <span class="s">&#39;feet&#39;</span>
-    <span class="nt">idomain</span><span class="p">:</span>
-      <span class="nt">filename</span><span class="p">:</span> <span class="s">&#39;shellmound/shps/active_area.shp&#39;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">13</span><span class="w"></span>
+<span class="w">    </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">35</span><span class="w"></span>
+<span class="w">  </span><span class="nt">griddata</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">delr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span><span class="w"></span>
+<span class="w">    </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">top</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"> </span><span class="c1"># DEM file; path relative to setup script</span><span class="w"></span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">botm</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/vkbg_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/ucaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mccu_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mcaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lccu_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lcaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mwaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lwaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer (top)</span><span class="w"></span>
+<span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mdwy_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Midway confining unit (top)</span><span class="w"></span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">idomain</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/active_area.shp&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -285,8 +285,8 @@ For example:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2021, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Dec 31, 2021.
+    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Feb 02, 2022.
       </span></p>
   </div>
 
