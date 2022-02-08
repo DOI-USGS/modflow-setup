@@ -1048,7 +1048,12 @@ class MFsetupMixin():
                                    for p in specified_packages]
                 parent_packages = {item for subset in parent_packages for item in subset}
                 load_only = list(set(packages_in_parent_namefile).intersection(parent_packages))
-                kwargs['load_only'] = load_only
+                if 'load_only' not in kwargs:
+                    kwargs['load_only'] = load_only
+                if 'skip_load' in kwargs:
+                    kwargs['skip_load'] = [s.lower() for s in kwargs['skip_load']]
+                    kwargs['load_only'] = [pckg for pckg in kwargs['load_only']
+                                           if pckg not in kwargs['skip_load']]
 
                 if self.cfg['parent']['version'] == 'mf6':
                     sim_kwargs = kwargs.copy()

@@ -128,6 +128,11 @@ def test_model(get_pleasant_mf6_with_grid):
     assert m.version == 'mf6'
     assert 'UPW' in m.parent.get_package_list()
 
+    # test skip load
+    package_list = [s.lower() for s in m.parent.get_package_list()]
+    for package in m.cfg['parent']['skip_load']:
+        assert package.lower() not in package_list
+
 
 def test_perioddata(get_pleasant_mf6, pleasant_nwt):
     nwt = pleasant_nwt

@@ -113,6 +113,11 @@ def test_model_setup(full_pleasant_nwt):
     m = full_pleasant_nwt
     assert isinstance(m, MFnwtModel)
 
+    # test load_only
+    package_list = [s.lower() for s in m.parent.get_package_list()]
+    load_only = [s.lower() for s in m.cfg['parent']['load_only']]
+    assert package_list == load_only
+
     # verify that gage package was written
     # verify that observation data were added and written
     obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])

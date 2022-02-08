@@ -181,7 +181,12 @@ class MFnwtModel(MFsetupMixin, Modflow):
                                                                     kwargs['f']))
             load_only = list(set(packages_in_parent_namefile).intersection(
                 set(self.cfg['model'].get('packages', set()))))
-            kwargs['load_only'] = load_only
+            if 'load_only' not in kwargs:
+                    kwargs['load_only'] = load_only
+            if 'skip_load' in kwargs:
+                kwargs['skip_load'] = [s.lower() for s in kwargs['skip_load']]
+                kwargs['load_only'] = [pckg for pckg in kwargs['load_only']
+                                        if pckg not in kwargs['skip_load']]
             kwargs = get_input_arguments(kwargs, fm.Modflow.load, warn=False)
 
             print('loading parent model {}...'.format(os.path.join(kwargs['model_ws'],
