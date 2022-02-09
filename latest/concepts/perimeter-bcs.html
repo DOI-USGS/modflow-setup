@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.post277+geb1f10b documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.post280+g4bbff55 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post277+geb1f10b
+                0.post280+g4bbff55
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -140,7 +140,7 @@
 <li><p>The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.</p></li>
 <li><p>The parent model may have different length units.</p></li>
 <li><p>The parent model may be of a different MODFLOW version (e.g. MODFLOW 6 inset with a MODFLOW-NWT parent)</p></li>
-<li><p>The inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.7.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
+<li><p>The inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
 <li><p>The perimeter may be irregular. For example, the edge of the model active area may follow a major surface water feature along the opposite side.</p></li>
 </ul>
 </section>
@@ -208,7 +208,7 @@
 </pre></div>
 </div>
 </div></blockquote>
-<p><strong>3) Specification of perimeter boundary cells with a shapefile</strong>. The locations of perimeter cells can be explicitly specified this way, but they still must coincide with the edge of the active extent in each layer (Modflow-setup will not put perimeter cells in the model interior). (Open) Polyline or Polygon shapefiles can be used; in either case a buffer is used to align the supplied features with the active area edge, which is determined using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/reference/generated/scipy.ndimage.sobel.html#scipy.ndimage.sobel" title="(in SciPy v1.7.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">Sobel</span> <span class="pre">edge</span> <span class="pre">detection</span> <span class="pre">filter</span> <span class="pre">in</span> <span class="pre">Scipy</span></code></a>.</p>
+<p><strong>3) Specification of perimeter boundary cells with a shapefile</strong>. The locations of perimeter cells can be explicitly specified this way, but they still must coincide with the edge of the active extent in each layer (Modflow-setup will not put perimeter cells in the model interior). (Open) Polyline or Polygon shapefiles can be used; in either case a buffer is used to align the supplied features with the active area edge, which is determined using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.sobel.html#scipy.ndimage.sobel" title="(in SciPy v1.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">Sobel</span> <span class="pre">edge</span> <span class="pre">detection</span> <span class="pre">filter</span> <span class="pre">in</span> <span class="pre">Scipy</span></code></a>.</p>
 <blockquote>
 <div><p>Input example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
@@ -233,7 +233,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 02, 2022.
+      <span class="lastupdated">Last updated on Feb 09, 2022.
       </span></p>
   </div>
 
