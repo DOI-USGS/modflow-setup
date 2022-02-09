@@ -229,8 +229,8 @@ texinfo_documents = [
 intersphinx_mapping = {
     'flopy': ('https://flopy.readthedocs.io/en/latest/', None),
     'python': ('https://docs.python.org/3/', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+    'numpy': ('https://numpy.org/doc/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
     'pyproj': ('https://pyproj4.github.io/pyproj/stable/', None),
     'matplotlib': ('https://matplotlib.org', None),
