@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 from pathlib import Path
 
@@ -881,6 +882,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
             if ext in {'.hyd', '.gag', '.gage'}:
                 continue
             add_version_to_fileheader(f, model_info=self.header)
+
+        if not self.cfg['mfsetup_options']['keep_original_arrays']:
+            tmpdir_path = self.tmpdir
+            shutil.rmtree(tmpdir_path)
 
     @staticmethod
     def _parse_model_kwargs(cfg):

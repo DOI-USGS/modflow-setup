@@ -219,6 +219,9 @@ def test_dis_setup(pfl_nwt_with_grid):
     assert np.allclose(dis.top.array.mean() * convert_length_units(1, 2), top_m.mean())
     assert np.allclose(dis.botm.array.mean() * convert_length_units(1, 2), botm_m.mean())
 
+    # check that original arrays were created in expected folder
+    assert Path(m.cfg['intermediate_data']['output_folder']).is_dir()
+
 
 def test_bas_setup(pfl_nwt_with_dis):
 
@@ -667,6 +670,13 @@ def test_model_setup_nans(pfl_nwt_setup_from_yaml):
 #@pytest.mark.skip("still working on wel")
 def test_model_setup_and_run(model_setup_and_run):
     m = model_setup_and_run  #deepcopy(model_setup_and_run)
+
+    # check that original arrays folder was deleted
+    # (on finish of setup_from_yaml workflow)
+    # this also tests whether m.model_ws is a pathlib object
+    # can't use m.tmpdir property here
+    # because the property remakes the folder if it's missing
+    assert not (m.model_ws / m.cfg['intermediate_data']['output_folder']).exists()
 
 
 def test_load(pfl_nwt_setup_from_yaml, pfl_nwt_test_cfg_path):

@@ -968,6 +968,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         for f in files:
             add_version_to_fileheader(f, model_info=self.header)
 
+        if not self.cfg['mfsetup_options']['keep_original_arrays']:
+            shutil.rmtree(self.tmpdir)
+
+
     @staticmethod
     def _parse_model_kwargs(cfg):
 

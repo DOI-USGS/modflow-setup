@@ -315,7 +315,7 @@ class MFsetupMixin():
     @property
     def model_ws(self):
         if self._model_ws is None:
-            self._model_ws = self._get_model_ws()
+            self._model_ws = Path(self._get_model_ws())
         return self._model_ws
 
     @model_ws.setter
@@ -361,14 +361,20 @@ class MFsetupMixin():
 
     @property
     def tmpdir(self):
-        abspath = os.path.abspath(
-                self.cfg['intermediate_data']['output_folder'])
-        if not os.path.isdir(abspath):
-            os.makedirs(abspath)
+        #abspath = os.path.abspath(
+        #        self.cfg['intermediate_data']['output_folder'])
+        abspath = self.model_ws / 'original-arrays'
+        self.cfg['intermediate_data']['output_folder'] = str(abspath)
+        abspath.mkdir(exist_ok=True)
+        #if not os.path.isdir(abspath):
+        #    os.makedirs(abspath)
+        tmpdir = abspath
         if self.relative_external_paths:
-            tmpdir = os.path.relpath(abspath)
-        else:
-            tmpdir = os.path.normpath(abspath)
+            #tmpdir = os.path.relpath(abspath)
+            tmpdir = abspath.relative_to(self.model_ws)
+        #else:
+        #   do we need to normalize with Pathlib??
+        #    tmpdir = os.path.normpath(abspath)
         return tmpdir
 
     @property
@@ -710,7 +716,7 @@ class MFsetupMixin():
             model_ws = os.path.relpath(abspath)
         else:
             model_ws = os.path.normpath(abspath)
-        return model_ws
+        return Path(model_ws)
 
     def _reset_bc_arrays(self):
         """Reset the boundary condition property arrays in order.

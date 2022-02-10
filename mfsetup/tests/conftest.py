@@ -293,7 +293,7 @@ def pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis_bas6):
 @pytest.fixture(scope="function")
 def full_pleasant_nwt(pleasant_nwt_setup_from_yaml):
     m = get_model(pleasant_nwt_setup_from_yaml)
-    m.write_input()
+    #m.write_input()
     return m
 
 

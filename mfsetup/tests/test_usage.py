@@ -25,7 +25,7 @@ def test_just_grid_setup_mf6(cfg_file, test_data_path, shellmound_cfg):
     os.chdir(wd)
     # model workspace should be set correctly
     # expected absolute path to model_ws
-    assert m.model_ws == '.'
+    assert m.model_ws == Path('.')
     expected_model_ws = cfg_file.parent / m.cfg['simulation']['sim_ws']
     assert expected_model_ws.is_absolute()
     assert Path(m._abs_model_ws).samefile(expected_model_ws)
@@ -46,7 +46,7 @@ def test_just_grid_setup_mf6(cfg_file, test_data_path, shellmound_cfg):
 
     # reset working directory
     os.chdir(wd)
-    assert m.model_ws == '.'
+    assert m.model_ws == Path('.')
     assert Path(m._abs_model_ws).samefile(expected_model_ws)
     # Note: the only reason this works is because
     # the correct absolute path to the cfg file and/or

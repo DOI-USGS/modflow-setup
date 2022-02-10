@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 sys.path.append('..')
 import glob
@@ -32,7 +33,7 @@ from mfsetup.utils import get_input_arguments
 @pytest.fixture(scope="module", autouse=True)
 def reset_dirs(shellmound_cfg):
     cfg = deepcopy(shellmound_cfg)
-    folders = [cfg['intermediate_data']['output_folder'],
+    folders = [cfg.get('intermediate_data', {}).get('output_folder', 'original-arrays/'),
                cfg['model'].get('external_path'),
                cfg['gisdir']
                ]
@@ -146,7 +147,6 @@ def test_load_cfg(shellmound_cfg, shellmound_cfg_path):
                                                                        relative_model_ws))
     cfg = shellmound_cfg
     assert cfg['simulation']['sim_ws'] == ws
-    assert cfg['intermediate_data']['output_folder'] == os.path.join(ws, 'original')
 
 
 def test_simulation(shellmound_simulation):
@@ -382,6 +382,9 @@ def test_dis_setup(shellmound_model_with_grid):
         mcaq_data = src.read(1)
         mcaq_data[mcaq_data == src.meta['nodata']] = np.nan
     assert np.allclose(m.dis.botm.array[3][dis.idomain.array[3] == 1].mean() / .3048, np.nanmean(mcaq_data), atol=5)
+
+    # check that original arrays were created in expected folder
+    assert Path(m.cfg['intermediate_data']['output_folder']).is_dir()
 
 
 def test_idomain(shellmound_model_with_dis):
@@ -859,6 +862,13 @@ def test_model_setup_no_nans(model_setup):
 
 def test_model_setup_and_run(model_setup_and_run):
     m = model_setup_and_run
+
+    # check that original arrays folder was deleted
+    # (on finish of setup_from_yaml workflow)
+    # this also tests whether m.model_ws is a pathlib object
+    # can't use m.tmpdir property here
+    # because the property remakes the folder if it's missing
+    assert not (m.model_ws / m.cfg['intermediate_data']['output_folder']).exists()
 
 
 def test_load(model_setup, shellmound_cfg_path):
