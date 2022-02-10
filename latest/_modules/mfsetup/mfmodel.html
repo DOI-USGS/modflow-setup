@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post280+g4bbff55 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post281+g9f375c9 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post280+g4bbff55
+                0.post281+g9f375c9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -411,7 +411,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">model_ws</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_ws</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_model_ws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_ws</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_ws</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_model_ws</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_ws</span>
 
     <span class="nd">@model_ws</span><span class="o">.</span><span class="n">setter</span>
@@ -457,14 +457,20 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tmpdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">abspath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;output_folder&#39;</span><span class="p">])</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">abspath</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+        <span class="c1">#abspath = os.path.abspath(</span>
+        <span class="c1">#        self.cfg[&#39;intermediate_data&#39;][&#39;output_folder&#39;])</span>
+        <span class="n">abspath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span> <span class="o">/</span> <span class="s1">&#39;original-arrays&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;output_folder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+        <span class="n">abspath</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#if not os.path.isdir(abspath):</span>
+        <span class="c1">#    os.makedirs(abspath)</span>
+        <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">abspath</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relative_external_paths</span><span class="p">:</span>
-            <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+            <span class="c1">#tmpdir = os.path.relpath(abspath)</span>
+            <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">abspath</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span><span class="p">)</span>
+        <span class="c1">#else:</span>
+        <span class="c1">#   do we need to normalize with Pathlib??</span>
+        <span class="c1">#    tmpdir = os.path.normpath(abspath)</span>
         <span class="k">return</span> <span class="n">tmpdir</span>
 
     <span class="nd">@property</span>
@@ -806,7 +812,7 @@
             <span class="n">model_ws</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">model_ws</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">model_ws</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_ws</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_reset_bc_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reset the boundary condition property arrays in order.</span>
@@ -1775,7 +1781,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 09, 2022.
+      <span class="lastupdated">Last updated on Feb 10, 2022.
       </span></p>
   </div>
 

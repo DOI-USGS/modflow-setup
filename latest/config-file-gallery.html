@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration File Gallery &mdash; modflow-setup 0.post280+g4bbff55 documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.post281+g9f375c9 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post280+g4bbff55
+                0.post281+g9f375c9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -1112,179 +1112,176 @@
 <li><p>Lake package observations set up automatically (output file for each lake)</p></li>
 <li><p>GHB package created from polygon feature and DEM raster</p></li>
 </ul>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="nt">intermediate_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">  2</span><span class="w">  </span><span class="nt">tmpdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;original/&#39;</span><span class="w">  </span><span class="c1"># external arrays are read from here by flopy, and written to external_path</span><span class="w"></span>
-<span class="linenos">  3</span>
-<span class="linenos">  4</span><span class="c1"># argments to flopy.modflow.Modflow.__init__ or load for pfl_nwt</span><span class="w"></span>
-<span class="linenos">  5</span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">  6</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant&#39;</span><span class="w"></span>
-<span class="linenos">  7</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../tmp/pleasant_nwt/&#39;</span><span class="w"></span>
-<span class="linenos">  8</span><span class="w">  </span><span class="nt">external_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;external/&#39;</span><span class="w"></span>
-<span class="linenos">  9</span><span class="w">  </span><span class="nt">packages</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 10</span><span class="w">             </span><span class="s">&#39;bas6&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 11</span><span class="w">             </span><span class="s">&#39;oc&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 12</span><span class="w">             </span><span class="s">&#39;upw&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 13</span><span class="w">             </span><span class="s">&#39;rch&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model</span><span class="w"></span>
-<span class="linenos"> 14</span><span class="w">             </span><span class="s">&#39;sfr&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 15</span><span class="w">             </span><span class="s">&#39;lak&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 16</span><span class="w">             </span><span class="s">&#39;wel&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 17</span><span class="w">             </span><span class="s">&#39;hyd&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 18</span><span class="w">             </span><span class="s">&#39;gag&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 19</span><span class="w">             </span><span class="s">&#39;nwt&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 20</span><span class="w">             </span><span class="s">&#39;chd&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos"> 21</span><span class="w">  </span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos"> 22</span>
-<span class="linenos"> 23</span><span class="nt">parent</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 24</span><span class="w">  </span><span class="c1"># argments to flopy.modflow.Modflow.load for parent model</span><span class="w"></span>
-<span class="linenos"> 25</span><span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant.nam&#39;</span><span class="w"></span>
-<span class="linenos"> 26</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/&#39;</span><span class="w"></span>
-<span class="linenos"> 27</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mfnwt&#39;</span><span class="w"></span>
-<span class="linenos"> 28</span><span class="w">  </span><span class="c1"># option to only load the parent packages that are needed</span><span class="w"></span>
-<span class="linenos"> 29</span><span class="w">  </span><span class="nt">load_only</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;bas6&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;upw&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;rch&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos"> 30</span><span class="w">  </span><span class="c1"># information for modflow-setup</span><span class="w"></span>
-<span class="linenos"> 31</span><span class="w">  </span><span class="c1"># note: parent model is geo-located in namfile header</span><span class="w"></span>
-<span class="linenos"> 32</span><span class="w">  </span><span class="c1"># (only works if length_units=&#39;meters&#39;)</span><span class="w"></span>
-<span class="linenos"> 33</span><span class="w">  </span><span class="nt">hiKlakes_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e4</span><span class="w"> </span><span class="c1"># unfortunately python yaml currently requires a dot to parse exp notation as float</span><span class="w"></span>
-<span class="linenos"> 34</span><span class="w">  </span><span class="nt">default_source_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># if True, packages and variables that are omitted will be pulled from this model</span><span class="w"></span>
-<span class="linenos"> 35</span><span class="w">  </span><span class="nt">copy_stress_periods</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span><span class="w"></span>
-<span class="linenos"> 36</span><span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="w"></span>
-<span class="linenos"> 37</span><span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
-<span class="linenos"> 38</span><span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w"></span>
-<span class="linenos"> 39</span>
-<span class="linenos"> 40</span><span class="c1"># parameters for setting up the pfl_nwt grid</span><span class="w"></span>
-<span class="linenos"> 41</span><span class="c1"># using features in features_file</span><span class="w"></span>
-<span class="linenos"> 42</span><span class="nt">setup_grid</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 43</span><span class="w">  </span><span class="nt">remake</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="linenos"> 44</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 45</span><span class="w">    </span><span class="nt">features_shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 46</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/all_lakes.shp&#39;</span><span class="w"></span>
-<span class="linenos"> 47</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
-<span class="linenos"> 48</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pleasant lake</span><span class="w"></span>
-<span class="linenos"> 49</span><span class="w">  </span><span class="nt">dxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w">  </span><span class="c1"># in CRS units of meters</span><span class="w"></span>
-<span class="linenos"> 50</span><span class="w">  </span><span class="nt">buffer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"> </span><span class="c1"># distance from feature(s) if interest to model boundary, in meters</span><span class="w"></span>
-<span class="linenos"> 51</span><span class="w">  </span><span class="nt">grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;grid.json&#39;</span><span class="w"> </span><span class="c1"># grid info will be written to this file</span><span class="w"></span>
-<span class="linenos"> 52</span><span class="w">  </span><span class="nt">epsg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3070</span><span class="w"></span>
-<span class="linenos"> 53</span>
-<span class="linenos"> 54</span><span class="c1"># Inset model settings and</span><span class="w"></span>
-<span class="linenos"> 55</span><span class="c1"># arguments to flopy.modflow.ModflowDis</span><span class="w"></span>
-<span class="linenos"> 56</span><span class="nt">dis</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 57</span><span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="linenos"> 58</span><span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
-<span class="linenos"> 59</span><span class="w">  </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="linenos"> 60</span><span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify lenuni: 2</span><span class="w"></span>
-<span class="linenos"> 61</span><span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="w"></span>
-<span class="linenos"> 62</span><span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify itmuni: 4</span><span class="w"></span>
-<span class="linenos"> 63</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 64</span><span class="w">    </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_parent</span><span class="w"></span>
-<span class="linenos"> 65</span><span class="w">    </span><span class="nt">botm</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 66</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 67</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span><span class="w"> </span><span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span><span class="w"></span>
-<span class="linenos"> 68</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent</span><span class="w"></span>
-<span class="linenos"> 69</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="linenos"> 70</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
-<span class="linenos"> 71</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
-<span class="linenos"> 72</span>
-<span class="linenos"> 73</span><span class="nt">bas6</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 74</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 75</span><span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 76</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 77</span><span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
-<span class="linenos"> 78</span><span class="w">        </span><span class="nt">stress_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
-<span class="linenos"> 79</span>
-<span class="linenos"> 80</span><span class="nt">upw</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 81</span><span class="w">  </span><span class="nt">ipakcb</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"> </span><span class="c1"># unit for writing cell budget output</span><span class="w"></span>
-<span class="linenos"> 82</span><span class="w">  </span><span class="nt">hdry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-9999</span><span class="w"></span>
-<span class="linenos"> 83</span>
-<span class="linenos"> 84</span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 85</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos"> 86</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 87</span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 88</span><span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span><span class="w"></span>
-<span class="linenos"> 89</span><span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/csls_sources_wu_pts.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span><span class="w"></span>
-<span class="linenos"> 90</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"></span>
-<span class="linenos"> 91</span><span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;resample&#39;</span><span class="p p-Indicator">}</span><span class="w"></span>
-<span class="linenos"> 92</span>
-<span class="linenos"> 93</span><span class="nt">ghb</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 94</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos"> 95</span><span class="w">  </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9</span><span class="w">  </span><span class="c1"># m2/d</span><span class="w"></span>
-<span class="linenos"> 96</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 97</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="linenos"> 98</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/all_lakes.shp&#39;</span><span class="w"></span>
-<span class="linenos"> 99</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
-<span class="linenos">100</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059161</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pond near pleasant lake</span><span class="w"></span>
-<span class="linenos">101</span><span class="w">    </span><span class="nt">dem</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">102</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/dem40m.tif&#39;</span><span class="w"></span>
-<span class="linenos">103</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
-<span class="linenos">104</span><span class="w">  </span><span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="linenos">105</span>
-<span class="linenos">106</span><span class="nt">lak</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">107</span><span class="w">  </span><span class="nt">theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.7</span><span class="w">  </span><span class="c1"># semi-implicit; negative value indicates that surfdep is read</span><span class="w"></span>
-<span class="linenos">108</span><span class="w">  </span><span class="nt">nssitr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">800</span><span class="w">  </span><span class="c1"># number of Newton iterations for solution of lake stage, for each MODFLOW iteration.</span><span class="w"></span>
-<span class="linenos">109</span><span class="w">  </span><span class="nt">sscncr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0000001</span><span class="w">  </span><span class="c1"># lake stage convergence criterion</span><span class="w"></span>
-<span class="linenos">110</span><span class="w">  </span><span class="nt">surfdep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">  </span><span class="c1"># undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)</span><span class="w"></span>
-<span class="linenos">111</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">112</span><span class="w">    </span><span class="nt">littoral_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.045</span><span class="w"> </span><span class="c1"># 1/d</span><span class="w"></span>
-<span class="linenos">113</span><span class="w">    </span><span class="nt">profundal_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.025</span><span class="w"> </span><span class="c1"># 1/d</span><span class="w"></span>
-<span class="linenos">114</span><span class="w">    </span><span class="nt">lakes_shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">115</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/all_lakes.shp&#39;</span><span class="w"></span>
-<span class="linenos">116</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
-<span class="linenos">117</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pleasant lake</span><span class="w"></span>
-<span class="linenos">118</span><span class="w">    </span><span class="nt">climate</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">119</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">120</span><span class="w">        </span><span class="nt">600059060</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv&#39;</span><span class="w"></span>
-<span class="linenos">121</span><span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prism&#39;</span><span class="w"></span>
-<span class="linenos">122</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">123</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># average daily rate for model period for initial steady state</span><span class="w"></span>
-<span class="linenos">124</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># average daily rate or value for each month</span><span class="w"></span>
-<span class="linenos">125</span><span class="w">    </span><span class="nt">bathymetry_raster</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">126</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif&#39;</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># argments to flopy.modflow.Modflow.__init__ or load for pfl_nwt</span><span class="w"></span>
+<span class="linenos">  2</span><span class="nt">model</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">  3</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant&#39;</span><span class="w"></span>
+<span class="linenos">  4</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../tmp/pleasant_nwt/&#39;</span><span class="w"></span>
+<span class="linenos">  5</span><span class="w">  </span><span class="nt">external_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;external/&#39;</span><span class="w"></span>
+<span class="linenos">  6</span><span class="w">  </span><span class="nt">packages</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos">  7</span><span class="w">             </span><span class="s">&#39;bas6&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos">  8</span><span class="w">             </span><span class="s">&#39;oc&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos">  9</span><span class="w">             </span><span class="s">&#39;upw&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 10</span><span class="w">             </span><span class="s">&#39;rch&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model</span><span class="w"></span>
+<span class="linenos"> 11</span><span class="w">             </span><span class="s">&#39;sfr&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 12</span><span class="w">             </span><span class="s">&#39;lak&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 13</span><span class="w">             </span><span class="s">&#39;wel&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 14</span><span class="w">             </span><span class="s">&#39;hyd&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 15</span><span class="w">             </span><span class="s">&#39;gag&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 16</span><span class="w">             </span><span class="s">&#39;nwt&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 17</span><span class="w">             </span><span class="s">&#39;chd&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos"> 18</span><span class="w">  </span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span><span class="nt">parent</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 21</span><span class="w">  </span><span class="c1"># argments to flopy.modflow.Modflow.load for parent model</span><span class="w"></span>
+<span class="linenos"> 22</span><span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant.nam&#39;</span><span class="w"></span>
+<span class="linenos"> 23</span><span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/&#39;</span><span class="w"></span>
+<span class="linenos"> 24</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mfnwt&#39;</span><span class="w"></span>
+<span class="linenos"> 25</span><span class="w">  </span><span class="c1"># option to only load the parent packages that are needed</span><span class="w"></span>
+<span class="linenos"> 26</span><span class="w">  </span><span class="nt">load_only</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;dis&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;bas6&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;upw&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;rch&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos"> 27</span><span class="w">  </span><span class="c1"># information for modflow-setup</span><span class="w"></span>
+<span class="linenos"> 28</span><span class="w">  </span><span class="c1"># note: parent model is geo-located in namfile header</span><span class="w"></span>
+<span class="linenos"> 29</span><span class="w">  </span><span class="c1"># (only works if length_units=&#39;meters&#39;)</span><span class="w"></span>
+<span class="linenos"> 30</span><span class="w">  </span><span class="nt">hiKlakes_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e4</span><span class="w"> </span><span class="c1"># unfortunately python yaml currently requires a dot to parse exp notation as float</span><span class="w"></span>
+<span class="linenos"> 31</span><span class="w">  </span><span class="nt">default_source_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># if True, packages and variables that are omitted will be pulled from this model</span><span class="w"></span>
+<span class="linenos"> 32</span><span class="w">  </span><span class="nt">copy_stress_periods</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span><span class="w"></span>
+<span class="linenos"> 33</span><span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="w"></span>
+<span class="linenos"> 34</span><span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="linenos"> 35</span><span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w"></span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span><span class="c1"># parameters for setting up the pfl_nwt grid</span><span class="w"></span>
+<span class="linenos"> 38</span><span class="c1"># using features in features_file</span><span class="w"></span>
+<span class="linenos"> 39</span><span class="nt">setup_grid</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 40</span><span class="w">  </span><span class="nt">remake</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="linenos"> 41</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 42</span><span class="w">    </span><span class="nt">features_shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 43</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/all_lakes.shp&#39;</span><span class="w"></span>
+<span class="linenos"> 44</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
+<span class="linenos"> 45</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pleasant lake</span><span class="w"></span>
+<span class="linenos"> 46</span><span class="w">  </span><span class="nt">dxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w">  </span><span class="c1"># in CRS units of meters</span><span class="w"></span>
+<span class="linenos"> 47</span><span class="w">  </span><span class="nt">buffer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w"> </span><span class="c1"># distance from feature(s) if interest to model boundary, in meters</span><span class="w"></span>
+<span class="linenos"> 48</span><span class="w">  </span><span class="nt">grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;grid.json&#39;</span><span class="w"> </span><span class="c1"># grid info will be written to this file</span><span class="w"></span>
+<span class="linenos"> 49</span><span class="w">  </span><span class="nt">epsg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3070</span><span class="w"></span>
+<span class="linenos"> 50</span>
+<span class="linenos"> 51</span><span class="c1"># Inset model settings and</span><span class="w"></span>
+<span class="linenos"> 52</span><span class="c1"># arguments to flopy.modflow.ModflowDis</span><span class="w"></span>
+<span class="linenos"> 53</span><span class="nt">dis</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 54</span><span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="linenos"> 55</span><span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="linenos"> 56</span><span class="w">  </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="linenos"> 57</span><span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify lenuni: 2</span><span class="w"></span>
+<span class="linenos"> 58</span><span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="w"></span>
+<span class="linenos"> 59</span><span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify itmuni: 4</span><span class="w"></span>
+<span class="linenos"> 60</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 61</span><span class="w">    </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_parent</span><span class="w"></span>
+<span class="linenos"> 62</span><span class="w">    </span><span class="nt">botm</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 63</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 64</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span><span class="w"> </span><span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span><span class="w"></span>
+<span class="linenos"> 65</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent</span><span class="w"></span>
+<span class="linenos"> 66</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="linenos"> 67</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="linenos"> 68</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
+<span class="linenos"> 69</span>
+<span class="linenos"> 70</span><span class="nt">bas6</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 71</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 72</span><span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 73</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 74</span><span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
+<span class="linenos"> 75</span><span class="w">        </span><span class="nt">stress_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="linenos"> 76</span>
+<span class="linenos"> 77</span><span class="nt">upw</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 78</span><span class="w">  </span><span class="nt">ipakcb</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"> </span><span class="c1"># unit for writing cell budget output</span><span class="w"></span>
+<span class="linenos"> 79</span><span class="w">  </span><span class="nt">hdry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-9999</span><span class="w"></span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 82</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos"> 83</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 84</span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 85</span><span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span><span class="w"></span>
+<span class="linenos"> 86</span><span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/csls_sources_wu_pts.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span><span class="w"></span>
+<span class="linenos"> 87</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"></span>
+<span class="linenos"> 88</span><span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;resample&#39;</span><span class="p p-Indicator">}</span><span class="w"></span>
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span><span class="nt">ghb</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 91</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos"> 92</span><span class="w">  </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9</span><span class="w">  </span><span class="c1"># m2/d</span><span class="w"></span>
+<span class="linenos"> 93</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 94</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 95</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/all_lakes.shp&#39;</span><span class="w"></span>
+<span class="linenos"> 96</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
+<span class="linenos"> 97</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059161</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pond near pleasant lake</span><span class="w"></span>
+<span class="linenos"> 98</span><span class="w">    </span><span class="nt">dem</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 99</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/dem40m.tif&#39;</span><span class="w"></span>
+<span class="linenos">100</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="linenos">101</span><span class="w">  </span><span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="linenos">102</span>
+<span class="linenos">103</span><span class="nt">lak</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">104</span><span class="w">  </span><span class="nt">theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.7</span><span class="w">  </span><span class="c1"># semi-implicit; negative value indicates that surfdep is read</span><span class="w"></span>
+<span class="linenos">105</span><span class="w">  </span><span class="nt">nssitr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">800</span><span class="w">  </span><span class="c1"># number of Newton iterations for solution of lake stage, for each MODFLOW iteration.</span><span class="w"></span>
+<span class="linenos">106</span><span class="w">  </span><span class="nt">sscncr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0000001</span><span class="w">  </span><span class="c1"># lake stage convergence criterion</span><span class="w"></span>
+<span class="linenos">107</span><span class="w">  </span><span class="nt">surfdep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">  </span><span class="c1"># undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)</span><span class="w"></span>
+<span class="linenos">108</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">109</span><span class="w">    </span><span class="nt">littoral_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.045</span><span class="w"> </span><span class="c1"># 1/d</span><span class="w"></span>
+<span class="linenos">110</span><span class="w">    </span><span class="nt">profundal_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.025</span><span class="w"> </span><span class="c1"># 1/d</span><span class="w"></span>
+<span class="linenos">111</span><span class="w">    </span><span class="nt">lakes_shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">112</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps/all_lakes.shp&#39;</span><span class="w"></span>
+<span class="linenos">113</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
+<span class="linenos">114</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pleasant lake</span><span class="w"></span>
+<span class="linenos">115</span><span class="w">    </span><span class="nt">climate</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">116</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">117</span><span class="w">        </span><span class="nt">600059060</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv&#39;</span><span class="w"></span>
+<span class="linenos">118</span><span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prism&#39;</span><span class="w"></span>
+<span class="linenos">119</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">120</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># average daily rate for model period for initial steady state</span><span class="w"></span>
+<span class="linenos">121</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># average daily rate or value for each month</span><span class="w"></span>
+<span class="linenos">122</span><span class="w">    </span><span class="nt">bathymetry_raster</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">123</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif&#39;</span><span class="w"></span>
+<span class="linenos">124</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="linenos">125</span><span class="w">    </span><span class="nt">stage_area_volume_file</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">126</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/area_stage_vol_Pleasant.csv&#39;</span><span class="w"></span>
 <span class="linenos">127</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
-<span class="linenos">128</span><span class="w">    </span><span class="nt">stage_area_volume_file</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">129</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/area_stage_vol_Pleasant.csv&#39;</span><span class="w"></span>
-<span class="linenos">130</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
-<span class="linenos">131</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hydroid&#39;</span><span class="w"></span>
-<span class="linenos">132</span><span class="w">      </span><span class="nt">column_mappings</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">133</span><span class="w">        </span><span class="nt">volume_m3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;volume&#39;</span><span class="w"></span>
-<span class="linenos">134</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">135</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;lak_lookup.csv&#39;</span><span class="w"></span>
-<span class="linenos">136</span>
-<span class="linenos">137</span><span class="nt">sfr</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">138</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">139</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">140</span><span class="w">      </span><span class="nt">nhdplus_paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos">141</span><span class="w">    </span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span><span class="w"></span>
-<span class="linenos">142</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/gages.csv&#39;</span><span class="w"></span>
-<span class="linenos">143</span><span class="w">      </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;downstream-flow&#39;</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span><span class="w"></span>
-<span class="linenos">144</span><span class="w">      </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x&#39;</span><span class="w"></span>
-<span class="linenos">145</span><span class="w">      </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y&#39;</span><span class="w"></span>
-<span class="linenos">146</span><span class="w">      </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;site_no&#39;</span><span class="w"></span>
-<span class="linenos">147</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">148</span><span class="w">    </span><span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">149</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/dem40m.tif&#39;</span><span class="w"></span>
-<span class="linenos">150</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
-<span class="linenos">151</span><span class="w">      </span><span class="nt">buffer_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
-<span class="linenos">152</span>
-<span class="linenos">153</span><span class="nt">nwt</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">154</span><span class="w">  </span><span class="c1">#use_existing_file: &#39;RGN_rjh_3_23_18.NWT&#39;</span><span class="w"></span>
-<span class="linenos">155</span><span class="w">  </span><span class="nt">headtol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span><span class="w"> </span><span class="c1"># read remaining parameters from default cfg</span><span class="w"></span>
-<span class="linenos">156</span><span class="w">  </span><span class="nt">hclosexmd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-4</span><span class="w"></span>
-<span class="linenos">157</span>
-<span class="linenos">158</span><span class="nt">hyd</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">159</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">160</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos">161</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span><span class="w">  </span><span class="c1"># some lakes are high-k; obs need to be in hydmod</span><span class="w"></span>
-<span class="linenos">162</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos">163</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/uwsp_heads.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="linenos">164</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/wgnhs_head_targets.csv&#39;</span><span class="w"></span>
-<span class="linenos">165</span><span class="w">                     </span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos">166</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">167</span><span class="w">      </span><span class="nt">hydlbl</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos">168</span><span class="w">  </span><span class="nt">drop_observations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span><span class="w">  </span><span class="c1"># pleasant lake; monitored via gage package</span><span class="w"></span>
-<span class="linenos">169</span><span class="w">  </span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="linenos">170</span>
-<span class="linenos">171</span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">172</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
-<span class="linenos">173</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
+<span class="linenos">128</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hydroid&#39;</span><span class="w"></span>
+<span class="linenos">129</span><span class="w">      </span><span class="nt">column_mappings</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">130</span><span class="w">        </span><span class="nt">volume_m3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;volume&#39;</span><span class="w"></span>
+<span class="linenos">131</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">132</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;lak_lookup.csv&#39;</span><span class="w"></span>
+<span class="linenos">133</span>
+<span class="linenos">134</span><span class="nt">sfr</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">135</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">136</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">137</span><span class="w">      </span><span class="nt">nhdplus_paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;../../../examples/data/pleasant/source_data/shps&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos">138</span><span class="w">    </span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span><span class="w"></span>
+<span class="linenos">139</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/gages.csv&#39;</span><span class="w"></span>
+<span class="linenos">140</span><span class="w">      </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;downstream-flow&#39;</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span><span class="w"></span>
+<span class="linenos">141</span><span class="w">      </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x&#39;</span><span class="w"></span>
+<span class="linenos">142</span><span class="w">      </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y&#39;</span><span class="w"></span>
+<span class="linenos">143</span><span class="w">      </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;site_no&#39;</span><span class="w"></span>
+<span class="linenos">144</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">145</span><span class="w">    </span><span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">146</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/dem40m.tif&#39;</span><span class="w"></span>
+<span class="linenos">147</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="linenos">148</span><span class="w">      </span><span class="nt">buffer_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"></span>
+<span class="linenos">149</span>
+<span class="linenos">150</span><span class="nt">nwt</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">151</span><span class="w">  </span><span class="c1">#use_existing_file: &#39;RGN_rjh_3_23_18.NWT&#39;</span><span class="w"></span>
+<span class="linenos">152</span><span class="w">  </span><span class="nt">headtol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span><span class="w"> </span><span class="c1"># read remaining parameters from default cfg</span><span class="w"></span>
+<span class="linenos">153</span><span class="w">  </span><span class="nt">hclosexmd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-4</span><span class="w"></span>
+<span class="linenos">154</span>
+<span class="linenos">155</span><span class="nt">hyd</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">156</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">157</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos">158</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span><span class="w">  </span><span class="c1"># some lakes are high-k; obs need to be in hydmod</span><span class="w"></span>
+<span class="linenos">159</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos">160</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/uwsp_heads.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="linenos">161</span><span class="w">                </span><span class="s">&#39;../../../examples/data/pleasant/source_data/tables/wgnhs_head_targets.csv&#39;</span><span class="w"></span>
+<span class="linenos">162</span><span class="w">                     </span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos">163</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">164</span><span class="w">      </span><span class="nt">hydlbl</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos">165</span><span class="w">  </span><span class="nt">drop_observations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span><span class="w">  </span><span class="c1"># pleasant lake; monitored via gage package</span><span class="w"></span>
+<span class="linenos">166</span><span class="w">  </span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos">167</span>
+<span class="linenos">168</span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">169</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="linenos">170</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -1517,7 +1514,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 09, 2022.
+      <span class="lastupdated">Last updated on Feb 10, 2022.
       </span></p>
   </div>
 
