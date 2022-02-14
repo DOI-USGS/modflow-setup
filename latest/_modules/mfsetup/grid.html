@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.post281+g9f375c9 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post282+g7bff750 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post281+g9f375c9
+                0.post282+g7bff750
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -728,7 +728,16 @@
 
     <span class="c1"># reproject to grid crs</span>
     <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">orig_crs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">crs</span>
         <span class="n">df</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">is_valid</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Something went wrong with reprojecting &#39;</span>
+                             <span class="sa">f</span><span class="s1">&#39;the input features from</span><span class="se">\n</span><span class="si">{</span><span class="n">orig_crs</span><span class="si">}</span><span class="se">\n</span><span class="s1">to</span><span class="se">\n</span><span class="si">{</span><span class="n">grid</span><span class="o">.</span><span class="n">crs</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                             <span class="s1">&#39;Check the input feature and model grid projections&#39;</span>
+                             <span class="s1">&#39;If you are on a network that requires special &#39;</span>
+                             <span class="s1">&#39;SSL authentication, try running this operation &#39;</span>
+                             <span class="s1">&#39;again off-network.&#39;</span>
+                             <span class="p">)</span>
 
     <span class="c1"># subset to include_ids</span>
     <span class="k">if</span> <span class="n">id_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">include_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1010,7 +1019,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 10, 2022.
+      <span class="lastupdated">Last updated on Feb 14, 2022.
       </span></p>
   </div>
 
