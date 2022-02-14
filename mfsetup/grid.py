@@ -632,7 +632,16 @@ def rasterize(feature, grid, id_column=None,
 
     # reproject to grid crs
     if df.crs is not None:
+        orig_crs = df.crs
         df.to_crs(grid.crs, inplace=True)
+        if not df.to_crs(grid.crs).is_valid.all():
+            raise ValueError('Something went wrong with reprojecting '
+                             f'the input features from\n{orig_crs}\nto\n{grid.crs}\n'
+                             'Check the input feature and model grid projections'
+                             'If you are on a network that requires special '
+                             'SSL authentication, try running this operation '
+                             'again off-network.'
+                             )
 
     # subset to include_ids
     if id_column is not None and include_ids is not None:
