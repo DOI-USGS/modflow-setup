@@ -1275,6 +1275,14 @@ class MFsetupMixin():
             kwargs = get_input_arguments(cfg, setup_structured_grid)
             self._modelgrid = setup_structured_grid(**kwargs)
             self.cfg['grid'] = self._modelgrid.cfg
+            # update DIS package configuration
+            if self.version == 'mf6':
+                self.cfg['dis']['dimensions']['nrow'] = self.cfg['grid']['nrow']
+                self.cfg['dis']['dimensions']['ncol'] = self.cfg['grid']['ncol']
+            else:
+                self.cfg['dis']['nrow'] = self.cfg['grid']['nrow']
+                self.cfg['dis']['ncol'] = self.cfg['grid']['ncol']
+
         self._reset_bc_arrays()
 
         # set up local grid refinement

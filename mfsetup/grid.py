@@ -813,6 +813,18 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     # (and not snapping to national hydrologic grid)
     if parent_model is not None and not snap_to_NHG:
 
+        # An alternative method for snapping to the parent grid
+        # if the code below is causing issues
+        # get the parent cell containing
+        # the inset upper left corner
+        # xul_in, yul_in = xul, yul
+        #pi2, pj2 = get_ij(parent_model.modelgrid, xul_in, yul_in)
+        # find the closest vertex
+        #verts2 = np.array(parent_model.modelgrid.get_cell_vertices(pi2, pj2))
+        #closest_pos = np.argmin(np.sqrt((xul-verts2[:,0])**2 +
+        #                                (yul-verts2[:,0])**2))
+        #xul, yul = verts2[closest_pos]
+
         # get location of coinciding cell in parent model for upper left
         # first make sure not sitting at the top of a cell (which can shift into wrong parent cell)
         # move to model coords
