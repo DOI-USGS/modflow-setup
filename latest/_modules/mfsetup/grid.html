@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.post282+g7bff750 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post284+g1c36696 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post282+g7bff750
+                0.post284+g1c36696
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -909,6 +909,18 @@
     <span class="c1"># (and not snapping to national hydrologic grid)</span>
     <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">snap_to_NHG</span><span class="p">:</span>
 
+        <span class="c1"># An alternative method for snapping to the parent grid</span>
+        <span class="c1"># if the code below is causing issues</span>
+        <span class="c1"># get the parent cell containing</span>
+        <span class="c1"># the inset upper left corner</span>
+        <span class="c1"># xul_in, yul_in = xul, yul</span>
+        <span class="c1">#pi2, pj2 = get_ij(parent_model.modelgrid, xul_in, yul_in)</span>
+        <span class="c1"># find the closest vertex</span>
+        <span class="c1">#verts2 = np.array(parent_model.modelgrid.get_cell_vertices(pi2, pj2))</span>
+        <span class="c1">#closest_pos = np.argmin(np.sqrt((xul-verts2[:,0])**2 +</span>
+        <span class="c1">#                                (yul-verts2[:,0])**2))</span>
+        <span class="c1">#xul, yul = verts2[closest_pos]</span>
+
         <span class="c1"># get location of coinciding cell in parent model for upper left</span>
         <span class="c1"># first make sure not sitting at the top of a cell (which can shift into wrong parent cell)</span>
         <span class="c1"># move to model coords</span>
@@ -1019,7 +1031,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 14, 2022.
+      <span class="lastupdated">Last updated on Feb 17, 2022.
       </span></p>
   </div>
 
