@@ -891,3 +891,18 @@ def test_packagelist(shellmound_cfg_path):
                                  exclude='packages')
     m = MF6model(cfg=cfg, **kwargs)
     assert m.package_list == [p for p in m._package_setup_order if p in packages]
+
+
+def test_delete_tmpdir_on_start(shellmound_cfg_path, tmpdir):
+    tmpdir = Path(tmpdir) / 'shellmound/original-arrays'
+    # Make the temporary 'original files' folder
+    # like it already exists
+    # add a stale file
+    tmpdir.mkdir()
+    stale_file = tmpdir / 'junk.txt'
+    with open(stale_file, 'w') as dest:
+        dest.write('junk!')
+    m = MF6model(cfg=shellmound_cfg_path)
+    # the temporary 'original files' folder
+    # should have been deleted and remade on init of MF6model
+    assert not stale_file.exists()

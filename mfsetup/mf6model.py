@@ -101,6 +101,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # arrays remade during this session
         self.updated_arrays = set()
 
+        # delete the temporary 'original-files' folder
+        # if it already exists, to avoid side effects from stale files
+        if not self._is_lgr:
+            shutil.rmtree(self.tmpdir, ignore_errors=True)
+
     def __repr__(self):
         return MFsetupMixin.__repr__(self)
 

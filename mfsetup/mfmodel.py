@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 import warnings
 from collections import defaultdict
@@ -126,6 +127,7 @@ class MFsetupMixin():
 
         # cache of interpolation weights to speed up regridding
         self._interp_weights = None
+
 
     def __repr__(self):
         header = f'{self.header}\n'
@@ -1654,9 +1656,7 @@ class MFsetupMixin():
             msg += f" from configuration in {cfg_filename}"
         print(msg)
         t0 = time.time()
-        #cfg = cls._parse_model_kwargs(cfg)
-        #kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
-        #                             exclude='packages')
+
         m = cls(cfg=cfg) #, **kwargs)
 
         # make a grid if one isn't already specified

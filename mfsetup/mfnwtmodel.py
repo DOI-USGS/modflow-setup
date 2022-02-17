@@ -99,6 +99,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # property arrays
         self._ibound = None
 
+        # delete the temporary 'original-files' folder
+        # if it already exists, to avoid side effects from stale files
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
     def __repr__(self):
         return MFsetupMixin.__repr__(self)
 
