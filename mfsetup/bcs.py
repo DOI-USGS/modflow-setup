@@ -3,7 +3,6 @@ Functions for simple MODFLOW boundary conditions such as ghb, drain, etc.
 """
 import numbers
 import shutil
-from pathlib import Path
 
 import flopy
 import numpy as np

@@ -1,8 +1,6 @@
 import os
 import shutil
 import time
-from collections import defaultdict
-from locale import D_FMT
 
 import flopy
 import numpy as np

@@ -1,5 +1,4 @@
 import os
-import shutil
 import time
 import warnings
 from collections import defaultdict
