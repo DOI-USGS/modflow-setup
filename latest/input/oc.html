@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MODFLOW Output Control &mdash; modflow-setup 0.post284+g1c36696 documentation</title>
+  <title>MODFLOW Output Control &mdash; modflow-setup 0.post288+gbac36d3 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Troubleshooting" href="../troubleshooting.html" />
-    <link rel="prev" title="Input instructions by package" href="index.html" /> 
+    <link rel="prev" title="Specifying boundary conditions with the ‘basic’ MODFLOW stress packages" href="basic-stress.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post284+g1c36696
+                0.post288+gbac36d3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -58,6 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Input instructions by package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="basic-stress.html">Basic stress packages</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">     Output Control</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#stress-period-input-format">Stress period input format</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#output-filenames-and-other-arguments">Output filenames and other arguments</a></li>
@@ -145,7 +146,7 @@
 </section>
 <section id="output-filenames-and-other-arguments">
 <h2>Output filenames and other arguments<a class="headerlink" href="#output-filenames-and-other-arguments" title="Permalink to this headline">¶</a></h2>
-<p>For MODFLOW 6 models, the <code class="docutils literal notranslate"><span class="pre">head_fileout_fmt</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_fileout_fmt</span></code> arguments can also be supplied to tell Flopy where to save the head and cell budget files, and how to name them. Modflow-setup fills any format specifiers (<code class="docutils literal notranslate"><span class="pre">'{}'</span></code>) with the model name, and passes the resulting strings to the <code class="docutils literal notranslate"><span class="pre">head_filerecord</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_filerecord</span></code> arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in flopy Documentation v3.3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> constructor.</p>
+<p>For MODFLOW 6 models, the <code class="docutils literal notranslate"><span class="pre">head_fileout_fmt</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_fileout_fmt</span></code> arguments can also be supplied to tell Flopy where to save the head and cell budget files, and how to name them. Modflow-setup fills any format specifiers (<code class="docutils literal notranslate"><span class="pre">'{}'</span></code>) with the model name, and passes the resulting strings to the <code class="docutils literal notranslate"><span class="pre">head_filerecord</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_filerecord</span></code> arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> constructor.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.hds&#39;</span><span class="w"></span>
 <span class="w">  </span><span class="nt">budget_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.cbc&#39;</span><span class="w"></span>
@@ -153,7 +154,7 @@
 <span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Any other valid arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in flopy Documentation v3.3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in flopy Documentation v3.3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructors can be supplied as keys in the <code class="docutils literal notranslate"><span class="pre">oc:</span></code> dictionary block. For example:</p>
+<p>Any other valid arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructors can be supplied as keys in the <code class="docutils literal notranslate"><span class="pre">oc:</span></code> dictionary block. For example:</p>
 <blockquote>
 <div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">unitnumber</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">14</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">51</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">52</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">53</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">]</span><span class="w"></span>
@@ -164,7 +165,7 @@
 </section>
 <section id="alternative-stress-period-input-formats">
 <h2>Alternative stress period input formats<a class="headerlink" href="#alternative-stress-period-input-formats" title="Permalink to this headline">¶</a></h2>
-<p>As with other arguments, stress period input can also be directly specified in the Flopy input formats. For example, <code class="docutils literal notranslate"><span class="pre">stress_period_data</span></code> could be supplied for a MODFLOW-2005 model as it would be supplied to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in flopy Documentation v3.3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructor:</p>
+<p>As with other arguments, stress period input can also be directly specified in the Flopy input formats. For example, <code class="docutils literal notranslate"><span class="pre">stress_period_data</span></code> could be supplied for a MODFLOW-2005 model as it would be supplied to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructor:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">stress_period_data</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">(0, 1)</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
@@ -177,7 +178,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Input instructions by package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="basic-stress.html" class="btn btn-neutral float-left" title="Specifying boundary conditions with the ‘basic’ MODFLOW stress packages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
@@ -185,7 +186,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 17, 2022.
+      <span class="lastupdated">Last updated on Mar 16, 2022.
       </span></p>
   </div>
 

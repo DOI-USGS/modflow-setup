@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The configuration file &mdash; modflow-setup 0.post284+g1c36696 documentation</title>
+  <title>The configuration file &mdash; modflow-setup 0.post288+gbac36d3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post284+g1c36696
+                0.post288+gbac36d3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -209,7 +209,7 @@ input. The <code class="docutils literal notranslate"><span class="pre">relative
 </section>
 <section id="source-data-sub-blocks">
 <h3>Source_data sub-blocks<a class="headerlink" href="#source-data-sub-blocks" title="Permalink to this headline">¶</a></h3>
-<p>Alternatively, <code class="docutils literal notranslate"><span class="pre">source_data</span></code> subblocks indicate input from general file formats (shapefiles, csvs, rasters, etc.) that needs to be mapped to the model space and time discretization. The <code class="docutils literal notranslate"><span class="pre">source_data</span></code> blocks are intended to be general across input types. For example- <code class="docutils literal notranslate"><span class="pre">filename</span></code> indicates a file path (string), regardless of the type of file, and <code class="docutils literal notranslate"><span class="pre">filenames</span></code> indicates a list or dictionary of files that map to model layers or stress periods. Items with the ‘_units’ suffix indicate the units of the source data, allowing modflow-setup to convert the values to model units accordingly. In the example below, the model top would be read from the specified <a class="reference external" href="https://en.wikipedia.org/wiki/GeoTIFF">GeoTiff</a> and mapped onto the model grid via linear interpolation (the default method for model layer elevations) using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html">scipy.interpolate.griddata</a> method. The model botm elevations would be read similarly, with missing layers sub-divided evenly between the specified layers. For example, the layer 7 bottom elevations would be set halfway between the layer 6 and 8 bottoms. Finally, supplying a shapefile as input to idomain instructs modflow-setup to intersect the shapefile with the model grid (using <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html">rasterio.features.rastersize</a>), and limit the active cells to the intersected area.</p>
+<p>Alternatively, <code class="docutils literal notranslate"><span class="pre">source_data</span></code> subblocks indicate input from general file formats (shapefiles, csvs, rasters, etc.) that needs to be mapped to the model space and time discretization. The <code class="docutils literal notranslate"><span class="pre">source_data</span></code> blocks are intended to be general across input types. For example- <code class="docutils literal notranslate"><span class="pre">filename</span></code> indicates a file path (string), regardless of the type of file, and <code class="docutils literal notranslate"><span class="pre">filenames</span></code> indicates a list or dictionary of files that map to model layers or stress periods. Items with the ‘_units’ suffix indicate the units of the source data, allowing modflow-setup to convert the values to model units accordingly. In the example below, the model top would be read from the specified <a class="reference external" href="https://en.wikipedia.org/wiki/GeoTIFF">GeoTiff</a> and mapped onto the model grid via linear interpolation (the default method for model layer elevations) using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html">scipy.interpolate.griddata</a> method. The model botm elevations would be read similarly, with missing layers sub-divided evenly between the specified layers. For example, the layer 7 bottom elevations would be set halfway between the layer 6 and 8 bottoms. Finally, supplying a shapefile as input to idomain instructs modflow-setup to intersect the shapefile with the model grid (using <code class="xref py py-meth docutils literal notranslate"><span class="pre">rasterio.features.rasterize()</span></code>), and limit the active cells to the intersected area.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
@@ -286,7 +286,7 @@ For example:</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 17, 2022.
+      <span class="lastupdated">Last updated on Mar 16, 2022.
       </span></p>
   </div>
 

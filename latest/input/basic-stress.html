@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.post288+gbac36d3 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MODFLOW Output Control" href="oc.html" />
+    <link rel="prev" title="Input instructions by package" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> modflow-setup
+          </a>
+              <div class="version">
+                0.post288+gbac36d3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Input instructions by package</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Basic stress packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#list-based-basic-stress-packages">List-based basic stress packages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#constant-head-chd-package">Constant Head (CHD) Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#drain-drn-package">Drain DRN Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#general-head-boundary-ghb-package">General Head Boundary (GHB) Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#river-riv-package">River (RIV) package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#well-wel-package">Well (WEL) Package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grid-based-basic-stress-packages">Grid-based basic stress packages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#recharge-rch-package">Recharge (RCH) Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oc.html">     Output Control</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Input instructions by package</a> &raquo;</li>
+      <li>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/input/basic-stress.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="specifying-boundary-conditions-with-the-basic-modflow-stress-packages">
+<h1>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages<a class="headerlink" href="#specifying-boundary-conditions-with-the-basic-modflow-stress-packages" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page is a work in progress and needs some more work.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Basic stress packages are currenly only supported for Modflow 6, except
+for the Constant Head (CHD) package in the context of perimeter boundary conditions.</p>
+</div>
+<p>This page describes configuration file input for the basic MODFLOW stress packages, including
+the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently supported by Modflow-setup. The supported packages can be broadly placed into two categories. Feature or list-based packages such as CHD, DRN, GHB, RIV and WEL often represent discrete phenomena such as surface water features, pumping wells, or even lines that denote a perimeter boundary. Input to  these packages in MODFLOW is tabular, consisting of a table for each stress period, with rows specifying stresses at individual grid cells representing the boundary features. In contrast, continuous or grid-based packages represent a stress field that applies to a large area, such as areal recharge. In past versions of MODFLOW, input to these packages was array-based, with values specified for all model cells, at each stress period. In MODFLOW 6, input to these packages can be array or list-based. The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup. In keeping with the current structured grid-based paradigm of Modflow-setup, Modflow 6 recharge input is generated for the array-based recharge package (Langevin and others, 2017).</p>
+<section id="list-based-basic-stress-packages">
+<h2>List-based basic stress packages<a class="headerlink" href="#list-based-basic-stress-packages" title="Permalink to this headline">¶</a></h2>
+<p>Input for list-based basic stress packages follows a similar pattern to other packages.</p>
+<ul>
+<li><p>Package blocks are named using the 3 letter MODFLOW abbrieviation for the Package in lower case (e.g. <code class="docutils literal notranslate"><span class="pre">chd:</span></code>, <code class="docutils literal notranslate"><span class="pre">ghb:</span></code>, etc.).</p></li>
+<li><p>Sub-blocks within the package block include:</p>
+<blockquote>
+<div><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">options:</span></code> for specifying Modflow 6 options, exactly as they are described in the input instructions (Langevin and others, 2017).</p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">source_data:</span></code> for specifying grid-independent source data to be mapped to the model discretization, in addition to other package input. <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> in turn can have the following sub-blocks and items:</dt><dd><ul>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">shapefile:</span></code> block for specifying shapefile input that maps the boundary condition features in space. Items in the shapefile block include</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filename:</span></code> path to the shapefile</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boundname_col:</span></code> column in shapefile with feature names to be applied as <cite>boundnames</cite> in Modflow 6 input</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">all_touched:</span></code> argument to <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html#rasterio.features.rasterize" title="(in rasterio v1.3a3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.features.rasterize()</span></code></a> that specifies whether all intersected grid cells should be included, or just the grid cells with centers inside the feature.</p></li>
+<li><p>One or more variable columns: Optionally the shapefile can also supply steady-state variable values by feature in attribute columns named for the variables (e.g. <code class="docutils literal notranslate"><span class="pre">'head'</span></code>, <code class="docutils literal notranslate"><span class="pre">'bhead'</span></code>, etc.)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>(Not implemented yet)</strong> A <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block for specifying point feature locations or time-varying values for the variables. Items in the shapefile block include</p>
+<blockquote>
+<div><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">filename:</span></code> or <cite>filenames:</cite> path(s) to the csv file(s)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">id_column</span></code>: unique identifier associated with each feature</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">datetime_column:</span></code> date-time associated with each stress value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end_datetime_column:</span></code> date-time associated with the end of stress value (optional; for rates that extend across more than one model stress period. If this is specified, <code class="docutils literal notranslate"><span class="pre">datetime_column:</span></code> is assumed to indicate the date-time associated with the start of each stress value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x_col:</span></code> feature x-coordinate (WEL package only; default <code class="docutils literal notranslate"><span class="pre">'x'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y_col:</span></code> feature y-coordinate (WEL package only; default <code class="docutils literal notranslate"><span class="pre">'y'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length_units:</span></code> length units associated with the stress value (optional; if omitted no conversion is performed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_units:</span></code> time units associated with the stress value (WEL package only; optional; if omitted no conversion is performed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">volume_units:</span></code> value-units associated with the stress value (e.g. <cite>gallons</cite>) in lieu of length-based volume units (e.g., <cite>cubic feet</cite>) (WEL package only; optional; if omitted volumes are assumed to be in model units of L<sup>3</sup> and no conversion is performed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boundname_col:</span></code> column in shapefile with feature names to be applied as <cite>boundnames</cite> in Modflow 6 input</p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">period_stats:</span></code> a sub-block that is used to specify mapping of the input data to the model temporal discretization. Items within period stats are numbered by stress period, with the entry for each item specifying the temporal aggregation. Currently, two options are supported:</dt><dd><ul class="simple">
+<li><p>aggregation of measurements falling within a stress period. For example, assigning the mean value of all input data points within the stress period. In this case, the aggregration method is simply specified as a string. While <code class="docutils literal notranslate"><span class="pre">mean</span></code> is typical, any of the standard numpy aggregators can be use (<code class="docutils literal notranslate"><span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, etc.)</p></li>
+<li><p>aggregation of measurements from an arbitrary time window. For example, applying a long-term mean to a steady-state stress period, or transient period representing a different time window. In this case three items are specified– the aggregation method, the start date, and end date (e.g. <code class="docutils literal notranslate"><span class="pre">[mean,</span> <span class="pre">2000-01-01,</span> <span class="pre">2017-12-31]</span></code>)</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># for the first two stress periods</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span><span class="w"></span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span><span class="w"></span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt>additional sub-blocks or items for specifying values for each variable</dt><dd><ul class="simple">
+<li><p>in general, these sub-blocks are named for the variable (e.g. <code class="docutils literal notranslate"><span class="pre">bhead:</span></code>)</p></li>
+<li><p>scalar values (items) are applied globally to the variable</p></li>
+<li><p>rasters can be used to specify steady-state values that vary in space; values supplied with a raster are mapped to the model grid using zonal statistics. If the raster contains projection information (GeoTIFFs are preferred in part because of this), any reprojection to the model coorindate reference system (CRS) will be performed automatically as needed. Otherwise, the raster is assumed to be in the model projection.</p></li>
+<li><p>(Not implemented yet) NetCDF input for gridded values that vary in time and space. Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<section id="constant-head-chd-package">
+<h3>Constant Head (CHD) Package<a class="headerlink" href="#constant-head-chd-package" title="Permalink to this headline">¶</a></h3>
+<p>Input consists of specified head values that may vary in time or space.</p>
+<blockquote>
+<div><p><strong>Required input</strong></p>
+<ul class="simple">
+<li><p>parent model head solution –or–</p></li>
+<li><p>shapefile of features –or–</p></li>
+<li><p>parent model package (not implemented yet)</p></li>
+<li><p>at least steady-state head values through one of the methods below</p></li>
+</ul>
+<p><strong>Optional input</strong></p>
+<ul class="simple">
+<li><p>raster to specify steady state elevations by cell (for supplied shapefile)</p></li>
+<li><p>shapefile or csv to specify steady elevations by feature</p></li>
+<li><p>csv to specify transient elevation by feature (needs to be referenced to features in shapefile)</p></li>
+</ul>
+<p><strong>Examples</strong>
+(also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Constant Head Package</span><span class="w"></span>
+<span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span><span class="w"></span>
+<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">head</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="drain-drn-package">
+<h3>Drain DRN Package<a class="headerlink" href="#drain-drn-package" title="Permalink to this headline">¶</a></h3>
+<p>Input consists of elevations and conductances that may vary in time or space.</p>
+<blockquote>
+<div><p><strong>Required input</strong></p>
+<ul class="simple">
+<li><p>shapefile of features  –or–</p></li>
+<li><p>parent model package (not implemented yet)</p></li>
+<li><p>at least steady-state head and conductance values through one of the methods below</p></li>
+</ul>
+<p><strong>Optional input</strong></p>
+<ul class="simple">
+<li><p>global conductance value specified directly</p></li>
+<li><p>raster to specify steady state elevation by cell (for supplied shapefile)</p></li>
+<li><p>shapefile or csv to specify steady elevations by feature</p></li>
+<li><p>csv to specify transient elevation by feature (needs to be referenced to features in shapefile)</p></li>
+</ul>
+<p><strong>Examples</strong>
+(also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Drain Package</span><span class="w"></span>
+<span class="nt">drn</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># simply omit the include_ids: key</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># id_column: can also be omitted</span><span class="w"></span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047154</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046236</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">    </span><span class="nt">elev</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="general-head-boundary-ghb-package">
+<h3>General Head Boundary (GHB) Package<a class="headerlink" href="#general-head-boundary-ghb-package" title="Permalink to this headline">¶</a></h3>
+<p>Input consists of head elevations and conductances that may vary in time or space.</p>
+<blockquote>
+<div><p><strong>Required input</strong></p>
+<ul class="simple">
+<li><p>shapefile of features –or–</p></li>
+<li><p>parent model package (not implemented yet)</p></li>
+<li><p>at least steady-state head and conductance values through one of the methods below</p></li>
+</ul>
+<p><strong>Optional input</strong></p>
+<ul class="simple">
+<li><p>global conductance value specified directly</p></li>
+<li><p>shapefile or csv to specify steady elevations and conductances by feature –or–</p></li>
+<li><p>rasters to specify steady state elevations or conductances by cell (for supplied shapefile)</p></li>
+<li><p>csv to specify transient elevations or conductances by feature (needs to be referenced to features in shapefile)</p></li>
+</ul>
+<p><strong>Examples</strong>
+(also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># General Head Boundary Package</span><span class="w"></span>
+<span class="nt">ghb</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># simply omit the include_ids: key</span><span class="w"></span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># argument to rasterio.features.rasterize</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># if true, all grid cells touching the feature(s)</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># in the shapefile will be assigned BCs, if False</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># only the cells with centers inside the polygon</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># will be included</span><span class="w"></span>
+<span class="w">      </span><span class="nt">all_touched</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">bhead</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="river-riv-package">
+<h3>River (RIV) package<a class="headerlink" href="#river-riv-package" title="Permalink to this headline">¶</a></h3>
+<dl>
+<dt>Input consists of stages, river bottom elevations and conductances,</dt><dd><p>that may vary in time or space.</p>
+<blockquote>
+<div><p><strong>Required input</strong></p>
+<ul class="simple">
+<li><p>shapefile of features –or–</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_riv:</span></code> block under <code class="docutils literal notranslate"><span class="pre">sfrmaker_options:</span></code> with an <code class="docutils literal notranslate"><span class="pre">sfr:</span></code> block (see configuration gallery)</p></li>
+<li><p>parent model package (not implemented yet)</p></li>
+</ul>
+<p><strong>Optional input</strong></p>
+<ul class="simple">
+<li><p>global conductance value specified directly</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_rbot_thick</span></code> argument to set a uniform riverbed thickness (<code class="docutils literal notranslate"><span class="pre">rbot</span> <span class="pre">=</span> <span class="pre">stage</span> <span class="pre">-</span> <span class="pre">uniform</span> <span class="pre">thickness</span></code>)</p></li>
+<li><p>shapefile or csv to specify steady heads, conductances and rbots by feature –or–</p></li>
+<li><p>rasters to specify steady heads, conductances and rbots by cell (for supplied shapefile)</p></li>
+<li><p>csv to specify transient heads, conductances and rbots by feature (needs to be referenced to features in shapefile)</p></li>
+</ul>
+<p><strong>Examples</strong>
+(also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># River Package</span><span class="w"></span>
+<span class="nt">riv</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17953939</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># option to include feature names from the shapefile</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># as Modflow boundnames</span><span class="w"></span>
+<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span><span class="w"></span>
+<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Example of setting up the RIV package using SFRmaker (via the <code class="docutils literal notranslate"><span class="pre">sfr:</span></code> block):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">sfr</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span><span class="w"></span>
+<span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">attr_length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span><span class="w"></span>
+<span class="w">      </span><span class="nt">attr_height_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span><span class="w"></span>
+<span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># convert reaches corresponding to these LineString identifiers</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># (in the flowlines id_column), and all downstream reaches</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># to the MODFLOW River package</span><span class="w"></span>
+<span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047212</span><span class="p p-Indicator">]</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</dd>
+</dl>
+</section>
+<section id="well-wel-package">
+<h3>Well (WEL) Package<a class="headerlink" href="#well-wel-package" title="Permalink to this headline">¶</a></h3>
+<p>Input consists of flux rates that may vary in time or space.</p>
+<blockquote>
+<div><p><strong>Required input</strong></p>
+<ul class="simple">
+<li><p>parent model cell by cell flow solution (not implemented yet) –or–</p></li>
+<li><p>parent model WEL package</p></li>
+<li><p>steady-state or transient flux values through one of the methods below</p></li>
+</ul>
+<p><strong>Optional input</strong></p>
+<ul class="simple">
+<li><p>temporal discretization (default is to use the average rate(s) for each stress period)</p></li>
+<li><p>vertical discretization (default is to distribute fluxes vertically by the individual transmissivities of the intersection(s) of the well open interval with the model layers.)</p></li>
+</ul>
+<p><strong>Flux input options with examples</strong>
+(also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
+<ul>
+<li><dl>
+<dt>Fluxes translated from a parent model WEL package</dt><dd><ul>
+<li><p>this input option is very simple. A parent model with a well package is needed, and <code class="docutils literal notranslate"><span class="pre">default_source_data:</span> <span class="pre">True</span></code> must be specified in the <code class="docutils literal notranslate"><span class="pre">parent:</span></code> block. Then, fluxes from the parent model are simply mapped to the inset model grid, based on the parent model cell centers, and the stress period mappings specified in the <code class="docutils literal notranslate"><span class="pre">parent:</span></code> block. Well package options can still be specified in a <code class="docutils literal notranslate"><span class="pre">wel:</span></code> block.</p></li>
+<li><p>Examples:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>CSV input from one or more files (<code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> block)</dt><dd><ul>
+<li><p>multiple files can be specified using a list, but column names and units must be consistent</p></li>
+<li><p>input for column names and units is the same for the general <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block described above</p></li>
+<li><p>temporal discretization is specified using a <code class="docutils literal notranslate"><span class="pre">period_stats:</span></code> sub-block</p></li>
+<li><p>spatial discretization for open intervals spanning multiple layers is specified using a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> sub-block</p></li>
+<li><p>Examples:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Well Package</span><span class="w"></span>
+<span class="nt">wel</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">csvfiles</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># pumping input from CSV files</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">                  </span><span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
+<span class="w">                  </span><span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span><span class="w"></span>
+<span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flux_m3&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># end datetimes only for input data that needs upsampling;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span><span class="w"></span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;node&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w">  </span><span class="c1"># how fluxes will be distributed across model stress periods</span><span class="w"></span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span><span class="w">  </span><span class="c1"># no wells simulated in initial period</span><span class="w"></span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># mean pumping rate for period 1 and subsequent periods</span><span class="w"></span>
+<span class="w">      </span><span class="nt">vertical_flux_distribution</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">across_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># False to put fluxes in one layer</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span><span class="w"></span>
+<span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;transmissivity&#39;</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">wdnr_dataset</span></code> block</dt><dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a custom option from early versions of Modflow-setup, and is likely to be generalized into a combined shapefile (or CSV site information file) and CSV timeseries input option similar to the other basic stress packages.</p>
+</div>
+<ul>
+<li><p>site information is specified in a shapefile formatted like <code class="docutils literal notranslate"><span class="pre">csls_sources_wu_pts.shp</span></code> below</p></li>
+<li><p>pumping rates are specified by month in a CSV file formatted like <code class="docutils literal notranslate"><span class="pre">master_wu.csv</span></code> below</p></li>
+<li><p>temporal discretization is specified with a <code class="docutils literal notranslate"><span class="pre">period_stats:</span></code> block similar to the <code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> option</p></li>
+<li><p>vertical discretization is specified with a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> block similar to the <code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> option</p></li>
+<li><p>Example:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/tables/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span><span class="w"></span>
+<span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/shps/csls_sources_wu_pts.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># for period 0, use average pumping rates for dates below</span><span class="w"></span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"></span>
+<span class="w">                     </span><span class="c1"># for subsequent periods,</span><span class="w"></span>
+<span class="w">                     </span><span class="c1"># average pumping rates to period start/end dates</span><span class="w"></span>
+<span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;resample&#39;</span><span class="p p-Indicator">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="simple">
+<dt><strong>The</strong> <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> <strong>sub-block</strong></dt><dd><ul class="simple">
+<li><p>This sub-block specifies how Well Packages fluxes should be distributed vertically.</p></li>
+<li><dl class="simple">
+<dt>Items/options include:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">across_layers:</span></code> If <code class="docutils literal notranslate"><span class="pre">True</span></code>, fluxes for a well will be put in the layer containing the open interval midpoint. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, fluxes will be distributed to the layers intersecting the well open interval.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">distribute_by:</span></code> <code class="docutils literal notranslate"><span class="pre">'transmissivity'</span></code> (default) to distribute fluxes based on the transmissivities of open interval/layer intersections; <code class="docutils literal notranslate"><span class="pre">'thickness'</span></code> to distribute fluxes based on intersection thicknesses. Only relevant with <code class="docutils literal notranslate"><span class="pre">across_layers:</span> <span class="pre">True</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minimum_layer_thickness:</span></code> Minimum layer thickness for placing a well (by default 2 model length units). Wells in layers thinner than this will be relocated to the thickess layers at their row, column locations. If no thicker layers exist at the row, column location, the wells are dropped, and reported in <em>&lt;model name&gt;_dropped_wells.csv</em>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+</section>
+<section id="grid-based-basic-stress-packages">
+<h2>Grid-based basic stress packages<a class="headerlink" href="#grid-based-basic-stress-packages" title="Permalink to this headline">¶</a></h2>
+<p>The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup.</p>
+<section id="recharge-rch-package">
+<h3>Recharge (RCH) Package<a class="headerlink" href="#recharge-rch-package" title="Permalink to this headline">¶</a></h3>
+<section id="direct-input">
+<h4>Direct input<a class="headerlink" href="#direct-input" title="Permalink to this headline">¶</a></h4>
+<p>As with other grid-based input such as aquifer properties, input to the recharge package can be specified directly as it would in Flopy. This may be useful for setting up a test model quickly. For example, a single scalar value could be entered to apply to all locations across all periods:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">recharge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Or global scalar values could be entered by stress period:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">recharge</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w"></span>
+<span class="w">    </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+</pre></div>
+</div>
+<p>In the above example, <code class="docutils literal notranslate"><span class="pre">0.01</span></code> would be also be applied to all subsequent stress periods.</p>
+</section>
+<section id="grid-independent-input">
+<h4>Grid-independent input<a class="headerlink" href="#grid-independent-input" title="Permalink to this headline">¶</a></h4>
+<p>Modflow-setup currently supports three methods for entering spatially-referenced recharge input not mapped to the model grid.</p>
+<blockquote>
+<div><ul>
+<li><dl class="simple">
+<dt>Recharge translated from a parent model RCH package</dt><dd><ul class="simple">
+<li><p>this input option is very simple. A parent model with a recharge package is needed, and <code class="docutils literal notranslate"><span class="pre">default_source_data:</span> <span class="pre">True</span></code> must be specified in the <code class="docutils literal notranslate"><span class="pre">parent:</span></code> block. Then, fluxes from the parent model are simply mapped to the inset model grid, based on the parent model cell centers, and the stress period mappings specified in the <code class="docutils literal notranslate"><span class="pre">parent:</span></code> block. Recharge package options can still be specified in a <code class="docutils literal notranslate"><span class="pre">rch:</span></code> block.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Raster input by stress period</dt><dd><ul>
+<li><p>A raster of spatially varying recharge values can be supplied for one or more model stress periods. Similar to the direct input, specified recharge will be applied to subsequent periods were recharge is not specified.</p></li>
+<li><p>If the raster contains projection information (GeoTIFFs are preferred in part because of this), any reprojection to the model coorindate reference system (CRS) will be performed automatically as needed. Otherwise, the raster is assumed to be in the model projection.</p></li>
+<li><dl class="simple">
+<dt>Input items include:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">length_units:</span></code> input recharge length units (optional; if omitted no conversion is performed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_units:</span></code> input recharge time units (optional; if omitted no conversion is performed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mult:</span></code> option multiplier value that applies to all stress periods.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resample_method:</span></code> method for resampling the data from the source grid to model grid. (optional; by default, <code class="docutils literal notranslate"><span class="pre">'nearest'</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Examples:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">rech</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="c1"># by stress period</span><span class="w"></span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">mult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.805</span><span class="w"></span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;years&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>NetCDF input</dt><dd><ul>
+<li><p>NetCDF input can be supplied for gridded values that vary in time and space.</p></li>
+<li><p>Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.</p></li>
+<li><dl class="simple">
+<dt>Input items include:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">length_units:</span></code> input recharge length units (optional; if omitted no conversion is performed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_units:</span></code> input recharge time units (optional; if omitted no conversion is performed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resample_method:</span></code> method for resampling the data from the source grid to model grid. (optional; by default, <code class="docutils literal notranslate"><span class="pre">'nearest'</span></code>)</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">period_stats:</span></code> a sub-block that is used to specify mapping of the input data to the model temporal discretization. Items within period stats are numbered by stress period, with the entry for each item specifying the temporal aggregation. Currently, two options are supported:</dt><dd><ul>
+<li><p>aggregation of measurements falling within a stress period. For example, assigning the mean value of all input data points within the stress period. In this case, the aggregration method is simply specified as a string. While <code class="docutils literal notranslate"><span class="pre">mean</span></code> is typical, any of the standard numpy aggregators can be use (<code class="docutils literal notranslate"><span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, etc.)</p></li>
+<li><p>aggregation of measurements from an arbitrary time window. For example, applying a long-term mean to a steady-state stress period, or transient period representing a different time window. In this case three items are specified– the aggregation method, the start date, and end date (e.g. <code class="docutils literal notranslate"><span class="pre">[mean,</span> <span class="pre">2000-01-01,</span> <span class="pre">2017-12-31]</span></code>; see below for an example)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Examples:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">    </span><span class="nt">readasarrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># resample recharge from NetCDF file with time-series of grids</span><span class="w"></span>
+<span class="w">    </span><span class="nt">recharge</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;net_infiltration&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">resample_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;linear&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># for the first two stress periods</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span><span class="w"></span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Input instructions by package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="oc.html" class="btn btn-neutral float-right" title="MODFLOW Output Control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Mar 16, 2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

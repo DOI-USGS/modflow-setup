@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.post284+g1c36696 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post288+gbac36d3 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post284+g1c36696
+                0.post288+gbac36d3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -649,7 +649,7 @@
 
 
 <div class="viewcode-block" id="rasterize"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.rasterize">[docs]</a><span class="k">def</span> <span class="nf">rasterize</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-              <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+              <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Rasterize a feature onto the model grid, using</span>
@@ -663,6 +663,13 @@
 <span class="sd">    id_column : str</span>
 <span class="sd">        Column with unique integer identifying each feature; values</span>
 <span class="sd">        from this column will be assigned to the output raster.</span>
+<span class="sd">    include_ids : sequence</span>
+<span class="sd">        Subset of IDs in id_column to include</span>
+<span class="sd">    names_column : str, optional</span>
+<span class="sd">        By default, the IDs in id_column, or sequential integers</span>
+<span class="sd">        are returned. This option allows another column of strings</span>
+<span class="sd">        to be specified (i.e. feature names); in which case</span>
+<span class="sd">        an array of the strings will be returned.</span>
 <span class="sd">    grid : grid.StructuredGrid instance</span>
 <span class="sd">    crs : obj</span>
 <span class="sd">        A Python int, dict, str, or pyproj.crs.CRS instance</span>
@@ -758,8 +765,13 @@
     <span class="n">geoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">numbers</span><span class="p">))</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">geoms</span><span class="p">,</span>
                                 <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span>
-                                <span class="n">transform</span><span class="o">=</span><span class="n">trans</span><span class="p">)</span>
+                                <span class="n">transform</span><span class="o">=</span><span class="n">trans</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Nothing was intersected!&quot;</span>
+    <span class="k">if</span> <span class="n">names_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">names_lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">names_column</span><span class="p">]))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">names_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">flat</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="nb">object</span>
     <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
@@ -1031,7 +1043,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 17, 2022.
+      <span class="lastupdated">Last updated on Mar 16, 2022.
       </span></p>
   </div>
 
