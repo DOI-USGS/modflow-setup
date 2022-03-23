@@ -17,7 +17,7 @@ model:
              'npf',
              'oc',
              'sto',
-             'rch', # Note: with no recharge block below and default_source_data=True, recharge is regridded from parent model
+             'rch',
              'sfr',
              'lak',
              'obs',
@@ -30,7 +30,6 @@ model:
 
 # grid for LGR inset based on buffer distance around Pleasant Lake
 setup_grid:
-  remake: True
   source_data:
     features_shapefile:
       filename: 'data/pleasant/source_data/shps/all_lakes.shp'
@@ -41,7 +40,6 @@ setup_grid:
   epsg: 3070  # CRS (Wisconsin Transverse Mercator)
 
 dis:
-  remake_top: True
   options:
     length_units: 'meters'
   dimensions:
@@ -57,33 +55,10 @@ dis:
         2: 'data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
         3: 'data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
         4: 'data/pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
-  drop_thin_cells: True
 
-npf:
-  options:
-    save_flows: True
-  griddata:
-    icelltype: 1 # variable sat. thickness in all layers
-  # k and k33 resampled from parent model by default
-
-sto:
-  options:
-    save_flows: True
-  griddata:
-    iconvert: 1  # convertible layers
-  # sy and ss resampled from parent model by default
-
-wel:
-  source_data:
-    # custom input format for Wisconsin Dept. of Natural Resources
-    wdnr_dataset:
-      water_use: 'data/pleasant/source_data/tables/master_wu.csv' # monthly water use rates from WDNR
-      water_use_points: 'data/pleasant/source_data/shps/csls_sources_wu_pts.shp' # point locations of wells in water_use
-      # for period 0, use average pumping rates for dates below
-      period_stats: {0: ['mean', '2012-01-01', '2018-12-31'],
-                     # for subsequent periods,
-                     # average pumping rates to period start/end dates
-                     1: 'resample'}
+# Recharge and Well packages are inherited from the parent model
+# (since this is an LGR model
+#  and the packages are specified in the packages: list)
 
 # Lake Package
 lak:
@@ -138,43 +113,18 @@ sfr:
   sfrmaker_options:
     set_streambed_top_elevations_from_dem: True
 
-ims:
-  options:
-    print_option: 'all'
-    complexity: 'moderate'
-    'csv_output fileout': 'solver_out.csv'
-  nonlinear:
-    outer_dvclose: 1.e-2
-    outer_maximum: 200
-    under_relaxation:  'dbd'
-    under_relaxation_theta: 0.7
-    under_relaxation_kappa: 0.1
-    under_relaxation_gamma: 0.0
-    under_relaxation_momentum: 0.0
-    backtracking_number: 0
-  linear:
-    inner_maximum: 100
-    inner_dvclose: 1.e-4
-    rcloserecord: [0.0001, 'relative_rclose']
-    linear_acceleration: 'bicgstab'
-    scaling_method: None
-    reordering_method: None
-    relaxation_factor: 0.0  # either ILU(0) or ILUT preconditioning
-    number_orthogonalizations: 0
-    preconditioner_levels: 7
-    preconditioner_drop_tolerance: 0.001
-
 obs:
   # same observation data that were applied to pleasant_lgr_parent model
   # any observations not within the LGR extent are culled
   source_data:
-    filenames: ['data/pleasant/source_data/tables/nwis_heads_info_file.csv',
+    filenames: [
+      #'data/pleasant/source_data/tables/nwis_heads_info_file.csv',
                 'data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
                 'data/pleasant/source_data/tables/wdnr_gw_sites.csv',
-                'data/pleasant/source_data/tables/uwsp_heads.csv',
-                'data/pleasant/source_data/tables/wgnhs_head_targets.csv'
+                #'data/pleasant/source_data/tables/uwsp_heads.csv',
+                #'data/pleasant/source_data/tables/wgnhs_head_targets.csv'
                      ]
     column_mappings:
-      obsname: ['obsprefix', 'obsnme', 'common_name']
+      obsname: ['obsprefix', 'common_name']
   drop_observations: ['10019209_lk'  # pleasant lake; monitored via gage package
   ]

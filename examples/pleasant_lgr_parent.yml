@@ -24,7 +24,6 @@ model:
     save_flows: True
     newton: True
     newton_under_relaxation: True
-  external_path: 'external/'
   # packages to build
   # (any packages not listed or commented out will not be built,
   #  event if they have an input block below)
@@ -52,7 +51,7 @@ parent:
   # information for modflow-setup
   # note: parent model is geo-located in namfile header
   # (only works if length_units='meters')
-  hiKlakes_value: 1.e4 # unfortunately python yaml currently requires a dot to parse exp notation as float
+  #hiKlakes_value: 1.e4 # unfortunately python yaml currently requires a dot to parse exp notation as float
   default_source_data: True  # if True, packages and variables that are omitted will be pulled from this model
   copy_stress_periods: 'all'
   inset_layer_mapping:  # mapping between inset and parent model layers
@@ -68,12 +67,10 @@ parent:
 # parameters for setting up the horizontal configuration of the grid
 # in the context of a coordinate reference system
 setup_grid:
-  remake: True
+  #remake: True
   xoff: 553000 # lower left x-coordinate
   yoff: 388000 # lower left y-coordinate
   rotation: 0.
-  nrow: 25
-  ncol: 25
   dxy: 200  # in CRS units of meters
   epsg: 3070  # CRS (Wisconsin Transverse Mercator)
   # local-grid refinement area
@@ -91,6 +88,8 @@ dis:
   dimensions:
     # if nrow and ncol are not specified here, the entries above in setup_grid are used
     nlay: 5
+    nrow: 25
+    ncol: 25
   # griddata:
   # delr and delc are developed from information above in setup_grid
   # top and botm arrays are sampled from GeoTIFF files
@@ -105,7 +104,6 @@ dis:
         2: 'data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
         3: 'data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
         4: 'data/pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
-  drop_thin_cells: True
 
 # Temporal Discretization Package
 tdis:
@@ -196,32 +194,17 @@ sfr:
     # or to_riv (shellmound_tmr example)
     set_streambed_top_elevations_from_dem: True
 
-# Iterative Model Solution
+# Iterative model solution
 ims:
   options:
-    print_option: 'all'
     complexity: 'moderate'
-    'csv_output fileout': 'solver_out.csv'
   nonlinear:
     outer_dvclose: 1.e-2
     outer_maximum: 200
-    under_relaxation:  'dbd'
-    under_relaxation_theta: 0.7
-    under_relaxation_kappa: 0.1
-    under_relaxation_gamma: 0.0
-    under_relaxation_momentum: 0.0
-    backtracking_number: 0
   linear:
     inner_maximum: 100
     inner_dvclose: 1.e-4
     rcloserecord: [0.0001, 'relative_rclose']
-    linear_acceleration: 'bicgstab'
-    scaling_method: None
-    reordering_method: None
-    relaxation_factor: 0.0  # either ILU(0) or ILUT preconditioning
-    number_orthogonalizations: 0
-    preconditioner_levels: 7
-    preconditioner_drop_tolerance: 0.001
 
 # Observation (OBS) Utility
 obs:
