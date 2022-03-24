@@ -4,5 +4,11 @@ Input instructions by package
 .. toctree::
    :maxdepth: 1
 
-   Basic stress packages <basic-stress.rst>
-	Output Control <oc.rst>
+   Specifying Aquifer Properties (UPW, NPF, STO) <props.rst>
+   Basic stress packages (CHD, DRN, GHB, RCH, RIV, WEL) <basic-stress.rst>
+   The Discretization Package (DIS, TDIS, BAS6) <dis.rst>
+   Specifying Initial Conditions (IC, BAS6) <ic.rst>
+   The Lake Package (LAK) <lak.rst>
+   The Streamflow Routing Package (SFR, GAGE) <sfr.rst>
+   Head observations (OBS, HYD) <obs.rst>
+	Output Control (OC) <oc.rst>

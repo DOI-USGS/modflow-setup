@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post288+gbac36d3 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.post292+g7d3ae12 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post288+gbac36d3
+                0.post292+g7d3ae12
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -720,7 +720,8 @@
 
         <span class="c1"># make the arrays or load them</span>
         <span class="n">lakzones</span> <span class="o">=</span> <span class="n">make_bdlknc_zones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">,</span>
-                                     <span class="n">include_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="s1">&#39;feat_id&#39;</span><span class="p">])</span>
+                                     <span class="n">include_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span><span class="p">[</span><span class="s1">&#39;feat_id&#39;</span><span class="p">],</span>
+                                     <span class="n">littoral_zone_buffer_width</span><span class="o">=</span><span class="n">source_data</span><span class="p">[</span><span class="s1">&#39;littoral_zone_buffer_width&#39;</span><span class="p">])</span>
         <span class="n">save_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;lakzones&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">lakzones</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">bdlknc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
@@ -1022,7 +1023,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Mar 16, 2022.
+      <span class="lastupdated">Last updated on Mar 24, 2022.
       </span></p>
   </div>
 

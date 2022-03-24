@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.post288+gbac36d3 documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.post292+g7d3ae12 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -23,8 +23,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="MODFLOW Output Control" href="oc.html" />
-    <link rel="prev" title="Input instructions by package" href="index.html" /> 
+    <link rel="next" title="The Discretization Package" href="dis.html" />
+    <link rel="prev" title="Specifying Aquifer Properties" href="props.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post288+gbac36d3
+                0.post292+g7d3ae12
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -58,7 +58,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Input instructions by package</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Basic stress packages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="props.html">Specifying Aquifer Properties (UPW, NPF, STO)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Basic stress packages (CHD, DRN, GHB, RCH, RIV, WEL)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#list-based-basic-stress-packages">List-based basic stress packages</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#constant-head-chd-package">Constant Head (CHD) Package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#drain-drn-package">Drain DRN Package</a></li>
@@ -73,7 +74,12 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="oc.html">     Output Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dis.html">The Discretization Package (DIS, TDIS, BAS6)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ic.html">Specifying Initial Conditions (IC, BAS6)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lak.html">The Lake Package (LAK)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfr.html">The Streamflow Routing Package (SFR, GAGE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="obs.html">Head observations (OBS, HYD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oc.html">     Output Control (OC)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
@@ -507,14 +513,14 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p>vertical discretization is specified with a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> block similar to the <code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> option</p></li>
 <li><p>Example:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/tables/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span><span class="w"></span>
-<span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/shps/csls_sources_wu_pts.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># for period 0, use average pumping rates for dates below</span><span class="w"></span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"></span>
-<span class="w">                     </span><span class="c1"># for subsequent periods,</span><span class="w"></span>
-<span class="w">                     </span><span class="c1"># average pumping rates to period start/end dates</span><span class="w"></span>
-<span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;resample&#39;</span><span class="p p-Indicator">}</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pleasant lake</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># setup lake precipitation and evaporation from PRISM data</span><span class="w"></span>
+<span class="w">   </span><span class="w w-Error"> </span><span class="nt">climate</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">600059060</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prism&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -669,15 +675,15 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Input instructions by package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="oc.html" class="btn btn-neutral float-right" title="MODFLOW Output Control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="props.html" class="btn btn-neutral float-left" title="Specifying Aquifer Properties" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dis.html" class="btn btn-neutral float-right" title="The Discretization Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Mar 16, 2022.
+      <span class="lastupdated">Last updated on Mar 24, 2022.
       </span></p>
   </div>
 
