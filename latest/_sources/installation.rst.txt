@@ -4,7 +4,7 @@ Installation
 
 Installing python dependencies with Conda
 -----------------------------------------
-``Modflow-setup`` depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with `conda`_. A few packages are not available via conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
+``Modflow-setup`` depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is through a  `Conda environment`_, using `Mamba`_ as the package manager. A few packages are not available via Conda, and must be installed with `pip`_. If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
 
 
 Download and install the 64-bit `Anaconda python distribution`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
@@ -21,23 +21,26 @@ Download and install the 64-bit `Anaconda python distribution`_ or `Miniconda <h
 Download an environment file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  * `requirements.yml`_ for a `conda environment`_ with the minimum packages required to run Modflow-setup, or
+  * `requirements.yml`_ for a `Conda environment`_ with the minimum packages required to run Modflow-setup, or
   * `gis.yml`_ for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by ``requirements.yml`` is called `mfsetup`, while the environment in ``gis.yml`` is called `gis`.
 
     .. note::
         To download the above YAML files, simply follow the links to get the raw text and then go to File > Save within your web browser, and save the text as a YAML file (with the `.yaml` or `.yml` extension).
 
   * Alternatively, clone (`using git`_) or `download`_ the ``modflow-setup`` repository, which includes the two environment files at the root level.
-  * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``conda`` packages are installed.
+  * Note that both of these environment files contain a ``pip`` section of packages that will be installed with pip, after the ``Conda`` packages are installed.
 
-Creating a `Conda environment`_
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Creating a `Conda environment`_ using `Mamba`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If you are on the USGS internal network, see the `Considerations for USGS Users`_ section below first.
-Open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of ``requirements.yml`` or ``gis.yml`` and enter:
+
+While Conda can of course be used to create a Conda environment, the Mamba package solver is generally faster and more robust, especially for larger, more complex environments like the included ``requirements.yml``. Mamba is a reimplementation of the conda package manager in C++.
+
+To get started, open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of ``requirements.yml`` or ``gis.yml`` and enter:
 
 .. code-block:: bash
 
-    conda env create -f requirements.yml
+    mamba env create -f requirements.yml
 
 Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see `Considerations for USGS Users`_ below) and either:
 
@@ -45,14 +48,14 @@ Building the environment will probably take a while. If the build fails because 
 
         .. code-block:: bash
 
-            conda env update -f requirements.yml
+            mamba env update -f requirements.yml
 
     b) 	or remove and reinstall it:
 
         .. code-block:: bash
 
-            conda env remove -n mfsetup
-            conda env create -f requirements.yml
+            mamba env remove -n mfsetup
+            mamba env create -f requirements.yml
 
 Keeping the Conda environment up to date
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -66,6 +69,8 @@ environment with the required dependencies. In the case of the Conda environment
 .. code-block:: bash
 
     conda activate mfsetup
+
+(note that even with Mamba, ``conda activate/deactivate`` are still used)
 
 
 Installing the latest develop version of Modflow-setup
@@ -205,8 +210,9 @@ so it needs to be commented out on other operating systems (normally it wouldn't
 
 .. _Anaconda python distribution: https://www.anaconda.com/distribution/
 .. _clean uninstall: https://docs.anaconda.com/anaconda/install/uninstall/
-.. _conda: https://docs.conda.io/en/latest/
-.. _conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
+.. _Conda: https://docs.conda.io/en/latest/
+.. _Mamba: https://mamba.readthedocs.io/en/latest/
+.. _Conda environment: https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html
 .. _condarc: https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html
 .. _download: https://github.com/aleaf/modflow-setup/archive/master.zip
 .. _gis.yml: https://raw.githubusercontent.com/aleaf/modflow-setup/master/gis.yml

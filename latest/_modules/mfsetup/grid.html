@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.post292+g7d3ae12 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post294+gd31ec37 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post292+g7d3ae12
+                0.post294+gd31ec37
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -780,7 +780,7 @@
                           <span class="n">dxy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">rotation</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
-                          <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">snap_to_NHG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">snap_to_parent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">snap_to_NHG</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                           <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">buffer</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
@@ -919,7 +919,7 @@
 
     <span class="c1"># align model with parent grid if there is a parent model</span>
     <span class="c1"># (and not snapping to national hydrologic grid)</span>
-    <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">snap_to_NHG</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">snap_to_parent</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">snap_to_NHG</span><span class="p">):</span>
 
         <span class="c1"># An alternative method for snapping to the parent grid</span>
         <span class="c1"># if the code below is causing issues</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; modflow-setup 0.post292+g7d3ae12 documentation</title>
+  <title>Installation &mdash; modflow-setup 0.post294+gd31ec37 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post292+g7d3ae12
+                0.post294+gd31ec37
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -52,7 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">Download and install the 64-bit Anaconda python distribution or Miniconda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#download-an-environment-file">Download an environment file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#creating-a-conda-environment">Creating a Conda environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-conda-environment-using-mamba">Creating a Conda environment using Mamba</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#keeping-the-conda-environment-up-to-date">Keeping the Conda environment up to date</a></li>
 </ul>
 </li>
@@ -149,7 +149,7 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <section id="installing-python-dependencies-with-conda">
 <h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is with <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a>. A few packages are not available via conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is through a  <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a>, using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a> as the package manager. A few packages are not available via Conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
 <section id="download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">
 <h3>Download and install the 64-bit <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a><a class="headerlink" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda" title="Permalink to this headline">¶</a></h3>
 <blockquote>
@@ -169,7 +169,7 @@
 <h3>Download an environment file<a class="headerlink" href="#download-an-environment-file" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul>
-<li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">conda environment</a> with the minimum packages required to run Modflow-setup, or</p></li>
+<li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> with the minimum packages required to run Modflow-setup, or</p></li>
 <li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/gis.yml">gis.yml</a> for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> is called <cite>mfsetup</cite>, while the environment in <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> is called <cite>gis</cite>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -177,28 +177,29 @@
 </div>
 </li>
 <li><p>Alternatively, clone (<a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">using git</a>) or <a class="reference external" href="https://github.com/aleaf/modflow-setup/archive/master.zip">download</a> the <code class="docutils literal notranslate"><span class="pre">modflow-setup</span></code> repository, which includes the two environment files at the root level.</p></li>
-<li><p>Note that both of these environment files contain a <code class="docutils literal notranslate"><span class="pre">pip</span></code> section of packages that will be installed with pip, after the <code class="docutils literal notranslate"><span class="pre">conda</span></code> packages are installed.</p></li>
+<li><p>Note that both of these environment files contain a <code class="docutils literal notranslate"><span class="pre">pip</span></code> section of packages that will be installed with pip, after the <code class="docutils literal notranslate"><span class="pre">Conda</span></code> packages are installed.</p></li>
 </ul>
 </div></blockquote>
 </section>
-<section id="creating-a-conda-environment">
-<h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a><a class="headerlink" href="#creating-a-conda-environment" title="Permalink to this headline">¶</a></h3>
-<p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.
-Open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f requirements.yml
+<section id="creating-a-conda-environment-using-mamba">
+<h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a><a class="headerlink" href="#creating-a-conda-environment-using-mamba" title="Permalink to this headline">¶</a></h3>
+<p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
+<p>While Conda can of course be used to create a Conda environment, the Mamba package solver is generally faster and more robust, especially for larger, more complex environments like the included <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code>. Mamba is a reimplementation of the conda package manager in C++.</p>
+<p>To get started, open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba env create -f requirements.yml
 </pre></div>
 </div>
 <p>Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> below) and either:</p>
 <blockquote>
 <div><ol class="loweralpha">
 <li><p>Update the environment</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env update -f requirements.yml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba env update -f requirements.yml
 </pre></div>
 </div>
 </li>
 <li><p>or remove and reinstall it:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env remove -n mfsetup
-conda env create -f requirements.yml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba env remove -n mfsetup
+mamba env create -f requirements.yml
 </pre></div>
 </div>
 </li>
@@ -217,6 +218,7 @@ environment with the required dependencies. In the case of the Conda environment
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate mfsetup
 </pre></div>
 </div>
+<p>(note that even with Mamba, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate/deactivate</span></code> are still used)</p>
 <section id="installing-the-latest-develop-version-of-modflow-setup">
 <h3>Installing the latest develop version of Modflow-setup<a class="headerlink" href="#installing-the-latest-develop-version-of-modflow-setup" title="Permalink to this headline">¶</a></h3>
 <p>Pip can be used to fetch Modflow-setup directly from GitHub:</p>
