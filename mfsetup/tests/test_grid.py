@@ -213,13 +213,15 @@ def check_grid(m):
         assert fp_info['yul'] == yul
 
 
-def test_grid_corners(basic_model_instance, project_root_path):
+@pytest.mark.parametrize('snap_to_parent', (True, False))
+def test_grid_corners(basic_model_instance, snap_to_parent, project_root_path):
     """Test grid corner locations with plainfield nwt,
     pleasant nwt and pleasnt mf6 test cases. All have model
     grids based on a buffer around feature of interest,
     snapped to parent model grid.
     """
     m = basic_model_instance
+    m.cfg['setup_grid']['snap_to_parent'] = snap_to_parent
     os.chdir(m._abs_model_ws)
     m.setup_grid()
     if m.version == 'mf6':
@@ -227,7 +229,19 @@ def test_grid_corners(basic_model_instance, project_root_path):
         m.write_input()
     else:
         m.write_name_file()
-    check_grid(m)
+
+    # get offset of model origin to closest parent cell corner
+    px = m.parent.modelgrid.xyzvertices[0]
+    py = m.parent.modelgrid.xyzvertices[1]
+    offset = np.min(np.sqrt((m.modelgrid.xoffset - px)**2 +\
+        (m.modelgrid.yoffset - py)**2))
+    if snap_to_parent:
+        check_grid(m)
+        # model origin should align with a parent cell corner
+        assert offset == 0
+    else:
+        # model origin should not align with a parent cell corner
+        assert offset > 0
     os.chdir(project_root_path)
 
 

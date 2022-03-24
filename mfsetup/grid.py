@@ -684,7 +684,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           dxy=None, delr=None, delc=None,
                           top=None, botm=None,
                           rotation=0.,
-                          parent_model=None, snap_to_NHG=False,
+                          parent_model=None, snap_to_parent=True, snap_to_NHG=False,
                           features=None, features_shapefile=None,
                           id_column=None, include_ids=None,
                           buffer=1000,
@@ -823,7 +823,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
 
     # align model with parent grid if there is a parent model
     # (and not snapping to national hydrologic grid)
-    if parent_model is not None and not snap_to_NHG:
+    if parent_model is not None and (snap_to_parent and not snap_to_NHG):
 
         # An alternative method for snapping to the parent grid
         # if the code below is causing issues
