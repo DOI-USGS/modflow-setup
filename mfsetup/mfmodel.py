@@ -5,6 +5,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import flopy
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
@@ -14,7 +15,13 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 import gisutils
 import sfrmaker
-from gisutils import get_proj_str, get_values_at_points, project, shp2df
+from gisutils import (
+    get_proj_str,
+    get_shapefile_crs,
+    get_values_at_points,
+    project,
+    shp2df,
+)
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
@@ -541,14 +548,15 @@ class MFsetupMixin():
         for f in features_file:
             if f not in self._features.keys():
                 if os.path.exists(f):
-                    try:
-                        from gisutils import get_shapefile_crs
-                        features_crs = get_shapefile_crs(kwargs['shapefile'])
-                    except Exception as e:
-                        features_crs = pyproj.crs.CRS.from_proj4(get_proj_str(f))
-                    authority = features_crs.to_authority()
-                    if authority is not None:
-                        features_crs = pyproj.CRS.from_user_input(features_crs.to_authority())
+                    features_crs = get_shapefile_crs(f)
+                    #try:
+                    #    from gisutils import get_shapefile_crs
+                    #    features_crs = get_shapefile_crs(kwargs['shapefile'])
+                    #except Exception as e:
+                    #    features_crs = pyproj.crs.CRS.from_proj4(get_proj_str(f))
+                    #authority = features_crs.to_authority()
+                    #if authority is not None:
+                    #    features_crs = pyproj.CRS.from_user_input(features_crs.to_authority())
                     if filter is None:
                         if self.bbox is not None:
                             bbox = self.bbox
@@ -564,12 +572,15 @@ class MFsetupMixin():
 
                     # implement automatic reprojection in gis-utils
                     # maintaining backwards compatibility
-                    kwargs = {'dest_crs': self.modelgrid.crs}
-                    kwargs = get_input_arguments(kwargs, shp2df)
-                    df = shp2df(f, filter=filter, **kwargs)
+                    #kwargs = {'dest_crs': self.modelgrid.crs}
+                    #kwargs = get_input_arguments(kwargs, shp2df)
+                    #df = shp2df(f, filter=filter, **kwargs)
+                    #df.columns = [c.lower() for c in df.columns]
+                    #if 'dest_crs' not in kwargs and features_crs != self.modelgrid.crs:
+                    #    df['geometry'] = project(df['geometry'], features_crs, self.modelgrid.crs)
+                    df = gpd.read_file(f)
+                    df.to_crs(self.modelgrid.crs, inplace=True)
                     df.columns = [c.lower() for c in df.columns]
-                    if 'dest_crs' not in kwargs and features_crs != self.modelgrid.crs:
-                        df['geometry'] = project(df['geometry'], features_crs, self.modelgrid.crs)
                     if cache:
                         print('caching data in {}...'.format(f))
                         self._features[f] = df

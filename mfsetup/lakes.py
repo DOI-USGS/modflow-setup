@@ -3,6 +3,7 @@ import time
 import warnings
 
 import flopy
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 from scipy.ndimage import sobel
@@ -56,7 +57,8 @@ def make_lakarr2d(grid, lakesdata,
 
 def make_bdlknc_zones(grid, lakesshp, include_ids,
                       feat_id_column='feat_id',
-                      lake_package_id_column='lak_id'):
+                      lake_package_id_column='lak_id',
+                      littoral_zone_buffer_width=20):
     """
     Make zones for populating with lakebed leakance values. Same as
     lakarr, but with a buffer around each lake so that horizontal
@@ -68,35 +70,40 @@ def make_bdlknc_zones(grid, lakesshp, include_ids,
     if isinstance(lakesshp, str):
         # implement automatic reprojection in gis-utils
         # maintaining backwards compatibility
-        kwargs = {'dest_crs': grid.crs}
-        kwargs = get_input_arguments(kwargs, shp2df)
-        lakes = shp2df(lakesshp, **kwargs)
+        #kwargs = {'dest_crs': grid.crs}
+        #kwargs = get_input_arguments(kwargs, shp2df)
+        #lakes = shp2df(lakesshp, **kwargs)
+        lakes = gpd.read_file(lakesshp)
     elif isinstance(lakesshp, pd.DataFrame):
-        lakes = lakesshp.copy()
+        lakes = gpd.GeoDataFrame(lakesshp)
     else:
         raise ValueError('unrecognized input for "lakesshp": {}'.format(lakesshp))
+    lakes.to_crs(grid.crs, inplace=True)
+
     # Exterior buffer
     id_column = feat_id_column.lower()
     lakes.columns = [c.lower() for c in lakes.columns]
-    exterior_buffer = 30  # m
     lakes.index = lakes[id_column]
     lakes = lakes.loc[include_ids]
     if lake_package_id_column not in lakes.columns:
         lakes[lake_package_id_column] = np.arange(1, len(lakes) + 1)
     # speed up buffer construction by getting exteriors once
     # and probably more importantly,
-    # simplifying possibly complex geometries of lakes generated from 2ft lidar
+    # simplifying potentially complex geometries of lakes
+    # set the exterior buffer to 1.5x the grid spacing
+    exterior_buffer = grid.delr[0] * 1.5
     unbuffered_exteriors = [Polygon(g.exterior).simplify(5) for g in lakes.geometry]
     lakes['geometry'] = [g.buffer(exterior_buffer) for g in unbuffered_exteriors]
     arr = rasterize(lakes, grid=grid, id_column=lake_package_id_column)
 
-    # Interior buffer for lower leakance, assumed to be 20 m around the lake
-    interior_buffer = -20  # m
+    # Interior buffer for lower leakance
+    interior_buffer = -littoral_zone_buffer_width
     lakes['geometry'] = [g.buffer(interior_buffer) for g in unbuffered_exteriors]
-    arr2 = rasterize(lakes, grid=grid, id_column=lake_package_id_column)
-    arr2 = arr2 * 100  # Create new ids for the interior, as multiples of 10
+    if not lakes.is_empty.all():
+        arr2 = rasterize(lakes, grid=grid, id_column=lake_package_id_column)
+        arr2 = arr2 * 100  # Create new ids for the interior, as multiples of 10
+        arr[arr2 > 0] = arr2[arr2 > 0]
 
-    arr[arr2 > 0] = arr2[arr2 > 0]
     # ensure that order of hydroids is unchanged
     # (used to match features to lake IDs in lake package)
     assert lakes[id_column].tolist() == list(include_ids)
@@ -171,12 +178,12 @@ def setup_lake_info(model):
                  for feat_id in lakesdata[id_column].values]
     if names is None:  # default to names based on lake ID
         names = names = ['lake{}'.format(i) for i in lak_ids]
-    df = pd.DataFrame({'lak_id': lak_ids,
+    df = gpd.GeoDataFrame({'lak_id': lak_ids,
                        'feat_id': lakesdata[id_column].values,
                        'name': names,
                        'latitude': [c.y for c in centroids],
                        'geometry': lakesdata['geometry']
-                       })
+                       }, crs=lakesdata.crs)
 
     # get starting stages from model top, for specifying ranges
     stages = []
@@ -326,7 +333,8 @@ def setup_lake_connectiondata(model, for_external_file=True,
     # profundal zones are the one-based lake number times 100
     # for example, for lake 1, littoral zone is 1; profundal zone is 100.
     lakzones = make_bdlknc_zones(model.modelgrid, model.lake_info,
-                                 include_ids=model.lake_info['feat_id'])
+                                 include_ids=model.lake_info['feat_id'],
+                                littoral_zone_buffer_width=cfg['source_data']['littoral_zone_buffer_width'])
     littoral_profundal_zones = get_littoral_profundal_zones(lakzones)
 
     model.setup_external_filepaths('lak', 'lakzones',

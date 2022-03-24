@@ -624,7 +624,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # make the arrays or load them
         lakzones = make_bdlknc_zones(self.modelgrid, self.lake_info,
-                                     include_ids=self.lake_info['feat_id'])
+                                     include_ids=self.lake_info['feat_id'],
+                                     littoral_zone_buffer_width=source_data['littoral_zone_buffer_width'])
         save_array(self.cfg['intermediate_data']['lakzones'][0], lakzones, fmt='%d')
 
         bdlknc = np.zeros((self.nlay, self.nrow, self.ncol))

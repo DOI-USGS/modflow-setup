@@ -447,6 +447,28 @@ def test_mnw_setup(pfl_nwt_with_dis):
      assert True
 
 
+def test_littoral_zone_buffer_width(pfl_nwt_with_dis):
+
+    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
+
+    # test huge buffer (no profundal zone)
+    m.cfg['lak']['source_data']['littoral_zone_buffer_width'] = 200
+    lak = m.setup_lak()
+    assert not np.any(np.any(lak.bdlknc.array == m.cfg['lak']['source_data']['profundal_leakance']))
+    m.remove_package('lak')
+    # verify that there are less litoral cells if no buffer is specified
+    # (there are always some, because of default 1.5 cell width buffer
+    # around outside edge of lake, for fluxes through horizontal cell faces)
+    m.cfg['lak']['source_data']['littoral_zone_buffer_width'] = 20
+    lak = m.setup_lak()
+    n_littoral_20 = np.sum(lak.bdlknc.array == m.cfg['lak']['source_data']['littoral_leakance'])
+    m.remove_package('lak')
+    m.cfg['lak']['source_data']['littoral_zone_buffer_width'] = 0
+    lak = m.setup_lak()
+    n_littoral_0 = np.sum(lak.bdlknc.array == m.cfg['lak']['source_data']['littoral_leakance'])
+    assert n_littoral_0 < n_littoral_20
+
+
 def test_lak_setup(pfl_nwt_with_dis):
 
     m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
@@ -462,8 +484,8 @@ def test_lak_setup(pfl_nwt_with_dis):
     lak.write_file()
     assert lak.bdlknc.array.sum() > 0
     assert not np.any(np.isnan(lak.bdlknc.array))
-    assert np.any(lak.bdlknc.array == m.cfg['lak']['littoral_leakance'])
-    assert np.any(lak.bdlknc.array == m.cfg['lak']['profundal_leakance'])
+    assert np.any(lak.bdlknc.array == m.cfg['lak']['source_data']['littoral_leakance'])
+    assert np.any(lak.bdlknc.array == m.cfg['lak']['source_data']['profundal_leakance'])
     assert os.path.exists(m.cfg['lak']['output_files']['lookup_file'])
     assert lak.lakarr.array.sum() > 0
     tabfiles = m.cfg['lak']['tab_files']
