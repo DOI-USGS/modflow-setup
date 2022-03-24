@@ -21,7 +21,7 @@ In contrast to Flopy, which is completely general, modflow-setup limits model co
 
 * models are only produced with the external files option in flopy, meaning that most array and table input are written to external files in a single folder. This facilitates parameter estimation and allows most of the intensive i/o operations to be performed by pandas and numpy, which are generally faster than parsing MODFLOW package input with base python.
 * Currently Modflow-setup favors a linear workflow, in which the entire model is (re)built after edits are made to the configuration file or input data. For many models, this process only takes a few minutes or less. While it is possible to :ref:`load a model <Loading a model>`, repeated loading and (re)writing of MODFLOW input with ad hoc edits (as one might do with Flopy, for example) is not well tested. A great way to speed development of a model is to rebuild the model successively with only the packages needed to troubleshoot or test a particular aspect. This can be done by commenting out or removing packages from the ``packages:`` list in the ``model:`` block of the configuration file. When everything works, a full build can then be made with all of the packages included.
-* Currently only regular (unrotated) model grids are supported; support for unstructured grids may be added in the future.
+* Currently only regular model grids are supported; support for unstructured grids may be added in the future.
 
 
 
