@@ -5,9 +5,9 @@ Modflow-setup is a Python package for automating the setup of MODFLOW groundwate
 
 
 ### Version 0.1
-![Tests](https://github.com/aleaf/modflow-setup/workflows/Tests/badge.svg)
-[![codecov](https://codecov.io/gh/aleaf/modflow-setup/branch/master/graph/badge.svg)](https://codecov.io/gh/aleaf/modflow-setup)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/aleaf/modflow-setup/develop?urlpath=lab/tree/examples)
+![Tests](https://github.com/usgs/modflow-setup/workflows/Tests/badge.svg)
+[![codecov](https://codecov.io/gh/aleaf/modflow-setup/branch/master/graph/badge.svg)](https://codecov.io/gh/usgs/modflow-setup)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/usgs/modflow-setup/develop?urlpath=lab/tree/examples)
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
 
@@ -16,9 +16,9 @@ Modflow-setup is a Python package for automating the setup of MODFLOW groundwate
 
 Getting Started
 -----------------------------------------------
-For more details, see the [modflow-setup documentation](https://aleaf.github.io/modflow-setup/)
+For more details, see the [modflow-setup documentation](https://usgs.github.io/modflow-setup/)
 
-Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/latest/config-file.html) similar to one of the examples in the [Configuration File Gallery](https://aleaf.github.io/modflow-setup/latest/config-file-gallery.html).
+Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/latest/config-file.html) similar to one of the examples in the [Configuration File Gallery](https://usgs.github.io/modflow-setup/latest/config-file-gallery.html).
 
 The yaml file summarizes source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
 
@@ -42,7 +42,7 @@ m.write_input()
 
 Installation
 -----------------------------------------------
-See the [Installation Instructions](https://aleaf.github.io/modflow-setup/latest/installation.html)
+See the [Installation Instructions](https://usgs.github.io/modflow-setup/latest/installation.html)
 
 
 How to cite
