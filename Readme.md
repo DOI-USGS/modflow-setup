@@ -44,6 +44,15 @@ Installation
 -----------------------------------------------
 See the [Installation Instructions](https://aleaf.github.io/modflow-setup/latest/installation.html)
 
+
+How to cite
+-----------------------------------------------
+###### Citation for Modflow-setup
+Leaf, A.T. and Fienen, M.N. (2022) Modflow-setup: Robust automation of groundwater model construction. (in Review) Front. Earth Sci. x:xx. doi: 10.3389/xxx
+
+###### Software/Code Citation for Modflow-setup
+Leaf, A.T. and Fienen, M.N. (2022). Modflow-setup version 0.1, U.S. Geological Survey Software Release (in Review), 1 May 2022. https://doi.org/10.5066/P9O3QWQ1
+
 MODFLOW Resources
 -----------------------------------------------
 
@@ -61,4 +70,6 @@ expressed or implied, is made by the USGS or the U.S. Government as to the
 functionality of the software and related material nor shall the fact of release
 constitute any such warranty. The software is provided on the condition that
 neither the USGS nor the U.S. Government shall be held liable for any damages
-resulting from the authorized or unauthorized use of the software.
+resulting from the authorized or unauthorized use of the software. It is the responsibility of the user to check the accuracy of the results.
+
+Any use of trade, firm, or product names is for descriptive purposes only and does not imply endorsement by the U.S. Government.
