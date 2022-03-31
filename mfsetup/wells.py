@@ -235,8 +235,10 @@ def assign_layers_from_screen_top_botm(data, model,
                                        distribute_by='transmissivity',
                                        minimum_layer_thickness=2.):
     """Assign model layers to pumping flux data based on
-    open interval. Fluxes are applied to each layer proportional
-    to the fraction of open interval in that layer.
+    open interval. Fluxes are assigned to either the thickest or
+    highest transmissivity layer intersection with the well open interval. In
+    the case of multiple intersections of identical thickness or transmissivity,
+    the deepest (highest) thickness or transmissivity intersection is selected.
 
     Parameters
     ----------
@@ -396,8 +398,10 @@ def assign_layers_from_screen_top_botm(data, model,
                 # record which wells were moved or dropped, and why
                 bad_wells = data.loc[invalid_open_interval].copy()
                 bad_wells['category'] = 'moved'
-                bad_wells['reason'] = 'longest open interval thickness < {} {} minimum'.format(minimum_layer_thickness,
-                                                                                               model.length_units)
+                bad_wells['reason'] = (f'longest open interval thickness < {minimum_layer_thickness} '
+                                      f'{model.length_units} minimum '
+                                      'or open interval placed well in inactive layer.'
+                                      )
                 bad_wells['routine'] = __name__ + '.assign_layers_from_screen_top_botm'
                 msg = ('Warning: {} of {} wells in layers less than '
                        'specified minimum thickness of {} {}\n'
@@ -427,6 +431,7 @@ def assign_layers_from_screen_top_botm(data, model,
                 # write shapefile and CSV output for wells that were dropped
                 cols = ['k', 'i', 'j', 'boundname',
                         'category', 'laythick', 'idomain', 'reason', 'routine', 'x', 'y']
+                cols = [c for c in cols if c in bad_wells.columns]
                 if flux_col in data.columns:
                     cols.insert(3, flux_col)
                 flux_below = bad_wells.groupby(['k', 'i', 'j']).first().reset_index()[cols]
@@ -438,7 +443,7 @@ def assign_layers_from_screen_top_botm(data, model,
                 # cull the wells that are still below the min. layer thickness
                 data = data.loc[data['laythick'] > minimum_layer_thickness].copy()
         else:
-            raise ValueError('Unrecognized argument for distribute_by: {}'.format(distribute_by))
+            raise ValueError(f'Unrecognized argument for distribute_by: {distribute_by}')
     return data
 
 

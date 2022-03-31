@@ -95,6 +95,36 @@ def test_assign_layers_from_screen_top_botm(shellmound_model_with_dis, test_data
                                                  minimum_layer_thickness=10.)
     assert results.loc[0, 'k'] == 12
 
+    # test handling of invalid open intervals
+    i, j = 5, 5
+    welldata2 = pd.DataFrame({
+        'i': [i],
+        'j': [j],
+        'q': [0.],
+        'screen_top': 20, # open interval coincides with layer 1
+        'screen_botm': 15,
+        'site_no': 'test_well2'
+    })
+    # if open interval places well in an inactive layer
+    # well should ideally get moved to closest active (and valid) layer below
+    # but this would require iteration to find a next layer
+    # that meets minimum thickness and is active
+    # currently, assign_layers_from_screen_top_botm simply
+    # relocates the well to the highest T layer at that i, j location
+    # (layer 12 in this case)
+    idomain = model.dis.idomain.array.copy()
+    idomain[:5, i, j] = 0  # make top 5 layers inactive
+    model.dis.idomain = idomain
+    results = assign_layers_from_screen_top_botm(welldata2, model,
+                                                flux_col='q',
+                                                screen_top_col='screen_top',
+                                                screen_botm_col='screen_botm',
+                                                label_col='site_no',
+                                                across_layers=False,
+                                                distribute_by='transmissivity',
+                                                minimum_layer_thickness=10.)
+    # well should get placed in layer 6 if next active layer were an option
+
 
 def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
 
