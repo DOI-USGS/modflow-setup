@@ -281,10 +281,12 @@ def assign_layers_from_screen_top_botm(data, model,
             elif 'x' in data.columns and 'y' in data.columns:
                 raise NotImplementedError('Assigning well layers with just x, y')
                 x, y = data['x'].values, data['y'].values
-            if screen_top_col in data.columns:
-                screen_top = data[screen_top_col].values
-            if screen_botm_col in data.columns:
-                screen_botm = data[screen_botm_col].values
+            if screen_top_col not in data.columns:
+                raise ValueError(f"No screen top column ('{screen_top_col}') in input data!")
+            screen_top = data[screen_top_col].values
+            if screen_botm_col not in data.columns:
+                raise ValueError(f"No screen bottom column ('{screen_botm_col}') in input data!")
+            screen_botm = data[screen_botm_col].values
 
             # get starting heads if available
             no_strt_msg = (f'Well setup: distribute_by: {distribute_by} selected '
