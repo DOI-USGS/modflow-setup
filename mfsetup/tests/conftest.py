@@ -249,7 +249,8 @@ def get_pleasant_nwt_with_dis(get_pleasant_nwt_with_grid):
 @pytest.fixture(scope="function")
 def get_pleasant_nwt_with_dis_bas6(get_pleasant_nwt_with_dis):
     print('creating Pleasant Lake MFnwtModel instance with dis and bas6 packages...')
-    m = copy.deepcopy(get_pleasant_nwt_with_dis)
+    #m = copy.deepcopy(get_pleasant_nwt_with_dis)
+    m = get_model(get_pleasant_nwt_with_dis)
     bas = m.setup_bas6()
     return m
 

@@ -237,15 +237,18 @@ class MFsetupGrid(StructuredGrid):
 
     @property
     def epsg(self):
-        return self.crs.to_epsg()
+        if self.crs is not None:
+            return self.crs.to_epsg()
 
     @property
     def proj_str(self):
-        return self.crs.to_proj4()
+        if self.crs is not None:
+            return self.crs.to_proj4()
 
     @property
     def wkt(self):
-        return self.crs.to_wkt(pretty=True)
+        if self.crs is not None:
+            return self.crs.to_wkt(pretty=True)
 
     @property
     def length_units(self):

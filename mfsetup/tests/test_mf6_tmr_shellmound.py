@@ -13,6 +13,7 @@ from scipy.interpolate import griddata
 from mfsetup import MF6model
 from mfsetup.fileio import exe_exists, load_array, load_cfg
 from mfsetup.grid import MFsetupGrid
+from mfsetup.interpolate import Interpolator
 from mfsetup.utils import get_input_arguments
 
 
@@ -217,7 +218,15 @@ def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):
     #  to interpolating data from regular grids (the parent model),
     # such as interpn (which xarray uses) although regular grid methods
     # wouldn't work for 3 or 4D interpolation because z is irregular
-    bheads_tmr = m.tmr.interpolate_values(parent_heads.ravel(), method='linear')
+
+    # create an interpolator instance
+    cell_centers_interp = Interpolator(m.tmr.parent_xyzcellcenters,
+                                       m.tmr.inset_boundary_cells[['x', 'y', 'z']].T.values,
+                                       d=3,
+                                       source_values_mask=m.tmr._source_grid_mask)
+
+    #bheads_tmr = m.tmr.interpolate_values(parent_heads.ravel(), method='linear')
+    bheads_tmr = cell_centers_interp.interpolate(parent_heads, method='linear')
 
     # x, y, z locations of parent model head values
     px, py, pz = m.tmr.parent_xyzcellcenters
