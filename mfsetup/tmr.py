@@ -957,8 +957,8 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
                  version='mf6',
                  model_top=None, model_bottom_array=None,
                  kstpkper=(0, 0),
-                 specific_discharge=False, 
-                 headfile=None, 
+                 specific_discharge=False,
+                 headfile=None,
                  modelgrid=None):
     """Get 2 or 3D arrays of cell by cell flows across the cell faces
     (for structured grid models).
@@ -970,13 +970,13 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
     binary_grid_file : str or pathlike
         File path to MODFLOW 6 binary grid (``*.dis.grb``) file. Not needed for MFNWT
     version : str
-        MODFLOW version- 'mf6' or other. If not 'mf6', the cell budget output 
+        MODFLOW version- 'mf6' or other. If not 'mf6', the cell budget output
         is assumed to be formatted similar to a MODFLOW 2005 style model.
     model_top : 2D numpy array of shape (nrow, ncol)
-        Model top elevations (only needed for modflow 2005 style models without 
+        Model top elevations (only needed for modflow 2005 style models without
         a binary grid file)
     model_bottom_array : 3D numpy array of shape (nlay, nrow, ncol)
-        Model bottom elevations (only needed for modflow 2005 style models 
+        Model bottom elevations (only needed for modflow 2005 style models
         without a binary grid file)
     kstpkper : tuple
         zero-based (time step, stress period)
@@ -985,7 +985,7 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
         instead of volumetric fluxes.
         By default, False
     headfile : str, pathlike, or instance of flopy.utils.binaryfile.HeadFile
-        File path or pointer to MODFLOW head file. Only required if 
+        File path or pointer to MODFLOW head file. Only required if
         specific_discharge=True
     modelgrid : instance of MFsetupGrid object
         Defaults to None, only required if specific_discharge=True
@@ -1047,22 +1047,22 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
             else:
                 hds = headsfile.get_data(kstpkper=kstpkper)
             thickness = modelgrid.saturated_thick(array=hds)
-        
+
         delr_gridp, delc_gridp = np.meshgrid(modelgrid.delr,
                                             modelgrid.delc)
 
         nlay, nrow, ncol = modelgrid.shape
 
-        # multiply average thickness by width (along rows or cols) to 
+        # multiply average thickness by width (along rows or cols) to
         # obtain cross sectional area on the faces
         # https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/delrdelcillustration.png
         qy_face_areas = np.tile(delr_gridp[:-1,:], (nlay,1,1)) * \
                                 ((thickness[:,:-1,:]+thickness[:,1:,:])/2)
-        # the above calculation results in a missing dimension ( only internal faces are 
+        # the above calculation results in a missing dimension ( only internal faces are
         # calculated ) so we concatenate on a repetition of the final row or column
         qy_face_areas = np.concatenate([qy_face_areas,
                     np.expand_dims(qy_face_areas[:,-1,:], axis=1)], axis=1)
-        
+
         qx_face_areas = np.tile(delc_gridp[:,:-1], (nlay,1,1)) * \
                                 ((thickness[:,:,:-1]+thickness[:,:,1:])/2)
         qx_face_areas = np.concatenate([qx_face_areas,
@@ -1071,11 +1071,11 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
         # z direction is simply delr * delc across all layers
         qz_face_areas = np.tile(delr_gridp * delc_gridp, (nlay,1,1))
 
-        # divide by the areas resulting in normalized, specific discharge 
+        # divide by the areas resulting in normalized, specific discharge
         qx /= qx_face_areas
         qy /= qy_face_areas
         qz /= qz_face_areas
-        
+
     return qx, qy, qz
 
 class TmrNew:
@@ -1208,7 +1208,7 @@ class TmrNew:
             # x, y, z locations of parent model head values for j faces
             jpx, jpy, jpz = self.x_jface_parent, self.y_jface_parent, self.z_jface_parent
 
-            
+
             # these are the i-direction fluxes
             x,y,z = self.inset_boundary_cell_faces.loc[
                 self.inset_boundary_cell_faces.cellface.isin(['top','bottom'])][['xface','yface','zface']].T.values
@@ -1218,7 +1218,7 @@ class TmrNew:
             # these are the j-direction fluxes
             x,y,z = self.inset_boundary_cell_faces.loc[
                 self.inset_boundary_cell_faces.cellface.isin(['left','right'])][['xface','yface','zface']].T.values
-                
+
             self._interp_weights_flux['jface'] = interp_weights((jpx, jpy, jpz), (x, y, z), d=3)
             assert not np.any(np.isnan(self._interp_weights_flux['jface'][1]))
 
@@ -1601,7 +1601,7 @@ class TmrNew:
             # NB --> trying to preserve the always seemingly
             # backwards delr/delc definitions
             # also note - for now, taking average thickness at a connected face
-            
+
             # need XYZ locations of the center of each face for
             # iface and jface edges (faces)
             # NB edges are returned in model coordinates
@@ -1611,7 +1611,7 @@ class TmrNew:
             ncol = self.parent.modelgrid.ncol
             # throw out the left and top edges, respectively
             xloc_edge=xloc_edge[1:]
-            yloc_edge=yloc_edge[1:]            
+            yloc_edge=yloc_edge[1:]
             # tile out to full dimensions of the grid
             xloc_edge = np.tile(np.atleast_2d(xloc_edge),(nlay+2,nrow,1))
             yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay+2,1,ncol))
@@ -1621,9 +1621,9 @@ class TmrNew:
                                 np.tile(delr_grid, (nlay,1,1))
             '''
             xloc_center, yloc_center = self.parent.modelgrid.xycenters
-            
+
             # tile out to full dimensions of the grid
-            
+
             xloc_center = np.tile(np.atleast_2d(xloc_center),(nlay+2,nrow,1))
             yloc_center = np.tile(np.atleast_2d(yloc_center).T,(nlay+2,1,ncol))
 
@@ -1635,7 +1635,7 @@ class TmrNew:
             zpadtop = np.expand_dims(self.parent.modelgrid.top_botm[0,:,:] + parent_thick[0], axis=0)
             zpadbotm = np.expand_dims(self.parent.modelgrid.top_botm[-1,:,:] - parent_thick[-1], axis=0)
             zloc=np.vstack([zpadtop,zloc,zpadbotm])
-            
+
             # for iface, all cols, nrow-1 rows
             self.x_iface_parent = xloc_center[:,:-1,:].ravel()
             self.y_iface_parent = yloc_edge[:,:,:-1].ravel()
@@ -1723,7 +1723,7 @@ class TmrNew:
                         vflux_array[vflux['kn'].values,
                                     vflux['in'].values,
                                     vflux['jn'].values] = vflux.q.values
-                    
+
                     # get modelgrid row-wise (i-direction) fluxes
                     if 'in' in df.columns and np.any(df['in'] < df['im']):
                         iflux = df.loc[(df['in'] < df['im'])]
@@ -1747,10 +1747,10 @@ class TmrNew:
                     q_jface = (jflux_array / parent_jface_areas)
                     '''
                     # mf6 specific discharge
-                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file, 
+                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file,
                                               self.parent_binary_grid_file,
                                               version='mf6',
-                                              model_top=self.parent.modelgrid.top, 
+                                              model_top=self.parent.modelgrid.top,
                                               model_bottom_array=self.parent.modelgrid.botm,
                                               kstpkper=parent_kstpkper,
                                               specific_discharge=True,
@@ -1759,10 +1759,10 @@ class TmrNew:
 
                 else:
                     # MFNWT specific discharge
-                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file, 
+                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file,
                                               self.parent_binary_grid_file,
                                               version='other', # this argument can be anything besides `mf6`
-                                              model_top=self.parent.modelgrid.top, 
+                                              model_top=self.parent.modelgrid.top,
                                               model_bottom_array=self.parent.modelgrid.botm,
                                               kstpkper=parent_kstpkper,
                                               specific_discharge=True,
@@ -1775,8 +1775,8 @@ class TmrNew:
                 qx = np.pad(qx, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
                 qy = np.pad(qy, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
                 qz = np.pad(qz, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
-                
-                
+
+
                 # TODO: consider padding or not on top, left, and "top (row-wise)"
                 # (parent x, y, z locations already contain this pad - see zloc above)
                 '''
@@ -1790,9 +1790,9 @@ class TmrNew:
 
                 # interpolate inset boundary heads from 3D parent head solution
                 y_flux = iface_interp.interpolate(qy, method='linear')
-                x_flux = jface_interp.interpolate(qx, method='linear')  
+                x_flux = jface_interp.interpolate(qx, method='linear')
                 # v_flux = kface_interp.interpolate(qz, method='linear')
-                
+
                 self.inset_boundary_cell_faces = self.inset_boundary_cell_faces.assign(
                     qx_interp=x_flux,
                     qy_interp=y_flux)#,
@@ -1801,13 +1801,13 @@ class TmrNew:
                 # assign q values and flip the sign for flux counter to the CBB convention directions of right and bottom
                 for fluxdir in ['top','bottom','left','right']:
                     if fluxdir == 'top':
-                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qy_interp 
+                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qy_interp
                     if fluxdir == 'bottom':
                         self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qy_interp * -1
                     if fluxdir == 'left':
-                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qx_interp 
+                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qx_interp
                     if fluxdir == 'right':
-                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qx_interp * -1          
+                        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==fluxdir, 'q_interp'] = self.inset_boundary_cell_faces.qx_interp * -1
 
                 # convert specific discharge in inset cells to Q -- flux for well package
                 self.inset_boundary_cell_faces['q'] = \
