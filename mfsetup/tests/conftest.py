@@ -43,8 +43,8 @@ def tmpdir(project_root_path):
     reset = True
     if reset:
         if os.path.isdir(folder):
-            shutil.rmtree(folder)
-        os.makedirs(folder)
+            shutil.rmtree(folder, ignore_errors=True)
+        os.makedirs(folder, exist_ok=True)
     return folder
 
 
