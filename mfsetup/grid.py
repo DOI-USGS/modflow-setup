@@ -947,6 +947,8 @@ def get_cellface_midpoint(grid, k, i, j, direction):
     For example, the midpoint for the right cell face is halfway between
     the upper and lower right corners of the cell, halfway between the
     top and bottom edges."""
+    if np.isscalar(k):
+        k = [k]
     if np.isscalar(i):
         i = [i]
     if np.isscalar(j):

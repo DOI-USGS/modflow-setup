@@ -272,30 +272,30 @@ def test_get_cellface_midpoint():
     x_expected, y_expected = rotate(10, 15, 0, 0, np.radians(grid.angrot))
     x_expected += grid.xoffset
     y_expected += grid.yoffset
-    assert x == x_expected
-    assert y == y_expected
-    assert z == 5
+    assert np.allclose(x, x_expected)
+    assert np.allclose(y, y_expected)
+    assert np.allclose(z, 5)
     x, y, z = get_cellface_midpoint(grid, k, i, j, 'left')
     x_expected, y_expected = rotate(0, 15, 0, 0, np.radians(grid.angrot))
     x_expected += grid.xoffset
     y_expected += grid.yoffset
-    assert x == x_expected
-    assert y == y_expected
-    assert z == 5
+    assert np.allclose(x, x_expected)
+    assert np.allclose(y, y_expected)
+    assert np.allclose(z, 5)
     x, y, z = get_cellface_midpoint(grid, k, i, j, 'top')
     x_expected, y_expected = rotate(5, 20, 0, 0, np.radians(grid.angrot))
     x_expected += grid.xoffset
     y_expected += grid.yoffset
-    assert x == x_expected
-    assert y == y_expected
-    assert z == 5
+    assert np.allclose(x, x_expected)
+    assert np.allclose(y, y_expected)
+    assert np.allclose(z, 5)
     x, y, z = get_cellface_midpoint(grid, k, i, j, 'bottom')
     x_expected, y_expected = rotate(5, 10, 0, 0, np.radians(grid.angrot))
     x_expected += grid.xoffset
     y_expected += grid.yoffset
-    assert x == x_expected
-    assert y == y_expected
-    assert z == 5
+    assert np.allclose(x, x_expected)
+    assert np.allclose(y, y_expected)
+    assert np.allclose(z, 5)
 
     # plot a visual of the cell midpoint
     #import matplotlib.pyplot as plt
