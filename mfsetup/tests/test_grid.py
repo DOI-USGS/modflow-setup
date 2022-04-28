@@ -6,6 +6,7 @@ import numpy as np
 import pyproj
 import pytest
 from flopy import mf6
+from flopy.utils.geometry import rotate
 from flopy.utils.mfreadnam import attribs_from_namfile_header
 from gisutils import get_authority_crs, shp2df
 
@@ -13,6 +14,7 @@ from mfsetup import MF6model
 from mfsetup.fileio import dump, load, load_modelgrid
 from mfsetup.grid import (
     MFsetupGrid,
+    get_cellface_midpoint,
     get_ij,
     get_nearest_point_on_grid,
     get_point_on_national_hydrogeologic_grid,
@@ -255,3 +257,50 @@ def test_grid_corners_sm(shellmound_model_with_grid):
     m.setup_tdis()
     m.write_input()
     check_grid(m)
+
+
+def test_get_cellface_midpoint():
+    delc = [10, 10]
+    delr = [10, 10]
+    grid = MFsetupGrid(delc=delc, delr=delr,
+                       top=np.ones((2, 2)) * 10,
+                       botm=np.ones((1, 2, 2)) * 0,
+                       xoff=10, yoff=20,
+                       angrot=45)
+    k, i, j = 0, 0, 0
+    x, y, z = get_cellface_midpoint(grid, k, i, j, 'right')
+    x_expected, y_expected = rotate(10, 15, 0, 0, np.radians(grid.angrot))
+    x_expected += grid.xoffset
+    y_expected += grid.yoffset
+    assert x == x_expected
+    assert y == y_expected
+    assert z == 5
+    x, y, z = get_cellface_midpoint(grid, k, i, j, 'left')
+    x_expected, y_expected = rotate(0, 15, 0, 0, np.radians(grid.angrot))
+    x_expected += grid.xoffset
+    y_expected += grid.yoffset
+    assert x == x_expected
+    assert y == y_expected
+    assert z == 5
+    x, y, z = get_cellface_midpoint(grid, k, i, j, 'top')
+    x_expected, y_expected = rotate(5, 20, 0, 0, np.radians(grid.angrot))
+    x_expected += grid.xoffset
+    y_expected += grid.yoffset
+    assert x == x_expected
+    assert y == y_expected
+    assert z == 5
+    x, y, z = get_cellface_midpoint(grid, k, i, j, 'bottom')
+    x_expected, y_expected = rotate(5, 10, 0, 0, np.radians(grid.angrot))
+    x_expected += grid.xoffset
+    y_expected += grid.yoffset
+    assert x == x_expected
+    assert y == y_expected
+    assert z == 5
+
+    # plot a visual of the cell midpoint
+    #import matplotlib.pyplot as plt
+    #import flopy
+    #fig, ax = plt.subplots()
+    #pmv = flopy.plot.PlotMapView(modelgrid=grid)
+    #pmv.plot_grid()
+    #plt.scatter(x, y)
