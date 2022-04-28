@@ -940,3 +940,45 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         write_bbox_shapefile(modelgrid, bbox_shapefile)
     print("finished in {:.2f}s\n".format(time.time() - t0))
     return modelgrid
+
+
+def get_cellface_midpoint(grid, k, i, j, direction):
+    """Return the midpoint of vertical cell face within a structured grid.
+    For example, the midpoint for the right cell face is halfway between
+    the upper and lower right corners of the cell, halfway between the
+    top and bottom edges."""
+    if np.isscalar(i):
+        i = [i]
+    if np.isscalar(j):
+        j = [j]
+    k = np.array(k).astype(int)
+    i = np.array(i).astype(int)
+    j = np.array(j).astype(int)
+    if isinstance(direction, str):
+        direction = [direction] * len(k)
+    x_edges_model = grid.xyedges[0]
+    x_centers_model = grid.xycenters[0]
+    y_edges_model = grid.xyedges[1]
+    y_centers_model = grid.xycenters[1]
+    model_x = []
+    model_y = []
+    for ii, jj, dn in zip(i, j, direction):
+        if dn == 'right':
+            x = x_edges_model[jj+1]
+            y = y_centers_model[ii]
+        elif dn == 'left':
+            x = x_edges_model[jj]
+            y = y_centers_model[ii]
+        elif dn == 'top':
+            x = x_centers_model[jj]
+            y = y_edges_model[ii]
+        elif dn == 'bottom':
+            x = x_centers_model[jj]
+            y = y_edges_model[ii+1]
+        else:
+            raise ValueError("direction needs to be right, left, top or bottom")
+        model_x.append(x)
+        model_y.append(y)
+    x, y = grid.get_coords(model_x, model_y)
+    z = grid.zcellcenters[k, i, j]
+    return x, y, z
