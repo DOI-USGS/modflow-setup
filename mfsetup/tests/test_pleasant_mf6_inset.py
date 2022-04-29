@@ -356,8 +356,8 @@ def test_rch_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
 
 def test_wel_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis
-    m.cfg['wel']['external_files'] = False
-    wel = m.setup_wel()
+    m.cfg['wel']['mfsetup_options']['external_files'] = False
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     wel.write()
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))
     assert isinstance(wel, mf6.ModflowGwfwel)
@@ -431,7 +431,7 @@ def test_external_tables(get_pleasant_mf6_with_dis):
     assert blocks['connectiondata'][0].strip().split()[1].strip('\'') == \
            m.cfg['external_files']['lak_connectiondata'][0]
 
-    wel = m.setup_wel()
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     wel.write()
     for f in m.cfg['external_files']['wel_stress_period_data'].values():
         assert os.path.exists(f)

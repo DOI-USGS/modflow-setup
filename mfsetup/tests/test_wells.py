@@ -30,7 +30,7 @@ def test_minimum_well_layer_thickness(shellmound_model_with_dis, all_layers):
     minthickness = 2
     m.cfg['wel']['source_data']['csvfiles']['vertical_flux_distribution']\
         ['minimum_layer_thickness'] = minthickness
-    df = setup_wel_data(m, for_external_files=False)
+    df = setup_wel_data(m, source_data=m.cfg['wel']['source_data'])
     assert np.all((-np.diff(all_layers, axis=0))[df.k, df.i, df.j] > minthickness)
 
 
@@ -182,8 +182,8 @@ def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
                     reason='obscure decode issue with pfl nwt model top external file')
 def test_get_package_stress_period_data(models_with_dis):
     m = models_with_dis
-    m.cfg['wel']['external_files'] = False
-    wel = m.setup_wel()
+    m.cfg['wel']['mfsetup_options']['external_files'] = False
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     result = get_package_stress_period_data(models_with_dis, package_name='wel')
     assert isinstance(result, pd.DataFrame)
     assert len({'k', 'i', 'j'}.intersection(result.columns)) == 3
