@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mfsetup.interpolate &mdash; modflow-setup 0.post326+gbd7e725 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> modflow-setup
+          </a>
+              <div class="version">
+                0.post326+gbd7e725
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>mfsetup.interpolate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mfsetup.interpolate</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">flopy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">qhull</span> <span class="k">as</span> <span class="n">qhull</span>
+
+
+<div class="viewcode-block" id="get_source_dest_model_xys"><a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.get_source_dest_model_xys">[docs]</a><span class="k">def</span> <span class="nf">get_source_dest_model_xys</span><span class="p">(</span><span class="n">source_model</span><span class="p">,</span> <span class="n">dest_model</span><span class="p">,</span>
+                              <span class="n">source_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the xyz and uvw inputs to the interp_weights function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    source_model : flopy.modeflow.Modflow, flopy.mf6.MFModel, or MFsetupGrid instance</span>
+<span class="sd">    dest_model : mfsetup.MFnwtModel, mfsetup.MF6model instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">source_modelgrid</span> <span class="o">=</span> <span class="n">source_model</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_model</span><span class="p">,</span> <span class="n">flopy</span><span class="o">.</span><span class="n">mbase</span><span class="o">.</span><span class="n">ModelInterface</span><span class="p">):</span>
+        <span class="n">source_modelgrid</span> <span class="o">=</span> <span class="n">source_model</span><span class="o">.</span><span class="n">modelgrid</span>
+    <span class="n">dest_modelgrid</span> <span class="o">=</span> <span class="n">dest_model</span><span class="o">.</span><span class="n">modelgrid</span>
+
+    <span class="k">if</span> <span class="n">source_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dest_model</span><span class="o">.</span><span class="n">parent_mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">source_modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="n">source_mask</span> <span class="o">=</span> <span class="n">dest_model</span><span class="o">.</span><span class="n">parent_mask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">source_modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">source_mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">source_modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;source mask of shape </span><span class="si">{}</span><span class="s1"> incompatible with source grid of shape </span><span class="si">{}</span><span class="s1">&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                        <span class="n">source_modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">source_modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="p">[</span><span class="n">source_mask</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">source_modelgrid</span><span class="o">.</span><span class="n">ycellcenters</span><span class="p">[</span><span class="n">source_mask</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">dest_modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> \
+             <span class="n">dest_modelgrid</span><span class="o">.</span><span class="n">ycellcenters</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">source_model_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">dest_model_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">source_model_xy</span><span class="p">,</span> <span class="n">dest_model_xy</span></div>
+
+
+<div class="viewcode-block" id="interp_weights"><a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.interp_weights">[docs]</a><span class="k">def</span> <span class="nf">interp_weights</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Speed up interpolation vs scipy.interpolate.griddata (method=&#39;linear&#39;),</span>
+<span class="sd">    by only computing the weights once:</span>
+<span class="sd">    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xyz : ndarray or tuple</span>
+<span class="sd">        x, y, z, ... locations of source data.</span>
+<span class="sd">        (shape n source points x ndims)</span>
+<span class="sd">    uvw : ndarray or tuple</span>
+<span class="sd">        x, y, z, ... locations of where source data will be interpolated</span>
+<span class="sd">        (shape n destination points x ndims)</span>
+<span class="sd">    d : int</span>
+<span class="sd">        Number of dimensions (2 for 2D, 3 for 3D, etc.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    indices : ndarray of shape n destination points x 3</span>
+<span class="sd">        Index positions in flattened (1D) xyz array</span>
+<span class="sd">    weights : ndarray of shape n destination points x 3</span>
+<span class="sd">        Fractional weights for each row position</span>
+<span class="sd">        in indices. Weights in each row sum to 1</span>
+<span class="sd">        across the 3 columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Calculating </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">D interpolation weights...&#39;</span><span class="p">)</span>
+    <span class="c1"># convert input to ndarrays of the right shape</span>
+    <span class="n">uvw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uvw</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">uvw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">uvw</span> <span class="o">=</span> <span class="n">uvw</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">tri</span> <span class="o">=</span> <span class="n">qhull</span><span class="o">.</span><span class="n">Delaunay</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+    <span class="n">simplex</span> <span class="o">=</span> <span class="n">tri</span><span class="o">.</span><span class="n">find_simplex</span><span class="p">(</span><span class="n">uvw</span><span class="p">)</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">tri</span><span class="o">.</span><span class="n">simplices</span><span class="p">,</span> <span class="n">simplex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">tri</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">simplex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">uvw</span> <span class="o">-</span> <span class="n">temp</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span>
+    <span class="n">bary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;njk,nk-&gt;nj&#39;</span><span class="p">,</span> <span class="n">temp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">d</span><span class="p">,</span> <span class="p">:],</span> <span class="n">delta</span><span class="p">)</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">bary</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">bary</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+    <span class="c1"># round the weights,</span>
+    <span class="c1"># so that the weights for each simplex sum to 1</span>
+    <span class="c1"># sums not exactly == 1 seem to cause spurious values</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">weights</span></div>
+
+
+<div class="viewcode-block" id="interpolate"><a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.interpolate">[docs]</a><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">vtx</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply the interpolation weights to a set of values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    values : 1D array of length n source points (same as xyz in interp_weights)</span>
+<span class="sd">    vtx : indices returned by interp_weights</span>
+<span class="sd">    wts : weights returned by interp_weights</span>
+<span class="sd">    fill_value : float</span>
+<span class="sd">        Value used to fill in for requested points outside of the convex hull</span>
+<span class="sd">        of the input points (i.e., those with at least one negative weight).</span>
+<span class="sd">        If not provided, then the default is nan.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    interpolated values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;nj,nj-&gt;n&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">vtx</span><span class="p">),</span> <span class="n">wts</span><span class="p">)</span>
+
+    <span class="c1"># fill nans that might result from</span>
+    <span class="c1"># child grid points that are outside of the convex hull of the parent grid</span>
+    <span class="c1"># and for an unknown reason on the Appveyor Windows environment</span>
+    <span class="k">if</span> <span class="n">fill_value</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+        <span class="n">fill_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fill_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">wts</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">fill_value</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="regrid"><a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.regrid">[docs]</a><span class="k">def</span> <span class="nf">regrid</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">grid2</span><span class="p">,</span> <span class="n">mask1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interpolate array values from one model grid to another,</span>
+<span class="sd">    using scipy.interpolate.griddata.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    arr : 2D numpy array</span>
+<span class="sd">        Source data</span>
+<span class="sd">    grid : flopy.discretization.StructuredGrid instance</span>
+<span class="sd">        Source grid</span>
+<span class="sd">    grid2 : flopy.discretization.StructuredGrid instance</span>
+<span class="sd">        Destination grid (to interpolate onto)</span>
+<span class="sd">    mask1 : boolean array</span>
+<span class="sd">        mask for source grid. Areas that are masked will be converted to</span>
+<span class="sd">        nans, and not included in the interpolation.</span>
+<span class="sd">    mask2 : boolean array</span>
+<span class="sd">        mask denoting active area for destination grid.</span>
+<span class="sd">        The mean value will be applied to inactive areas if linear interpolation</span>
+<span class="sd">        is used (not for integer/categorical arrays).</span>
+<span class="sd">    method : str</span>
+<span class="sd">        interpolation method (&#39;nearest&#39;, &#39;linear&#39;, or &#39;cubic&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scipy not installed</span><span class="se">\n</span><span class="s1">try pip install scipy&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># only include points specified by mask</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ycellcenters</span>
+    <span class="k">if</span> <span class="n">mask1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask1</span> <span class="o">=</span> <span class="n">mask1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+    <span class="n">arr2</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                   <span class="p">(</span><span class="n">grid2</span><span class="o">.</span><span class="n">xcellcenters</span><span class="p">,</span> <span class="n">grid2</span><span class="o">.</span><span class="n">ycellcenters</span><span class="p">),</span>
+                   <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="c1"># fill any areas that are nan</span>
+    <span class="c1"># (new active area includes some areas not in uwsp model)</span>
+    <span class="n">fill</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">arr2</span><span class="p">)</span>
+
+    <span class="c1"># if new active area is supplied, fill areas outside of that too</span>
+    <span class="k">if</span> <span class="n">mask2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask2</span> <span class="o">=</span> <span class="n">mask2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">fill</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask2</span> <span class="o">|</span> <span class="n">fill</span>
+
+    <span class="c1"># only fill with mean value if linear interpolation used</span>
+    <span class="c1"># (floating point arrays)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">fill_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">arr2</span><span class="p">)</span>
+        <span class="n">arr2</span><span class="p">[</span><span class="n">fill</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">arr2</span><span class="p">[</span><span class="o">~</span><span class="n">fill</span><span class="p">])</span>
+    <span class="c1">#else:</span>
+    <span class="c1">#    arr2[fill] = nodataval</span>
+    <span class="k">if</span> <span class="n">arr2</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">j</span><span class="o">=</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">arr2</span></div>
+
+
+<div class="viewcode-block" id="regrid3d"><a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.regrid3d">[docs]</a><span class="k">def</span> <span class="nf">regrid3d</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">grid2</span><span class="p">,</span> <span class="n">mask1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interpolate array values from one model grid to another,</span>
+<span class="sd">    using scipy.interpolate.griddata.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    arr : 3D numpy array</span>
+<span class="sd">        Source data</span>
+<span class="sd">    grid : flopy.discretization.StructuredGrid instance</span>
+<span class="sd">        Source grid</span>
+<span class="sd">    grid2 : flopy.discretization.StructuredGrid instance</span>
+<span class="sd">        Destination grid (to interpolate onto)</span>
+<span class="sd">    mask1 : boolean array</span>
+<span class="sd">        mask for source grid. Areas that are masked will be converted to</span>
+<span class="sd">        nans, and not included in the interpolation.</span>
+<span class="sd">    mask2 : boolean array</span>
+<span class="sd">        mask denoting active area for destination grid.</span>
+<span class="sd">        The mean value will be applied to inactive areas if linear interpolation</span>
+<span class="sd">        is used (not for integer/categorical arrays).</span>
+<span class="sd">    method : str</span>
+<span class="sd">        interpolation method (&#39;nearest&#39;, &#39;linear&#39;, or &#39;cubic&#39;)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    arr : 3D numpy array</span>
+<span class="sd">        Interpolated values at the x, y, z locations in grid2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scipy not installed</span><span class="se">\n</span><span class="s1">try pip install scipy&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;input array must be 3d&quot;</span>
+    <span class="k">if</span> <span class="n">grid2</span><span class="o">.</span><span class="n">botm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;regrid3d: grid2.botm is None; grid2 must have cell bottom elevations&#39;</span><span class="p">)</span>
+
+    <span class="c1"># source model grid points</span>
+    <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xyzcellcenters</span>
+    <span class="n">nlay</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">pz</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">px</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">px</span><span class="p">,</span> <span class="p">(</span><span class="n">nlay</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">py</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">py</span><span class="p">,</span> <span class="p">(</span><span class="n">nlay</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># apply the mask</span>
+    <span class="k">if</span> <span class="n">mask1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask1</span> <span class="o">=</span> <span class="n">mask1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="c1"># tile the mask to nlay x nrow x ncol</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">mask1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">mask1</span><span class="p">,</span> <span class="p">(</span><span class="n">nlay</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span>
+        <span class="n">px</span> <span class="o">=</span> <span class="n">px</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span>
+        <span class="n">py</span> <span class="o">=</span> <span class="n">py</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span>
+        <span class="n">pz</span> <span class="o">=</span> <span class="n">pz</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span>
+
+    <span class="c1"># dest modelgrid points</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">grid2</span><span class="o">.</span><span class="n">xyzcellcenters</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nlay</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">j</span><span class="o">=</span><span class="mi">2</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">nlay</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="n">nlay</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># interpolate inset boundary heads from 3D parent head solution</span>
+    <span class="n">arr2</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span><span class="p">),</span> <span class="n">arr</span><span class="p">,</span>
+                     <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    <span class="c1"># get the locations of any bad values</span>
+    <span class="n">bk</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">bj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">arr2</span><span class="p">))</span>
+    <span class="n">bx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">bk</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">bj</span><span class="p">]</span>
+    <span class="n">by</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">bk</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">bj</span><span class="p">]</span>
+    <span class="n">bz</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">bk</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">bj</span><span class="p">]</span>
+    <span class="c1"># tweak the result slightly to resolve any apparent triangulation errors</span>
+    <span class="n">fixed</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">((</span><span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span><span class="p">),</span> <span class="n">arr</span><span class="p">,</span>
+                     <span class="p">(</span><span class="n">bx</span><span class="p">,</span> <span class="n">by</span><span class="p">,</span> <span class="n">bz</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    <span class="n">arr2</span><span class="p">[</span><span class="n">bk</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">bj</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span>
+
+    <span class="c1"># fill any remaining areas that are nan</span>
+    <span class="c1"># (new active area includes some areas not in uwsp model)</span>
+    <span class="n">fill</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">arr2</span><span class="p">)</span>
+
+    <span class="c1"># if new active area is supplied, fill areas outside of that too</span>
+    <span class="k">if</span> <span class="n">mask2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask2</span> <span class="o">=</span> <span class="n">mask2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">fill</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask2</span> <span class="o">|</span> <span class="n">fill</span>
+
+    <span class="c1"># only fill with mean value if linear interpolation used</span>
+    <span class="c1"># (floating point arrays)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">arr2</span><span class="p">[</span><span class="n">fill</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">arr2</span><span class="p">[</span><span class="o">~</span><span class="n">fill</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">arr2</span></div>
+
+
+<div class="viewcode-block" id="Interpolator"><a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.Interpolator">[docs]</a><span class="k">class</span> <span class="nc">Interpolator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Speed up barycentric interpolation similar to scipy.interpolate.griddata</span>
+<span class="sd">    (method=&#39;linear&#39;), by computing the weights once and then re-using them for</span>
+<span class="sd">    successive interpolation with the same source and destination points.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xyz : ndarray or tuple</span>
+<span class="sd">        x, y, z, ... locations of source data.</span>
+<span class="sd">        (shape n source points x ndims)</span>
+<span class="sd">    uvw : ndarray or tuple</span>
+<span class="sd">        x, y, z, ... locations of where source data will be interpolated</span>
+<span class="sd">        (shape n destination points x ndims)</span>
+<span class="sd">    d : int</span>
+<span class="sd">        Number of dimensions (2 for 2D, 3 for 3D, etc.)</span>
+<span class="sd">    source_values_mask : boolean array</span>
+<span class="sd">        Boolean array of same structure as the `source_values` array</span>
+<span class="sd">        input to the :meth:`~mfsetup.interpolate.Interpolator.interpolate` method,</span>
+<span class="sd">        with the same number of active values as the size of `xyz`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The methods employed are based on this Stack Overflow post:</span>
+<span class="sd">    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span> <span class="o">=</span> <span class="n">uvw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span>
+
+        <span class="c1"># properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source_values_mask</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_values_mask</span> <span class="o">=</span> <span class="n">source_values_mask</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the interpolation weights.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source_values_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_values_mask</span>
+
+    <span class="nd">@source_values_mask</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">source_values_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">source_values_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">source_values_mask</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;source_values_mask must contain the same number &#39;</span>
+                             <span class="s1">&#39;of True (active) values as there are source (xyz) points&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source_values_mask</span> <span class="o">=</span> <span class="n">source_values_mask</span>
+
+<div class="viewcode-block" id="Interpolator.interpolate"><a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.Interpolator.interpolate">[docs]</a>    <span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Interpolate values in source_values to the destination points in the *uvw* attribute.</span>
+<span class="sd">        using modelgrid instances</span>
+<span class="sd">        attached to the source and destination models.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source_values : ndarray</span>
+<span class="sd">            Values to be interpolated to destination points. Array must be the same size as</span>
+<span class="sd">            the number of source points, or the number of active points within source points,</span>
+<span class="sd">            as defined by the `source_values_mask` array input to the :class:`~mfsetup.interpolate.Interpolator`.</span>
+<span class="sd">        method : str (&#39;linear&#39;, &#39;nearest&#39;)</span>
+<span class="sd">            Interpolation method. With &#39;linear&#39; a triangular mesh is discretized around</span>
+<span class="sd">            the source points, and barycentric weights representing the influence of the *d* +1</span>
+<span class="sd">            source points on each destination point (where *d* is the number of dimensions),</span>
+<span class="sd">            are computed. With &#39;nearest&#39;, the input is simply passed to :meth:`scipy.interpolate.griddata`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        interpolated : 1D numpy array</span>
+<span class="sd">            Array of interpolated values at the destination locations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_values_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">source_values</span> <span class="o">=</span> <span class="n">source_values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">source_values_mask</span><span class="o">.</span><span class="n">flatten</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+            <span class="n">interpolated</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">source_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">interp_weights</span><span class="p">,</span>
+                                       <span class="n">fill_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
+            <span class="n">interpolated</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span> <span class="n">source_values</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">interpolated</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Example from stack overflow. In this example, both</span>
+<span class="sd">    xyz and uvw have points in 3 dimensions. (npoints x ndim)&quot;&quot;&quot;</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">3.5e4</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mf">3e3</span><span class="p">),</span> <span class="mi">3</span>
+    <span class="c1"># make sure no new grid point is extrapolated</span>
+    <span class="n">bounding_cube</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="n">d</span><span class="p">)))</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">bounding_cube</span><span class="p">,</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounding_cube</span><span class="p">)),</span> <span class="n">d</span><span class="p">)))</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="n">uvw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="n">vtx</span><span class="p">,</span> <span class="n">wts</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">)</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">vtx</span><span class="p">,</span> <span class="n">wts</span><span class="p">),</span> <span class="n">griddata</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">uvw</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Apr 29, 2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

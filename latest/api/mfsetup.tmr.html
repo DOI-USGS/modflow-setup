@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr module &mdash; modflow-setup 0.post300+g3533984 documentation</title>
+  <title>mfsetup.tmr module &mdash; modflow-setup 0.post326+gbd7e725 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post300+g3533984
+                0.post326+gbd7e725
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -68,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html">mfsetup.interpolate module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.tmr module</a></li>
 </ul>
@@ -136,7 +137,7 @@
 <span id="mfsetup-tmr-module"></span><h1>mfsetup.tmr module<a class="headerlink" href="#module-mfsetup.tmr" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.tmr.TmrNew">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">TmrNew</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_head_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_cell_budget_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_parent_period_mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_start_date_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">define_connections_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_active_extent'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#TmrNew"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.TmrNew" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">TmrNew</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_head_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_cell_budget_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_binary_grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_parent_period_mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_start_date_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">define_connections_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_active_extent'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#TmrNew"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.TmrNew" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for general telescopic mesh refinement of a MODFLOW model. Head or
 flux fields from parent model are interpolated to boundary cells of
@@ -151,6 +152,8 @@ inset model, which may be in any configuration (jagged, rotated, etc.).</p>
 <dt><strong>parent_head_file</strong><span class="classifier">filepath</span></dt><dd><p>MODFLOW binary head output</p>
 </dd>
 <dt><strong>parent_cell_budget_file</strong><span class="classifier">filepath</span></dt><dd><p>MODFLOW binary cell budget output</p>
+</dd>
+<dt><strong>parent_binary_grid_file</strong><span class="classifier">filepath</span></dt><dd><p>MODFLOW 6 binary grid file (<code class="docutils literal notranslate"><span class="pre">*.grb</span></code>)</p>
 </dd>
 <dt><strong>define_connections</strong><span class="classifier">str, {‘max_active_extent’, ‘by_layer’}</span></dt><dd><p>Method for defining perimeter cells where the TMR boundary
 condition will be applied. If ‘max_active_extent’, the
@@ -208,35 +211,22 @@ is active).</p>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mfsetup.tmr.TmrNew.interp_weights">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interp_weights</span></span><a class="headerlink" href="#mfsetup.tmr.TmrNew.interp_weights" title="Permalink to this definition">¶</a></dt>
-<dd><p>For a given parent, only calculate interpolation weights
-once to speed up re-gridding of arrays to pfl_nwt.</p>
+<dt class="sig sig-object py" id="mfsetup.tmr.TmrNew.inset_zone_within_parent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inset_zone_within_parent</span></span><a class="headerlink" href="#mfsetup.tmr.TmrNew.inset_zone_within_parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The footprint of the inset model maximum active area footprint
+(<code class="docutils literal notranslate"><span class="pre">TmrNew._inset_max_active_area</span></code>) within the parentmodel grid.
+In other words, all parent cells containing one or inset
+model cell centers within <code class="docutils literal notranslate"><span class="pre">TmrNew._inset_max_active_area</span></code> (ones).
+Zeros indicate parent cells with no inset cells.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mfsetup.tmr.TmrNew.interpolate_values">
-<span class="sig-name descname"><span class="pre">interpolate_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#TmrNew.interpolate_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.TmrNew.interpolate_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interpolate values in source array onto
-the destination model grid, using modelgrid instances
-attached to the source and destination models.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>source_array</strong><span class="classifier">ndarray</span></dt><dd><p>Values from source model to be interpolated to destination grid.
-3D numpy array of same shape as the source model.</p>
-</dd>
-<dt><strong>method</strong><span class="classifier">str (‘linear’, ‘nearest’)</span></dt><dd><p>Interpolation method.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>interpolated</strong><span class="classifier">ndarray</span></dt><dd><p>3D array of interpolated values at the inset model grid locations.</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.tmr.TmrNew.interp_weights_flux">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interp_weights_flux</span></span><a class="headerlink" href="#mfsetup.tmr.TmrNew.interp_weights_flux" title="Permalink to this definition">¶</a></dt>
+<dd><p>For the two main directions of flux (i, j) and the four orientations of
+inset faces to interpolate to (right.left,top,bottom
+we can precalulate the interpolation weights of the combinations to speed up
+interpolation</p>
 </dd></dl>
 
 <dl class="py property">
@@ -245,6 +235,18 @@ attached to the source and destination models.</p>
 <dd><p>Get x, y, z locations of parent cells in a buffered area
 (defined by the _source_grid_mask property) around the
 inset model.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.tmr.TmrNew.parent_xyzcellfacecenters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_xyzcellfacecenters</span></span><a class="headerlink" href="#mfsetup.tmr.TmrNew.parent_xyzcellfacecenters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get x, y, z locations of the centroids of the cell faces
+in the row and column directions in a buffered area
+(defined by the _source_grid_mask property) around the
+inset model. Analogous to parent_xyzcellcenters, but for
+interpolating parent model cell by cell fluxes that are located
+at the cell face centers (instead of heads that are located
+at the cell centers).</p>
 </dd></dl>
 
 </dd></dl>
@@ -295,6 +297,113 @@ boundary face of the pfl_nwt model cells in each layer).
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tmr.get_flowja_face">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_flowja_face</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_budget_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_grid_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstpkper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_discharge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_flowja_face"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_flowja_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get DataFrame of FLOW-JA-FACE (cell by cell flow connections)
+from MODFLOW 6 budget output and binary grid file.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cell_budget_file</strong><span class="classifier">str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile</span></dt><dd><p>File path or pointer to MODFLOW 6 cell budget file.</p>
+</dd>
+<dt><strong>binary_grid_file</strong><span class="classifier">str or pathlike</span></dt><dd><p>File path to MODFLOW 6 binary grid (<code class="docutils literal notranslate"><span class="pre">*.dis.grb</span></code>) file</p>
+</dd>
+<dt><strong>kstpkper</strong><span class="classifier">tuple</span></dt><dd><p>zero-based (time step, stress period)</p>
+</dd>
+<dt><strong>specific_discharge</strong><span class="classifier">bool</span></dt><dd><p>Option to return arrays of specific discharge (1D vector components)
+instead of volumetric fluxes.
+By default, False</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>df</strong><span class="classifier">DataFrame</span></dt><dd><p>DataFrame with one connection per row, with the following columns</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 78%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>zero-based from: cell number</p></td>
+</tr>
+<tr class="row-even"><td><p>m</p></td>
+<td><p>zero-based to: cell number</p></td>
+</tr>
+<tr class="row-odd"><td><p>q</p></td>
+<td><p>volumetric flux or specific discharge</p></td>
+</tr>
+<tr class="row-even"><td><p>kn, in, jn</p></td>
+<td><p>zero-based layer, row, column location of n cell (structured grids)</p></td>
+</tr>
+<tr class="row-odd"><td><p>km, im, jm</p></td>
+<td><p>zero-based layer, row, column location of m cell (structured grids)</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tmr.get_intercell_connections">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_intercell_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ja</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowja</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_intercell_connections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_intercell_connections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tmr.get_kij_from_node3d">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_kij_from_node3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node3d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_kij_from_node3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_kij_from_node3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a consecutive cell number in row-major order
+(row, column, layer), get the zero-based row, column position.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tmr.get_qx_qy_qz">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_qx_qy_qz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_budget_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf6'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_bottom_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstpkper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_discharge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_qx_qy_qz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_qx_qy_qz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get 2 or 3D arrays of cell by cell flows across the cell faces
+(for structured grid models).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cell_budget_file</strong><span class="classifier">str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile</span></dt><dd><p>File path or pointer to MODFLOW cell budget file.</p>
+</dd>
+<dt><strong>binary_grid_file</strong><span class="classifier">str or pathlike</span></dt><dd><p>File path to MODFLOW 6 binary grid (<code class="docutils literal notranslate"><span class="pre">*.dis.grb</span></code>) file. Not needed for MFNWT</p>
+</dd>
+<dt><strong>version</strong><span class="classifier">str</span></dt><dd><p>MODFLOW version- ‘mf6’ or other. If not ‘mf6’, the cell budget output
+is assumed to be formatted similar to a MODFLOW 2005 style model.</p>
+</dd>
+<dt><strong>model_top</strong><span class="classifier">2D numpy array of shape (nrow, ncol)</span></dt><dd><p>Model top elevations (only needed for modflow 2005 style models without
+a binary grid file)</p>
+</dd>
+<dt><strong>model_bottom_array</strong><span class="classifier">3D numpy array of shape (nlay, nrow, ncol)</span></dt><dd><p>Model bottom elevations (only needed for modflow 2005 style models
+without a binary grid file)</p>
+</dd>
+<dt><strong>kstpkper</strong><span class="classifier">tuple</span></dt><dd><p>zero-based (time step, stress period)</p>
+</dd>
+<dt><strong>specific_discharge</strong><span class="classifier">bool</span></dt><dd><p>Option to return arrays of specific discharge (1D vector components)
+instead of volumetric fluxes.
+By default, False</p>
+</dd>
+<dt><strong>headfile</strong><span class="classifier">str, pathlike, or instance of flopy.utils.binaryfile.HeadFile</span></dt><dd><p>File path or pointer to MODFLOW head file. Only required if
+specific_discharge=True</p>
+</dd>
+<dt><strong>modelgrid</strong><span class="classifier">instance of MFsetupGrid object</span></dt><dd><p>Defaults to None, only required if specific_discharge=True</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>Qx, Qy, Qz</strong><span class="classifier">tuple of 2 or 3D numpy arrays</span></dt><dd><p>Volumetric or specific discharge fluxes across cell faces.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -309,7 +418,7 @@ boundary face of the pfl_nwt model cells in each layer).
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 25, 2022.
+      <span class="lastupdated">Last updated on Apr 29, 2022.
       </span></p>
   </div>
 

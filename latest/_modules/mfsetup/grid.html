@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.post300+g3533984 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post326+gbd7e725 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post300+g3533984
+                0.post326+gbd7e725
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -333,15 +333,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">epsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">proj_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_proj4</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_proj4</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">(</span><span class="n">pretty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">(</span><span class="n">pretty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -940,7 +943,7 @@
         <span class="c1"># move away from the edge of a cell</span>
         <span class="n">xul_mod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">delr_grid</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span>
         <span class="n">yul_mod</span> <span class="o">-=</span> <span class="p">(</span><span class="n">delc_grid</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span>
-        <span class="c1"># flip back to work coords</span>
+        <span class="c1"># flip back to world coords</span>
         <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">xul_mod</span><span class="p">,</span> <span class="n">yul_mod</span><span class="p">)</span>
         <span class="c1"># get corresponding cell</span>
         <span class="n">pi</span><span class="p">,</span> <span class="n">pj</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
@@ -1033,6 +1036,50 @@
         <span class="n">write_bbox_shapefile</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">bbox_shapefile</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">modelgrid</span></div>
+
+
+<div class="viewcode-block" id="get_cellface_midpoint"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_cellface_midpoint">[docs]</a><span class="k">def</span> <span class="nf">get_cellface_midpoint</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the midpoint of vertical cell face within a structured grid.</span>
+<span class="sd">    For example, the midpoint for the right cell face is halfway between</span>
+<span class="sd">    the upper and lower right corners of the cell, halfway between the</span>
+<span class="sd">    top and bottom edges.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="p">[</span><span class="n">direction</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">x_edges_model</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x_centers_model</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xycenters</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_edges_model</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">y_centers_model</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">xycenters</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">model_x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">model_y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">jj</span><span class="p">,</span> <span class="n">dn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dn</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_edges_model</span><span class="p">[</span><span class="n">jj</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y_centers_model</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">dn</span> <span class="o">==</span> <span class="s1">&#39;left&#39;</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_edges_model</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y_centers_model</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">dn</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_centers_model</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y_edges_model</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">dn</span> <span class="o">==</span> <span class="s1">&#39;bottom&#39;</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_centers_model</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y_edges_model</span><span class="p">[</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;direction needs to be right, left, top or bottom&quot;</span><span class="p">)</span>
+        <span class="n">model_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">model_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">model_x</span><span class="p">,</span> <span class="n">model_y</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">zcellcenters</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
 </pre></div>
 
            </div>
@@ -1043,7 +1090,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 25, 2022.
+      <span class="lastupdated">Last updated on Apr 29, 2022.
       </span></p>
   </div>
 
