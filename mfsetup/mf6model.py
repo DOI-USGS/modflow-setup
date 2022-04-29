@@ -11,11 +11,7 @@ mf6 = flopy.mf6
 from flopy.utils.lgrutil import Lgr
 from gisutils import get_values_at_points
 
-from mfsetup.bcs import (
-    remove_inactive_bcs,
-    setup_basic_stress_data,
-    setup_flopy_stress_period_data,
-)
+from mfsetup.bcs import remove_inactive_bcs
 from mfsetup.discretization import (
     ModflowGwfdis,
     create_vertical_pass_through_cells,
@@ -548,7 +544,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return rch
 
-    def setup_wel(self, **kwargs):
+    def setup_wel_old(self, **kwargs):
         """
         Sets up the WEL package.
         """
@@ -731,102 +727,11 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             rivdata=rivdata, **kwargs)
 
 
-    def _setup_basic_stress_package(self, package, flopy_package_class,
-                                    variable_columns, rivdata=None,
-                                    **kwargs):
-        print(f'\nSetting up {package.upper()} package...')
-        t0 = time.time()
-
-        # possible future support to
-        # handle filenames of multiple packages
-        # leave this out for now because of additional complexity
-        # from multiple sets of external files
-        #existing_packages = getattr(self, package, None)
-        #filename = f"{self.name}.{package}"
-        #if existing_packages is not None:
-        #    try:
-        #        len(existing_packages)
-        #        suffix = len(existing_packages) + 1
-        #    except:
-        #        suffix = 1
-        #    filename = f"{self.name}-{suffix}.{package}"
-
-        # perimeter boundary (CHD or WEL)
-        dfs = []
-        if 'perimeter_boundary' in kwargs:
-            perimeter_cfg = kwargs['perimeter_boundary']
-            if package == 'chd':
-                perimeter_cfg['boundary_type'] = 'head'
-            elif package == 'wel':
-                perimeter_cfg['boundary_type'] = 'flux'
-            else:
-                raise ValueError(f'Unsupported package for perimeter_boundary: {package.upper()}')
-            if 'inset_parent_period_mapping' not in perimeter_cfg:
-                perimeter_cfg['inset_parent_period_mapping'] = self.parent_stress_periods
-            if 'parent_start_time' not in perimeter_cfg:
-                perimeter_cfg['parent_start_date_time'] = self.parent.perioddata['start_datetime'][0]
-            self.tmr = TmrNew(self.parent, self, **perimeter_cfg)
-            df = self.tmr.get_inset_boundary_values()
-
-            # add boundname to allow boundary flux to be tracked as observation
-            df['boundname'] = 'perimeter-heads'
-            dfs.append(df)
-
-        # RIV package converted from SFR input
-        elif rivdata is not None:
-            if 'name' in rivdata.stress_period_data.columns:
-                rivdata.stress_period_data['boundname'] = rivdata.stress_period_data['name']
-            dfs.append(rivdata.stress_period_data)
-
-        # set up package from user input
-        if 'source_data' in kwargs:
-            df_sd = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs['mfsetup_options'])
-            if df_sd is not None:
-                dfs.append(df_sd)
-
-        if len(dfs) == 0:
-            print(f"{package.upper()} package:\n"
-                  "No input specified or package configuration file input "
-                  "not understood. See the Configuration "
-                  "File Gallery in the online docs for example input "
-                  "Note that direct input to basic stress period packages "
-                  "is currently not supported.")
-            return
-        else:
-            df = pd.concat(dfs, axis=0)
-
-        # option to write stress_period_data to external files
-        external_files = self.cfg[package].get('external_files', True)
-        external_filename_fmt = self.cfg[package]['mfsetup_options']['external_filename_fmt']
-        spd = setup_flopy_stress_period_data(self, package, df,
-                                                 flopy_package_class=flopy_package_class,
-                                                 variable_columns=variable_columns,
-                                                 external_files=external_files,
-                                                 external_filename_fmt=external_filename_fmt)
-
-        kwargs = self.cfg[package]
-        kwargs.update(self.cfg[package]['options'])
-        #kwargs['filename'] = filename
-        # add observation for perimeter BCs
-        # and any user input with a boundname col
-        obslist = []
-        obsfile = f'{self.name}.{package}.obs.output.csv'
-        if 'perimeter_boundary' in kwargs:
-            perimeter_btype = f"perimeter-{perimeter_cfg['boundary_type']}"
-            obslist.append((perimeter_btype, package, perimeter_btype))
-        if 'boundname' in df.columns:
-            unique_boundnames = df['boundname'].unique()
-            for bname in unique_boundnames:
-                obslist.append((bname, package, bname))
-        if len(obslist) > 0:
-            kwargs['observations'] = {obsfile: obslist}
-
-        kwargs = get_input_arguments(kwargs, flopy_package_class)
-        if not external_files:
-            kwargs['stress_period_data'] = spd
-        pckg = flopy_package_class(self, **kwargs)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
-        return pckg
+    def setup_wel(self, **kwargs):
+        """Set up the Well Package.
+        """
+        return self._setup_basic_stress_package(
+            'wel', mf6.ModflowGwfwel, ['q'], **kwargs)
 
 
     def setup_obs(self, **kwargs):

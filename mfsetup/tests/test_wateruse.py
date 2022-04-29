@@ -124,7 +124,7 @@ def test_resample_ss_first_period(inset_with_transient_parent, wu_data):
     assert m.perioddata.perlen[0] == 1
 
     # test with transient first stress period
-    m.setup_wel()
+    m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     df = m.wel.stress_period_data.get_dataframe()
 
     # get expected steady state rates for period 0

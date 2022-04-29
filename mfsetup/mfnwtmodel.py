@@ -430,7 +430,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return upw
 
-    def setup_wel(self, **kwargs):
+    def setup_wel_old(self, **kwargs):
         """
         Setup the WEL package, including boundary fluxes and any pumping.
 
@@ -469,7 +469,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return wel
 
-    def setup_ghb(self, **kwargs):
+    def setup_ghb_old(self, **kwargs):
         """
         Set up the GHB package
         """
@@ -683,6 +683,43 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return lak
 
+
+    def setup_chd(self, **kwargs):
+        """Set up the CHD Package.
+        """
+        return self._setup_basic_stress_package(
+            'chd', fm.ModflowChd, ['shead', 'ehead'], **kwargs)
+
+
+    def setup_drn(self, **kwargs):
+        """Set up the Drain Package.
+        """
+        return self._setup_basic_stress_package(
+            'drn', fm.ModflowDrn, ['stage', 'cond'], **kwargs)
+
+
+    def setup_ghb(self, **kwargs):
+        """Set up the General Head Boundary Package.
+        """
+        return self._setup_basic_stress_package(
+            'ghb', fm.ModflowGhb, ['stage', 'cond'], **kwargs)
+
+
+    def setup_riv(self, rivdata=None, **kwargs):
+        """Set up the River Package.
+        """
+        return self._setup_basic_stress_package(
+            'riv', fm.ModflowRiv, ['stage', 'cond', 'rbot'],
+            rivdata=rivdata, **kwargs)
+
+
+    def setup_wel(self, **kwargs):
+        """Set up the Well Package.
+        """
+        return self._setup_basic_stress_package(
+            'wel', fm.ModflowWel, ['flux'], **kwargs)
+
+
     def setup_nwt(self, **kwargs):
 
         print('setting up NWT package...')
@@ -806,7 +843,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return gag
 
-    def setup_chd(self, **kwargs):
+    def setup_chd_old(self, **kwargs):
         """
         Sets up the CHD package.
         """

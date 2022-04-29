@@ -96,19 +96,61 @@ lak:
 
 sfr:
 
+chd:
+  options:
+  source_data:
+    shapefile:
+      all_touched: True
+    head:
+      stat: 'min'
+  mfsetup_options:
+    external_files: True  # option to write stress_period_data to external files
+    external_filename_fmt: "chd_{:03d}.dat"
+
+drn:
+  options:
+  source_data:
+    shapefile:
+      all_touched: True
+    elev:
+      stat: 'min'
+  mfsetup_options:
+    external_files: True  # option to write stress_period_data to external files
+    external_filename_fmt: "drn_{:03d}.dat"
+
+ghb:
+  options:
+  source_data:
+    shapefile:
+      all_touched: True
+    bhead:
+      stat: 'min'
+  mfsetup_options:
+    external_files: True  # option to write stress_period_data to external files
+    external_filename_fmt: "ghb_{:03d}.dat"
+
 riv:
+  source_data:
+    shapefile:
+      all_touched: True
+    stage:
+      stat: 'min'
   output_files:
     rivdata_file: '{}_rivdata.csv' # table with auxillary information on river reaches (routing, source hydrography IDs, etc.)
+  mfsetup_options:
+    default_rbot_thickness: 1.
+    external_files: True  # option to write stress_period_data to external files
+    external_filename_fmt: "riv_{:03d}.dat"
 
 wel:
   options: ['SPECIFY', '0.01']
-  source_data:
-  period_stats: {0: 'mean'} # statistic to apply to each stress period 'mean' to average all data; <monthname> to average values for a given month across the period (e.g. 'august')
   output_files:
     lookup_file: '{}_wel_lookup.csv' # output file that maps wel package data to site numbers
     dropped_wells_file: '{}_dropped_wells.csv' # output file that records wells that were dropped during model setup
-  minimum_layer_thickness: 2.
-  # Note: external files are not yet implemented for the wel package in MODFLOW-NWT models
+  mfsetup_options:
+    minimum_layer_thickness: 2.
+    external_files: True  # option to write stress_period_data to external files
+    external_filename_fmt: "wel_{:03d}.dat"
 
 mnw:
   defaults: {losstype: 'skin',

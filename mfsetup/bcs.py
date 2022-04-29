@@ -531,6 +531,7 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
 
             else:
                 if model.version == 'mf6':
+                    flopy.modflow.ModflowWel.stress_period_data
                     kspd = flopy_package_class.stress_period_data.empty(model,
                                                                         len(group),
                                                                         boundnames=True)[0]
@@ -569,7 +570,7 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
                     else:
                         for col in variable_columns:
                             kspd[col] = group[col]
-                        if 'boundname' in group.columns:
+                        if 'boundname' in group.columns and 'boundname' in kspd:
                             kspd['boundname'] = group['boundname']
                 spd[kper] = kspd
         else:

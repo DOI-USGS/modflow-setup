@@ -120,7 +120,7 @@ def test_get_wel_package_from_parent(input, basic_model_instance, request):
     if 'source_data' in m.cfg['wel']:
         del m.cfg['wel']['source_data']
     # well package
-    wel = m.setup_wel()
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     data = wel.stress_period_data.data
 
     if m.version != 'mf6':

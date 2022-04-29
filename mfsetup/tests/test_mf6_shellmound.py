@@ -628,8 +628,8 @@ def test_basic_stress_package_setup(shellmound_model_with_dis, pckg_abbrv,
 
 def test_wel_setup(shellmound_model_with_dis):
     m = shellmound_model_with_dis  # deepcopy(model)
-    m.cfg['wel']['external_files'] = False
-    wel = m.setup_wel()
+    m.cfg['wel']['mfsetup_options']['external_files'] = False
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     wel.write()
     assert os.path.exists(os.path.join(m.model_ws, wel.filename))
     assert isinstance(wel, mf6.ModflowGwfwel)

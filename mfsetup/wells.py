@@ -13,7 +13,8 @@ from mfsetup.tmr import Tmr
 from mfsetup.wateruse import get_mean_pumping_rates, resample_pumping_rates
 
 
-def setup_wel_data(model, for_external_files=True):
+def setup_wel_data(model, source_data=None, #for_external_files=True,
+                   dropped_wells_file='dropped_wells.csv'):
     """Performs the part of well package setup that is independent of
     MODFLOW version. Returns a DataFrame with the information
     needed to set up stress_period_data.
@@ -31,10 +32,9 @@ def setup_wel_data(model, for_external_files=True):
     df = pd.DataFrame(columns=columns)
 
     # check for source data
-    datasets = model.cfg['wel'].get('source_data')
+    datasets = source_data
 
     # delete the dropped wells file if it exists, to avoid confusion
-    dropped_wells_file = model.cfg['wel']['output_files']['dropped_wells_file'].format(model.name)
     if os.path.exists(dropped_wells_file):
         os.remove(dropped_wells_file)
 
@@ -215,14 +215,19 @@ def setup_wel_data(model, for_external_files=True):
 
     # save a lookup file with well site numbers/categories
     df.sort_values(by=['boundname', 'per'], inplace=True)
-    df[['per', 'k', 'i', 'j', 'q', 'boundname']].to_csv(wel_lookup_file, index=False)
+    if model.version == 'mf6':
+        cols = ['per', 'k', 'i', 'j', 'q', 'boundname']
+    else:
+        cols = ['per', 'k', 'i', 'j', 'flux', 'boundname']
+        df.rename(columns={'q': 'flux'}, inplace=True)
+    df[cols].to_csv(wel_lookup_file, index=False)
 
     # convert to one-based and comment out header if df will be written straight to external file
-    if for_external_files:
-        df.rename(columns={'k': '#k'}, inplace=True)
-        df['#k'] += 1
-        df['i'] += 1
-        df['j'] += 1
+    #if for_external_files:
+    #    df.rename(columns={'k': '#k'}, inplace=True)
+    #    df['#k'] += 1
+    #    df['i'] += 1
+    #    df['j'] += 1
     return df
 
 
