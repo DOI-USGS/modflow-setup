@@ -701,61 +701,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return lak
 
-    def setup_riv_old(self, rivdata=None, **kwargs):
-        """Set up River Package.
-        """
-        package = 'riv'
-        print(f'\nSetting up {package.upper()} package...')
-        t0 = time.time()
-
-        # RIV package from user input
-        if rivdata is None and 'source_data' in kwargs:
-            df = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs['mfsetup_options'])
-
-        else:
-            raise NotImplementedError(f"{package.upper()} package configuration file input "
-                                      "not understood. See the Configuration "
-                                      "File Gallery in the online docs for example input "
-                                      "Note that direct input to basic stress period packages "
-                                      "is currently not supported.")
-        if len(df) == 0:
-            print('No input specified or streams not in model.')
-            return
-
-        # option to write stress_period_data to external files
-        external_files = self.cfg[package].get('external_files', True)
-        external_filename_fmt = self.cfg[package]['mfsetup_options']['external_filename_fmt']
-        spd = setup_flopy_stress_period_data(self, package, df,
-                                                 flopy_package_class=mf6.ModflowGwfriv,
-                                                 variable_columns=['stage', 'cond', 'rbot'],
-                                                 external_files=external_files,
-                                                 external_filename_fmt=external_filename_fmt)
-
-        #if external_files:
-        #    # get the file path (allowing for different external file locations, specified name format, etc.)
-        #    filename_format = package + '_{:03d}.dat'  # stress period suffix
-        #    filepaths = self.setup_external_filepaths(package, 'stress_period_data',
-        #                                              filename_format=filename_format,
-        #                                              file_numbers=sorted(df.per.unique().tolist()))
-        #else:
-        #    filepaths = None
-        #
-        ## Setup basic stress package stress_period_data for Flopy or Modflow,
-        ## either as external files or a dictionary of recarrays.
-        #spd = setup_stress_period_data(df, self, mf6.ModflowGwfriv,
-        #                               filepaths=filepaths,
-        #                               external_files_folder=self.cfg['intermediate_data']['output_folder'])
-
-        kwargs = self.cfg[package]
-        # need default options from rivdata instance or cfg defaults
-        kwargs.update(self.cfg[package]['options'])
-        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfriv)
-        if not external_files:
-            kwargs['stress_period_data'] = spd
-        riv = mf6.ModflowGwfriv(self, **kwargs)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
-        return riv
-
 
     def setup_chd(self, **kwargs):
         """Set up the CHD Package.
