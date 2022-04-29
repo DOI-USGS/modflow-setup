@@ -1290,7 +1290,7 @@ def setup_array(model, package, var, data=None,
         # save a copy of original top elevations
         # (prior to adjustment for lake bathymetry)
         # name of the copy:
-        original_top_file = Path(model.tmpdir,
+        original_top_file = Path(model.external_path,
                                  f"{model.name}_{model.cfg[package]['top_filename_fmt']}.original")
 
         try:

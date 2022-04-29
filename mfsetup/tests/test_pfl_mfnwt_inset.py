@@ -212,7 +212,7 @@ def test_dis_setup(pfl_nwt_with_grid):
     assert m.cfg['parent']['length_units'] == 'meters'
     assert m.cfg['parent']['time_units'] == 'days'
     assert m.length_units == 'feet'
-    original_top_file = Path(m.tmpdir,
+    original_top_file = Path(m.external_path,
                              f"{m.name}_{m.cfg['dis']['top_filename_fmt']}.original")
     original_top_file.unlink(missing_ok=True)
     dis = m.setup_dis()

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from mfsetup import MF6model
 from mfsetup.wells import (
     assign_layers_from_screen_top_botm,
     get_open_interval_thickness,
@@ -124,6 +125,37 @@ def test_assign_layers_from_screen_top_botm(shellmound_model_with_dis, test_data
                                                 distribute_by='transmissivity',
                                                 minimum_layer_thickness=10.)
     # well should get placed in layer 6 if next active layer were an option
+
+
+def test_assign_layers_from_screen_top_botm_from_load(shellmound_model_with_dis,
+                                                      project_root_path,
+                                                      test_data_path, shellmound_cfg_path):
+    m = shellmound_model_with_dis
+    m.setup_tdis()
+    m.setup_solver()
+    m.write_input()
+    import os
+    m2 = MF6model.load_from_config(shellmound_cfg_path, load_only=['dis'])
+
+    welldata = pd.DataFrame({
+        'i': [10],
+        'j': [10],
+        'q': [-100],
+        'screen_top': 20,
+        'screen_botm': 15,
+        'site_no': 'test_well'
+    })
+    results = assign_layers_from_screen_top_botm(welldata, m2,
+                                                flux_col='q',
+                                                screen_top_col='screen_top',
+                                                screen_botm_col='screen_botm',
+                                                label_col='site_no',
+                                                across_layers=False,
+                                                distribute_by='transmissivity',
+                                                minimum_layer_thickness=10.)
+    # top 3 layers at this location are zero-thickness;
+    # well should be in layer 4
+    assert results['k'].values[0] == 3
 
 
 def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
