@@ -688,21 +688,21 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """Set up the CHD Package.
         """
         return self._setup_basic_stress_package(
-            'chd', fm.ModflowChd, ['shead', 'ehead'], **kwargs)
+            'chd', fm.ModflowChd, ['head'], **kwargs)
 
 
     def setup_drn(self, **kwargs):
         """Set up the Drain Package.
         """
         return self._setup_basic_stress_package(
-            'drn', fm.ModflowDrn, ['stage', 'cond'], **kwargs)
+            'drn', fm.ModflowDrn, ['elev', 'cond'], **kwargs)
 
 
     def setup_ghb(self, **kwargs):
         """Set up the General Head Boundary Package.
         """
         return self._setup_basic_stress_package(
-            'ghb', fm.ModflowGhb, ['stage', 'cond'], **kwargs)
+            'ghb', fm.ModflowGhb, ['bhead', 'cond'], **kwargs)
 
 
     def setup_riv(self, rivdata=None, **kwargs):

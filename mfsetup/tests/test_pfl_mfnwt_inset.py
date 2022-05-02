@@ -364,28 +364,11 @@ def test_upw_setup(pfl_nwt_with_dis, case, simulate_high_k_lakes):
                            np.array([10, 10, 10, 10, 10]))
 
 
-@pytest.mark.skip("still need to fix TMR")
-def test_wel_tmr(pfl_nwt_with_dis):
-    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
-    m.setup_upw()
-
-    # test with tmr
-    m.cfg['model']['perimeter_boundary_type'] = 'specified flux'
-    wel = m.setup_wel()
-    wel.write_file()
-    assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
-    df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
-    bfluxes0 = df.loc[(df.boundname == 'boundary_flux') & (df.per == 0)]
-    assert len(bfluxes0) == (m.nrow*2 + m.ncol*2) * m.nlay
-
-
 def test_wel_setup(pfl_nwt_with_dis_bas6):
     m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
     m.setup_upw()
-
     # test without tmr
-    m.cfg['model']['perimeter_boundary_type'] = 'specified head'
-    wel = m.setup_wel()
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     wel.write_file()
     assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
     df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
@@ -406,37 +389,27 @@ def test_wel_setup(pfl_nwt_with_dis_bas6):
 def test_wel_setup_drop_ids(pfl_nwt_with_dis_bas6):
     m = pfl_nwt_with_dis_bas6  # deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
     m.setup_upw()
-
     m.cfg['wel']['source_data']['wdnr_dataset']['drop_ids'] = [4026]
-    wel = m.setup_wel()
+    m.cfg['wel']['mfsetup_options']['external_files'] = False
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])
     assert 'site4026' not in df.boundname.tolist()
     assert len(df) == len(wel.stress_period_data[1])
 
 
-@pytest.mark.skip("not implemented yet")
 def test_wel_setup_csv_by_per(pfl_nwt_with_dis_bas6):
 
     m = pfl_nwt_with_dis_bas6  # deepcopy(pfl_nwt_with_dis)deepcopy(pfl_nwt_with_dis)
     m.setup_upw()
     # test adding a wel from a csv file
-    m.cfg['wel']['source_data']['csvfile'] = 'plainfieldlakes/source_data/added_wells.csv'
-    wel = m.setup_wel()
+    m.cfg['wel']['source_data']['csvfile'] = {
+        'filename':'plainfieldlakes/source_data/added_wells.csv',
+        'data_column': 'flux',
+        'id_column': 'name',
+        'datetime_column': 'datetime'
+    }
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     assert -2000 in wel.stress_period_data[1]['flux']
-
-
-@pytest.mark.skip("still working wel")
-def test_wel_wu_resampling(inset_with_transient_parent):
-
-    m = inset_with_transient_parent  #deepcopy(inset_with_transient_parent)
-    m.cfg['upw']['hk'] = 1
-    m.cfg['upw']['vka'] = 1
-    m.setup_upw()
-
-    # test without tmr
-    m.cfg['model']['perimeter_boundary_type'] = 'specified head'
-    m.cfg['wel']['period_stats'] = 'resample'
-    wel = m.setup_wel()
 
 
 def test_mnw_setup(pfl_nwt_with_dis):
@@ -628,7 +601,7 @@ def test_lake_gag_setup(pfl_nwt_with_dis):
 def test_perimeter_boundary_setup(pfl_nwt_with_dis_bas6):
 
     m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)
-    chd = m.setup_chd()
+    chd = m.setup_chd(**m.cfg['chd'], **m.cfg['chd']['mfsetup_options'])
     chd.write_file()
     assert os.path.exists(chd.fn_path)
     assert len(chd.stress_period_data.data.keys()) == len(set(m.cfg['parent']['copy_stress_periods']))

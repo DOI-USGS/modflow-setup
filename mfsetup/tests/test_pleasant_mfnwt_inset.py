@@ -61,7 +61,7 @@ def test_setup_lak(pleasant_nwt_with_dis_bas6):
 
 def test_ghb_setup(get_pleasant_nwt_with_dis_bas6):
     m = get_pleasant_nwt_with_dis_bas6
-    ghb = m.setup_ghb()
+    ghb = m.setup_ghb(**m.cfg['ghb'], **m.cfg['ghb']['mfsetup_options'])
     ghb.write_file()
     assert os.path.exists(ghb.fn_path)
     assert isinstance(ghb, fm.ModflowGhb)
@@ -75,7 +75,7 @@ def test_ghb_setup(get_pleasant_nwt_with_dis_bas6):
 
     # check that heads are above layer botms
     assert np.all(spd0['bhead'] > m.dis.botm.array[k, i, j])
-    assert np.all(spd0['cond'] == m.cfg['ghb']['cond'])
+    assert np.all(spd0['cond'] == m.cfg['ghb']['source_data']['cond'])
 
 
 def test_wel_setup(get_pleasant_nwt_with_dis_bas6):
@@ -85,7 +85,7 @@ def test_wel_setup(get_pleasant_nwt_with_dis_bas6):
 
     # test without tmr
     m.cfg['model']['perimeter_boundary_type'] = 'specified head'
-    wel = m.setup_wel()
+    wel = m.setup_wel(**m.cfg['wel'], **m.cfg['wel']['mfsetup_options'])
     wel.write_file()
     assert os.path.exists(m.cfg['wel']['output_files']['lookup_file'])
     df = pd.read_csv(m.cfg['wel']['output_files']['lookup_file'])

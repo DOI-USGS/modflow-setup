@@ -89,15 +89,15 @@ wel:
 
 ghb:
   options: ['SPECIFY', '0.01']
-  cond: 9  # m2/d
   source_data:
     shapefile:
       filename: '../../../examples/data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059161] # pond near pleasant lake
-    dem:
+    bhead:
       filename: '../../../examples/data/pleasant/source_data/rasters/dem40m.tif'
       elevation_units: 'meters'
+    cond: 9  # m2/d
 
 lak:
   theta: -0.7  # semi-implicit; negative value indicates that surfdep is read
