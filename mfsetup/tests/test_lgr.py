@@ -240,7 +240,7 @@ def test_lgr_load(pleasant_lgr_setup_from_yaml,
     m2 = MF6model.load_from_config(pleasant_lgr_test_cfg_path)
     assert m2.inset['plsnt_lgr_inset'].simulation is m2.simulation
 
-    assert set(m2.get_package_list()).difference(m.get_package_list()) == {'SFR_OBS', 'CHD_OBS'}
+    assert set(m2.get_package_list()).difference(m.get_package_list()) == {'WEL_OBS', 'SFR_OBS', 'CHD_OBS'}
     # can't compare equality if sfr obs was added by SFRmaker, because it won't be listed in m.get_package_list()
     # but will be listed in m2.get_package_list()
     #assert m == m2

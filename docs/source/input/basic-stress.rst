@@ -5,10 +5,6 @@ Specifying boundary conditions with the 'basic' MODFLOW stress packages
 .. note::
    This page is a work in progress and needs some more work.
 
-.. note::
-   Basic stress packages are currenly only supported for Modflow 6, except
-   for the Constant Head (CHD) package in the context of perimeter boundary conditions.
-
 This page describes configuration file input for the basic MODFLOW stress packages, including
 the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently supported by Modflow-setup. The supported packages can be broadly placed into two categories. Feature or list-based packages such as CHD, DRN, GHB, RIV and WEL often represent discrete phenomena such as surface water features, pumping wells, or even lines that denote a perimeter boundary. Input to  these packages in MODFLOW is tabular, consisting of a table for each stress period, with rows specifying stresses at individual grid cells representing the boundary features. In contrast, continuous or grid-based packages represent a stress field that applies to a large area, such as areal recharge. In past versions of MODFLOW, input to these packages was array-based, with values specified for all model cells, at each stress period. In MODFLOW 6, input to these packages can be array or list-based. The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup. In keeping with the current structured grid-based paradigm of Modflow-setup, Modflow 6 recharge input is generated for the array-based recharge package (Langevin and others, 2017).
 
@@ -59,7 +55,11 @@ Input for list-based basic stress packages follows a similar pattern to other pa
             * scalar values (items) are applied globally to the variable
             * rasters can be used to specify steady-state values that vary in space; values supplied with a raster are mapped to the model grid using zonal statistics. If the raster contains projection information (GeoTIFFs are preferred in part because of this), any reprojection to the model coorindate reference system (CRS) will be performed automatically as needed. Otherwise, the raster is assumed to be in the model projection.
             * (Not implemented yet) NetCDF input for gridded values that vary in time and space. Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.
+    * ``mfsetup_options:`` Configuration options for Modflow-setup. General options that apply to all basic stress packages include:
+            * ``external_files:`` Whether to write the package input as external text arrays or tables (i.e., with ``open/close`` statements). By default ``True`` except in the case of list-based or tabular files for MODFLOW-NWT models, which are not supported. Adding support for this may require changes to Flopy, which handles external list-based files differently for MODFLOW-2005 style models.
+            * ``external_filename_fmt:`` Python string format for external file names. By default, ``"<package or variable abbreviation>_{:03d}.dat"``. which results in filenames such as ``wel_000.dat``, ``wel_001.dat``, ``wel_002.dat``... for stress periods 0, 1, and 2, for example.
 
+            Other Modflow-setup options specific to individual packages are described below.
 
 Constant Head (CHD) Package
 ++++++++++++++++++++++++++++++
@@ -87,7 +87,7 @@ Input consists of specified head values that may vary in time or space.
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
         :language: yaml
-        :lines: 285-296
+        :lines: 285-298
 
 
 Drain DRN Package
@@ -136,7 +136,7 @@ Input consists of head elevations and conductances that may vary in time or spac
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
         :language: yaml
-        :lines: 316-335
+        :lines: 316-337
 
 River (RIV) package
 ++++++++++++++++++++
@@ -162,7 +162,7 @@ Input consists of stages, river bottom elevations and conductances,
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
         :language: yaml
-        :lines: 338-356
+        :lines: 338-358
 
     Example of setting up the RIV package using SFRmaker (via the ``sfr:`` block):
 
@@ -206,7 +206,7 @@ Input consists of flux rates that may vary in time or space.
 
             .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
                 :language: yaml
-                :lines: 359-386
+                :lines: 359-388
 
     * ``wdnr_dataset`` block
         .. note::
@@ -219,9 +219,9 @@ Input consists of flux rates that may vary in time or space.
 
         * Example:
 
-            .. literalinclude:: ../../../examples/pleasant_lgr_inset.yml
+            .. literalinclude:: ../../../mfsetup/tests/data/pfl_nwt_test.yml
                 :language: yaml
-                :lines: 79-86
+                :lines: 113-118
 
     **The** ``vertical_flux_distribution:`` **sub-block**
         * This sub-block specifies how Well Packages fluxes should be distributed vertically.

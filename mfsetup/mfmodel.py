@@ -1310,7 +1310,7 @@ class MFsetupMixin():
             dfs.append(rivdata.stress_period_data)
 
         # set up package from user input
-
+        df_sd = None
         if 'source_data' in kwargs:
             if package == 'wel':
                 dropped_wells_file =\
@@ -1320,7 +1320,7 @@ class MFsetupMixin():
                                        dropped_wells_file=dropped_wells_file)
             else:
                 df_sd = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs['mfsetup_options'])
-            if df_sd is not None:
+            if df_sd is not None and len(df_sd) > 0:
                 dfs.append(df_sd)
         # set up package from parent model
         elif self.cfg['parent'].get('default_source_data') and\
@@ -1331,9 +1331,8 @@ class MFsetupMixin():
                 df_sd = setup_wel_data(self,
                                        dropped_wells_file=dropped_wells_file)
             else:
-                raise NotImplementedError(f"Setup of {package.upper()} "
-                                          "package from the parent model.")
-            if df_sd is not None:
+                print(f'Skipping setup of {package.upper()} Package from parent model-- not implemented.')
+            if df_sd is not None and len(df_sd) > 0:
                 dfs.append(df_sd)
         if len(dfs) == 0:
             print(f"{package.upper()} package:\n"
@@ -1347,7 +1346,12 @@ class MFsetupMixin():
             df = pd.concat(dfs, axis=0)
 
         # option to write stress_period_data to external files
-        external_files = self.cfg[package]['mfsetup_options'].get('external_files', True)
+        if self.version == 'mf6':
+            external_files = self.cfg[package]['mfsetup_options'].get('external_files', True)
+        else:
+            # external list or tabular type files not supported for MODFLOW-NWT
+            # adding support for this may require changes to Flopy
+            external_files = False
         external_filename_fmt = self.cfg[package]['mfsetup_options']['external_filename_fmt']
         spd = setup_flopy_stress_period_data(self, package, df,
                                                  flopy_package_class=flopy_package_class,
@@ -1372,7 +1376,6 @@ class MFsetupMixin():
                 obslist.append((bname, package, bname))
         if len(obslist) > 0:
             kwargs['observations'] = {obsfile: obslist}
-
         kwargs = get_input_arguments(kwargs, flopy_package_class)
         if not external_files:
             kwargs['stress_period_data'] = spd

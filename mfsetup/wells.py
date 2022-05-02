@@ -64,7 +64,7 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
 
         # set boundnames based on well locations in parent model
         parent_name = parent.name
-        spd['boundname'] = ['{}_({},{},{})'.format(parent_name, pk, pi, pj)
+        spd['boundname'] = ['{}_{}-{}-{}'.format(parent_name, pk, pi, pj)
                            for pk, pi, pj in zip(parent_well_k, parent_well_i, parent_well_j)]
 
         parent_well_x = parent.modelgrid.xcellcenters[parent_well_i, parent_well_j]
@@ -209,9 +209,18 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
     if df.boundname.isna().any():
         no_name = df.boundname.isna()
         k, i, j = df.loc[no_name, ['k', 'i', 'j']].T.values
-        names = ['({},{},{})'.format(k, i, j) for k, i, j in zip(k, i, j)]
+        names = ['wel_{}-{}-{}'.format(k, i, j) for k, i, j in zip(k, i, j)]
         df.loc[no_name, 'boundname'] = names
     assert not df.boundname.isna().any()
+
+    # if boundname is all ints (or can be casted as such)
+    # convert to strings, otherwise MODFLOW may mistake
+    # the boundnames in any observation files as cellids
+    try:
+        [int(s) for s in df['boundname']]
+        df['boundname'] = [f"wel_{bn}" for bn in df['boundname']]
+    except:
+        pass
 
     # save a lookup file with well site numbers/categories
     df.sort_values(by=['boundname', 'per'], inplace=True)

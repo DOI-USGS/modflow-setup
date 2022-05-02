@@ -64,6 +64,8 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
     if bc_cells.dtype == object:
         df['boundname'] = bc_cells.flat
         df.loc[df.boundname.isna(), 'boundname'] = 'unnamed'
+    # cull to just the cells with bcs
+    df = df.loc[cells_with_bc].copy()
 
     variables = {'head': head, 'elev': elev, 'bhead': bhead,
                  'stage': stage, 'cond': cond, 'rbot': rbot}
@@ -71,8 +73,10 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
         if entry is not None:
             # Raster of variable values supplied
             if isinstance(entry, dict):
-                key = [k for k in entry.keys() if 'filename' in k.lower()][0]
-                filename = entry[key]
+                filename_entries = [k for k in entry.keys() if 'filename' in k.lower()]
+                if not any(filename_entries):
+                    continue
+                filename = entry[filename_entries[0]]
                 with rasterio.open(filename) as src:
                     meta = src.meta
 
@@ -92,19 +96,25 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                 stat = entry['stat']
                 results = zonal_stats(polygons, filename, stats=stat,
                                     all_touched=all_touched)
-                values = np.ones((m.nrow * m.ncol), dtype=float) * np.nan
-                values[cells_with_bc] = np.array([r[stat] for r in results])
+                #values = np.ones((m.nrow * m.ncol), dtype=float) * np.nan
+                #values[cells_with_bc] = np.array([r[stat] for r in results])
+                values = np.array([r[stat] for r in results])
+                # cull to polygon statistics within model area
+                valid = values != None
+                values = values[valid]
+                df = df.loc[valid].copy()
+
                 units_key = [k for k in entry if 'units' in k]
                 if len(units_key) > 0:
                     values *= convert_length_units(entry[units_key[0]],
                                                     model.length_units)
-                values = np.reshape(values, (m.nrow, m.ncol))
+                #values = np.reshape(values, (m.nrow, m.ncol))
 
                 # add the layer and the values to the Modflow input DataFrame
                 # assign layers so that the elevation is above the cell bottoms
                 if var in ['head', 'elev', 'bhead']:
-                    df['k'] = get_layer(model.dis.botm.array, df.i, df.j, values.flat)
-                df[var] = values.flat
+                    df['k'] = get_layer(model.dis.botm.array, df.i, df.j, values)
+                df[var] = values
             # single global value specified
             elif isinstance(entry, numbers.Number):
                 df[var] = entry
@@ -498,8 +508,12 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
     """
 
     df = data.copy()
+    missing_variables = set(variable_columns).difference(df.columns)
+    if any(missing_variables):
+        raise ValueError(f"{package.upper()} Package: missing input for variables: "
+                         f"{', '.join(missing_variables)}")
     # set up stress_period_data
-    if external_files:
+    if external_files and model.version == 'mf6':
         # get the file path (allowing for different external file locations, specified name format, etc.)
         filepaths = model.setup_external_filepaths(package, 'stress_period_data',
                                                    filename_format=external_filename_fmt,
@@ -521,17 +535,16 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
         if kper in period_groups.groups:
             group = period_groups.get_group(kper)
             group.drop('per', axis=1, inplace=True)
-            if external_files:
-                if model.version == 'mf6':
-                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
-                    # make a copy for the intermediate data folder, for consistency with mf-2005
-                    shutil.copy(filepaths[kper]['filename'], model.cfg['intermediate_data']['output_folder'])
-                else:
-                    group.to_csv(filepaths[kper], index=False, sep=' ', float_format='%g')
+            if external_files and model.version == 'mf6':
+                group.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
+                # make a copy for the intermediate data folder, for consistency with mf-2005
+                shutil.copy(filepaths[kper]['filename'], model.cfg['intermediate_data']['output_folder'])
+
+                # external list or tabular type files not supported for MODFLOW-NWT
+                # adding support for this may require changes to Flopy
 
             else:
                 if model.version == 'mf6':
-                    flopy.modflow.ModflowWel.stress_period_data
                     kspd = flopy_package_class.stress_period_data.empty(model,
                                                                         len(group),
                                                                         boundnames=True)[0]

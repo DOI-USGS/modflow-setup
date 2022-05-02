@@ -73,16 +73,19 @@ def test_ghb_sfr_overlap(pleasant_nwt_with_dis_bas6, project_root_path):
         {'filename': os.path.join(project_root_path, 'examples/data/pleasant/source_data/shps/ghb_lake.shp'),
          'id_column': 'id'
          }
-    m.setup_ghb()
+    m.cfg['ghb']['source_data']['bhead'] = m.dis.top.array.mean()
+    m.cfg['ghb']['source_data']['cond'] = 100
+    m.setup_ghb(**m.cfg['ghb'], **m.cfg['ghb']['mfsetup_options'])
     # using the isbc array to get the number of ghb cells
     # doesn't work because of this issue with layer 0 containing all i, j locations
     # (over-counts)
+    m._set_isbc()
     nwel, no_bc, nlak, n_highklake, nghb = np.bincount(m.isbc.ravel() + 1)
     spd = m.ghb.stress_period_data[0]
     cellids = list(zip(spd.k, spd.i, spd.j))
     nghb = len(set(cellids))
     # todo: figure out why some cells aren't getting intersected with ghb_lake.shp
-    assert nghb == 12
+    assert nghb == 16
     ghb_cells = set(zip(*np.where(m._isbc2d == 3)))
     m.setup_sfr()
     sfr_cells = set(zip(m.sfrdata.reach_data.i.values,

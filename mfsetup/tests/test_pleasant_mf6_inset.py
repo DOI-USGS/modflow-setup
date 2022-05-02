@@ -578,7 +578,8 @@ def test_model_setup(pleasant_mf6_setup_from_yaml, tmpdir):
                                          'OBS_1',  # lak obs todo: specify names of mf6 packages with multiple instances
                                          'CHD_0',
                                          'OBS_0',  # chd obs
-                                         'OBS_2'  # head obs
+                                         'OBS_2',  # head obs
+                                         'OBS_3'  # head obs
                                          }
     external_path = os.path.join(m.model_ws, 'external')
     external_files = glob.glob(external_path + '/*')
