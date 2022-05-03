@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.post327+g8ce5349 documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.post336+g2ba2159 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post327+g8ce5349
+                0.post336+g2ba2159
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -136,12 +136,14 @@
 <section id="features-and-limitations">
 <h2>Features and Limitations<a class="headerlink" href="#features-and-limitations" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Currently, specified head perimeter boundaries are supported via the MODFLOW 6 Constant Head (CHD) Package; specified flux boundaries using the MODFLOW 6 Well (WEL) Package are in <a class="reference external" href="https://github.com/aleaf/modflow-setup/issues/25">active development</a>. It is envisioned that specified flux perimeter cells will follow the same basic structure/conceptualization as specified heads.</p></li>
+<li><p>Currently, specified head perimeter boundaries are supported via the MODFLOW Constant Head (CHD) Package; specified flux boundaries are supported via the MODFLOW Well (WEL) Package.</p></li>
 <li><p>The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.</p></li>
 <li><p>The parent model may have different length units.</p></li>
 <li><p>The parent model may be of a different MODFLOW version (e.g. MODFLOW 6 inset with a MODFLOW-NWT parent)</p></li>
-<li><p>The inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
+<li><p>For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.8.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
+<li><p>Specified flux boundaries are currently limited to the parent and inset models being colinear.</p></li>
 <li><p>The perimeter may be irregular. For example, the edge of the model active area may follow a major surface water feature along the opposite side.</p></li>
+<li><p>Specified perimeter heads in MODFLOW-NWT models will have ending heads for each stress period assigned from the starting head of the next stress period (with the last period having the same starting and ending heads). The MODFLOW 6 Constant Head Package only supports assignment of a single head per stress period. This distinction only matters for models where stress periods are subdivided by multiple timesteps.</p></li>
 </ul>
 </section>
 <section id="input">
@@ -165,10 +167,19 @@
 </li>
 <li><p>In a <code class="docutils literal notranslate"><span class="pre">perimeter_boundary:</span></code> sub-block for the relevant package (only specified heads via CHD are currently supported).</p>
 <blockquote>
-<div><p>Input example:</p>
+<div><p>Input example (specified head):</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Input example (specified flux, with optional shapefile defining an irregular perimeter boundary,
+and the MODFLOW 6 binary grid file, which is required for reading the cell budget output from MODFLOW 6 parent models):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -188,7 +199,7 @@
 </section>
 <section id="specifying-the-locations-of-perimeter-boundary-cells">
 <h2>Specifying the locations of perimeter boundary cells<a class="headerlink" href="#specifying-the-locations-of-perimeter-boundary-cells" title="Permalink to this headline">¶</a></h2>
-<p>Modflow-setup provides 3 primary options for specifying the locations of perimeter cells. In all cases, boundary cells are produced by the <a class="reference internal" href="../api/mfsetup.tmr.html#mfsetup.tmr.TmrNew.get_inset_boundary_cells" title="mfsetup.tmr.TmrNew.get_inset_boundary_cells"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mfsetup.tmr.TmrNew.get_inset_boundary_cells()</span></code></a> method, and the resulting cells (including the boundary faces) can be visualized in a GIS environment with the <code class="docutils literal notranslate"><span class="pre">boundary_cells.shp</span></code> shapefile that gets written to the <code class="docutils literal notranslate"><span class="pre">tables/</span></code> folder by default.</p>
+<p>Modflow-setup provides 3 primary options for specifying the locations of perimeter cells. In all cases, boundary cells are produced by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">mfsetup.tmr.TmrNew.get_inset_boundary_cells()</span></code> method, and the resulting cells (including the boundary faces) can be visualized in a GIS environment with the <code class="docutils literal notranslate"><span class="pre">boundary_cells.shp</span></code> shapefile that gets written to the <code class="docutils literal notranslate"><span class="pre">tables/</span></code> folder by default.</p>
 <p><strong>1) No specification of where the perimeter boundary should be applied</strong> (e.g. a shapefile) and <code class="docutils literal notranslate"><span class="pre">by_layer=False:</span></code> (the default). Perimeter BC cells are applied to active cells that coincide with the edge of the maximum areal footprint of the active model area. In places where the edge of the active area is inside of the max active footprint, no perimeter cells are applied.</p>
 <blockquote>
 <div><p>Input example:</p>
@@ -233,7 +244,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 29, 2022.
+      <span class="lastupdated">Last updated on May 03, 2022.
       </span></p>
   </div>
 

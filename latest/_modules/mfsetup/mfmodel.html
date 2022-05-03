@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post327+g8ce5349 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.post336+g2ba2159 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post327+g8ce5349
+                0.post336+g2ba2159
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -111,17 +111,15 @@
 <span class="n">mf6</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span>
 <span class="kn">import</span> <span class="nn">gisutils</span>
 <span class="kn">import</span> <span class="nn">sfrmaker</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">get_proj_str</span><span class="p">,</span>
-    <span class="n">get_shapefile_crs</span><span class="p">,</span>
-    <span class="n">get_values_at_points</span><span class="p">,</span>
-    <span class="n">project</span><span class="p">,</span>
-    <span class="n">shp2df</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span><span class="p">,</span> <span class="n">get_values_at_points</span><span class="p">,</span> <span class="n">project</span>
 <span class="kn">from</span> <span class="nn">sfrmaker</span> <span class="kn">import</span> <span class="n">Lines</span>
 <span class="kn">from</span> <span class="nn">sfrmaker.utils</span> <span class="kn">import</span> <span class="n">assign_layers</span>
 
-<span class="kn">from</span> <span class="nn">mfsetup.bcs</span> <span class="kn">import</span> <span class="n">get_bc_package_cells</span>
+<span class="kn">from</span> <span class="nn">mfsetup.bcs</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_bc_package_cells</span><span class="p">,</span>
+    <span class="n">setup_basic_stress_data</span><span class="p">,</span>
+    <span class="n">setup_flopy_stress_period_data</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.config</span> <span class="kn">import</span> <span class="n">validate_configuration</span>
 <span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">check_source_files</span><span class="p">,</span>
@@ -153,8 +151,10 @@
     <span class="n">setup_perioddata</span><span class="p">,</span>
     <span class="n">setup_perioddata_group</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mfsetup.tmr</span> <span class="kn">import</span> <span class="n">Tmr</span>
 <span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">lenuni_text</span><span class="p">,</span> <span class="n">lenuni_values</span>
 <span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span><span class="p">,</span> <span class="n">update</span>
+<span class="kn">from</span> <span class="nn">mfsetup.wells</span> <span class="kn">import</span> <span class="n">setup_wel_data</span>
 
 <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">gisutils</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;0.2.2&#39;</span><span class="p">):</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Automatic reprojection functionality requires gis-utils &gt;= 0.2.2&#39;</span>
@@ -1352,6 +1352,129 @@
                            <span class="n">source_model</span><span class="o">=</span><span class="n">source_model</span><span class="p">,</span> <span class="n">source_package</span><span class="o">=</span><span class="n">source_package</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_setup_basic_stress_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">flopy_package_class</span><span class="p">,</span>
+                                    <span class="n">variable_columns</span><span class="p">,</span> <span class="n">rivdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s1"> package...&#39;</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># possible future support to</span>
+        <span class="c1"># handle filenames of multiple packages</span>
+        <span class="c1"># leave this out for now because of additional complexity</span>
+        <span class="c1"># from multiple sets of external files</span>
+        <span class="c1">#existing_packages = getattr(self, package, None)</span>
+        <span class="c1">#filename = f&quot;{self.name}.{package}&quot;</span>
+        <span class="c1">#if existing_packages is not None:</span>
+        <span class="c1">#    try:</span>
+        <span class="c1">#        len(existing_packages)</span>
+        <span class="c1">#        suffix = len(existing_packages) + 1</span>
+        <span class="c1">#    except:</span>
+        <span class="c1">#        suffix = 1</span>
+        <span class="c1">#    filename = f&quot;{self.name}-{suffix}.{package}&quot;</span>
+
+        <span class="c1"># perimeter boundary (CHD or WEL)</span>
+        <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s1">&#39;perimeter_boundary&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">perimeter_cfg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;perimeter_boundary&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;chd&#39;</span><span class="p">:</span>
+                <span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;boundary_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;head&#39;</span>
+                <span class="n">boundname</span> <span class="o">=</span> <span class="s1">&#39;perimeter-heads&#39;</span>
+            <span class="k">elif</span> <span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;wel&#39;</span><span class="p">:</span>
+                <span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;boundary_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;flux&#39;</span>
+                <span class="n">boundname</span> <span class="o">=</span> <span class="s1">&#39;perimeter-fluxes&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported package for perimeter_boundary: </span><span class="si">{</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;inset_parent_period_mapping&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">perimeter_cfg</span><span class="p">:</span>
+                <span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;inset_parent_period_mapping&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_stress_periods</span>
+            <span class="k">if</span> <span class="s1">&#39;parent_start_time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">perimeter_cfg</span><span class="p">:</span>
+                <span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;parent_start_date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tmr</span> <span class="o">=</span> <span class="n">Tmr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">perimeter_cfg</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmr</span><span class="o">.</span><span class="n">get_inset_boundary_values</span><span class="p">()</span>
+
+            <span class="c1"># add boundname to allow boundary flux to be tracked as observation</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boundname</span>
+            <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># RIV package converted from SFR input</span>
+        <span class="k">elif</span> <span class="n">rivdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">rivdata</span><span class="o">.</span><span class="n">stress_period_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">rivdata</span><span class="o">.</span><span class="n">stress_period_data</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rivdata</span><span class="o">.</span><span class="n">stress_period_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rivdata</span><span class="o">.</span><span class="n">stress_period_data</span><span class="p">)</span>
+
+        <span class="c1"># set up package from user input</span>
+        <span class="n">df_sd</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;source_data&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;wel&#39;</span><span class="p">:</span>
+                <span class="n">dropped_wells_file</span> <span class="o">=</span>\
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;output_files&#39;</span><span class="p">][</span><span class="s1">&#39;dropped_wells_file&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">df_sd</span> <span class="o">=</span> <span class="n">setup_wel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">source_data</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">],</span>
+                                       <span class="n">dropped_wells_file</span><span class="o">=</span><span class="n">dropped_wells_file</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df_sd</span> <span class="o">=</span> <span class="n">setup_basic_stress_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">df_sd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_sd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_sd</span><span class="p">)</span>
+        <span class="c1"># set up package from parent model</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default_source_data&#39;</span><span class="p">)</span> <span class="ow">and</span>\
+            <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;wel&#39;</span><span class="p">:</span>
+                <span class="n">dropped_wells_file</span> <span class="o">=</span>\
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;output_files&#39;</span><span class="p">][</span><span class="s1">&#39;dropped_wells_file&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">df_sd</span> <span class="o">=</span> <span class="n">setup_wel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">dropped_wells_file</span><span class="o">=</span><span class="n">dropped_wells_file</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skipping setup of </span><span class="si">{</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s1"> Package from parent model-- not implemented.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">df_sd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_sd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_sd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> package:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                  <span class="s2">&quot;No input specified or package configuration file input &quot;</span>
+                  <span class="s2">&quot;not understood. See the Configuration &quot;</span>
+                  <span class="s2">&quot;File Gallery in the online docs for example input &quot;</span>
+                  <span class="s2">&quot;Note that direct input to basic stress period packages &quot;</span>
+                  <span class="s2">&quot;is currently not supported.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># option to write stress_period_data to external files</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+            <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external_files&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># external list or tabular type files not supported for MODFLOW-NWT</span>
+            <span class="c1"># adding support for this may require changes to Flopy</span>
+            <span class="n">external_files</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">external_filename_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">][</span><span class="s1">&#39;external_filename_fmt&#39;</span><span class="p">]</span>
+        <span class="n">spd</span> <span class="o">=</span> <span class="n">setup_flopy_stress_period_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
+                                                 <span class="n">flopy_package_class</span><span class="o">=</span><span class="n">flopy_package_class</span><span class="p">,</span>
+                                                 <span class="n">variable_columns</span><span class="o">=</span><span class="n">variable_columns</span><span class="p">,</span>
+                                                 <span class="n">external_files</span><span class="o">=</span><span class="n">external_files</span><span class="p">,</span>
+                                                 <span class="n">external_filename_fmt</span><span class="o">=</span><span class="n">external_filename_fmt</span><span class="p">)</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">])</span>
+        <span class="c1">#kwargs[&#39;filename&#39;] = filename</span>
+        <span class="c1"># add observation for perimeter BCs</span>
+        <span class="c1"># and any user input with a boundname col</span>
+        <span class="n">obslist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">obsfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">package</span><span class="si">}</span><span class="s1">.obs.output.csv&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;perimeter_boundary&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">perimeter_btype</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;perimeter-</span><span class="si">{</span><span class="n">perimeter_cfg</span><span class="p">[</span><span class="s1">&#39;boundary_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">obslist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">perimeter_btype</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">perimeter_btype</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;boundname&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">unique_boundnames</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;boundname&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">bname</span> <span class="ow">in</span> <span class="n">unique_boundnames</span><span class="p">:</span>
+                <span class="n">obslist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">bname</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">bname</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obslist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;observations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">obsfile</span><span class="p">:</span> <span class="n">obslist</span><span class="p">}</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">flopy_package_class</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">external_files</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd</span>
+        <span class="n">pckg</span> <span class="o">=</span> <span class="n">flopy_package_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pckg</span>
+
 <div class="viewcode-block" id="MFsetupMixin.setup_grid"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_grid">[docs]</a>    <span class="k">def</span> <span class="nf">setup_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set up the attached modelgrid instance from configuration input</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1809,7 +1932,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 29, 2022.
+      <span class="lastupdated">Last updated on May 03, 2022.
       </span></p>
   </div>
 

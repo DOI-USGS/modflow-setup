@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.post327+g8ce5349 documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.post336+g2ba2159 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post327+g8ce5349
+                0.post336+g2ba2159
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -151,11 +151,6 @@
 <p class="admonition-title">Note</p>
 <p>This page is a work in progress and needs some more work.</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Basic stress packages are currenly only supported for Modflow 6, except
-for the Constant Head (CHD) package in the context of perimeter boundary conditions.</p>
-</div>
 <p>This page describes configuration file input for the basic MODFLOW stress packages, including
 the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently supported by Modflow-setup. The supported packages can be broadly placed into two categories. Feature or list-based packages such as CHD, DRN, GHB, RIV and WEL often represent discrete phenomena such as surface water features, pumping wells, or even lines that denote a perimeter boundary. Input to  these packages in MODFLOW is tabular, consisting of a table for each stress period, with rows specifying stresses at individual grid cells representing the boundary features. In contrast, continuous or grid-based packages represent a stress field that applies to a large area, such as areal recharge. In past versions of MODFLOW, input to these packages was array-based, with values specified for all model cells, at each stress period. In MODFLOW 6, input to these packages can be array or list-based. The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup. In keeping with the current structured grid-based paradigm of Modflow-setup, Modflow 6 recharge input is generated for the array-based recharge package (Langevin and others, 2017).</p>
 <section id="list-based-basic-stress-packages">
@@ -226,6 +221,15 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </dd>
 </dl>
 </li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">mfsetup_options:</span></code> Configuration options for Modflow-setup. General options that apply to all basic stress packages include:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">external_files:</span></code> Whether to write the package input as external text arrays or tables (i.e., with <code class="docutils literal notranslate"><span class="pre">open/close</span></code> statements). By default <code class="docutils literal notranslate"><span class="pre">True</span></code> except in the case of list-based or tabular files for MODFLOW-NWT models, which are not supported. Adding support for this may require changes to Flopy, which handles external list-based files differently for MODFLOW-2005 style models.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">external_filename_fmt:</span></code> Python string format for external file names. By default, <code class="docutils literal notranslate"><span class="pre">&quot;&lt;package</span> <span class="pre">or</span> <span class="pre">variable</span> <span class="pre">abbreviation&gt;_{:03d}.dat&quot;</span></code>. which results in filenames such as <code class="docutils literal notranslate"><span class="pre">wel_000.dat</span></code>, <code class="docutils literal notranslate"><span class="pre">wel_001.dat</span></code>, <code class="docutils literal notranslate"><span class="pre">wel_002.dat</span></code>… for stress periods 0, 1, and 2, for example.</p></li>
+</ul>
+<p>Other Modflow-setup options specific to individual packages are described below.</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
 </li>
@@ -249,10 +253,10 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Constant Head Package</span><span class="w"></span>
@@ -267,6 +271,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
 <span class="w">    </span><span class="nt">head</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -348,6 +353,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <span class="w">    </span><span class="nt">bhead</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -392,11 +398,11 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span><span class="w"></span>
 <span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w"></span>
 <span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">default_rbot_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Example of setting up the RIV package using SFRmaker (via the <code class="docutils literal notranslate"><span class="pre">sfr:</span></code> block):</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">sfr</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
@@ -493,6 +499,8 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <span class="w">        </span><span class="nt">across_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># False to put fluxes in one layer</span><span class="w"></span>
 <span class="w">        </span><span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span><span class="w"></span>
 <span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;transmissivity&#39;</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span><span class="w"></span>
+<span class="w">        </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.</span><span class="w">  </span><span class="c1"># layers must be at 10 length units thick to have a well;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -513,14 +521,12 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p>vertical discretization is specified with a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> block similar to the <code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> option</p></li>
 <li><p>Example:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600059060</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># pleasant lake</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># setup lake precipitation and evaporation from PRISM data</span><span class="w"></span>
-<span class="w">   </span><span class="w w-Error"> </span><span class="nt">climate</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">600059060</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prism&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span><span class="w"></span>
+<span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/wu_points.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span><span class="w"></span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period &#39;mean&#39; to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. &#39;august&#39;)</span><span class="w"></span>
+<span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;august&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">}</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -683,7 +689,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 29, 2022.
+      <span class="lastupdated">Last updated on May 03, 2022.
       </span></p>
   </div>
 

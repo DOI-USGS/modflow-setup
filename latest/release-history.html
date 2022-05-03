@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; modflow-setup 0.post327+g8ce5349 documentation</title>
+  <title>Release History &mdash; modflow-setup 0.post336+g2ba2159 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post327+g8ce5349
+                0.post336+g2ba2159
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -65,7 +65,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-1-initial-release-2022-04-01">Version 0.1 Initial release (2022-04-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-1-initial-release-2022-xx-xx">Version 0.1 Initial release (2022-xx-xx)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
@@ -125,28 +125,33 @@
 </style>
 <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this headline">¶</a></h1>
-<section id="version-0-1-initial-release-2022-04-01">
-<h2>Version 0.1 Initial release (2022-04-01)<a class="headerlink" href="#version-0-1-initial-release-2022-04-01" title="Permalink to this headline">¶</a></h2>
+<section id="version-0-1-initial-release-2022-xx-xx">
+<h2>Version 0.1 Initial release (2022-xx-xx)<a class="headerlink" href="#version-0-1-initial-release-2022-xx-xx" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>support for constructing MODFLOW-NWT or MODFLOW-6 models from scratch</p></li>
 <li><p>supported source dataset formats include GeoTiff, Arc-Ascii grids, shapefiles, NetCDF, and CSV files</p></li>
 <li><p>automatic reprojection of source datasets that have CRS information (GeoTiffs, shapefiles, etc.)</p></li>
-<li><p>model input can also be supplied from parent model package input or MODFLOW binary output</p></li>
-<li><p>supported MODFLOW-NWT packages: DIS, BAS6, OC, UPW, RCH, GHB, SFR2, LAK, WEL, MNW2, HYD, GAGE, NWT</p></li>
+<li><p>supported MODFLOW-NWT packages: DIS, BAS6, OC, UPW, RCH, GHB, SFR2, LAK, WEL, MNW2, HYD, GAGE, NWT, CHD, DRN, GHB, RIV</p></li>
 <li><p>supported MODFLOW-6 packages: DIS, IC, OC, NPF, RCHA, SFR, LAK, WEL, OBS, IMS, TDIS, CHD, DRN, GHB, RIV</p></li>
-<li><p>Lake observations are set up automatically (one output file per lake)</p></li>
+<li><p>Lake observations are set up automatically (one output file per lake); basic stress package observations are also setup up automatically</p></li>
 <li><p>SFR observations can be set up via <code class="docutils literal notranslate"><span class="pre">observations</span></code> block in the SFR package <code class="docutils literal notranslate"><span class="pre">source_data</span></code></p></li>
 <li><dl class="simple">
 <dt>Telescopic mesh refinement (TMR) insets from MODFLOW-NWT or MODFLOW 6 models</dt><dd><ul>
-<li><p>support for specified head boundaries from parent head solution</p></li>
-<li><p>specified head boundaries can be along model perimeter or irregular polygon of model active area</p></li>
+<li><p>support for specified head or flux perimeter boundaries from the parent model solution</p></li>
+<li><p>perimeter boundaries can be along the model bounding box perimeter, or an irregular polygon of the active model area</p></li>
+<li><p>model input can also be supplied from grid-independent source data, parent model package input (except for SFR, LAK, CHD, DRN, GHB, RIV), or MODFLOW binary output (perimeter boundaries and starting heads)</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p>Local grid refinement (LGR) insets supported for MODFLOW-6 models.
-* The water mover (MVR) package is set up automatically at the simulation level for LGR models with SFR packages in the parent and inset model.</p></li>
-<li><p>see .yml configuation files in mfsetup/tests/data folder for examples of valid input to modflow-setup</p></li>
+<li><dl class="simple">
+<dt>Local grid refinement (LGR) insets supported for MODFLOW-6 models.</dt><dd><ul>
+<li><p>The water mover (MVR) package is set up automatically at the simulation level for LGR models with SFR packages in the parent and inset model.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>see the <a class="reference external" href="https://usgs.github.io/modflow-setup/docs/build/html/examples.html#configuration-file-gallery">Configuration File Gallery</a> or the <code class="docutils literal notranslate"><span class="pre">*.yml</span></code> configuation files in mfsetup/tests/data folder for examples of valid input to modflow-setup</p></li>
 </ul>
 </section>
 </section>
@@ -163,7 +168,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 29, 2022.
+      <span class="lastupdated">Last updated on May 03, 2022.
       </span></p>
   </div>
 
