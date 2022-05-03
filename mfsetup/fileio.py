@@ -34,19 +34,6 @@ def check_source_files(fileslist):
             raise IOError('Cannot find {}'.format(f))
 
 
-def load_array(filename, shape=None):
-    """Load an array, ensuring the correct shape."""
-    arr = np.loadtxt(filename)
-    if shape is not None:
-        if arr.shape != shape:
-            if arr.size == np.prod(shape):
-                arr = np.reshape(arr, shape)
-            else:
-                raise ValueError("Data in {} have size {}; should be {}"
-                                 .format(filename, arr.shape, shape))
-    return arr
-
-
 def load(filename):
     """Load a configuration file."""
     filename = Path(filename)

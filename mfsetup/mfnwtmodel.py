@@ -700,6 +700,8 @@ class MFnwtModel(MFsetupMixin, Modflow):
             # TODO: make private attribute to facilitate keeping track of lake IDs
             lak_files = ['lak{}_{}.ggo'.format(i+1, hydroid)
                          for i, hydroid in enumerate(self.cfg['lak']['source_data']['lakes_shapefile']['include_ids'])]
+            # update the starting unit number of avoid collisions with other gage packages
+            starting_unit_number = np.max(np.abs(lake_unit)) + 1
 
         # need to add streams at some point
         nstream_gages = 0
