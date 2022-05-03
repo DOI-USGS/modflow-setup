@@ -27,8 +27,8 @@ In contrast to Flopy, which is completely general, modflow-setup limits model co
 
 
 
-.. _Configuration File Gallery: https://aleaf.github.io/modflow-setup/docs/build/html/examples.html#configuration-file-gallery
-.. _Release History: https://aleaf.github.io/modflow-setup/release-history.html
+.. _Configuration File Gallery: https://usgs.github.io/modflow-setup/docs/build/html/examples.html#configuration-file-gallery
+.. _Release History: https://usgs.github.io/modflow-setup/release-history.html
 .. _hydrosense: https://ngwa.onlinelibrary.wiley.com/doi/abs/10.1111/j.1745-6584.2012.00936.x
 
 .. _step-wise modeling: https://www.haitjema.com/stepwise.html
