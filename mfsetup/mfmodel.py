@@ -15,13 +15,7 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 import gisutils
 import sfrmaker
-from gisutils import (
-    get_proj_str,
-    get_shapefile_crs,
-    get_values_at_points,
-    project,
-    shp2df,
-)
+from gisutils import get_shapefile_crs, get_values_at_points, project
 from sfrmaker import Lines
 from sfrmaker.utils import assign_layers
 
@@ -61,7 +55,7 @@ from mfsetup.tdis import (
     setup_perioddata,
     setup_perioddata_group,
 )
-from mfsetup.tmr import TmrNew
+from mfsetup.tmr import Tmr
 from mfsetup.units import convert_length_units, lenuni_text, lenuni_values
 from mfsetup.utils import flatten, get_input_arguments, get_packages, update
 from mfsetup.wells import setup_wel_data
@@ -1298,7 +1292,7 @@ class MFsetupMixin():
                 perimeter_cfg['inset_parent_period_mapping'] = self.parent_stress_periods
             if 'parent_start_time' not in perimeter_cfg:
                 perimeter_cfg['parent_start_date_time'] = self.parent.perioddata['start_datetime'][0]
-            self.tmr = TmrNew(self.parent, self, **perimeter_cfg)
+            self.tmr = Tmr(self.parent, self, **perimeter_cfg)
             df = self.tmr.get_inset_boundary_values()
 
             # add boundname to allow boundary flux to be tracked as observation
