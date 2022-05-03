@@ -384,7 +384,8 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
                         'ref', 'dat',
                         'nc',
                         'yml', 'json',
-                        'hds', 'cbb', 'cbc']
+                        'hds', 'cbb', 'cbc',
+                        'grb']
     file_keys = ['filename',
                  'filenames',
                  'binaryfile',

@@ -1866,10 +1866,14 @@ class TmrNew:
                     #qz_interp=v_flux)
 
                 # assign q values and flip the sign for flux counter to the CBB convention directions of right and bottom
-                self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='top', 'q_interp'] = self.inset_boundary_cell_faces.qy_interp
-                self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='bottom', 'q_interp'] = self.inset_boundary_cell_faces.qy_interp * -1
-                self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='left', 'q_interp'] = self.inset_boundary_cell_faces.qx_interp
-                self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface=='right', 'q_interp'] = self.inset_boundary_cell_faces.qx_interp * -1
+                top_faces = self.inset_boundary_cell_faces.cellface == 'top'
+                self.inset_boundary_cell_faces.loc[top_faces, 'q_interp'] = self.inset_boundary_cell_faces.loc[top_faces, 'qy_interp']
+                bottom_faces = self.inset_boundary_cell_faces.cellface == 'bottom'
+                self.inset_boundary_cell_faces.loc[bottom_faces, 'q_interp'] = -self.inset_boundary_cell_faces.loc[bottom_faces, 'qy_interp']
+                left_faces = self.inset_boundary_cell_faces.cellface == 'left'
+                self.inset_boundary_cell_faces.loc[left_faces, 'q_interp'] = self.inset_boundary_cell_faces.loc[left_faces, 'qx_interp']
+                right_faces = self.inset_boundary_cell_faces.cellface == 'right'
+                self.inset_boundary_cell_faces.loc[right_faces, 'q_interp'] = -self.inset_boundary_cell_faces.loc[right_faces, 'qx_interp']
 
                 # convert specific discharge in inset cells to Q -- flux for well package
                 self.inset_boundary_cell_faces['q'] = \
@@ -1887,7 +1891,13 @@ class TmrNew:
                 df['per'] = inset_per
 
                 # boundary fluxes must be in active cells
-                dfs.append(df.loc[df['idomain'] > 0])
+                # corresponding parent cells must be active too,
+                # otherwise a nan flux will be produced
+                # drop nan fluxes, which will revert these boundary cells to the
+                # default no-flow condition in MODFLOW
+                # (consistent with parent model cell being inactive)
+                keep = (df['idomain'] > 0) & ~df['q'].isna()
+                dfs.append(df.loc[keep].copy())
                 print("took {:.2f}s".format(time.time() - t1))
 
             df = pd.concat(dfs)

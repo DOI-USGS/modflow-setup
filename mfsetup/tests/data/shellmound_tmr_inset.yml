@@ -18,7 +18,6 @@ model:
              'rch',
              'sfr',
              'wel',
-             'chd'
   ]
   external_path: 'external/'
   relative_external_filepaths: True
@@ -117,7 +116,8 @@ sfr:
     # to the MODFLOW River package
     to_riv: [18047212]
 
-chd:
+wel:
   perimeter_boundary:
     shapefile: 'shellmound/tmr_parent/gis/irregular_boundary.shp'
-    parent_head_file: 'shellmound/tmr_parent/shellmound.hds'  # needed for the perimeter boundary setup
+    parent_cell_budget_file: 'shellmound/tmr_parent/shellmound.cbc'  # needed for the perimeter boundary setup
+    parent_binary_grid_file: 'shellmound/tmr_parent/shellmound.dis.grb'

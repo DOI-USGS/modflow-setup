@@ -7,12 +7,14 @@ Often the area we are trying to model is part of a larger flow system, and we mu
 
 Features and Limitations
 -------------------------
-* Currently, specified head perimeter boundaries are supported via the MODFLOW 6 Constant Head (CHD) Package; specified flux boundaries using the MODFLOW 6 Well (WEL) Package are in `active development <https://github.com/aleaf/modflow-setup/issues/25>`_. It is envisioned that specified flux perimeter cells will follow the same basic structure/conceptualization as specified heads.
+* Currently, specified head perimeter boundaries are supported via the MODFLOW Constant Head (CHD) Package; specified flux boundaries are supported via the MODFLOW Well (WEL) Package.
 * The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.
 * The parent model may have different length units.
 * The parent model may be of a different MODFLOW version (e.g. MODFLOW 6 inset with a MODFLOW-NWT parent)
-* The inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to :py:func:`scipy.interpolate.griddata`). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The :ref:`LGR capability <Pleasant Lake test case>` of Modflow-setup can help with this.
+* For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to :py:func:`scipy.interpolate.griddata`). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The :ref:`LGR capability <Pleasant Lake test case>` of Modflow-setup can help with this.
+* Specified flux boundaries are currently limited to the parent and inset models being colinear.
 * The perimeter may be irregular. For example, the edge of the model active area may follow a major surface water feature along the opposite side.
+* Specified perimeter heads in MODFLOW-NWT models will have ending heads for each stress period assigned from the starting head of the next stress period (with the last period having the same starting and ending heads). The MODFLOW 6 Constant Head Package only supports assignment of a single head per stress period. This distinction only matters for models where stress periods are subdivided by multiple timesteps.
 
 
 Input
@@ -36,13 +38,24 @@ Input to set up perimeter boundaries are specified in two places:
 
 2) In a ``perimeter_boundary:`` sub-block for the relevant package (only specified heads via CHD are currently supported).
 
-    Input example:
+    Input example (specified head):
 
     .. code-block:: yaml
 
       chd:
         perimeter_boundary:
             parent_head_file: 'data/pleasant/pleasant.hds'
+
+    Input example (specified flux, with optional shapefile defining an irregular perimeter boundary,
+    and the MODFLOW 6 binary grid file, which is required for reading the cell budget output from MODFLOW 6 parent models):
+
+    .. code-block:: yaml
+
+      wel:
+        perimeter_boundary:
+          shapefile: 'shellmound/tmr_parent/gis/irregular_boundary.shp'
+          parent_cell_budget_file: 'shellmound/tmr_parent/shellmound.cbc'
+          parent_binary_grid_file: 'shellmound/tmr_parent/shellmound.dis.grb'
 
 
 Time discretization

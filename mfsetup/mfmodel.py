@@ -1288,8 +1288,10 @@ class MFsetupMixin():
             perimeter_cfg = kwargs['perimeter_boundary']
             if package == 'chd':
                 perimeter_cfg['boundary_type'] = 'head'
+                boundname = 'perimeter-heads'
             elif package == 'wel':
                 perimeter_cfg['boundary_type'] = 'flux'
+                boundname = 'perimeter-fluxes'
             else:
                 raise ValueError(f'Unsupported package for perimeter_boundary: {package.upper()}')
             if 'inset_parent_period_mapping' not in perimeter_cfg:
@@ -1300,7 +1302,7 @@ class MFsetupMixin():
             df = self.tmr.get_inset_boundary_values()
 
             # add boundname to allow boundary flux to be tracked as observation
-            df['boundname'] = 'perimeter-heads'
+            df['boundname'] = boundname
             dfs.append(df)
 
         # RIV package converted from SFR input
