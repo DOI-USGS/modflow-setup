@@ -170,7 +170,7 @@ def test_ic_setup(shellmound_tmr_model_with_dis, from_binary):
     """Test starting heads setup from model top or parent model head solution
     (MODFLOW binary output)."""
     m = copy.deepcopy(shellmound_tmr_model_with_dis)
-    binaryfile = m.cfg['chd']['perimeter_boundary']['parent_head_file']
+    binaryfile = str(Path(m.parent.model_ws) / f'{m.parent.name}.hds')
     if from_binary:
         config = {'strt': {'from_parent': {'binaryfile': binaryfile,
                                            'period': 0
@@ -186,9 +186,22 @@ def test_ic_setup(shellmound_tmr_model_with_dis, from_binary):
     assert m.ic.strt.array[m.dis.idomain.array > 0].max() < 50
 
 
-def test_irregular_perimeter_boundary(shellmound_tmr_model_with_dis, tmpdir):
+def test_irregular_perimeter_head_boundary(shellmound_tmr_model_with_dis, test_data_path, tmpdir):
     m = shellmound_tmr_model_with_dis
-    chd = m.setup_chd(**m.cfg['chd'], **m.cfg['chd']['mfsetup_options'])
+
+    if 'wel' in m.cfg:
+        del m.cfg['wel']
+    head_cfg = {
+        'perimeter_boundary': {
+            'shapefile': test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp',
+            'parent_head_file': test_data_path / 'shellmound/tmr_parent/shellmound.hds'
+            },
+        'mfsetup_options': {
+            'external_files': True,
+            'external_filename_fmt': 'chd_{:03d}.dat'
+            }
+    }
+    chd = m.setup_chd(**head_cfg, **head_cfg['mfsetup_options'])
 
     ra = chd.stress_period_data.array[0]
     kh, ih, jh = zip(*ra['cellid'])
@@ -324,3 +337,35 @@ def test_model_setup(shellmound_tmr_model_setup):
 def test_model_setup_and_run(shellmound_tmr_model_setup_and_run):
     m = shellmound_tmr_model_setup_and_run
     # todo: add test comparing shellmound parent heads to tmr heads
+    plot_figure = False
+    if plot_figure:
+        from matplotlib import pyplot as plt
+        parent_headfile = Path(m.parent.model_ws) / f"{m.parent.name}.hds"
+        parent_hds = bf.HeadFile(parent_headfile)
+        parent_heads = parent_hds.get_data(kstpkper=(0, 0))
+        parent_heads = np.ma.masked_array(parent_heads, mask=parent_heads > 1e5)
+        inset_hds = bf.HeadFile(Path(m.model_ws).absolute() / f"{m.name}.hds")
+        inset_heads = inset_hds.get_data(kstpkper=(0, 0))
+        inset_heads = np.ma.masked_array(inset_heads, mask=inset_heads > 1e5)
+
+        fig = plt.figure(figsize=(12, 9))
+        ax = fig.add_subplot(1, 1, 1, aspect="equal")
+        pmv = flopy.plot.PlotMapView(model=m.parent, ax=ax)
+        arr = pmv.plot_array(parent_heads[3])
+        contours = pmv.contour_array(parent_heads[3], colors="white", levels=np.linspace(30, 38, 9))
+        ax.clabel(contours, fmt="%2.2f")
+        plt.colorbar(arr, shrink=0.5, ax=ax)
+        ax.set_title("Simulated Heads")
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+
+        pmv = flopy.plot.PlotMapView(model=m, ax=ax)
+        arr = pmv.plot_array(inset_heads[3], vmin=parent_heads.min(), vmax=parent_heads.max())
+        contours = pmv.contour_array(inset_heads[3], colors="red", levels=np.linspace(30, 38, 9))
+        ax.clabel(contours, fmt="%2.2f")
+        plt.colorbar(arr, shrink=0.5, ax=ax)
+        ax.set_title("Simulated Heads")
+        ax.set_xlim(xmin, xmax)
+        ax.set_ylim(ymin, ymax)
+        plt.savefig(m.model_ws / 'head_comp.pdf')
+    j=2
