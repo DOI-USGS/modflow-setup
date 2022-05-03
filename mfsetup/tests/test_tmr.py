@@ -19,7 +19,7 @@ from flopy.utils import binaryfile as bf
 from mfsetup.discretization import get_layer
 from mfsetup.fileio import exe_exists
 from mfsetup.grid import MFsetupGrid, get_ij
-from mfsetup.tmr import Tmr, TmrNew, get_qx_qy_qz
+from mfsetup.tmr import Tmr, get_qx_qy_qz
 from mfsetup.zbud import write_zonebudget6_input
 
 from .test_mf6_tmr_shellmound import (
@@ -44,56 +44,6 @@ def pleasant_model(request,
                    pleasant_nwt_with_dis_bas6):
     return {'get_pleasant_mf6_with_dis': get_pleasant_mf6_with_dis,
             'pleasant_nwt_with_dis_bas6': pleasant_nwt_with_dis_bas6}[request.param]
-
-
-@pytest.fixture(scope='function')
-def tmr(pleasant_model):
-    m = pleasant_model
-    tmr = Tmr(m.parent, m,
-              parent_head_file=m.cfg['chd']['perimeter_boundary']['parent_head_file'],
-              inset_parent_layer_mapping=m.parent_layers,
-              inset_parent_period_mapping=m.parent_stress_periods)
-    return tmr
-
-
-@pytest.fixture(scope='function')
-def parent_heads(tmr):
-    headfile = tmr.hpth
-    hdsobj = bf.HeadFile(headfile)
-    yield hdsobj  # provide the fixture value
-    # code below yield statement is executed after test function finishes
-    print("closing the heads file")
-    hdsobj.close()
-
-
-def test_get_inset_boundary_heads(tmr, parent_heads):
-    """Verify that inset model specified head boundary accurately
-    reflects parent model head solution, including when cells
-    are dry or missing (e.g. pinched out cells in MF6).
-    """
-    bheads_df = tmr.get_inset_boundary_heads(for_external_files=False)
-    groups = bheads_df.groupby('per')
-    all_kstpkper = parent_heads.get_kstpkper()
-    kstpkper_list = [all_kstpkper[0], all_kstpkper[-1]]
-    for kstp, kper in kstpkper_list:
-        hds = parent_heads.get_data(kstpkper=(kstp, kper))
-        df = groups.get_group(kper)
-        df['cellid'] = list(zip(df.k, df.i, df.j))
-        # check for duplicate locations (esp. corners)
-        # in mf2005, duplicate chd heads will be summed
-        assert not df.cellid.duplicated().any()
-
-        # x, y, z locations of inset model boundary cells
-        ix = tmr.inset.modelgrid.xcellcenters[df.i, df.j]
-        iy = tmr.inset.modelgrid.ycellcenters[df.i, df.j]
-        iz = tmr.inset.modelgrid.zcellcenters[df.k, df.i, df.j]
-
-        # parent model grid cells associated with inset boundary cells
-        i, j = get_ij(tmr.parent.modelgrid, ix, iy)
-        k = get_layer(tmr.parent.dis.botm.array, i, j, iz)
-
-        # error between parent heads and inset heads
-        # todo: interpolate parent head solution to inset points for comparison
 
 
 @pytest.mark.parametrize('specific_discharge',(False, True))
@@ -144,7 +94,7 @@ def test_tmr_new(pleasant_model):
     parent_headfile = Path(m.cfg['chd']['perimeter_boundary']['parent_head_file'])
     parent_cellbudgetfile = parent_headfile.with_suffix('.cbc')
 
-    tmr = TmrNew(m.parent, m,
+    tmr = Tmr(m.parent, m,
                  parent_head_file=parent_headfile)
 
     results = tmr.get_inset_boundary_values(for_external_files=False)
@@ -180,7 +130,7 @@ def test_get_boundary_cells_shapefile(shellmound_tmr_model_with_dis, test_data_p
     from mfexport import export
     export(m, m.modelgrid, 'dis', 'idomain', pdfs=False, output_path=tmpdir)
     boundary_shapefile = test_data_path / 'shellmound/tmr_parent/gis/irregular_boundary.shp'
-    tmr = TmrNew(m.parent, m,
+    tmr = Tmr(m.parent, m,
                  inset_parent_period_mapping=m.parent_stress_periods,
                  boundary_type='head')
     df = tmr.get_inset_boundary_cells(shapefile=boundary_shapefile)
@@ -558,7 +508,7 @@ def test_get_boundary_heads(parent_model, inset_model,
     parent_budget_file = parent_ws / f'{parent_model.name}.cbc'
     parent_head_file = parent_ws / f'{parent_model.name}.hds'
     parent_binary_grid_file = parent_ws / f'{parent_model.name}.dis.grb'
-    tmr = TmrNew(parent_model, m, parent_head_file=parent_head_file,
+    tmr = Tmr(parent_model, m, parent_head_file=parent_head_file,
                  boundary_type='head',
                  )
     perimeter_df = tmr.get_inset_boundary_values()
@@ -739,7 +689,7 @@ def test_get_boundary_fluxes(parent_model, inset_model,
         parent_binary_grid_file = parent_ws / f'{parent_model.name}.dis.grb'
     else:
         parent_binary_grid_file = None
-    tmr = TmrNew(parent_model, m, parent_cell_budget_file=parent_budget_file,
+    tmr = Tmr(parent_model, m, parent_cell_budget_file=parent_budget_file,
                  parent_binary_grid_file=parent_binary_grid_file,
                  parent_head_file=parent_head_file,
                  boundary_type='flux',
@@ -956,7 +906,7 @@ def test_parent_xyzcellfacecenters(parent_model_mf6, inset_model_mf6):
     parent_budget_file = parent_ws / f'{parent_model_mf6.name}.cbc'
     parent_head_file = parent_ws / f'{parent_model_mf6.name}.hds'
     parent_binary_grid_file = parent_ws / f'{parent_model_mf6.name}.dis.grb'
-    tmr = TmrNew(parent_model_mf6, inset_model_mf6, parent_cell_budget_file=parent_budget_file,
+    tmr = Tmr(parent_model_mf6, inset_model_mf6, parent_cell_budget_file=parent_budget_file,
                  parent_binary_grid_file=parent_binary_grid_file,
                  parent_head_file=parent_head_file,
                  boundary_type='flux',

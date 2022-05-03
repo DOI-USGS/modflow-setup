@@ -9,7 +9,6 @@ from shapely.geometry import Point
 from mfsetup.fileio import append_csv, check_source_files
 from mfsetup.grid import get_ij
 from mfsetup.sourcedata import TransientTabularSourceData
-from mfsetup.tmr import Tmr
 from mfsetup.wateruse import get_mean_pumping_rates, resample_pumping_rates
 
 

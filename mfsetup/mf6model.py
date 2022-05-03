@@ -22,7 +22,6 @@ from mfsetup.discretization import (
     make_lgr_idomain,
 )
 from mfsetup.fileio import add_version_to_fileheader, flopy_mfsimulation_load
-from mfsetup.fileio import load
 from mfsetup.fileio import load as load_config
 from mfsetup.fileio import load_cfg
 from mfsetup.ic import setup_strt
@@ -39,10 +38,8 @@ from mfsetup.mover import get_mover_sfr_package_input
 from mfsetup.obs import setup_head_observations
 from mfsetup.oc import parse_oc_period_input
 from mfsetup.tdis import add_date_comments_to_tdis
-from mfsetup.tmr import TmrNew
 from mfsetup.units import convert_time_units
 from mfsetup.utils import flatten, get_input_arguments
-from mfsetup.wells import setup_wel_data
 
 
 class MF6model(MFsetupMixin, mf6.ModflowGwf):
@@ -543,60 +540,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         rch = mf6.ModflowGwfrcha(self, **kwargs)
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return rch
-
-    def setup_wel_old(self, **kwargs):
-        """
-        Sets up the WEL package.
-        """
-        package = 'wel'
-        print('\nSetting up {} package...'.format(package.upper()))
-        t0 = time.time()
-
-        # option to write stress_period_data to external files
-        external_files = self.cfg[package]['external_files']
-
-        # munge well package input
-        # returns dataframe with information to populate stress_period_data
-        df = setup_wel_data(self, for_external_files=external_files)
-        if len(df) == 0:
-            print('No wells in active model area')
-            return
-
-        # set up stress_period_data
-        if external_files:
-            # get the file path (allowing for different external file locations, specified name format, etc.)
-            filename_format = self.cfg[package]['external_filename_fmt']
-            filepaths = self.setup_external_filepaths(package, 'stress_period_data',
-                                                      filename_format=filename_format,
-                                                      file_numbers=sorted(df.per.unique().tolist()))
-        spd = {}
-        period_groups = df.groupby('per')
-        for kper in range(self.nper):
-            if kper in period_groups.groups:
-                group = period_groups.get_group(kper)
-                group.drop('per', axis=1, inplace=True)
-                if external_files:
-                    group.to_csv(filepaths[kper]['filename'], index=False, sep=' ', float_format='%g')
-                    # make a copy for the intermediate data folder, for consistency with mf-2005
-                    shutil.copy(filepaths[kper]['filename'], self.cfg['intermediate_data']['output_folder'])
-                else:
-                    kspd = mf6.ModflowGwfwel.stress_period_data.empty(self,
-                                                                      len(group),
-                                                                      boundnames=True)[0]
-                    kspd['cellid'] = list(zip(group.k, group.i, group.j))
-                    kspd['q'] = group['q']
-                    kspd['boundname'] = group['boundname']
-                    spd[kper] = kspd
-            else:
-                pass  # spd[kper] = None
-        kwargs = self.cfg[package].copy()
-        kwargs.update(self.cfg[package]['options'])
-        if not external_files:
-            kwargs['stress_period_data'] = spd
-        kwargs = get_input_arguments(kwargs, mf6.ModflowGwfwel)
-        wel = mf6.ModflowGwfwel(self, **kwargs)
-        print("finished in {:.2f}s\n".format(time.time() - t0))
-        return wel
 
     def setup_lak(self, **kwargs):
         """
