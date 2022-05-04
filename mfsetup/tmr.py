@@ -924,14 +924,11 @@ class Tmr:
                                         d=3, source_values_mask=self._source_grid_mask
                                         )
             _ = jface_interp.interp_weights
-#
-            #'''
+
             #kface_interp = Interpolator((self.x_kface_parent, self.y_kface_parent, self.z_kface_parent),
             #                            self.inset_boundary_cells[['x', 'y', 'z']].T.values,
             #                            d=3)
             #_ = kface_interp.interp_weights
-            #'''
-#
 
             for inset_per, parent_per in self.inset_parent_period_mapping.items():
                 print(f'for stress period {inset_per}', end=', ')
@@ -944,54 +941,16 @@ class Tmr:
                     parent_periods.append(parent_per)
                 parent_kstpkper = last_steps[parent_per], parent_per
 
-                if self.parent.version == 'mf6':
-                    df = get_flowja_face(fileobj,
-                                         binary_grid_file=self.parent_binary_grid_file,
-                                         kstpkper=parent_kstpkper)
-                    if df is None:
-                        raise ValueError('No fluxes returned by get_flowja_face')
-
-                    # TODO: flux BCs
-                    # subset df to boundary cells  -- not possible a priori
-                    # get x and y direction fluxes separately -- DONE
-                    # do same for vertical fluxes -- DONE
-                    # * normalize by cell face area to make specific discharge -- DONE
-                    # * use meshgrid to locate all the cell face locations in the parent (hello xyedges from grid!) -- DONE
-                    # * need to set up inset xyz locations to interpolate to -- DONE
-                    # * branch the geometry stuff above for MF6 vs. MF2005 parent (does it matter for modelgrid object??)
-                    # * interpolate using meshgrid-derived lox and arrays of fluxes to inset correct faces  -- DONE
-                    # * consider correct face interpolation weights precalculation -- DONE
-                    # * multiply by inset face area -- DONE
-                    # * ---- verify direciton of q coming from CBC file (e.g. always m --> n???) -- yes, it's n-centric. e.g. + is into n
-                    # * verify the interpolation scheme - getting NaNs
-                    # * verify that flipping sign of q_interp below is correct (e.g. only flip left and top?)
-                    # * verify that all the xy locating works with rotated grid (!) -- DONE (working only in model coords)
-                    # for MF-2005 case, would slice arrays returned by flopy binary utility to boundary cells
-                    #    (so that mf6 and mf2005 come out the same)
-                    # *  refactor to use updated modelgrid object sat thickness calcs
-
-                    # mf6 specific discharge
-                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file,
-                                              self.parent_binary_grid_file,
-                                              version='mf6',
-                                              model_top=self.parent.modelgrid.top,
-                                              model_bottom_array=self.parent.modelgrid.botm,
-                                              kstpkper=parent_kstpkper,
-                                              specific_discharge=True,
-                                              modelgrid=self.parent.modelgrid,
-                                              headfile=self.parent_head_file)
-
-                else:
-                    # MFNWT specific discharge
-                    qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file,
-                                              self.parent_binary_grid_file,
-                                              version='other', # this argument can be anything besides `mf6`
-                                              model_top=self.parent.modelgrid.top,
-                                              model_bottom_array=self.parent.modelgrid.botm,
-                                              kstpkper=parent_kstpkper,
-                                              specific_discharge=True,
-                                              modelgrid=self.parent.modelgrid,
-                                              headfile=self.parent_head_file)
+                # get specific discharge
+                qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file,
+                                            self.parent_binary_grid_file,
+                                            version=self.parent.version,
+                                            model_top=self.parent.modelgrid.top,
+                                            model_bottom_array=self.parent.modelgrid.botm,
+                                            kstpkper=parent_kstpkper,
+                                            specific_discharge=True,
+                                            modelgrid=self.parent.modelgrid,
+                                            headfile=self.parent_head_file)
 
                 # pad the two parent flux arrays on the top and bottom
                 # so that inset cells above and below the top/bottom cell centers

@@ -696,7 +696,7 @@ def test_get_boundary_fluxes(parent_model, inset_model,
                  )
     perimeter_df = tmr.get_inset_boundary_values()
 
-    # set up the CHD package
+    # set up the WEL package
     perimeter_df['cellid'] = list(perimeter_df[['k', 'i', 'j']].to_records(index=False))
     period_groups = perimeter_df.groupby('per')
     if m.version == 'mf6':
