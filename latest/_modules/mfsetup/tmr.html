@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr &mdash; modflow-setup 0.post336+g2ba2159 documentation</title>
+  <title>mfsetup.tmr &mdash; modflow-setup 0.post337+gf8e6d65 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post336+g2ba2159
+                0.post337+gf8e6d65
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -1020,14 +1020,11 @@
                                         <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_grid_mask</span>
                                         <span class="p">)</span>
             <span class="n">_</span> <span class="o">=</span> <span class="n">jface_interp</span><span class="o">.</span><span class="n">interp_weights</span>
-<span class="c1">#</span>
-            <span class="c1">#&#39;&#39;&#39;</span>
+
             <span class="c1">#kface_interp = Interpolator((self.x_kface_parent, self.y_kface_parent, self.z_kface_parent),</span>
             <span class="c1">#                            self.inset_boundary_cells[[&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]].T.values,</span>
             <span class="c1">#                            d=3)</span>
             <span class="c1">#_ = kface_interp.interp_weights</span>
-            <span class="c1">#&#39;&#39;&#39;</span>
-<span class="c1">#</span>
 
             <span class="k">for</span> <span class="n">inset_per</span><span class="p">,</span> <span class="n">parent_per</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_parent_period_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for stress period </span><span class="si">{</span><span class="n">inset_per</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
@@ -1040,54 +1037,16 @@
                     <span class="n">parent_periods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent_per</span><span class="p">)</span>
                 <span class="n">parent_kstpkper</span> <span class="o">=</span> <span class="n">last_steps</span><span class="p">[</span><span class="n">parent_per</span><span class="p">],</span> <span class="n">parent_per</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">get_flowja_face</span><span class="p">(</span><span class="n">fileobj</span><span class="p">,</span>
-                                         <span class="n">binary_grid_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_binary_grid_file</span><span class="p">,</span>
-                                         <span class="n">kstpkper</span><span class="o">=</span><span class="n">parent_kstpkper</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No fluxes returned by get_flowja_face&#39;</span><span class="p">)</span>
-
-                    <span class="c1"># TODO: flux BCs</span>
-                    <span class="c1"># subset df to boundary cells  -- not possible a priori</span>
-                    <span class="c1"># get x and y direction fluxes separately -- DONE</span>
-                    <span class="c1"># do same for vertical fluxes -- DONE</span>
-                    <span class="c1"># * normalize by cell face area to make specific discharge -- DONE</span>
-                    <span class="c1"># * use meshgrid to locate all the cell face locations in the parent (hello xyedges from grid!) -- DONE</span>
-                    <span class="c1"># * need to set up inset xyz locations to interpolate to -- DONE</span>
-                    <span class="c1"># * branch the geometry stuff above for MF6 vs. MF2005 parent (does it matter for modelgrid object??)</span>
-                    <span class="c1"># * interpolate using meshgrid-derived lox and arrays of fluxes to inset correct faces  -- DONE</span>
-                    <span class="c1"># * consider correct face interpolation weights precalculation -- DONE</span>
-                    <span class="c1"># * multiply by inset face area -- DONE</span>
-                    <span class="c1"># * ---- verify direciton of q coming from CBC file (e.g. always m --&gt; n???) -- yes, it&#39;s n-centric. e.g. + is into n</span>
-                    <span class="c1"># * verify the interpolation scheme - getting NaNs</span>
-                    <span class="c1"># * verify that flipping sign of q_interp below is correct (e.g. only flip left and top?)</span>
-                    <span class="c1"># * verify that all the xy locating works with rotated grid (!) -- DONE (working only in model coords)</span>
-                    <span class="c1"># for MF-2005 case, would slice arrays returned by flopy binary utility to boundary cells</span>
-                    <span class="c1">#    (so that mf6 and mf2005 come out the same)</span>
-                    <span class="c1"># *  refactor to use updated modelgrid object sat thickness calcs</span>
-
-                    <span class="c1"># mf6 specific discharge</span>
-                    <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="n">get_qx_qy_qz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell_budget_file</span><span class="p">,</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">parent_binary_grid_file</span><span class="p">,</span>
-                                              <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
-                                              <span class="n">model_top</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">top</span><span class="p">,</span>
-                                              <span class="n">model_bottom_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">botm</span><span class="p">,</span>
-                                              <span class="n">kstpkper</span><span class="o">=</span><span class="n">parent_kstpkper</span><span class="p">,</span>
-                                              <span class="n">specific_discharge</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                              <span class="n">modelgrid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
-                                              <span class="n">headfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span><span class="p">)</span>
-
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># MFNWT specific discharge</span>
-                    <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="n">get_qx_qy_qz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell_budget_file</span><span class="p">,</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">parent_binary_grid_file</span><span class="p">,</span>
-                                              <span class="n">version</span><span class="o">=</span><span class="s1">&#39;other&#39;</span><span class="p">,</span> <span class="c1"># this argument can be anything besides `mf6`</span>
-                                              <span class="n">model_top</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">top</span><span class="p">,</span>
-                                              <span class="n">model_bottom_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">botm</span><span class="p">,</span>
-                                              <span class="n">kstpkper</span><span class="o">=</span><span class="n">parent_kstpkper</span><span class="p">,</span>
-                                              <span class="n">specific_discharge</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                              <span class="n">modelgrid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
-                                              <span class="n">headfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span><span class="p">)</span>
+                <span class="c1"># get specific discharge</span>
+                <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span> <span class="o">=</span> <span class="n">get_qx_qy_qz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell_budget_file</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">parent_binary_grid_file</span><span class="p">,</span>
+                                            <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                                            <span class="n">model_top</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">top</span><span class="p">,</span>
+                                            <span class="n">model_bottom_array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">botm</span><span class="p">,</span>
+                                            <span class="n">kstpkper</span><span class="o">=</span><span class="n">parent_kstpkper</span><span class="p">,</span>
+                                            <span class="n">specific_discharge</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                            <span class="n">modelgrid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+                                            <span class="n">headfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span><span class="p">)</span>
 
                 <span class="c1"># pad the two parent flux arrays on the top and bottom</span>
                 <span class="c1"># so that inset cells above and below the top/bottom cell centers</span>
@@ -1177,7 +1136,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 03, 2022.
+      <span class="lastupdated">Last updated on May 04, 2022.
       </span></p>
   </div>
 
