@@ -930,10 +930,15 @@ def test_model_setup_and_run(model_setup_and_run):
     assert not (m.model_ws / m.cfg['intermediate_data']['output_folder']).exists()
 
 
-def test_load(model_setup, shellmound_cfg_path):
+@pytest.mark.parametrize('load_only', (None, ['dis']))
+def test_load(model_setup, shellmound_cfg_path, load_only):
     m = model_setup  #deepcopy(pfl_nwt_setup_from_yaml)
-    m2 = MF6model.load_from_config(shellmound_cfg_path)
-    assert m == m2
+    m2 = MF6model.load_from_config(shellmound_cfg_path,
+                                   load_only=load_only)
+    if load_only is None:
+        assert m == m2
+    else:
+        assert m2.get_package_list() == ['DIS']
 
 
 def test_packagelist(shellmound_cfg_path):

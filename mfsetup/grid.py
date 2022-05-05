@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import pyproj
 from flopy.discretization import StructuredGrid
+from flopy.mf6.utils.binarygrid_util import MfGrdFile
 from geopandas.geodataframe import GeoDataFrame
 from gisutils import df2shp, get_proj_str, project, shp2df
 from packaging import version
@@ -96,7 +97,7 @@ class MFsetupGrid(StructuredGrid):
     """
 
     def __init__(self, delc, delr, top=None, botm=None, idomain=None,
-                 laycbd=None, lenuni=None,
+                 laycbd=None, lenuni=None, binary_grid_file=None,
                  epsg=None, proj_str=None, prj=None, wkt=None, crs=None,
                  xoff=0.0, yoff=0.0, xul=None, yul=None, angrot=0.0):
         super(MFsetupGrid, self).__init__(delc=np.array(delc), delr=np.array(delr),
@@ -116,6 +117,10 @@ class MFsetupGrid(StructuredGrid):
         self._vertices = None
         self._polygons = None
         self._dataframe = None
+
+        # MODFLOW 6 binary grid file, for getting intercell connections
+        # (needed for reading cell budget files)
+        self.binary_grid_file = binary_grid_file
 
         # if no epsg, set from proj4 string if possible
         #if epsg is None and proj_str is not None and 'epsg' in proj_str.lower():
@@ -276,6 +281,71 @@ class MFsetupGrid(StructuredGrid):
             self._dataframe = self.get_dataframe(layers=True)
         return self._dataframe
 
+    @property
+    def intercell_connections(self):
+        """Pandas DataFrame of flow connections between grid cells."""
+        if self._intercell_connections is None:
+            self._intercell_connections = self.get_intercell_connections()
+        return self._intercell_connections
+
+    @property
+    def top(self):
+        return self._top
+
+    @top.setter
+    def top(self, top):
+        self._top = top
+
+    @property
+    def botm(self):
+        return self._botm
+
+    @botm.setter
+    def botm(self, botm):
+        if (self._StructuredGrid__nrow, self._StructuredGrid__ncol) != botm.shape[1:]:
+            raise ValueError("botm array shape is inconsistent with the model grid")
+        self._StructuredGrid__nlay = botm.shape[0]
+        self._botm = botm
+
+    def get_intercell_connections(self, binary_grid_file=None):
+        """_summary_
+
+        Parameters
+        ----------
+        binary_grid_file : str or pathlike
+            MODFLOW 6 binary grid file
+
+        Returns
+        -------
+        df : DataFrame
+            Intercell connections, with the following columns:
+
+            === =============================================================
+            n   from zero-based node number
+            kn  from zero-based layer
+            in  from zero-based row
+            jn  from zero-based column
+            m   to zero-based node number
+            kn  to zero-based layer
+            in  to zero-based row
+            jn  to zero-based column
+            === =============================================================
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
+        if binary_grid_file is not None:
+            self.binary_grid_file = binary_grid_file
+        if self.binary_grid_file is None:
+            raise ValueError("A MODFLOW 6 binary_grid_file "
+                             "is needed to get intercell connections. "
+                             "Either run get_intercell_connections or "
+                             "re-instantiate the grid with a binary_grid_file argument.")
+        self._intercell_connections = get_intercell_connections(self.binary_grid_file)
+        return self._intercell_connections
+
     def get_dataframe(self, layers=True):
         """Get a pandas DataFrame of grid cell polygons
         with i, j locations.
@@ -297,7 +367,7 @@ class MFsetupGrid(StructuredGrid):
         i, j = np.indices((self.nrow, self.ncol))
         geoms = self.polygons
         df = gpd.GeoDataFrame({'i': i.ravel(),
-                              'j': j.ravel(),
+                               'j': j.ravel(),
                               'geometry': geoms}, crs=5070)
         if layers and self.nlay is not None:
             # add layer information
@@ -431,6 +501,17 @@ def get_ij(grid, x, y, local=False):
     i, j = np.unravel_index(loc, (grid.nrow, grid.ncol))
     print("finished in {:.2f}s\n".format(time.time() - t0))
     return i, j
+
+
+def get_kij_from_node3d(node3d, nrow, ncol):
+    """For a consecutive cell number in row-major order
+    (row, column, layer), get the zero-based row, column position.
+    """
+    node2d = node3d % (nrow * ncol)
+    k = node3d // (nrow * ncol)
+    i = node2d // ncol
+    j = node2d % ncol
+    return k, i, j
 
 
 def get_grid_bounding_box(modelgrid):
@@ -984,3 +1065,65 @@ def get_cellface_midpoint(grid, k, i, j, direction):
     x, y = grid.get_coords(model_x, model_y)
     z = grid.zcellcenters[k, i, j]
     return x, y, z
+
+
+def get_intercell_connections(binary_grid_file):
+    """Get all of the connections between cells in a
+    MODFLOW 6 structured grid.
+
+    Parameters
+    ----------
+    binary_grid_file : str or pathlike
+        MODFLOW 6 binary grid file
+
+    Returns
+    -------
+    df : DataFrame
+        Intercell connections, with the following columns:
+
+        ==== =============================================================
+        n    from zero-based node number
+        kn   from zero-based layer
+        in   from zero-based row
+        jn   from zero-based column
+        m    to zero-based node number
+        kn   to zero-based layer
+        in   to zero-based row
+        jn   to zero-based column
+        qidx index position of flow in cell budget file
+        ==== =============================================================
+
+    Raises
+    ------
+    ValueError
+        _description_
+    """
+    print('Getting intercell connections...')
+    ta = time.time()
+    bgf = MfGrdFile(binary_grid_file)
+    nrow = bgf.nrow
+    ncol = bgf.ncol
+    # IA array maps cell number to connection number
+    # (one-based index number of first connection at each cell)?
+    # taking the forward difference then yields nconnections per cell
+    ia = bgf._datadict['IA'] - 1
+    # Connections in the JA array correspond directly with the
+    # FLOW-JA-FACE record that is written to the budget file.
+    ja = bgf._datadict['JA'] - 1  # cell connections
+
+    all_n = []
+    m = []
+    qidx = []
+    for n in range(len(ia)-1):
+        for ipos in range(ia[n] + 1, ia[n+1]):
+            all_n.append(n)
+            m.append(ja[ipos])  # m is the cell that n connects to
+            qidx.append(ipos)
+    df = pd.DataFrame({'n': all_n, 'm': m, 'qidx': qidx})
+    k, i, j = get_kij_from_node3d(df['n'].values, nrow, ncol)
+    df['kn'], df['in'], df['jn'] = k, i, j
+    k, i, j = get_kij_from_node3d(df['m'].values, nrow, ncol)
+    df['km'], df['im'], df['jm'] = k, i, j
+    df.reset_index()
+    print(f"Getting intercell connections took {time.time() - ta:.2f}s\n")
+    return df

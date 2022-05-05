@@ -836,7 +836,10 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
         if verbosity_level.value >= VerbosityLevel.normal.value:
             print('  loading model {}...'.format(item[0].lower()))
 
-        instance._models[item[2]] = flopy_mf6model_load(instance, model_obj, strict=strict, model_rel_path=path)
+        instance._models[item[2]] = flopy_mf6model_load(instance, model_obj,
+                                                        strict=strict,
+                                                        model_rel_path=path,
+                                                        load_only=load_only)
 
         # original flopy code to load model
         #instance._models[item[2]] = model_obj.load(
@@ -956,7 +959,8 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
     return instance
 
 
-def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.'):
+def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.',
+                        load_only=None):
     """Execute the code in flopy.mf6.MFmodel.load_base on an
         existing instance of MF6model."""
 
@@ -986,9 +990,23 @@ def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.'):
     sim_struct = mfstructure.MFStructure().sim_struct
     instance._ftype_num_dict = {}
     for ftype, fname, pname in packages_ordered:
+        ftype_orig = ftype
         ftype = ftype[0:-1].lower()
         if ftype in structure.package_struct_objs or ftype in \
                 sim_struct.utl_struct_objs:
+            if (
+                load_only is not None
+                and not instance._in_pkg_list(
+                    priority_packages, ftype_orig, pname
+                )
+                and not instance._in_pkg_list(load_only, ftype_orig, pname)
+            ):
+                if (
+                    simulation.simulation_data.verbosity_level.value
+                    >= VerbosityLevel.normal.value
+                ):
+                    print(f"    skipping package {ftype}...")
+                continue
             if model_rel_path and model_rel_path != '.':
                 # strip off model relative path from the file path
                 filemgr = simulation.simulation_data.mfpath

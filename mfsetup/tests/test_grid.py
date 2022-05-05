@@ -6,6 +6,7 @@ import numpy as np
 import pyproj
 import pytest
 from flopy import mf6
+from flopy.utils import binaryfile as bf
 from flopy.utils.geometry import rotate
 from flopy.utils.mfreadnam import attribs_from_namfile_header
 from gisutils import get_authority_crs, shp2df
@@ -304,3 +305,24 @@ def test_get_cellface_midpoint():
     #pmv = flopy.plot.PlotMapView(modelgrid=grid)
     #pmv.plot_grid()
     #plt.scatter(x, y)
+
+
+def test_set_botm_nlay(test_data_path):
+    grid = load_modelgrid(test_data_path / 'shellmound/tmr_parent/shellmound_grid.json')
+    botm = []
+    for i in range(13):
+        botm.append(np.loadtxt(test_data_path /\
+            f'shellmound/tmr_parent/external/botm{i}.dat'))
+    botm = np.array(botm)
+    grid.botm = botm
+    assert grid.nlay is not None
+
+def test_get_intercell_connections(test_data_path):
+    grid = load_modelgrid(test_data_path / 'shellmound/tmr_parent/shellmound_grid.json')
+    binary_grid_file = test_data_path / 'shellmound/tmr_parent/shellmound.dis.grb'
+    cell_budget_file = test_data_path / 'shellmound/tmr_parent/shellmound.cbc'
+    cbb = bf.CellBudgetFile(cell_budget_file)
+    flowja = cbb.get_data(text='FLOW-JA-FACE', kstpkper=[0, 0])[0][0, 0, :]
+    cn = grid.get_intercell_connections(binary_grid_file=binary_grid_file)
+    q = flowja[cn['qidx']]
+    assert len(cn) == len(q)
