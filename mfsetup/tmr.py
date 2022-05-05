@@ -14,105 +14,14 @@ from flopy.utils import binaryfile as bf
 
 from mfsetup.discretization import find_remove_isolated_cells
 from mfsetup.fileio import check_source_files
-from mfsetup.grid import get_cellface_midpoint, get_ij
+from mfsetup.grid import get_cellface_midpoint, get_ij, get_intercell_connections
 from mfsetup.interpolate import Interpolator, interp_weights
 from mfsetup.lakes import get_horizontal_connections
 
 
-def get_kij_from_node3d(node3d, nrow, ncol):
-    """For a consecutive cell number in row-major order
-    (row, column, layer), get the zero-based row, column position.
-    """
-    node2d = node3d % (nrow * ncol)
-    k = node3d // (nrow * ncol)
-    i = node2d // ncol
-    j = node2d % ncol
-    return k, i, j
-
-
-def get_intercell_connections(ia, ja, flowja):
-    print('Making DataFrame of intercell connections...')
-    ta = time.time()
-    all_n = []
-    m = []
-    q = []
-    for n in range(len(ia)-1):
-        for ipos in range(ia[n] + 1, ia[n+1]):
-            all_n.append(n)
-            m.append(ja[ipos])  # m is the cell that n connects to
-            q.append(flowja[ipos])  # flow across the connection
-    df = pd.DataFrame({'n': all_n, 'm': m, 'q': q})
-    et = time.time() - ta
-    print("finished in {:.2f}s\n".format(et))
-    return df
-
-
-def get_flowja_face(cell_budget_file, binary_grid_file,
-                    kstpkper=(0, 0),
-                    specific_discharge=False):
-    """Get DataFrame of FLOW-JA-FACE (cell by cell flow connections)
-    from MODFLOW 6 budget output and binary grid file.
-
-    Parameters
-    ----------
-    cell_budget_file : str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile
-        File path or pointer to MODFLOW 6 cell budget file.
-    binary_grid_file : str or pathlike
-        File path to MODFLOW 6 binary grid (``*.dis.grb``) file
-    kstpkper : tuple
-        zero-based (time step, stress period)
-    specific_discharge : bool
-        Option to return arrays of specific discharge (1D vector components)
-        instead of volumetric fluxes.
-        By default, False
-
-    Returns
-    -------
-    df : DataFrame
-        DataFrame with one connection per row, with the following columns
-
-        =================== ===================================================================
-        n                   zero-based from: cell number
-        m                   zero-based to: cell number
-        q                   volumetric flux or specific discharge
-        kn, in, jn          zero-based layer, row, column location of n cell (structured grids)
-        km, im, jm          zero-based layer, row, column location of m cell (structured grids)
-        =================== ===================================================================
-    """
-    if isinstance(cell_budget_file, str) or isinstance(cell_budget_file, Path):
-        cbb = bf.CellBudgetFile(cell_budget_file)
-    else:
-        cbb = cell_budget_file
-    if binary_grid_file is None:
-        print("Couldn't get FLOW-JA-FACE, need binary grid file for connection information.")
-        return
-    bgf = MfGrdFile(binary_grid_file)
-    # IA array maps cell number to connection number
-    # (one-based index number of first connection at each cell)?
-    # taking the forward difference then yields nconnections per cell
-    ia = bgf._datadict['IA'] - 1
-    # Connections in the JA array correspond directly with the
-    # FLOW-JA-FACE record that is written to the budget file.
-    ja = bgf._datadict['JA'] - 1  # cell connections
-    flowja = cbb.get_data(text='FLOW-JA-FACE', kstpkper=kstpkper)[0][0, 0, :]
-    df = get_intercell_connections(ia, ja, flowja)
-    cols = ['n', 'm', 'q']
-
-    # get the k, i, j locations for plotting the connections
-    if isinstance(bgf.modelgrid, StructuredGrid):
-        nlay, nrow, ncol = bgf.modelgrid.nlay, bgf.modelgrid.nrow, bgf.modelgrid.ncol
-        k, i, j = get_kij_from_node3d(df['n'].values, nrow, ncol)
-        df['kn'], df['in'], df['jn'] = k, i, j
-        k, i, j = get_kij_from_node3d(df['m'].values, nrow, ncol)
-        df['km'], df['im'], df['jm'] = k, i, j
-        df.reset_index()
-        cols += ['kn', 'in', 'jn', 'km', 'im', 'jm']
-    return df[cols].copy()
-
-
 def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
+                 cell_connections_df=None,
                  version='mf6',
-                 model_top=None, model_bottom_array=None,
                  kstpkper=(0, 0),
                  specific_discharge=False,
                  headfile=None,
@@ -126,6 +35,23 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
         File path or pointer to MODFLOW cell budget file.
     binary_grid_file : str or pathlike
         File path to MODFLOW 6 binary grid (``*.dis.grb``) file. Not needed for MFNWT
+    cell_connections_df : DataFrame
+        DataFrame of cell connections that can be provided as an alternative to bindary_grid_file,
+        to avoid having to get the connections with each call to get_qx_qy_qz. This can
+        be produced by the :meth:``mfsetup.grid.MFsetupGrid.intercell_connections`` method.
+        Must have following columns:
+
+        === =============================================================
+        n   from zero-based node number
+        kn  from zero-based layer
+        in  from zero-based row
+        jn  from zero-based column
+        m   to zero-based node number
+        kn  to zero-based layer
+        in  to zero-based row
+        jn  to zero-based column
+        === =============================================================
+
     version : str
         MODFLOW version- 'mf6' or other. If not 'mf6', the cell budget output
         is assumed to be formatted similar to a MODFLOW 2005 style model.
@@ -153,16 +79,31 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
     Qx, Qy, Qz : tuple of 2 or 3D numpy arrays
         Volumetric or specific discharge fluxes across cell faces.
     """
-
+    msg = 'Getting discharge...'
+    if specific_discharge:
+        msg = 'Getting specific discharge...'
+    print(msg)
+    ta = time.time()
     if version == 'mf6':
-        assert binary_grid_file is not None, 'Must specify mf6 binary grid file'
-        # get dataframe of flow at each n to m cell connection
-        df = get_flowja_face(cell_budget_file, binary_grid_file=binary_grid_file,
-                            kstpkper=kstpkper, specific_discharge=specific_discharge)
+        # get the cell connections
+        if cell_connections_df is not None:
+            df = cell_connections_df
+        elif binary_grid_file is not None:
+            df = get_intercell_connections(binary_grid_file)
+        else:
+            raise ValueError("Must specify a binary_grid_file or cell_connections_df.")
 
-        # get grid info
-        bgf = MfGrdFile(binary_grid_file)
-        nlay, nrow, ncol = bgf.modelgrid.nlay, bgf.modelgrid.nrow, bgf.modelgrid.ncol
+        # get the flows
+        # this constitutes almost all of the execution time for this fn
+        t1 = time.time()
+        if isinstance(cell_budget_file, str) or isinstance(cell_budget_file, Path):
+            cbb = bf.CellBudgetFile(cell_budget_file)
+        else:
+            cbb = cell_budget_file
+        nlay, nrow, ncol = cbb.shape
+        flowja = cbb.get_data(text='FLOW-JA-FACE', kstpkper=kstpkper)[0][0, 0, :]
+        df['q'] = flowja[df['qidx']]
+        print(f"getting flows from budget file took {time.time() - t1:.2f}s\n")
 
         # get arrays of flow through cell faces
         # Qx (right face; TODO: confirm direction)
@@ -180,7 +121,6 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
         bfdf = df.loc[(df['kn'] < df['km'])]
         qz = np.zeros((nlay, nrow, ncol))
         qz[bfdf['kn'].values, bfdf['in'].values, bfdf['jn'].values] = -bfdf.q.values
-
     else:
         if isinstance(cell_budget_file, str) or isinstance(cell_budget_file, Path):
             cbb = bf.CellBudgetFile(cell_budget_file)
@@ -211,7 +151,6 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
 
         delr_gridp, delc_gridp = np.meshgrid(modelgrid.delr,
                                             modelgrid.delc)
-
         nlay, nrow, ncol = modelgrid.shape
 
         # multiply average thickness by width (along rows or cols) to
@@ -237,6 +176,7 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
         qy /= qy_face_areas
         qz /= qz_face_areas
 
+    print(f"{msg} took {time.time() - ta:.2f}s\n")
     return qx, qy, qz
 
 class Tmr:
@@ -918,17 +858,23 @@ class Tmr:
             #py = self.y_jface_parent
             #pz = self.z_jface_parent
             #px, py, pz = self.parent_xyzcellfacecenters['right']
-            jface_interp = Interpolator((px, py, pz),
-                                        #self.inset_boundary_cell_faces[['x', 'y', 'z']].T.values,
-                                        self.inset_boundary_cells[['x', 'y', 'z']].T.values,
-                                        d=3, source_values_mask=self._source_grid_mask
-                                        )
-            _ = jface_interp.interp_weights
+            #jface_interp = Interpolator((px, py, pz),
+            #                            #self.inset_boundary_cell_faces[['x', 'y', 'z']].T.values,
+            #                            self.inset_boundary_cells[['x', 'y', 'z']].T.values,
+            #                            d=3, source_values_mask=self._source_grid_mask
+            #                            )
+            #_ = jface_interp.interp_weights
 
             #kface_interp = Interpolator((self.x_kface_parent, self.y_kface_parent, self.z_kface_parent),
             #                            self.inset_boundary_cells[['x', 'y', 'z']].T.values,
             #                            d=3)
             #_ = kface_interp.interp_weights
+
+            # get a dataframe of cell connections
+            # (that can be reused with subsequent stress periods)
+            cell_connections_df = None
+            if self.parent.version == 'mf6':
+                cell_connections_df = get_intercell_connections(self.parent_binary_grid_file)
 
             for inset_per, parent_per in self.inset_parent_period_mapping.items():
                 print(f'for stress period {inset_per}', end=', ')
@@ -941,16 +887,14 @@ class Tmr:
                     parent_periods.append(parent_per)
                 parent_kstpkper = last_steps[parent_per], parent_per
 
-                # get specific discharge
+                # get parent specific discharge for inset area
                 qx, qy, qz = get_qx_qy_qz(self.parent_cell_budget_file,
-                                            self.parent_binary_grid_file,
-                                            version=self.parent.version,
-                                            model_top=self.parent.modelgrid.top,
-                                            model_bottom_array=self.parent.modelgrid.botm,
-                                            kstpkper=parent_kstpkper,
-                                            specific_discharge=True,
-                                            modelgrid=self.parent.modelgrid,
-                                            headfile=self.parent_head_file)
+                                          cell_connections_df=cell_connections_df,
+                                          version=self.parent.version,
+                                          kstpkper=parent_kstpkper,
+                                          specific_discharge=True,
+                                          modelgrid=self.parent.modelgrid,
+                                          headfile=self.parent_head_file)
 
                 # pad the two parent flux arrays on the top and bottom
                 # so that inset cells above and below the top/bottom cell centers
@@ -970,10 +914,13 @@ class Tmr:
                 # interpolate q at the four different face orientations (e.g. fluxdir)
 
                 # interpolate inset boundary heads from 3D parent head solution
+                t2 = time.time()
                 y_flux = iface_interp.interpolate(qy, method='linear')
-                x_flux = jface_interp.interpolate(qx, method='linear')
+                x_flux = iface_interp.interpolate(qx, method='linear')
                 # v_flux = kface_interp.interpolate(qz, method='linear')
+                f"interpolation took {time.time() - t2:.2f}s"
 
+                t2 = time.time()
                 self.inset_boundary_cell_faces = self.inset_boundary_cell_faces.assign(
                     qx_interp=x_flux,
                     qy_interp=y_flux)#,
@@ -1012,7 +959,8 @@ class Tmr:
                 # (consistent with parent model cell being inactive)
                 keep = (df['idomain'] > 0) & ~df['q'].isna()
                 dfs.append(df.loc[keep].copy())
-                print("took {:.2f}s".format(time.time() - t1))
+                f"assigning face fluxes took {time.time() - t2:.2f}s"
+                print(f"took {time.time() - t1:.2f}s total")
 
             df = pd.concat(dfs)
             # drop duplicate cells (accounting for stress periods)

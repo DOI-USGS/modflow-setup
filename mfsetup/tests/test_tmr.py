@@ -56,8 +56,6 @@ def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_disch
     m6 = parent_model_mf6
     qx6, qy6, qz6 = get_qx_qy_qz(mf6_ws / 'tmr_parent.cbc', binary_grid_file=mf6_ws / 'tmr_parent.dis.grb',
                                 version='mf6',
-                                model_top=m6.dis.top.array,
-                                model_bottom_array=m6.dis.botm.array,
                                 specific_discharge=specific_discharge,
                                 modelgrid=m6.modelgrid,
                                 headfile=mf6_ws / 'tmr_parent.hds')
@@ -69,8 +67,6 @@ def test_get_qx_qy_qz(tmpdir, parent_model_mf6, parent_model_nwt, specific_disch
     mnwt = parent_model_nwt
     qxnwt, qynwt, qznwt = get_qx_qy_qz(mfnwt_ws / 'tmr_parent_nwt.cbc',
                                        version='mfnwt',
-                                       model_top=mnwt.dis.top.array,
-                                       model_bottom_array=mnwt.dis.botm.array,
                                        specific_discharge=specific_discharge,
                                        modelgrid=mnwt.modelgrid,
                                        headfile=mfnwt_ws / 'tmr_parent_nwt.hds')
