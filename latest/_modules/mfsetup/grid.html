@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.post337+gf8e6d65 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.post338+g85cc44e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post337+gf8e6d65
+                0.post338+g85cc44e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -110,6 +110,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">pyproj</span>
 <span class="kn">from</span> <span class="nn">flopy.discretization</span> <span class="kn">import</span> <span class="n">StructuredGrid</span>
+<span class="kn">from</span> <span class="nn">flopy.mf6.utils.binarygrid_util</span> <span class="kn">import</span> <span class="n">MfGrdFile</span>
 <span class="kn">from</span> <span class="nn">geopandas.geodataframe</span> <span class="kn">import</span> <span class="n">GeoDataFrame</span>
 <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_proj_str</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">shp2df</span>
 <span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
@@ -192,7 +193,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delc</span><span class="p">,</span> <span class="n">delr</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">laycbd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenuni</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">laycbd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenuni</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">xoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MFsetupGrid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">delc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delc</span><span class="p">),</span> <span class="n">delr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delr</span><span class="p">),</span>
@@ -212,6 +213,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># MODFLOW 6 binary grid file, for getting intercell connections</span>
+        <span class="c1"># (needed for reading cell budget files)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_grid_file</span> <span class="o">=</span> <span class="n">binary_grid_file</span>
 
         <span class="c1"># if no epsg, set from proj4 string if possible</span>
         <span class="c1">#if epsg is None and proj_str is not None and &#39;epsg&#39; in proj_str.lower():</span>
@@ -372,6 +377,71 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pandas DataFrame of flow connections between grid cells.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_intercell_connections</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top</span>
+
+    <span class="nd">@top</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_top</span> <span class="o">=</span> <span class="n">top</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">botm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_botm</span>
+
+    <span class="nd">@botm</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">botm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">botm</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_StructuredGrid__nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_StructuredGrid__ncol</span><span class="p">)</span> <span class="o">!=</span> <span class="n">botm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;botm array shape is inconsistent with the model grid&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_StructuredGrid__nlay</span> <span class="o">=</span> <span class="n">botm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_botm</span> <span class="o">=</span> <span class="n">botm</span>
+
+<div class="viewcode-block" id="MFsetupGrid.get_intercell_connections"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_intercell_connections">[docs]</a>    <span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binary_grid_file : str or pathlike</span>
+<span class="sd">            MODFLOW 6 binary grid file</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df : DataFrame</span>
+<span class="sd">            Intercell connections, with the following columns:</span>
+
+<span class="sd">            === =============================================================</span>
+<span class="sd">            n   from zero-based node number</span>
+<span class="sd">            kn  from zero-based layer</span>
+<span class="sd">            in  from zero-based row</span>
+<span class="sd">            jn  from zero-based column</span>
+<span class="sd">            m   to zero-based node number</span>
+<span class="sd">            kn  to zero-based layer</span>
+<span class="sd">            in  to zero-based row</span>
+<span class="sd">            jn  to zero-based column</span>
+<span class="sd">            === =============================================================</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">binary_grid_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_grid_file</span> <span class="o">=</span> <span class="n">binary_grid_file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_grid_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A MODFLOW 6 binary_grid_file &quot;</span>
+                             <span class="s2">&quot;is needed to get intercell connections. &quot;</span>
+                             <span class="s2">&quot;Either run get_intercell_connections or &quot;</span>
+                             <span class="s2">&quot;re-instantiate the grid with a binary_grid_file argument.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span> <span class="o">=</span> <span class="n">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_grid_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span></div>
+
 <div class="viewcode-block" id="MFsetupGrid.get_dataframe"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get a pandas DataFrame of grid cell polygons</span>
 <span class="sd">        with i, j locations.</span>
@@ -393,7 +463,7 @@
         <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
         <span class="n">geoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
-                              <span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                               <span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
                               <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">geoms</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="mi">5070</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">layers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># add layer information</span>
@@ -527,6 +597,17 @@
     <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
+
+
+<div class="viewcode-block" id="get_kij_from_node3d"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_kij_from_node3d">[docs]</a><span class="k">def</span> <span class="nf">get_kij_from_node3d</span><span class="p">(</span><span class="n">node3d</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;For a consecutive cell number in row-major order</span>
+<span class="sd">    (row, column, layer), get the zero-based row, column position.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node2d</span> <span class="o">=</span> <span class="n">node3d</span> <span class="o">%</span> <span class="p">(</span><span class="n">nrow</span> <span class="o">*</span> <span class="n">ncol</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">node3d</span> <span class="o">//</span> <span class="p">(</span><span class="n">nrow</span> <span class="o">*</span> <span class="n">ncol</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">node2d</span> <span class="o">//</span> <span class="n">ncol</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">node2d</span> <span class="o">%</span> <span class="n">ncol</span>
+    <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
 
 
 <div class="viewcode-block" id="get_grid_bounding_box"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_grid_bounding_box">[docs]</a><span class="k">def</span> <span class="nf">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
@@ -1080,6 +1161,68 @@
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">model_x</span><span class="p">,</span> <span class="n">model_y</span><span class="p">)</span>
     <span class="n">z</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">zcellcenters</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="get_intercell_connections"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_intercell_connections">[docs]</a><span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="n">binary_grid_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get all of the connections between cells in a</span>
+<span class="sd">    MODFLOW 6 structured grid.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    binary_grid_file : str or pathlike</span>
+<span class="sd">        MODFLOW 6 binary grid file</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df : DataFrame</span>
+<span class="sd">        Intercell connections, with the following columns:</span>
+
+<span class="sd">        ==== =============================================================</span>
+<span class="sd">        n    from zero-based node number</span>
+<span class="sd">        kn   from zero-based layer</span>
+<span class="sd">        in   from zero-based row</span>
+<span class="sd">        jn   from zero-based column</span>
+<span class="sd">        m    to zero-based node number</span>
+<span class="sd">        kn   to zero-based layer</span>
+<span class="sd">        in   to zero-based row</span>
+<span class="sd">        jn   to zero-based column</span>
+<span class="sd">        qidx index position of flow in cell budget file</span>
+<span class="sd">        ==== =============================================================</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Getting intercell connections...&#39;</span><span class="p">)</span>
+    <span class="n">ta</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">bgf</span> <span class="o">=</span> <span class="n">MfGrdFile</span><span class="p">(</span><span class="n">binary_grid_file</span><span class="p">)</span>
+    <span class="n">nrow</span> <span class="o">=</span> <span class="n">bgf</span><span class="o">.</span><span class="n">nrow</span>
+    <span class="n">ncol</span> <span class="o">=</span> <span class="n">bgf</span><span class="o">.</span><span class="n">ncol</span>
+    <span class="c1"># IA array maps cell number to connection number</span>
+    <span class="c1"># (one-based index number of first connection at each cell)?</span>
+    <span class="c1"># taking the forward difference then yields nconnections per cell</span>
+    <span class="n">ia</span> <span class="o">=</span> <span class="n">bgf</span><span class="o">.</span><span class="n">_datadict</span><span class="p">[</span><span class="s1">&#39;IA&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1"># Connections in the JA array correspond directly with the</span>
+    <span class="c1"># FLOW-JA-FACE record that is written to the budget file.</span>
+    <span class="n">ja</span> <span class="o">=</span> <span class="n">bgf</span><span class="o">.</span><span class="n">_datadict</span><span class="p">[</span><span class="s1">&#39;JA&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># cell connections</span>
+
+    <span class="n">all_n</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">qidx</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ia</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ipos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ia</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ia</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">all_n</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ja</span><span class="p">[</span><span class="n">ipos</span><span class="p">])</span>  <span class="c1"># m is the cell that n connects to</span>
+            <span class="n">qidx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ipos</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="n">all_n</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="n">m</span><span class="p">,</span> <span class="s1">&#39;qidx&#39;</span><span class="p">:</span> <span class="n">qidx</span><span class="p">})</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">get_kij_from_node3d</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;kn&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;in&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;jn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">get_kij_from_node3d</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;km&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;im&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;jm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Getting intercell connections took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">ta</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
 </pre></div>
 
            </div>
@@ -1090,7 +1233,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 04, 2022.
+      <span class="lastupdated">Last updated on May 05, 2022.
       </span></p>
   </div>
 

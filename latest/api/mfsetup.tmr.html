@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr module &mdash; modflow-setup 0.post337+gf8e6d65 documentation</title>
+  <title>mfsetup.tmr module &mdash; modflow-setup 0.post338+g85cc44e documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post337+gf8e6d65
+                0.post338+g85cc44e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -136,80 +136,53 @@
 <section id="module-mfsetup.tmr">
 <span id="mfsetup-tmr-module"></span><h1>mfsetup.tmr module<a class="headerlink" href="#module-mfsetup.tmr" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="mfsetup.tmr.get_flowja_face">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_flowja_face</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_budget_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_grid_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstpkper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_discharge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_flowja_face"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_flowja_face" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get DataFrame of FLOW-JA-FACE (cell by cell flow connections)
-from MODFLOW 6 budget output and binary grid file.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>cell_budget_file</strong><span class="classifier">str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile</span></dt><dd><p>File path or pointer to MODFLOW 6 cell budget file.</p>
-</dd>
-<dt><strong>binary_grid_file</strong><span class="classifier">str or pathlike</span></dt><dd><p>File path to MODFLOW 6 binary grid (<code class="docutils literal notranslate"><span class="pre">*.dis.grb</span></code>) file</p>
-</dd>
-<dt><strong>kstpkper</strong><span class="classifier">tuple</span></dt><dd><p>zero-based (time step, stress period)</p>
-</dd>
-<dt><strong>specific_discharge</strong><span class="classifier">bool</span></dt><dd><p>Option to return arrays of specific discharge (1D vector components)
-instead of volumetric fluxes.
-By default, False</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>df</strong><span class="classifier">DataFrame</span></dt><dd><p>DataFrame with one connection per row, with the following columns</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 22%" />
-<col style="width: 78%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>n</p></td>
-<td><p>zero-based from: cell number</p></td>
-</tr>
-<tr class="row-even"><td><p>m</p></td>
-<td><p>zero-based to: cell number</p></td>
-</tr>
-<tr class="row-odd"><td><p>q</p></td>
-<td><p>volumetric flux or specific discharge</p></td>
-</tr>
-<tr class="row-even"><td><p>kn, in, jn</p></td>
-<td><p>zero-based layer, row, column location of n cell (structured grids)</p></td>
-</tr>
-<tr class="row-odd"><td><p>km, im, jm</p></td>
-<td><p>zero-based layer, row, column location of m cell (structured grids)</p></td>
-</tr>
-</tbody>
-</table>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mfsetup.tmr.get_intercell_connections">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_intercell_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ja</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flowja</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_intercell_connections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_intercell_connections" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mfsetup.tmr.get_kij_from_node3d">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_kij_from_node3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node3d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_kij_from_node3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_kij_from_node3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>For a consecutive cell number in row-major order
-(row, column, layer), get the zero-based row, column position.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.tmr.get_qx_qy_qz">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_qx_qy_qz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_budget_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf6'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_bottom_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstpkper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_discharge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_qx_qy_qz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_qx_qy_qz" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tmr.</span></span><span class="sig-name descname"><span class="pre">get_qx_qy_qz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_budget_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_connections_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf6'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kstpkper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_discharge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tmr.html#get_qx_qy_qz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tmr.get_qx_qy_qz" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get 2 or 3D arrays of cell by cell flows across the cell faces
 (for structured grid models).</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
+<dd class="field-odd"><dl>
 <dt><strong>cell_budget_file</strong><span class="classifier">str, pathlike, or instance of flopy.utils.binaryfile.CellBudgetFile</span></dt><dd><p>File path or pointer to MODFLOW cell budget file.</p>
 </dd>
 <dt><strong>binary_grid_file</strong><span class="classifier">str or pathlike</span></dt><dd><p>File path to MODFLOW 6 binary grid (<code class="docutils literal notranslate"><span class="pre">*.dis.grb</span></code>) file. Not needed for MFNWT</p>
+</dd>
+<dt><strong>cell_connections_df</strong><span class="classifier">DataFrame</span></dt><dd><p>DataFrame of cell connections that can be provided as an alternative to bindary_grid_file,
+to avoid having to get the connections with each call to get_qx_qy_qz. This can
+be produced by the :meth:<code class="docutils literal notranslate"><span class="pre">mfsetup.grid.MFsetupGrid.intercell_connections</span></code> method.
+Must have following columns:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 95%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>from zero-based node number</p></td>
+</tr>
+<tr class="row-even"><td><p>kn</p></td>
+<td><p>from zero-based layer</p></td>
+</tr>
+<tr class="row-odd"><td><p>in</p></td>
+<td><p>from zero-based row</p></td>
+</tr>
+<tr class="row-even"><td><p>jn</p></td>
+<td><p>from zero-based column</p></td>
+</tr>
+<tr class="row-odd"><td><p>m</p></td>
+<td><p>to zero-based node number</p></td>
+</tr>
+<tr class="row-even"><td><p>kn</p></td>
+<td><p>to zero-based layer</p></td>
+</tr>
+<tr class="row-odd"><td><p>in</p></td>
+<td><p>to zero-based row</p></td>
+</tr>
+<tr class="row-even"><td><p>jn</p></td>
+<td><p>to zero-based column</p></td>
+</tr>
+</tbody>
+</table>
 </dd>
 <dt><strong>version</strong><span class="classifier">str</span></dt><dd><p>MODFLOW version- ‘mf6’ or other. If not ‘mf6’, the cell budget output
 is assumed to be formatted similar to a MODFLOW 2005 style model.</p>
@@ -256,7 +229,7 @@ specific_discharge=True</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 04, 2022.
+      <span class="lastupdated">Last updated on May 05, 2022.
       </span></p>
   </div>
 

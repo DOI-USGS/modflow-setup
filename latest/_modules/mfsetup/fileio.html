@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.fileio &mdash; modflow-setup 0.post337+gf8e6d65 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.post338+g85cc44e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post337+gf8e6d65
+                0.post338+g85cc44e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -932,7 +932,10 @@
         <span class="k">if</span> <span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  loading model </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
 
-        <span class="n">instance</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">flopy_mf6model_load</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">model_obj</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">model_rel_path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">flopy_mf6model_load</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">model_obj</span><span class="p">,</span>
+                                                        <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span>
+                                                        <span class="n">model_rel_path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                                                        <span class="n">load_only</span><span class="o">=</span><span class="n">load_only</span><span class="p">)</span>
 
         <span class="c1"># original flopy code to load model</span>
         <span class="c1">#instance._models[item[2]] = model_obj.load(</span>
@@ -1052,7 +1055,8 @@
     <span class="k">return</span> <span class="n">instance</span></div>
 
 
-<div class="viewcode-block" id="flopy_mf6model_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mf6model_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mf6model_load</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">model_rel_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="flopy_mf6model_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mf6model_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mf6model_load</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">model_rel_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
+                        <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Execute the code in flopy.mf6.MFmodel.load_base on an</span>
 <span class="sd">        existing instance of MF6model.&quot;&quot;&quot;</span>
 
@@ -1082,9 +1086,23 @@
     <span class="n">sim_struct</span> <span class="o">=</span> <span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span><span class="n">sim_struct</span>
     <span class="n">instance</span><span class="o">.</span><span class="n">_ftype_num_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">ftype</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">packages_ordered</span><span class="p">:</span>
+        <span class="n">ftype_orig</span> <span class="o">=</span> <span class="n">ftype</span>
         <span class="n">ftype</span> <span class="o">=</span> <span class="n">ftype</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">ftype</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">package_struct_objs</span> <span class="ow">or</span> <span class="n">ftype</span> <span class="ow">in</span> \
                 <span class="n">sim_struct</span><span class="o">.</span><span class="n">utl_struct_objs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">load_only</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">instance</span><span class="o">.</span><span class="n">_in_pkg_list</span><span class="p">(</span>
+                    <span class="n">priority_packages</span><span class="p">,</span> <span class="n">ftype_orig</span><span class="p">,</span> <span class="n">pname</span>
+                <span class="p">)</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">instance</span><span class="o">.</span><span class="n">_in_pkg_list</span><span class="p">(</span><span class="n">load_only</span><span class="p">,</span> <span class="n">ftype_orig</span><span class="p">,</span> <span class="n">pname</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">simulation</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">verbosity_level</span><span class="o">.</span><span class="n">value</span>
+                    <span class="o">&gt;=</span> <span class="n">VerbosityLevel</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">value</span>
+                <span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    skipping package </span><span class="si">{</span><span class="n">ftype</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
             <span class="k">if</span> <span class="n">model_rel_path</span> <span class="ow">and</span> <span class="n">model_rel_path</span> <span class="o">!=</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
                 <span class="c1"># strip off model relative path from the file path</span>
                 <span class="n">filemgr</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfpath</span>
@@ -1303,7 +1321,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 04, 2022.
+      <span class="lastupdated">Last updated on May 05, 2022.
       </span></p>
   </div>
 
