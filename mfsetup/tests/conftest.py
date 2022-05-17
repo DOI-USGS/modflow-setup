@@ -31,7 +31,7 @@ def project_root_path():
 
 @pytest.fixture(scope="session")
 def test_data_path(project_root_path):
-    """Root folder for the project (with setup.py),
+    """Root folder for the project (with pyproject.toml),
     two levels up from the location of this file.
     """
     return Path(project_root_path, 'mfsetup', 'tests', 'data')
