@@ -3,7 +3,12 @@ from os import path
 
 from setuptools import find_packages, setup
 
-import versioneer
+# ensure the current directory is on sys.path so versioneer can be imported
+# when pip uses PEP 517/518 build rules.
+# https://github.com/python-versioneer/python-versioneer/issues/193
+sys.path.append(path.dirname(__file__))
+
+import versioneer  # noqa: E402
 
 # NOTE: This file must remain Python 2 compatible for the foreseeable future,
 # to ensure that we error out properly for people with outdated setuptools
@@ -40,6 +45,7 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     description="Package to facilitate setup of a MODFLOW-6 groundwater flow model with the SFR package.",
     long_description=readme,
+    long_description_content_type='text/markdown',
     author="USGS MAP Project",
     author_email='aleaf@usgs.gov',
     url='https://github.com/aleaf/modflow-setup',

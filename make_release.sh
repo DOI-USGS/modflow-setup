@@ -17,8 +17,8 @@ echo "removing kruft..."
 #git clean -dfx
 
 echo "making the wheel..."
-python setup.py sdist
-python setup.py bdist_wheel
+python -m build
 
 echo "uploading to PyPI..."
+twine check --strict dist/*
 twine upload dist/* --cert ~/cert.pem
