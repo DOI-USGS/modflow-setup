@@ -11,7 +11,6 @@ from mfsetup.grid import get_ij
 from mfsetup.sourcedata import TransientTabularSourceData
 from mfsetup.wateruse import get_mean_pumping_rates, resample_pumping_rates
 
-
 def setup_wel_data(model, source_data=None, #for_external_files=True,
                    dropped_wells_file='dropped_wells.csv'):
     """Performs the part of well package setup that is independent of
@@ -161,21 +160,6 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                           exclude_steady_state=True,
                                                           model=model)
                     df = df.append(wu_resampled)
-
-
-    # boundary fluxes from parent model
-    if model.perimeter_bc_type == 'flux':
-        assert model.parent is not None, "need parent model for TMR cut"
-
-        # boundary fluxes
-        kstpkper = [(0, 0)]
-        tmr = Tmr(model.parent, model)
-
-        # parent periods to copy over
-        kstpkper = [(0, per) for per in model.cfg['model']['parent_stress_periods']]
-        bfluxes = tmr.get_inset_boundary_fluxes(kstpkper=kstpkper)
-        bfluxes['boundname'] = 'boundary_flux'
-        df = df.append(bfluxes)
 
     for col in ['per', 'k', 'i', 'j']:
         df[col] = df[col].astype(int)
