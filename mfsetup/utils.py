@@ -137,7 +137,11 @@ def get_packages(namefile):
             elif 'end packages' in line.lower():
                 read = False
             elif read:
-                package_name = line.strip().lower().split()[0]
+                package_name = line.strip().lower().split()
+                if len(package_name) > 0:
+                    package_name = package_name[0]
+                else:
+                    continue
                 if package_name not in {'bas6'}:
                     package_name = package_name.replace('6', '')
                 packages.append(package_name)

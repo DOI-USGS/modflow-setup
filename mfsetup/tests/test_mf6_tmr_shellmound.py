@@ -368,4 +368,3 @@ def test_model_setup_and_run(shellmound_tmr_model_setup_and_run):
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
         plt.savefig(m.model_ws / 'head_comp.pdf')
-    j=2

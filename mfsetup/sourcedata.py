@@ -291,7 +291,7 @@ class ArraySourceData(SourceData):
     """
     def __init__(self, variable, filenames=None, values=None, length_units='unknown', time_units='unknown',
                  dest_model=None, source_modelgrid=None, source_array=None,
-                 from_source_model_layers=None, datatype=None,
+                 from_source_model_layers=None, source_array_includes_model_top=False, datatype=None,
                  id_column=None, include_ids=None, column_mappings=None,
                  resample_method='linear',
                  vmin=-1e30, vmax=1e30, dtype=float,
@@ -313,6 +313,7 @@ class ArraySourceData(SourceData):
             if len(source_array.shape) == 2:
                 source_array = source_array.reshape(1, *source_array.shape)
             self.source_array = source_array.copy()
+        self.source_array_includes_model_top = source_array_includes_model_top
         self.dest_modelgrid = getattr(self.dest_model, 'modelgrid', None)
         self.datatype = datatype
         self.id_column = id_column
@@ -503,8 +504,11 @@ class ArraySourceData(SourceData):
                     # check source_k is a whole number to 4 decimal places
                     # and if is a layer in source_array
                     if np.round(source_k, 4) in range(self.source_array.shape[0]):
-                        if self.source_array.shape[0] - self.dest_model.nlay == 1:
-                            source_k +=1
+                        #if (self.source_array.shape[0] - self.dest_model.nlay == 1) and\
+                        #    ((source_k + 1) < self.source_array.shape[0]):
+                        #    source_k +=1
+                        if self.source_array_includes_model_top:
+                            source_k += 1
                         source_k = int(np.round(source_k, 4))
                         arr = self.source_array[source_k]
                     # destination model layers that are a weighted average
@@ -1225,6 +1229,7 @@ def setup_array(model, package, var, data=None,
                 # the botm array has to be handled differently
                 # because dest. layers may be interpolated between
                 # model top and first botm
+                source_array_includes_model_top = False
                 if source_variable == 'botm' and \
                         from_source_model_layers is not None and \
                         from_source_model_layers[0] < 0:
@@ -1233,6 +1238,7 @@ def setup_array(model, package, var, data=None,
                     source_array[0] = source_model.dis.top.array
                     source_array[1:] = source_model.dis.botm.array
                     from_source_model_layers = {k: v+1 for k, v in from_source_model_layers.items()}
+                    source_array_includes_model_top = True
                 else:
                     source_array = getattr(source_model, source_package).__dict__[source_variable].array
 
@@ -1253,6 +1259,7 @@ def setup_array(model, package, var, data=None,
                                          source_modelgrid=source_model.modelgrid,
                                          source_array=source_array,
                                          from_source_model_layers=from_source_model_layers,
+                                         source_array_includes_model_top=source_array_includes_model_top,
                                          length_units=model.cfg[modelname]['length_units'],
                                          time_units=model.cfg[modelname]['time_units'],
                                          vmin=vmin, vmax=vmax,
