@@ -30,8 +30,9 @@ def check_source_files(fileslist):
     if isinstance(fileslist, str):
         fileslist = [fileslist]
     for f in fileslist:
-        if not os.path.exists(f):
-            raise IOError('Cannot find {}'.format(f))
+        f = Path(f)
+        if not f.exists():
+            raise IOError(f'Cannot find {f.absolute()}')
 
 
 def load(filename):
