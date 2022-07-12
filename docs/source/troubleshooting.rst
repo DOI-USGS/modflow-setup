@@ -20,6 +20,6 @@ Updating Modflow-setup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ``conda list`` can also be used to check if you Modflow-setup is up to date.
 
-* if you installed Modflow-setup from GitHub and you need to incorporate a recently pushed bug fix: ``pip install --upgrade git+git://github.com/aleaf/modflow-setup@develop``
+* if you installed Modflow-setup from GitHub and you need to incorporate a recently pushed bug fix: ``pip install --upgrade git+https://github.com/aleaf/modflow-setup@develop``
 * if you cloned the Modflow-setup source code and need to incorporate a recently pushed bug fix, you will need to pull (``git pull``) and possibly reinstall (``pip install --upgrade -e .`` in the root folder of the source code).
 * in both cases, the version reported by ``conda list`` should match the latest commit hash. For example version ``0.post250.dev0+g9af1c61`` for the commit hash starting with ``9af1c61``.

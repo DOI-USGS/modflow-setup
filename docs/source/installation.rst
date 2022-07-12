@@ -79,14 +79,14 @@ Pip can be used to fetch Modflow-setup directly from GitHub:
 
 .. code-block:: bash
 
-    pip install git+git://github.com/aleaf/modflow-setup@develop
+    pip install git+https://github.com/aleaf/modflow-setup@develop
 
 Subsequent updates can then be made with
 
 .. code-block:: bash
 
     pip uninstall modflow-setup
-    pip install git+git://github.com/aleaf/modflow-setup@develop
+    pip install git+https://github.com/aleaf/modflow-setup@develop
 
 Installing the Modflow-setup source code in-place
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
