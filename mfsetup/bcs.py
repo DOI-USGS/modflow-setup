@@ -239,7 +239,7 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
     dfs = []
     for per, recs in data.data.items():
 
-        if recs is None or recs == 0:
+        if recs is None or len(recs) == 0:
             # add an empty dataframe if a stress period is
             # set to 0 (e.g. no pumping during a predevelopment
             # period)
@@ -467,7 +467,7 @@ def setup_flopy_stress_period_data(model, package, data, flopy_package_class,
                     else:
                         for col in variable_columns:
                             kspd[col] = group[col]
-                        if 'boundname' in group.columns and 'boundname' in kspd:
+                        if 'boundname' in group.columns and 'boundname' in kspd.dtype.names:
                             kspd['boundname'] = group['boundname']
                 spd[kper] = kspd
         else:
