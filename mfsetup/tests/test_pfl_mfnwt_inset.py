@@ -184,6 +184,7 @@ def test_dis_setup(pfl_nwt_with_grid):
     m.cfg['dis']['nstp'] = [1, 1, 1, 1]
     m.cfg['dis']['tsmult'] = [1, 1, 1, 1]
     m.cfg['dis']['steady'] = [1, 0, 0, 1]
+    m._perioddata = None
     dis = m.setup_dis()
     dis.write_file()
     arrayfiles = m.cfg['external_files']['top'] + \
@@ -205,6 +206,7 @@ def test_dis_setup(pfl_nwt_with_grid):
     del m.cfg['setup_grid']['botm']
     m.cfg['dis']['remake_top'] = True
     m.cfg['dis']['lenuni'] = 1 # feet
+    m.cfg['dis']['minimum_layer_thickness'] = 1/.3048 # feet
     m.cfg['setup_grid']['dxy'] = 20  # in CRS units
     m.remove_package('DIS')
     m.setup_grid()

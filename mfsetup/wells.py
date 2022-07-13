@@ -193,7 +193,27 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
     # record dropped wells in csv file
     # (which might contain wells dropped by other routines)
     if np.any(inactive):
-        #inactive_i, inactive_j = df.loc[inactive, 'i'].values, df.loc[inactive, 'j'].values
+        # try moving the wells to the closest active layer first
+        df['cellid'] = list(zip(df['k'], df['i'], df['j']))
+        idm = model.idomain
+        new_layers = {}
+        for i, r in df.loc[inactive].iterrows():
+            cellid = (r['k'], r['i'], r['j'])
+            if cellid not in new_layers:
+                k2 = move_to_active_layer(r['k'], r['i'], r['j'], idm)
+                new_layers[cellid] = (k2, r['i'], r['j'])
+                df.loc[df['cellid'] == cellid, 'k'] = k2
+
+        # get inactive cells again after moving layers
+        if model.version == 'mf6':
+            inactive = model.dis.idomain.array[df.k.values,
+                                            df.i.values,
+                                            df.j.values] < 1
+        else:
+            inactive = model.bas6.ibound.array[df.k.values,
+                                            df.i.values,
+                                            df.j.values] < 1
+
         dropped = df.loc[inactive].copy()
         dropped = dropped.groupby(['k', 'i', 'j']).first().reset_index()
         dropped['reason'] = 'in inactive cell'
@@ -465,6 +485,38 @@ def assign_layers_from_screen_top_botm(data, model,
         else:
             raise ValueError(f'Unrecognized argument for distribute_by: {distribute_by}')
     return data
+
+
+def move_to_active_layer(k, i, j, idomain):
+    """Given a k, i, j location, check that idomain is
+    > 0 (active). If it is < 1 (inactive), try the cells
+    above and below at the same i, j location, returning
+    the first active cell encountered.
+
+    Parameters
+    ----------
+    k : layer index
+    i : row index
+    j : column index
+    idomain : array indicating active/inactive cells
+
+    Returns
+    -------
+    k or k2 : new layer if an active cell is encountered,
+    the original layer if not.
+    """
+    if idomain[k, i, j] < 1:
+        for increment in range(idomain.shape[0] -1):
+            # lock at next layer below, and above
+            for sign in -1, 1:
+                k2 = k + increment * sign
+                if (k2 < idomain.shape[0]) and (k2 > -1):
+                    if idomain[k2, i, j] > 0:
+                        return k2
+    # if no other layers are active, return the original layer
+    return k
+
+
 
 
 def get_open_interval_thickness(m,

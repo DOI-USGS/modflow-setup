@@ -278,6 +278,8 @@ class MFsetupMixin():
                 parent_layers = self.cfg['parent'].get('inset_layer_mapping')
             elif isinstance(botm_source_data, dict) and 'from_parent' in botm_source_data:
                 parent_layers = botm_source_data.get('from_parent')
+            elif self.parent is not None:
+                parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
             else:
                 #parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
                 parent_layers = None
