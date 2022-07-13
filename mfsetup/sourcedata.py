@@ -507,7 +507,8 @@ class ArraySourceData(SourceData):
                         #if (self.source_array.shape[0] - self.dest_model.nlay == 1) and\
                         #    ((source_k + 1) < self.source_array.shape[0]):
                         #    source_k +=1
-                        if self.source_array_includes_model_top:
+                        if self.source_array_includes_model_top and\
+                            ((source_k + 1) < self.source_array.shape[0]):
                             source_k += 1
                         source_k = int(np.round(source_k, 4))
                         arr = self.source_array[source_k]

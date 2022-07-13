@@ -418,8 +418,15 @@ def test_lak_setup(get_pleasant_mf6_with_dis):
     with rasterio.open(bathy_raster) as src:
         bathy = np.squeeze(list(src.sample(zip([x], [y]))))
         bathy[(bathy == src.nodata) | (bathy == 0)] = np.nan
-    assert np.allclose(m.dis.botm.array[:2, i, j], m.dis.top[i, j])
-    assert np.allclose(m.dis.idomain.array[:2, i, j], 0)
+
+    # all inactive cells should have zero thickness
+    edges = [m.dis.top.array[i, j]] + m.dis.botm.array[:, i, j].tolist()
+    assert np.all((np.diff(edges) != 0) ==\
+        m.dis.idomain.array[:, i, j].astype(bool))
+    # original version of this test had the first two layers as inactive
+    # not sure why
+    #assert np.allclose(m.dis.botm.array[:2, i, j], m.dis.top[i, j])
+    #assert np.allclose(m.dis.idomain.array[:2, i, j], 0)
 
 
 def test_external_tables(get_pleasant_mf6_with_dis):
