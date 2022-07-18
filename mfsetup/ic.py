@@ -23,12 +23,18 @@ def setup_strt(model, package, strt=None, source_data_config=None,
     datatype = 'array3d'
     # model that strt values could come from
     source_model = model.parent
+    # for LGR models, use the ultimate parent model if there is one
+    if model._is_lgr:
+        source_data_config = model.parent.cfg['ic']['source_data']
+
     default_parent_source_data = model._parent_default_source_data
     strt_config = source_data_config.get('strt')
 
     # check for parent model and a binary file
     binary_file = False
     if strt_config is not None and 'from_parent' in strt_config:
+        if model._is_lgr:
+            source_model = source_model.parent
         if source_model is None:
             raise ValueError(("'from_parent' in configuration by no parent model."
                               f"{package} package, {model.name} model.\n"

@@ -220,9 +220,28 @@ def regrid3d(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
 
     # source model grid points
     px, py, pz = grid.xyzcellcenters
+
+    # pad z cell centers to avoid nans
+    # from dest cells that are above or below source cells
+    # pad top by top layer thickness
+    b1 = grid.top - grid.botm[0]
+    top = pz[0] + b1
+    # pad botm by botm layer thickness
+    if grid.shape[0] > 1:
+        b2 = -np.diff(grid.botm[-2:], axis=0)[0]
+    else:
+        b2 = b1
+    botm = pz[-1] - b2
+    pz = np.vstack([[top], pz, [botm]])
     nlay, nrow, ncol = pz.shape
     px = np.tile(px, (nlay, 1, 1))
     py = np.tile(py, (nlay, 1, 1))
+
+    # pad the source array (and mask) on the top and bottom
+    # so that dest cells above and below the top/bottom cell centers
+    # will be within the interpolation space
+    # (source x, y, z locations already contain this pad)
+    arr = np.pad(arr, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
 
     # apply the mask
     if mask1 is not None:
@@ -230,10 +249,18 @@ def regrid3d(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
         # tile the mask to nlay x nrow x ncol
         if len(mask1.shape) == 2:
             mask1 = np.tile(mask1, (nlay, 1, 1))
+        # pad the mask vertically to match the source array
+        elif (len(mask1.shape) == 3) and (mask1.shape[0] == (nlay - 2)):
+            mask1 = np.pad(mask1, pad_width=1, mode='edge')[:, 1:-1, 1:-1]
         arr = arr[mask1]
         px = px[mask1]
         py = py[mask1]
         pz = pz[mask1]
+    else:
+        px = px.ravel()
+        py = py.ravel()
+        pz = pz.ravel()
+        arr = arr.ravel()
 
     # dest modelgrid points
     x, y, z = grid2.xyzcellcenters
@@ -254,7 +281,7 @@ def regrid3d(arr, grid, grid2, mask1=None, mask2=None, method='linear'):
     bz = z[bk, bi, bj]
     # tweak the result slightly to resolve any apparent triangulation errors
     fixed = griddata((px, py, pz), arr,
-                     (bx, by, bz+0.0001), method='linear')
+                     (bx+0.0001, by+0.0001, bz+0.0001), method='linear')
     arr2[bk, bi, bj] = fixed
 
     # fill any remaining areas that are nan
