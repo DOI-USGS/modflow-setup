@@ -14,6 +14,7 @@ from flopy.utils import binaryfile as bf
 from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
 from mfsetup.fileio import dump, exe_exists, load, load_cfg, read_mf6_block
+from mfsetup.interpolate import regrid3d
 from mfsetup.mover import get_sfr_package_connections
 from mfsetup.testing import compare_inset_parent_values
 from mfsetup.utils import get_input_arguments
@@ -183,6 +184,23 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml, tmpdir):
         if 'stage_area_volume' in f:
             continue
         assert m.name in f or 'plsnt_lgr_inset' in f
+
+    binaryfile = m.cfg['ic']['source_data']['strt']['from_parent']['binaryfile']
+    kper = m.cfg['ic']['source_data']['strt']['from_parent']['stress_period']
+    phds = bf.HeadFile(binaryfile)
+    kstpkper = [kstpkper for kstpkper in phds.get_kstpkper() if kstpkper[1] == kper][-1]
+
+    from mfsetup.interpolate import regrid3d
+    inset_hds2 = regrid3d(phds.get_data(kstpkper),
+                          m.parent.modelgrid,
+                          m.inset['plsnt_lgr_inset'].modelgrid,
+                          mask1=None, mask2=None, method='linear')
+    diff = m.inset['plsnt_lgr_inset'].ic.strt.array - inset_hds2
+
+    # for some reason one random cell is different by 0.1
+    # not sure why
+    # verify that no other cells are off by more than 0.01
+    assert np.sum(np.abs(diff) > 0.01) <= 1
 
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
