@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; modflow-setup 0.post338+g85cc44e documentation</title>
+  <title>Installation &mdash; modflow-setup 0.post347+g2d02edf documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -16,6 +16,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
@@ -35,7 +36,7 @@
             <a href="index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post338+g85cc44e
+                0.post347+g2d02edf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -146,12 +147,12 @@
 }
 </style>
 <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
 <section id="installing-python-dependencies-with-conda">
-<h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this headline">¶</a></h2>
+<h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is through a  <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a>, using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a> as the package manager. A few packages are not available via Conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
 <section id="download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">
-<h3>Download and install the 64-bit <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a><a class="headerlink" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda" title="Permalink to this headline">¶</a></h3>
+<h3>Download and install the 64-bit <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a><a class="headerlink" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda" title="Permalink to this heading">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><p>Anaconda comes with a larger selection of popular data science and scientific packages, making it ideal for those who use python frequently for scientific computing.</p></li>
@@ -166,7 +167,7 @@
 </div></blockquote>
 </section>
 <section id="download-an-environment-file">
-<h3>Download an environment file<a class="headerlink" href="#download-an-environment-file" title="Permalink to this headline">¶</a></h3>
+<h3>Download an environment file<a class="headerlink" href="#download-an-environment-file" title="Permalink to this heading">¶</a></h3>
 <blockquote>
 <div><ul>
 <li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> with the minimum packages required to run Modflow-setup, or</p></li>
@@ -182,7 +183,7 @@
 </div></blockquote>
 </section>
 <section id="creating-a-conda-environment-using-mamba">
-<h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a><a class="headerlink" href="#creating-a-conda-environment-using-mamba" title="Permalink to this headline">¶</a></h3>
+<h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a><a class="headerlink" href="#creating-a-conda-environment-using-mamba" title="Permalink to this heading">¶</a></h3>
 <p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
 <p>While Conda can of course be used to create a Conda environment, the Mamba package solver is generally faster and more robust, especially for larger, more complex environments like the included <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code>. Mamba is a reimplementation of the conda package manager in C++.</p>
 <p>To get started, open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
@@ -207,12 +208,12 @@ mamba env create -f requirements.yml
 </div></blockquote>
 </section>
 <section id="keeping-the-conda-environment-up-to-date">
-<h3>Keeping the Conda environment up to date<a class="headerlink" href="#keeping-the-conda-environment-up-to-date" title="Permalink to this headline">¶</a></h3>
+<h3>Keeping the Conda environment up to date<a class="headerlink" href="#keeping-the-conda-environment-up-to-date" title="Permalink to this heading">¶</a></h3>
 <p>The python packages and other open source software libraries that Modflow-setup depends on are continually changing. Modflow-setup aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
 </section>
 </section>
 <section id="installing-modflow-setup">
-<h2>Installing Modflow-setup<a class="headerlink" href="#installing-modflow-setup" title="Permalink to this headline">¶</a></h2>
+<h2>Installing Modflow-setup<a class="headerlink" href="#installing-modflow-setup" title="Permalink to this heading">¶</a></h2>
 <p>There are several ways to install Modflow-setup. Regardless of the method, the installation must be performed in a python
 environment with the required dependencies. In the case of the Conda environment created above, the environment must be activated, so that right version of python is called when <code class="docutils literal notranslate"><span class="pre">python</span></code> is entered at the command line:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate mfsetup
@@ -220,19 +221,19 @@ environment with the required dependencies. In the case of the Conda environment
 </div>
 <p>(note that even with Mamba, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate/deactivate</span></code> are still used)</p>
 <section id="installing-the-latest-develop-version-of-modflow-setup">
-<h3>Installing the latest develop version of Modflow-setup<a class="headerlink" href="#installing-the-latest-develop-version-of-modflow-setup" title="Permalink to this headline">¶</a></h3>
+<h3>Installing the latest develop version of Modflow-setup<a class="headerlink" href="#installing-the-latest-develop-version-of-modflow-setup" title="Permalink to this heading">¶</a></h3>
 <p>Pip can be used to fetch Modflow-setup directly from GitHub:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+git://github.com/aleaf/modflow-setup@develop
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/aleaf/modflow-setup@develop
 </pre></div>
 </div>
 <p>Subsequent updates can then be made with</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip uninstall modflow-setup
-pip install git+git://github.com/aleaf/modflow-setup@develop
+pip install git+https://github.com/aleaf/modflow-setup@develop
 </pre></div>
 </div>
 </section>
 <section id="installing-the-modflow-setup-source-code-in-place">
-<h3>Installing the Modflow-setup source code in-place<a class="headerlink" href="#installing-the-modflow-setup-source-code-in-place" title="Permalink to this headline">¶</a></h3>
+<h3>Installing the Modflow-setup source code in-place<a class="headerlink" href="#installing-the-modflow-setup-source-code-in-place" title="Permalink to this heading">¶</a></h3>
 <p>Alternatively, if you intend to contribute to Modflow-setup (please do!) or update your install frequently, the best route is probably to clone the source code from git and install it in place.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/aleaf/modflow-setup.git
 <span class="nb">cd</span> modflow-setup
@@ -256,14 +257,14 @@ will work to remove the package, and the current version of the package (includi
 </section>
 </section>
 <section id="id1">
-<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <p>Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
 If you are encountering persistant issues with creating the conda environment,
 you may have better luck trying the install off of the USGS network (e.g. at home).
 See <a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">here</a> for more information
 about SSL verification on the USGS network, and to download the DOI SSL certificate.</p>
 <section id="id2">
-<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic">
 <li><p><a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">Download the DOI SSL certificate</a></p></li>
 <li><p><a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#config-file">Create a pip configuration file</a>, which may be specified at the user, environment, or system level. At the user level:</p>
@@ -286,7 +287,7 @@ where <code class="docutils literal notranslate"><span class="pre">$HOME</span><
 <p>Note that when you are off the USGS network, you may have to comment out the <code class="docutils literal notranslate"><span class="pre">cert=</span></code> line in the above pip configuration file to get <code class="docutils literal notranslate"><span class="pre">pip</span></code> to work.</p>
 </section>
 <section id="installing-the-doi-ssl-certificate-for-use-with-conda">
-<h3>Installing the DOI SSL certificate for use with conda<a class="headerlink" href="#installing-the-doi-ssl-certificate-for-use-with-conda" title="Permalink to this headline">¶</a></h3>
+<h3>Installing the DOI SSL certificate for use with conda<a class="headerlink" href="#installing-the-doi-ssl-certificate-for-use-with-conda" title="Permalink to this heading">¶</a></h3>
 <p>See <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify">these instructions</a>.
 This may or may not work. Basically, <code class="docutils literal notranslate"><span class="pre">ssl_verify:</span></code> needs to be set in your <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a> file to point
 to a valid SSL certificate, which may be different from the basic <code class="docutils literal notranslate"><span class="pre">DOIRootCA2.cer</span></code> file.</p>
@@ -310,21 +311,21 @@ and comment out the SSL certificate file, if it is specified. E.g.:</p>
 </ul>
 </section>
 <section id="troubleshooting-issues-with-the-usgs-network">
-<h3>Troubleshooting issues with the USGS network<a class="headerlink" href="#troubleshooting-issues-with-the-usgs-network" title="Permalink to this headline">¶</a></h3>
+<h3>Troubleshooting issues with the USGS network<a class="headerlink" href="#troubleshooting-issues-with-the-usgs-network" title="Permalink to this heading">¶</a></h3>
 <section id="ssl-related-error-messages-when-using-conda">
-<h4>SSL-related error messages when using conda<a class="headerlink" href="#ssl-related-error-messages-when-using-conda" title="Permalink to this headline">¶</a></h4>
+<h4>SSL-related error messages when using conda<a class="headerlink" href="#ssl-related-error-messages-when-using-conda" title="Permalink to this heading">¶</a></h4>
 <p>(with <code class="docutils literal notranslate"><span class="pre">SSL</span></code> mentioned in the message and possibly <code class="docutils literal notranslate"><span class="pre">bad</span> <span class="pre">handshake</span></code>)</p>
 <p>Make sure that the <code class="docutils literal notranslate"><span class="pre">conda</span></code> package installer is configured to use the USGS certificate
 (see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda"><span class="std std-ref">Installing the DOI SSL certificate for use with conda</span></a> above).</p>
 </section>
 <section id="ssl-related-error-messages-when-using-pip">
-<h4>SSL-related error messages when using pip<a class="headerlink" href="#ssl-related-error-messages-when-using-pip" title="Permalink to this headline">¶</a></h4>
+<h4>SSL-related error messages when using pip<a class="headerlink" href="#ssl-related-error-messages-when-using-pip" title="Permalink to this heading">¶</a></h4>
 <p>(something similar to <code class="docutils literal notranslate"><span class="pre">SSL:</span> <span class="pre">CERTIFICATE_VERIFY_FAILED</span></code>).</p>
 <p>Make sure that the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer is configured to use the USGS certificate
 (see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</a> above).</p>
 </section>
 <section id="if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message">
-<h4>If you are on the USGS network, using Windows, and you get this error message:<a class="headerlink" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message" title="Permalink to this headline">¶</a></h4>
+<h4>If you are on the USGS network, using Windows, and you get this error message:<a class="headerlink" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message" title="Permalink to this heading">¶</a></h4>
 <blockquote>
 <div><p>CondaHTTPError: HTTP 500 INTERNAL ERROR for url &lt;<a class="reference external" href="https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2">https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2</a>&gt;
 Elapsed: 00:30.647993</p>
@@ -354,7 +355,7 @@ so it needs to be commented out on other operating systems (normally it wouldn�
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 05, 2022.
+      <span class="lastupdated">Last updated on Jul 18, 2022.
       </span></p>
   </div>
 

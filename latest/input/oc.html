@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MODFLOW Output Control &mdash; modflow-setup 0.post338+g85cc44e documentation</title>
+  <title>MODFLOW Output Control &mdash; modflow-setup 0.post347+g2d02edf documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
@@ -35,7 +36,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post338+g85cc44e
+                0.post347+g2d02edf
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -137,9 +138,9 @@
 }
 </style>
 <section id="modflow-output-control">
-<h1>MODFLOW Output Control<a class="headerlink" href="#modflow-output-control" title="Permalink to this headline">¶</a></h1>
+<h1>MODFLOW Output Control<a class="headerlink" href="#modflow-output-control" title="Permalink to this heading">¶</a></h1>
 <section id="stress-period-input-format">
-<h2>Stress period input format<a class="headerlink" href="#stress-period-input-format" title="Permalink to this headline">¶</a></h2>
+<h2>Stress period input format<a class="headerlink" href="#stress-period-input-format" title="Permalink to this heading">¶</a></h2>
 <p>Regardless of the model version (MODFLOW-2005-style or MODFLOW 6), output control can be specified in a format similar to native MODFLOW 6 input:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">period_options</span><span class="p">:</span><span class="w"></span>
@@ -151,7 +152,7 @@
 <p>The above <code class="docutils literal notranslate"><span class="pre">period_options:</span></code> block would save the head and cell budget output on the last timestep of stress periods 0 through 9, and from 15 on, but turn off output saving for stress periods 10 through 14. This behavior is consistent with MODFLOW 6 but differs from MODFLOW-2005, where each stress periods must be explicitly included for output to be written. Other options besides <code class="docutils literal notranslate"><span class="pre">'last'</span></code> include <code class="docutils literal notranslate"><span class="pre">all,</span> <span class="pre">first,</span> <span class="pre">frequency</span> <span class="pre">&lt;frequency&gt;,</span> <span class="pre">and</span> <span class="pre">steps</span> <span class="pre">&lt;steps(&lt;nstp)&gt;</span></code>; see the MODFLOW 6 input instructions for more details.</p>
 </section>
 <section id="output-filenames-and-other-arguments">
-<h2>Output filenames and other arguments<a class="headerlink" href="#output-filenames-and-other-arguments" title="Permalink to this headline">¶</a></h2>
+<h2>Output filenames and other arguments<a class="headerlink" href="#output-filenames-and-other-arguments" title="Permalink to this heading">¶</a></h2>
 <p>For MODFLOW 6 models, the <code class="docutils literal notranslate"><span class="pre">head_fileout_fmt</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_fileout_fmt</span></code> arguments can also be supplied to tell Flopy where to save the head and cell budget files, and how to name them. Modflow-setup fills any format specifiers (<code class="docutils literal notranslate"><span class="pre">'{}'</span></code>) with the model name, and passes the resulting strings to the <code class="docutils literal notranslate"><span class="pre">head_filerecord</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_filerecord</span></code> arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> constructor.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.hds&#39;</span><span class="w"></span>
@@ -170,7 +171,7 @@
 <p>would set the unit numbers for the head, drawdown, budget, and ibound output files. See the Flopy documentation for more details. Invalid arguments are filtered out prior to calling the constructor.</p>
 </section>
 <section id="alternative-stress-period-input-formats">
-<h2>Alternative stress period input formats<a class="headerlink" href="#alternative-stress-period-input-formats" title="Permalink to this headline">¶</a></h2>
+<h2>Alternative stress period input formats<a class="headerlink" href="#alternative-stress-period-input-formats" title="Permalink to this heading">¶</a></h2>
 <p>As with other arguments, stress period input can also be directly specified in the Flopy input formats. For example, <code class="docutils literal notranslate"><span class="pre">stress_period_data</span></code> could be supplied for a MODFLOW-2005 model as it would be supplied to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructor:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">stress_period_data</span><span class="p">:</span><span class="w"></span>
@@ -192,7 +193,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 05, 2022.
+      <span class="lastupdated">Last updated on Jul 18, 2022.
       </span></p>
   </div>
 
