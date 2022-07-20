@@ -148,7 +148,7 @@ want to clone your fork to your machine::
 
     git clone git@github.com:your-user-name/modflow-setup.git modflow-setup-yourname
     cd modflow-setup-yourname
-    git remote add upstream git://github.com/modflow-setup/modflow-setup.git
+    git remote add upstream https://github.com/modflow-setup/modflow-setup.git
 
 This creates the directory `modflow-setup-yourname` and connects your repository to
 the upstream (main project) *modflow-setup* repository.
