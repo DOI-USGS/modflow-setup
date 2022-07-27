@@ -44,6 +44,9 @@ To get started, open an Anaconda Command Prompt on Windows or a terminal window 
 
 Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see `Considerations for USGS Users`_ below) and either:
 
+    .. note::
+        Creating the ``requirements.yml`` environment (or any environment with ``git+https: ...`` installs) requires Git to be installed and visible in the system path where ``env create`` is being run. If Git is installed and somehow not in the system path, it can be added to the system path on Windows 10 without admin. rights via the "environment variables" editor under User Accounts in the Control Panel (Google it).
+
     a) 	Update the environment
 
         .. code-block:: bash
