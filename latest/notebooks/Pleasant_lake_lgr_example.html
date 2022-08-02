@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pleasant Lake Example &mdash; modflow-setup 0.post353+g018c499 documentation</title>
+  <title>Pleasant Lake Example &mdash; modflow-setup 0.post356+g49893a2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post353+g018c499
+                0.post356+g49893a2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -410,7 +410,7 @@ div.rendered_html tbody tr:hover {
 needed, to simulate farfield water-use activity (chiefly irrigated agriculture) in order to delineate a limit of connection, as well as to incorporate distant hydrologic boundaries. Adopting a fine enough discretization for the lake detail throughout the farfield would have resulted in a model with more cells than could be practically managed. To mitigate this, three models were combined: a large regional model built with MODFLOW-NWT (Niswonger et al. 2011), an intermediate MODFLOW 6 model inset
 within the regional model to simulate the irrigated agriculture area, and a refined MODFLOW 6 inset model (nested within the intermediate model) to simulate the lake. Regional groundwater flow and the effects of distant boundaries were simulated with the MODFLOW-NWT model, which was coupled sequentially (one-way) to the MODFLOW 6 models through time-varying specified head boundaries along the intermediate MODFLOW 6 model perimeter. The two MODFLOW 6 models were coupled dynamically (both ways)
 within the groundwater flow solution, allowing for feedback between the models. Estimates of groundwater recharge for the MODFLOW models were provided by a soil water balance code (SWB; Westenbroek et al 2018) simulation that could consider alternative assumptions of climate and land use. Net infiltration estimates from the SWB model were conveyed to the Recharge Packages in the MODFLOW models using the NetCDF functionality in Modflow-setup.</p>
-<p><img alt="58d0cbed3b70410bbcb7f82d1d1da5c5" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
+<p><img alt="ed47664122c043e0ba2bc583ec30695c" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
 <p><strong>Figure 1</strong>: The full Pleasant Lake model domain with location map, showing the relationship between the regional, intermediate and LGR inset models, as well as the irrigation wells considered.</p>
 <p>Most details of the Fienen et al (2021) model are included here, but to reduce file sizes and execution time, a smaller Modflow-6 simulation domain is used. The smaller domain is for illustration purposes only, and is not intended to be adequate for representing pumping impacts or providing a sufficient distance to the perimeter boundaries.</p>
 <ul class="simple">
@@ -561,7 +561,7 @@ finished in 0.01s
 
 writing postproc/shps/plsnt_lgr_parent_grid.shp... Done
 creating shapely Polygons of grid cells...
-finished in 0.05s
+finished in 0.06s
 
 writing postproc/shps/plsnt_lgr_inset_grid.shp... Done
 </pre></div></div>
@@ -604,7 +604,7 @@ writing postproc/shps/plsnt_lgr_inset_grid.shp... Done
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Pleasant Lake test case version 0.1.post353+g018c499
+Pleasant Lake test case version 0.1.post356+g49893a2
 Parent model: /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/pleasant
 5 layer(s), 25 row(s), 25 column(s)
 delr: [200.00...200.00] meters
@@ -700,7 +700,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.post353+g018c499
+{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.post356+g49893a2
  Parent model: ./plsnt_lgr_parent
  5 layer(s), 70 row(s), 80 column(s)
  delr: [40.00...40.00] meters
@@ -761,7 +761,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7ff38b26efe0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f13f4815b40&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -821,7 +821,7 @@ INFORMATION: maxbound in (&#39;gwf6&#39;, &#39;wel&#39;, &#39;dimensions&#39;) c
     writing package lak_0...
     writing package obs_0...
     writing package obs_1...
-SFRmaker v. 0.9.1.post10+g706a282
+SFRmaker v. 0.9.2
 
 Running Flopy v. 3.3.6 diagnostics...
 passed.
@@ -929,7 +929,7 @@ liable for any damages resulting from the authorized or unauthorized
 use of the software.
 
 
- Run start date and time (yyyy/mm/dd hh:mm:ss): 2022/07/27 14:47:16
+ Run start date and time (yyyy/mm/dd hh:mm:ss): 2022/08/02 21:38:17
 
  Writing simulation list file: mfsim.lst
  Using Simulation name file: mfsim.nam
@@ -948,8 +948,8 @@ use of the software.
     Solving:  Stress period:    12    Time step:     1
     Solving:  Stress period:    13    Time step:     1
 
- Run end date and time (yyyy/mm/dd hh:mm:ss): 2022/07/27 14:47:21
- Elapsed run time:  4.738 Seconds
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2022/08/02 21:38:22
+ Elapsed run time:  4.711 Seconds
 
  Normal termination of simulation.
 </pre></div></div>
@@ -1397,7 +1397,7 @@ skipped, not implemented yet
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 27, 2022.
+      <span class="lastupdated">Last updated on Aug 02, 2022.
       </span></p>
   </div>
 
