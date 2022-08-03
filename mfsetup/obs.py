@@ -42,6 +42,11 @@ def read_observation_data(f=None, column_info=None,
     else:
         print('    y location col: {}'.format(ycol))
     df.rename(columns=rename, inplace=True)
+    # force observation names to strings
+    obsname_cols = ['obsname', 'hydlbl']
+    for c in obsname_cols:
+        if c in df.columns:
+            df[c] = df[c].astype(str)
     return df
 
 

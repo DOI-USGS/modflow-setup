@@ -1,4 +1,4 @@
-from mfsetup.obs import make_obsname
+from mfsetup.obs import make_obsname, read_observation_data
 
 
 def test_make_obsname():
@@ -21,3 +21,14 @@ def test_make_obsname():
         unique_names.add(result)
         assert len(result) <= maxlen
         assert result == expected[i]
+
+
+def test_read_observation_data(test_data_path):
+
+    csvfile = test_data_path / 'shellmound/tables/observations.csv'
+
+    results = read_observation_data(csvfile, column_info={},#'x_location_col', 'x',
+                                                          #'y_location_col', 'y'},
+                          column_mappings={'obsname': 'comid'})
+    assert results['obsname'].dtype == object
+    assert isinstance(results['obsname'].values[0], str)
