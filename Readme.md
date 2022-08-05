@@ -16,9 +16,9 @@ Modflow-setup is a Python package for automating the setup of MODFLOW groundwate
 
 Getting Started
 -----------------------------------------------
-For more details, see the [modflow-setup documentation](https://usgs.github.io/modflow-setup/)
+For more details, see the [modflow-setup documentation](https://doi-usgs.github.io/modflow-setup/)
 
-Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/latest/config-file.html) similar to one of the examples in the [Configuration File Gallery](https://usgs.github.io/modflow-setup/latest/config-file-gallery.html).
+Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/latest/config-file.html) similar to one of the examples in the [Configuration File Gallery](https:/doi-usgs.github.io/modflow-setup/latest/config-file-gallery.html).
 
 The yaml file summarizes source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
 
@@ -42,7 +42,7 @@ m.write_input()
 
 Installation
 -----------------------------------------------
-See the [Installation Instructions](https://usgs.github.io/modflow-setup/latest/installation.html)
+See the [Installation Instructions](https://doi-usgs.github.io/modflow-setup/latest/installation.html)
 
 
 How to cite

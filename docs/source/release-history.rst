@@ -21,4 +21,4 @@ Version 0.1 Initial release (2022-xx-xx)
 
 * see the `Configuration File Gallery`_ or the ``*.yml`` configuation files in mfsetup/tests/data folder for examples of valid input to modflow-setup
 
-.. _Configuration File Gallery: https://usgs.github.io/modflow-setup/docs/build/html/examples.html#configuration-file-gallery
+.. _Configuration File Gallery: https://doi-usgs.github.io/modflow-setup/docs/build/html/examples.html#configuration-file-gallery
