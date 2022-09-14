@@ -752,7 +752,14 @@ def rasterize(feature, grid, id_column=None,
         values = dict(zip(unique_values, range(1, len(unique_values) + 1)))
         numbers = [values[n] for n in df[id_column]]
     else:
-        numbers = df[id_column].tolist()
+        numbers = df[id_column].values
+        # add one if the lowest number is 0
+        # (zero indicates non-intersected raster cells)
+        if np.min(numbers) == 0:
+            numbers += 1
+        elif np.min(numbers) < 0:
+            raise ValueError("id_column must have positive integers!")
+        numbers = list(numbers)
 
     geoms = list(zip(df.geometry, numbers))
     result = features.rasterize(geoms,
