@@ -188,9 +188,11 @@ class Tmr:
     Parameters
     ----------
     parent_model : flopy model instance instance of parent model
-        Must have a valid, attached ModelGrid (modelgrid) attribute.
+        Must have a valid, attached ``modelgrid`` attribute that is an instance of
+        :class:`mfsetup.grid.MFsetupGrid`.
     inset_model : flopy model instance instance of inset model
-        Must have a valid, attached ModelGrid (modelgrid) attribute.
+        Must have a valid, attached ``modelgrid`` attribute that is an instance of
+        :class:`mfsetup.grid.MFsetupGrid`.
     parent_head_file : filepath
         MODFLOW binary head output
     parent_cell_budget_file : filepath
@@ -462,7 +464,10 @@ class Tmr:
                 (self.inset.parent_mask.shape == self.parent.modelgrid.xcellcenters.shape):
                 mask = self.inset.parent_mask
             else:
-                x, y = np.squeeze(self.inset.modelgrid.bbox.exterior.coords.xy)
+                #x, y = np.squeeze(self.inset.modelgrid.bbox.exterior.coords.xy)
+                l, r, b, t = self.inset.modelgrid.extent
+                x = np.array([r, r, l, l, r])
+                y = np.array([b, t, t, b, b])
                 pi, pj = get_ij(self.parent.modelgrid, x, y)
                 pad = 3
                 i0 = np.max([pi.min() - pad, 0])
@@ -523,7 +528,7 @@ class Tmr:
             df = gp.sjoin(grid_df, perimeter, op='intersects', how='inner')
             # add layers
             dfs = []
-            for k in range(self.inset.nlay):
+            for k in range(self.inset.modelgrid.nlay):
                 kdf = df.copy()
                 kdf['k'] = k
                 dfs.append(kdf)
