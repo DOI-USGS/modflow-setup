@@ -225,6 +225,13 @@ class MFsetupMixin():
     def modelgrid(self):
         if self._modelgrid is None:
             self.setup_grid()
+        # trap for instance where default (base) modelgrid
+        # instance is attached to the flopy model
+        # (because the grid hasn't been set up with)
+        # self._modelgrid.nlay will error in this case
+        # because of NotImplementedError in base class
+        elif self._modelgrid.grid_type is None:
+            pass
         elif self._modelgrid.nlay is None and 'DIS' in self.get_package_list():
             self.setup_grid()
         return self._modelgrid
