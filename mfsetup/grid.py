@@ -826,11 +826,11 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         to_grid_units_parent = convert_length_units(get_model_length_units(parent_model), grid_units)
         # parent model grid spacing in meters
         parent_delr_grid = np.round(parent_model.dis.delr.array[0] * to_grid_units_parent, 4)
-        if not parent_delr_grid % delr_grid == 0:
+        if not parent_delr_grid % delr_grid % parent_delr_grid == 0:
             raise ValueError('inset delr spacing of {} must be factor of parent spacing of {}'.format(delr_grid,
                                                                                                       parent_delr_grid))
         parent_delc_grid = np.round(parent_model.dis.delc.array[0] * to_grid_units_parent, 4)
-        if not parent_delc_grid % delc_grid == 0:
+        if not parent_delc_grid % delc_grid % parent_delc_grid == 0:
             raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_grid,
                                                                                                       parent_delc_grid))
 
