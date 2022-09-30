@@ -55,14 +55,14 @@ jobs:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-${{ matrix.python-version }}-${{
              matrix.run-type }}-${{ env.CACHE_NUMBER }}-${{
-             hashFiles('ci/test_environment.yml') }}
+             hashFiles('ci/test_environment.yaml') }}
 
     - name: Setup conda environment
       uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
         activate-environment: mfsetup_ci
-        environment-file: ci/test_environment.yml
+        environment-file: ci/test_environment.yaml
         python-version: '3.9'
         auto-activate-base: false
         # must be false in most cases
