@@ -49,10 +49,10 @@ See the [Installation Instructions](https://doi-usgs.github.io/modflow-setup/lat
 How to cite
 -----------------------------------------------
 ###### Citation for Modflow-setup
-Leaf, A.T. and Fienen, M.N. (2022) Modflow-setup: Robust automation of groundwater model construction. (in revision) Front. Earth Sci. x:xx. doi: 10.3389/xxx
+Leaf AT and Fienen MN (2022) Modflow-setup: Robust automation of groundwater model construction. Front. Earth Sci. 10:903965. https://doi.org/10.3389/feart.2022.903965
 
 ###### Software/Code Citation for Modflow-setup
-Leaf, A.T. and Fienen, M.N. (2022). Modflow-setup version 0.1, U.S. Geological Survey Software Release (IP-137457; in review), 1 Aug 2022. https://doi.org/10.5066/P9O3QWQ1
+Leaf, A.T. and Fienen, M.N. (2022). Modflow-setup version 0.1, U.S. Geological Survey Software Release, 30 Sep. 2022. https://doi.org/10.5066/P9O3QWQ1
 
 MODFLOW Resources
 -----------------------------------------------
