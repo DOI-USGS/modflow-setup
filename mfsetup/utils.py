@@ -127,6 +127,7 @@ def get_packages(namefile):
         read = True
         for line in src:
             if line.startswith('#') or \
+                    len(line.strip()) < 1 or \
                     line.lower().startswith('data') or \
                     line.lower().strip().startswith('list'):
                 continue
