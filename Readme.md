@@ -19,7 +19,7 @@ Getting Started
 -----------------------------------------------
 For more details, see the [modflow-setup documentation](https://aleaf.github.io/modflow-setup/)
 
-Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://aleaf.github.io/modflow-setup/latest/config-file.html) similar to one of the examples in the [Configuration File Gallery](https:/doi-usgs.github.io/modflow-setup/latest/config-file-gallery.html).
+Using a [yaml](https://en.wikipedia.org/wiki/YAML)-aware text editor, create a [configuration file](https://doi-usgs.github.io/modflow-setup/latest/config-file.html) similar to one of the examples in the [Configuration File Gallery](https://doi-usgs.github.io/modflow-setup/latest/config-file-gallery.html).
 
 The yaml file summarizes source data and parameter settings for setting up the various MODFLOW packages. To set up the model:
 
