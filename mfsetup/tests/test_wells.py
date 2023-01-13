@@ -115,7 +115,13 @@ def test_assign_layers_from_screen_top_botm(shellmound_model_with_dis, test_data
     # (layer 12 in this case)
     idomain = model.dis.idomain.array.copy()
     idomain[:5, i, j] = 0  # make top 5 layers inactive
-    model.dis.idomain = idomain
+    # update the external files
+    # (as of 3.3.7, flopy doesn't appear to allow updating
+    # an externally-based array in memory)
+    idm_files = model.cfg['dis']['griddata']['idomain']
+    for layer, arr2d in enumerate(idomain):
+        np.savetxt(idm_files[layer]['filename'], arr2d, fmt='%d')
+    #model.dis.idomain = idomain
     results = assign_layers_from_screen_top_botm(welldata2, model,
                                                 flux_col='q',
                                                 screen_top_col='screen_top',
