@@ -24,6 +24,13 @@ variable_packages = {'mf6': {'sy': 'sto',
                                 'vka': 'lpf',
                                 'ibound': 'bas6',
                                 'strt': 'bas6',
+                                },
+                     'mf2k': {'sy': 'lpf',
+                                'ss': 'lpf',
+                                'hk': 'lpf',
+                                'vka': 'lpf',
+                                'ibound': 'bas6',
+                                'strt': 'bas6',
                                 }
                      }
 
@@ -47,6 +54,13 @@ packages = {'mf6': {'upw': {'npf', 'sto'},
                        'tdis': {'dis'},
                        'ims': 'pcg2'
                        },
+            'mf2k': {'npf': {'lpf'},
+                       'sto': {'lpf'},
+                       'ic': {'bas6'},
+                       'dis': {'dis', 'bas6'},
+                       'tdis': {'dis'},
+                       'ims': 'pcg'
+                       },
             }
 
 
@@ -66,7 +80,7 @@ def get_variable_name(variable, model_version):
     """
     if model_version == 'mf6':
         return mf6_variables.get(variable, variable)
-    elif model_version in {'mfnwt', 'mf2005'}:
+    elif model_version in {'mfnwt', 'mf2005', 'mf2k'}:
         return mf2005_variables.get(variable, variable)
     else:
         msg = ('Could not get variable {}; '

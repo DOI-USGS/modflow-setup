@@ -1013,7 +1013,7 @@ class MFsetupMixin():
             self.parent.dis.lenuni = lenuni_values[parent_units]
 
         # make sure crs is populated, then get CRS units for the grid
-        if kwargs['epsg'] is not None:
+        if kwargs.get('epsg') is not None:
             kwargs['crs'] = pyproj.crs.CRS.from_epsg(kwargs['epsg'])
         elif kwargs['crs'] is not None:
             from gisutils import get_authority_crs
