@@ -545,8 +545,8 @@ def test_rch_setup(shellmound_model_with_dis):
     assert rch.recharge is not None
     # get the same data from the source file
     ds = xr.open_dataset(m.cfg['rch']['source_data']['recharge']['filename'])
-    x = xr.DataArray(m.modelgrid.xcellcenters.ravel(), dims='z')
-    y = xr.DataArray(m.modelgrid.ycellcenters.ravel(), dims='z')
+    x = m.modelgrid.xcellcenters[0, :]
+    y = m.modelgrid.ycellcenters[:, 0] # not sure if y should be flipped or not
 
     unit_conversion = convert_length_units('inches', 'meters')
 
@@ -597,7 +597,7 @@ def test_direct_rch_setup(shellmound_model_with_dis):
                          (('chd', ['head'], False),
                           ('drn', ['elev'], False),
                           ('ghb', ['bhead'], False),
-                          ('riv', ['stage'], {'"lake henry"'}),
+                          ('riv', ['stage'], {'lake henry'}),
                           )
                          )
 def test_basic_stress_package_setup(shellmound_model_with_dis, pckg_abbrv,
@@ -916,7 +916,8 @@ def test_model_setup_no_nans(model_setup):
     df = pd.read_csv(m.model_ws / 'external/riv_000.dat', delim_whitespace=True)
     # single RIV external file should have Lake Henry (from riv: block)
     # and Tallahatchie/Yazoo (via SFRmaker to_riv:)
-    assert set(df.boundname) == {'Lake Henry', 'Yazoo River', 'Tallahatchie River'}
+    # does flopy force boundnames to lower case as of v3.3.7?
+    assert set(df.boundname) == {'yazoo river', 'lake henry', 'tallahatchie river'}
 
 
 def test_model_setup_and_run(model_setup_and_run):

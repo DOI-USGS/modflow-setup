@@ -111,7 +111,12 @@ def test_remove_inactive_bcs(basic_model_instance):
     else:
         idm = m.dis.idomain.array
         idm[:, :, 0] = 0
-        m.dis.idomain = idm
+        idm_files = m.cfg['dis']['griddata']['idomain']
+        # update the external files
+        # (as of 3.3.7, flopy doesn't appear to allow updating
+        # an externally-based array in memory)
+        for layer, arr2d in enumerate(idm):
+            np.savetxt(idm_files[layer]['filename'], arr2d, fmt='%d')
         k, i, j = zip(*m.chd.stress_period_data.data[0]['cellid'])
         assert any(m.dis.idomain.array[k, i, j] == 0)
     external_files = m.cfg['chd']['stress_period_data']
