@@ -706,7 +706,7 @@ def rasterize(feature, grid, id_column=None,
     elif isinstance(feature, pd.DataFrame):
         df = feature.copy()
         df = gpd.GeoDataFrame(df, crs=crs)
-    elif isinstance(feature, collections.Iterable):
+    elif isinstance(feature, collections.abc.Iterable):
         # list of shapefiles
         if isinstance(feature[0], str) or isinstance(feature[0], Path):
             # use shp2df to read multiple shapefiles
@@ -716,7 +716,7 @@ def rasterize(feature, grid, id_column=None,
         else:
             df = pd.DataFrame({'geometry': feature})
             df = gpd.GeoDataFrame(df, crs=crs)
-    elif not isinstance(feature, collections.Iterable):
+    elif not isinstance(feature, collections.abc.Iterable):
         df = pd.DataFrame({'geometry': [feature]})
         df = gpd.GeoDataFrame(df, crs=crs)
     else:
