@@ -784,7 +784,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """
         # prior to writing output
         # remove any BCs in inactive cells
-        pckgs = ['CHD']
+        pckgs = ['chd', 'drn', 'ghb', 'riv', 'wel']
         for pckg in pckgs:
             package_instance = getattr(self, pckg.lower(), None)
             if package_instance is not None:
