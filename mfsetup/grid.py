@@ -822,7 +822,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                 delc_grid = delc_grid[0]
             else:
                 regular = False
-    if parent_model is not None:
+    if parent_model is not None and snap_to_parent:
         to_grid_units_parent = convert_length_units(get_model_length_units(parent_model), grid_units)
         # parent model grid spacing in meters
         parent_delr_grid = np.round(parent_model.dis.delr.array[0] * to_grid_units_parent, 4)
