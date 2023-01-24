@@ -430,7 +430,7 @@ class ArraySourceData(SourceData):
         elif isinstance(f, str):
             # sample "source_data" that may not be on same grid
             # TODO: add bilinear and zonal statistics methods
-            if any([f.lower().endswith(i) for i in ['asc', 'tif', 'tiff', 'geotiff', 'gtiff']]):
+            if any([f.lower().endswith(i) for i in ['asc', 'tif', 'tiff', 'geotiff', 'gtiff', 'vrt']]):
                 arr = get_values_at_points(f,
                                            self.dest_model.modelgrid.xcellcenters.ravel(),
                                            self.dest_model.modelgrid.ycellcenters.ravel(),
