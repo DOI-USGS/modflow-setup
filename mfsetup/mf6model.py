@@ -835,7 +835,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # add version info to file headers
         files = [self.namefile]
         files += [p.filename for p in self.packagelist]
-        files += [p.filename for k, p in self.simulation.package_key_dict.items()]
+        files += [p[0].filename for k, p in self.simulation.package_key_dict.items()]
         for f in files:
             add_version_to_fileheader(f, model_info=self.header)
 

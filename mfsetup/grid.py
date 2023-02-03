@@ -880,17 +880,17 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             except:
                 features_crs = get_proj_str(features_shapefile)
                 reproject_filter = True
-            filter = None
+            bbox_filter = None
             if parent_model is not None:
                 if reproject_filter:
-                    filter = project(parent_model.modelgrid.bbox,
+                    bbox_filter = project(parent_model.modelgrid.bbox,
                                      parent_model.modelgrid.crs, features_crs).bounds
                 else:
-                    filter = parent_model.modelgrid.bbox.bounds
+                    bbox_filter = parent_model.modelgrid.bbox.bounds
             shp2df_kwargs = {'dest_crs': crs}
             shp2df_kwargs = get_input_arguments(shp2df_kwargs, shp2df)
             df = shp2df(features_shapefile,
-                        filter=filter, **shp2df_kwargs)
+                        filter=bbox_filter, **shp2df_kwargs)
 
             # optionally subset shapefile data to specified features
             if id_column is not None and include_ids is not None:
