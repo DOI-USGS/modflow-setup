@@ -544,7 +544,7 @@ class MFsetupMixin():
             return np.array(arrays)
         return load_array(filename, shape=(self.nrow, self.ncol))
 
-    def load_features(self, filename, filter=None,
+    def load_features(self, filename, bbox_filter=None,
                       id_column=None, include_ids=None,
                       cache=True):
         """Load vector and attribute data from a shapefile;
@@ -566,7 +566,7 @@ class MFsetupMixin():
                     #authority = features_crs.to_authority()
                     #if authority is not None:
                     #    features_crs = pyproj.CRS.from_user_input(features_crs.to_authority())
-                    if filter is None:
+                    if bbox_filter is None:
                         if self.bbox is not None:
                             bbox = self.bbox
                         elif self.parent.modelgrid is not None:
@@ -575,9 +575,9 @@ class MFsetupMixin():
                             assert model_proj_str is not None
 
                         if features_crs != self.modelgrid.crs:
-                            filter = project(bbox, self.modelgrid.crs, features_crs).bounds
+                            bbox_filter = project(bbox, self.modelgrid.crs, features_crs).bounds
                         else:
-                            filter = bbox.bounds
+                            bbox_filter = bbox.bounds
 
                     # implement automatic reprojection in gis-utils
                     # maintaining backwards compatibility
@@ -1472,9 +1472,9 @@ class MFsetupMixin():
                     return
 
                 # create an sfrmaker.lines instance
-                filter = project(self.bbox, self.modelgrid.crs, 'epsg:4269').bounds
+                bbox_filter = project(self.bbox, self.modelgrid.crs, 'epsg:4269').bounds
                 lines = Lines.from_nhdplus_v2(NHDPlus_paths=nhdplus_paths,
-                                            filter=filter)
+                                            bbox_filter=bbox_filter)
             else:
                 for key in ['filename', 'filenames']:
                     if key in flowlines:
@@ -1497,10 +1497,10 @@ class MFsetupMixin():
                         if authority is not None:
                             shapefile_crs = pyproj.CRS.from_user_input(shapefile_crs.to_authority())
 
-                        filter = self.bbox.bounds
+                        bbox_filter = self.bbox.bounds
                         if shapefile_crs != self.modelgrid.crs:
-                            filter = project(self.bbox, self.modelgrid.crs, shapefile_crs).bounds
-                        kwargs['filter'] = filter
+                            bbox_filter = project(self.bbox, self.modelgrid.crs, shapefile_crs).bounds
+                        kwargs['bbox_filter'] = bbox_filter
                         # create an sfrmaker.lines instance
                         kwargs = get_input_arguments(kwargs, Lines.from_shapefile)
                         lines = Lines.from_shapefile(**kwargs)
