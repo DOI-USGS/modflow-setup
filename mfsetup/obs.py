@@ -174,7 +174,7 @@ def setup_head_observations(model, obs_info_files=None,
     df = pd.concat([heads_all_layers, non_heads], axis=0)
 
     # dtypes
-    assert df[obsname_column].dtype == np.object
+    assert df[obsname_column].dtype == object
     df['klay'] = df.klay.astype(int)
 
     if format == 'hyd':

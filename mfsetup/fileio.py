@@ -679,7 +679,7 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
                 if forgive:
                     try:
                         package_load_args = \
-                            list(inspect.getargspec(item.package.load))[0]
+                            list(inspect.getfullargspec(item.package.load))[0]
                         if "check" in package_load_args:
                             item.package.load(
                                 item.filename, m,
@@ -700,7 +700,7 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
                         files_not_loaded.append(item.filename)
                 else:
                     package_load_args = \
-                        list(inspect.getargspec(item.package.load))[0]
+                        list(inspect.getfullargspec(item.package.load))[0]
                     if "check" in package_load_args:
                         item.package.load(
                             item.filename, m,

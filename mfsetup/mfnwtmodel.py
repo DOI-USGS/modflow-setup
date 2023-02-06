@@ -3,10 +3,8 @@ import shutil
 import time
 from pathlib import Path
 
-import numpy as np
-
-np.warnings.filterwarnings('ignore')
 import flopy
+import numpy as np
 import pandas as pd
 
 fm = flopy.modflow
@@ -383,7 +381,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # Determine which hk, vka to use
         # load parent upw if it's needed and not loaded
         source_package = package
-        if np.any(np.array([hk, vka]) == None) and \
+        if None in [hk, vka] and \
                 'UPW' not in self.parent.get_package_list() and \
                 'LPF' not in self.parent.get_package_list():
             for ext, pckgcls in {'upw': fm.ModflowUpw,
