@@ -522,10 +522,10 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
             assert datetime_column in data.columns, \
                 "datetime_column needed for " \
                 "resampling irregular data to model stress periods"
-            if data[datetime_column].dtype == np.object:
+            if data[datetime_column].dtype == object:
                 data[datetime_column] = pd.to_datetime(data[datetime_column])
             if end_datetime_column in data.columns and \
-                    data[end_datetime_column].dtype == np.object:
+                    data[end_datetime_column].dtype == object:
                 data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])
             if start_datetime is None:
                 start_datetime = data[datetime_column].iloc[0]
@@ -547,7 +547,7 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
             # and end datetimes that are after the period start
             # in other words, include all values that overlap in time with the period
             else:
-                if data[end_datetime_column].dtype == np.object:
+                if data[end_datetime_column].dtype == object:
                     data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])
                 data_overlaps_period = (data[datetime_column] < end_datetime) & \
                                        (data[end_datetime_column] > start_datetime)

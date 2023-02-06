@@ -63,7 +63,8 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
     # add the boundnames
     if bc_cells.dtype == object:
         df['boundname'] = bc_cells.flat
-        df.loc[df.boundname.isna(), 'boundname'] = 'unnamed'
+        nan_boundnames = df.boundname.isna() | df.boundname.isin({'', 'nan'})
+        df.loc[nan_boundnames, 'boundname'] = 'unnamed'
     # cull to just the cells with bcs
     df = df.loc[cells_with_bc].copy()
 
