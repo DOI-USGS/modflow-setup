@@ -2,7 +2,18 @@
 Release History
 ===============
 
-Version 0.1 Initial release (2022-09-30)
+Version 0.2.0 (2023-02-06)
+----------------------------------------
+* add minimal support for MODFLOW-2000 parent models and variably-spaced structured grids
+    * relax requirement that inset cells align with parent cells
+    * add package translations between mf6 and mf2k
+* remove all basic stress package bcs from inactive cells prior to write
+* fix to allow for no epsg input argument to setup_grid (crs is now favored)
+* add support for virtual raster (`*.vrt` file) input
+* add support for parent MODFLOW model Name files with blank lines
+* other fixes to adapt to breaking changes in numpy 1.24, pandas, inspect, collections and SFRmaker
+
+Version 0.1.0 Initial release (2022-09-30)
 ----------------------------------------
 * support for constructing MODFLOW-NWT or MODFLOW-6 models from scratch
 * supported source dataset formats include GeoTiff, Arc-Ascii grids, shapefiles, NetCDF, and CSV files
