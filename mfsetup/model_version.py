@@ -32,7 +32,7 @@ def render_pep440_post(pieces, start_version='0'):
     Exceptions:
     1: no tags. 0.postDISTANCE[.dev0]
     """
-    if pieces["closest-tag"]:
+    if pieces["closest-tag"] and start_version == '0':
         rendered = pieces["closest-tag"]
         if pieces["distance"] or pieces["dirty"]:
             rendered += ".post%d" % pieces["distance"]

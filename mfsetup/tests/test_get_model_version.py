@@ -7,10 +7,12 @@ from mfsetup.model_version import get_versions
 from mfsetup.tests.conftest import basic_model_instance
 
 
-@pytest.mark.parametrize('start_version', ('0',
-                                           '3.0.0',
-                                           '3.0',
-                                           '3'
+@pytest.mark.parametrize('start_version', (
+    #'0' start_version=0 is the default, and
+    # only produces result below if there are no tags
+    '3.0.0',
+    '3.0',
+    '3'
                                            )
                          )
 def test_get_versions(start_version):
@@ -18,6 +20,7 @@ def test_get_versions(start_version):
                         start_version='')
     result = get_versions(path='.',
                           start_version=start_version)
+    #
     assert result['version'] == start_version + rest['version']
 
 
