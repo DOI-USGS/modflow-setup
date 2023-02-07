@@ -5,10 +5,10 @@ Modflow-setup is a Python package for automating the setup of MODFLOW groundwate
 
 
 ### Version 0.2
-![Tests](https://github.com/usgs/modflow-setup/workflows/Tests/badge.svg)
-[![codecov](https://codecov.io/gh/usgs/modflow-setup/branch/develop/graph/badge.svg?token=aWN47DYeIv)](https://codecov.io/gh/usgs/modflow-setup)
+![Tests](https://github.com/aleaf/modflow-setup/workflows/Tests/badge.svg)
+[![codecov](https://codecov.io/gh/aleaf/modflow-setup/branch/develop/graph/badge.svg?token=aWN47DYeIv)](https://codecov.io/gh/aleaf/modflow-setup)
 [![PyPI version](https://badge.fury.io/py/modflow-setup.svg)](https://badge.fury.io/py/modflow-setup)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/usgs/modflow-setup/develop?urlpath=lab/tree/examples)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/doi-usgs/modflow-setup/develop?urlpath=lab/tree/examples)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 
