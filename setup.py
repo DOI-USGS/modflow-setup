@@ -43,7 +43,7 @@ setup(
     name='modflow-setup',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description="Package to facilitate setup of a MODFLOW-6 groundwater flow model with the SFR package.",
+    description="Robust automation of MODFLOW model construction.",
     long_description=readme,
     long_description_content_type='text/markdown',
     author="USGS MAP Project",
