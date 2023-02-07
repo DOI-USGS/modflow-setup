@@ -359,7 +359,7 @@ class MFsetupMixin():
         """
         if self._model_version is None:
             self._model_version = get_versions(path=self.model_ws,
-                                   start_version=self.cfg['metadata']['start_version'])
+                                   start_version=str(self.cfg['metadata']['start_version']))
         return self._model_version
 
     @property
