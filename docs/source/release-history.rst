@@ -14,7 +14,7 @@ Version 0.2.0 (2023-02-06)
 * other fixes to adapt to breaking changes in numpy 1.24, pandas, inspect, collections and SFRmaker
 
 Version 0.1.0 Initial release (2022-09-30)
-----------------------------------------
+-----------------------------------------------
 * support for constructing MODFLOW-NWT or MODFLOW-6 models from scratch
 * supported source dataset formats include GeoTiff, Arc-Ascii grids, shapefiles, NetCDF, and CSV files
 * automatic reprojection of source datasets that have CRS information (GeoTiffs, shapefiles, etc.)
