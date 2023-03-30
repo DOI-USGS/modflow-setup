@@ -729,7 +729,10 @@ def rasterize(feature, grid, id_column=None,
         df.to_crs(grid.crs, inplace=True)
         if not df['geometry'].is_valid.all():
             df['geometry'] = [g.buffer(0) for g in df.geometry]
-        if not df['geometry'].is_valid.all():
+        geoms_are_valid = df['geometry'].is_valid.all() & \
+            (not df.geometry.is_empty.any()) & \
+                np.isfinite(df.geometry.bounds.sum().sum())
+        if not geoms_are_valid:
             raise ValueError('Something went wrong with reprojecting '
                              f'the input features from\n{orig_crs}\nto\n{grid.crs}\n'
                              'Check the input feature and model grid projections'
