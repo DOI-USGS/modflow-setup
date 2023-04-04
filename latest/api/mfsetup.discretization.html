@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization module &mdash; modflow-setup 0.post357+g6471806 documentation</title>
+  <title>mfsetup.discretization module &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post357+g6471806
+                0.2.0.post8+g86708ef
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -66,7 +67,28 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html#model-classes">Model classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#supporting-modules">Supporting modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.discretization module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.discretization module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.ModflowGwfdis"><code class="docutils literal notranslate"><span class="pre">ModflowGwfdis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.adjust_layers"><code class="docutils literal notranslate"><span class="pre">adjust_layers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.cellids_to_kij"><code class="docutils literal notranslate"><span class="pre">cellids_to_kij()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.create_vertical_pass_through_cells"><code class="docutils literal notranslate"><span class="pre">create_vertical_pass_through_cells()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.deactivate_idomain_above"><code class="docutils literal notranslate"><span class="pre">deactivate_idomain_above()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.fill_cells_vertically"><code class="docutils literal notranslate"><span class="pre">fill_cells_vertically()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.fill_empty_layers"><code class="docutils literal notranslate"><span class="pre">fill_empty_layers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.find_remove_isolated_cells"><code class="docutils literal notranslate"><span class="pre">find_remove_isolated_cells()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.fix_model_layer_conflicts"><code class="docutils literal notranslate"><span class="pre">fix_model_layer_conflicts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.get_layer"><code class="docutils literal notranslate"><span class="pre">get_layer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.get_layer_thicknesses"><code class="docutils literal notranslate"><span class="pre">get_layer_thicknesses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.make_ibound"><code class="docutils literal notranslate"><span class="pre">make_ibound()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.make_idomain"><code class="docutils literal notranslate"><span class="pre">make_idomain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.make_irch"><code class="docutils literal notranslate"><span class="pre">make_irch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.make_lgr_idomain"><code class="docutils literal notranslate"><span class="pre">make_lgr_idomain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.populate_values"><code class="docutils literal notranslate"><span class="pre">populate_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.verify_minimum_layer_thickness"><code class="docutils literal notranslate"><span class="pre">verify_minimum_layer_thickness()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.voxels_to_layers"><code class="docutils literal notranslate"><span class="pre">voxels_to_layers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.weighted_average_between_layers"><code class="docutils literal notranslate"><span class="pre">weighted_average_between_layers()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html">mfsetup.interpolate module</a></li>
@@ -98,9 +120,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Code Reference</a> &raquo;</li>
-      <li>mfsetup.discretization module</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code Reference</a></li>
+      <li class="breadcrumb-item active">mfsetup.discretization module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/mfsetup.discretization.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -140,7 +162,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.discretization.ModflowGwfdis">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">ModflowGwfdis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#ModflowGwfdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.ModflowGwfdis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfdis.html#flopy.mf6.modflow.mfgwfdis.ModflowGwfdis" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowGwfdis</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfdis.html#flopy.mf6.modflow.mfgwfdis.ModflowGwfdis" title="(in FloPy Documentation v3.3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowGwfdis</span></code></a></p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.discretization.ModflowGwfdis.thickness">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thickness</span></span><a class="headerlink" href="#mfsetup.discretization.ModflowGwfdis.thickness" title="Permalink to this definition">¶</a></dt>
@@ -560,8 +582,8 @@ by default 0.01.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 03, 2022.
+    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Apr 04, 2023.
       </span></p>
   </div>
 

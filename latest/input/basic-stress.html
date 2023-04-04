@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.post357+g6471806 documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post357+g6471806
+                0.2.0.post8+g86708ef
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -110,9 +111,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Input instructions by package</a> &raquo;</li>
-      <li>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Input instructions by package</a></li>
+      <li class="breadcrumb-item active">Specifying boundary conditions with the ‘basic’ MODFLOW stress packages</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/input/basic-stress.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -170,7 +171,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">filename:</span></code> path to the shapefile</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">boundname_col:</span></code> column in shapefile with feature names to be applied as <cite>boundnames</cite> in Modflow 6 input</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">all_touched:</span></code> argument to <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html#rasterio.features.rasterize" title="(in rasterio v1.4dev)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.features.rasterize()</span></code></a> that specifies whether all intersected grid cells should be included, or just the grid cells with centers inside the feature.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">all_touched:</span></code> argument to <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html#rasterio.features.rasterize" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.features.rasterize()</span></code></a> that specifies whether all intersected grid cells should be included, or just the grid cells with centers inside the feature.</p></li>
 <li><p>One or more variable columns: Optionally the shapefile can also supply steady-state variable values by feature in attribute columns named for the variables (e.g. <code class="docutils literal notranslate"><span class="pre">'head'</span></code>, <code class="docutils literal notranslate"><span class="pre">'bhead'</span></code>, etc.)</p></li>
 </ul>
 </div></blockquote>
@@ -689,8 +690,8 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 03, 2022.
+    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Apr 04, 2023.
       </span></p>
   </div>
 

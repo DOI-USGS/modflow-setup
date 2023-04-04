@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.fileio module &mdash; modflow-setup 0.post357+g6471806 documentation</title>
+  <title>mfsetup.fileio module &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post357+g6471806
+                0.2.0.post8+g86708ef
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -67,7 +68,33 @@
 <li class="toctree-l2"><a class="reference internal" href="index.html#model-classes">Model classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#supporting-modules">Supporting modules</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.fileio module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.fileio module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.add_version_to_fileheader"><code class="docutils literal notranslate"><span class="pre">add_version_to_fileheader()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.append_csv"><code class="docutils literal notranslate"><span class="pre">append_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.check_source_files"><code class="docutils literal notranslate"><span class="pre">check_source_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.dump"><code class="docutils literal notranslate"><span class="pre">dump()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.dump_json"><code class="docutils literal notranslate"><span class="pre">dump_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.dump_yml"><code class="docutils literal notranslate"><span class="pre">dump_yml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.exe_exists"><code class="docutils literal notranslate"><span class="pre">exe_exists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.flopy_mf2005_load"><code class="docutils literal notranslate"><span class="pre">flopy_mf2005_load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.flopy_mf6model_load"><code class="docutils literal notranslate"><span class="pre">flopy_mf6model_load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.flopy_mfsimulation_load"><code class="docutils literal notranslate"><span class="pre">flopy_mfsimulation_load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.load_array"><code class="docutils literal notranslate"><span class="pre">load_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.load_cfg"><code class="docutils literal notranslate"><span class="pre">load_cfg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.load_json"><code class="docutils literal notranslate"><span class="pre">load_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.load_modelgrid"><code class="docutils literal notranslate"><span class="pre">load_modelgrid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.load_yml"><code class="docutils literal notranslate"><span class="pre">load_yml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.read_ggofile"><code class="docutils literal notranslate"><span class="pre">read_ggofile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.read_lak_ggo"><code class="docutils literal notranslate"><span class="pre">read_lak_ggo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.read_mf6_block"><code class="docutils literal notranslate"><span class="pre">read_mf6_block()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.remove_file_header"><code class="docutils literal notranslate"><span class="pre">remove_file_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.save_array"><code class="docutils literal notranslate"><span class="pre">save_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.set_cfg_paths_to_absolute"><code class="docutils literal notranslate"><span class="pre">set_cfg_paths_to_absolute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.setup_external_filepaths"><code class="docutils literal notranslate"><span class="pre">setup_external_filepaths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.fileio.which"><code class="docutils literal notranslate"><span class="pre">which()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html">mfsetup.interpolate module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a></li>
@@ -98,9 +125,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Code Reference</a> &raquo;</li>
-      <li>mfsetup.fileio module</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code Reference</a></li>
+      <li class="breadcrumb-item active">mfsetup.fileio module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/mfsetup.fileio.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -359,8 +386,8 @@ layers or stress periods.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 03, 2022.
+    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Apr 04, 2023.
       </span></p>
   </div>
 

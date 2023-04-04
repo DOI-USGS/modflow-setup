@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.post357+g6471806 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -33,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post357+g6471806
+                0.2.0.post8+g86708ef
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -83,9 +84,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>mfsetup.mf6model</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mfsetup.mf6model</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -881,7 +882,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># prior to writing output</span>
         <span class="c1"># remove any BCs in inactive cells</span>
-        <span class="n">pckgs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CHD&#39;</span><span class="p">]</span>
+        <span class="n">pckgs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;chd&#39;</span><span class="p">,</span> <span class="s1">&#39;drn&#39;</span><span class="p">,</span> <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;riv&#39;</span><span class="p">,</span> <span class="s1">&#39;wel&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">pckg</span> <span class="ow">in</span> <span class="n">pckgs</span><span class="p">:</span>
             <span class="n">package_instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pckg</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">package_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -932,7 +933,7 @@
         <span class="c1"># add version info to file headers</span>
         <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">namefile</span><span class="p">]</span>
         <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagelist</span><span class="p">]</span>
-        <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
             <span class="n">add_version_to_fileheader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
 
@@ -1031,8 +1032,8 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 03, 2022.
+    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Apr 04, 2023.
       </span></p>
   </div>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; modflow-setup 0.post357+g6471806 documentation</title>
+  <title>Installation &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post357+g6471806
+                0.2.0.post8+g86708ef
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -51,19 +52,22 @@
 <li class="toctree-l1"><a class="reference internal" href="philosophy.html">     Philosophy</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">Download and install the 64-bit Anaconda python distribution or Miniconda</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-and-install-a-python-distribution-and-conda-like-package-installer">Download and install a python distribution and Conda-like package installer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#download-an-environment-file">Download an environment file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-conda-environment-using-mamba">Creating a Conda environment using Mamba</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#keeping-the-conda-environment-up-to-date">Keeping the Conda environment up to date</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#installing-modflow-setup">Installing Modflow-setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-and-updating-modflow-setup-from-pypi">Installing and updating Modflow-setup from PyPI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installing-the-latest-develop-version-of-modflow-setup">Installing the latest develop version of Modflow-setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installing-the-modflow-setup-source-code-in-place">Installing the Modflow-setup source code in-place</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#id1">Considerations for USGS Users</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Installing the DOI SSL certificate for use with pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks">Installing the IPython kernel to use Modflow-setup in Jupyter Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Considerations for USGS Users</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Installing the DOI SSL certificate for use with pip</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda">Installing the DOI SSL certificate for use with conda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#troubleshooting-issues-with-the-usgs-network">Troubleshooting issues with the USGS network</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-conda">SSL-related error messages when using conda</a></li>
@@ -111,8 +115,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Installation</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -151,18 +155,21 @@
 <section id="installing-python-dependencies-with-conda">
 <h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is through a  <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a>, using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a> as the package manager. A few packages are not available via Conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
-<section id="download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda">
-<h3>Download and install the 64-bit <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a><a class="headerlink" href="#download-and-install-the-64-bit-anaconda-python-distribution-or-miniconda" title="Permalink to this heading">¶</a></h3>
+<section id="download-and-install-a-python-distribution-and-conda-like-package-installer">
+<h3>Download and install a python distribution and Conda-like package installer<a class="headerlink" href="#download-and-install-a-python-distribution-and-conda-like-package-installer" title="Permalink to this heading">¶</a></h3>
+<p>There are many ways to do this:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Anaconda comes with a larger selection of popular data science and scientific packages, making it ideal for those who use python frequently for scientific computing.</p></li>
-<li><p>Miniconda is a minimal installer with a much smaller footprint, making it ideal for those who only want to use <code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code>.</p></li>
-<li><p><strong>Make sure to install Anaconda or Miniconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
-<ul>
+<li><p>The <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a> comes with a large selection of popular data science and scientific packages pre-installed.</p></li>
+<li><p><a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> is a minimal installer with a much smaller footprint, making it ideal for creating python environments dedicated to specific tasks (a recommended practice).</p></li>
+<li><p><a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Mambaforge</a> is like Miniconda, but pre-configured to use the <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a> installer, and only the <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> channel for getting packages (more below). If the above two options don’t work (for example, the Conda installer fails or gets stuck on the “solve” step), this may be your best option.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Make sure to install Anaconda or Miniconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.</p></li>
 <li><p>If your installer skips the “Destination Select” step, when you get to “Installation Type”, click “Change Install Location” and then “Install for me only.”</p></li>
-</ul>
-</li>
 </ul>
 </div></blockquote>
 </section>
@@ -185,8 +192,16 @@
 <section id="creating-a-conda-environment-using-mamba">
 <h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a><a class="headerlink" href="#creating-a-conda-environment-using-mamba" title="Permalink to this heading">¶</a></h3>
 <p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
-<p>While Conda can of course be used to create a Conda environment, the Mamba package solver is generally faster and more robust, especially for larger, more complex environments like the included <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code>. Mamba is a reimplementation of the conda package manager in C++.</p>
-<p>To get started, open an Anaconda Command Prompt on Windows or a terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
+<p>Before using Mamba, you will need to <a class="reference external" href="https://mamba.readthedocs.io/en/latest/installation.html">install it first</a>.</p>
+<p>Python packages are available from conda via channels. Conda comes preconfigured to install packages from the default channel, which is maintained by Anaconda, Inc. In general, you may have better luck exclusively using the <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> channel instead, which is community-based and intended to provide a single location to get any package, with a minimum of hassle. In general, it is bad practice to mix package channels within a single environment. You can read more <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">here</a>, but to set conda-forge as the default:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda config --add channels conda-forge
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are having trouble installing Mamba (for example, the conda package solver fails when you try to install it, or takes an excessively long time), you may have better luck uninstalling <a class="reference external" href="cleanuninstall">Anaconda completely</a> and installing <a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Mambaforge</a> instead, as directed in the Mamba install instructions. Mambaforge solves both of the above problems by providing a minimal python distribution and conda-style package installer that is preconfigured to use both <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> and <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a>.</p>
+</div>
+<p>Once you have a python distribution and mamba installed, to create the conda environment, open a new Anaconda Command Prompt on Windows or a new terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba env create -f requirements.yml
 </pre></div>
 </div>
@@ -213,7 +228,7 @@ mamba env create -f requirements.yml
 </section>
 <section id="keeping-the-conda-environment-up-to-date">
 <h3>Keeping the Conda environment up to date<a class="headerlink" href="#keeping-the-conda-environment-up-to-date" title="Permalink to this heading">¶</a></h3>
-<p>The python packages and other open source software libraries that Modflow-setup depends on are continually changing. Modflow-setup aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.8 and 3.7) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
+<p>The python packages and other open source software libraries that Modflow-setup depends on are continually changing. Modflow-setup aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.11 and 3.10) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
 </section>
 </section>
 <section id="installing-modflow-setup">
@@ -224,13 +239,35 @@ environment with the required dependencies. In the case of the Conda environment
 </pre></div>
 </div>
 <p>(note that even with Mamba, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate/deactivate</span></code> are still used)</p>
+<section id="installing-and-updating-modflow-setup-from-pypi">
+<h3>Installing and updating Modflow-setup from <a class="reference external" href="https://pypi.org/">PyPI</a><a class="headerlink" href="#installing-and-updating-modflow-setup-from-pypi" title="Permalink to this heading">¶</a></h3>
+<p>Once a suitable conda environment (that contains ALL of the dependencies) is made and activated, the simplest way to install Modflow-setup is from the Python Package Index using pip.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install modflow-setup
+</pre></div>
+</div>
+<p>Subsequent releases of Modflow-setup to PyPI can then be installed with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade modflow-setup
+</pre></div>
+</div>
+<p>Note that in some situations you may have to <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">uninstall</span> <span class="pre">modflow-setup</span></code> and then <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">modflow-setup</span></code>. You can always check
+what version of Modflow-setup you have within a python session with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mfsetup</span>
+<span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+<p>Or if you are using Conda, at the command line with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda list
+</pre></div>
+</div>
+</section>
 <section id="installing-the-latest-develop-version-of-modflow-setup">
 <h3>Installing the latest develop version of Modflow-setup<a class="headerlink" href="#installing-the-latest-develop-version-of-modflow-setup" title="Permalink to this heading">¶</a></h3>
-<p>Pip can be used to fetch Modflow-setup directly from GitHub:</p>
+<p>In some situations you may want the bleeding-edge version of Modflow-setup that is being actively developed on GitHub. For example,
+to incorporate a bug fix that was made after the latest release. Pip can also be used to fetch Modflow-setup directly from GitHub:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/aleaf/modflow-setup@develop
 </pre></div>
 </div>
-<p>Subsequent updates can then be made with</p>
+<p>(for the develop branch). Subsequent updates can then be made with</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip uninstall modflow-setup
 pip install git+https://github.com/aleaf/modflow-setup@develop
 </pre></div>
@@ -260,15 +297,36 @@ pip install -e .
 will work to remove the package, and the current version of the package (including the latest commit information) will be visible with <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">list</span></code>.</p>
 </section>
 </section>
-<section id="id1">
-<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<section id="installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks">
+<h2>Installing the IPython kernel to use Modflow-setup in Jupyter Notebooks<a class="headerlink" href="#installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks" title="Permalink to this heading">¶</a></h2>
+<p>This step may not be needed if you already have an existing Python environment with the packages required by Modflow-setup <em>and</em> Jupyter Notebook installed. However, if you’d like to use Modflow-setup in a Jupyter Notebook with the included <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> environment (specified in <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code>), you’ll most likely need to install the IPython kernel in that environment. You can do this at the command line or terminal window (with <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> activated):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m ipykernel install --user --name mfsetup --display-name <span class="s2">&quot;mfsetup&quot;</span>
+</pre></div>
+</div>
+<p>The first instance of <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> in this command is the environment to install the kernel to, and the second instance (in quotes) is the name that will appear in the <code class="docutils literal notranslate"><span class="pre">Kernel</span></code> menu within Jupyter Notebook. To use the kernel, simply select it from the <code class="docutils literal notranslate"><span class="pre">Kernel</span> <span class="pre">&gt;</span> <span class="pre">Change</span> <span class="pre">kernel</span></code> menu within  Jupyter Notebook.</p>
+</section>
+<section id="best-practices">
+<h2>Best practices<a class="headerlink" href="#best-practices" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Install the *conda distribution of your choice to your user account, NOT at the system level. Installing to your user means you have rights to delete and reinstall Anaconda as-needed, as well as to edit any configuration files for pip, Conda, etc. Installing at the system level also just seems to lead to more confusing problems with dependencies, at least in the USGS.</p></li>
+<li><p>Periodically (maybe a few times a year?) fully remove your *conda distribution and reinstall it. If you just can’t get things to work (packages won’t import or produce DLL errors on import, adding or upgrading a package takes a very long time or results in excessive upgrades or downgrades of other packages, etc.), fully removing and reinstalling *conda just may resolve your issues.</p></li>
+<li><p>Don’t use your base environment; create and delete environments as needed. Conda is generally pretty good about managing packages between environments without wasting a lot of disk space.</p></li>
+<li><p>Use an environment file (as above) to create a conda environment, instead of installing packages ad-hoc.</p></li>
+<li><p>Use Mamba instead of Conda; it just works better for environments with a lot of packages.</p></li>
+<li><p>After setting up the above conda environment, scan the screen output to make sure that everything installed correctly, especially the packages installed through pip.</p></li>
+<li><p>Avoid mixing package channels within a Conda environment. Strictly sticking to conda-forge may yield the best results.</p></li>
+<li><p>Use <a class="reference external" href="https://conda.github.io/conda-pack/">conda-pack</a>, rather than an overly-detailed environment file, to guarantee reproducibility.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
 <p>Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
 If you are encountering persistant issues with creating the conda environment,
 you may have better luck trying the install off of the USGS network (e.g. at home).
 See <a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">here</a> for more information
 about SSL verification on the USGS network, and to download the DOI SSL certificate.</p>
-<section id="id2">
-<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<section id="id5">
+<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic">
 <li><p><a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">Download the DOI SSL certificate</a></p></li>
 <li><p><a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#config-file">Create a pip configuration file</a>, which may be specified at the user, environment, or system level. At the user level:</p>
@@ -358,8 +416,8 @@ so it needs to be commented out on other operating systems (normally it wouldn�
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 03, 2022.
+    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Apr 04, 2023.
       </span></p>
   </div>
 

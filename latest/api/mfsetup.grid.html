@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid module &mdash; modflow-setup 0.post357+g6471806 documentation</title>
+  <title>mfsetup.grid module &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -18,6 +18,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -36,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.post357+g6471806
+                0.2.0.post8+g86708ef
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -68,7 +69,22 @@
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#supporting-modules">Supporting modules</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.grid module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.grid module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.MFsetupGrid"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_cellface_midpoint"><code class="docutils literal notranslate"><span class="pre">get_cellface_midpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_crs"><code class="docutils literal notranslate"><span class="pre">get_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_crs_length_units"><code class="docutils literal notranslate"><span class="pre">get_crs_length_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_grid_bounding_box"><code class="docutils literal notranslate"><span class="pre">get_grid_bounding_box()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_ij"><code class="docutils literal notranslate"><span class="pre">get_ij()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_intercell_connections"><code class="docutils literal notranslate"><span class="pre">get_intercell_connections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_kij_from_node3d"><code class="docutils literal notranslate"><span class="pre">get_kij_from_node3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_nearest_point_on_grid"><code class="docutils literal notranslate"><span class="pre">get_nearest_point_on_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_point_on_national_hydrogeologic_grid"><code class="docutils literal notranslate"><span class="pre">get_point_on_national_hydrogeologic_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.rasterize"><code class="docutils literal notranslate"><span class="pre">rasterize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.setup_structured_grid"><code class="docutils literal notranslate"><span class="pre">setup_structured_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.write_bbox_shapefile"><code class="docutils literal notranslate"><span class="pre">write_bbox_shapefile()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html">mfsetup.interpolate module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mfsetup.tmr.html">mfsetup.tmr module</a></li>
@@ -98,9 +114,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Code Reference</a> &raquo;</li>
-      <li>mfsetup.grid module</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code Reference</a></li>
+      <li class="breadcrumb-item active">mfsetup.grid module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/mfsetup.grid.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -142,7 +158,7 @@ the discretization module.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">MFsetupGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laycbd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenuni</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angrot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.discretization.structuredgrid.html#flopy.discretization.structuredgrid.StructuredGrid" title="(in flopy Documentation v3.3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StructuredGrid</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.discretization.structuredgrid.html#flopy.discretization.structuredgrid.StructuredGrid" title="(in FloPy Documentation v3.3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StructuredGrid</span></code></a></p>
 <p>Class representing a structured grid. Extends flopy.discretization.StructuredGrid
 to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).</p>
 <dl class="field-list">
@@ -179,7 +195,7 @@ over a PROJ string (see References)</p>
 <dt><strong>wkt</strong><span class="classifier">str, optional</span></dt><dd><p>Well-known text string describing model CRS.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.5.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 Can be any of:</p>
 <blockquote>
 <div><ul class="simple">
@@ -192,7 +208,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -615,7 +631,7 @@ an array of the strings will be returned.</p>
 </dd>
 <dt><strong>grid</strong><span class="classifier">grid.StructuredGrid instance</span></dt><dd></dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.3.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.5.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 Can be any of:</p>
 <blockquote>
 <div><ul class="simple">
@@ -628,7 +644,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -669,8 +685,8 @@ Can be any of:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2022, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 03, 2022.
+    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Apr 04, 2023.
       </span></p>
   </div>
 
