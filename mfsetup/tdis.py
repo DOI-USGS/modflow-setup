@@ -574,19 +574,19 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
     duplicated = pd.Series(list(zip(period_data[datetime_column],
                                     period_data[id_column],
                                     period_data[category_column]))).duplicated()
-    # if len(period_data) > 0:
-    if any(duplicated):
-        if resolve_duplicates_with == 'raise error':
-            duplicate_info = period_data.loc[duplicated.values]
-            msg = 'The following locations are duplicates which need to be resolved:\n'.format(duplicate_info.__str__())
-            raise ValueError(msg)
-        period_data.index.name = None
-        by_period = period_data.groupby([id_column, datetime_column]).first().reset_index()
-        by_period[data_column] = getattr(period_data.groupby([id_column, datetime_column]),
-                                            resolve_duplicates_with)()[data_column].values
-        period_data = by_period
     aggregated = period_data.groupby(id_column).first()
-    aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
+    for data_column in data_columns:
+        if any(duplicated):
+            if resolve_duplicates_with == 'raise error':
+                duplicate_info = period_data.loc[duplicated.values]
+                msg = 'The following locations are duplicates which need to be resolved:\n'.format(duplicate_info.__str__())
+                raise ValueError(msg)
+            period_data.index.name = None
+            by_period = period_data.groupby([id_column, datetime_column]).first().reset_index()
+            by_period[data_column] = getattr(period_data.groupby([id_column, datetime_column]),
+                                                resolve_duplicates_with)()[data_column].values
+            period_data = by_period
+        aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
     # if category column was argued, get counts of measured vs estimated
     # for each measurement location, for current stress period
     if categories:

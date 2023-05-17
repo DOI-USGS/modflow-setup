@@ -41,6 +41,7 @@ from mfsetup.utils import get_input_arguments
 renames = {'mult': 'multiplier',
            'elevation_units': 'length_units',
            'from_parent': 'from_source_model_layers',
+           'data_column': 'data_columns'
            }
 
 
@@ -972,18 +973,19 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
     """Subclass for handling tabular source data that
     represents a time series."""
 
-    def __init__(self, filenames, data_column, datetime_column, id_column,
+    def __init__(self, filenames, data_columns, datetime_column, id_column,
                  x_col='x', y_col='y', end_datetime_column=None, period_stats={0: 'mean'},
                  length_units='unknown', time_units='unknown', volume_units=None,
                  column_mappings=None, category_column=None,
-                 dest_model=None, resolve_duplicates_with='raise error'):
+                 dest_model=None, resolve_duplicates_with='raise error', **kwargs):
         SourceData.__init__(self, filenames=filenames,
                             length_units=length_units, time_units=time_units,
                             volume_units=volume_units,
                             dest_model=dest_model)
         TransientSourceDataMixin.__init__(self, period_stats=period_stats, dest_model=dest_model)
-
-        self.data_column = data_column
+        if isinstance(data_columns, str):
+            data_columns = [data_columns]
+        self.data_columns = data_columns
         self.datetime_column = datetime_column
         self.end_datetime_column = end_datetime_column
         self.id_column = id_column
@@ -1046,7 +1048,7 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
             aggregated = aggregate_dataframe_to_stress_period(df, id_column=self.id_column,
                                                               datetime_column=self.datetime_column,
                                                               end_datetime_column=self.end_datetime_column,
-                                                              data_column=self.data_column,
+                                                              data_column=self.data_columns,
                                                               category_column=self.category_column,
                                                               resolve_duplicates_with=self.resolve_duplicates_with,
                                                               **period_stat)
@@ -1054,8 +1056,9 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
             period_data.append(aggregated)
         dfm = pd.concat(period_data)
 
-        if self.data_column is not None:
-            dfm[self.data_column] *= self.unit_conversion
+        if self.data_columns is not None:
+            for col in self.data_columns:
+                dfm[col] *= self.unit_conversion
         dfm.sort_values(by=['per', self.id_column], inplace=True)
 
         # drop any extra unnamed columns from accidental saving of the index on to_csv

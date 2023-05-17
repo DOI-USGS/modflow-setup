@@ -374,16 +374,20 @@ def times():
 
 @pytest.mark.parametrize('category_col', (None, 'comment'))
 def test_aggregate_values_with_categories(obsdata, times, category_col, dest_model, tmpdir):
-    file = os.path.join(tmpdir, 'obsdata.csv')
-    obsdata.to_csv(file, index=False)
+    csvfile = os.path.join(tmpdir, 'obsdata.csv')
+    obsdata['flow_ft3d'] = obsdata['flow_m3d']/(.3048**3)
+    obsdata.to_csv(csvfile, index=False)
     dest_model._perioddata = times
-    sd = TransientTabularSourceData(file, data_column='flow_m3d', datetime_column='datetime', id_column='line_id',
+    sd = TransientTabularSourceData(csvfile, data_columns=['flow_m3d', 'flow_ft3d'], datetime_column='datetime', id_column='line_id',
                                     x_col='x', y_col='y', end_datetime_column=None, period_stats={0: 'mean'},
                                     length_units='unknown', time_units='unknown', volume_units=None,
                                     column_mappings=None, category_column=category_col,
                                     resolve_duplicates_with='raise error',
                                     dest_model=dest_model)
     results = sd.get_data()
+    # check that multiple data_columns get passed through
+    # and treated the same
+    assert np.allclose(results['flow_m3d']/results['flow_ft3d'],.3048**3)
     results.sort_values(by=['per', 'site_no'], inplace=True)
     assert np.array_equal(results.site_no.values,
                           np.array([2000, 2001, 2000, 2002]))

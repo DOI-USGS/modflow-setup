@@ -353,7 +353,7 @@ def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_mod
     df['geometry'] = [str(Point(x, y)) for x, y in zip(df.X, df.Y)]
     df.to_csv(input_csv, index=False)
 
-    sd = TransientTabularSourceData(filenames=input_csv, data_column='Flux_m3',
+    sd = TransientTabularSourceData(filenames=input_csv, data_columns='Flux_m3',
                                     datetime_column='Start_datetime', id_column='Node',
                                     x_col='X', y_col='Y',
                                     period_stats={0: 'mean', 1: None, 2: 'none', 3: 'mean'},

@@ -201,7 +201,7 @@ sto:
     sy: 0.25
     ss: 1.e-6
 
-# recharge package
+# Recharge Package
 rch:
   options:
     print_input: True
@@ -292,9 +292,21 @@ chd:
       id_column: 'COMID' # shapefile attribute field with include_ids:
       include_ids: [18046162] # features used to form the boundary
       boundname_col: 'GNIS_NAME'
-    head:
-      filename: 'shellmound/rasters/meras_100m_dem.tif'
-      elevation_units: 'feet'
+    csvfile:
+      filename: 'shellmound/tables/chd_heads.csv'
+      id_column: 'comid'
+      datetime_column: 'start_datetime'
+      end_datetime_column: 'end_datetime'
+      head_column: 'head'
+      length_units: 'feet'
+      # how heads will be aggregated to the model stress periods
+      period_stats:
+          # apply the mean heads across a specified time period
+          # for the initial steady state
+          # (default of 'mean' uses all times in input data)
+          0: ['mean', '2000-01-01', '2017-12-31']
+          1: mean  # apply the mean heads for the time period of s.p. 1
+          #  the last statistic specified (mean) will also be applied to subsequent periods
 
 # Drain Package
 drn:
@@ -330,10 +342,26 @@ ghb:
       # only the cells with centers inside the polygon
       # will be included
       all_touched: True
-    bhead:
-      filename: 'shellmound/rasters/meras_100m_dem.tif'
-      elevation_units: 'feet'
-    cond: 1.e+3
+    # Example of mixed boundary condition input, where
+    # a shapefile defines the feature extents
+    # a csvfile defines transient head values
+    # a raster defines static but spatially varying conductance
+    csvfile:
+      filename: 'shellmound/tables/chd_heads.csv'
+      id_column: 'comid'
+      datetime_column: 'start_datetime'
+      end_datetime_column: 'end_datetime'
+      bhead_column: 'head'
+      length_units: 'feet'
+      # with no period_stats: block, aggregation defaults
+      # to 'mean' for each stress period
+    cond:
+      # note: a single global value could also be specified here,
+      # as for the Drain Package
+      filename: shellmound/rasters/k330.tif
+      length_units: meters
+      time_units: days
+
 
 # River Package
 riv:

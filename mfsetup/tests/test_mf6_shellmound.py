@@ -619,8 +619,39 @@ def test_basic_stress_package_setup(shellmound_model_with_dis, pckg_abbrv,
         assert np.all(df[var] > cell_bottoms)
     if pckg_abbrv == 'riv':
         assert np.all(df['stage'] > df['rbot'])
-    if pckg_abbrv != 'chd':
+    if pckg_abbrv not in {'chd', 'ghb'}:
         assert np.all(df['cond'] == m.cfg[pckg_abbrv]['source_data']['cond'])
+    # checks for basic transient csv input case
+    if pckg_abbrv == 'chd':
+        include_ids = m.cfg['chd']['source_data']['shapefile']['include_ids']
+        in_df = pd.read_csv(m.cfg['chd']['source_data']['csvfile']['filename'])
+        in_df = in_df.loc[in_df['comid'].isin(include_ids)]
+        spd_heads = np.array(
+            [ra[0][1] for per, ra in m.chd.stress_period_data.data.items()])
+        # every stress period should have input
+        assert len(m.chd.stress_period_data.data.keys()) == m.nper
+        # heads in CHD package should match the CSV input,
+        # after conversion to meters
+        assert np.allclose(in_df['head'].values, spd_heads[1:]/.3048)
+    # more advanced transient input case with csv
+    # and conductance values specified via a raster
+    if pckg_abbrv == 'ghb':
+        in_df = pd.read_csv(m.cfg['ghb']['source_data']['csvfile']['filename'])
+        spd_heads = np.array(
+            [ra[0][1] for per, ra in m.ghb.stress_period_data.data.items()])
+        # every stress period should have input
+        assert len(m.ghb.stress_period_data.data.keys()) == m.nper
+        # heads in CHD package should match the CSV input,
+        # after conversion to meters
+        assert np.allclose(in_df['head'].values[-1], spd_heads[1:]/.3048)
+
+        in_raster = m.cfg['ghb']['source_data']['cond']['filename']
+        with rasterio.open(in_raster) as src:
+            data = src.read(1)
+            raster_cond = np.unique(data[data > 0])[0]
+        spd_conds = np.array(
+            [ra[0][2] for per, ra in m.ghb.stress_period_data.data.items()])
+        assert np.allclose(spd_conds, raster_cond)
     if boundnames:
         assert 'boundname_col' in m.cfg[pckg_abbrv]['source_data']['shapefile']
         assert not set(df['boundname']).symmetric_difference(boundnames)
