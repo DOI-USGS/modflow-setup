@@ -456,21 +456,31 @@ def make_idomain(top, botm, nodata=-9999,
     return idomain
 
 
+def get_highest_active_layer(idomain, null_value=-9999):
+    """Get the highest active model layer at each
+    i, j location, accounting for inactive and
+    vertical pass-through cells."""
+    idm = idomain.copy()
+    # reset all inactive/passthrough values to large positive value
+    # for min calc
+    idm[idm < 1] = 9999
+    highest_active_layer = np.argmin(idm, axis=0)
+    # set locations with all inactive cells to null values
+    highest_active_layer[(idm == 9999).all(axis=0)] = null_value
+    return highest_active_layer
+
+
 def make_irch(idomain):
-    # make the irch array
-    # copy idomain
-    idm_lay = idomain.copy()
-    for i,cl in enumerate(idm_lay):
-        # set both inactive and pass through cells to -1
-        cl[cl<=0] = -1
-        # set active cells to current layer
-        cl[cl>0] = i
-    # now reset all the inactive/passthrough values to large positive to not mess up min calc
-    idm_lay[idm_lay==-1] = 9999
-    # find min active layer
-    irch = np.min(idm_lay, axis=0)
-    # set all inactive and pass through back to -1
-    irch[irch==9999] = 0
+    """Make an irch array for the MODFLOW 6 Recharge Package,
+    which specifies the highest active model layer at each
+    i, j location, accounting for inactive and
+    vertical pass-through cells. Set all i, j locations
+    with no active layers to 1 (MODFLOW 6 only allows
+    valid layer numbers in the irch array).
+    """
+    irch = get_highest_active_layer(idomain, null_value=-9999)
+    # set locations where all layers are inactive back to 0
+    irch[irch == -9999] = 0
     irch += 1 # set to one-based
     return irch
 
