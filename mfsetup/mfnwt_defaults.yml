@@ -116,6 +116,8 @@ drn:
       all_touched: True
     elev:
       stat: 'min'
+    cond:
+      stat: 'mean'
   mfsetup_options:
     external_files: True  # option to write stress_period_data to external files
     external_filename_fmt: "drn_{:03d}.dat"
@@ -127,6 +129,8 @@ ghb:
       all_touched: True
     bhead:
       stat: 'min'
+    cond:
+      stat: 'mean'
   mfsetup_options:
     external_files: False  # option to write stress_period_data to external files
     external_filename_fmt: "ghb_{:03d}.dat"
@@ -137,6 +141,8 @@ riv:
       all_touched: True
     stage:
       stat: 'min'
+    cond:
+      stat: 'mean'
   output_files:
     rivdata_file: '{}_rivdata.csv' # table with auxillary information on river reaches (routing, source hydrography IDs, etc.)
   mfsetup_options:

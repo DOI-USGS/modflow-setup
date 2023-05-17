@@ -5,6 +5,7 @@ import numbers
 import shutil
 
 import flopy
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 
@@ -15,9 +16,18 @@ from gisutils import project
 from rasterstats import zonal_stats
 from shapely.geometry import Polygon
 
-from mfsetup.discretization import cellids_to_kij, get_layer
+from mfsetup.discretization import cellids_to_kij, get_highest_active_layer, get_layer
 from mfsetup.grid import rasterize
-from mfsetup.units import convert_length_units
+from mfsetup.sourcedata import TransientTabularSourceData
+from mfsetup.units import convert_length_units, convert_time_units
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 
 def setup_basic_stress_data(model, shapefile=None, csvfile=None,
@@ -27,6 +37,10 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                             **kwargs):
 
     m = model
+
+    # basic stress package variables
+    variables = {'head': head, 'elev': elev, 'bhead': bhead,
+                 'stage': stage, 'cond': cond, 'rbot': rbot}
 
     # get the BC cells
     # todo: generalize more of the GHB setup code and move it somewhere else
@@ -41,8 +55,28 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                 if 'boundname_col' in shapefile:
                     shapefile['names_column'] = shapefile.pop('boundname_col')
             bc_cells = rasterize(shapefile_name, m.modelgrid, **shapefile)
+            bc_cell_id_kwargs = shapefile.copy()
+            bc_cell_id_kwargs['names_column'] = shapefile['id_column']
+            bc_cell_ids = rasterize(shapefile_name, m.modelgrid, **bc_cell_id_kwargs)
+            # fill unnamed feature names with id numbers (as strings)
+            unnamed = bc_cells == 'nan'
+            bc_cells[unnamed] = bc_cell_ids[unnamed]
+
+    csv_input = None
     if csvfile is not None:
-        raise NotImplementedError('Time-varying (CSV) file input not yet supported for this package.')
+        csv_kwargs = csvfile.copy()
+        csv_kwargs['filenames'] = [csv_kwargs.pop('filename')]
+        data_columns = {v: k.split('_')[0] for k, v in csv_kwargs.items()
+                                  if k.split('_')[0] in variables.keys()}
+        csv_kwargs['data_columns'] = list(data_columns.keys())
+        sd = TransientTabularSourceData(
+                dest_model=m, **csv_kwargs)
+        csv_input = sd.get_data()
+        csv_input.index = csv_input[csv_kwargs['id_column']].astype(str)
+        # rename the input data columns to their MODFLOW variable names
+        csv_input.rename(columns=data_columns, inplace=True)
+
+        #raise NotImplementedError('Time-varying (CSV) file input not yet supported for this package.')
     if bc_cells is None:
         return
 
@@ -51,28 +85,51 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
         cells_with_bc = bc_cells.flat != ''
     else:
         cells_with_bc = bc_cells.flat > 0
+
     vertices = np.array(m.modelgrid.vertices)[cells_with_bc, :, :]
     polygons = [Polygon(vrts) for vrts in vertices]
 
     # setup DataFrame for MODFLOW input
     i, j = np.indices((m.nrow, m.ncol))
-    df = pd.DataFrame({'per': 0,
+    # start with stress period 0 as a template
+    df_0 = pd.DataFrame({'per': 0,
                        'k': 0,
                        'i': i.flat,
                        'j': j.flat})
     # add the boundnames
     if bc_cells.dtype == object:
-        df['boundname'] = bc_cells.flat
-        nan_boundnames = df.boundname.isna() | df.boundname.isin({'', 'nan'})
-        df.loc[nan_boundnames, 'boundname'] = 'unnamed'
-    # cull to just the cells with bcs
-    df = df.loc[cells_with_bc].copy()
+        df_0['boundname'] = bc_cells.flat
+        nan_boundnames = df_0.boundname.isna() | df_0.boundname.isin({'', 'nan'})
+        df_0.loc[nan_boundnames, 'boundname'] = 'unnamed'
+        # convert any numeric boundnames to strings
+        # (otherwise MODFLOW 6 will mistake them for cell IDs)
+        df_0['boundname'] = [f"feature-{bname}" if is_number(bname)
+                             else bname for bname in df_0['boundname']]
+    # add the feature ids
+    # (for associating transient input with cells)
+    df_0['feature_id'] = bc_cell_ids.flat
+    df_0.index = df_0['feature_id']
 
-    variables = {'head': head, 'elev': elev, 'bhead': bhead,
-                 'stage': stage, 'cond': cond, 'rbot': rbot}
+    # cull to just the cells with bcs
+    df_0 = df_0.loc[cells_with_bc].copy()
+    df = gpd.GeoDataFrame(df_0, geometry=polygons, crs=model.modelgrid.crs)
+
+    # collect input that may be mixed
+    # between transient input supplied via csvfiles
+    # and static input supplied via rasters or global values
     for var, entry in variables.items():
-        if entry is not None:
-            # Raster of variable values supplied
+        # check for transient csv input for the variable
+        if csv_input is not None and var in csv_input:
+            dfs = []
+            for per in csv_input['per'].unique():
+                df_per = df_0.copy()
+                df_per['per'] = per
+                df_per[var] = csv_input.loc[csv_input['per'] == per, var]
+                dfs.append(df_per)
+            df = pd.concat(dfs, axis=0)
+        # otherwise, check for static input
+        elif entry is not None:
+            # Raster of spatially varying values supplied
             if isinstance(entry, dict):
                 filename_entries = [k for k in entry.keys() if 'filename' in k.lower()]
                 if not any(filename_entries):
@@ -88,7 +145,9 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                 except:
                     raster_crs = pyproj.crs.CRS.from_user_input(src.crs)
                 if raster_crs != m.modelgrid.crs:
-                    polygons = project(polygons, m.modelgrid.crs, raster_crs)
+                    polygons = project(df.geometry.tolist(), m.modelgrid.crs, raster_crs)
+                else:
+                    polygons = df.geometry.tolist()
 
                 # all_touched arg for rasterstats.zonal_stats
                 all_touched = False
@@ -105,11 +164,16 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                 values = values[valid]
                 df = df.loc[valid].copy()
 
-                units_key = [k for k in entry if 'units' in k]
-                if len(units_key) > 0:
-                    values *= convert_length_units(entry[units_key[0]],
+                # Convert units if they are specified
+                # Note: this only works because the variables considered here
+                # all have length in the numerator
+                # and cond has time in the denominator
+                if 'length_units' in entry:
+                    values *= convert_length_units(entry['length_units'],
                                                     model.length_units)
-                #values = np.reshape(values, (m.nrow, m.ncol))
+                if var == 'cond' and 'time_units' in entry:
+                    values /= convert_time_units(entry['time_units'],
+                                                    model.time_units)
 
                 # add the layer and the values to the Modflow input DataFrame
                 # assign layers so that the elevation is above the cell bottoms
@@ -131,21 +195,42 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
     # special handling of rbot for RIV package
     if 'stage' in df.columns and 'rbot' not in df.columns:
         df['rbot'] = df['stage'] - default_rbot_thickness
-        df['k'] = get_layer(model.dis.botm.array, df.i, df.j, df['rbot'])
+
+    # exclude inactive cells
+    #k, i, j = df.k, df.i, df.j
+    if model.version == 'mf6':
+        idomain = model.idomain
+    else:
+        idomain = model.ibound
 
     # remove BC cells from places where the specified head is below the model
+    # set the layer according to the variable
     for var in ['head', 'elev', 'bhead', 'rbot']:
         if var in df.columns:
             below_bottom_of_model = df[var] < model.dis.botm.array[-1, df.i, df.j] + 0.01
             df = df.loc[~below_bottom_of_model].copy()
+            df['k'] = get_layer(model.dis.botm.array,
+                                df['i'], df['j'], df[var])
+            # move any variable elevations in inactive cells
+            # to the highest active layer below
+            df['idomain'] = idomain[df['k'], df['i'], df['j']]
+            if any(df['idomain'] < 1):
+                idomain_slice = idomain[:, df['i'], df['j']]
+                is_above = model.dis.botm.array[:, df['i'], df['j']] > \
+                    [df[var].tolist()] * idomain.shape[0]
+                idomain_slice[is_above] = 0
+                highest_active_below = np.argmax(idomain_slice, axis=0)
+                df.loc[df['idomain'] < 1, 'k'] = highest_active_below[df['idomain'] < 1]
 
-    # exclude inactive cells
-    k, i, j = df.k, df.i, df.j
-    if model.version == 'mf6':
-        active_cells = model.idomain[k, i, j] >= 1
-    else:
-        active_cells = model.ibound[k, i, j] >= 1
-    df = df.loc[active_cells]
+    #active_cells = idomain[k, i, j] >= 1
+    #df = df.loc[active_cells]
+
+    # set layer to the highest active
+    #highest_active = get_highest_active_layer(idomain)
+    #df['k'] = highest_active[df['i'], df['j']]
+
+    # drop locations that are completely inactive
+    df = df.loc[df['k'].isin(range(idomain.shape[0]))]
 
     # sort the columns
     col_order = ['per', 'k', 'i', 'j', 'head', 'elev', 'bhead', 'stage',
@@ -153,6 +238,7 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
     cols = [c for c in col_order if c in df.columns]
     df = df[cols].copy()
     return df
+
 
 def get_bc_package_cells(package, exclude_horizontal=True):
     """
@@ -225,10 +311,6 @@ def mftransientlist_to_dataframe(mftransientlist, squeeze=True):
     # find relevant variable names
     # may have to iterate over the first stress period
     #for per in range(data.model.nper):
-    try:
-        data.data
-    except:
-        j=2
     for per, spd in data.data.items():
         if spd is not None and hasattr(spd, 'dtype'):
             varnames = list([n for n in spd.dtype.names
