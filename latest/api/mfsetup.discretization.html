@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization module &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
+  <title>mfsetup.discretization module &mdash; modflow-setup 0.2.0.post10+g8f16cce documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -37,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post8+g86708ef
+                0.2.0.post10+g8f16cce
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -77,6 +77,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.fill_empty_layers"><code class="docutils literal notranslate"><span class="pre">fill_empty_layers()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.find_remove_isolated_cells"><code class="docutils literal notranslate"><span class="pre">find_remove_isolated_cells()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.fix_model_layer_conflicts"><code class="docutils literal notranslate"><span class="pre">fix_model_layer_conflicts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.get_highest_active_layer"><code class="docutils literal notranslate"><span class="pre">get_highest_active_layer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.get_layer"><code class="docutils literal notranslate"><span class="pre">get_layer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.get_layer_thicknesses"><code class="docutils literal notranslate"><span class="pre">get_layer_thicknesses()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.discretization.make_ibound"><code class="docutils literal notranslate"><span class="pre">make_ibound()</span></code></a></li>
@@ -346,6 +347,14 @@ as necessary to maintain a minimum thickness.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.discretization.get_highest_active_layer">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">get_highest_active_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idomain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#get_highest_active_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.get_highest_active_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the highest active model layer at each
+i, j location, accounting for inactive and
+vertical pass-through cells.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.discretization.get_layer">
 <span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">get_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">botm_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#get_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.get_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the layers for elevations at i, j locations.</p>
@@ -457,7 +466,13 @@ in other words, these cells have no thicknesses)
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.discretization.make_irch">
 <span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">make_irch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idomain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#make_irch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.make_irch" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Make an irch array for the MODFLOW 6 Recharge Package,
+which specifies the highest active model layer at each
+i, j location, accounting for inactive and
+vertical pass-through cells. Set all i, j locations
+with no active layers to 1 (MODFLOW 6 only allows
+valid layer numbers in the irch array).</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.discretization.make_lgr_idomain">
@@ -583,7 +598,7 @@ by default 0.01.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 04, 2023.
+      <span class="lastupdated">Last updated on May 18, 2023.
       </span></p>
   </div>
 

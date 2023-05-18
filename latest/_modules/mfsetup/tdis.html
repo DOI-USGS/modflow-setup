@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.2.0.post10+g8f16cce documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -34,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post8+g86708ef
+                0.2.0.post10+g8f16cce
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -672,19 +672,19 @@
     <span class="n">duplicated</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">period_data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">],</span>
                                     <span class="n">period_data</span><span class="p">[</span><span class="n">id_column</span><span class="p">],</span>
                                     <span class="n">period_data</span><span class="p">[</span><span class="n">category_column</span><span class="p">])))</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span>
-    <span class="c1"># if len(period_data) &gt; 0:</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">duplicated</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">resolve_duplicates_with</span> <span class="o">==</span> <span class="s1">&#39;raise error&#39;</span><span class="p">:</span>
-            <span class="n">duplicate_info</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">duplicated</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The following locations are duplicates which need to be resolved:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">duplicate_info</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">period_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">by_period</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-        <span class="n">by_period</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">]),</span>
-                                            <span class="n">resolve_duplicates_with</span><span class="p">)()[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">period_data</span> <span class="o">=</span> <span class="n">by_period</span>
     <span class="n">aggregated</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">id_column</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-    <span class="n">aggregated</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">id_column</span><span class="p">),</span> <span class="n">stat</span><span class="p">)()[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">for</span> <span class="n">data_column</span> <span class="ow">in</span> <span class="n">data_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">duplicated</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">resolve_duplicates_with</span> <span class="o">==</span> <span class="s1">&#39;raise error&#39;</span><span class="p">:</span>
+                <span class="n">duplicate_info</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">duplicated</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The following locations are duplicates which need to be resolved:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">duplicate_info</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">period_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">by_period</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+            <span class="n">by_period</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">]),</span>
+                                                <span class="n">resolve_duplicates_with</span><span class="p">)()[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">period_data</span> <span class="o">=</span> <span class="n">by_period</span>
+        <span class="n">aggregated</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">id_column</span><span class="p">),</span> <span class="n">stat</span><span class="p">)()[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="c1"># if category column was argued, get counts of measured vs estimated</span>
     <span class="c1"># for each measurement location, for current stress period</span>
     <span class="k">if</span> <span class="n">categories</span><span class="p">:</span>
@@ -803,7 +803,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 04, 2023.
+      <span class="lastupdated">Last updated on May 18, 2023.
       </span></p>
   </div>
 

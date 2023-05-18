@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
+  <title>mfsetup.discretization &mdash; modflow-setup 0.2.0.post10+g8f16cce documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -34,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post8+g86708ef
+                0.2.0.post10+g8f16cce
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -554,21 +554,31 @@
     <span class="k">return</span> <span class="n">idomain</span></div>
 
 
+<div class="viewcode-block" id="get_highest_active_layer"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.get_highest_active_layer">[docs]</a><span class="k">def</span> <span class="nf">get_highest_active_layer</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the highest active model layer at each</span>
+<span class="sd">    i, j location, accounting for inactive and</span>
+<span class="sd">    vertical pass-through cells.&quot;&quot;&quot;</span>
+    <span class="n">idm</span> <span class="o">=</span> <span class="n">idomain</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># reset all inactive/passthrough values to large positive value</span>
+    <span class="c1"># for min calc</span>
+    <span class="n">idm</span><span class="p">[</span><span class="n">idm</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">9999</span>
+    <span class="n">highest_active_layer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">idm</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># set locations with all inactive cells to null values</span>
+    <span class="n">highest_active_layer</span><span class="p">[(</span><span class="n">idm</span> <span class="o">==</span> <span class="mi">9999</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">null_value</span>
+    <span class="k">return</span> <span class="n">highest_active_layer</span></div>
+
+
 <div class="viewcode-block" id="make_irch"><a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.make_irch">[docs]</a><span class="k">def</span> <span class="nf">make_irch</span><span class="p">(</span><span class="n">idomain</span><span class="p">):</span>
-    <span class="c1"># make the irch array</span>
-    <span class="c1"># copy idomain</span>
-    <span class="n">idm_lay</span> <span class="o">=</span> <span class="n">idomain</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">cl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">idm_lay</span><span class="p">):</span>
-        <span class="c1"># set both inactive and pass through cells to -1</span>
-        <span class="n">cl</span><span class="p">[</span><span class="n">cl</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="c1"># set active cells to current layer</span>
-        <span class="n">cl</span><span class="p">[</span><span class="n">cl</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
-    <span class="c1"># now reset all the inactive/passthrough values to large positive to not mess up min calc</span>
-    <span class="n">idm_lay</span><span class="p">[</span><span class="n">idm_lay</span><span class="o">==-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">9999</span>
-    <span class="c1"># find min active layer</span>
-    <span class="n">irch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">idm_lay</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="c1"># set all inactive and pass through back to -1</span>
-    <span class="n">irch</span><span class="p">[</span><span class="n">irch</span><span class="o">==</span><span class="mi">9999</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="sd">&quot;&quot;&quot;Make an irch array for the MODFLOW 6 Recharge Package,</span>
+<span class="sd">    which specifies the highest active model layer at each</span>
+<span class="sd">    i, j location, accounting for inactive and</span>
+<span class="sd">    vertical pass-through cells. Set all i, j locations</span>
+<span class="sd">    with no active layers to 1 (MODFLOW 6 only allows</span>
+<span class="sd">    valid layer numbers in the irch array).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">irch</span> <span class="o">=</span> <span class="n">get_highest_active_layer</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mi">9999</span><span class="p">)</span>
+    <span class="c1"># set locations where all layers are inactive back to 0</span>
+    <span class="n">irch</span><span class="p">[</span><span class="n">irch</span> <span class="o">==</span> <span class="o">-</span><span class="mi">9999</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">irch</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1"># set to one-based</span>
     <span class="k">return</span> <span class="n">irch</span></div>
 
@@ -832,7 +842,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 04, 2023.
+      <span class="lastupdated">Last updated on May 18, 2023.
       </span></p>
   </div>
 

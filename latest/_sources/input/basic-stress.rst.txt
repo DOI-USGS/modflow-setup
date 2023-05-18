@@ -27,7 +27,14 @@ Input for list-based basic stress packages follows a similar pattern to other pa
             * ``all_touched:`` argument to :func:`rasterio.features.rasterize` that specifies whether all intersected grid cells should be included, or just the grid cells with centers inside the feature.
             * One or more variable columns: Optionally the shapefile can also supply steady-state variable values by feature in attribute columns named for the variables (e.g. ``'head'``, ``'bhead'``, etc.)
 
-        * **(Not implemented yet)** A ``csvfile:`` block for specifying point feature locations or time-varying values for the variables. Items in the shapefile block include
+            Example:
+
+            .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
+                :language: yaml
+                :start-at: shapefile:
+                :end-before: csvfile:
+
+        * A ``csvfile:`` block for specifying point feature locations or time-varying values for the variables. Items in the shapefile block include
 
             * ``filename:`` or `filenames:` path(s) to the csv file(s)
             * ``id_column``: unique identifier associated with each feature
@@ -39,22 +46,45 @@ Input for list-based basic stress packages follows a similar pattern to other pa
             * ``time_units:`` time units associated with the stress value (WEL package only; optional; if omitted no conversion is performed)
             * ``volume_units:`` value-units associated with the stress value (e.g. `gallons`) in lieu of length-based volume units (e.g., `cubic feet`) (WEL package only; optional; if omitted volumes are assumed to be in model units of L\ :sup:`3` and no conversion is performed)
             * ``boundname_col:`` column in shapefile with feature names to be applied as `boundnames` in Modflow 6 input
+            * one or more columns for the package variables, specified in the format of ``<variable>_col``, where ``<variable>`` is an input variable for the package; for example ``head_col`` for the Constant Head Package, or ``cond_col`` for the Drain or GHB packages.
             * ``period_stats:`` a sub-block that is used to specify mapping of the input data to the model temporal discretization. Items within period stats are numbered by stress period, with the entry for each item specifying the temporal aggregation. Currently, two options are supported:
                 * aggregation of measurements falling within a stress period. For example, assigning the mean value of all input data points within the stress period. In this case, the aggregration method is simply specified as a string. While ``mean`` is typical, any of the standard numpy aggregators can be use (``min``, ``max``, etc.)
                 * aggregation of measurements from an arbitrary time window. For example, applying a long-term mean to a steady-state stress period, or transient period representing a different time window. In this case three items are specified-- the aggregation method, the start date, and end date (e.g. ``[mean, 2000-01-01, 2017-12-31]``)
+
+            Example:
+
+            .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
+                :language: yaml
+                :start-at: csvfile:
+                :end-before: # Drain Package
+
+
+        * Additional sub-blocks or items for specifying values for each variable
+            * In general, these sub-blocks are named for the variable (e.g. ``bhead:``).
+            * Scalar values (items) can be specified in model units, and are applied globally to the variable.
 
                 Example:
 
                 .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
                     :language: yaml
-                    :lines: 219-224
+                    :start-at: cond:
+                    :end-at: cond:
 
+            * Rasters can be used to specify steady-state values that vary in space; values supplied with a raster are mapped to the model grid using zonal statistics. If the raster contains projection information (GeoTIFFs are preferred in part because of this), reprojection to the model coorindate reference system (CRS) will be performed automatically as needed. Otherwise, the raster is assumed to be in the model projection. Units can optionally be specified and automatically converted; otherwise, the raster values are assumed to be in the model units. Items in the raster block include:
 
-        * additional sub-blocks or items for specifying values for each variable
-            * in general, these sub-blocks are named for the variable (e.g. ``bhead:``)
-            * scalar values (items) are applied globally to the variable
-            * rasters can be used to specify steady-state values that vary in space; values supplied with a raster are mapped to the model grid using zonal statistics. If the raster contains projection information (GeoTIFFs are preferred in part because of this), any reprojection to the model coorindate reference system (CRS) will be performed automatically as needed. Otherwise, the raster is assumed to be in the model projection.
-            * (Not implemented yet) NetCDF input for gridded values that vary in time and space. Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.
+                * ``filename:`` or `filenames:` path(s) to the raster
+                * ``length_units:`` (or ``elevation_units``; optional): length units of the raster values
+                * ``time_units:`` (optional): time units of the raster values (``cond`` variable only)
+                * ``stat:`` (optional): zonal statistic to use in sampling the raster (defaults are listed for each variable in the :ref:`Configuration defaults`)
+
+                Example:
+
+                .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
+                    :language: yaml
+                    :start-at: stage:
+                    :end-before: mfsetup_options:
+
+            * **Not implemented yet:** NetCDF input for gridded values that vary in time and space. Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.
     * ``mfsetup_options:`` Configuration options for Modflow-setup. General options that apply to all basic stress packages include:
             * ``external_files:`` Whether to write the package input as external text arrays or tables (i.e., with ``open/close`` statements). By default ``True`` except in the case of list-based or tabular files for MODFLOW-NWT models, which are not supported. Adding support for this may require changes to Flopy, which handles external list-based files differently for MODFLOW-2005 style models.
             * ``external_filename_fmt:`` Python string format for external file names. By default, ``"<package or variable abbreviation>_{:03d}.dat"``. which results in filenames such as ``wel_000.dat``, ``wel_001.dat``, ``wel_002.dat``... for stress periods 0, 1, and 2, for example.
@@ -81,13 +111,19 @@ Input consists of specified head values that may vary in time or space.
     **Examples**
     (also see the :ref:`Configuration File Gallery`)
 
-    .. literalinclude:: ../../../mfsetup/tests/data/shellmound_tmr_inset.yml
+    Setting up a Constant Head package with perimeter fluxes from a parent model (Note: an additional ``source_data`` block can be added to represent other features inside of the model perimeter, as below):
+
+    .. literalinclude:: ../../../mfsetup/tests/data/pfl_nwt_test.yml
         :language: yaml
-        :lines: 120-123
+        :start-at: chd:
+
+    Setting up a Constant Head package from features specified in a shapefile,
+    and time-varing heads specified in a csvfile:
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
         :language: yaml
-        :lines: 285-298
+        :start-after: # Constant Head Package
+        :end-before: # Drain Package
 
 
 Drain DRN Package
@@ -112,7 +148,8 @@ Input consists of elevations and conductances that may vary in time or space.
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
         :language: yaml
-        :lines: 299-313
+        :start-after: # Drain Package
+        :end-before: # General Head Boundary Package
 
 General Head Boundary (GHB) Package
 +++++++++++++++++++++++++++++++++++++
@@ -136,7 +173,8 @@ Input consists of head elevations and conductances that may vary in time or spac
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
         :language: yaml
-        :lines: 316-337
+        :start-after: # General Head Boundary Package
+        :end-before: # River Package
 
 River (RIV) package
 ++++++++++++++++++++
@@ -162,13 +200,15 @@ Input consists of stages, river bottom elevations and conductances,
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
         :language: yaml
-        :lines: 338-358
+        :start-after: # River Package
+        :end-before: # Well Package
 
     Example of setting up the RIV package using SFRmaker (via the ``sfr:`` block):
 
     .. literalinclude:: ../../../mfsetup/tests/data/shellmound_tmr_inset.yml
         :language: yaml
-        :lines: 99-118
+        :start-at: sfr:
+        :end-at: to_riv:
 
 
 Well (WEL) Package
@@ -206,7 +246,17 @@ Input consists of flux rates that may vary in time or space.
 
             .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
                 :language: yaml
-                :lines: 359-388
+                :start-after: # Well Package
+                :end-before: # Output Control Package
+
+    * Perimeter boundary fluxes from a parent model solution:
+
+            .. literalinclude:: ../../../mfsetup/tests/data/shellmound_tmr_inset.yml
+                :language: yaml
+                :start-at: wel:
+
+
+        Similar to the Constant Head Package, a ``perimeter_boundary`` block can be mixed with the other input blocks described here to simulate pumping or injection inside of the model perimeter.
 
     * ``wdnr_dataset`` block
         .. note::
@@ -296,4 +346,5 @@ Modflow-setup currently supports three methods for entering spatially-referenced
 
             .. literalinclude:: ../../../mfsetup/tests/data/shellmound.yml
                 :language: yaml
-                :lines: 205-224
+                :start-after: # Recharge Package
+                :end-before: # Streamflow Routing Package

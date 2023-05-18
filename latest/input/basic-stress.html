@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.2.0.post8+g86708ef documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.2.0.post10+g8f16cce documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -37,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post8+g86708ef
+                0.2.0.post10+g8f16cce
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -174,11 +174,19 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p><code class="docutils literal notranslate"><span class="pre">all_touched:</span></code> argument to <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.features.html#rasterio.features.rasterize" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.features.rasterize()</span></code></a> that specifies whether all intersected grid cells should be included, or just the grid cells with centers inside the feature.</p></li>
 <li><p>One or more variable columns: Optionally the shapefile can also supply steady-state variable values by feature in attribute columns named for the variables (e.g. <code class="docutils literal notranslate"><span class="pre">'head'</span></code>, <code class="docutils literal notranslate"><span class="pre">'bhead'</span></code>, etc.)</p></li>
 </ul>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span><span class="w"></span>
+<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
+</pre></div>
+</div>
 </div></blockquote>
 </li>
-<li><p><strong>(Not implemented yet)</strong> A <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block for specifying point feature locations or time-varying values for the variables. Items in the shapefile block include</p>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block for specifying point feature locations or time-varying values for the variables. Items in the shapefile block include</p>
 <blockquote>
-<div><ul>
+<div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">filename:</span></code> or <cite>filenames:</cite> path(s) to the csv file(s)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">id_column</span></code>: unique identifier associated with each feature</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">datetime_column:</span></code> date-time associated with each stress value</p></li>
@@ -189,32 +197,67 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p><code class="docutils literal notranslate"><span class="pre">time_units:</span></code> time units associated with the stress value (WEL package only; optional; if omitted no conversion is performed)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">volume_units:</span></code> value-units associated with the stress value (e.g. <cite>gallons</cite>) in lieu of length-based volume units (e.g., <cite>cubic feet</cite>) (WEL package only; optional; if omitted volumes are assumed to be in model units of L<sup>3</sup> and no conversion is performed)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">boundname_col:</span></code> column in shapefile with feature names to be applied as <cite>boundnames</cite> in Modflow 6 input</p></li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">period_stats:</span></code> a sub-block that is used to specify mapping of the input data to the model temporal discretization. Items within period stats are numbered by stress period, with the entry for each item specifying the temporal aggregation. Currently, two options are supported:</dt><dd><ul class="simple">
+<li><p>one or more columns for the package variables, specified in the format of <code class="docutils literal notranslate"><span class="pre">&lt;variable&gt;_col</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;variable&gt;</span></code> is an input variable for the package; for example <code class="docutils literal notranslate"><span class="pre">head_col</span></code> for the Constant Head Package, or <code class="docutils literal notranslate"><span class="pre">cond_col</span></code> for the Drain or GHB packages.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">period_stats:</span></code> a sub-block that is used to specify mapping of the input data to the model temporal discretization. Items within period stats are numbered by stress period, with the entry for each item specifying the temporal aggregation. Currently, two options are supported:</dt><dd><ul>
 <li><p>aggregation of measurements falling within a stress period. For example, assigning the mean value of all input data points within the stress period. In this case, the aggregration method is simply specified as a string. While <code class="docutils literal notranslate"><span class="pre">mean</span></code> is typical, any of the standard numpy aggregators can be use (<code class="docutils literal notranslate"><span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, etc.)</p></li>
 <li><p>aggregation of measurements from an arbitrary time window. For example, applying a long-term mean to a steady-state stress period, or transient period representing a different time window. In this case three items are specified– the aggregation method, the start date, and end date (e.g. <code class="docutils literal notranslate"><span class="pre">[mean,</span> <span class="pre">2000-01-01,</span> <span class="pre">2017-12-31]</span></code>)</p></li>
 </ul>
-<p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># for the first two stress periods</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span><span class="w"></span>
-<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span><span class="w"></span>
-</pre></div>
-</div>
 </dd>
 </dl>
 </li>
 </ul>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span><span class="w"></span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># for the initial steady state</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span><span class="w"></span>
+<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span><span class="w"></span>
+<span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span><span class="w"></span>
+</pre></div>
+</div>
 </div></blockquote>
 </li>
-<li><dl class="simple">
-<dt>additional sub-blocks or items for specifying values for each variable</dt><dd><ul class="simple">
-<li><p>in general, these sub-blocks are named for the variable (e.g. <code class="docutils literal notranslate"><span class="pre">bhead:</span></code>)</p></li>
-<li><p>scalar values (items) are applied globally to the variable</p></li>
-<li><p>rasters can be used to specify steady-state values that vary in space; values supplied with a raster are mapped to the model grid using zonal statistics. If the raster contains projection information (GeoTIFFs are preferred in part because of this), any reprojection to the model coorindate reference system (CRS) will be performed automatically as needed. Otherwise, the raster is assumed to be in the model projection.</p></li>
-<li><p>(Not implemented yet) NetCDF input for gridded values that vary in time and space. Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.</p></li>
+<li><dl>
+<dt>Additional sub-blocks or items for specifying values for each variable</dt><dd><ul>
+<li><p>In general, these sub-blocks are named for the variable (e.g. <code class="docutils literal notranslate"><span class="pre">bhead:</span></code>).</p></li>
+<li><p>Scalar values (items) can be specified in model units, and are applied globally to the variable.</p>
+<blockquote>
+<div><p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Rasters can be used to specify steady-state values that vary in space; values supplied with a raster are mapped to the model grid using zonal statistics. If the raster contains projection information (GeoTIFFs are preferred in part because of this), reprojection to the model coorindate reference system (CRS) will be performed automatically as needed. Otherwise, the raster is assumed to be in the model projection. Units can optionally be specified and automatically converted; otherwise, the raster values are assumed to be in the model units. Items in the raster block include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filename:</span></code> or <cite>filenames:</cite> path(s) to the raster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length_units:</span></code> (or <code class="docutils literal notranslate"><span class="pre">elevation_units</span></code>; optional): length units of the raster values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_units:</span></code> (optional): time units of the raster values (<code class="docutils literal notranslate"><span class="pre">cond</span></code> variable only)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stat:</span></code> (optional): zonal statistic to use in sampling the raster (defaults are listed for each variable in the <a class="reference internal" href="../config-file-defaults.html#configuration-defaults"><span class="std std-ref">Configuration defaults</span></a>)</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span><span class="w"></span>
+<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p><strong>Not implemented yet:</strong> NetCDF input for gridded values that vary in time and space. Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.</p></li>
 </ul>
 </dd>
 </dl>
@@ -255,14 +298,15 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span><span class="w"></span>
-<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span><span class="w"></span>
+<p>Setting up a Constant Head package with perimeter fluxes from a parent model (Note: an additional <code class="docutils literal notranslate"><span class="pre">source_data</span></code> block can be added to represent other features inside of the model perimeter, as below):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span><span class="w"></span>
 </pre></div>
 </div>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Constant Head Package</span><span class="w"></span>
-<span class="nt">chd</span><span class="p">:</span><span class="w"></span>
+<p>Setting up a Constant Head package from features specified in a shapefile,
+and time-varing heads specified in a csvfile:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
@@ -271,9 +315,21 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span><span class="w"></span>
 <span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">head</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span><span class="w"></span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># for the initial steady state</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span><span class="w"></span>
+<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span><span class="w"></span>
+<span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -297,8 +353,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Drain Package</span><span class="w"></span>
-<span class="nt">drn</span><span class="p">:</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">drn</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
@@ -312,6 +367,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <span class="w">    </span><span class="nt">elev</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -335,8 +391,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># General Head Boundary Package</span><span class="w"></span>
-<span class="nt">ghb</span><span class="p">:</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ghb</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
@@ -352,10 +407,25 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <span class="w">      </span><span class="c1"># only the cells with centers inside the polygon</span><span class="w"></span>
 <span class="w">      </span><span class="c1"># will be included</span><span class="w"></span>
 <span class="w">      </span><span class="nt">all_touched</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="nt">bhead</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># Example of mixed boundary condition input, where</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># a shapefile defines the feature extents</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># a csvfile defines transient head values</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># a raster defines static but spatially varying conductance</span><span class="w"></span>
+<span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">bhead_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># with no period_stats: block, aggregation defaults</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># to &#39;mean&#39; for each stress period</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># note: a single global value could also be specified here,</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># as for the Drain Package</span><span class="w"></span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shellmound/rasters/k330.tif</span><span class="w"></span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span><span class="w"></span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">days</span><span class="w"></span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -381,8 +451,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># River Package</span><span class="w"></span>
-<span class="nt">riv</span><span class="p">:</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">riv</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
@@ -404,7 +473,8 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </pre></div>
 </div>
 <p>Example of setting up the RIV package using SFRmaker (via the <code class="docutils literal notranslate"><span class="pre">sfr:</span></code> block):</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">sfr</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
@@ -473,8 +543,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p>spatial discretization for open intervals spanning multiple layers is specified using a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> sub-block</p></li>
 <li><p>Examples:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Well Package</span><span class="w"></span>
-<span class="nt">wel</span><span class="p">:</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
 <span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
@@ -510,6 +579,23 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 </dd>
 </dl>
+</li>
+<li><p>Perimeter boundary fluxes from a parent model solution:</p>
+<blockquote>
+<div><blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># parent model head solution</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># for determining boundary fluxes based on saturated thickness</span><span class="w"></span>
+<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Similar to the Constant Head Package, a <code class="docutils literal notranslate"><span class="pre">perimeter_boundary</span></code> block can be mixed with the other input blocks described here to simulate pumping or injection inside of the model perimeter.</p>
+</div></blockquote>
 </li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">wdnr_dataset</span></code> block</dt><dd><div class="admonition note">
@@ -691,7 +777,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 04, 2023.
+      <span class="lastupdated">Last updated on May 18, 2023.
       </span></p>
   </div>
 
