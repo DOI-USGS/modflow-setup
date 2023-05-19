@@ -619,7 +619,7 @@ class TransientArraySourceData(ArraySourceData, TransientSourceDataMixin):
 
 class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
     def __init__(self, filenames, variable, period_stats,
-                 length_units='unknown', time_units='days',
+                 length_units='unknown', time_units='days', crs=None,
                  dest_model=None, source_modelgrid=None,
                  from_source_model_layers=None, datatype='transient2d',
                  resample_method='nearest', vmin=-1e30, vmax=1e30
@@ -647,6 +647,7 @@ class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
         self.time_col = 'time'
 
         self._crs = None
+        self._specified_crs = crs
 
         # set xy value arrays for source and dest. grids
         with xr.open_dataset(self.filename) as ds:
@@ -682,20 +683,31 @@ class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
         information is stored in a 'crs' variable.
 
         """
+        specified_crs = None
+        ncfile_crs = None
+        if self._specified_crs is not None:
+            specified_crs = pyproj.CRS(self._specified_crs)
+            self._specified_crs = specified_crs
         if self._crs is None:
             with xr.open_dataset(self.filename) as ds:
                 crs_da = getattr(ds, 'crs', None)
             if crs_da is not None:
                 grid_mapping = crs_da.attrs
-                crs = self.get_crs_from_grid_mapping(grid_mapping)
-            if crs is None:
-                print('Could not create valid pyproj.CRS object'
-                      f'from grid mapping infromation in {self.filename}.'
-                      f'Input in {self.filename} will be assumed to be in the '
-                      'model coordinate reference system.')
-                return
+                ncfile_crs = self.get_crs_from_grid_mapping(grid_mapping)
+            if specified_crs is None:
+                if ncfile_crs is None:
+                    print('Could not create valid pyproj.CRS object'
+                         f'from grid mapping infromation in {self.filename} '
+                         f'Input in {self.filename} will be assumed to be in the '
+                          'model coordinate reference system.')
+                else:
+                    self._crs = ncfile_crs
+            elif (ncfile_crs is None) or (specified_crs == ncfile_crs):
+                self._crs = specified_crs
             else:
-                self._crs = crs
+                raise ValueError(f'Specified CRS is different than CRS in NetCDF file; check for consistency.\n'
+                                 '{specified_crs}\n!=\n{ncfile_crs}')
+
         return self._crs
 
     def regrid_from_source(self, source_array,

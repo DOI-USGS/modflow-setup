@@ -2,9 +2,6 @@
 Specifying boundary conditions with the 'basic' MODFLOW stress packages
 =======================================================================================
 
-.. note::
-   This page is a work in progress and needs some more work.
-
 This page describes configuration file input for the basic MODFLOW stress packages, including
 the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently supported by Modflow-setup. The supported packages can be broadly placed into two categories. Feature or list-based packages such as CHD, DRN, GHB, RIV and WEL often represent discrete phenomena such as surface water features, pumping wells, or even lines that denote a perimeter boundary. Input to  these packages in MODFLOW is tabular, consisting of a table for each stress period, with rows specifying stresses at individual grid cells representing the boundary features. In contrast, continuous or grid-based packages represent a stress field that applies to a large area, such as areal recharge. In past versions of MODFLOW, input to these packages was array-based, with values specified for all model cells, at each stress period. In MODFLOW 6, input to these packages can be array or list-based. The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup. In keeping with the current structured grid-based paradigm of Modflow-setup, Modflow 6 recharge input is generated for the array-based recharge package (Langevin and others, 2017).
 
@@ -314,7 +311,7 @@ Grid-independent input
 Modflow-setup currently supports three methods for entering spatially-referenced recharge input not mapped to the model grid.
 
     * Recharge translated from a parent model RCH package
-        * this input option is very simple. A parent model with a recharge package is needed, and ``default_source_data: True`` must be specified in the ``parent:`` block. Then, fluxes from the parent model are simply mapped to the inset model grid, based on the parent model cell centers, and the stress period mappings specified in the ``parent:`` block. Recharge package options can still be specified in a ``rch:`` block.
+        * This input option is very simple. A parent model with a recharge package is needed, and ``default_source_data: True`` must be specified in the ``parent:`` block. Then, fluxes from the parent model are simply mapped to the inset model grid, based on the parent model cell centers, and the stress period mappings specified in the ``parent:`` block. Recharge package options can still be specified in a ``rch:`` block.
 
     * Raster input by stress period
         * A raster of spatially varying recharge values can be supplied for one or more model stress periods. Similar to the direct input, specified recharge will be applied to subsequent periods were recharge is not specified.
@@ -333,10 +330,14 @@ Modflow-setup currently supports three methods for entering spatially-referenced
 
     * NetCDF input
         * NetCDF input can be supplied for gridded values that vary in time and space.
-        * Due to the lack of standardization in NetCDF coordinate reference information, automatic reprojection is currently not supported for NetCDF files; the data are assumed to be in the model CRS.
+        * Automatic reprojection is supported for Climate Forecast (CF) 1.8-compliant netcdf files (that work with the :py:meth:`pyproj.CRS.from_cf() <pyproj.crs.CRS.from_cf>` constructor), or files that have a `'crs_wkt'` or `'proj4_string'` grid mapping variable (the latter includes many or most Soil Water Balance Code models).
+        * Otherwise, coordinate reference information can be supplied via the ``crs:`` item (using any valid input to :py:class:`pyproj.crs.CRS`), and the data will be reprojected to the model coordinate reference system.
+
         * Input items include:
+            * ``variable:`` name of variable in NetCDF file containing the recharge values.
             * ``length_units:`` input recharge length units (optional; if omitted no conversion is performed)
             * ``time_units:`` input recharge time units (optional; if omitted no conversion is performed)
+            * ``crs``: coordinate reference system (CRS) of the netcdf file (optional; only needed if the NetCDF file is in a different CRS than the model *and* automatic reprojection from the internal `grid mapping <http://cfconventions.org/cf-conventions/cf-conventions.html#grid-mappings-and-projections>`_ isn't working.
             * ``resample_method:`` method for resampling the data from the source grid to model grid. (optional; by default, ``'nearest'``)
             * ``period_stats:`` a sub-block that is used to specify mapping of the input data to the model temporal discretization. Items within period stats are numbered by stress period, with the entry for each item specifying the temporal aggregation. Currently, two options are supported:
                 * aggregation of measurements falling within a stress period. For example, assigning the mean value of all input data points within the stress period. In this case, the aggregration method is simply specified as a string. While ``mean`` is typical, any of the standard numpy aggregators can be use (``min``, ``max``, etc.)
