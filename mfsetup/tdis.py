@@ -608,8 +608,9 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
     return aggregated
 
 
-def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
-                                      period_stat, datetime_column):
+def aggregate_xarray_to_stress_period(data, datetime_coords_name='time',
+                                      start_datetime=None, end_datetime=None,
+                                      period_stat='mean'):
 
     if isinstance(start_datetime, pd.Timestamp):
         start_datetime = start_datetime.strftime('%Y-%m-%d')
@@ -633,7 +634,7 @@ def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
             period = period_stat.pop()
             # stat for a specified month
             if period in months.keys() or period in months.values():
-                arr = data.loc[data[datetime_column].dt.month == months.get(period, period)].values
+                arr = data.loc[data[datetime_coords_name].dt.month == months.get(period, period)].values
 
             # stat for a period specified by single string (e.g. '2014', '2014-01', etc.)
             else:
@@ -641,15 +642,33 @@ def aggregate_xarray_to_stress_period(data, start_datetime, end_datetime,
 
         # no period specified; use start/end of current period
         elif len(period_stat) == 0:
+
+            assert datetime_coords_name in data.coords, \
+                "datetime_column needed for " \
+                "resampling irregular data to model stress periods"
+            # not sure if this is needed for xarray
+            if data[datetime_coords_name].dtype == object:
+                data[datetime_coords_name] = pd.to_datetime(data[datetime_coords_name])
+            # default to aggregating whole dataset
+            # if start_ and end_datetime not provided
+            if start_datetime is None:
+                start_datetime = data[datetime_coords_name].values[0]
+            if end_datetime is None:
+                end_datetime = data[datetime_coords_name].values[-1]
+            # >= includes the start datetime
+            # for now, in comparison to aggregate_dataframe_to_stress_period() fn
+            # for tabular data (pandas)
+            # assume that xarray data does not have an end_datetime column
+            # (infer the end datetimes)
             arr = data.loc[start_datetime:end_datetime].values
 
         else:
             raise Exception("")
 
     # compute statistic on data
-    period_stat = getattr(arr, stat)(axis=0)
+    aggregated = getattr(arr, stat)(axis=0)
 
-    return period_stat
+    return aggregated
 
 
 def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
