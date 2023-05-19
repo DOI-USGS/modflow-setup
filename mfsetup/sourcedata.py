@@ -6,8 +6,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pyproj
 from flopy.utils import binaryfile as bf
-from gisutils import get_values_at_points, shp2df
+from gisutils import get_values_at_points, project, shp2df
 from scipy.interpolate import griddata
 from shapely.geometry import Point
 
@@ -645,11 +646,20 @@ class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
         self.dest_model = dest_model
         self.time_col = 'time'
 
+        self._crs = None
+
         # set xy value arrays for source and dest. grids
         with xr.open_dataset(self.filename) as ds:
             x1, y1 = np.meshgrid(ds.x.values, ds.y.values)
             x1 = x1.ravel()
             y1 = y1.ravel()
+            # reproject the netcdf coords
+            # to the model CRS
+            if self.crs is not None:
+                if self.crs != self.dest_model.modelgrid.crs:
+                    x1, y1 = project((x1, y1),
+                                     self.crs,
+                                     self.dest_model.modelgrid.crs)
             self.source_grid_xy = np.array([x1, y1]).transpose()
         x2 = self.dest_model.modelgrid.xcellcenters.ravel()
         y2 = self.dest_model.modelgrid.ycellcenters.ravel()
@@ -663,6 +673,30 @@ class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
             self._interp_weights = interp_weights(self.source_grid_xy,
                                                   self.dest_grid_xy)
         return self._interp_weights
+
+    @property
+    def crs(self):
+        """Try to make a valid pyproj.CRS instance from
+        coordinate reference system information in the
+        NetCDF file. Assumes that CF-like grid_mapping
+        information is stored in a 'crs' variable.
+
+        """
+        if self._crs is None:
+            with xr.open_dataset(self.filename) as ds:
+                crs_da = getattr(ds, 'crs', None)
+            if crs_da is not None:
+                grid_mapping = crs_da.attrs
+                crs = self.get_crs_from_grid_mapping(grid_mapping)
+            if crs is None:
+                print('Could not create valid pyproj.CRS object'
+                      f'from grid mapping infromation in {self.filename}.'
+                      f'Input in {self.filename} will be assumed to be in the '
+                      'model coordinate reference system.')
+                return
+            else:
+                self._crs = crs
+        return self._crs
 
     def regrid_from_source(self, source_array,
                            method='linear'):
@@ -701,7 +735,7 @@ class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
             if period_stat is None:
                 continue
             aggregated = aggregate_xarray_to_stress_period(data,
-                                                           datetime_column=self.time_col,
+                                                           datetime_coords_name=self.time_col,
                                                            **period_stat)
             # sample the data onto the model grid
             resampled = self.regrid_from_source(aggregated,
@@ -713,6 +747,27 @@ class NetCDFSourceData(ArraySourceData, TransientSourceDataMixin):
         self.data = results
         return results
 
+    @staticmethod
+    def get_crs_from_grid_mapping(grid_mapping):
+        crs = None
+        try:
+            crs = pyproj.CRS.from_cf(grid_mapping)
+        except:
+            pass
+        if 'crs_wkt' in grid_mapping:
+            try:
+                crs = pyproj.CRS(grid_mapping['crs_wkt'])
+            except:
+                pass
+        # Soil Water Balance Code output
+        # usually has a "proj4_string" entry
+        if 'proj4_string' in grid_mapping:
+            try:
+                crs = pyproj.CRS(grid_mapping['proj4_string'])
+            except:
+                pass
+        # could add more crazy try/excepts here
+        return crs
 
 class MFBinaryArraySourceData(ArraySourceData):
     """Subclass for handling MODFLOW binary array data
