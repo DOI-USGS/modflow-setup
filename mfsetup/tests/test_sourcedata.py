@@ -390,7 +390,12 @@ def test_transient_array_source_data(pfl_nwt_with_dis):
                  resample_method='nearest', vmin=-1e30, vmax=1e30
                  )
 
-def test_netcdf_source_data(test_data_path, tmpdir,
+@pytest.mark.parametrize('crs', (
+    None,
+    5070,
+    pytest.param(4269, marks=pytest.mark.xfail(reason='inconsistent CRS'))
+    ))
+def test_netcdf_source_data(test_data_path, tmpdir, crs,
                             shellmound_model_with_dis):
 
     # netcdf input in same projection as the model
@@ -400,61 +405,89 @@ def test_netcdf_source_data(test_data_path, tmpdir,
 
     sd = NetCDFSourceData(ncfile, 'net_infiltration', period_stats={0: 'mean'},
                  length_units='inches', time_units='days',
-                 dest_model=m
+                 dest_model=m, crs=crs
                  )
     results1 = sd.get_data()
 
-    # make a new netcdf on a different CRS
-    ds = xr.open_dataset(ncfile)
+    # only run the next part of the test,
+    # which looks at reproject, once
+    if crs is None:
+        # make a new netcdf on a different CRS
+        ds = xr.open_dataset(ncfile)
 
-    orig_grid_mapping = ds.crs.attrs.copy()
-    std_parallel = (orig_grid_mapping.pop('latitude_of_first_standard_parallel'),
-                    orig_grid_mapping.pop('latitude_of_second_standard_parallel'))
-    orig_grid_mapping['standard_parallel'] = std_parallel
-    orig_crs = pyproj.CRS.from_cf(orig_grid_mapping)
+        orig_grid_mapping = ds.crs.attrs.copy()
+        std_parallel = (orig_grid_mapping.pop('latitude_of_first_standard_parallel'),
+                        orig_grid_mapping.pop('latitude_of_second_standard_parallel'))
+        orig_grid_mapping['standard_parallel'] = std_parallel
+        orig_crs = pyproj.CRS.from_cf(orig_grid_mapping)
 
-    # reference the second netcdf to UTM zone 15 north
-    dest_crs = pyproj.CRS(26915)
-    x, y = np.meshgrid(ds.x, ds.y)
-    X_utm, Y_utm = gisutils.project((x, y), orig_crs, dest_crs)
-    dx = ds.x.diff(dim='x').values[0]
-    dy = ds.y.diff(dim='y').values[0]
-    # new x and y vectors
-    x_utm = np.add.accumulate([0] + np.ones(len(ds.x)).tolist()[:-1]) * dx + X_utm[0, 0]
-    y_utm = np.add.accumulate([0] + np.ones(len(ds.y)).tolist()[:-1]) * dy + Y_utm[0, 0]
-    # represenations of new x and y locations in old crs
-    x2, y2 = gisutils.project(tuple(np.meshgrid(x_utm, y_utm)), dest_crs, orig_crs)
+        # reference the second netcdf to UTM zone 15 north
+        dest_epsg = 26915
+        dest_crs = pyproj.CRS(dest_epsg)
+        x, y = np.meshgrid(ds.x, ds.y)
+        X_utm, Y_utm = gisutils.project((x, y), orig_crs, dest_crs)
+        dx = ds.x.diff(dim='x').values[0]
+        dy = ds.y.diff(dim='y').values[0]
+        # new x and y vectors
+        x_utm = np.add.accumulate([0] + np.ones(len(ds.x)).tolist()[:-1]) * dx + X_utm[0, 0]
+        y_utm = np.add.accumulate([0] + np.ones(len(ds.y)).tolist()[:-1]) * dy + Y_utm[0, 0]
+        # represenations of new x and y locations in old crs
+        x2, y2 = gisutils.project(tuple(np.meshgrid(x_utm, y_utm)), dest_crs, orig_crs)
 
-    interped = ds['net_infiltration'].interp(x=(['x', 'y'], x2),
-                                             y=(['x', 'y'], y2),
-                                             method='linear')
-    ds2 = xr.Dataset({
-        'net_infiltration': (('time', 'y', 'x'), interped.values),
-        'crs': ds['crs'].values
-        },
-                  #dims=['time', 'y', 'x'],
-                  coords={'x': x_utm, 'y': y_utm, 'time': interped.time}
-                  )
-    ds2['crs'].attrs = dest_crs.to_cf()
-    # write out netcdf
-    reprojected_ncfile = Path(tmpdir) / f'net_inf_{26915}.nc'
-    ds2.to_netcdf(reprojected_ncfile, format='netcdf4', engine='netcdf4', #engine='h5netcdf',
-                    encoding={'net_infiltration': {'zlib': True, 'complevel': 4,
-                                                    'dtype': 'float32', #'scale_factor': 0.01,
-                                                    '_FillValue': -9999,
-                                                    }})
-    sd2 = NetCDFSourceData(reprojected_ncfile, 'net_infiltration', period_stats={0: 'mean'},
-                 length_units='inches', time_units='days',
-                 dest_model=m, #resample_method='linear'
-                 )
-    results2 = sd2.get_data()
-    # the reprojected results won't match the original results
-    # especially well, because of the coarse grid size
-    # and interpolation involved in resampling
-    # the orignal onto another rectilinear grid
-    # in a different orientation (the non-model crs)
-    # both nearest and linear resampling result in
-    # error between 1 and 5%
-    for per in results1.keys():
-        assert np.allclose(results1[per].mean(),
-                           results2[per].mean(), rtol=0.05)
+        interped = ds['net_infiltration'].interp(x=(['x', 'y'], x2),
+                                                y=(['x', 'y'], y2),
+                                                method='linear')
+        ds2 = xr.Dataset({
+            'net_infiltration': (('time', 'y', 'x'), interped.values),
+            'crs': ds['crs'].values
+            },
+                    #dims=['time', 'y', 'x'],
+                    coords={'x': x_utm, 'y': y_utm, 'time': interped.time}
+                    )
+        ds2['crs'].attrs = dest_crs.to_cf()
+        # write out netcdf
+        reprojected_ncfile = Path(tmpdir) / f'net_inf_{dest_epsg}.nc'
+        ds2.to_netcdf(reprojected_ncfile, format='netcdf4', engine='netcdf4', #engine='h5netcdf',
+                        encoding={'net_infiltration': {'zlib': True, 'complevel': 4,
+                                                        'dtype': 'float32', #'scale_factor': 0.01,
+                                                        '_FillValue': -9999,
+                                                        }})
+        sd2 = NetCDFSourceData(reprojected_ncfile, 'net_infiltration', period_stats={0: 'mean'},
+                    length_units='inches', time_units='days',
+                    dest_model=m, #resample_method='linear'
+                    )
+        results2 = sd2.get_data()
+        # the reprojected results won't match the original results
+        # especially well, because of the coarse grid size
+        # and interpolation involved in resampling
+        # the orignal onto another rectilinear grid
+        # in a different orientation (the non-model crs)
+        # both nearest and linear resampling result in
+        # error between 1 and 5%
+        for per in results1.keys():
+            assert np.allclose(results1[per].mean(),
+                            results2[per].mean(), rtol=0.05)
+        # write another netcdf with no CRS information
+        del ds2['crs']
+        reprojected_ncfile = Path(tmpdir) / f'net_inf_no-crs.nc'
+        ds2.to_netcdf(reprojected_ncfile, format='netcdf4', engine='netcdf4', #engine='h5netcdf',
+                        encoding={'net_infiltration': {'zlib': True, 'complevel': 4,
+                                                        'dtype': 'float32', #'scale_factor': 0.01,
+                                                        '_FillValue': -9999,
+                                                        }})
+        sd3 = NetCDFSourceData(reprojected_ncfile, 'net_infiltration', period_stats={0: 'mean'},
+                    length_units='inches', time_units='days', crs=dest_epsg,
+                    dest_model=m, #resample_method='linear'
+                    )
+        results3 = sd3.get_data()
+        # the reprojected results won't match the original results
+        # especially well, because of the coarse grid size
+        # and interpolation involved in resampling
+        # the orignal onto another rectilinear grid
+        # in a different orientation (the non-model crs)
+        # both nearest and linear resampling result in
+        # error between 1 and 5%
+        for per in results1.keys():
+            assert np.allclose(results1[per].mean(),
+                            results3[per].mean(), rtol=0.05)
+        j=2
