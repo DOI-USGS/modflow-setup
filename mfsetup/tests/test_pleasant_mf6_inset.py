@@ -307,7 +307,7 @@ def test_npf_setup(get_pleasant_mf6_with_dis, simulate_high_k_lakes):
 
 def test_obs_setup(get_pleasant_mf6_with_dis):
     m = get_pleasant_mf6_with_dis  # deepcopy(model)
-    obs = m.setup_obs()
+    obs = m.setup_obs(**m.cfg['obs'])
     obs.write()
     obsfile = os.path.join(m.model_ws, obs.filename)
     assert os.path.exists(obsfile)
@@ -316,7 +316,7 @@ def test_obs_setup(get_pleasant_mf6_with_dis):
         for line in obsdata:
             if 'fileout' in line.lower():
                 _, _, _, fname = line.strip().split()
-                assert fname == m.cfg['obs']['filename_fmt'].format(m.name)
+                assert fname == m.cfg['obs']['mfsetup_options']['filename_fmt'].format(m.name)
                 break
 
 

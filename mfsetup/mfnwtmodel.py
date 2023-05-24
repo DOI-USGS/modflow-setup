@@ -663,9 +663,22 @@ class MFnwtModel(MFsetupMixin, Modflow):
         print('setting up HYDMOD package...')
         t0 = time.time()
 
-        # munge the head observation data
-        df = setup_head_observations(self, format=package,
-                                     obsname_column='hydlbl')
+        iobs_domain = None
+        if not kwargs['mfsetup_options']['allow_obs_in_bc_cells']:
+            # for now, discard any head observations in same (i, j) column of cells
+            # as a non-well boundary condition
+            # including lake package lakes and non lake, non well BCs
+            # (high-K lakes are excluded, since we may want head obs at those locations,
+            #  to serve as pseudo lake stage observations)
+            iobs_domain = (self.isbc == 1) | np.any(self.isbc > 2)
+
+        # munge the observation data
+        df = setup_head_observations(self,
+                                     obs_package=package,
+                                     obsname_column='hydlbl',
+                                     iobs_domain=iobs_domain,
+                                     **kwargs['source_data'],
+                                     **kwargs['mfsetup_options'])
 
         # create observation data recarray
         obsdata = fm.ModflowHyd.get_empty(len(df))

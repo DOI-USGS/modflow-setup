@@ -177,12 +177,14 @@ oc:
 
 hyd:
   hydnoh: -999
-  default_columns:
-    x_location_col: 'x_utm' # x coordinates in wtm
-    y_location_col: 'y_utm' # y coordinates in wtm
   source_data:
     column_mappings:
       hydlbl: ['obsprefix', 'obsnme', 'common_name']
+    x_location_col: 'x' # x coordinates in wtm
+    y_location_col: 'y' # y coordinates in wtm
+  mfsetup_options:
+    allow_obs_in_bc_cells: False
+    obsname_character_limit: 14  # hydmod limit
 
 gag:
   starting_unit_number: 250

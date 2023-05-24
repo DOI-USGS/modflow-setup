@@ -23,7 +23,7 @@ from mfsetup.discretization import (
     find_remove_isolated_cells,
     get_layer_thicknesses,
 )
-from mfsetup.fileio import exe_exists, load_array, load_cfg, read_mf6_block
+from mfsetup.fileio import exe_exists, load, load_array, load_cfg, read_mf6_block
 from mfsetup.grid import rasterize
 from mfsetup.mf6model import MF6model
 from mfsetup.units import convert_length_units
@@ -468,20 +468,12 @@ def test_npf_setup(shellmound_model_with_dis):
                                           },
                                      },
                                     ])
-def test_obs_setup(shellmound_model_with_dis, config):
+def test_obs_setup(shellmound_model_with_dis, config, project_root_path):
     m = shellmound_model_with_dis  # deepcopy(model)
-    defaults = {'default_columns':
-                    {'x_location_col': 'x', # x coordinates in wtm
-                     'y_location_col': 'y' # y coordinates in wtm
-                     },
-                'filename_fmt': '{}.head.obs',  # only head obs supported at this point
-                'options':
-                    {'digits': 10,
-                     'print_input': True}
-                }
-    defaults.update(config)
-    m.cfg['obs'] = defaults
-    obs = m.setup_obs()
+    default_mf6_cfg = load(Path(project_root_path) / 'mfsetup/mf6_defaults.yml')
+    kwargs = default_mf6_cfg['obs'].copy()
+    kwargs.update(config)
+    obs = m.setup_obs(**kwargs)
     obs.write()
     obsfile = os.path.join(m.model_ws, obs.filename)
     assert os.path.exists(obsfile)
@@ -490,9 +482,8 @@ def test_obs_setup(shellmound_model_with_dis, config):
         for line in obsdata:
             if 'fileout' in line.lower():
                 _, _, _, fname = line.strip().split()
-                assert fname == m.cfg['obs']['filename_fmt'].format(m.name)
+                assert fname == m.cfg['obs']['mfsetup_options']['filename_fmt'].format(m.name)
                 break
-    j=2
 
 
 @pytest.mark.parametrize('input', [
@@ -723,8 +714,7 @@ def test_wel_setup(shellmound_model_with_dis):
     assert np.allclose(sums, sums2, rtol=0.01)
 
 
-def test_sfr_setup(model_with_sfr
-                   ):
+def test_sfr_setup(model_with_sfr, project_root_path):
     m = model_with_sfr
     m.sfr.write()
     assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
@@ -807,7 +797,10 @@ def test_sfr_setup(model_with_sfr
     assert np.allclose(np.round(m.sfr.packagedata.array['rgrd'].min(), 6), \
                        np.round(m.cfg['sfr']['sfrmaker_options']['minimum_slope'], 6))
     # check that no observations were placed in cells with SFR
-    m.setup_obs()
+    #default_mf6_cfg = load(Path(project_root_path) / 'mfsetup/mf6_defaults.yml')
+    #kwargs = default_mf6_cfg['obs'].copy()
+    #kwargs.update(config)
+    obs = m.setup_obs(**m.cfg['obs'])
     sfr_cells = set(m.sfr.packagedata.array['cellid'])
     obs_cells = set(m.obs[1].continuous.data['shellmound.head.obs']['id'])
     assert not any(obs_cells.intersection(sfr_cells))
