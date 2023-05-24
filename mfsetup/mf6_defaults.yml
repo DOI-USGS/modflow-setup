@@ -248,10 +248,12 @@ obs:
   source_data:
     column_mappings:
       hydlbl: ['obsprefix', 'obsnme', 'common_name']
-  default_columns:
     x_location_col: 'x' # x coordinates in wtm
     y_location_col: 'y' # y coordinates in wtm
-  filename_fmt: '{}.head.obs'  # only head obs supported at this point
+  mfsetup_options:
+    allow_obs_in_bc_cells: False
+    obsname_character_limit: 40  # modflow 6 limit
+    filename_fmt: '{}.head.obs'  # only head obs supported at this point
 
 ims:
   options:

@@ -685,14 +685,26 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
 
+        iobs_domain = None
+        if not kwargs['mfsetup_options']['allow_obs_in_bc_cells']:
+            # for now, discard any head observations in same (i, j) column of cells
+            # as a non-well boundary condition
+            # including lake package lakes and non lake, non well BCs
+            # (high-K lakes are excluded, since we may want head obs at those locations,
+            #  to serve as pseudo lake stage observations)
+            iobs_domain = ~((self.isbc == 1) | np.any(self.isbc > 2))
+
         # munge the observation data
         df = setup_head_observations(self,
-                                     format=package,
-                                     obsname_column='obsname')
+                                     obs_package=package,
+                                     obsname_column='obsname',
+                                     iobs_domain=iobs_domain,
+                                     **kwargs['source_data'],
+                                     **kwargs['mfsetup_options'])
 
         # reformat to flopy input format
         obsdata = df[['obsname', 'obstype', 'id']].to_records(index=False)
-        filename = self.cfg[package]['filename_fmt'].format(self.name)
+        filename = self.cfg[package]['mfsetup_options']['filename_fmt'].format(self.name)
         obsdata = {filename: obsdata}
 
         kwargs = self.cfg[package].copy()

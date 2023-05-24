@@ -548,7 +548,7 @@ def test_oc_setup(pfl_nwt, input, expected):
 def test_hyd_setup(pfl_nwt_with_dis_bas6):
 
     m = pfl_nwt_with_dis_bas6  #deepcopy(pfl_nwt_with_dis)
-    hyd = m.setup_hyd()
+    hyd = m.setup_hyd(**m.cfg['hyd'])
     hyd.write_file()
     # verify that each head observation is in each layer
     df = pd.DataFrame(hyd.obsdata)

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from shapely.geometry import Point
+from shapely.geometry import Point, box
 
 from mfsetup.fileio import check_source_files
 from mfsetup.grid import get_ij
@@ -50,41 +50,44 @@ def read_observation_data(f=None, column_info=None,
     return df
 
 
-def setup_head_observations(model, obs_info_files=None,
-                            format='hyd',
-                            obsname_column='obsname'):
-
-    self = model
-    package = format
-    source_data_config = self.cfg[package]['source_data']
+def setup_head_observations(model, filenames=None,
+                            obs_package='hyd', column_mappings=None,
+                            obsname_column='obsname',
+                            x_location_col='x',
+                            y_location_col='y',
+                            obsname_character_limit=40,
+                            drop_observations=None, iobs_domain=None,
+                            **kwargs):
 
     # set a 14 character obsname limit for the hydmod package
     # https://water.usgs.gov/ogw/modflow-nwt/MODFLOW-NWT-Guide/index.html?hyd.htm
     # 40 character limit for MODFLOW-6 (see IO doc)
-    obsname_character_limit = 40
-    if format == 'hyd':
-        obsname_character_limit = 14
+
 
     # TODO: read head observation data using TabularSourceData instead
-    if obs_info_files is None:
-        for key in 'filename', 'filenames':
-            if key in source_data_config:
-                obs_info_files = source_data_config[key]
-        if obs_info_files is None:
+    if filenames is None:
+        filenames = kwargs.get('filename')
+        if filenames is None:
             print("No data for the Observation (OBS) utility.")
             return
+    obs_info_files = filenames
 
     # get obs_info_files into dictionary format
     # filename: dict of column names mappings
+    default_inputs = {
+            'x_location_col': x_location_col,
+            'y_location_col': y_location_col,
+        }
+
     if isinstance(obs_info_files, str):
         obs_info_files = [obs_info_files]
     if isinstance(obs_info_files, list):
-        obs_info_files = {f: self.cfg[package]['default_columns']
+        obs_info_files = {f: default_inputs
                           for f in obs_info_files}
     elif isinstance(obs_info_files, dict):
         for k, v in obs_info_files.items():
             if v is None:
-                obs_info_files[k] = self.cfg[package]['default_columns']
+                obs_info_files[k] = default_inputs
 
     check_source_files(obs_info_files.keys())
     # dictionaries mapping from obstypes to hydmod input
@@ -104,7 +107,6 @@ def setup_head_observations(model, obs_info_files=None,
     dfs = []
     for f, column_info in obs_info_files.items():
         print(f)
-        column_mappings = self.cfg[package]['source_data'].get('column_mappings')
         df = read_observation_data(f, column_info,
                                    column_mappings=column_mappings)
         if 'obs_type' in df.columns and 'pckg' not in df.columns:
@@ -123,30 +125,10 @@ def setup_head_observations(model, obs_info_files=None,
 
     print('\nCulling observations to model area...')
     df['geometry'] = [Point(x, y) for x, y in zip(df.x, df.y)]
-    within = [g.within(self.bbox) for g in df.geometry]
+    l, r, t, b = model.modelgrid.extent
+    bbox = box(l, b, r, t)
+    within = [g.within(bbox) for g in df.geometry]
     df = df.loc[within].copy()
-
-    print('Dropping head observations that coincide with boundary conditions...')
-    i, j = get_ij(self.modelgrid, df.x.values, df.y.values)
-    df['i'], df['j'] = i, j
-
-    #islak = self.lakarr[0, i, j] != 0
-    # for now, discard any head observations in same (i, j) column of cells
-    # as a non-well boundary condition
-    # lake package lakes
-    has_lak = np.any(self.isbc[:, i, j] == 1, axis=0)
-    # non lake, non well BCs
-    # (high-K lakes are excluded, since we may want head obs at those locations,
-    #  to serve as pseudo lake stage observations)
-    has_bc = has_lak | np.any(self.isbc[:, i, j] > 2, axis=0)
-    if any(has_bc):
-        print(f'dropped {np.sum(has_bc)} of {len(df)} observations in cells with bcs.')
-    df = df.loc[~has_bc].copy()
-
-    drop_obs = self.cfg[package].get('drop_observations', [])
-    if len(drop_obs) > 0:
-        print('Dropping head observations specified in {}...'.format(self.cfg.get('filename', 'config file')))
-        df = df.loc[~df[obsname_column].astype(str).isin(drop_obs)]
 
     # make unique observation names for each model layer; applying the character limit
     # preserve end of obsname, truncating initial characters as needed
@@ -166,8 +148,8 @@ def setup_head_observations(model, obs_info_files=None,
     heads = df.loc[df.arr == 'HD'].copy()
     heads0 = heads.groupby(obsname_column).first().reset_index()
     heads0[obsname_column] = heads0[obsname_column].astype(str)
-    heads_all_layers = pd.concat([heads0] * self.nlay).sort_values(by=obsname_column)
-    heads_all_layers['klay'] = list(range(self.nlay)) * len(heads0)
+    heads_all_layers = pd.concat([heads0] * model.modelgrid.nlay).sort_values(by=obsname_column)
+    heads_all_layers['klay'] = list(range(model.modelgrid.nlay)) * len(heads0)
     heads_all_layers[obsname_column] = ['{}'.format(obsname)  # _{:.0f}'.format(obsname, k)
                                         for obsname, k in zip(heads_all_layers[obsname_column],
                                                               heads_all_layers['klay'])]
@@ -177,16 +159,31 @@ def setup_head_observations(model, obs_info_files=None,
     assert df[obsname_column].dtype == object
     df['klay'] = df.klay.astype(int)
 
-    if format == 'hyd':
+    print('Culling observations to cells allowed by iobs_domain...')
+    i, j = get_ij(model.modelgrid, df.x.values, df.y.values)
+    df['i'], df['j'] = i, j
+
+    keep = np.array([True] * len(df))
+    if iobs_domain is not None:
+        keep = np.ravel(iobs_domain[df['klay'].values, i, j] > 0)
+    if np.any(~keep):
+        print(f'dropped {np.sum(~keep)} of {len(df)} observations in cells with bcs.')
+        df = df.loc[keep].copy()
+
+    if drop_observations is not None:
+        print('Dropping head observations specified in drop_observations...')
+        df = df.loc[~df[obsname_column].astype(str).isin(drop_observations)]
+
+    if obs_package == 'hyd':
         # get model locations
-        xl, yl = self.modelgrid.get_local_coords(df.x.values, df.y.values)
+        xl, yl = model.modelgrid.get_local_coords(df.x.values, df.y.values)
         df['xl'] = xl
         df['yl'] = yl
         # drop observations located in inactive cels
         ibdn = model.bas6.ibound.array[df.klay.values, df.i.values, df.j.values]
         active = ibdn >= 1
         df.drop(['i', 'j'], axis=1, inplace=True)
-    elif format == 'obs':  # mf6 observation utility
+    elif obs_package == 'obs':  # mf6 observation utility
         obstype = {'BAS': 'HEAD'}
         renames = {'pckg': 'obstype'}
         df.pckg.replace(obstype, inplace=True)
