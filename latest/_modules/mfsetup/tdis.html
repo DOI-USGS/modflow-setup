@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis &mdash; modflow-setup 0.2.0.post10+g8f16cce documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.2.0.post13+g88e3569 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -34,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post10+g8f16cce
+                0.2.0.post13+g88e3569
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -706,8 +706,9 @@
     <span class="k">return</span> <span class="n">aggregated</span></div>
 
 
-<div class="viewcode-block" id="aggregate_xarray_to_stress_period"><a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.aggregate_xarray_to_stress_period">[docs]</a><span class="k">def</span> <span class="nf">aggregate_xarray_to_stress_period</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">start_datetime</span><span class="p">,</span> <span class="n">end_datetime</span><span class="p">,</span>
-                                      <span class="n">period_stat</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">):</span>
+<div class="viewcode-block" id="aggregate_xarray_to_stress_period"><a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.aggregate_xarray_to_stress_period">[docs]</a><span class="k">def</span> <span class="nf">aggregate_xarray_to_stress_period</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">datetime_coords_name</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">,</span>
+                                      <span class="n">start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                      <span class="n">period_stat</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">):</span>
         <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">start_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -731,7 +732,7 @@
             <span class="n">period</span> <span class="o">=</span> <span class="n">period_stat</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
             <span class="c1"># stat for a specified month</span>
             <span class="k">if</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">months</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">or</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">months</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="n">months</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">period</span><span class="p">)]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="n">months</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">period</span><span class="p">)]</span><span class="o">.</span><span class="n">values</span>
 
             <span class="c1"># stat for a period specified by single string (e.g. &#39;2014&#39;, &#39;2014-01&#39;, etc.)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -739,15 +740,33 @@
 
         <span class="c1"># no period specified; use start/end of current period</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">period_stat</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="k">assert</span> <span class="n">datetime_coords_name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> \
+                <span class="s2">&quot;datetime_column needed for &quot;</span> \
+                <span class="s2">&quot;resampling irregular data to model stress periods&quot;</span>
+            <span class="c1"># not sure if this is needed for xarray</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">])</span>
+            <span class="c1"># default to aggregating whole dataset</span>
+            <span class="c1"># if start_ and end_datetime not provided</span>
+            <span class="k">if</span> <span class="n">start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">end_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># &gt;= includes the start datetime</span>
+            <span class="c1"># for now, in comparison to aggregate_dataframe_to_stress_period() fn</span>
+            <span class="c1"># for tabular data (pandas)</span>
+            <span class="c1"># assume that xarray data does not have an end_datetime column</span>
+            <span class="c1"># (infer the end datetimes)</span>
             <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_datetime</span><span class="p">:</span><span class="n">end_datetime</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="c1"># compute statistic on data</span>
-    <span class="n">period_stat</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">stat</span><span class="p">)(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">aggregated</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">stat</span><span class="p">)(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">period_stat</span></div>
+    <span class="k">return</span> <span class="n">aggregated</span></div>
 
 
 <div class="viewcode-block" id="add_date_comments_to_tdis"><a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.add_date_comments_to_tdis">[docs]</a><span class="k">def</span> <span class="nf">add_date_comments_to_tdis</span><span class="p">(</span><span class="n">tdis_file</span><span class="p">,</span> <span class="n">start_dates</span><span class="p">,</span> <span class="n">end_dates</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -803,7 +822,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 18, 2023.
+      <span class="lastupdated">Last updated on Jun 02, 2023.
       </span></p>
   </div>
 

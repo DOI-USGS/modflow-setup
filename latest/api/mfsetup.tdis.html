@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis module &mdash; modflow-setup 0.2.0.post10+g8f16cce documentation</title>
+  <title>mfsetup.tdis module &mdash; modflow-setup 0.2.0.post13+g88e3569 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -37,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post10+g8f16cce
+                0.2.0.post13+g88e3569
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -227,7 +227,7 @@ their start dates (as opposed to midpoint dates or end dates).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.tdis.aggregate_xarray_to_stress_period">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">aggregate_xarray_to_stress_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_xarray_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_xarray_to_stress_period" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">aggregate_xarray_to_stress_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_coords_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_xarray_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_xarray_to_stress_period" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -267,14 +267,14 @@ a list of groups (dicts).</p>
 <dd><p>Sets up time discretization for a model; outputs a DataFrame with
 stress period dates/times and properties. Stress periods can be established
 by explicitly specifying perlen as a list of period lengths in
-model units. Or, stress periods can be generated via <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.0.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>,
+model units. Or, stress periods can be generated via <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>,
 using three of the start_date_time, end_date_time, nper, and freq arguments.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>start_date_time</strong><span class="classifier">str or datetime-like</span></dt><dd><p>Left bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.0.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
+<dt><strong>start_date_time</strong><span class="classifier">str or datetime-like</span></dt><dd><p>Left bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
 </dd>
-<dt><strong>end_date_time</strong><span class="classifier">str or datetime-like, optional</span></dt><dd><p>Right bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.0.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
+<dt><strong>end_date_time</strong><span class="classifier">str or datetime-like, optional</span></dt><dd><p>Right bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.0.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
 </dd>
 <dt><strong>nper</strong><span class="classifier">int, optional</span></dt><dd><p>Number of stress periods. Only used if perlen is None, or in combination with freq
 if an end_date_time isn’t specified.</p>
@@ -395,7 +395,7 @@ simulated. For example, <code class="docutils literal notranslate"><span class="
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 18, 2023.
+      <span class="lastupdated">Last updated on Jun 02, 2023.
       </span></p>
   </div>
 
