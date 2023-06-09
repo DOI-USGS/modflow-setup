@@ -204,9 +204,7 @@ class MFsetupGrid(StructuredGrid):
     def transform(self):
         """Rasterio Affine object (same as transform attribute of rasters).
         """
-        return Affine(self.delr[0], 0., self.xul,
-                      0., -self.delc[0], self.yul) * \
-               Affine.rotation(-self.angrot)
+        return get_transform(self)
 
     @property
     def crs(self):
@@ -699,7 +697,7 @@ def rasterize(feature, grid, id_column=None,
         from gisutils import get_authority_crs
         crs = get_authority_crs(crs)
 
-    trans = grid.transform
+    trans = get_transform(grid)
 
     if isinstance(feature, str) or isinstance(feature, Path):
         df = gpd.read_file(feature)
@@ -1141,3 +1139,18 @@ def get_intercell_connections(binary_grid_file):
     df.reset_index()
     print(f"Getting intercell connections took {time.time() - ta:.2f}s\n")
     return df
+
+
+def get_transform(modelgrid):
+    """Get a rasterio Affine object from a Flopy modelgrid
+    (same as transform attribute of rasters).
+    """
+    if not isinstance(modelgrid, StructuredGrid):
+        raise ValueError(
+            f"{type(modelgrid)}: Input needs to be a flopy.discretization.StructuredGrid")
+    x0 = modelgrid.xyedges[0][0]
+    y0 = modelgrid.xyedges[1][0]
+    xul, yul = modelgrid.get_coords(x0, y0)
+    return Affine(modelgrid.delr[0], 0., xul,
+                    0., -modelgrid.delc[0], yul) * \
+            Affine.rotation(-modelgrid.angrot)
