@@ -183,6 +183,16 @@ def test_namefile(shellmound_model_with_dis):
                 assert line.strip().split()[-1] == expected_listfile_name
 
 
+def test_ims_setup(shellmound_model):
+    model = shellmound_model
+    ims = model.setup_ims()
+
+    assert ims.csv_outer_output_filerecord is not None
+
+    assert ims.csv_outer_output_filerecord.array[0][0] == \
+        'solver_outer_out.csv'
+
+
 def test_snap_to_NHG(shellmound_cfg, shellmound_simulation):
     cfg = deepcopy(shellmound_cfg)
     #simulation = deepcopy(simulation)

@@ -742,6 +742,13 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nSetting up {} package...'.format(package.upper()))
         t0 = time.time()
         kwargs = flatten(self.cfg[package])
+        # renames to cover difference between mf6: flopy input
+        renames = {'csv_outer_output': 'csv_outer_output_filerecord',
+                   'csv_inner_output': 'csv_outer_inner_filerecord'
+                   }
+        for k, v in renames.items():
+            if k in kwargs:
+                kwargs[v] = kwargs[k]
         kwargs = get_input_arguments(kwargs, mf6.ModflowIms)
         ims = mf6.ModflowIms(self.simulation, **kwargs)
         #self.simulation.register_ims_package(ims, [self.name])
