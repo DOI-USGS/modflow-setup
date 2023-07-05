@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.2.0.post13+g88e3569 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -34,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post13+g88e3569
+                0.2.0.post16+g14fea2b
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -302,9 +302,7 @@
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Rasterio Affine object (same as transform attribute of rasters).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xul</span><span class="p">,</span>
-                      <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">yul</span><span class="p">)</span> <span class="o">*</span> \
-               <span class="n">Affine</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">angrot</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -797,7 +795,7 @@
         <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
 
-    <span class="n">trans</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">transform</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">get_transform</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
@@ -1239,6 +1237,21 @@
     <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Getting intercell connections took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">ta</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="get_transform"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_transform">[docs]</a><span class="k">def</span> <span class="nf">get_transform</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get a rasterio Affine object from a Flopy modelgrid</span>
+<span class="sd">    (same as transform attribute of rasters).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">StructuredGrid</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">)</span><span class="si">}</span><span class="s2">: Input needs to be a flopy.discretization.StructuredGrid&quot;</span><span class="p">)</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">xul</span><span class="p">,</span>
+                    <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">yul</span><span class="p">)</span> <span class="o">*</span> \
+            <span class="n">Affine</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span><span class="o">-</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">angrot</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -1249,7 +1262,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jun 02, 2023.
+      <span class="lastupdated">Last updated on Jul 05, 2023.
       </span></p>
   </div>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid module &mdash; modflow-setup 0.2.0.post13+g88e3569 documentation</title>
+  <title>mfsetup.grid module &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -37,7 +37,7 @@
             <a href="../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post13+g88e3569
+                0.2.0.post16+g14fea2b
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -80,6 +80,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_kij_from_node3d"><code class="docutils literal notranslate"><span class="pre">get_kij_from_node3d()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_nearest_point_on_grid"><code class="docutils literal notranslate"><span class="pre">get_nearest_point_on_grid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_point_on_national_hydrogeologic_grid"><code class="docutils literal notranslate"><span class="pre">get_point_on_national_hydrogeologic_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_transform"><code class="docutils literal notranslate"><span class="pre">get_transform()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.rasterize"><code class="docutils literal notranslate"><span class="pre">rasterize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.setup_structured_grid"><code class="docutils literal notranslate"><span class="pre">setup_structured_grid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.write_bbox_shapefile"><code class="docutils literal notranslate"><span class="pre">write_bbox_shapefile()</span></code></a></li>
@@ -158,7 +159,7 @@ the discretization module.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.grid.MFsetupGrid">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">MFsetupGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idomain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laycbd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lenuni</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angrot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#MFsetupGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.MFsetupGrid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.discretization.structuredgrid.html#flopy.discretization.structuredgrid.StructuredGrid" title="(in FloPy Documentation v3.3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StructuredGrid</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.discretization.structuredgrid.html#flopy.discretization.structuredgrid.StructuredGrid" title="(in FloPy Documentation v3.4.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StructuredGrid</span></code></a></p>
 <p>Class representing a structured grid. Extends flopy.discretization.StructuredGrid
 to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).</p>
 <dl class="field-list">
@@ -195,7 +196,7 @@ over a PROJ string (see References)</p>
 <dt><strong>wkt</strong><span class="classifier">str, optional</span></dt><dd><p>Well-known text string describing model CRS.</p>
 </dd>
 <dt><strong>crs</strong><span class="classifier">obj, optional</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.5.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.6.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 Can be any of:</p>
 <blockquote>
 <div><ul class="simple">
@@ -208,7 +209,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -609,6 +610,13 @@ contains it.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.grid.get_transform">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">get_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#get_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.get_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a rasterio Affine object from a Flopy modelgrid
+(same as transform attribute of rasters).</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.grid.rasterize">
 <span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">rasterize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ids=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names_column=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#rasterize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.rasterize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rasterize a feature onto the model grid, using
@@ -631,7 +639,7 @@ an array of the strings will be returned.</p>
 </dd>
 <dt><strong>grid</strong><span class="classifier">grid.StructuredGrid instance</span></dt><dd></dd>
 <dt><strong>crs</strong><span class="classifier">obj</span></dt><dd><p>A Python int, dict, str, or pyproj.crs.CRS instance
-passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.5.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
+passed to <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS.from_user_input" title="(in pyproj v3.6.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyproj.crs.CRS.from_user_input()</span></code></a>
 Can be any of:</p>
 <blockquote>
 <div><ul class="simple">
@@ -644,7 +652,7 @@ Can be any of:</p>
 <li><p>An EPSG integer code [i.e. 4326]</p></li>
 <li><p>A tuple of (“auth_name”: “auth_code”) [i.e (‘epsg’, ‘4326’)]</p></li>
 <li><p>An object with a <cite>to_wkt</cite> method.</p></li>
-<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
+<li><p>A <a class="reference external" href="https://pyproj4.github.io/pyproj/stable/api/crs/crs.html#pyproj.crs.CRS" title="(in pyproj v3.6.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.crs.CRS</span></code></a> class</p></li>
 </ul>
 </div></blockquote>
 </dd>
@@ -686,7 +694,7 @@ Can be any of:</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jun 02, 2023.
+      <span class="lastupdated">Last updated on Jul 05, 2023.
       </span></p>
   </div>
 

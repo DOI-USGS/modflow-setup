@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.2.0.post13+g88e3569 documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -34,7 +34,7 @@
             <a href="../../index.html" class="icon icon-home"> modflow-setup
           </a>
               <div class="version">
-                0.2.0.post13+g88e3569
+                0.2.0.post16+g14fea2b
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -761,9 +761,22 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up HYDMOD package...&#39;</span><span class="p">)</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="c1"># munge the head observation data</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">setup_head_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">package</span><span class="p">,</span>
-                                     <span class="n">obsname_column</span><span class="o">=</span><span class="s1">&#39;hydlbl&#39;</span><span class="p">)</span>
+        <span class="n">iobs_domain</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">][</span><span class="s1">&#39;allow_obs_in_bc_cells&#39;</span><span class="p">]:</span>
+            <span class="c1"># for now, discard any head observations in same (i, j) column of cells</span>
+            <span class="c1"># as a non-well boundary condition</span>
+            <span class="c1"># including lake package lakes and non lake, non well BCs</span>
+            <span class="c1"># (high-K lakes are excluded, since we may want head obs at those locations,</span>
+            <span class="c1">#  to serve as pseudo lake stage observations)</span>
+            <span class="n">iobs_domain</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isbc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isbc</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># munge the observation data</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">setup_head_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                     <span class="n">obs_package</span><span class="o">=</span><span class="n">package</span><span class="p">,</span>
+                                     <span class="n">obsname_column</span><span class="o">=</span><span class="s1">&#39;hydlbl&#39;</span><span class="p">,</span>
+                                     <span class="n">iobs_domain</span><span class="o">=</span><span class="n">iobs_domain</span><span class="p">,</span>
+                                     <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">],</span>
+                                     <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">])</span>
 
         <span class="c1"># create observation data recarray</span>
         <span class="n">obsdata</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowHyd</span><span class="o">.</span><span class="n">get_empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
@@ -933,7 +946,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jun 02, 2023.
+      <span class="lastupdated">Last updated on Jul 05, 2023.
       </span></p>
   </div>
 
