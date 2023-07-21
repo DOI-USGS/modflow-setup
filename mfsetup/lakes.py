@@ -401,7 +401,7 @@ def setup_lake_connectiondata(model, for_external_file=True,
             horizontal_connections['zone'] = littoral_profundal_zones[i, j]
             horizontal_connections['cellid'] = list(zip(k, i, j))
             horizontal_connections.drop(['k', 'i', 'j'], axis=1, inplace=True)
-            df = df.append(horizontal_connections)
+            df = pd.concat([df, horizontal_connections], axis=0)
     # assign iconn (connection number) values for each lake
     dfs = []
     for lakeno, group in df.groupby('lakeno'):
@@ -483,7 +483,7 @@ def get_lakeperioddata(lake_fluxes):
         group.rename(columns={'precipitation': 'rainfall'}, inplace=True)
         group.index = group.lak_id.values
         datacols = {'rainfall', 'evaporation', 'withdrawal', 'runoff', 'stage'}
-        datacols = datacols.intersection(group.columns)
+        datacols = [c for c in group.columns if c in datacols]
         group = group.loc[:, datacols]
         data = group.stack().reset_index()
         data.rename(columns={'level_0': 'lakeno',

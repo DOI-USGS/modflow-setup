@@ -120,6 +120,7 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
     for var, entry in variables.items():
         # check for transient csv input for the variable
         if csv_input is not None and var in csv_input:
+            df_0 = df.copy()
             dfs = []
             for per in csv_input['per'].unique():
                 df_per = df_0.copy()

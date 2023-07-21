@@ -239,11 +239,6 @@ class MFsetupGrid(StructuredGrid):
         self._crs = crs
 
     @property
-    def epsg(self):
-        if self.crs is not None:
-            return self.crs.to_epsg()
-
-    @property
     def proj_str(self):
         if self.crs is not None:
             return self.crs.to_proj4()

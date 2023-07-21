@@ -267,8 +267,8 @@ def get_mean_pumping_rates(wu_file, wu_points, model,
         else:
             raise ValueError('Unrecognized input for stat: {}'.format(stat))
 
-        site_means = period_data.groupby('site_no').mean()
-        site_sums = period_data.groupby('site_no').sum()
+        site_means = period_data.groupby('site_no').mean(numeric_only=True)
+        site_sums = period_data.groupby('site_no').sum(numeric_only=True)
         site_means['gal_d'] = site_sums['gallons'] / site_sums['days']
         # conversion to model units is based on lenuni variable in DIS package
         gal_to_model_units = convert_volume_units('gal', get_model_length_units(model))

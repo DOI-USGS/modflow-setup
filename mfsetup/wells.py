@@ -11,6 +11,7 @@ from mfsetup.grid import get_ij
 from mfsetup.sourcedata import TransientTabularSourceData
 from mfsetup.wateruse import get_mean_pumping_rates, resample_pumping_rates
 
+
 def setup_wel_data(model, source_data=None, #for_external_files=True,
                    dropped_wells_file='dropped_wells.csv'):
     """Performs the part of well package setup that is independent of
@@ -84,7 +85,7 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
         to_inset_layers = {v:k for k, v in model.parent_layers.items()}
         spd['k'] = [to_inset_layers[k] for k in spd['k']]
 
-        df = df.append(spd)
+        df = pd.concat([df, spd], axis=0)
 
 
     # read source data and map onto model space and time discretization
@@ -111,7 +112,7 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                                      **vfd)
                     else:
                         csvdata['k'] = 0
-                df = df.append(csvdata[columns])
+                df = pd.concat([df, csvdata[columns]], axis=0)
 
             elif k.lower() == 'wells':  # generic dict
                 added_wells = {k: v for k, v in v.items() if v is not None}
@@ -127,7 +128,7 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                   aw['y'].values)
                     aw['per'] = aw['per'].astype(int)
                     aw['k'] = aw['k'].astype(int)
-                    df = df.append(aw)
+                    df = pd.concat([df, aw], axis=0)
 
             elif k.lower() == 'wdnr_dataset':  # custom input format for WI DNR
                 # Get steady-state pumping rates
@@ -152,14 +153,14 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                       period_stats=periods_with_dataset_means,
                                                       drop_ids=v.get('drop_ids'),
                                                       model=model)
-                    df = df.append(wu_means)
+                    df = pd.concat([df, wu_means], axis=0)
                 if len(resampled_periods) > 0:
                     wu_resampled = resample_pumping_rates(v['water_use'],
                                                           v['water_use_points'],
                                                           drop_ids=v.get('drop_ids'),
                                                           exclude_steady_state=True,
                                                           model=model)
-                    df = df.append(wu_resampled)
+                    df = pd.concat([df, wu_resampled], axis=0)
 
     for col in ['per', 'k', 'i', 'j']:
         df[col] = df[col].astype(int)

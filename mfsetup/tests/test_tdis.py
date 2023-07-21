@@ -274,7 +274,7 @@ def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, d
     welldata['start_datetime'] = pd.to_datetime(welldata.start_datetime)
     welldata['end_datetime'] = pd.to_datetime(welldata.end_datetime)
     duplicate_well = welldata.groupby('node').get_group(welldata.node.values[0])
-    welldata = welldata.append(duplicate_well)
+    welldata = pd.concat([welldata, duplicate_well], axis=0)
     start_datetime = pd.Timestamp(start)
     end_datetime = pd.Timestamp(end)  # pandas convention of including last day
     result = aggregate_dataframe_to_stress_period(welldata, id_column='node', data_column='flux_m3',
@@ -293,7 +293,8 @@ def test_aggregate_dataframe_to_stress_period(shellmound_datapath, sourcefile, d
     if not any(overlap):
         assert len(result) == 0
     if any(overlap):
-        agg = welldata.loc[overlap].copy().groupby(['start_datetime', 'node']).sum().reset_index()
+        groupbedby = welldata.loc[overlap].copy().groupby(['start_datetime', 'node'])
+        agg = groupbedby.sum(numeric_only=True).reset_index()
         agg = agg.groupby('node').mean().reset_index()
         expected_sum = agg['flux_m3'].sum()
         if duplicate_well.node.values[0] in agg.index:

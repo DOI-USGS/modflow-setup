@@ -763,7 +763,7 @@ def test_sfr_setup(model_with_sfr, project_root_path):
     runoff_period_data = runoff_period_data.loc[2:].copy()
     runoff_period_data['line_id_in_model'] = runoff_period_data['line_id_in_model'].astype(int)
     # sum runoff by line id for each period
-    runoff_period_comid_sums = runoff_period_data.groupby(['per', 'line_id_in_model']).sum()
+    runoff_period_comid_sums = runoff_period_data.groupby(['per', 'line_id_in_model']).sum(numeric_only=True)
     # then take the mean for each line id across periods
     mean_period_data_runoff_by_comid = runoff_period_comid_sums.groupby('line_id_in_model').mean()
     # read in the input values
