@@ -47,8 +47,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     """
     default_file = '/mf6_defaults.yml'
 
-    def __init__(self, simulation=None, parent=None, cfg=None,
-                 modelname='model', exe_name='mf6', load=False,
+    def __init__(self, simulation=None, modelname='model', parent=None, cfg=None,
+                 exe_name='mf6', load=False,
                  version='mf6', lgr=False, **kwargs):
         defaults = {'simulation': simulation,
                     'parent': parent,
