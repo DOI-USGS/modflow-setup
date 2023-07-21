@@ -15,39 +15,23 @@ jobs:
 
     steps:
     - name: Checkout source
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         persist-credentials: false
 
     - name: Fetch all Git tags
       run: git fetch --prune --unshallow --tags
 
-    - name: Cache Miniconda
-      uses: actions/cache@v2.1.0
-      env:
-        # Increase this value to reset cache if environment.yml has changed
-        CACHE_NUMBER: 0
+    - name: Setup Micromamba
+      uses: mamba-org/setup-micromamba@v1
       with:
-        path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-${{ matrix.python-version }}-${{
-             matrix.run-type }}-${{ env.CACHE_NUMBER }}-${{
-             hashFiles('ci/test_environment.yaml') }}
-
-    - name: Setup conda environment
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        auto-update-conda: true
-        activate-environment: mfsetup_ci
-        environment-file: ci/test_environment.yaml
-        python-version: '3.10'
-        auto-activate-base: false
-        # must be false in most cases
-        # https://github.com/JamesIves/github-pages-deploy-action
-        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+        environment-file: ci/test_environment.yml
+        cache-environment: true
+        cache-downloads: true
 
     - name: Conda info
       shell: bash -l {0}
-      run: conda info
+      run: micromamba info
     - name: Add executables to path
       shell: bash
       run: |
@@ -75,7 +59,7 @@ jobs:
         python -m ipykernel install --user --name mfsetup_ci --display-name "mfsetup_ci"
     - name: Conda list
       shell: bash -l {0}
-      run: conda list
+      run: micromamba list
 
     - name: Run tests
       shell: bash -l {0}
