@@ -170,7 +170,8 @@ def test_ic_setup(shellmound_tmr_model_with_dis, from_binary):
     """Test starting heads setup from model top or parent model head solution
     (MODFLOW binary output)."""
     m = copy.deepcopy(shellmound_tmr_model_with_dis)
-    binaryfile = str(Path(m.parent.model_ws) / f'{m.parent.name}.hds')
+    parent_ws = Path(m.cfg['parent']['model_ws'])
+    binaryfile = str(parent_ws / f'{m.parent.name}.hds')
     if from_binary:
         config = {'strt': {'from_parent': {'binaryfile': binaryfile,
                                            'period': 0

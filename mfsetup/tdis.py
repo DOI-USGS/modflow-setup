@@ -81,12 +81,16 @@ def get_parent_stress_periods(parent_model, nper=None,
     return parent_sp
 
 
-def parse_perioddata_groups(perioddata_dict, defaults={}):
+def parse_perioddata_groups(perioddata_dict,
+                            **kwargs):
     """Reorganize input in perioddata dict into
     a list of groups (dicts).
     """
-    #perioddata = perioddata_dict.copy()
     perioddata_groups = []
+    defaults = {
+        'start_date_time': '1970-01-01'
+    }
+    defaults.update(kwargs)
     group0 = defaults.copy()
 
     valid_txt = "if transient: perlen specified or 3 of start_date_time, " \
@@ -105,7 +109,7 @@ def parse_perioddata_groups(perioddata_dict, defaults={}):
                 prefix = "perioddata input for {} must have".format(k)
                 raise Exception(prefix + valid_txt)
         elif 'perioddata' in k.lower():
-            perioddata_groups += parse_perioddata_groups(perioddata_dict[k], defaults=defaults)
+            perioddata_groups += parse_perioddata_groups(perioddata_dict[k], **defaults)
         else:
             group0[k] = v
     if len(perioddata_groups) == 0:
@@ -117,7 +121,7 @@ def parse_perioddata_groups(perioddata_dict, defaults={}):
         perioddata_groups = [data]
     for group in perioddata_groups:
         if 'steady' in group:
-            if np.isscalar(group['steady']):
+            if np.isscalar(group['steady']) or group['steady'] is None:
                 group['steady'] = {0: group['steady']}
             elif not isinstance(group['steady'], dict):
                 group['steady'] = {i: s for i, s in enumerate(group['steady'])}
@@ -369,6 +373,7 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
     for i in range(len(perioddata)):
         issteady.append(steady.get(i, issteady[i]))
     perioddata['steady'] = issteady[1:]
+    perioddata['steady'] = perioddata['steady'].astype(bool)
 
     # set up output control, using previous value to fill empty periods
     # (same as MF6)
@@ -378,12 +383,15 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
     perioddata['oc'] = oclist[1:]
 
     # correct nstp and tsmult to be 1 for steady-state periods
-    perioddata.loc[perioddata.steady, 'nstp'] = 1
-    perioddata.loc[perioddata.steady, 'tsmult'] = 1
+    perioddata.loc[perioddata.steady.values, 'nstp'] = 1
+    perioddata.loc[perioddata.steady.values, 'tsmult'] = 1
     return perioddata
 
 
-def setup_perioddata(perioddata_groups, time_units='days'):
+def concat_periodata_groups(perioddata_groups, time_units='days'):
+    """Concatenate multiple perioddata DataFrames, but sort
+    result on (absolute) datetimes and increment model time and stress period
+    numbers accordingly."""
 
     # update any missing variables in the groups with global variables
     group_dfs = []
@@ -393,22 +401,131 @@ def setup_perioddata(perioddata_groups, time_units='days'):
         df = setup_perioddata_group(**group)
         group_dfs.append(df)
 
-    # concatenate groups into single dataframe of perioddata
-    perioddata = concat_periodata_groups(group_dfs)
-    return perioddata
-
-
-def concat_periodata_groups(groups):
-    """Concatenate multiple perioddata DataFrames, but sort
-    result on (absolute) datetimes and increment model time and stress period
-    numbers accordingly."""
-    df = pd.concat(groups).sort_values(by=['end_datetime'])
+    df = pd.concat(group_dfs).sort_values(by=['end_datetime'])
     perlen = np.ones(len(df))
     perlen[~df.steady.values] = df.loc[~df.steady.values, 'perlen']
     df['time'] = np.cumsum(perlen)
     df['per'] = range(len(df))
     df.index = range(len(df))
     return df
+
+
+def setup_perioddata(model,
+                     tdis_perioddata_config,
+                     default_start_datetime=None,
+                     nper=None,
+                     steady=None, time_units='days',
+                     oc_saverecord=None, parent_model=None,
+                     parent_stress_periods=None,
+                     ):
+    """Sets up the perioddata DataFrame that is used to reference model
+    stress period start and end times to real date time.
+
+    Parameters
+    ----------
+    model : _type_
+        _description_
+    tdis_perioddata_config : dict
+        ``perioddata:``, ``tdis:`` (MODFLOW 6 models) or ``dis:`` (MODFLOW-2005 models)
+        block from the Modflow-setup configuration file.
+    default_start_datetime : str, optional
+        Start date for model from the tdis: options: block in the configuration file,
+        or ``model.modeltime.start_datetime`` Flopy attribute. Only used
+        where start_datetime information is missing, for example if a group
+        for an initial steady-state period in ``tdis_perioddata_config``
+        doesn't have a start_datetime: entry. By default, None, in which case
+        the default start_datetime of 1970-01-01 may be applied by
+        py:func:`setup_perioddata_group`.
+    nper : int, optional
+        Number of stress periods. Only used if nper is specified in the
+        tdis: dimensions: block of the configuration file and
+        not in a perioddata group.
+    steady : bool, sequence or dict
+        Whether each period is steady-state or transient. Only used
+        if steady is specified in the tdis: or sto: configuration file
+        blocks (MODFLOW 6 models) or the dis: block (MODFLOW-2005 models),
+        and not in perioddata groups.
+    time_units : str, optional
+        Model time units, by default 'days'.
+    oc_saverecord : dict, optional
+        Output control settings, keyed by stress period. Only
+        used to record this information in the stress period data table.
+    parent_model : flopy model instance, optional
+        Parent model, if model is an inset.
+    parent_stress_periods : list of ints, optional
+        Parent model stress periods to apply to the inset model
+        (read from the parent: copy_stress_periods: item in the
+        configuration file).
+
+    Returns
+    -------
+    perioddata : DataFrame
+        Table of stress period information with columns:
+
+        ============== =========================================
+        start_datetime Start date of each model stress period
+        end_datetime   End date of each model stress period
+        time           MODFLOW elapsed time, in days*
+        per            Model stress period number
+        perlen         Stress period length (days)
+        nstp           Number of timesteps in stress period
+        tsmult         Timestep multiplier
+        steady         Steady-state or transient
+        oc             Output control setting for MODFLOW
+        parent_sp      Corresponding parent model stress period
+        ============== =========================================
+
+    Notes
+    -----
+    perioddata is also saved to stress_period_data.csv in the tables folder
+    (usually `/tables`).
+
+    *Modflow elapsed time includes the time lengths specified for
+    any steady-state periods (at least 1 day). Therefore if the model
+    has an initial steady-state period with a ``perlen`` of one day,
+    the elapsed time at the model start date will already be 1 day.
+    """
+    # get start_date_time from parent if available and start_date_time wasn't specified
+    # only apply to tdis_perioddata_config if it wasn't specified there
+    if tdis_perioddata_config.get('start_datetime', '1970-01-01') == '1970-01-01' and \
+            default_start_datetime != '1970-01-01':
+        tdis_perioddata_config['start_date_time'] = default_start_datetime
+
+    # cast steady array to boolean
+    #if steady is not None and not isinstance(steady, dict):
+    #    tdis_perioddata_config['steady'] = np.array(steady).astype(bool).tolist()
+
+    # get period data groups
+    # if no groups are specified, make a group from general stress period input
+    #cfg = self.cfg
+    defaults = {#'start_date_time': default_start_datetime,
+                #'nper': nper,
+                #'steady': steady,
+                #'oc_saverecord': oc_saverecord,
+                }
+    perioddata_groups = parse_perioddata_groups(tdis_perioddata_config,
+                                                nper=nper, steady=steady,
+                                                start_date_time=default_start_datetime)
+
+    # set up the perioddata table from the groups
+    perioddata = concat_periodata_groups(perioddata_groups, time_units)
+
+    # assign parent model stress periods to each inset model stress period
+    parent_sp = None
+    if parent_model is not None:
+        if parent_stress_periods is not None:
+            # parent_sp has parent model stress period corresponding
+            # to each inset model stress period (len=nper)
+            # the same parent stress period can be specified for multiple inset model periods
+            parent_sp = get_parent_stress_periods(parent_model, nper=len(perioddata),
+                                                    parent_stress_periods=parent_stress_periods)
+        elif model._is_lgr:
+            parent_sp = perioddata['per'].values
+
+        # add corresponding stress periods in parent model if there are any
+        perioddata['parent_sp'] = parent_sp
+    assert np.array_equal(perioddata['per'].values, np.arange(len(perioddata)))
+    return perioddata
 
 
 def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_column='datetime',
@@ -583,10 +700,12 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
                 raise ValueError(msg)
             period_data.index.name = None
             by_period = period_data.groupby([id_column, datetime_column]).first().reset_index()
-            by_period[data_column] = getattr(period_data.groupby([id_column, datetime_column]),
-                                                resolve_duplicates_with)()[data_column].values
+            agg_groupedby = getattr(period_data.groupby([id_column, datetime_column]),
+                                    resolve_duplicates_with)(numeric_only=True)
+            by_period[data_column] = agg_groupedby[data_column].values
             period_data = by_period
-        aggregated[data_column] = getattr(period_data.groupby(id_column), stat)()[data_column].values
+        agg_groupedby = getattr(period_data.groupby(id_column), stat)(numeric_only=True)
+        aggregated[data_column] = agg_groupedby[data_column].values
     # if category column was argued, get counts of measured vs estimated
     # for each measurement location, for current stress period
     if categories:

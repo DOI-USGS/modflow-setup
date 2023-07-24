@@ -19,7 +19,8 @@ def is_valid_perioddata(data):
     steady = data.get('steady', False)
     if isinstance(steady, dict):
         steady = steady.get(0)
-    if not steady:
+    # if there's at least one transient stress period
+    if not np.all(steady):
         included = [k for k in ['nper', 'start_date_time', 'end_date_time', 'freq']
                     if data.get(k) is not None]
         has3 = len(included) >= 3

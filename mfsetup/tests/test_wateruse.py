@@ -56,8 +56,8 @@ def test_get_mean_pumping_rates(pfl_nwt_with_dis_bas6):
     # verify that the monthly values match the annual totals
     assert np.allclose(wu['annual_wdrl_total_gallons'], wu['annual_total_calc'])
 
-    sums = wu.dropna(subset=['annual_wdrl_total_gallons'], axis=0).groupby('site_no').sum()
-    means = wu.dropna(subset=['annual_wdrl_total_gallons'], axis=0).groupby('site_no').mean()
+    sums = wu.dropna(subset=['annual_wdrl_total_gallons'], axis=0).groupby('site_no').sum(numeric_only=True)
+    means = wu.dropna(subset=['annual_wdrl_total_gallons'], axis=0).groupby('site_no').mean(numeric_only=True)
     means['Q_m3d'] = sums['annual_wdrl_total_gallons'] / sums['days'] / conversions[2]
 
     sites = [int(s.strip('site')) for s in df.boundname]
@@ -118,7 +118,7 @@ def test_resample_ss_first_period(inset_with_transient_parent, wu_data):
     m.cfg['dis']['nstp'] = [1] + [5] * nper
     m.cfg['dis']['tsmult'] = [1] + [1.2] * nper
 
-    m._set_perioddata()
+    m.perioddata
     m.perioddata['parent_sp'] = [0] + list(range(nper))
     assert m.perioddata.steady[0]
     assert m.perioddata.perlen[0] == 1

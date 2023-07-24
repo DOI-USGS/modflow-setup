@@ -150,7 +150,7 @@ def append_csv(filename, df, **kwargs):
     back to filename."""
     if os.path.exists(filename):
         written = pd.read_csv(filename)
-        df = df.append(written)
+        df = pd.concat([df, written], axis=0)
     df.to_csv(filename, **kwargs)
 
 

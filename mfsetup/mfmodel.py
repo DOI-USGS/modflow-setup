@@ -50,6 +50,7 @@ from mfsetup.mf5to6 import (
 from mfsetup.model_version import get_versions
 from mfsetup.sourcedata import TransientTabularSourceData, setup_array
 from mfsetup.tdis import (
+    concat_periodata_groups,
     get_parent_stress_periods,
     parse_perioddata_groups,
     setup_perioddata,
@@ -242,27 +243,27 @@ class MFsetupMixin():
             self._bbox = self.modelgrid.bbox
         return self._bbox
 
-    @property
-    def perioddata(self):
-        """DataFrame summarizing stress period information.
-
-        Columns:
-
-          start_date_time : pandas datetimes; start date/time of each stress period
-          (does not include steady-state periods)
-          end_date_time : pandas datetimes; end date/time of each stress period
-          (does not include steady-state periods)
-          time : float; cumulative MODFLOW time (includes steady-state periods)
-          per : zero-based stress period
-          perlen : stress period length in model time units
-          nstp : number of timesteps in the stress period
-          tsmult : timestep multiplier for stress period
-          steady : True=steady-state, False=Transient
-          oc : MODFLOW-6 output control options
-        """
-        if self._perioddata is None:
-            self._set_perioddata()
-        return self._perioddata
+    #@property
+    #def perioddata(self):
+    #    """DataFrame summarizing stress period information.
+#
+    #    Columns:
+#
+    #      start_date_time : pandas datetimes; start date/time of each stress period
+    #      (does not include steady-state periods)
+    #      end_date_time : pandas datetimes; end date/time of each stress period
+    #      (does not include steady-state periods)
+    #      time : float; cumulative MODFLOW time (includes steady-state periods)
+    #      per : zero-based stress period
+    #      perlen : stress period length in model time units
+    #      nstp : number of timesteps in the stress period
+    #      tsmult : timestep multiplier for stress period
+    #      steady : True=steady-state, False=Transient
+    #      oc : MODFLOW-6 output control options
+    #    """
+    #    if self._perioddata is None:
+    #        perioddata = setup_perioddata(self)
+    #    return self._perioddata
 
     @property
     def parent(self):
@@ -998,8 +999,9 @@ class MFsetupMixin():
             kwargs = {'xoff': self.parent.modelgrid.xoffset,
                       'yoff': self.parent.modelgrid.yoffset,
                       'angrot': self.parent.modelgrid.angrot,
+                      'crs': self.parent.modelgrid.crs,
                       'epsg': self.parent.modelgrid.epsg,
-                      'proj4': self.parent.modelgrid.proj4,
+                      #'proj4': self.parent.modelgrid.proj4,
                       }
         parent_units = get_model_length_units(self.parent)
         if 'lenuni' in self.cfg['parent']:
@@ -1013,11 +1015,22 @@ class MFsetupMixin():
             self.parent.dis.lenuni = lenuni_values[parent_units]
 
         # make sure crs is populated, then get CRS units for the grid
-        if kwargs.get('epsg') is not None:
-            kwargs['crs'] = pyproj.crs.CRS.from_epsg(kwargs['epsg'])
-        elif kwargs['crs'] is not None:
-            from gisutils import get_authority_crs
+        from gisutils import get_authority_crs
+        if kwargs.get('crs') is not None:
             kwargs['crs'] = get_authority_crs(kwargs['crs'])
+        elif kwargs.get('epsg') is not None:
+            kwargs['crs'] = get_authority_crs(kwargs['epsg'])
+        # no parent CRS info, assume the parent model is in the same CRS
+        elif self.cfg['setup_grid'].get('crs') is not None:
+            kwargs['crs'] = get_authority_crs(self.cfg['setup_grid']['crs'])
+        # no parent CRS info, assume the parent model is in the same CRS
+        elif self.cfg['setup_grid'].get('epsg') is not None:
+            kwargs['crs'] = get_authority_crs(self.cfg['setup_grid']['epsg'])
+        else:
+            raise ValueError('No coordinate reference input in setup_grid: or parent: '
+                             'SpatialReference: blocks of configuration file. Supply '
+                             'at least coordinate reference information to '
+                             'setup_grid: crs: item.')
 
         parent_grid_units = kwargs['crs'].axis_info[0].unit_name
 
@@ -1114,20 +1127,24 @@ class MFsetupMixin():
             self._set_parent_modelgrid(mg_kwargs)
 
             # setup parent model perioddata table
-            if not hasattr(self.parent, 'perioddata'):
+            if getattr(self.parent, 'perioddata', None) is None:
                 kwargs = self.cfg['parent'].copy()
-                kwargs['nper'] = self.parent.nper
                 kwargs['model_time_units'] = self.cfg['parent']['time_units']
-                if self.version == 'mf6':
+                if self.parent.version == 'mf6':
                     for var in ['perlen', 'nstp', 'tsmult']:
                         kwargs[var] = getattr(self.parent.modeltime, var)
                     kwargs['steady'] = self.parent.modeltime.steady_state
+                    kwargs['nper'] = self.parent.simulation.tdis.nper.array
                 else:
                     for var in ['perlen', 'steady', 'nstp', 'tsmult']:
                         kwargs[var] = self.parent.dis.__dict__[var].array
+                    kwargs['nper'] = self.parent.dis.nper
                 kwargs = get_input_arguments(kwargs, setup_perioddata_group)
                 kwargs['oc_saverecord'] = {}
-                self._parent.perioddata = setup_perioddata_group(**kwargs)
+                if hasattr(self.parent, '_perioddata'):
+                    self._parent._perioddata = setup_perioddata_group(**kwargs)
+                else:
+                    self._parent.perioddata = setup_perioddata_group(**kwargs)
 
             # default_source_data, where omitted configuration input is
             # obtained from parent model by default
@@ -1191,72 +1208,6 @@ class MFsetupMixin():
                             for var in ['perlen', 'nstp', 'tsmult', 'steady']:
                                 if self.cfg['dis'].get(var) is None:
                                     self.cfg['dis'][var] = self.parent.dis.__dict__[var].array[parent_periods]
-
-    def _set_perioddata(self):
-        """Sets up the perioddata DataFrame.
-
-        Needs some work to be more general.
-        """
-
-        if self.version == 'mf6':
-            default_start_datetime = self.cfg['tdis']['options'].get('start_date_time', '1970-01-01')
-            tdis_dimensions_config = self.cfg['tdis']['dimensions']
-            tdis_perioddata_config = self.cfg['tdis']['perioddata']
-            nper = self.cfg['tdis']['dimensions'].get('nper')
-            # steady can be input in either the tdis or sto input blocks
-            steady = self.cfg['tdis'].get('steady')
-            if steady is None:
-                steady = self.cfg['sto'].get('steady')
-        else:
-            default_start_datetime = self.cfg['dis'].get('start_date_time', '1970-01-01')
-            tdis_dimensions_config = self.cfg['dis']
-            tdis_perioddata_config = self.cfg['dis']
-            nper = self.cfg['dis'].get('nper')
-            steady = self.cfg['dis'].get('steady')
-
-        # get start_date_time from parent if available and start_date_time wasn't specified
-        if tdis_perioddata_config.get('start_date_time', '1970-01-01') == '1970-01-01' and \
-                default_start_datetime != '1970-01-01':
-            tdis_perioddata_config['start_date_time'] = default_start_datetime
-
-        # cast steady array to boolean
-        if steady is not None and not isinstance(steady, dict):
-            tdis_perioddata_config['steady'] = np.array(tdis_perioddata_config['steady']).astype(bool).tolist()
-
-        # get period data groups
-        # if no groups are specified, make a group from general stress period input
-        cfg = self.cfg
-        defaults = {'start_date_time': default_start_datetime,
-                    'nper': nper,
-                    'steady': steady,
-                    'oc_saverecord': cfg['oc'].get('saverecord', {0: ['save head last',
-                                                                      'save budget last']})
-                    }
-        perioddata_groups = parse_perioddata_groups(tdis_perioddata_config, defaults)
-
-        # set up the perioddata table from the groups
-        self._perioddata = setup_perioddata(perioddata_groups, self.time_units)
-
-        # assign parent model stress periods to each inset model stress period
-        parent_stress_periods = self.cfg.get('parent', {}).get('copy_stress_periods')
-        parent_sp = None
-        if self.parent is not None:
-            if parent_stress_periods is not None:
-                # parent_sp has parent model stress period corresponding
-                # to each inset model stress period (len=nper)
-                # the same parent stress period can be specified for multiple inset model periods
-                parent_sp = get_parent_stress_periods(self.parent, nper=self.nper,
-                                                      parent_stress_periods=parent_stress_periods)
-                self.cfg['parent']['copy_stress_periods'] = parent_sp
-            elif self._is_lgr:
-                parent_sp = self._perioddata['per'].values
-
-        # add corresponding stress periods in parent model if there are any
-        self._perioddata['parent_sp'] = parent_sp
-        assert np.array_equal(self._perioddata['per'].values, np.arange(len(self._perioddata)))
-        # reset nper property so that it will reference perioddata table
-        self._nper = None
-        self._perioddata.to_csv('{}/stress_period_data.csv'.format(self._tables_path), index=False)
 
     def _setup_array(self, package, var, vmin=-1e30, vmax=1e30,
                       source_model=None, source_package=None,

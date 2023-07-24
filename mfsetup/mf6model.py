@@ -1,3 +1,4 @@
+import copy
 import os
 import shutil
 import time
@@ -37,7 +38,7 @@ from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.mover import get_mover_sfr_package_input
 from mfsetup.obs import setup_head_observations
 from mfsetup.oc import parse_oc_period_input
-from mfsetup.tdis import add_date_comments_to_tdis
+from mfsetup.tdis import add_date_comments_to_tdis, setup_perioddata
 from mfsetup.units import convert_time_units
 from mfsetup.utils import flatten, get_input_arguments
 
@@ -119,6 +120,63 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     @property
     def time_units(self):
         return self.cfg['tdis']['options']['time_units']
+
+
+    @property
+    def perioddata(self):
+        """DataFrame summarizing stress period information.
+        Columns:
+        ============== =========================================
+        start_datetime Start date of each model stress period
+        end_datetime   End date of each model stress period
+        time           MODFLOW elapsed time, in days*
+        per            Model stress period number
+        perlen         Stress period length (days)
+        nstp           Number of timesteps in stress period
+        tsmult         Timestep multiplier
+        steady         Steady-state or transient
+        oc             Output control setting for MODFLOW
+        parent_sp      Corresponding parent model stress period
+        ============== =========================================
+        """
+        if self._perioddata is None:
+            # check first for already loaded time discretization info
+            try:
+                tdis_perioddata_config = {col: getattr(self.modeltime, col)
+                                          for col in ['perlen', 'nstp', 'tsmult']}
+                nper = self.modeltime.nper
+                steady = self.modeltime.steady_state
+                default_start_datetime = self.modeltime.start_datetime
+            except:
+                tdis_perioddata_config = self.cfg['tdis']['perioddata']
+                default_start_datetime = self.cfg['tdis']['options'].get('start_date_time',
+                                                                         '1970-01-01')
+                #tdis_dimensions_config = self.cfg['tdis']['dimensions']
+                nper = self.cfg['tdis']['dimensions'].get('nper')
+                # steady can be input in either the tdis or sto input blocks
+                steady = self.cfg['tdis'].get('steady')
+                if steady is None:
+                    steady = self.cfg['sto'].get('steady')
+
+            parent_stress_periods = self.cfg.get('parent').get('copy_stress_periods')
+            perioddata = setup_perioddata(
+                    self,
+                    tdis_perioddata_config=tdis_perioddata_config,
+                    default_start_datetime=default_start_datetime,
+                    nper=nper, steady=steady,
+                    time_units=self.time_units,
+                    parent_model=self.parent,
+                    parent_stress_periods=parent_stress_periods,
+                    )
+            self._perioddata = perioddata
+            # reset nper property so that it will reference perioddata table
+            self._nper = None
+            self._perioddata.to_csv(f'{self._tables_path}/stress_period_data.csv', index=False)
+            # update the model configuration
+            if 'parent_sp' in perioddata.columns:
+                self.cfg['parent']['copy_stress_periods'] = perioddata['parent_sp'].tolist()
+
+        return self._perioddata
 
     @property
     def idomain(self):
@@ -407,9 +465,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # but instantiate with modflow-setup subclass of ModflowGwfdis
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfdis)
         dis = ModflowGwfdis(model=self, **kwargs)
-        self._perioddata = None  # reset perioddata
-        #if not isinstance(self._modelgrid, MFsetupGrid):
-        #    self._modelgrid = None  # override DIS package grid setup
         self._mg_resync = False
         self._reset_bc_arrays()
         self._set_idomain()

@@ -8,7 +8,8 @@ def get_model(basic_model_instance, parent_stress_period_input):
     m = basic_model_instance
     m.setup_dis()
     m.cfg['parent']['copy_stress_periods'] = parent_stress_period_input
-    m._set_perioddata()
+    #m._set_perioddata()
+    m.perioddata
     # test how parent stress periods are used in package setup
     if m.version != 'mf6':
         m.setup_bas6()
@@ -16,20 +17,21 @@ def get_model(basic_model_instance, parent_stress_period_input):
     return m
 
 
-@pytest.mark.parametrize('input',
+@pytest.mark.parametrize('copy_parent_sp',
            ('all',
             [0],  # repeat parent stress period 0
             [2],  # repeat parent stress period 2
             [1, 2]  # include parent stress periods 1 and 2, repeating 2
             ))
-def test_get_perimeter_heads_from_parent(input, basic_model_instance, request, project_root_path):
+def test_get_perimeter_heads_from_parent(copy_parent_sp,
+                                         basic_model_instance, request, project_root_path):
     # change the working dir to the current model_ws
     # (wd gets set to model_ws for each model handled in basic_model
     os.chdir(basic_model_instance._abs_model_ws)
     test_name = request.node.name.split('[')[1].strip(']')
-    if basic_model_instance.name == 'pfl' and input not in ('all', [0]):
+    if basic_model_instance.name == 'pfl' and copy_parent_sp not in ('all', [0]):
         return
-    m = get_model(basic_model_instance, input)
+    m = get_model(basic_model_instance, copy_parent_sp)
 
     # perimeter heads
     # kind of cheesy because it doesn't test the actual values, only differences
@@ -52,15 +54,15 @@ def test_get_perimeter_heads_from_parent(input, basic_model_instance, request, p
     first_value_different = np.array_equal(np.diff(np.round(mean_heads, 4)) == 0,
                                            [False] + [True] * (len(mean_heads) - 2))
     expected = {'pfl_nwt-all': same_head_as_start,  # one parent model stress period, 'all' input
-                'pfl_nwt-input1': same_head_as_start,  # one parent model stress period, input=[0]
+                'pfl_nwt-copy_parent_sp1': same_head_as_start,  # one parent model stress period, input=[0]
                 'pleasant_nwt-all': all_heads_are_different,  # many parent model stress periods, input='all'
-                'pleasant_nwt-input1': same_head_as_start,  # many parent model stress periods, input=[0]
-                'pleasant_nwt-input2': same_head_as_start,  # many parent model stress periods, input=[2]
-                'pleasant_nwt-input3': first_value_different,  # many parent model stress periods, input=[1, 2]
+                'pleasant_nwt-copy_parent_sp1': same_head_as_start,  # many parent model stress periods, input=[0]
+                'pleasant_nwt-copy_parent_sp2': same_head_as_start,  # many parent model stress periods, input=[2]
+                'pleasant_nwt-copy_parent_sp3': first_value_different,  # many parent model stress periods, input=[1, 2]
                 'get_pleasant_mf6-all': all_heads_are_different,
-                'get_pleasant_mf6-input1': same_head_as_start,
-                'get_pleasant_mf6-input2': same_head_as_start,
-                'get_pleasant_mf6-input3': first_value_different,
+                'get_pleasant_mf6-copy_parent_sp1': same_head_as_start,
+                'get_pleasant_mf6-copy_parent_sp2': same_head_as_start,
+                'get_pleasant_mf6-copy_parent_sp3': first_value_different,
                 }
     assert expected[test_name]
     # reset the working directory

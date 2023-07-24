@@ -231,7 +231,8 @@ def test_get_parent_stress_periods(copy_periods, nper, basic_model_instance, req
         for var in ['perlen', 'nstp', 'tsmult', 'steady']:
             del m.cfg['dis'][var]
     m._set_parent()
-    m._set_perioddata()
+    m._perioddata = None
+    m.perioddata
     assert np.array_equal(m.perioddata['parent_sp'], np.array(expected[test_name]))
 
 

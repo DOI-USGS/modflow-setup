@@ -22,7 +22,7 @@ from mfsetup.tests.test_lakes import get_prism_data
 
 def test_perioddata(get_pleasant_nwt):
     m = get_pleasant_nwt
-    m._set_perioddata()
+    m.perioddata
     assert m.perioddata['start_datetime'][0] == pd.Timestamp(m.cfg['dis']['start_date_time'])
 
 

@@ -136,9 +136,9 @@ def test_model(get_pleasant_mf6_with_grid):
 
 def test_perioddata(get_pleasant_mf6, pleasant_nwt):
     nwt = pleasant_nwt
-    nwt._set_perioddata()
+    nwt.perioddata
     m = get_pleasant_mf6
-    m._set_perioddata()
+    m.perioddata
     assert m.perioddata['start_datetime'][0] == pd.Timestamp(m.cfg['tdis']['options']['start_date_time'])
     pd.testing.assert_frame_equal(m.perioddata, nwt.perioddata, check_dtype=False)
 

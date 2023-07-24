@@ -34,7 +34,11 @@ from mfsetup.lakes import (
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.obs import setup_head_observations
 from mfsetup.oc import parse_oc_period_input
-from mfsetup.tdis import get_parent_stress_periods, setup_perioddata_group
+from mfsetup.tdis import (
+    get_parent_stress_periods,
+    setup_perioddata,
+    setup_perioddata_group,
+)
 from mfsetup.units import convert_length_units, itmuni_text, lenuni_text
 from mfsetup.utils import get_input_arguments, get_packages
 
@@ -108,6 +112,53 @@ class MFnwtModel(MFsetupMixin, Modflow):
     @property
     def time_units(self):
         return itmuni_text[self.cfg['dis']['itmuni']]
+
+    @property
+    def perioddata(self):
+        """DataFrame summarizing stress period information.
+        Columns:
+        ============== =========================================
+        start_datetime Start date of each model stress period
+        end_datetime   End date of each model stress period
+        time           MODFLOW elapsed time, in days*
+        per            Model stress period number
+        perlen         Stress period length (days)
+        nstp           Number of timesteps in stress period
+        tsmult         Timestep multiplier
+        steady         Steady-state or transient
+        oc             Output control setting for MODFLOW
+        parent_sp      Corresponding parent model stress period
+        ============== =========================================
+
+        TODO: the code here might still need to be adapted to
+        parallel the code in MF6model.perioddata, to work with
+        parent models that are already loaded but have no configuration.
+        """
+        if self._perioddata is None:
+            default_start_datetime = self.cfg['dis'].get('start_date_time', '1970-01-01')
+            tdis_perioddata_config = self.cfg['dis']
+            nper = self.cfg['dis'].get('nper')
+            steady = self.cfg['dis'].get('steady')
+            parent_stress_periods=None
+            if self.parent is not None:
+                parent_stress_periods = self.cfg['parent'].get('copy_stress_periods')
+            perioddata = setup_perioddata(
+                    self,
+                    tdis_perioddata_config=tdis_perioddata_config,
+                    default_start_datetime=default_start_datetime,
+                    nper=nper, steady=steady, time_units=self.time_units,
+                    parent_model=self.parent,
+                    parent_stress_periods=parent_stress_periods,
+                    )
+            self._perioddata = perioddata
+            # reset nper property so that it will reference perioddata table
+            self._nper = None
+            self._perioddata.to_csv(f'{self._tables_path}/stress_period_data.csv', index=False)
+            # update the model configuration
+            if 'parent_sp' in perioddata.columns:
+                self.cfg['parent']['copy_stress_periods'] = perioddata['parent_sp'].tolist()
+
+        return self._perioddata
 
     @property
     def ipakcb(self):
@@ -293,7 +344,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
         """Calls the _set_perioddata, to establish time discretization. Only purpose
         is to conform to same syntax as mf6 for MFsetupMixin.setup_from_yaml()
         """
-        self._set_perioddata()
+        self.perioddata
 
     def setup_bas6(self, **kwargs):
         """"""

@@ -25,6 +25,7 @@ def parse_oc_period_input(period_input, nstp=None, output_fmt='mf6'):
     Examples
     --------
     >>> period_input = {'saverecord': {0: {'head': 'last', 'budget': 'last'}}
+    >>> parse_oc_period_input(period_input)
     {0: [('head', 'last'), ('budget', 'last')]}
     """
     if nstp is not None:
