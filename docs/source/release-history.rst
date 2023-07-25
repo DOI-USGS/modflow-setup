@@ -2,6 +2,28 @@
 Release History
 ===============
 
+
+Version 0.3.0 (2023-07-25)
+----------------------------------------
+
+* Transient input to basic stress packages can now be supplied via a ``csvfile:`` block. Transient
+  values for the package variables are associated with the shapefile feature extents via an
+  ``id_column`` of values that match values in the shapefile id_column. Input can be mixed between
+  transient ``csvfile:`` input and static input supplied via rasters (that varies spatially)
+  or uniform global values. See the Basic stress packages section in the documentation for more details.
+* add automatic reprojection of NetCDF source data files
+* most Soil Water Balance code models should be work as-is
+* added ``crs:`` configuration file item to specify the coordinate reference system for NetCDF files
+  where coordinate reference information can't be parsed.
+* add support for inner and outer CSV file output in MODFLOW 6 IMS options (remap input to work with Flopy)
+* refactor ``grid.rasterize()`` function to work with standard Flopy ``StructuredGrid`` (s)
+* refactor MODFLOW 6 head observations setup
+* add ``allow_obs_in_bc_cells`` option to allow observations in boundary condition cells (previously not allowed).
+* put modflow-setup specific options in an ``mfsetup_options:`` sub-block, consistent with other packages
+* fixes to adapted to breaking changes with pandas 2.0 and revised flopy modelgrid/crs interface
+* fix ``AttributeError`` issue with model name not getting passed to flopy
+* some fixes to model version reporting in MODFLOW input file headers
+
 Version 0.2.0 (2023-02-06)
 ----------------------------------------
 * add minimal support for MODFLOW-2000 parent models and variably-spaced structured grids

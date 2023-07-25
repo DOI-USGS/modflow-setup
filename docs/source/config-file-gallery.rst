@@ -28,7 +28,7 @@ Shellmound TMR inset test case
 * parent model grid defined with a SpatialReference subblock (which overrides information in MODFLOW Namefile)
 * DIS package top and bottom elevations copied from parent model
 * IC, NPF, STO, RCH, and WEL packages copied from parent model (default if not specified in config file)
-* `default OC configuration <#MODFLOW-6 configuration defaults>`_
+* :ref:`default OC configuration <MODFLOW-6 configuration defaults>`
 * variable time discretization
 * model grid aligned with the `National Hydrologic Grid`_
 * SFR network created from custom hydrography

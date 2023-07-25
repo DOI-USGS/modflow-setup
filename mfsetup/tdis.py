@@ -465,7 +465,7 @@ def setup_perioddata(model,
         ============== =========================================
         start_datetime Start date of each model stress period
         end_datetime   End date of each model stress period
-        time           MODFLOW elapsed time, in days*
+        time           MODFLOW elapsed time, in days [#f1]_
         per            Model stress period number
         perlen         Stress period length (days)
         nstp           Number of timesteps in stress period
@@ -480,10 +480,12 @@ def setup_perioddata(model,
     perioddata is also saved to stress_period_data.csv in the tables folder
     (usually `/tables`).
 
-    *Modflow elapsed time includes the time lengths specified for
-    any steady-state periods (at least 1 day). Therefore if the model
-    has an initial steady-state period with a ``perlen`` of one day,
-    the elapsed time at the model start date will already be 1 day.
+    .. rubric:: Footnotes
+
+    .. [#f1] Modflow elapsed time includes the time lengths specified for
+        any steady-state periods (at least 1 day). Therefore if the model
+        has an initial steady-state period with a ``perlen`` of one day,
+        the elapsed time at the model start date will already be 1 day.
     """
     # get start_date_time from parent if available and start_date_time wasn't specified
     # only apply to tdis_perioddata_config if it wasn't specified there
@@ -491,18 +493,6 @@ def setup_perioddata(model,
             default_start_datetime != '1970-01-01':
         tdis_perioddata_config['start_date_time'] = default_start_datetime
 
-    # cast steady array to boolean
-    #if steady is not None and not isinstance(steady, dict):
-    #    tdis_perioddata_config['steady'] = np.array(steady).astype(bool).tolist()
-
-    # get period data groups
-    # if no groups are specified, make a group from general stress period input
-    #cfg = self.cfg
-    defaults = {#'start_date_time': default_start_datetime,
-                #'nper': nper,
-                #'steady': steady,
-                #'oc_saverecord': oc_saverecord,
-                }
     perioddata_groups = parse_perioddata_groups(tdis_perioddata_config,
                                                 nper=nper, steady=steady,
                                                 start_date_time=default_start_datetime)
