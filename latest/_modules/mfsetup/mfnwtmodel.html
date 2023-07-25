@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -31,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -84,7 +88,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">mfsetup.mfnwtmodel</li>
       <li class="wy-breadcrumbs-aside">
@@ -132,13 +136,17 @@
 <span class="kn">from</span> <span class="nn">mfsetup.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
 <span class="kn">from</span> <span class="nn">mfsetup.obs</span> <span class="kn">import</span> <span class="n">setup_head_observations</span>
 <span class="kn">from</span> <span class="nn">mfsetup.oc</span> <span class="kn">import</span> <span class="n">parse_oc_period_input</span>
-<span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="n">get_parent_stress_periods</span><span class="p">,</span> <span class="n">setup_perioddata_group</span>
+<span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_parent_stress_periods</span><span class="p">,</span>
+    <span class="n">setup_perioddata</span><span class="p">,</span>
+    <span class="n">setup_perioddata_group</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span><span class="p">,</span> <span class="n">itmuni_text</span><span class="p">,</span> <span class="n">lenuni_text</span>
 <span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span><span class="p">,</span> <span class="n">get_packages</span>
 
 
 <div class="viewcode-block" id="MFnwtModel"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel">[docs]</a><span class="k">class</span> <span class="nc">MFnwtModel</span><span class="p">(</span><span class="n">MFsetupMixin</span><span class="p">,</span> <span class="n">Modflow</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class representing a MODFLOW-NWT model&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a MODFLOW-NWT model&quot;&quot;&quot;</span>
     <span class="n">default_file</span> <span class="o">=</span> <span class="s1">&#39;/mfnwt_defaults.yml&#39;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -208,13 +216,60 @@
         <span class="k">return</span> <span class="n">itmuni_text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;itmuni&#39;</span><span class="p">]]</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">perioddata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;DataFrame summarizing stress period information.</span>
+<span class="sd">        Columns:</span>
+<span class="sd">        ============== =========================================</span>
+<span class="sd">        start_datetime Start date of each model stress period</span>
+<span class="sd">        end_datetime   End date of each model stress period</span>
+<span class="sd">        time           MODFLOW elapsed time, in days*</span>
+<span class="sd">        per            Model stress period number</span>
+<span class="sd">        perlen         Stress period length (days)</span>
+<span class="sd">        nstp           Number of timesteps in stress period</span>
+<span class="sd">        tsmult         Timestep multiplier</span>
+<span class="sd">        steady         Steady-state or transient</span>
+<span class="sd">        oc             Output control setting for MODFLOW</span>
+<span class="sd">        parent_sp      Corresponding parent model stress period</span>
+<span class="sd">        ============== =========================================</span>
+
+<span class="sd">        TODO: the code here might still need to be adapted to</span>
+<span class="sd">        parallel the code in MF6model.perioddata, to work with</span>
+<span class="sd">        parent models that are already loaded but have no configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">default_start_datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">,</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">)</span>
+            <span class="n">tdis_perioddata_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span>
+            <span class="n">nper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nper&#39;</span><span class="p">)</span>
+            <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;steady&#39;</span><span class="p">)</span>
+            <span class="n">parent_stress_periods</span><span class="o">=</span><span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parent_stress_periods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;copy_stress_periods&#39;</span><span class="p">)</span>
+            <span class="n">perioddata</span> <span class="o">=</span> <span class="n">setup_perioddata</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">tdis_perioddata_config</span><span class="o">=</span><span class="n">tdis_perioddata_config</span><span class="p">,</span>
+                    <span class="n">default_start_datetime</span><span class="o">=</span><span class="n">default_start_datetime</span><span class="p">,</span>
+                    <span class="n">nper</span><span class="o">=</span><span class="n">nper</span><span class="p">,</span> <span class="n">steady</span><span class="o">=</span><span class="n">steady</span><span class="p">,</span> <span class="n">time_units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_units</span><span class="p">,</span>
+                    <span class="n">parent_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+                    <span class="n">parent_stress_periods</span><span class="o">=</span><span class="n">parent_stress_periods</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span> <span class="o">=</span> <span class="n">perioddata</span>
+            <span class="c1"># reset nper property so that it will reference perioddata table</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nper</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="si">}</span><span class="s1">/stress_period_data.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># update the model configuration</span>
+            <span class="k">if</span> <span class="s1">&#39;parent_sp&#39;</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;copy_stress_periods&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;parent_sp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ipakcb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;By default write everything to one cell budget file.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;By default write everything to one cell budget file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;upw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ipakcb&#39;</span><span class="p">,</span> <span class="mi">53</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ibound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;3D array indicating which cells will be included in the simulation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;3D array indicating which cells will be included in the simulation.</span>
 <span class="sd">        Made a property so that it can be easily updated when any packages</span>
 <span class="sd">        it depends on change.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -223,7 +278,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ibound</span>
 
     <span class="k">def</span> <span class="nf">_set_ibound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remake the idomain array from the source data,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remake the idomain array from the source data,</span>
 <span class="sd">        no data values in the top and bottom arrays, and</span>
 <span class="sd">        so that cells above SFR reaches are inactive.&quot;&quot;&quot;</span>
         <span class="n">ibound_from_layer_elevations</span> <span class="o">=</span> <span class="n">make_ibound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
@@ -260,7 +315,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;bas6&#39;</span><span class="p">][</span><span class="s1">&#39;ibound&#39;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set attributes related to a parent or source model</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set attributes related to a parent or source model</span>
 <span class="sd">        if one is specified.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
@@ -336,7 +391,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">parent_periods</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_update_grid_configuration_with_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update grid configuration with any information supplied to dis package</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update grid configuration with any information supplied to dis package</span>
 <span class="sd">        (so that settings specified for DIS package have priority). This method</span>
 <span class="sd">        is called by MFsetupMixin.setup_grid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -345,7 +400,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="n">param</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">setup_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;dis&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -388,13 +443,13 @@
         <span class="k">return</span> <span class="n">dis</span>
 
 <div class="viewcode-block" id="MFnwtModel.setup_tdis"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_tdis">[docs]</a>    <span class="k">def</span> <span class="nf">setup_tdis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calls the _set_perioddata, to establish time discretization. Only purpose</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calls the _set_perioddata, to establish time discretization. Only purpose</span>
 <span class="sd">        is to conform to same syntax as mf6 for MFsetupMixin.setup_from_yaml()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_perioddata</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span></div>
 
     <span class="k">def</span> <span class="nf">setup_bas6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;bas6&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -461,7 +516,7 @@
         <span class="k">return</span> <span class="n">rch</span>
 
 <div class="viewcode-block" id="MFnwtModel.setup_upw"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_upw">[docs]</a>    <span class="k">def</span> <span class="nf">setup_upw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;upw&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
@@ -705,33 +760,33 @@
         <span class="k">return</span> <span class="n">lak</span>
 
 <div class="viewcode-block" id="MFnwtModel.setup_chd"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_chd">[docs]</a>    <span class="k">def</span> <span class="nf">setup_chd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up the CHD Package.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the CHD Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
             <span class="s1">&#39;chd&#39;</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowChd</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;head&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MFnwtModel.setup_drn"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_drn">[docs]</a>    <span class="k">def</span> <span class="nf">setup_drn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up the Drain Package.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Drain Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
             <span class="s1">&#39;drn&#39;</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowDrn</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;elev&#39;</span><span class="p">,</span> <span class="s1">&#39;cond&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MFnwtModel.setup_ghb"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_ghb">[docs]</a>    <span class="k">def</span> <span class="nf">setup_ghb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up the General Head Boundary Package.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the General Head Boundary Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
             <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowGhb</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;bhead&#39;</span><span class="p">,</span> <span class="s1">&#39;cond&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MFnwtModel.setup_riv"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_riv">[docs]</a>    <span class="k">def</span> <span class="nf">setup_riv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rivdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up the River Package.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the River Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
             <span class="s1">&#39;riv&#39;</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowRiv</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;stage&#39;</span><span class="p">,</span> <span class="s1">&#39;cond&#39;</span><span class="p">,</span> <span class="s1">&#39;rbot&#39;</span><span class="p">],</span>
             <span class="n">rivdata</span><span class="o">=</span><span class="n">rivdata</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MFnwtModel.setup_wel"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_wel">[docs]</a>    <span class="k">def</span> <span class="nf">setup_wel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up the Well Package.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Well Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
             <span class="s1">&#39;wel&#39;</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">ModflowWel</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;flux&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -756,7 +811,7 @@
         <span class="k">return</span> <span class="n">nwt</span>
 
 <div class="viewcode-block" id="MFnwtModel.setup_hyd"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_hyd">[docs]</a>    <span class="k">def</span> <span class="nf">setup_hyd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;TODO: generalize hydmod setup with specific input requirements&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TODO: generalize hydmod setup with specific input requirements&quot;&quot;&quot;</span>
         <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;hyd&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up HYDMOD package...&#39;</span><span class="p">)</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -875,7 +930,7 @@
         <span class="k">return</span> <span class="n">gag</span>
 
 <div class="viewcode-block" id="MFnwtModel.write_input"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.write_input">[docs]</a>    <span class="k">def</span> <span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Write the model input.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the model input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># prior to writing output</span>
         <span class="c1"># remove any BCs in inactive cells</span>
@@ -917,7 +972,7 @@
 
 <div class="viewcode-block" id="MFnwtModel.load"><a class="viewcode-back" href="../../api/mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">yamlfile</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">forgive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Load a model from a config file and set of MODFLOW files.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a model from a config file and set of MODFLOW files.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_cfg</span><span class="p">(</span><span class="n">yamlfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">default_file</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">default_file</span><span class="p">)</span> <span class="c1"># &#39;/mfnwt_defaults.yml&#39;)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Loading </span><span class="si">{}</span><span class="s1"> model from data in </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;modelname&#39;</span><span class="p">],</span> <span class="n">yamlfile</span><span class="p">))</span>
@@ -946,7 +1001,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

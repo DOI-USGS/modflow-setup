@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis module &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>mfsetup.tdis module &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -34,14 +34,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -110,7 +114,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Code Reference</a></li>
       <li class="breadcrumb-item active">mfsetup.tdis module</li>
       <li class="wy-breadcrumbs-aside">
@@ -122,31 +126,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="module-mfsetup.tdis">
+  <section id="module-mfsetup.tdis">
 <span id="mfsetup-tdis-module"></span><h1>mfsetup.tdis module<a class="headerlink" href="#module-mfsetup.tdis" title="Permalink to this heading">¶</a></h1>
 <p>Functions related to temporal discretization</p>
 <dl class="py function">
@@ -232,7 +212,7 @@ their start dates (as opposed to midpoint dates or end dates).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.tdis.concat_periodata_groups">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">concat_periodata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#concat_periodata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.concat_periodata_groups" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">concat_periodata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#concat_periodata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.concat_periodata_groups" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenate multiple perioddata DataFrames, but sort
 result on (absolute) datetimes and increment model time and stress period
 numbers accordingly.</p>
@@ -251,15 +231,112 @@ numbers accordingly.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.tdis.parse_perioddata_groups">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">parse_perioddata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#parse_perioddata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.parse_perioddata_groups" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">parse_perioddata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#parse_perioddata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.parse_perioddata_groups" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reorganize input in perioddata dict into
 a list of groups (dicts).</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.tdis.setup_perioddata">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">setup_perioddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">setup_perioddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tdis_perioddata_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steady</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oc_saverecord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_stress_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets up the perioddata DataFrame that is used to reference model
+stress period start and end times to real date time.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model</strong><span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+<dt><strong>tdis_perioddata_config</strong><span class="classifier">dict</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">perioddata:</span></code>, <code class="docutils literal notranslate"><span class="pre">tdis:</span></code> (MODFLOW 6 models) or <code class="docutils literal notranslate"><span class="pre">dis:</span></code> (MODFLOW-2005 models)
+block from the Modflow-setup configuration file.</p>
+</dd>
+<dt><strong>default_start_datetime</strong><span class="classifier">str, optional</span></dt><dd><p>Start date for model from the tdis: options: block in the configuration file,
+or <code class="docutils literal notranslate"><span class="pre">model.modeltime.start_datetime</span></code> Flopy attribute. Only used
+where start_datetime information is missing, for example if a group
+for an initial steady-state period in <code class="docutils literal notranslate"><span class="pre">tdis_perioddata_config</span></code>
+doesn’t have a start_datetime: entry. By default, None, in which case
+the default start_datetime of 1970-01-01 may be applied by
+py:func:<cite>setup_perioddata_group</cite>.</p>
+</dd>
+<dt><strong>nper</strong><span class="classifier">int, optional</span></dt><dd><p>Number of stress periods. Only used if nper is specified in the
+tdis: dimensions: block of the configuration file and
+not in a perioddata group.</p>
+</dd>
+<dt><strong>steady</strong><span class="classifier">bool, sequence or dict</span></dt><dd><p>Whether each period is steady-state or transient. Only used
+if steady is specified in the tdis: or sto: configuration file
+blocks (MODFLOW 6 models) or the dis: block (MODFLOW-2005 models),
+and not in perioddata groups.</p>
+</dd>
+<dt><strong>time_units</strong><span class="classifier">str, optional</span></dt><dd><p>Model time units, by default ‘days’.</p>
+</dd>
+<dt><strong>oc_saverecord</strong><span class="classifier">dict, optional</span></dt><dd><p>Output control settings, keyed by stress period. Only
+used to record this information in the stress period data table.</p>
+</dd>
+<dt><strong>parent_model</strong><span class="classifier">flopy model instance, optional</span></dt><dd><p>Parent model, if model is an inset.</p>
+</dd>
+<dt><strong>parent_stress_periods</strong><span class="classifier">list of ints, optional</span></dt><dd><p>Parent model stress periods to apply to the inset model
+(read from the parent: copy_stress_periods: item in the
+configuration file).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>perioddata</strong><span class="classifier">DataFrame</span></dt><dd><p>Table of stress period information with columns:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>start_datetime</p></td>
+<td><p>Start date of each model stress period</p></td>
+</tr>
+<tr class="row-even"><td><p>end_datetime</p></td>
+<td><p>End date of each model stress period</p></td>
+</tr>
+<tr class="row-odd"><td><p>time</p></td>
+<td><p>MODFLOW elapsed time, in days <a class="footnote-reference brackets" href="#f1" id="id1">1</a></p></td>
+</tr>
+<tr class="row-even"><td><p>per</p></td>
+<td><p>Model stress period number</p></td>
+</tr>
+<tr class="row-odd"><td><p>perlen</p></td>
+<td><p>Stress period length (days)</p></td>
+</tr>
+<tr class="row-even"><td><p>nstp</p></td>
+<td><p>Number of timesteps in stress period</p></td>
+</tr>
+<tr class="row-odd"><td><p>tsmult</p></td>
+<td><p>Timestep multiplier</p></td>
+</tr>
+<tr class="row-even"><td><p>steady</p></td>
+<td><p>Steady-state or transient</p></td>
+</tr>
+<tr class="row-odd"><td><p>oc</p></td>
+<td><p>Output control setting for MODFLOW</p></td>
+</tr>
+<tr class="row-even"><td><p>parent_sp</p></td>
+<td><p>Corresponding parent model stress period</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>perioddata is also saved to stress_period_data.csv in the tables folder
+(usually <cite>/tables</cite>).</p>
+<p class="rubric">Footnotes</p>
+<dl class="footnote brackets">
+<dt class="label" id="f1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Modflow elapsed time includes the time lengths specified for
+any steady-state periods (at least 1 day). Therefore if the model
+has an initial steady-state period with a <code class="docutils literal notranslate"><span class="pre">perlen</span></code> of one day,
+the elapsed time at the model start date will already be 1 day.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.tdis.setup_perioddata_group">
@@ -395,7 +472,7 @@ simulated. For example, <code class="docutils literal notranslate"><span class="
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

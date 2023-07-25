@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>Installation &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -34,14 +34,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -115,7 +119,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
@@ -126,31 +130,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="installation">
+  <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
 <section id="installing-python-dependencies-with-conda">
 <h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Permalink to this heading">¶</a></h2>
@@ -194,7 +174,7 @@
 <p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
 <p>Before using Mamba, you will need to <a class="reference external" href="https://mamba.readthedocs.io/en/latest/installation.html">install it first</a>.</p>
 <p>Python packages are available from conda via channels. Conda comes preconfigured to install packages from the default channel, which is maintained by Anaconda, Inc. In general, you may have better luck exclusively using the <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> channel instead, which is community-based and intended to provide a single location to get any package, with a minimum of hassle. In general, it is bad practice to mix package channels within a single environment. You can read more <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">here</a>, but to set conda-forge as the default:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda config --add channels conda-forge
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>config<span class="w"> </span>--add<span class="w"> </span>channels<span class="w"> </span>conda-forge
 </pre></div>
 </div>
 <div class="admonition note">
@@ -202,7 +182,7 @@
 <p>If you are having trouble installing Mamba (for example, the conda package solver fails when you try to install it, or takes an excessively long time), you may have better luck uninstalling <a class="reference external" href="cleanuninstall">Anaconda completely</a> and installing <a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Mambaforge</a> instead, as directed in the Mamba install instructions. Mambaforge solves both of the above problems by providing a minimal python distribution and conda-style package installer that is preconfigured to use both <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> and <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a>.</p>
 </div>
 <p>Once you have a python distribution and mamba installed, to create the conda environment, open a new Anaconda Command Prompt on Windows or a new terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba env create -f requirements.yml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>requirements.yml
 </pre></div>
 </div>
 <p>Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> below) and either:</p>
@@ -213,13 +193,13 @@
 </div>
 <ol class="loweralpha">
 <li><p>Update the environment</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba env update -f requirements.yml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>-f<span class="w"> </span>requirements.yml
 </pre></div>
 </div>
 </li>
 <li><p>or remove and reinstall it:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba env remove -n mfsetup
-mamba env create -f requirements.yml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>-n<span class="w"> </span>mfsetup
+mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>requirements.yml
 </pre></div>
 </div>
 </li>
@@ -235,18 +215,18 @@ mamba env create -f requirements.yml
 <h2>Installing Modflow-setup<a class="headerlink" href="#installing-modflow-setup" title="Permalink to this heading">¶</a></h2>
 <p>There are several ways to install Modflow-setup. Regardless of the method, the installation must be performed in a python
 environment with the required dependencies. In the case of the Conda environment created above, the environment must be activated, so that right version of python is called when <code class="docutils literal notranslate"><span class="pre">python</span></code> is entered at the command line:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate mfsetup
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>mfsetup
 </pre></div>
 </div>
 <p>(note that even with Mamba, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate/deactivate</span></code> are still used)</p>
 <section id="installing-and-updating-modflow-setup-from-pypi">
 <h3>Installing and updating Modflow-setup from <a class="reference external" href="https://pypi.org/">PyPI</a><a class="headerlink" href="#installing-and-updating-modflow-setup-from-pypi" title="Permalink to this heading">¶</a></h3>
 <p>Once a suitable conda environment (that contains ALL of the dependencies) is made and activated, the simplest way to install Modflow-setup is from the Python Package Index using pip.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install modflow-setup
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>modflow-setup
 </pre></div>
 </div>
 <p>Subsequent releases of Modflow-setup to PyPI can then be installed with</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade modflow-setup
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>modflow-setup
 </pre></div>
 </div>
 <p>Note that in some situations you may have to <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">uninstall</span> <span class="pre">modflow-setup</span></code> and then <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">modflow-setup</span></code>. You can always check
@@ -256,7 +236,7 @@ what version of Modflow-setup you have within a python session with</p>
 </pre></div>
 </div>
 <p>Or if you are using Conda, at the command line with</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda list
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>list
 </pre></div>
 </div>
 </section>
@@ -264,21 +244,21 @@ what version of Modflow-setup you have within a python session with</p>
 <h3>Installing the latest develop version of Modflow-setup<a class="headerlink" href="#installing-the-latest-develop-version-of-modflow-setup" title="Permalink to this heading">¶</a></h3>
 <p>In some situations you may want the bleeding-edge version of Modflow-setup that is being actively developed on GitHub. For example,
 to incorporate a bug fix that was made after the latest release. Pip can also be used to fetch Modflow-setup directly from GitHub:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/aleaf/modflow-setup@develop
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/aleaf/modflow-setup@develop
 </pre></div>
 </div>
 <p>(for the develop branch). Subsequent updates can then be made with</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip uninstall modflow-setup
-pip install git+https://github.com/aleaf/modflow-setup@develop
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>uninstall<span class="w"> </span>modflow-setup
+pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/aleaf/modflow-setup@develop
 </pre></div>
 </div>
 </section>
 <section id="installing-the-modflow-setup-source-code-in-place">
 <h3>Installing the Modflow-setup source code in-place<a class="headerlink" href="#installing-the-modflow-setup-source-code-in-place" title="Permalink to this heading">¶</a></h3>
 <p>Alternatively, if you intend to contribute to Modflow-setup (please do!) or update your install frequently, the best route is probably to clone the source code from git and install it in place.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/aleaf/modflow-setup.git
-<span class="nb">cd</span> modflow-setup
-pip install -e .
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/aleaf/modflow-setup.git
+<span class="nb">cd</span><span class="w"> </span>modflow-setup
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
 <div class="admonition note">
@@ -286,7 +266,7 @@ pip install -e .
 <p>Don’t forget the <code class="docutils literal notranslate"><span class="pre">.</span></code> after <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span></code>!</p>
 </div>
 <p>Your local copy of the Modflow-setup repository can then be subsequently updated with</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git pull origin master
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>master
 </pre></div>
 </div>
 <div class="admonition note">
@@ -300,7 +280,7 @@ will work to remove the package, and the current version of the package (includi
 <section id="installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks">
 <h2>Installing the IPython kernel to use Modflow-setup in Jupyter Notebooks<a class="headerlink" href="#installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks" title="Permalink to this heading">¶</a></h2>
 <p>This step may not be needed if you already have an existing Python environment with the packages required by Modflow-setup <em>and</em> Jupyter Notebook installed. However, if you’d like to use Modflow-setup in a Jupyter Notebook with the included <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> environment (specified in <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code>), you’ll most likely need to install the IPython kernel in that environment. You can do this at the command line or terminal window (with <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> activated):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m ipykernel install --user --name mfsetup --display-name <span class="s2">&quot;mfsetup&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>ipykernel<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--name<span class="w"> </span>mfsetup<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;mfsetup&quot;</span>
 </pre></div>
 </div>
 <p>The first instance of <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> in this command is the environment to install the kernel to, and the second instance (in quotes) is the name that will appear in the <code class="docutils literal notranslate"><span class="pre">Kernel</span></code> menu within Jupyter Notebook. To use the kernel, simply select it from the <code class="docutils literal notranslate"><span class="pre">Kernel</span> <span class="pre">&gt;</span> <span class="pre">Change</span> <span class="pre">kernel</span></code> menu within  Jupyter Notebook.</p>
@@ -395,7 +375,7 @@ Elapsed: 00:30.647993</p>
 HTTP errors are often intermittent, and a simple retry will get you on your way.</p>
 </div></blockquote>
 <p>Adding the following line to <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> should work:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">msys2::m2w64-gettext</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">msys2::m2w64-gettext</span>
 </pre></div>
 </div>
 <p>This tells conda to fetch <code class="docutils literal notranslate"><span class="pre">m2w64-gettext</span></code> from the <code class="docutils literal notranslate"><span class="pre">msys2</span></code> channel instead. Note that this is only a dependency on Windows,
@@ -417,7 +397,7 @@ so it needs to be commented out on other operating systems (normally it wouldn�
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

@@ -4,11 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pleasant Lake Example &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>Pleasant Lake Example &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -36,14 +37,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -115,7 +120,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../examples.html">Examples</a></li>
       <li class="breadcrumb-item active">Pleasant Lake Example</li>
       <li class="wy-breadcrumbs-aside">
@@ -127,292 +132,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="Pleasant-Lake-Example">
+  <section id="Pleasant-Lake-Example">
 <h1>Pleasant Lake Example<a class="headerlink" href="#Pleasant-Lake-Example" title="Permalink to this heading">¶</a></h1>
 <p>This example is a simplified version of the Pleasant Lake model published by Fienen et al (2021). The goal of the Pleasant Lake model, part of the Central Sands Lake Study, was to address connections between groundwater abstraction and ecological function of a lake in central Wisconsin, USA (WDNR 2021; Figure 1). This required modeling at multiple scales. Fine discretization was needed near the lake for accurate simulation of water levels and groundwater-lake flux. A large model domain was also
-needed, to simulate farfield water-use activity (chiefly irrigated agriculture) in order to delineate a limit of connection, as well as to incorporate distant hydrologic boundaries. Adopting a fine enough discretization for the lake detail throughout the farfield would have resulted in a model with more cells than could be practically managed. To mitigate this, three models were combined: a large regional model built with MODFLOW-NWT (Niswonger et al. 2011), an intermediate MODFLOW 6 model inset
+needed, to simulate farfield water-use activity (chiefly irrigated agriculture) in order to delineate a limit of connection, as well as to incorporate distant hydrologic boundaries. Adopting a fine enough discretization for the lake detail throughout the farfield would have resulted in a model with more cells than could be practically managed. To mitigate this, three models were combined: a large regional model built with MODFLOW-NWT (Niswonger et al. 2011), an intermediate MODFLOW 6 model inset
 within the regional model to simulate the irrigated agriculture area, and a refined MODFLOW 6 inset model (nested within the intermediate model) to simulate the lake. Regional groundwater flow and the effects of distant boundaries were simulated with the MODFLOW-NWT model, which was coupled sequentially (one-way) to the MODFLOW 6 models through time-varying specified head boundaries along the intermediate MODFLOW 6 model perimeter. The two MODFLOW 6 models were coupled dynamically (both ways)
 within the groundwater flow solution, allowing for feedback between the models. Estimates of groundwater recharge for the MODFLOW models were provided by a soil water balance code (SWB; Westenbroek et al 2018) simulation that could consider alternative assumptions of climate and land use. Net infiltration estimates from the SWB model were conveyed to the Recharge Packages in the MODFLOW models using the NetCDF functionality in Modflow-setup.</p>
-<p><img alt="9b1d77963d874e62a486f4782c4cbfc0" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
+<p><img alt="eb2351525b554c77b294fe2d91f6bf01" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
 <p><strong>Figure 1</strong>: The full Pleasant Lake model domain with location map, showing the relationship between the regional, intermediate and LGR inset models, as well as the irrigation wells considered.</p>
 <p>Most details of the Fienen et al (2021) model are included here, but to reduce file sizes and execution time, a smaller Modflow-6 simulation domain is used. The smaller domain is for illustration purposes only, and is not intended to be adequate for representing pumping impacts or providing a sufficient distance to the perimeter boundaries.</p>
 <ul class="simple">
@@ -559,7 +285,7 @@ Bounds: (554200.0, 557400.0, 389000.0, 391800.0)
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 creating shapely Polygons of grid cells...
-finished in 0.01s
+finished in 0.02s
 
 writing postproc/shps/plsnt_lgr_parent_grid.shp... Done
 creating shapely Polygons of grid cells...
@@ -606,7 +332,7 @@ writing postproc/shps/plsnt_lgr_inset_grid.shp... Done
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Pleasant Lake test case version 0.1.post16+g14fea2b
+Pleasant Lake test case version 0.1.post23+g97c0995
 Parent model: /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/pleasant
 5 layer(s), 25 row(s), 25 column(s)
 delr: [200.00...200.00] meters
@@ -702,7 +428,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.2.0.post16+g14fea2b
+{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.2.0.post23+g97c0995
  Parent model: ./plsnt_lgr_parent
  5 layer(s), 70 row(s), 80 column(s)
  delr: [40.00...40.00] meters
@@ -763,7 +489,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f751602cbe0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f49e24e0590&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -823,9 +549,9 @@ INFORMATION: maxbound in (&#39;gwf6&#39;, &#39;wel&#39;, &#39;dimensions&#39;) c
     writing package lak_0...
     writing package obs_0...
     writing package obs_1...
-SFRmaker v. 0.10.0.post5+gbee7e39
+SFRmaker v. 0.11.0
 
-Running Flopy v. 3.4.2.dev0 diagnostics...
+Running Flopy v. 3.5.0.dev0 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -931,7 +657,7 @@ liable for any damages resulting from the authorized or unauthorized
 use of the software.
 
 
- Run start date and time (yyyy/mm/dd hh:mm:ss): 2023/07/05 11:43:18
+ Run start date and time (yyyy/mm/dd hh:mm:ss): 2023/07/25 14:20:25
 
  Writing simulation list file: mfsim.lst
  Using Simulation name file: mfsim.nam
@@ -950,8 +676,8 @@ use of the software.
     Solving:  Stress period:    12    Time step:     1
     Solving:  Stress period:    13    Time step:     1
 
- Run end date and time (yyyy/mm/dd hh:mm:ss): 2023/07/05 11:43:22
- Elapsed run time:  4.090 Seconds
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2023/07/25 14:20:29
+ Elapsed run time:  4.045 Seconds
 
  Normal termination of simulation.
 </pre></div></div>
@@ -1233,11 +959,7 @@ wrote postproc/plsnt_lgr_parent/rasters/recharge_per11.tif
 wrote postproc/plsnt_lgr_parent/rasters/recharge_per12.tif
 
 chd_0 package...
-writing postproc/plsnt_lgr_parent/shps/chd0_stress_period_data.shp... Done
-head:
-boundname:
-Warning, variable: boundname
-Export of non-period data from transientlists not implemented!
+skipped, not implemented yet
 
 obs_0 package...
 skipped, not implemented yet
@@ -1246,11 +968,7 @@ sfr_0 package...
 writing postproc/plsnt_lgr_parent/shps/plsnt_lgr_parent.sfr.shp... Done
 
 wel_0 package...
-writing postproc/plsnt_lgr_parent/shps/wel0_stress_period_data.shp... Done
-q:
-boundname:
-Warning, variable: boundname
-Export of non-period data from transientlists not implemented!
+skipped, not implemented yet
 
 obs_1 package...
 skipped, not implemented yet
@@ -1381,6 +1099,8 @@ skipped, not implemented yet
 <div class="highlight"><pre>
 summarizing plsnt_lgr_parent input...
 skipped, not implemented yet
+skipped, not implemented yet
+skipped, not implemented yet
 summarizing plsnt_lgr_inset input...
 skipped, not implemented yet
 skipped, not implemented yet
@@ -1401,7 +1121,7 @@ skipped, not implemented yet
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>Release History &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -34,14 +34,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -67,6 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-3-0-2023-07-25">Version 0.3.0 (2023-07-25)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-2-0-2023-02-06">Version 0.2.0 (2023-02-06)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-1-0-initial-release-2022-09-30">Version 0.1.0 Initial release (2022-09-30)</a></li>
 </ul>
@@ -91,7 +96,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Release History</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/release-history.rst.txt" rel="nofollow"> View page source</a>
@@ -102,32 +107,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="release-history">
+  <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this heading">¶</a></h1>
+<section id="version-0-3-0-2023-07-25">
+<h2>Version 0.3.0 (2023-07-25)<a class="headerlink" href="#version-0-3-0-2023-07-25" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Transient input to basic stress packages can now be supplied via a <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block. Transient
+values for the package variables are associated with the shapefile feature extents via an
+<code class="docutils literal notranslate"><span class="pre">id_column</span></code> of values that match values in the shapefile id_column. Input can be mixed between
+transient <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> input and static input supplied via rasters (that varies spatially)
+or uniform global values. See the Basic stress packages section in the documentation for more details.</p></li>
+<li><p>add automatic reprojection of NetCDF source data files</p></li>
+<li><p>most Soil Water Balance code models should be work as-is</p></li>
+<li><p>added <code class="docutils literal notranslate"><span class="pre">crs:</span></code> configuration file item to specify the coordinate reference system for NetCDF files
+where coordinate reference information can’t be parsed.</p></li>
+<li><p>add support for inner and outer CSV file output in MODFLOW 6 IMS options (remap input to work with Flopy)</p></li>
+<li><p>refactor <code class="docutils literal notranslate"><span class="pre">grid.rasterize()</span></code> function to work with standard Flopy <code class="docutils literal notranslate"><span class="pre">StructuredGrid</span></code> (s)</p></li>
+<li><p>refactor MODFLOW 6 head observations setup</p></li>
+<li><p>add <code class="docutils literal notranslate"><span class="pre">allow_obs_in_bc_cells</span></code> option to allow observations in boundary condition cells (previously not allowed).</p></li>
+<li><p>put modflow-setup specific options in an <code class="docutils literal notranslate"><span class="pre">mfsetup_options:</span></code> sub-block, consistent with other packages</p></li>
+<li><p>fixes to adapted to breaking changes with pandas 2.0 and revised flopy modelgrid/crs interface</p></li>
+<li><p>fix <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> issue with model name not getting passed to flopy</p></li>
+<li><p>some fixes to model version reporting in MODFLOW input file headers</p></li>
+</ul>
+</section>
 <section id="version-0-2-0-2023-02-06">
 <h2>Version 0.2.0 (2023-02-06)<a class="headerlink" href="#version-0-2-0-2023-02-06" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -189,7 +192,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

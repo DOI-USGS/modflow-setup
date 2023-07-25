@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>mfsetup.tmr &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -31,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -84,7 +88,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">mfsetup.tmr</li>
       <li class="wy-breadcrumbs-aside">
@@ -124,7 +128,7 @@
                  <span class="n">specific_discharge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">headfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">modelgrid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get 2 or 3D arrays of cell by cell flows across the cell faces</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get 2 or 3D arrays of cell by cell flows across the cell faces</span>
 <span class="sd">    (for structured grid models).</span>
 
 <span class="sd">    Parameters</span>
@@ -201,7 +205,7 @@
         <span class="n">nlay</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">flowja</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;FLOW-JA-FACE&#39;</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flowja</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;qidx&#39;</span><span class="p">]]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;getting flows from budget file took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;getting flows from budget file took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># get arrays of flow through cell faces</span>
         <span class="c1"># Qx (right face; TODO: confirm direction)</span>
@@ -274,11 +278,11 @@
         <span class="n">qy</span> <span class="o">/=</span> <span class="n">qy_face_areas</span>
         <span class="n">qz</span> <span class="o">/=</span> <span class="n">qz_face_areas</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">ta</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ta</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span></div>
 
 <span class="k">class</span> <span class="nc">Tmr</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for general telescopic mesh refinement of a MODFLOW model. Head or</span>
 <span class="sd">    flux fields from parent model are interpolated to boundary cells of</span>
 <span class="sd">    inset model, which may be in any configuration (jagged, rotated, etc.).</span>
@@ -354,7 +358,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Active area of the inset model.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Active area of the inset model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
@@ -396,7 +400,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">interp_weights_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;For the two main directions of flux (i, j) and the four orientations of</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;For the two main directions of flux (i, j) and the four orientations of</span>
 <span class="sd">        inset faces to interpolate to (right.left,top,bottom</span>
 <span class="sd">        we can precalulate the interpolation weights of the combinations to speed up</span>
 <span class="sd">        interpolation&quot;&quot;&quot;</span>
@@ -426,7 +430,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent_xyzcellcenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get x, y, z locations of parent cells in a buffered area</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, y, z locations of parent cells in a buffered area</span>
 <span class="sd">        (defined by the _source_grid_mask property) around the</span>
 <span class="sd">        inset model.&quot;&quot;&quot;</span>
         <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">xyzcellcenters</span>
@@ -458,7 +462,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent_xyzcellfacecenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get x, y, z locations of the centroids of the cell faces</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, y, z locations of the centroids of the cell faces</span>
 <span class="sd">        in the row and column directions in a buffered area</span>
 <span class="sd">        (defined by the _source_grid_mask property) around the</span>
 <span class="sd">        inset model. Analogous to parent_xyzcellcenters, but for</span>
@@ -506,7 +510,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_inset_max_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The maximum (2D) footprint of the active area within the inset</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The maximum (2D) footprint of the active area within the inset</span>
 <span class="sd">        model grid, where each i, j location has at least 1 active cell</span>
 <span class="sd">        vertically, excluding any inactive holes that are surrounded by</span>
 <span class="sd">        active cells.</span>
@@ -533,7 +537,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">inset_zone_within_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The footprint of the inset model maximum active area footprint</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The footprint of the inset model maximum active area footprint</span>
 <span class="sd">        (``Tmr._inset_max_active_area``) within the parentmodel grid.</span>
 <span class="sd">        In other words, all parent cells containing one or inset</span>
 <span class="sd">        model cell centers within ``Tmr._inset_max_active_area`` (ones).</span>
@@ -552,7 +556,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_source_grid_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Boolean array indicating window in parent model grid (subset of cells)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean array indicating window in parent model grid (subset of cells)</span>
 <span class="sd">        that encompass the inset model domain. Used to speed up interpolation</span>
 <span class="sd">        of parent grid values onto inset grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -583,7 +587,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span>
 
     <span class="k">def</span> <span class="nf">get_inset_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">by_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get a dataframe of connection information for</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a dataframe of connection information for</span>
 <span class="sd">        horizontal boundary cells.</span>
 
 <span class="sd">        Parameters</span>
@@ -1021,7 +1025,7 @@
                 <span class="n">y_flux</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">qy</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
                 <span class="n">x_flux</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">qx</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
                 <span class="c1"># v_flux = kface_interp.interpolate(qz, method=&#39;linear&#39;)</span>
-                <span class="sa">f</span><span class="s2">&quot;interpolation took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;interpolation took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span>
 
                 <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
@@ -1062,8 +1066,8 @@
                 <span class="c1"># (consistent with parent model cell being inactive)</span>
                 <span class="n">keep</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
                 <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-                <span class="sa">f</span><span class="s2">&quot;assigning face fluxes took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s total&quot;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s2">&quot;assigning face fluxes took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s total&quot;</span><span class="p">)</span>
 
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
             <span class="c1"># drop duplicate cells (accounting for stress periods)</span>
@@ -1091,7 +1095,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

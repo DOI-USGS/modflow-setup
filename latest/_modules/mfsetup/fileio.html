@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.fileio &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -31,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -84,7 +88,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">mfsetup.fileio</li>
       <li class="wy-breadcrumbs-aside">
@@ -123,7 +127,7 @@
 
 
 <div class="viewcode-block" id="check_source_files"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.check_source_files">[docs]</a><span class="k">def</span> <span class="nf">check_source_files</span><span class="p">(</span><span class="n">fileslist</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Check that the files in fileslist exist.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check that the files in fileslist exist.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fileslist</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">fileslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">fileslist</span><span class="p">]</span>
@@ -134,7 +138,7 @@
 
 
 <div class="viewcode-block" id="load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load a configuration file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a configuration file.&quot;&quot;&quot;</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">({</span><span class="s1">&#39;.yml&#39;</span><span class="p">,</span> <span class="s1">&#39;.yaml&#39;</span><span class="p">}):</span>
         <span class="k">return</span> <span class="n">load_yml</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -143,7 +147,7 @@
 
 
 <div class="viewcode-block" id="dump"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.dump">[docs]</a><span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Write a dictionary to a configuration file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write a dictionary to a configuration file.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.yml&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.yaml&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">dump_yml</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">):</span>
@@ -151,21 +155,21 @@
 
 
 <div class="viewcode-block" id="load_json"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_json">[docs]</a><span class="k">def</span> <span class="nf">load_json</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convenience function to load a json file; replacing</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience function to load a json file; replacing</span>
 <span class="sd">    some escaped characters.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="dump_json"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.dump_json">[docs]</a><span class="k">def</span> <span class="nf">dump_json</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Write a dictionary to a json file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write a dictionary to a json file.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="load_modelgrid"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_modelgrid">[docs]</a><span class="k">def</span> <span class="nf">load_modelgrid</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create a MFsetupGrid instance from model config json file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a MFsetupGrid instance from model config json file.&quot;&quot;&quot;</span>
     <span class="n">cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">rename</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xll&#39;</span><span class="p">:</span> <span class="s1">&#39;xoff&#39;</span><span class="p">,</span>
               <span class="s1">&#39;yll&#39;</span><span class="p">:</span> <span class="s1">&#39;yoff&#39;</span><span class="p">,</span>
@@ -182,21 +186,21 @@
 
 
 <div class="viewcode-block" id="load_yml"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_yml">[docs]</a><span class="k">def</span> <span class="nf">load_yml</span><span class="p">(</span><span class="n">yml_file</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load yaml file into a dictionary.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load yaml file into a dictionary.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yml_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cfg</span></div>
 
 
 <div class="viewcode-block" id="dump_yml"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.dump_yml">[docs]</a><span class="k">def</span> <span class="nf">dump_yml</span><span class="p">(</span><span class="n">yml_file</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Write a dictionary to a yaml file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write a dictionary to a yaml file.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yml_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
         <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span><span class="c1">#, Dumper=yaml.Dumper)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;wrote </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">yml_file</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="load_array"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_array">[docs]</a><span class="k">def</span> <span class="nf">load_array</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load an array, ensuring the correct shape.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load an array, ensuring the correct shape.&quot;&quot;&quot;</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span><span class="p">]</span>
@@ -232,7 +236,7 @@
 
 <div class="viewcode-block" id="save_array"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.save_array">[docs]</a><span class="k">def</span> <span class="nf">save_array</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span>
                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Save and array and print that it was written.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save and array and print that it was written.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;filename&#39;</span> <span class="ow">in</span> <span class="n">filename</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -243,17 +247,17 @@
 
 
 <div class="viewcode-block" id="append_csv"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.append_csv">[docs]</a><span class="k">def</span> <span class="nf">append_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read data from filename,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read data from filename,</span>
 <span class="sd">    append to dataframe, and write appended dataframe</span>
 <span class="sd">    back to filename.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
         <span class="n">written</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">written</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">written</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="load_cfg"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.load_cfg">[docs]</a><span class="k">def</span> <span class="nf">load_cfg</span><span class="p">(</span><span class="n">cfgfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This method loads a YAML or JSON configuration file,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This method loads a YAML or JSON configuration file,</span>
 <span class="sd">    applies configuration defaults from a default_file if specified,</span>
 <span class="sd">    adds the absolute file path of the configuration file</span>
 <span class="sd">    to the configuration dictionary, and converts any</span>
@@ -378,7 +382,7 @@
 
 
 <span class="k">def</span> <span class="nf">_set_path</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;From a sequence of keys that point to a file</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;From a sequence of keys that point to a file</span>
 <span class="sd">    path in a nested dictionary, convert the file</span>
 <span class="sd">    path at that location from relative to absolute,</span>
 <span class="sd">    based on a provided absolute path.</span>
@@ -418,7 +422,7 @@
 
 
 <span class="k">def</span> <span class="nf">_set_absolute_paths_to_location</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set relative file paths in a configuration dictionary</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set relative file paths in a configuration dictionary</span>
 <span class="sd">    to a specified location.</span>
 
 <span class="sd">    Parameters</span>
@@ -436,7 +440,7 @@
 
 
 <span class="k">def</span> <span class="nf">_parse_file_path_keys_from_source_data</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Parse a source data entry in the configuration file.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a source data entry in the configuration file.</span>
 
 <span class="sd">    pseudo code:</span>
 <span class="sd">    For each key or item in source_data,</span>
@@ -509,7 +513,7 @@
 <div class="viewcode-block" id="setup_external_filepaths"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.setup_external_filepaths">[docs]</a><span class="k">def</span> <span class="nf">setup_external_filepaths</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span>
                              <span class="n">filename_format</span><span class="p">,</span> <span class="n">file_numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                              <span class="n">relative_external_paths</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set up external file paths for a MODFLOW package variable. Sets paths</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up external file paths for a MODFLOW package variable. Sets paths</span>
 <span class="sd">    for intermediate files, which are written from the (processed) source data.</span>
 <span class="sd">    Intermediate files are supplied to Flopy as external files for a given package</span>
 <span class="sd">    variable. Flopy writes external files to a specified location when the MODFLOW</span>
@@ -629,7 +633,7 @@
 
 
 <div class="viewcode-block" id="flopy_mf2005_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mf2005_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mf2005_load</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">forgive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Execute the code in flopy.modflow.Modflow.load on an existing</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute the code in flopy.modflow.Modflow.load on an existing</span>
 <span class="sd">    flopy.modflow.Modflow instance.&quot;&quot;&quot;</span>
     <span class="n">version</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">version</span>
     <span class="n">verbose</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">verbose</span>
@@ -869,7 +873,7 @@
 
 <div class="viewcode-block" id="flopy_mfsimulation_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mfsimulation_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mfsimulation_load</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">verify_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Execute the code in flopy.mf6.MFSimulation.load on</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute the code in flopy.mf6.MFSimulation.load on</span>
 <span class="sd">    existing instances of flopy.mf6.MFSimulation and flopy.mf6.MF6model&quot;&quot;&quot;</span>
 
     <span class="n">instance</span> <span class="o">=</span> <span class="n">sim</span>
@@ -1060,7 +1064,7 @@
 
 <div class="viewcode-block" id="flopy_mf6model_load"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.flopy_mf6model_load">[docs]</a><span class="k">def</span> <span class="nf">flopy_mf6model_load</span><span class="p">(</span><span class="n">simulation</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">model_rel_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
                         <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Execute the code in flopy.mf6.MFmodel.load_base on an</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute the code in flopy.mf6.MFmodel.load_base on an</span>
 <span class="sd">        existing instance of MF6model.&quot;&quot;&quot;</span>
 
     <span class="n">instance</span> <span class="o">=</span> <span class="n">model</span>
@@ -1135,7 +1139,7 @@
 
 
 <div class="viewcode-block" id="which"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.which">[docs]</a><span class="k">def</span> <span class="nf">which</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Check for existance of executable.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for existance of executable.</span>
 <span class="sd">    https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">is_exe</span><span class="p">(</span><span class="n">fpath</span><span class="p">):</span>
@@ -1252,7 +1256,7 @@
 
 
 <div class="viewcode-block" id="add_version_to_fileheader"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.add_version_to_fileheader">[docs]</a><span class="k">def</span> <span class="nf">add_version_to_fileheader</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add modflow-setup, flopy and optionally model</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add modflow-setup, flopy and optionally model</span>
 <span class="sd">    version info to an existing file header denoted by</span>
 <span class="sd">    the comment characters ``#``, ``!``, or ``//``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1303,7 +1307,7 @@
 
 
 <div class="viewcode-block" id="remove_file_header"><a class="viewcode-back" href="../../api/mfsetup.fileio.html#mfsetup.fileio.remove_file_header">[docs]</a><span class="k">def</span> <span class="nf">remove_file_header</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Remove the header of a MODFLOW input file,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the header of a MODFLOW input file,</span>
 <span class="sd">    to allow comparison betwee files that have different</span>
 <span class="sd">    headers but are otherwise the same, for example.&quot;&quot;&quot;</span>
     <span class="n">backup_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.backup&#39;</span>
@@ -1324,7 +1328,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

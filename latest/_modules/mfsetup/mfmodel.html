@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -31,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -84,7 +88,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">mfsetup.mfmodel</li>
       <li class="wy-breadcrumbs-aside">
@@ -148,6 +152,7 @@
 <span class="kn">from</span> <span class="nn">mfsetup.model_version</span> <span class="kn">import</span> <span class="n">get_versions</span>
 <span class="kn">from</span> <span class="nn">mfsetup.sourcedata</span> <span class="kn">import</span> <span class="n">TransientTabularSourceData</span><span class="p">,</span> <span class="n">setup_array</span>
 <span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">concat_periodata_groups</span><span class="p">,</span>
     <span class="n">get_parent_stress_periods</span><span class="p">,</span>
     <span class="n">parse_perioddata_groups</span><span class="p">,</span>
     <span class="n">setup_perioddata</span><span class="p">,</span>
@@ -167,13 +172,13 @@
 
 
 <div class="viewcode-block" id="MFsetupMixin"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin">[docs]</a><span class="k">class</span> <span class="nc">MFsetupMixin</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Mixin class for shared functionality between MF6model and MFnwtModel.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin class for shared functionality between MF6model and MFnwtModel.</span>
 <span class="sd">    Meant to be inherited by both those classes and not be called directly.</span>
 
 <span class="sd">    https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-are-they-useful</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">source_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="sd">&quot;&quot;&quot;        -1 : well</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;        -1 : well</span>
 <span class="sd">        0 : no lake</span>
 <span class="sd">        1 : lak package lake (lakarr &gt; 0)</span>
 <span class="sd">        2 : high-k lake</span>
@@ -255,7 +260,7 @@
         <span class="k">return</span> <span class="n">txt</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Test for equality to another model object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test for equality to another model object.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="c1"># kludge: skip obs packages for now</span>
@@ -340,27 +345,27 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">bbox</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bbox</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">perioddata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;DataFrame summarizing stress period information.</span>
-
-<span class="sd">        Columns:</span>
-
-<span class="sd">          start_date_time : pandas datetimes; start date/time of each stress period</span>
-<span class="sd">          (does not include steady-state periods)</span>
-<span class="sd">          end_date_time : pandas datetimes; end date/time of each stress period</span>
-<span class="sd">          (does not include steady-state periods)</span>
-<span class="sd">          time : float; cumulative MODFLOW time (includes steady-state periods)</span>
-<span class="sd">          per : zero-based stress period</span>
-<span class="sd">          perlen : stress period length in model time units</span>
-<span class="sd">          nstp : number of timesteps in the stress period</span>
-<span class="sd">          tsmult : timestep multiplier for stress period</span>
-<span class="sd">          steady : True=steady-state, False=Transient</span>
-<span class="sd">          oc : MODFLOW-6 output control options</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_perioddata</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span>
+    <span class="c1">#@property</span>
+    <span class="c1">#def perioddata(self):</span>
+    <span class="c1">#    &quot;&quot;&quot;DataFrame summarizing stress period information.</span>
+<span class="c1">#</span>
+    <span class="c1">#    Columns:</span>
+<span class="c1">#</span>
+    <span class="c1">#      start_date_time : pandas datetimes; start date/time of each stress period</span>
+    <span class="c1">#      (does not include steady-state periods)</span>
+    <span class="c1">#      end_date_time : pandas datetimes; end date/time of each stress period</span>
+    <span class="c1">#      (does not include steady-state periods)</span>
+    <span class="c1">#      time : float; cumulative MODFLOW time (includes steady-state periods)</span>
+    <span class="c1">#      per : zero-based stress period</span>
+    <span class="c1">#      perlen : stress period length in model time units</span>
+    <span class="c1">#      nstp : number of timesteps in the stress period</span>
+    <span class="c1">#      tsmult : timestep multiplier for stress period</span>
+    <span class="c1">#      steady : True=steady-state, False=Transient</span>
+    <span class="c1">#      oc : MODFLOW-6 output control options</span>
+    <span class="c1">#    &quot;&quot;&quot;</span>
+    <span class="c1">#    if self._perioddata is None:</span>
+    <span class="c1">#        perioddata = setup_perioddata(self)</span>
+    <span class="c1">#    return self._perioddata</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -368,7 +373,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Mapping between layers in source model and</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping between layers in source model and</span>
 <span class="sd">        layers in destination model.</span>
 
 <span class="sd">        Returns</span>
@@ -393,7 +398,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent_stress_periods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Mapping between stress periods in source model and</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping between stress periods in source model and</span>
 <span class="sd">        stress periods in destination model.</span>
 
 <span class="sd">        Returns</span>
@@ -405,7 +410,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">package_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Definitive list of packages. Get from namefile input first</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Definitive list of packages. Get from namefile input first</span>
 <span class="sd">        (as in mf6 input), then look under model input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">packages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nam&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;packages&#39;</span><span class="p">,</span> <span class="p">[])</span>
@@ -416,7 +421,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">perimeter_bc_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Dictates how perimeter boundaries are set up.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictates how perimeter boundaries are set up.</span>
 
 <span class="sd">        if &#39;head&#39;; a constant head package is created</span>
 <span class="sd">            from the parent model starting heads</span>
@@ -443,7 +448,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Semantic version of model, using a hacked version of the versioneer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Semantic version of model, using a hacked version of the versioneer.</span>
 <span class="sd">        Version is reported using git tags for the model repository</span>
 <span class="sd">        or a start_version: key specified in the configuration file (default 0).</span>
 <span class="sd">        The start_version or tag is then appended by the remaining information</span>
@@ -513,7 +518,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;For a given parent, only calculate interpolation weights</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;For a given parent, only calculate interpolation weights</span>
 <span class="sd">        once to speed up re-gridding of arrays to pfl_nwt.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parent_xy</span><span class="p">,</span> <span class="n">inset_xy</span> <span class="o">=</span> <span class="n">get_source_dest_model_xys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
@@ -523,7 +528,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Boolean array indicating window in parent model grid (subset of cells)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean array indicating window in parent model grid (subset of cells)</span>
 <span class="sd">        that encompass the inset model domain, with a surrounding buffer.</span>
 <span class="sd">        Used to speed up interpolation of parent grid values onto inset model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -548,7 +553,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_lakarr2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;2-D array of areal extent of lakes. Non-zero values</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;2-D array of areal extent of lakes. Non-zero values</span>
 <span class="sd">        correspond to lak package IDs.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lakarr_2d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_lakarr2d</span><span class="p">()</span>
@@ -556,7 +561,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lakarr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;3-D array of lake extents in each layer. Non-zero values</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;3-D array of lake extents in each layer. Non-zero values</span>
 <span class="sd">        correspond to lak package IDs. Extent of lake in</span>
 <span class="sd">        each layer is based on bathymetry and model layer thickness.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -572,7 +577,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_isbc2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;2-D array indicating the i, j locations of</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;2-D array indicating the i, j locations of</span>
 <span class="sd">        boundary conditions.</span>
 <span class="sd">        -1 : well</span>
 <span class="sd">        0 : no lake</span>
@@ -590,7 +595,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isbc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;3D array indicating which cells have a lake in each layer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;3D array indicating which cells have a lake in each layer.</span>
 <span class="sd">        -1 : well</span>
 <span class="sd">        0 : no lake</span>
 <span class="sd">        1 : lak package lake (lakarr &gt; 0)</span>
@@ -611,7 +616,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lake_bathymetry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Put lake bathymetry setup logic here instead of DIS package.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Put lake bathymetry setup logic here instead of DIS package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lake_bathymetry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -620,7 +625,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">high_k_lake_recharge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Recharge value to apply to high-K lakes, in model units.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recharge value to apply to high-K lakes, in model units.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_high_k_lake_recharge</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;high_k_lakes&#39;</span><span class="p">][</span><span class="s1">&#39;simulate_high_k_lakes&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -645,7 +650,7 @@
 <div class="viewcode-block" id="MFsetupMixin.load_features"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.load_features">[docs]</a>    <span class="k">def</span> <span class="nf">load_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">bbox_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Load vector and attribute data from a shapefile;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load vector and attribute data from a shapefile;</span>
 <span class="sd">        cache it to the _features dictionary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -707,7 +712,7 @@
         <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="MFsetupMixin.get_boundary_cells"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.get_boundary_cells">[docs]</a>    <span class="k">def</span> <span class="nf">get_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_inactive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the i, j locations of cells along the model perimeter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the i, j locations of cells along the model perimeter.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -746,7 +751,7 @@
 <div class="viewcode-block" id="MFsetupMixin.regrid_from_parent"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.regrid_from_parent">[docs]</a>    <span class="k">def</span> <span class="nf">regrid_from_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_array</span><span class="p">,</span>
                            <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Interpolate values in parent array onto</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate values in parent array onto</span>
 <span class="sd">        the pfl_nwt model grid, using model grid instances</span>
 <span class="sd">        attached to the parent and pfl_nwt models.</span>
 
@@ -782,7 +787,7 @@
 
 <div class="viewcode-block" id="MFsetupMixin.setup_external_filepaths"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_external_filepaths">[docs]</a>    <span class="k">def</span> <span class="nf">setup_external_filepaths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span>
                                  <span class="n">filename_format</span><span class="p">,</span> <span class="n">file_numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up external file paths for a MODFLOW package variable. Sets paths</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up external file paths for a MODFLOW package variable. Sets paths</span>
 <span class="sd">        for intermediate files, which are written from the (processed) source data.</span>
 <span class="sd">        Intermediate files are supplied to Flopy as external files for a given package</span>
 <span class="sd">        variable. Flopy writes external files to a specified location when the MODFLOW</span>
@@ -841,7 +846,7 @@
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_ws</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_reset_bc_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Reset the boundary condition property arrays in order.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the boundary condition property arrays in order.</span>
 <span class="sd">        _lakarr2d (depends on _lakarr_2d</span>
 <span class="sd">        _isbc2d  (depends on _lakarr2d)</span>
 <span class="sd">        _lake_bathymetry (depends on _isbc2d)</span>
@@ -857,7 +862,7 @@
         <span class="c1">#self._set_isbc() # calls self._set_lakarr()</span>
 
     <span class="k">def</span> <span class="nf">_set_cfg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_specified_cfg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Load configuration file; update dictionary.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load configuration file; update dictionary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#self.cfg = defaultdict(dict)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">)</span>
@@ -945,7 +950,7 @@
         <span class="n">validate_configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_high_k_lakes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the i, j locations of any high-k lakes within the model grid.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the i, j locations of any high-k lakes within the model grid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lakesdata</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">lakes_shapefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;high_k_lakes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lakes_shapefile&#39;</span><span class="p">)</span>
@@ -961,7 +966,7 @@
             <span class="k">return</span> <span class="n">is_high_k_lake</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="nf">_set_isbc2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up the _isbc2d array, that indicates the i,j locations</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the _isbc2d array, that indicates the i,j locations</span>
 <span class="sd">        of boundary conditions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">isbc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -1086,7 +1091,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_lake_bathymetry</span> <span class="o">=</span> <span class="n">bathy</span>
 
     <span class="k">def</span> <span class="nf">_set_parent_modelgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mg_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Reset the parent model grid from keyword arguments</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the parent model grid from keyword arguments</span>
 <span class="sd">        or existing modelgrid, and DIS package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1096,8 +1101,9 @@
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xoff&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">xoffset</span><span class="p">,</span>
                       <span class="s1">&#39;yoff&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">yoffset</span><span class="p">,</span>
                       <span class="s1">&#39;angrot&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">angrot</span><span class="p">,</span>
+                      <span class="s1">&#39;crs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
                       <span class="s1">&#39;epsg&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">epsg</span><span class="p">,</span>
-                      <span class="s1">&#39;proj4&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">proj4</span><span class="p">,</span>
+                      <span class="c1">#&#39;proj4&#39;: self.parent.modelgrid.proj4,</span>
                       <span class="p">}</span>
         <span class="n">parent_units</span> <span class="o">=</span> <span class="n">get_model_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
         <span class="k">if</span> <span class="s1">&#39;lenuni&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]:</span>
@@ -1111,11 +1117,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">lenuni</span> <span class="o">=</span> <span class="n">lenuni_values</span><span class="p">[</span><span class="n">parent_units</span><span class="p">]</span>
 
         <span class="c1"># make sure crs is populated, then get CRS units for the grid</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;epsg&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">])</span>
-        <span class="k">elif</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
+        <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;crs&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;epsg&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">])</span>
+        <span class="c1"># no parent CRS info, assume the parent model is in the same CRS</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;crs&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="s1">&#39;crs&#39;</span><span class="p">])</span>
+        <span class="c1"># no parent CRS info, assume the parent model is in the same CRS</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;epsg&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="s1">&#39;epsg&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No coordinate reference input in setup_grid: or parent: &#39;</span>
+                             <span class="s1">&#39;SpatialReference: blocks of configuration file. Supply &#39;</span>
+                             <span class="s1">&#39;at least coordinate reference information to &#39;</span>
+                             <span class="s1">&#39;setup_grid: crs: item.&#39;</span><span class="p">)</span>
 
         <span class="n">parent_grid_units</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
 
@@ -1145,7 +1162,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_modelgrid</span> <span class="o">=</span> <span class="n">MFsetupGrid</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set attributes related to a parent or source model</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set attributes related to a parent or source model</span>
 <span class="sd">        if one is specified.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1212,20 +1229,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_parent_modelgrid</span><span class="p">(</span><span class="n">mg_kwargs</span><span class="p">)</span>
 
             <span class="c1"># setup parent model perioddata table</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;perioddata&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;perioddata&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">nper</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model_time_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;time_units&#39;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">]:</span>
                         <span class="n">kwargs</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modeltime</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
                     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modeltime</span><span class="o">.</span><span class="n">steady_state</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">tdis</span><span class="o">.</span><span class="n">nper</span><span class="o">.</span><span class="n">array</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">]:</span>
                         <span class="n">kwargs</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">array</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nper&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">nper</span>
                 <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">setup_perioddata_group</span><span class="p">)</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;oc_saverecord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">perioddata</span> <span class="o">=</span> <span class="n">setup_perioddata_group</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;_perioddata&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_perioddata</span> <span class="o">=</span> <span class="n">setup_perioddata_group</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">perioddata</span> <span class="o">=</span> <span class="n">setup_perioddata_group</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="c1"># default_source_data, where omitted configuration input is</span>
             <span class="c1"># obtained from parent model by default</span>
@@ -1289,72 +1310,6 @@
                             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">]:</span>
                                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">parent_periods</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">_set_perioddata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sets up the perioddata DataFrame.</span>
-
-<span class="sd">        Needs some work to be more general.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-            <span class="n">default_start_datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">,</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">)</span>
-            <span class="n">tdis_dimensions_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span>
-            <span class="n">tdis_perioddata_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;perioddata&#39;</span><span class="p">]</span>
-            <span class="n">nper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nper&#39;</span><span class="p">)</span>
-            <span class="c1"># steady can be input in either the tdis or sto input blocks</span>
-            <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;steady&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">steady</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sto&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;steady&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">default_start_datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">,</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">)</span>
-            <span class="n">tdis_dimensions_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span>
-            <span class="n">tdis_perioddata_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span>
-            <span class="n">nper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nper&#39;</span><span class="p">)</span>
-            <span class="n">steady</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;steady&#39;</span><span class="p">)</span>
-
-        <span class="c1"># get start_date_time from parent if available and start_date_time wasn&#39;t specified</span>
-        <span class="k">if</span> <span class="n">tdis_perioddata_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">,</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;1970-01-01&#39;</span> <span class="ow">and</span> \
-                <span class="n">default_start_datetime</span> <span class="o">!=</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">:</span>
-            <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_start_datetime</span>
-
-        <span class="c1"># cast steady array to boolean</span>
-        <span class="k">if</span> <span class="n">steady</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">steady</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-        <span class="c1"># get period data groups</span>
-        <span class="c1"># if no groups are specified, make a group from general stress period input</span>
-        <span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span>
-        <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">:</span> <span class="n">default_start_datetime</span><span class="p">,</span>
-                    <span class="s1">&#39;nper&#39;</span><span class="p">:</span> <span class="n">nper</span><span class="p">,</span>
-                    <span class="s1">&#39;steady&#39;</span><span class="p">:</span> <span class="n">steady</span><span class="p">,</span>
-                    <span class="s1">&#39;oc_saverecord&#39;</span><span class="p">:</span> <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;oc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;saverecord&#39;</span><span class="p">,</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;save head last&#39;</span><span class="p">,</span>
-                                                                      <span class="s1">&#39;save budget last&#39;</span><span class="p">]})</span>
-                    <span class="p">}</span>
-        <span class="n">perioddata_groups</span> <span class="o">=</span> <span class="n">parse_perioddata_groups</span><span class="p">(</span><span class="n">tdis_perioddata_config</span><span class="p">,</span> <span class="n">defaults</span><span class="p">)</span>
-
-        <span class="c1"># set up the perioddata table from the groups</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span> <span class="o">=</span> <span class="n">setup_perioddata</span><span class="p">(</span><span class="n">perioddata_groups</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_units</span><span class="p">)</span>
-
-        <span class="c1"># assign parent model stress periods to each inset model stress period</span>
-        <span class="n">parent_stress_periods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parent&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;copy_stress_periods&#39;</span><span class="p">)</span>
-        <span class="n">parent_sp</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">parent_stress_periods</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># parent_sp has parent model stress period corresponding</span>
-                <span class="c1"># to each inset model stress period (len=nper)</span>
-                <span class="c1"># the same parent stress period can be specified for multiple inset model periods</span>
-                <span class="n">parent_sp</span> <span class="o">=</span> <span class="n">get_parent_stress_periods</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">nper</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nper</span><span class="p">,</span>
-                                                      <span class="n">parent_stress_periods</span><span class="o">=</span><span class="n">parent_stress_periods</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;copy_stress_periods&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_sp</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_lgr</span><span class="p">:</span>
-                <span class="n">parent_sp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-
-        <span class="c1"># add corresponding stress periods in parent model if there are any</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="p">[</span><span class="s1">&#39;parent_sp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_sp</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="p">)))</span>
-        <span class="c1"># reset nper property so that it will reference perioddata table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_nper</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/stress_period_data.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_setup_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mf">1e30</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1e30</span><span class="p">,</span>
                       <span class="n">source_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_package</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1487,7 +1442,7 @@
         <span class="k">return</span> <span class="n">pckg</span>
 
 <div class="viewcode-block" id="MFsetupMixin.setup_grid"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_grid">[docs]</a>    <span class="k">def</span> <span class="nf">setup_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set up the attached modelgrid instance from configuration input</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the attached modelgrid instance from configuration input</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">]</span> <span class="c1">#.copy()</span>
         <span class="c1"># update grid configuration with any information supplied to dis package</span>
@@ -1545,7 +1500,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">create_lgr_models</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="MFsetupMixin.load_grid"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.load_grid">[docs]</a>    <span class="k">def</span> <span class="nf">load_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gridfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Load model grid information from a json or yml file.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load model grid information from a json or yml file.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">gridfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="s1">&#39;grid_file&#39;</span><span class="p">]):</span>
                 <span class="n">gridfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="s1">&#39;grid_file&#39;</span><span class="p">]</span>
@@ -1845,7 +1800,7 @@
             <span class="k">if</span> <span class="n">package_setup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> package not supported for MODFLOW version=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pkg</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">))</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">package_setup</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">package_setup</span><span class="p">):</span>
                 <span class="n">package_setup</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">MFsetupMixin</span><span class="p">,</span> <span class="s1">&#39;setup_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pkg</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;6&#39;</span><span class="p">)))</span>
             <span class="c1"># avoid multiple package instances for now, except for obs</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="s1">&#39;mf6&#39;</span> <span class="ow">or</span> <span class="n">pkg</span> <span class="o">==</span> <span class="s1">&#39;obs&#39;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkg</span><span class="p">):</span>
@@ -1854,7 +1809,7 @@
 
 <div class="viewcode-block" id="MFsetupMixin.load_cfg"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.load_cfg">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load_cfg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">yamlfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads a configuration file, with default settings</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads a configuration file, with default settings</span>
 <span class="sd">        specific to the MFnwtModel or MF6model class.</span>
 
 <span class="sd">        Parameters</span>
@@ -1871,7 +1826,7 @@
 
 <div class="viewcode-block" id="MFsetupMixin.setup_from_yaml"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_from_yaml">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">setup_from_yaml</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">yamlfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Make a model from scratch, using information in a yamlfile.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a model from scratch, using information in a yamlfile.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1888,7 +1843,7 @@
 
 <div class="viewcode-block" id="MFsetupMixin.setup_from_cfg"><a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_from_cfg">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">setup_from_cfg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Make a model from scratch, using information in a configuration dictionary.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a model from scratch, using information in a configuration dictionary.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1943,7 +1898,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.2.0.post16+g14fea2b documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.2.0.post23+g97c0995 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -34,14 +34,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> modflow-setup
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
           </a>
               <div class="version">
-                0.2.0.post16+g14fea2b
+                0.2.0.post23+g97c0995
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -111,7 +115,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Input instructions by package</a></li>
       <li class="breadcrumb-item active">Specifying boundary conditions with the ‘basic’ MODFLOW stress packages</li>
       <li class="wy-breadcrumbs-aside">
@@ -123,31 +127,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="specifying-boundary-conditions-with-the-basic-modflow-stress-packages">
+  <section id="specifying-boundary-conditions-with-the-basic-modflow-stress-packages">
 <h1>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages<a class="headerlink" href="#specifying-boundary-conditions-with-the-basic-modflow-stress-packages" title="Permalink to this heading">¶</a></h1>
 <p>This page describes configuration file input for the basic MODFLOW stress packages, including
 the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently supported by Modflow-setup. The supported packages can be broadly placed into two categories. Feature or list-based packages such as CHD, DRN, GHB, RIV and WEL often represent discrete phenomena such as surface water features, pumping wells, or even lines that denote a perimeter boundary. Input to  these packages in MODFLOW is tabular, consisting of a table for each stress period, with rows specifying stresses at individual grid cells representing the boundary features. In contrast, continuous or grid-based packages represent a stress field that applies to a large area, such as areal recharge. In past versions of MODFLOW, input to these packages was array-based, with values specified for all model cells, at each stress period. In MODFLOW 6, input to these packages can be array or list-based. The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup. In keeping with the current structured grid-based paradigm of Modflow-setup, Modflow 6 recharge input is generated for the array-based recharge package (Langevin and others, 2017).</p>
@@ -171,11 +151,11 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p>One or more variable columns: Optionally the shapefile can also supply steady-state variable values by feature in attribute columns named for the variables (e.g. <code class="docutils literal notranslate"><span class="pre">'head'</span></code>, <code class="docutils literal notranslate"><span class="pre">'bhead'</span></code>, etc.)</p></li>
 </ul>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span><span class="w"></span>
-<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span>
+<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -204,21 +184,21 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </li>
 </ul>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span><span class="w"></span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span><span class="w"></span>
-<span class="w">          </span><span class="c1"># for the initial steady state</span><span class="w"></span>
-<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span><span class="w"></span>
-<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span><span class="w"></span>
-<span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span>
+<span class="w">          </span><span class="c1"># for the initial steady state</span>
+<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span>
+<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span>
+<span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -229,7 +209,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p>Scalar values (items) can be specified in model units, and are applied globally to the variable.</p>
 <blockquote>
 <div><p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -243,12 +223,12 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <li><p><code class="docutils literal notranslate"><span class="pre">stat:</span></code> (optional): zonal statistic to use in sampling the raster (defaults are listed for each variable in the <a class="reference internal" href="../config-file-defaults.html#configuration-defaults"><span class="std std-ref">Configuration defaults</span></a>)</p></li>
 </ul>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span><span class="w"></span>
-<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span>
+<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -295,37 +275,37 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
 <p>Setting up a Constant Head package with perimeter fluxes from a parent model (Note: an additional <code class="docutils literal notranslate"><span class="pre">source_data</span></code> block can be added to represent other features inside of the model perimeter, as below):</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
 </pre></div>
 </div>
 <p>Setting up a Constant Head package from features specified in a shapefile,
 and time-varing heads specified in a csvfile:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span><span class="w"></span>
-<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span><span class="w"></span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span><span class="w"></span>
-<span class="w">          </span><span class="c1"># for the initial steady state</span><span class="w"></span>
-<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span><span class="w"></span>
-<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span><span class="w"></span>
-<span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span>
+<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span>
+<span class="w">          </span><span class="c1"># for the initial steady state</span>
+<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span>
+<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span>
+<span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -349,21 +329,21 @@ and time-varing heads specified in a csvfile:</p>
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">drn</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># simply omit the include_ids: key</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># id_column: can also be omitted</span><span class="w"></span>
-<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047154</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046236</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">    </span><span class="nt">elev</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">drn</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span>
+<span class="w">      </span><span class="c1"># simply omit the include_ids: key</span>
+<span class="w">      </span><span class="c1"># id_column: can also be omitted</span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047154</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046236</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">elev</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -387,41 +367,41 @@ and time-varing heads specified in a csvfile:</p>
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ghb</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># simply omit the include_ids: key</span><span class="w"></span>
-<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># argument to rasterio.features.rasterize</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># if true, all grid cells touching the feature(s)</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># in the shapefile will be assigned BCs, if False</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># only the cells with centers inside the polygon</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># will be included</span><span class="w"></span>
-<span class="w">      </span><span class="nt">all_touched</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># Example of mixed boundary condition input, where</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># a shapefile defines the feature extents</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># a csvfile defines transient head values</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># a raster defines static but spatially varying conductance</span><span class="w"></span>
-<span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">bhead_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># with no period_stats: block, aggregation defaults</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># to &#39;mean&#39; for each stress period</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># note: a single global value could also be specified here,</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># as for the Drain Package</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shellmound/rasters/k330.tif</span><span class="w"></span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span><span class="w"></span>
-<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">days</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ghb</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span>
+<span class="w">      </span><span class="c1"># simply omit the include_ids: key</span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="c1"># argument to rasterio.features.rasterize</span>
+<span class="w">      </span><span class="c1"># if true, all grid cells touching the feature(s)</span>
+<span class="w">      </span><span class="c1"># in the shapefile will be assigned BCs, if False</span>
+<span class="w">      </span><span class="c1"># only the cells with centers inside the polygon</span>
+<span class="w">      </span><span class="c1"># will be included</span>
+<span class="w">      </span><span class="nt">all_touched</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="c1"># Example of mixed boundary condition input, where</span>
+<span class="w">    </span><span class="c1"># a shapefile defines the feature extents</span>
+<span class="w">    </span><span class="c1"># a csvfile defines transient head values</span>
+<span class="w">    </span><span class="c1"># a raster defines static but spatially varying conductance</span>
+<span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="w">      </span><span class="nt">bhead_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="c1"># with no period_stats: block, aggregation defaults</span>
+<span class="w">      </span><span class="c1"># to &#39;mean&#39; for each stress period</span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># note: a single global value could also be specified here,</span>
+<span class="w">      </span><span class="c1"># as for the Drain Package</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shellmound/rasters/k330.tif</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">days</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -447,48 +427,48 @@ and time-varing heads specified in a csvfile:</p>
 </ul>
 <p><strong>Examples</strong>
 (also see the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>)</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">riv</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17953939</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># option to include feature names from the shapefile</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># as Modflow boundnames</span><span class="w"></span>
-<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span><span class="w"></span>
-<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w"></span>
-<span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">default_rbot_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">riv</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17953939</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="c1"># option to include feature names from the shapefile</span>
+<span class="w">      </span><span class="c1"># as Modflow boundnames</span>
+<span class="w">      </span><span class="nt">boundname_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span>
+<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span>
+<span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span>
+<span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">default_rbot_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span>
 </pre></div>
 </div>
 <p>Example of setting up the RIV package using SFRmaker (via the <code class="docutils literal notranslate"><span class="pre">sfr:</span></code> block):</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">sfr</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span><span class="w"></span>
-<span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">attr_length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span><span class="w"></span>
-<span class="w">      </span><span class="nt">attr_height_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span><span class="w"></span>
-<span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># convert reaches corresponding to these LineString identifiers</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># (in the flowlines id_column), and all downstream reaches</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># to the MODFLOW River package</span><span class="w"></span>
-<span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047212</span><span class="p p-Indicator">]</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">sfr</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
+<span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
+<span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
+<span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
+<span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
+<span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
+<span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="w">      </span><span class="nt">attr_length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="w">      </span><span class="nt">attr_height_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># convert reaches corresponding to these LineString identifiers</span>
+<span class="w">    </span><span class="c1"># (in the flowlines id_column), and all downstream reaches</span>
+<span class="w">    </span><span class="c1"># to the MODFLOW River package</span>
+<span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047212</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -518,11 +498,11 @@ and time-varing heads specified in a csvfile:</p>
 <li><p>this input option is very simple. A parent model with a well package is needed, and <code class="docutils literal notranslate"><span class="pre">default_source_data:</span> <span class="pre">True</span></code> must be specified in the <code class="docutils literal notranslate"><span class="pre">parent:</span></code> block. Then, fluxes from the parent model are simply mapped to the inset model grid, based on the parent model cell centers, and the stress period mappings specified in the <code class="docutils literal notranslate"><span class="pre">parent:</span></code> block. Well package options can still be specified in a <code class="docutils literal notranslate"><span class="pre">wel:</span></code> block.</p></li>
 <li><p>Examples:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -539,35 +519,35 @@ and time-varing heads specified in a csvfile:</p>
 <li><p>spatial discretization for open intervals spanning multiple layers is specified using a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> sub-block</p></li>
 <li><p>Examples:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">csvfiles</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># pumping input from CSV files</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="w">                  </span><span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span><span class="w"></span>
-<span class="w">                  </span><span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span><span class="w"></span>
-<span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flux_m3&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># end datetimes only for input data that needs upsampling;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span><span class="w"></span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;node&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w">  </span><span class="c1"># how fluxes will be distributed across model stress periods</span><span class="w"></span>
-<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span><span class="w">  </span><span class="c1"># no wells simulated in initial period</span><span class="w"></span>
-<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># mean pumping rate for period 1 and subsequent periods</span><span class="w"></span>
-<span class="w">      </span><span class="nt">vertical_flux_distribution</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">across_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># False to put fluxes in one layer</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span><span class="w"></span>
-<span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;transmissivity&#39;</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span><span class="w"></span>
-<span class="w">        </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.</span><span class="w">  </span><span class="c1"># layers must be at 10 length units thick to have a well;</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">csvfiles</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># pumping input from CSV files</span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="w">                  </span><span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="w">                  </span><span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span>
+<span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flux_m3&#39;</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="w">      </span><span class="c1"># end datetimes only for input data that needs upsampling;</span>
+<span class="w">      </span><span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;node&#39;</span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w">  </span><span class="c1"># how fluxes will be distributed across model stress periods</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span><span class="w">  </span><span class="c1"># no wells simulated in initial period</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># mean pumping rate for period 1 and subsequent periods</span>
+<span class="w">      </span><span class="nt">vertical_flux_distribution</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">across_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># False to put fluxes in one layer</span>
+<span class="w">        </span><span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span>
+<span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;transmissivity&#39;</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span>
+<span class="w">        </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.</span><span class="w">  </span><span class="c1"># layers must be at 10 length units thick to have a well;</span>
+<span class="w">        </span><span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -579,14 +559,14 @@ and time-varing heads specified in a csvfile:</p>
 <li><p>Perimeter boundary fluxes from a parent model solution:</p>
 <blockquote>
 <div><blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span><span class="w"></span>
-<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># parent model head solution</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># for determining boundary fluxes based on saturated thickness</span><span class="w"></span>
-<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span>
+<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span>
+<span class="w">    </span><span class="c1"># parent model head solution</span>
+<span class="w">    </span><span class="c1"># for determining boundary fluxes based on saturated thickness</span>
+<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -605,12 +585,12 @@ and time-varing heads specified in a csvfile:</p>
 <li><p>vertical discretization is specified with a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> block similar to the <code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> option</p></li>
 <li><p>Example:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span><span class="w"></span>
-<span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/wu_points.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span><span class="w"></span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period &#39;mean&#39; to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. &#39;august&#39;)</span><span class="w"></span>
-<span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;august&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">}</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span>
+<span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/wu_points.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period &#39;mean&#39; to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. &#39;august&#39;)</span>
+<span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;august&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span>
+<span class="w">      </span><span class="p p-Indicator">}</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -646,15 +626,15 @@ and time-varing heads specified in a csvfile:</p>
 <section id="direct-input">
 <h4>Direct input<a class="headerlink" href="#direct-input" title="Permalink to this heading">¶</a></h4>
 <p>As with other grid-based input such as aquifer properties, input to the recharge package can be specified directly as it would in Flopy. This may be useful for setting up a test model quickly. For example, a single scalar value could be entered to apply to all locations across all periods:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">recharge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">recharge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
 </pre></div>
 </div>
 <p>Or global scalar values could be entered by stress period:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">recharge</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w"></span>
-<span class="w">    </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">recharge</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">    </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
 </pre></div>
 </div>
 <p>In the above example, <code class="docutils literal notranslate"><span class="pre">0.01</span></code> would be also be applied to all subsequent stress periods.</p>
@@ -687,14 +667,14 @@ and time-varing heads specified in a csvfile:</p>
 </li>
 <li><p>Examples:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">rech</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="c1"># by stress period</span><span class="w"></span>
-<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">mult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.805</span><span class="w"></span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;years&#39;</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">rech</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="c1"># by stress period</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif&#39;</span>
+<span class="w">      </span><span class="nt">mult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.805</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;years&#39;</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -729,27 +709,27 @@ and time-varing heads specified in a csvfile:</p>
 </li>
 <li><p>Examples:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"></span>
-<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">    </span><span class="nt">readasarrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># resample recharge from NetCDF file with time-series of grids</span><span class="w"></span>
-<span class="w">    </span><span class="nt">recharge</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;net_infiltration&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span><span class="w"></span>
-<span class="w">      </span><span class="nt">resample_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;linear&#39;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># for the first two stress periods</span><span class="w"></span>
-<span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span><span class="w"></span>
-<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span><span class="w"></span>
-<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span><span class="w"></span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">readasarrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># resample recharge from NetCDF file with time-series of grids</span>
+<span class="w">    </span><span class="nt">recharge</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc&#39;</span>
+<span class="w">      </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;net_infiltration&#39;</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="w">      </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span>
+<span class="w">      </span><span class="nt">resample_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;linear&#39;</span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># for the first two stress periods</span>
+<span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -777,7 +757,7 @@ and time-varing heads specified in a csvfile:</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 05, 2023.
+      <span class="lastupdated">Last updated on Jul 25, 2023.
       </span></p>
   </div>
 
