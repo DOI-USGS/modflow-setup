@@ -748,7 +748,9 @@ def rasterize(feature, grid, id_column=None,
         values = dict(zip(unique_values, range(1, len(unique_values) + 1)))
         numbers = [values[n] for n in df[id_column]]
     else:
-        numbers = df[id_column].values
+        # enforce integers; very long NHDPlusIDs
+        # can cause trouble if they are in float64 format
+        numbers = df[id_column].values.astype(int)
         # add one if the lowest number is 0
         # (zero indicates non-intersected raster cells)
         if np.min(numbers) == 0:
