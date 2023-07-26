@@ -3,6 +3,7 @@ Functions for simple MODFLOW boundary conditions such as ghb, drain, etc.
 """
 import numbers
 import shutil
+import warnings
 
 import flopy
 import geopandas as gpd
@@ -46,14 +47,24 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
     # todo: generalize more of the GHB setup code and move it somewhere else
     bc_cells = None
     if shapefile is not None:
+
+        # rename some columns for interface change
+        if 'boundname_col' in shapefile:
+            warnings.warn(
+                "The boundname_col: item will be deprecated and removed in "
+                "version 0.4.0. Use boundname_column: instead.",
+                PendingDeprecationWarning,
+            )
+        renames = {'boundname_col': 'boundname_column'}
         shapefile = shapefile.copy()
+        shapefile = {renames.get(k, k): v for k, v in shapefile.items()}
         key = [k for k in shapefile.keys() if 'filename' in k.lower()]
         if key:
             shapefile_name = shapefile.pop(key[0])
             if 'all_touched' in shapefile:
                 all_touched = shapefile['all_touched']
-                if 'boundname_col' in shapefile:
-                    shapefile['names_column'] = shapefile.pop('boundname_col')
+                if 'boundname_column' in shapefile:
+                    shapefile['names_column'] = shapefile.pop('boundname_column')
             bc_cells = rasterize(shapefile_name, m.modelgrid, **shapefile)
             bc_cell_id_kwargs = shapefile.copy()
             bc_cell_id_kwargs['names_column'] = shapefile['id_column']

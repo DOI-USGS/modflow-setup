@@ -654,7 +654,7 @@ def test_basic_stress_package_setup(shellmound_model_with_dis, pckg_abbrv,
             [ra[0][2] for per, ra in m.ghb.stress_period_data.data.items()])
         assert np.allclose(spd_conds, raster_cond)
     if boundnames:
-        assert 'boundname_col' in m.cfg[pckg_abbrv]['source_data']['shapefile']
+        assert 'boundname_column' in m.cfg[pckg_abbrv]['source_data']['shapefile']
         assert not set(df['boundname']).symmetric_difference(boundnames)
 
 
