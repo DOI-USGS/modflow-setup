@@ -941,7 +941,7 @@ def test_model_setup_no_nans(model_setup):
     assert m.simulation.name_file.continue_.array
 
     # verify that basic stress packages were built
-    # and that there is only on RIV package
+    # and that there is only one RIV package
     package_list = m.get_package_list()
     for pckg in 'CHD_0', 'DRN_0', 'GHB_0', 'RIV_0':
         assert pckg in package_list
