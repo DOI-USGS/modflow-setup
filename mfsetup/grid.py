@@ -633,8 +633,7 @@ def write_bbox_shapefile(modelgrid, outshp):
 
 def rasterize(feature, grid, id_column=None,
               include_ids=None, names_column=None,
-              crs=None,
-              dtype=np.float32, **kwargs):
+              crs=None, **kwargs):
     """Rasterize a feature onto the model grid, using
     the rasterio.features.rasterize method. Features are intersected
     if they contain the cell center.
@@ -669,9 +668,6 @@ def rasterize(feature, grid, id_column=None,
           - A tuple of ("auth_name": "auth_code") [i.e ('epsg', '4326')]
           - An object with a `to_wkt` method.
           - A :class:`pyproj.crs.CRS` class
-
-    dtype : dtype
-        Datatype for the output array
     **kwargs : keyword arguments to rasterio.features.rasterize()
         https://rasterio.readthedocs.io/en/stable/api/rasterio.features.html
 
@@ -768,8 +764,8 @@ def rasterize(feature, grid, id_column=None,
         names_lookup = dict(zip(numbers, df[names_column]))
         result = [names_lookup.get(n, '') for n in result.flat]
         result = np.reshape(result, (grid.nrow, grid.ncol))
-        dtype = object
-    return result.astype(dtype)
+        result = result.astype(object)
+    return result
 
 
 def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
