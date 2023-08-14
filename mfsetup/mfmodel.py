@@ -90,6 +90,7 @@ class MFsetupMixin():
                   'sfr': 4,
                   'riv': 5
                   }
+    model_type = "mfsetup"
 
     def __init__(self, parent):
 
@@ -1514,7 +1515,13 @@ class MFsetupMixin():
 
         # assign layers to the sfr reaches
         botm = self.dis.botm.array.copy()
-        layers, new_botm = assign_layers(sfr.reach_data, botm_array=botm)
+        if self.version == 'mf6':
+            idomain = self.dis.idomain.array
+        else:
+            idomain = self.bas6.ibound.array
+        layers, new_botm = assign_layers(sfr.reach_data,
+                                         botm_array=botm,
+                                         idomain=idomain)
         sfr.reach_data['k'] = layers
         if new_botm is not None:
             if self.cfg['intermediate_data'].get('botm') is None:
