@@ -2,6 +2,15 @@
 Release History
 ===============
 
+Version 0.3.1 (2023-08-17)
+----------------------------------------
+* change 'boundname_col' argument in basic stress CSV input to 'boundname_column' for consistency with other inputs.
+* fix issue with layer assignment in SFR Package setup where idomain/ibound array wasn't getting passed to the SFRmaker `assign_layers()` function, which can be problematic for models with extensive inactive cells in their upper layers.
+* fix issue with model grid setup where `.prj` file for bounding box shapefile wasn't being written.
+* bug fixes for compatibility with `flopy>=3.4``
+* fixes to `grid.rasterize()` to better handle 64-bit integer and `object` dtypes
+* update example configuration files to use new length unit arguments in `sfrmaker>=0.11.1`
+
 
 Version 0.3.0 (2023-07-25)
 ----------------------------------------

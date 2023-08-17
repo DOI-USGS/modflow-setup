@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; modflow-setup 0.3.0.post8+g540e0ac documentation</title>
+  <title>Release History &mdash; modflow-setup 0.3.0.post10+g51c4e5f documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -41,7 +41,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post8+g540e0ac
+                0.3.0.post10+g51c4e5f
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -71,6 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-3-1-2023-08-17">Version 0.3.1 (2023-08-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-3-0-2023-07-25">Version 0.3.0 (2023-07-25)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-2-0-2023-02-06">Version 0.2.0 (2023-02-06)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-1-0-initial-release-2022-09-30">Version 0.1.0 Initial release (2022-09-30)</a></li>
@@ -109,6 +110,17 @@
              
   <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this heading">¶</a></h1>
+<section id="version-0-3-1-2023-08-17">
+<h2>Version 0.3.1 (2023-08-17)<a class="headerlink" href="#version-0-3-1-2023-08-17" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>change ‘boundname_col’ argument in basic stress CSV input to ‘boundname_column’ for consistency with other inputs.</p></li>
+<li><p>fix issue with layer assignment in SFR Package setup where idomain/ibound array wasn’t getting passed to the SFRmaker <cite>assign_layers()</cite> function, which can be problematic for models with extensive inactive cells in their upper layers.</p></li>
+<li><p>fix issue with model grid setup where <cite>.prj</cite> file for bounding box shapefile wasn’t being written.</p></li>
+<li><p>bug fixes for compatibility with <cite>flopy&gt;=3.4`</cite></p></li>
+<li><p>fixes to <cite>grid.rasterize()</cite> to better handle 64-bit integer and <cite>object</cite> dtypes</p></li>
+<li><p>update example configuration files to use new length unit arguments in <cite>sfrmaker&gt;=0.11.1</cite></p></li>
+</ul>
+</section>
 <section id="version-0-3-0-2023-07-25">
 <h2>Version 0.3.0 (2023-07-25)<a class="headerlink" href="#version-0-3-0-2023-07-25" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
