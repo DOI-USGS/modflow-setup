@@ -626,9 +626,10 @@ def get_point_on_national_hydrogeologic_grid(x, y, offset='edge', **kwargs):
 
 def write_bbox_shapefile(modelgrid, outshp):
     outline = get_grid_bounding_box(modelgrid)
-    df2shp(pd.DataFrame({'desc': ['model bounding box'],
-                         'geometry': [outline]}),
-           outshp, epsg=modelgrid.epsg)
+    gdf = gpd.GeoDataFrame({'desc': ['model bounding box'],
+                            'geometry': [outline]},
+                            crs=modelgrid.crs)
+    gdf.to_file(outshp, index=False)
 
 
 def rasterize(feature, grid, id_column=None,
