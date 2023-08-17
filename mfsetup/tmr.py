@@ -141,13 +141,13 @@ def get_qx_qy_qz(cell_budget_file, binary_grid_file=None,
         if headfile is None:
             print('No headfile object provided - thickness for specific discharge calculations\n' +
                 'will be based on the model top rather than the water table')
-            thickness = modelgrid.thick
+            thickness = modelgrid.cell_thickness
         else:
             if isinstance(headfile, str) or isinstance(headfile, Path):
                 hds = bf.HeadFile(headfile).get_data(kstpkper=kstpkper)
             else:
                 hds = headfile.get_data(kstpkper=kstpkper)
-            thickness = modelgrid.saturated_thick(array=hds)
+            thickness = modelgrid.saturated_thickness(array=hds)
 
         delr_gridp, delc_gridp = np.meshgrid(modelgrid.delr,
                                             modelgrid.delc)
@@ -778,7 +778,7 @@ class Tmr:
             # Now handle the geometry issues for the parent
             # first thicknesses (at cell centers)
 
-            parent_thick = self.parent.modelgrid.thick
+            parent_thick = self.parent.modelgrid.cell_thickness
 
             # make matrices of the row and column spacings
             # NB --> trying to preserve the always seemingly
