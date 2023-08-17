@@ -153,21 +153,6 @@ def read_wdnr_monthly_water_use(wu_file, wu_points, model,
                                        across_layers=False,
                                        distribute_by='transmissivity',
                                        minimum_layer_thickness=2.)
-    #isthin = well_info.laythick < minimum_layer_thickness
-    #well_info.loc[isthin, 'k'] = well_info.loc[isthin, 'ktop'].values
-    #well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
-    #                                                              well_info.i[isthin].values,
-    #                                                              well_info.j[isthin].values]
-    #isthin = well_info.laythick < minimum_layer_thickness
-    #well_info.loc[isthin, 'k'] = well_info.loc[isthin, 'kbotm'].values
-    #well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
-    #                                                              well_info.i[isthin].values,
-    #                                                              well_info.j[isthin].values]
-    #isthin = well_info.laythick < minimum_layer_thickness
-    #well_info.loc[isthin, 'k'] = 1
-    #well_info.loc[isthin, 'laythick'] = model.dis.thickness.array[well_info.k[isthin].values,
-    #                                                              well_info.i[isthin].values,
-    #                                                              well_info.j[isthin].values]
     isthin = well_info.laythick < minimum_layer_thickness
     assert not np.any(isthin)
 
