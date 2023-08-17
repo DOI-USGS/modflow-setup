@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr &mdash; modflow-setup 0.3.0 documentation</title>
+  <title>mfsetup.tmr &mdash; modflow-setup 0.3.0.post8+g540e0ac documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0
+                0.3.0.post8+g540e0ac
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -243,13 +243,13 @@
         <span class="k">if</span> <span class="n">headfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No headfile object provided - thickness for specific discharge calculations</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
                 <span class="s1">&#39;will be based on the model top rather than the water table&#39;</span><span class="p">)</span>
-            <span class="n">thickness</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">thick</span>
+            <span class="n">thickness</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">cell_thickness</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">headfile</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">headfile</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
                 <span class="n">hds</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="n">headfile</span><span class="p">)</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">hds</span> <span class="o">=</span> <span class="n">headfile</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)</span>
-            <span class="n">thickness</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">saturated_thick</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="n">hds</span><span class="p">)</span>
+            <span class="n">thickness</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">saturated_thickness</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="n">hds</span><span class="p">)</span>
 
         <span class="n">delr_gridp</span><span class="p">,</span> <span class="n">delc_gridp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">,</span>
                                             <span class="n">modelgrid</span><span class="o">.</span><span class="n">delc</span><span class="p">)</span>
@@ -880,7 +880,7 @@
             <span class="c1"># Now handle the geometry issues for the parent</span>
             <span class="c1"># first thicknesses (at cell centers)</span>
 
-            <span class="n">parent_thick</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">thick</span>
+            <span class="n">parent_thick</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">cell_thickness</span>
 
             <span class="c1"># make matrices of the row and column spacings</span>
             <span class="c1"># NB --&gt; trying to preserve the always seemingly</span>
@@ -1095,7 +1095,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 25, 2023.
+      <span class="lastupdated">Last updated on Aug 17, 2023.
       </span></p>
   </div>
 

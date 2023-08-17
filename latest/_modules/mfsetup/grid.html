@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.3.0 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.3.0.post8+g540e0ac documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0
+                0.3.0.post8+g540e0ac
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -728,15 +728,15 @@
 
 <div class="viewcode-block" id="write_bbox_shapefile"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.write_bbox_shapefile">[docs]</a><span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">outshp</span><span class="p">):</span>
     <span class="n">outline</span> <span class="o">=</span> <span class="n">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">)</span>
-    <span class="n">df2shp</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;model bounding box&#39;</span><span class="p">],</span>
-                         <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">outline</span><span class="p">]}),</span>
-           <span class="n">outshp</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">epsg</span><span class="p">)</span></div>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;model bounding box&#39;</span><span class="p">],</span>
+                            <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">outline</span><span class="p">]},</span>
+                            <span class="n">crs</span><span class="o">=</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">outshp</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="rasterize"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.rasterize">[docs]</a><span class="k">def</span> <span class="nf">rasterize</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-              <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-              <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+              <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rasterize a feature onto the model grid, using</span>
 <span class="sd">    the rasterio.features.rasterize method. Features are intersected</span>
 <span class="sd">    if they contain the cell center.</span>
@@ -771,9 +771,6 @@
 <span class="sd">          - A tuple of (&quot;auth_name&quot;: &quot;auth_code&quot;) [i.e (&#39;epsg&#39;, &#39;4326&#39;)]</span>
 <span class="sd">          - An object with a `to_wkt` method.</span>
 <span class="sd">          - A :class:`pyproj.crs.CRS` class</span>
-
-<span class="sd">    dtype : dtype</span>
-<span class="sd">        Datatype for the output array</span>
 <span class="sd">    **kwargs : keyword arguments to rasterio.features.rasterize()</span>
 <span class="sd">        https://rasterio.readthedocs.io/en/stable/api/rasterio.features.html</span>
 
@@ -850,7 +847,9 @@
         <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">unique_values</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_values</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
         <span class="n">numbers</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">numbers</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># enforce integers; very long NHDPlusIDs</span>
+        <span class="c1"># can cause trouble if they are in float64 format</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="c1"># add one if the lowest number is 0</span>
         <span class="c1"># (zero indicates non-intersected raster cells)</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -868,8 +867,8 @@
         <span class="n">names_lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">names_column</span><span class="p">]))</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">names_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">flat</span><span class="p">]</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
-        <span class="n">dtype</span> <span class="o">=</span> <span class="nb">object</span>
-    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span></div>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="setup_structured_grid"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.setup_structured_grid">[docs]</a><span class="k">def</span> <span class="nf">setup_structured_grid</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1261,7 +1260,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 25, 2023.
+      <span class="lastupdated">Last updated on Aug 17, 2023.
       </span></p>
   </div>
 
