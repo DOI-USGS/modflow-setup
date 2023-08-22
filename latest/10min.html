@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10 Minutes to Modflow-setup &mdash; modflow-setup 0.3.0.post11+g3a6ec42 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            modflow-setup
+          </a>
+              <div class="version">
+                0.3.0.post11+g3a6ec42
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> 10 Minutes to Modflow-setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#define-the-model-active-area-and-coordinate-reference-system">1) Define the model active area and coordinate reference system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-a-setup-script-and-configuration-file">2) Create a setup script and configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#develop-flowlines-to-represent-streams">3) Develop flowlines to represent streams</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#preprocessing-nhdplus-hr">Preprocessing NHDPlus HR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preprocessing-nhdplus-version-2">Preprocessing NHDPlus version 2</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#get-a-dem">4) Get a DEM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#making-a-virtual-raster">Making a virtual raster</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#make-a-minimum-working-configuration-file-and-model-build-script">5) Make a minimum working configuration file and model build script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">10 Minutes to Modflow-setup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/10min.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="minutes-to-modflow-setup">
+<h1>10 Minutes to Modflow-setup<a class="headerlink" href="#minutes-to-modflow-setup" title="Permalink to this heading">¶</a></h1>
+<p>This is a short introduction to help get you up and running with Modflow-setup. A complete workflow can be found in the <a class="reference internal" href="notebooks/Pleasant_lake_lgr_example.html#Pleasant-Lake-Example"><span class="std std-ref">Pleasant Lake Example</span></a>; additional examples of working configuration files can be found in the <a class="reference internal" href="config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>.</p>
+<section id="define-the-model-active-area-and-coordinate-reference-system">
+<h2>1) Define the model active area and coordinate reference system<a class="headerlink" href="#define-the-model-active-area-and-coordinate-reference-system" title="Permalink to this heading">¶</a></h2>
+<p>Depending on the problem, the model area might simply be a box enclosing features of interest and any relevant hydrologic boundaries, or an irregular shape surrounding a watershed or other feature. In either case, it may be helpful to <a class="reference internal" href="#develop-flowlines-to-represent-streams"><span class="std std-ref">download hydrography first</span></a>, to ensure that the model area includes all important features. The model should be referenced to a <a class="reference external" href="https://en.wikipedia.org/wiki/Projected_coordinate_system">projected coordinate reference system (CRS)</a>, ideally with length units of meters and an authority code (such as an <a class="reference external" href="https://en.wikipedia.org/wiki/EPSG_Geodetic_Parameter_Dataset">EPSG code</a>) that unambiguously defines it.</p>
+<p>Modflow-setup provides two ways to define a model grid:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>x and y coordinates of the model origin (lower left or upper left corner), grid spacing, number of rows and columns, rotation, and CRS</p></li>
+<li><p>As a rectangular area of specified discretization surrounding a polygon shapefile of the model active area (traced by hand or developed by some other means) or a feature of interest buffered by a specified distance.</p></li>
+</ul>
+</div></blockquote>
+<p>The active model area is defined subsequently in the DIS package.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Don’t forget about the farfield! Usually it is advised to include important competing sinks outside of the immediate area of interest   (the nearfield), so that the solution is not over-specified by the perimeter boundary condition, and recognizing that the surface watershed boundary doesn’t always coincide exactly with the groundwatershed boundary. See Haitjema (1995) and Anderson and others   (2015) for more info.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Need a polygon defining a watershed? In the United States, the <a class="reference external" href="https://www.usgs.gov/national-hydrography/access-national-hydrography-products">Watershed Boundary Dataset</a> provides watershed deliniations at various scales.</p>
+</div>
+</div></blockquote>
+</section>
+<section id="create-a-setup-script-and-configuration-file">
+<h2>2) Create a setup script and configuration file<a class="headerlink" href="#create-a-setup-script-and-configuration-file" title="Permalink to this heading">¶</a></h2>
+<p>Usually creating the desired grid requires some iteration. We can get started on this by making a model setup script and corresponding configuration file.</p>
+<p>An initial model setup script for making the model grid:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MF6model</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Just set up (a shapefile of) the model grid.</span>
+<span class="linenos"> 6</span><span class="sd">    For trying different grid configurations.&quot;&quot;&quot;</span>
+<span class="linenos"> 7</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">cfg_file</span><span class="p">)</span>
+<span class="linenos"> 8</span>    <span class="n">m</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
+<span class="linenos"> 9</span>    <span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">&#39;postproc/shps/grid.shp&#39;</span><span class="p">)</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="n">setup_grid</span><span class="p">(</span><span class="s1">&#39;initial_config_poly.yaml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Download the file:
+<a class="reference download internal" download="" href="_downloads/b6ae5d6478362c1168ffc009e617fa38/initial_grid_setup.py"><code class="xref download docutils literal notranslate"><span class="pre">initial_grid_setup.py</span></code></a></p>
+</div></blockquote>
+<p>An initial configuration file for developing a model grid around a pre-defined active area:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">simulation</span><span class="p">:</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos"> 3</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span>
+<span class="linenos"> 4</span><span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;model&#39;</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="nt">model</span><span class="p">:</span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos"> 8</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos"> 9</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">10</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">11</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">12</span><span class="w">    </span><span class="nt">newton</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">13</span><span class="w">  </span><span class="nt">packages</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span>
+<span class="linenos">14</span><span class="w">  </span><span class="p p-Indicator">]</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="nt">setup_grid</span><span class="p">:</span>
+<span class="linenos">17</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">18</span><span class="w">    </span><span class="nt">features_shapefile</span><span class="p">:</span>
+<span class="linenos">19</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="linenos">20</span><span class="w">  </span><span class="nt">buffer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos">21</span><span class="w">  </span><span class="nt">dxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># Uniform x, y spacing in meters</span>
+<span class="linenos">22</span><span class="w">  </span><span class="nt">rotation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.</span>
+<span class="linenos">23</span><span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span><span class="w">  </span><span class="c1"># EPSG code for NAD83 CONUS Albers (meters)</span>
+<span class="linenos">24</span><span class="w">  </span><span class="nt">snap_to_NHG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># option to snap to the USGS National Hydrogeologic Grid</span>
+</pre></div>
+</div>
+<p>Download the file:
+<a class="reference download internal" download="" href="_downloads/ad797c943aa792619c7a8c98cfbd6638/initial_config_poly.yaml"><code class="xref download docutils literal notranslate"><span class="pre">initial_config_poly.yaml</span></code></a></p>
+</div></blockquote>
+<p>To define a model grid using an origin, grid spacing and dimensions, a <code class="docutils literal notranslate"><span class="pre">setup_grid:</span></code> block like this one could be substitued above:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">setup_grid</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">xoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">501405</span><span class="w"> </span><span class="c1"># lower left x-coordinate</span>
+<span class="w">  </span><span class="nt">yoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1175835</span><span class="w"> </span><span class="c1"># lower left y-coordinate</span>
+<span class="w">  </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">  </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">35</span>
+<span class="w">  </span><span class="nt">dxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">  </span><span class="nt">rotation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.</span>
+<span class="w">  </span><span class="nt">epsg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span>
+<span class="w">  </span><span class="nt">snap_to_NHG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+<p>Download the file:
+<a class="reference download internal" download="" href="_downloads/baf13b4007664691088da3dfada3c732/initial_config_box.yaml"><code class="xref download docutils literal notranslate"><span class="pre">initial_config_poly.yaml</span></code></a></p>
+</div></blockquote>
+<p>Now <code class="docutils literal notranslate"><span class="pre">initial_setup_script.py</span></code> can be run repeatedly to explore different grids.</p>
+</section>
+<section id="develop-flowlines-to-represent-streams">
+<h2>3) Develop flowlines to represent streams<a class="headerlink" href="#develop-flowlines-to-represent-streams" title="Permalink to this heading">¶</a></h2>
+<p>Next, let’s get some data for setting up boundary conditions. For streams, Modflow-setup can accept any linestring shapefile that has a routing column indicating how the lines connect to one another. This can be created by hand, or in the United States, obtained from the National Hydrography Dataset Plus (NHDPlus). There are two types of NHDPlus:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://www.epa.gov/waterdata/nhdplus-national-hydrography-dataset-plus">NHDPlus version 2</a> is mapped at the 1:100,000 scale, and is therefore suitable for larger regional models with cell sizes of ~100s of meters to ~1km. NHDPlus version 2 can be the best choice for larger model areas (greater than approx 1,000 km<sup>2</sup>), where NHDPlus HR might have too many lines. NHDPlus version 2 can be obtained from the <a class="reference external" href="https://www.epa.gov/waterdata/nhdplus-national-hydrography-dataset-plus">EPA</a>.</p></li>
+<li><p><a class="reference external" href="https://www.usgs.gov/national-hydrography/nhdplus-high-resolution">NHDPlus High Resolution (HR)</a> is mapped at the finer 1:24,000 scale, and may therefore work better for smaller problems (discretizations of ~100 meters or less) where better alignment between the mapped lines and stream channel in the DEM is desired, and where the number of linestring features to manage won’t be prohibitive. NHDPlus HR can be accessed via the <a class="reference external" href="https://apps.nationalmap.gov/downloader/">National Map Downloader</a>.</p></li>
+</ul>
+</div></blockquote>
+<section id="preprocessing-nhdplus-hr">
+<h3>Preprocessing NHDPlus HR<a class="headerlink" href="#preprocessing-nhdplus-hr" title="Permalink to this heading">¶</a></h3>
+<p>Currently, NHDPlus HR data, which comes in a file geodatabase (GDB), must be preprocessed into a shapefile for input to Modflow-setup and <a class="reference external" href="https://github.com/DOI-USGS/sfrmaker">SFRmaker</a> (which Modflow-setup uses to build the stream network). In many cases, multiple GDBs may need to be combined and undesired line features such as storm sewers culled. The <a class="reference external" href="https://doi-usgs.github.io/sfrmaker/latest/index.html">SFRmaker documentation</a> has examples for how to read and preprocesses NHDPlus HR.</p>
+</section>
+<section id="preprocessing-nhdplus-version-2">
+<h3>Preprocessing NHDPlus version 2<a class="headerlink" href="#preprocessing-nhdplus-version-2" title="Permalink to this heading">¶</a></h3>
+<p>Depending on the application, NHDPlus version 2 may not need to be preprocessed. Reasons to preprocess include:</p>
+<ul>
+<li><p>the model area is large, and</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>read times for one or more NHDPlus drainage basins are slowing the model build</p></li>
+<li><p>the DEM being used for the model top is relatively coarse, and sampling a fine DEM during the model build is prohibitive for time or space reasons.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>the stream network is too dense, with too many model cells containing SFR reaches (especially a problem in the eastern US at the 1 km resolution); or there are too many ephemeral streams represented.</p></li>
+<li><p>the stream network has divergences where one or more distributary lines are downstream of a confluence.</p></li>
+</ul>
+<p>The <a class="reference external" href="https://doi-usgs.github.io/sfrmaker/latest/notebooks/preprocessing_demo.html">preprocessing module in SFRmaker</a> can resolve these issues, producing a single set of culled flowlines with width and elevation information and divergences removed. The elevation functionality in the preprocessing module requires a DEM.</p>
+</section>
+</section>
+<section id="get-a-dem">
+<h2>4) Get a DEM<a class="headerlink" href="#get-a-dem" title="Permalink to this heading">¶</a></h2>
+<p>The <a class="reference external" href="https://apps.nationalmap.gov/downloader/">National Map Downloader</a> has 10 meter DEMs for the United States, with finer resolutions available in many areas. Typically, these come in 1 degree x 1 degree tiles. If many tiles are needed, the uGet Download Manager linked to on the National Map site can automate downloading many tiles. Alternatively, links to the files follow a consistent format, and are therefore amenable to scripted or manual downloads. For example, the tile located between -88 and -87 west and 43 and 44 north is available at:</p>
+<p><a class="reference external" href="https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/current/n44w088/USGS_13_n44w088.tif">https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/current/n44w088/USGS_13_n44w088.tif</a></p>
+<section id="making-a-virtual-raster">
+<h3>Making a virtual raster<a class="headerlink" href="#making-a-virtual-raster" title="Permalink to this heading">¶</a></h3>
+<p>Once all of the tiles are downloaded, a virtual raster can be made that allows them to be treated as a single file, without any modifications to the original data. This is required for input to SFRmaker and Modflow-setup. For example, in <a class="reference external" href="https://qgis.org/">QGIS</a>:</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Load all of the tiles to verify that they are correct and cover the whole model active area.</p></li>
+<li><p>From the <code class="docutils literal notranslate"><span class="pre">Raster</span></code> menu, select <code class="docutils literal notranslate"><span class="pre">Miscellaneous</span> <span class="pre">&gt;</span> <span class="pre">Build</span> <span class="pre">Virtual</span> <span class="pre">Raster</span></code>. This will make a virtual raster file with a <code class="docutils literal notranslate"><span class="pre">.vrt</span></code> extension that points to the original set of GeoTIFFs, but allows them to be treated as a single continuous raster.</p></li>
+</ol>
+</div></blockquote>
+</section>
+</section>
+<section id="make-a-minimum-working-configuration-file-and-model-build-script">
+<h2>5) Make a minimum working configuration file and model build script<a class="headerlink" href="#make-a-minimum-working-configuration-file-and-model-build-script" title="Permalink to this heading">¶</a></h2>
+<p>Now that we have a set of flowlines and a DEM (and perhaps shapefiles for other surface water boundaries), we can fill out the rest of the configuration file to get an initial working model. Later, additional details such as more layers, a well package, observations, or other features can be added in a stepwise approach (Haitjema, 1995).</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="nt">simulation</span><span class="p">:</span>
+<span class="linenos">  2</span><span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos">  3</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span>
+<span class="linenos">  4</span><span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;model&#39;</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="nt">model</span><span class="p">:</span>
+<span class="linenos">  7</span><span class="w">  </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos">  8</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos">  9</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 10</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 11</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 12</span><span class="w">    </span><span class="nt">newton</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 13</span><span class="w">  </span><span class="nt">packages</span><span class="p">:</span>
+<span class="linenos"> 14</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dis</span>
+<span class="linenos"> 15</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ic</span>
+<span class="linenos"> 16</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">np</span>
+<span class="linenos"> 17</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oc</span>
+<span class="linenos"> 18</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sto</span>
+<span class="linenos"> 19</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rch</span>
+<span class="linenos"> 20</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sfr</span>
+<span class="linenos"> 21</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">wel</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span><span class="nt">setup_grid</span><span class="p">:</span>
+<span class="linenos"> 24</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos"> 25</span><span class="w">    </span><span class="nt">features_shapefile</span><span class="p">:</span>
+<span class="linenos"> 26</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="linenos"> 27</span><span class="w">  </span><span class="nt">buffer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos"> 28</span><span class="w">  </span><span class="nt">dxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># Uniform x, y spacing in meters</span>
+<span class="linenos"> 29</span><span class="w">  </span><span class="nt">rotation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.</span>
+<span class="linenos"> 30</span><span class="w">  </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span><span class="w">  </span><span class="c1"># EPSG code for NAD83 CONUS Albers (meters)</span>
+<span class="linenos"> 31</span><span class="w">  </span><span class="nt">snap_to_NHG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># option to snap to the USGS National Hydrogeologic Grid</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="nt">dis</span><span class="p">:</span>
+<span class="linenos"> 34</span><span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 35</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 36</span><span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos"> 37</span><span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span>
+<span class="linenos"> 38</span><span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 39</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos"> 40</span><span class="w">    </span><span class="nt">top</span><span class="p">:</span>
+<span class="linenos"> 41</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif&#39;</span>
+<span class="linenos"> 42</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos"> 43</span><span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
+<span class="linenos"> 44</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
+<span class="linenos"> 45</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/rasters/mdwy_surf.tif&#39;</span>
+<span class="linenos"> 46</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos"> 47</span><span class="w">    </span><span class="nt">idomain</span><span class="p">:</span>
+<span class="linenos"> 48</span><span class="w">      </span><span class="c1"># polygon shapefile of model active area</span>
+<span class="linenos"> 49</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="linenos"> 50</span>
+<span class="linenos"> 51</span><span class="nt">tdis</span><span class="p">:</span>
+<span class="linenos"> 52</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 53</span><span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="linenos"> 54</span><span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-01-01&#39;</span>
+<span class="linenos"> 55</span><span class="w">  </span><span class="nt">perioddata</span><span class="p">:</span>
+<span class="linenos"> 56</span><span class="w">    </span><span class="nt">group 1</span><span class="p">:</span>
+<span class="linenos"> 57</span><span class="w">      </span><span class="nt">perlen</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 58</span><span class="w">      </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 59</span><span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 60</span><span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 61</span>
+<span class="linenos"> 62</span><span class="nt">npf</span><span class="p">:</span>
+<span class="linenos"> 63</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 64</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 65</span><span class="w">    </span><span class="nt">rewet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 66</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="linenos"> 67</span><span class="w">    </span><span class="nt">icelltype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 68</span><span class="w">    </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30.</span>
+<span class="linenos"> 69</span><span class="w">    </span><span class="nt">k33</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span><span class="nt">sto</span><span class="p">:</span>
+<span class="linenos"> 72</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 73</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 74</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="linenos"> 75</span><span class="w">    </span><span class="nt">iconvert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">  </span><span class="c1"># convertible layers</span>
+<span class="linenos"> 76</span><span class="w">    </span><span class="nt">sy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="linenos"> 77</span><span class="w">    </span><span class="nt">ss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span>
+<span class="linenos"> 78</span>
+<span class="linenos"> 79</span><span class="nt">rch</span><span class="p">:</span>
+<span class="linenos"> 80</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 81</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 82</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos"> 83</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 84</span><span class="w">    </span><span class="nt">readasarrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 85</span><span class="w">  </span><span class="nt">recharge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.00025</span><span class="w">  </span><span class="c1"># 0.00025 m/d ~ 3.5 inches/year</span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span><span class="nt">sfr</span><span class="p">:</span>
+<span class="linenos"> 88</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 89</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 90</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos"> 91</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="linenos"> 92</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/shps/flowlines.shp&#39;</span>
+<span class="linenos"> 93</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.lines.from_shapefile</span>
+<span class="linenos"> 94</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
+<span class="linenos"> 95</span><span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
+<span class="linenos"> 96</span><span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
+<span class="linenos"> 97</span><span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
+<span class="linenos"> 98</span><span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
+<span class="linenos"> 99</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="linenos">100</span><span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of flowline widths</span>
+<span class="linenos">101</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of flowline elevations</span>
+<span class="linenos">102</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
+<span class="linenos">103</span><span class="w">    </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1">#  consolidate SFR reaches to one per i, j location</span>
+<span class="linenos">104</span><span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="c1"># convert this line and all downstream lines to the RIV package</span>
+<span class="linenos">105</span><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">18047206</span>
+<span class="linenos">106</span>
+<span class="linenos">107</span><span class="nt">oc</span><span class="p">:</span>
+<span class="linenos">108</span><span class="w">  </span><span class="nt">period_options</span><span class="p">:</span>
+<span class="linenos">109</span><span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">110</span>
+<span class="linenos">111</span><span class="nt">ims</span><span class="p">:</span>
+<span class="linenos">112</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">113</span><span class="w">    </span><span class="nt">print_option</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span>
+<span class="linenos">114</span><span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;complex&#39;</span>
+<span class="linenos">115</span><span class="w">    </span><span class="nt">csv_output_filerecord</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;solver_out.csv&#39;</span>
+<span class="linenos">116</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
+<span class="linenos">117</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span><span class="w">  </span><span class="c1"># m3/d in SFR package</span>
+<span class="linenos">118</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="linenos">119</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
+<span class="linenos">120</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">121</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="linenos">122</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Download the file:
+<a class="reference download internal" download="" href="_downloads/509f6a4d0dd4389c5a7ae0a232072191/initial_config_full.yaml"><code class="xref download docutils literal notranslate"><span class="pre">initial_config_full.yaml</span></code></a></p>
+</div></blockquote>
+<p>A setup script for making a minimum working model. Additional functions can be added later to further customize the model outside of the Modflow-setup build step.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">os</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MF6model</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="k">def</span> <span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Just set up (a shapefile of) the model grid.</span>
+<span class="linenos"> 8</span><span class="sd">    For trying different grid configurations.&quot;&quot;&quot;</span>
+<span class="linenos"> 9</span>    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="linenos">10</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">cfg_file</span><span class="p">)</span>
+<span class="linenos">11</span>    <span class="n">m</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
+<span class="linenos">12</span>    <span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">&#39;postproc/shps/grid.shp&#39;</span><span class="p">)</span>
+<span class="linenos">13</span>    <span class="c1"># Modflow-setup changes the working directory</span>
+<span class="linenos">14</span>    <span class="c1"># to the model workspace; change it back</span>
+<span class="linenos">15</span>    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="k">def</span> <span class="nf">setup_model</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+<span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up the whole model.&quot;&quot;&quot;</span>
+<span class="linenos">20</span>    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="linenos">21</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
+<span class="linenos">22</span>    <span class="n">m</span><span class="o">.</span><span class="n">write_input</span><span class="p">()</span>
+<span class="linenos">23</span>    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+<span class="linenos">24</span>    <span class="k">return</span> <span class="n">m</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="c1">#setup_grid(&#39;initial_config_poly.yaml&#39;)</span>
+<span class="linenos">30</span>    <span class="n">setup_model</span><span class="p">(</span><span class="s1">&#39;initial_config_full.yaml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Download the file:
+<a class="reference download internal" download="" href="_downloads/e1fbf3d202706a1435f28708d4ab74a5/initial_model_setup.py"><code class="xref download docutils literal notranslate"><span class="pre">initial_model_setup.py</span></code></a></p>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Aug 22, 2023.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

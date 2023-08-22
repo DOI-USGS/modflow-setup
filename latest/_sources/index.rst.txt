@@ -17,6 +17,7 @@ Modflow-setup is a Python package for automating the setup of MODFLOW groundwate
 
 	Philosophy <philosophy>
     Installation <installation>
+    10 Minutes to Modflow-setup <10min>
     Examples <examples>
     Configuration File Gallery <config-file-gallery>
 
