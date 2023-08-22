@@ -1,0 +1,122 @@
+simulation:
+  sim_name: 'shellmound'
+  version: 'mf6'
+  sim_ws: 'model'
+
+model:
+  simulation: 'shellmound'
+  modelname: 'shellmound'
+  options:
+    print_input: True
+    save_flows: True
+    newton: True
+  packages:
+    - dis
+    - ic
+    - np
+    - oc
+    - sto
+    - rch
+    - sfr
+    - wel
+
+setup_grid:
+  source_data:
+    features_shapefile:
+      filename: '../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp'
+  buffer: 0
+  dxy: 1000  # Uniform x, y spacing in meters
+  rotation: 0.
+  crs: 5070  # EPSG code for NAD83 CONUS Albers (meters)
+  snap_to_NHG: True  # option to snap to the USGS National Hydrogeologic Grid
+
+dis:
+  remake_top: True
+  options:
+    length_units: 'meters'
+  dimensions:
+    nlay: 1
+  source_data:
+    top:
+      filename: '../mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif'
+      elevation_units: 'feet'
+    botm:
+      filenames:
+        0: '../mfsetup/tests/data/shellmound/rasters/mdwy_surf.tif'
+      elevation_units: 'feet'
+    idomain:
+      # polygon shapefile of model active area
+      filename: '../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp'
+
+tdis:
+  options:
+    time_units: 'days'
+    start_date_time: '2020-01-01'
+  perioddata:
+    group 1:
+      perlen: 1
+      nper: 1
+      nstp: 1
+      steady: True
+
+npf:
+  options:
+    save_flows: True
+    rewet: True
+  griddata:
+    icelltype: 1
+    k: 30.
+    k33: 0.3
+
+sto:
+  options:
+    save_flows: True
+  griddata:
+    iconvert: 1  # convertible layers
+    sy: 0.2
+    ss: 1.e-6
+
+rch:
+  options:
+    print_input: True
+    print_flows: False
+    save_flows: True
+    readasarrays: True
+  recharge: 0.00025  # 0.00025 m/d ~ 3.5 inches/year
+
+sfr:
+  options:
+    save_flows: True
+  source_data:
+    flowlines:
+      filename: '../mfsetup/tests/data/shellmound/shps/flowlines.shp'
+      id_column: 'COMID'  # arguments to sfrmaker.lines.from_shapefile
+      routing_column: 'tocomid'
+      width1_column: 'width1'
+      width2_column: 'width2'
+      up_elevation_column: 'elevupsmo'
+      dn_elevation_column: 'elevdnsmo'
+      name_column: 'GNIS_NAME'
+      width_units: 'feet'  # units of flowline widths
+      elevation_units: 'feet'  # units of flowline elevations
+  sfrmaker_options:
+    one_reach_per_cell: True #  consolidate SFR reaches to one per i, j location
+    to_riv: # convert this line and all downstream lines to the RIV package
+      - 18047206
+
+oc:
+  period_options:
+    0: ['save head last','save budget last']
+
+ims:
+  options:
+    print_option: 'all'
+    complexity: 'complex'
+    csv_output_filerecord: 'solver_out.csv'
+  nonlinear:
+    outer_dvclose: 1.  # m3/d in SFR package
+    outer_maximum: 50
+  linear:
+    inner_maximum: 100
+    inner_dvclose: 0.01
+    rcloserecord: [0.001, 'relative_rclose']
