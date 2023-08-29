@@ -747,7 +747,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             # including lake package lakes and non lake, non well BCs
             # (high-K lakes are excluded, since we may want head obs at those locations,
             #  to serve as pseudo lake stage observations)
-            iobs_domain = ~((self.isbc == 1) | np.any(self.isbc > 2))
+            iobs_domain = ~((self.isbc == 1) | np.any(self.isbc > 2, axis=0))
 
         # munge the observation data
         df = setup_head_observations(self,
