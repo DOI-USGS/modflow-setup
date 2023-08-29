@@ -573,8 +573,8 @@ class MFsetupMixin():
                             bbox = self.bbox
                         elif self.parent.modelgrid is not None:
                             bbox = self.parent.modelgrid.bbox
-                            model_proj_str = self.parent.modelgrid.proj_str
-                            assert model_proj_str is not None
+                            model_crs = self.parent.modelgrid.crs
+                            assert model_crs is not None
 
                         if features_crs != self.modelgrid.crs:
                             bbox_filter = project(bbox, self.modelgrid.crs, features_crs).bounds
@@ -600,10 +600,14 @@ class MFsetupMixin():
                     return
             else:
                 df = self._features[f]
-            if id_column is not None and include_ids is not None:
+            if id_column is not None:
                 id_column = id_column.lower()
+                # convert any floating point dtypes to integer
+                if df[id_column].dtype == float:
+                    df[id_column] = df[id_column].astype(int)
                 df.index = df[id_column]
-                df = df.loc[include_ids]
+            if include_ids is not None:
+                df = df.loc[include_ids].copy()
             dfs_list.append(df)
         df = pd.concat(dfs_list)
         if len(df) == 0:
@@ -942,10 +946,12 @@ class MFsetupMixin():
             if 'lak' in self.package_list:
                 lakes_shapefile = self.cfg['lak'].get('source_data', {}).get('lakes_shapefile', {}).copy()
                 if lakes_shapefile:
-                    lakesdata = self.load_features(**lakes_shapefile)  # caches loaded features
+                    kwargs = get_input_arguments(lakes_shapefile, self.load_features)
+                    lakesdata = self.load_features(**kwargs)  # caches loaded features
                     lakes_shapefile['lakesdata'] = lakesdata
                     lakes_shapefile.pop('filename')
-                    lakarr2d = make_lakarr2d(self.modelgrid, **lakes_shapefile)
+                    kwargs = get_input_arguments(lakes_shapefile, make_lakarr2d)
+                    lakarr2d = make_lakarr2d(self.modelgrid, **kwargs)
             self._lakarr_2d = lakarr2d
             self._set_isbc2d()
 
