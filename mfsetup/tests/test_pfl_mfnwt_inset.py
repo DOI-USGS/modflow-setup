@@ -461,7 +461,8 @@ def test_lak_setup(pfl_nwt_with_dis):
     assert not np.any(np.isnan(lak.bdlknc.array))
     assert np.any(lak.bdlknc.array == m.cfg['lak']['source_data']['littoral_leakance'])
     assert np.any(lak.bdlknc.array == m.cfg['lak']['source_data']['profundal_leakance'])
-    assert os.path.exists(m.cfg['lak']['output_files']['lookup_file'])
+    lookup_file = Path(m._tables_path, Path(m.cfg['lak']['output_files']['lookup_file']).name)
+    assert lookup_file.exists()
     assert lak.lakarr.array.sum() > 0
     tabfiles = m.cfg['lak']['tab_files']
     for f in tabfiles:
@@ -492,7 +493,7 @@ def test_lak_setup(pfl_nwt_with_dis):
     assert len(ds9_entries) == 6
 
     # check that order in lake lookup file is same as specified in include_ids
-    lookup = pd.read_csv(m.cfg['lak']['output_files']['lookup_file'])
+    lookup = pd.read_csv(lookup_file)
     include_ids = m.cfg['lak']['source_data']['lakes_shapefile']['include_ids']
     assert lookup.feat_id.tolist() == include_ids
 

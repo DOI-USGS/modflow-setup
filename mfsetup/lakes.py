@@ -1,6 +1,7 @@
 import os
 import time
 import warnings
+from pathlib import Path
 
 import flopy
 import geopandas as gpd
@@ -10,7 +11,7 @@ from scipy.ndimage import sobel
 from shapely.geometry import Polygon
 
 fm = flopy.modflow
-from gisutils import get_proj_str, project, shp2df
+from gisutils import project, shp2df
 
 from mfsetup.evaporation import hamon_evaporation
 from mfsetup.fileio import save_array
@@ -26,7 +27,7 @@ from mfsetup.utils import get_input_arguments
 
 
 def make_lakarr2d(grid, lakesdata,
-                  include_ids, id_column='hydroid'):
+                  include_ids=None, id_column='hydroid'):
     """
     Make a nrow x ncol array with lake package extent for each lake,
     using the numbers in the 'id' column in the lakes shapefile.
@@ -44,7 +45,10 @@ def make_lakarr2d(grid, lakesdata,
     id_column = id_column.lower()
     lakes.columns = [c.lower() for c in lakes.columns]
     lakes.index = lakes[id_column]
-    lakes = lakes.loc[include_ids]
+    if include_ids is not None:
+        lakes = lakes.loc[include_ids]
+    else:
+        include_ids = lakes[id_column].tolist()
     lakes['lakid'] = np.arange(1, len(lakes) + 1)
     lakes['geometry'] = [Polygon(g.exterior) for g in lakes.geometry]
     arr = rasterize(lakes, grid=grid, id_column='lakid')
@@ -155,15 +159,15 @@ def setup_lake_info(model):
     source_data = model.cfg.get('lak', {}).get('source_data')
     if source_data is None or 'lak' not in model.package_list:
         return
-    lakesdata = model.load_features(**source_data['lakes_shapefile'])
-    lakesdata_proj_str = get_proj_str(source_data['lakes_shapefile']['filename'])
+    kwargs = get_input_arguments(source_data['lakes_shapefile'], model.load_features)
+    lakesdata = model.load_features(**kwargs)
     id_column = source_data['lakes_shapefile']['id_column'].lower()
     name_column = source_data['lakes_shapefile'].get('name_column', 'name').lower()
     nlakes = len(lakesdata)
 
     # make dataframe with lake IDs, names and locations
     centroids = project([g.centroid for g in lakesdata.geometry],
-                        lakesdata_proj_str, 'epsg:4269')
+                        lakesdata.crs, 4269)
     # boundnames for lakes
     # from source shapefile
     lak_ids = np.arange(1, nlakes + 1)
@@ -194,8 +198,16 @@ def setup_lake_info(model):
     df['strt'] = np.array(stages)
 
     # save a lookup file mapping lake ids to hydroids
-    lookup_file = model.cfg['lak']['output_files']['lookup_file'].format(model.name)
-    df.drop('geometry', axis=1).to_csv(os.path.join(model._tables_path, lookup_file), index=False)
+    lookup_file = Path(
+        model.cfg['lak']['output_files']['lookup_file'].format(model.name)).name
+    out_table = Path(model._tables_path) / lookup_file
+    df.drop('geometry', axis=1).to_csv(out_table)
+    print(f'wrote {out_table}')
+    poly_shp = Path(
+        model.cfg['lak']['output_files']['lak_polygons_shapefile'].format(model.name)).name
+    out_shapefile = Path(model._shapefiles_path) / poly_shp
+    df.to_file(out_shapefile)
+    print(f'wrote {out_shapefile}')
 
     # clean up names
     #df['name'].replace('nan', '', inplace=True)
@@ -245,6 +257,15 @@ def setup_lake_fluxes(model, block='lak'):
         if format == 'prism':
             sd = PrismSourceData.from_config(cfg, dest_model=model)
             data = sd.get_data()
+            # if PRISM source data were specified without any lake IDs
+            # assign to all lakes
+            if data['lake_id'].sum() == 0:
+                dfs = []
+                for lake_id in model.lake_info['lak_id']:
+                    data_lake_id = data.copy()
+                    data_lake_id['lak_id'] = lake_id
+                    dfs.append(data_lake_id)
+                data = pd.concat(dfs, axis=0)
             tmid = data['start_datetime'] + (data['end_datetime'] - data['start_datetime'])/2
             data['day_of_year'] = tmid.dt.dayofyear
             id_lookup = {'feat_id': dict(zip(model.lake_info['lak_id'],
@@ -262,9 +283,12 @@ def setup_lake_fluxes(model, block='lak'):
                                              data['latitude'],  # DD
                                              dest_length_units=model.length_units)
             # update flux dataframe
-            for c in columns:
-                if c in data:
-                    df[c] = data[c]
+            data.sort_values(by=['lak_id', 'per'], inplace=True)
+            df.sort_values(by=['lak_id', 'per'], inplace=True)
+            assert np.all(data[['lak_id', 'per']].values == \
+                df[['lak_id', 'per']].values)
+            data.reset_index(drop=True, inplace=True)
+            df.update(data)
 
         else:
             # TODO: option 3; general csv input for lake fluxes
@@ -414,6 +438,21 @@ def setup_lake_connectiondata(model, for_external_file=True,
     connections_lookup_file = os.path.join(model._tables_path, os.path.split(connections_lookup_file)[1])
     model.cfg['lak']['output_files']['connections_lookup_file'] = connections_lookup_file
     df.to_csv(connections_lookup_file, index=False)
+    # write shapefile version
+    k, i, j = map(np.array, zip(*df['cellid']))
+    df['k'] = k
+    df['i'] = i
+    df['j'] = j
+    ncol = model.modelgrid.ncol
+    gwf_nodes = i * ncol + j
+    gdf = gpd.GeoDataFrame(df.drop('cellid', axis=1),
+                          geometry=np.array(model.modelgrid.polygons)[gwf_nodes],
+                          crs=model.modelgrid.crs)
+    connections_shapefile = Path(
+        model.cfg['lak']['output_files']['connections_shapefile'].format(model.name)).name
+    out_shapefile = Path(model._shapefiles_path) / connections_shapefile
+    gdf.to_file(out_shapefile)
+    print(f'wrote {out_shapefile}')
 
     # convert to one-based and comment out header if df will be written straight to external file
     if for_external_file:
@@ -698,7 +737,7 @@ class PrismSourceData(SourceData, TransientSourceDataMixin):
 
         # aggregate the data from multiple files
         dfs = []
-        for id, f in self.filenames.items():
+        for lake_id, f in self.filenames.items():
             meta = self.parse_header(f)
             df = pd.read_csv(f, skiprows=meta['skiprows'],
                              header=None, names=meta['column_names'])
@@ -727,7 +766,7 @@ class PrismSourceData(SourceData, TransientSourceDataMixin):
             df[meta['column_names'][2]] = meta['temp_conversion'](df[meta['column_names'][2]])
 
             # record lake ID
-            df[self.id_column] = id
+            df[self.id_column] = lake_id
             dfs.append(df)
         df = pd.concat(dfs)
 
