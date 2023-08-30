@@ -102,7 +102,8 @@ def parse_perioddata_groups(perioddata_dict,
             data = defaults.copy()
             data.update(v)
             if is_valid_perioddata(data):
-                data = get_input_arguments(data, setup_perioddata_group)
+                data = get_input_arguments(data, setup_perioddata_group,
+                                           errors='raise')
                 perioddata_groups.append(data)
             else:
                 print_item(k, data)
