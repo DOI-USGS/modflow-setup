@@ -41,7 +41,8 @@ def update(d, u):
     return d
 
 
-def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=None):
+def get_input_arguments(kwargs, function, verbose=False, warn=False, errors='coerce',
+                        exclude=None):
     """Return subset of keyword arguments in kwargs dict
     that are valid parameters to a function or method.
 
@@ -91,6 +92,11 @@ def get_input_arguments(kwargs, function, verbose=False, warn=False, exclude=Non
         for k, v in not_arguments.items():
             #print('{}: {}'.format(k, v))
             print_item(k, v)
+    if errors == 'raise' and len(not_arguments) > 0:
+        raise ValueError(
+            f'Invalid input arguments to {function.__name__}(): '
+            f"{', '.join(not_arguments.keys())}\n"
+            f"Valid arguments: {', '.join(params.parameters.keys())}")
     if verbose:
         print('\n')
     return input_kwargs
