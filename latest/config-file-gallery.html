@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration File Gallery &mdash; modflow-setup 0.3.0.post11+g3a6ec42 documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -41,7 +41,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post11+g3a6ec42
+                0.3.0.post15+gdb03604
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -1501,34 +1501,35 @@
 <span class="linenos">167</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes.shp&#39;</span>
 <span class="linenos">168</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span>
 <span class="linenos">169</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600054357</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054355</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054434</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054319</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># list of WDNR HYDROIDs</span>
-<span class="linenos">170</span><span class="w">    </span><span class="nt">bathymetry_raster</span><span class="p">:</span>
-<span class="linenos">171</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/pfl_bathymetry.tif&#39;</span>
-<span class="linenos">172</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="linenos">173</span><span class="w">    </span><span class="nt">stage_area_volume_file</span><span class="p">:</span>
-<span class="linenos">174</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes_stage_area_volume.csv&#39;</span><span class="w"> </span><span class="c1">#&#39;../../bcs/lakes/area_stage_vol_Long.csv&#39;</span>
-<span class="linenos">175</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="linenos">176</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hydroid&#39;</span>
-<span class="linenos">177</span><span class="w">      </span><span class="nt">column_mappings</span><span class="p">:</span>
-<span class="linenos">178</span><span class="w">        </span><span class="nt">volume_m3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;volume&#39;</span>
-<span class="linenos">179</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
-<span class="linenos">180</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;lak_lookup.csv&#39;</span>
-<span class="linenos">181</span>
-<span class="linenos">182</span><span class="nt">nwt</span><span class="p">:</span>
-<span class="linenos">183</span><span class="w">  </span><span class="nt">headtol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span><span class="w"> </span><span class="c1"># read remaining parameters from default cfg</span>
-<span class="linenos">184</span>
-<span class="linenos">185</span><span class="nt">hyd</span><span class="p">:</span>
-<span class="linenos">186</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">187</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;plainfieldlakes/source_data/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">188</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">189</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">190</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/uwsp_heads.csv&#39;</span>
-<span class="linenos">191</span><span class="w">                </span><span class="p p-Indicator">]</span>
-<span class="linenos">192</span><span class="w">    </span><span class="nt">x_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x_utm&#39;</span><span class="w"> </span><span class="c1"># x coordinates in wtm</span>
-<span class="linenos">193</span><span class="w">    </span><span class="nt">y_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y_utm&#39;</span><span class="w"> </span><span class="c1"># y coordinates in wtm</span>
-<span class="linenos">194</span>
-<span class="linenos">195</span><span class="nt">chd</span><span class="p">:</span>
-<span class="linenos">196</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="linenos">197</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
+<span class="linenos">170</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Name&#39;</span>
+<span class="linenos">171</span><span class="w">    </span><span class="nt">bathymetry_raster</span><span class="p">:</span>
+<span class="linenos">172</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/pfl_bathymetry.tif&#39;</span>
+<span class="linenos">173</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos">174</span><span class="w">    </span><span class="nt">stage_area_volume_file</span><span class="p">:</span>
+<span class="linenos">175</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes_stage_area_volume.csv&#39;</span><span class="w"> </span><span class="c1">#&#39;../../bcs/lakes/area_stage_vol_Long.csv&#39;</span>
+<span class="linenos">176</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos">177</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hydroid&#39;</span>
+<span class="linenos">178</span><span class="w">      </span><span class="nt">column_mappings</span><span class="p">:</span>
+<span class="linenos">179</span><span class="w">        </span><span class="nt">volume_m3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;volume&#39;</span>
+<span class="linenos">180</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
+<span class="linenos">181</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;lak_lookup.csv&#39;</span>
+<span class="linenos">182</span>
+<span class="linenos">183</span><span class="nt">nwt</span><span class="p">:</span>
+<span class="linenos">184</span><span class="w">  </span><span class="nt">headtol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span><span class="w"> </span><span class="c1"># read remaining parameters from default cfg</span>
+<span class="linenos">185</span>
+<span class="linenos">186</span><span class="nt">hyd</span><span class="p">:</span>
+<span class="linenos">187</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">188</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;plainfieldlakes/source_data/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">189</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">190</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">191</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/uwsp_heads.csv&#39;</span>
+<span class="linenos">192</span><span class="w">                </span><span class="p p-Indicator">]</span>
+<span class="linenos">193</span><span class="w">    </span><span class="nt">x_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x_utm&#39;</span><span class="w"> </span><span class="c1"># x coordinates in wtm</span>
+<span class="linenos">194</span><span class="w">    </span><span class="nt">y_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y_utm&#39;</span><span class="w"> </span><span class="c1"># y coordinates in wtm</span>
+<span class="linenos">195</span>
+<span class="linenos">196</span><span class="nt">chd</span><span class="p">:</span>
+<span class="linenos">197</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
+<span class="linenos">198</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
 </pre></div>
 </div>
 </section>
@@ -1546,7 +1547,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 22, 2023.
+      <span class="lastupdated">Last updated on Sep 21, 2023.
       </span></p>
   </div>
 

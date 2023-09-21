@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.3.0.post11+g3a6ec42 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post11+g3a6ec42
+                0.3.0.post15+gdb03604
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -850,7 +850,7 @@
             <span class="c1"># including lake package lakes and non lake, non well BCs</span>
             <span class="c1"># (high-K lakes are excluded, since we may want head obs at those locations,</span>
             <span class="c1">#  to serve as pseudo lake stage observations)</span>
-            <span class="n">iobs_domain</span> <span class="o">=</span> <span class="o">~</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">isbc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isbc</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">iobs_domain</span> <span class="o">=</span> <span class="o">~</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">isbc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isbc</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 
         <span class="c1"># munge the observation data</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">setup_head_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -1112,7 +1112,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 22, 2023.
+      <span class="lastupdated">Last updated on Sep 21, 2023.
       </span></p>
   </div>
 

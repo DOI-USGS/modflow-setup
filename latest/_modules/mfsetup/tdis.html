@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis &mdash; modflow-setup 0.3.0.post11+g3a6ec42 documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post11+g3a6ec42
+                0.3.0.post15+gdb03604
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -205,7 +205,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">is_valid_perioddata</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">setup_perioddata_group</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">setup_perioddata_group</span><span class="p">,</span>
+                                           <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">)</span>
                 <span class="n">perioddata_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">print_item</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -810,7 +811,12 @@
     <span class="n">aggregated</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># add datetime back in</span>
-    <span class="n">aggregated</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">start_datetime</span>
+    <span class="n">aggregated</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">start_datetime</span>
+    <span class="c1"># enforce consistent datetime dtypes</span>
+    <span class="c1"># (otherwise pd.concat of multiple outputs from this function may fail)</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">aggregated</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">aggregated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">aggregated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;datetime64[ns]&#39;</span><span class="p">)</span>
 
     <span class="c1"># drop original datetime column, which doesn&#39;t reflect dates for period averages</span>
     <span class="n">drop_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span>
@@ -936,7 +942,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 22, 2023.
+      <span class="lastupdated">Last updated on Sep 21, 2023.
       </span></p>
   </div>
 

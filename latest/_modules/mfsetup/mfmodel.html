@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.3.0.post11+g3a6ec42 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post11+g3a6ec42
+                0.3.0.post15+gdb03604
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -676,8 +676,8 @@
                             <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span>
                         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">bbox</span>
-                            <span class="n">model_proj_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">proj_str</span>
-                            <span class="k">assert</span> <span class="n">model_proj_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="n">model_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span>
+                            <span class="k">assert</span> <span class="n">model_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
                         <span class="k">if</span> <span class="n">features_crs</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
                             <span class="n">bbox_filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">features_crs</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
@@ -703,10 +703,14 @@
                     <span class="k">return</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">id_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">include_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">id_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">id_column</span> <span class="o">=</span> <span class="n">id_column</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="c1"># convert any floating point dtypes to integer</span>
+                <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+                    <span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
                 <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">include_ids</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">include_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">include_ids</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">dfs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs_list</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1045,10 +1049,12 @@
             <span class="k">if</span> <span class="s1">&#39;lak&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_list</span><span class="p">:</span>
                 <span class="n">lakes_shapefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;lak&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lakes_shapefile&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">lakes_shapefile</span><span class="p">:</span>
-                    <span class="n">lakesdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_features</span><span class="p">(</span><span class="o">**</span><span class="n">lakes_shapefile</span><span class="p">)</span>  <span class="c1"># caches loaded features</span>
+                    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">lakes_shapefile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_features</span><span class="p">)</span>
+                    <span class="n">lakesdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_features</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># caches loaded features</span>
                     <span class="n">lakes_shapefile</span><span class="p">[</span><span class="s1">&#39;lakesdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lakesdata</span>
                     <span class="n">lakes_shapefile</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
-                    <span class="n">lakarr2d</span> <span class="o">=</span> <span class="n">make_lakarr2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="o">**</span><span class="n">lakes_shapefile</span><span class="p">)</span>
+                    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">lakes_shapefile</span><span class="p">,</span> <span class="n">make_lakarr2d</span><span class="p">)</span>
+                    <span class="n">lakarr2d</span> <span class="o">=</span> <span class="n">make_lakarr2d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_lakarr_2d</span> <span class="o">=</span> <span class="n">lakarr2d</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_isbc2d</span><span class="p">()</span>
 
@@ -1906,7 +1912,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 22, 2023.
+      <span class="lastupdated">Last updated on Sep 21, 2023.
       </span></p>
   </div>
 
