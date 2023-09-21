@@ -708,7 +708,12 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
     aggregated.reset_index(inplace=True)
 
     # add datetime back in
-    aggregated['start_datetime'] = pd.Timestamp(start) if start is not None else start_datetime
+    aggregated['start_datetime'] = start if start is not None else start_datetime
+    # enforce consistent datetime dtypes
+    # (otherwise pd.concat of multiple outputs from this function may fail)
+    for col in 'start_datetime', 'end_datetime':
+        if col in aggregated.columns:
+            aggregated[col] = aggregated[col].astype('datetime64[ns]')
 
     # drop original datetime column, which doesn't reflect dates for period averages
     drop_cols = [datetime_column]
