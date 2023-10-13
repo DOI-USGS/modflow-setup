@@ -716,7 +716,10 @@ def rasterize(feature, grid, id_column=None,
     # reproject to grid crs
     if df.crs is not None:
         orig_crs = df.crs
-        df.to_crs(grid.crs, inplace=True)
+        try:
+            df.to_crs(grid.crs, inplace=True)
+        except:
+            df.to_crs(grid.crs, inplace=True)
         if not df['geometry'].is_valid.all():
             df['geometry'] = [g.buffer(0) for g in df.geometry]
         geoms_are_valid = df['geometry'].is_valid.all() & \
