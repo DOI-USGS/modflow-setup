@@ -6,6 +6,7 @@ import copy
 import datetime as dt
 import os
 import shutil
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -178,7 +179,7 @@ def setup_perioddata_group(start_date_time, end_date_time=None,
 
     Returns
     -------
-    perrioddata : pandas.DataFrame
+    perioddata : pandas.DataFrame
         DataFrame summarizing stress period information. Data columns:
 
         ==================  ================  ==============================================
@@ -494,12 +495,50 @@ def setup_perioddata(model,
             default_start_datetime != '1970-01-01':
         tdis_perioddata_config['start_date_time'] = default_start_datetime
 
-    perioddata_groups = parse_perioddata_groups(tdis_perioddata_config,
-                                                nper=nper, steady=steady,
-                                                start_date_time=default_start_datetime)
-
-    # set up the perioddata table from the groups
-    perioddata = concat_periodata_groups(perioddata_groups, time_units)
+    # option to define stress periods in table prior to model build
+    if 'csvfile' in tdis_perioddata_config:
+        csvfile = Path(model._config_path) / tdis_perioddata_config['csvfile']['filename']
+        perioddata = pd.read_csv(csvfile)
+        defaults = {
+            'start_datetime_column': 'start_datetime',
+            'end_datetime_column': 'end_datetime',
+            'steady_column': 'steady',
+            'nstp_column': 'nstp',
+            'tsmult_column': 'tsmult'
+        }
+        csv_config = tdis_perioddata_config['csvfile']
+        renames = {csv_config.get(k): v
+                   for k, v in defaults.items() if k in csv_config}
+        perioddata.rename(columns=renames, inplace=True)
+        perioddata['start_datetime'] = pd.to_datetime(perioddata['start_datetime'])
+        perioddata['end_datetime'] = pd.to_datetime(perioddata['end_datetime'])
+        perioddata['per'] = np.arange(len(perioddata))
+        time_edges = getattr((perioddata['end_datetime'] -
+                              perioddata['start_datetime'][0]).dt,
+                             model.time_units).tolist()
+        time_edges = [0] + time_edges
+        perlen = np.diff(time_edges)
+        # set initial steady-state stress period to at least length 1
+        if perioddata['steady'][0] and perlen[0] < 1:
+            perlen[0] = 1
+        perioddata['perlen'] = perlen
+        perioddata['time'] = np.cumsum(perlen)
+        cols = ['start_datetime', 'end_datetime', 'time',
+                'per', 'perlen', 'nstp', 'tsmult', 'steady']
+        # option to supply Output Contorl INstructions as well
+        if 'oc' in perioddata.columns:
+            cols.append('oc')
+        perioddata = perioddata[cols]
+        # some validation
+        assert np.all(perioddata['perlen'] > 0)
+        assert np.all(np.diff(perioddata['time']) > 0)
+    # define stress periods from perioddata group blocks in configuration file
+    else:
+        perioddata_groups = parse_perioddata_groups(tdis_perioddata_config,
+                                                    nper=nper, steady=steady,
+                                                    start_date_time=default_start_datetime)
+        # set up the perioddata table from the groups
+        perioddata = concat_periodata_groups(perioddata_groups, time_units)
 
     # assign parent model stress periods to each inset model stress period
     parent_sp = None
