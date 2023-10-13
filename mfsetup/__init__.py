@@ -6,4 +6,6 @@ from mfsetup.fileio import load_modelgrid
 from mfsetup.mf6model import MF6model
 from mfsetup.mfnwtmodel import MFnwtModel
 
-from . import interpolate
+from . import _version, interpolate
+
+__version__ = _version.get_versions()['version']
