@@ -71,29 +71,13 @@ tdis:
     time_units: 'days'
     start_date_time: '1998-04-01'
   perioddata:
-    # time discretization info can be specified directly under the perioddata key
-    # or in groups of stress periods that are discretized in a similar way
-    group 1: # initial steady-state period (steady specified under sto package)
-      #perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."
-      nper: 1
-      nstp: 1
-      tsmult: 1
-      steady: True  # "steady" can be entered here; otherwise the global entry specified in the sto package is used as the default
-      # oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default
-    group 2: # single long period for spin-up of pumping
-      start_date_time: '1998-04-01'  # can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.
-      end_date_time: '2007-04-01'  # model ends at midnight on this date (2007-03-31 would be the last day simulated)
-      nper: 1
-      nstp: 10
-      tsmult: 1.5
-      steady: False
-    group 3:
-      start_date_time: '2007-04-01'
-      end_date_time: '2015-09-30'  # model ends at midnight on this date (2015-09-30 would be the last day simulated)
-      freq: '6MS' # same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
-      nstp: 5
-      tsmult: 1.5
-      steady: False
+    csvfile:
+      filename: 'shellmound/tmr_parent/tables/stress_period_data.csv'
+      start_datetime_column: 'start_datetime'
+      end_datetime_column: 'end_datetime'
+      steady_column: 'steady'
+      nstp_column: 'nstp'
+      tsmult_column: 'tsmult'
 
 sfr:
   options:

@@ -187,6 +187,14 @@ def test_ic_setup(shellmound_tmr_model_with_dis, from_binary):
     assert m.ic.strt.array[m.dis.idomain.array > 0].max() < 50
 
 
+def test_predefined_stress_period_data(shellmound_tmr_model, test_data_path):
+    perioddata = shellmound_tmr_model.perioddata
+    expected_spd_file = test_data_path /\
+        shellmound_tmr_model.cfg['tdis']['perioddata']['csvfile']['filename']
+    expected_spd = pd.read_csv(expected_spd_file)
+    assert np.all(perioddata[expected_spd.columns[:-1]] == expected_spd.iloc[:, :-1])
+
+
 def test_irregular_perimeter_head_boundary(shellmound_tmr_model_with_dis, test_data_path, tmpdir):
     m = shellmound_tmr_model_with_dis
 
