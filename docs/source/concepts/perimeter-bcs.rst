@@ -17,7 +17,7 @@ Features and Limitations
 * Specified perimeter heads in MODFLOW-NWT models will have ending heads for each stress period assigned from the starting head of the next stress period (with the last period having the same starting and ending heads). The MODFLOW 6 Constant Head Package only supports assignment of a single head per stress period. This distinction only matters for models where stress periods are subdivided by multiple timesteps.
 
 
-Input
+Configuration input
 -------------------
 Input to set up perimeter boundaries are specified in two places:
 
@@ -58,8 +58,8 @@ Input to set up perimeter boundaries are specified in two places:
           parent_binary_grid_file: 'shellmound/tmr_parent/shellmound.dis.grb'
 
 
-Time discretization
--------------------
+Specifying the time discretization
+------------------------------------
 By default, inset model stress period 0 is assumed to align with parent model stress period zero (``copy_stress_periods: 'all'`` in the :ref:`configuration file <The configuration file>` parent block, which is the default). Alternatively, stress periods can be mapped explicitly using a dictionary. For example:
 
 .. code-block:: yaml
