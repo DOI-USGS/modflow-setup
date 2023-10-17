@@ -506,18 +506,22 @@ def setup_perioddata(model,
             'nstp_column': 'nstp',
             'tsmult_column': 'tsmult'
         }
+
         csv_config = tdis_perioddata_config['csvfile']
         renames = {csv_config.get(k): v
                    for k, v in defaults.items() if k in csv_config}
         perioddata.rename(columns=renames, inplace=True)
+        required_cols = defaults.values()
+        for col in required_cols:
+            if col not in perioddata.columns:
+                raise KeyError(f"{col} column missing in supplied stress "
+                               f"period table {csvfile}.")
         perioddata['start_datetime'] = pd.to_datetime(perioddata['start_datetime'])
         perioddata['end_datetime'] = pd.to_datetime(perioddata['end_datetime'])
         perioddata['per'] = np.arange(len(perioddata))
-        time_edges = getattr((perioddata['end_datetime'] -
-                              perioddata['start_datetime'][0]).dt,
-                             model.time_units).tolist()
-        time_edges = [0] + time_edges
-        perlen = np.diff(time_edges)
+        perlen = getattr((perioddata['end_datetime'] -
+                          perioddata['start_datetime']).dt,
+                          model.time_units).tolist()
         # set initial steady-state stress period to at least length 1
         if perioddata['steady'][0] and perlen[0] < 1:
             perlen[0] = 1
