@@ -254,6 +254,7 @@ def inset_model_mf6(tmpdir, mf6_exe, test_model_properties):
 
     sim = flopy.mf6.MFSimulation(sim_name=name, exe_name='mf6',
                     sim_ws=str(model_ws))
+    setattr(sim.simulation_data, 'use_pandas', False)
     tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
                                 perioddata=[(1.0, 1, 1.0)])
     ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="MODERATE",
