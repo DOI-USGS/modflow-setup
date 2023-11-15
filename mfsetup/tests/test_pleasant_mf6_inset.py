@@ -151,8 +151,8 @@ def test_tdis_setup(get_pleasant_mf6):
     assert os.path.exists(os.path.join(m.model_ws, tdis.filename))
     assert isinstance(tdis, mf6.ModflowTdis)
     period_df = pd.DataFrame(tdis.perioddata.array)
-    period_df['perlen'] = period_df['perlen'].astype(np.float64)
-    period_df['nstp'] = period_df['nstp'].astype(np.int64)
+    period_df['perlen'] = period_df['perlen'].astype(float)
+    period_df['nstp'] = period_df['nstp'].astype(int)
     pd.testing.assert_frame_equal(period_df[['perlen', 'nstp', 'tsmult']],
                                   m.perioddata[['perlen', 'nstp', 'tsmult']])
 

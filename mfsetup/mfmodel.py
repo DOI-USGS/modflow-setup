@@ -604,7 +604,7 @@ class MFsetupMixin():
                 id_column = id_column.lower()
                 # convert any floating point dtypes to integer
                 if df[id_column].dtype == float:
-                    df[id_column] = df[id_column].astype(int)
+                    df[id_column] = df[id_column].astype('int64')
                 df.index = df[id_column]
             if include_ids is not None:
                 df = df.loc[include_ids].copy()

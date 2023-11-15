@@ -2,6 +2,7 @@ import copy
 import os
 
 import fiona
+import geopandas as gpd
 import numpy as np
 import pyproj
 import pytest
@@ -19,6 +20,7 @@ from mfsetup.grid import (
     get_ij,
     get_nearest_point_on_grid,
     get_point_on_national_hydrogeologic_grid,
+    rasterize
 )
 from mfsetup.testing import point_is_on_nhg
 from mfsetup.units import convert_length_units
@@ -326,3 +328,25 @@ def test_get_intercell_connections(test_data_path):
     cn = grid.get_intercell_connections(binary_grid_file=binary_grid_file)
     q = flowja[cn['qidx']]
     assert len(cn) == len(q)
+
+@pytest.mark.parametrize('id', 
+                         (0, 
+                          75004400017127.0,
+                          ))
+@pytest.mark.parametrize('id_col_dtype',
+                         (None, str, float, int))
+def test_rasterize(shellmound_model,
+                   id_col_dtype, id,
+                   test_data_path):
+    gdf = gpd.read_file(test_data_path / 'shellmound/shps/active_area.shp')
+    if id_col_dtype is None:
+        id_column = None
+        pass
+    else:
+        id_column = 'id'
+        gdf[id_column] = id_col_dtype(id)
+    results = rasterize(gdf, 
+                        shellmound_model.modelgrid,
+                        id_column=id_column
+                        )
+    j=2
