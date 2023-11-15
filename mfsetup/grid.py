@@ -750,7 +750,7 @@ def rasterize(feature, grid, id_column=None,
     else:
         # enforce integers; very long NHDPlusIDs
         # can cause trouble if they are in float64 format
-        numbers = df[id_column].values.astype(int)
+        numbers = df[id_column].values.astype('int64')
         # add one if the lowest number is 0
         # (zero indicates non-intersected raster cells)
         if np.min(numbers) == 0:
