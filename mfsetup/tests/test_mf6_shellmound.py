@@ -420,8 +420,8 @@ def test_tdis_setup(shellmound_model):
     assert os.path.exists(os.path.join(m.model_ws, tdis.filename))
     assert isinstance(tdis, mf6.ModflowTdis)
     period_df = pd.DataFrame(tdis.perioddata.array)
-    period_df['perlen'] = period_df['perlen'].astype(np.float64)
-    period_df['nstp'] = period_df['nstp'].astype(np.int64)
+    period_df['perlen'] = period_df['perlen'].astype(float)
+    period_df['nstp'] = period_df['nstp'].astype(int)
     pd.testing.assert_frame_equal(period_df[['perlen', 'nstp', 'tsmult']],
                                   m.perioddata[['perlen', 'nstp', 'tsmult']])
 
@@ -761,7 +761,7 @@ def test_sfr_setup(model_with_sfr, project_root_path):
     runoff_period_data = m.sfrdata.period_data.dropna(subset=['runoff'], axis=0)
     # only compare periods 2-7 (2007-04-01 to 2010-04-01)
     runoff_period_data = runoff_period_data.loc[2:].copy()
-    runoff_period_data['line_id_in_model'] = runoff_period_data['line_id_in_model'].astype(int)
+    runoff_period_data['line_id_in_model'] = runoff_period_data['line_id_in_model'].astype('int64')
     # sum runoff by line id for each period
     runoff_period_comid_sums = runoff_period_data.groupby(['per', 'line_id_in_model']).sum(numeric_only=True)
     # then take the mean for each line id across periods
