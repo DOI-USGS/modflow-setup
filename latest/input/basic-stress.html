@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -25,7 +25,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="The Discretization Package" href="dis.html" />
+    <link rel="next" title="Time and space discretization" href="dis.html" />
     <link rel="prev" title="Specifying Aquifer Properties" href="props.html" /> 
 </head>
 
@@ -41,7 +41,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post15+gdb03604
+                0.3.0.post24+g585fe20
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -586,12 +586,12 @@ and time-varing heads specified in a csvfile:</p>
 <li><p>vertical discretization is specified with a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> block similar to the <code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> option</p></li>
 <li><p>Example:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span>
 <span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/wu_points.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span>
 <span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period &#39;mean&#39; to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. &#39;august&#39;)</span>
 <span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;august&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span>
 <span class="w">      </span><span class="p p-Indicator">}</span>
+<span class="w"> </span><span class="w w-Error"> </span><span class="nt">output_files</span><span class="p">:</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -668,8 +668,7 @@ and time-varing heads specified in a csvfile:</p>
 </li>
 <li><p>Examples:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">rech</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="c1"># by stress period</span>
 <span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif&#39;</span>
@@ -751,14 +750,14 @@ and time-varing heads specified in a csvfile:</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="props.html" class="btn btn-neutral float-left" title="Specifying Aquifer Properties" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dis.html" class="btn btn-neutral float-right" title="The Discretization Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dis.html" class="btn btn-neutral float-right" title="Time and space discretization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 21, 2023.
+      <span class="lastupdated">Last updated on Nov 16, 2023.
       </span></p>
   </div>
 

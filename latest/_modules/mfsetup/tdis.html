@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
@@ -38,7 +38,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post15+gdb03604
+                0.3.0.post24+g585fe20
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -109,6 +109,7 @@
 <span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -281,7 +282,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    perrioddata : pandas.DataFrame</span>
+<span class="sd">    perioddata : pandas.DataFrame</span>
 <span class="sd">        DataFrame summarizing stress period information. Data columns:</span>
 
 <span class="sd">        ==================  ================  ==============================================</span>
@@ -597,12 +598,54 @@
             <span class="n">default_start_datetime</span> <span class="o">!=</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">:</span>
         <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_start_datetime</span>
 
-    <span class="n">perioddata_groups</span> <span class="o">=</span> <span class="n">parse_perioddata_groups</span><span class="p">(</span><span class="n">tdis_perioddata_config</span><span class="p">,</span>
-                                                <span class="n">nper</span><span class="o">=</span><span class="n">nper</span><span class="p">,</span> <span class="n">steady</span><span class="o">=</span><span class="n">steady</span><span class="p">,</span>
-                                                <span class="n">start_date_time</span><span class="o">=</span><span class="n">default_start_datetime</span><span class="p">)</span>
+    <span class="c1"># option to define stress periods in table prior to model build</span>
+    <span class="k">if</span> <span class="s1">&#39;csvfile&#39;</span> <span class="ow">in</span> <span class="n">tdis_perioddata_config</span><span class="p">:</span>
+        <span class="n">csvfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_config_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;csvfile&#39;</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+        <span class="n">perioddata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;start_datetime_column&#39;</span><span class="p">:</span> <span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;end_datetime_column&#39;</span><span class="p">:</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;steady_column&#39;</span><span class="p">:</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;nstp_column&#39;</span><span class="p">:</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;tsmult_column&#39;</span><span class="p">:</span> <span class="s1">&#39;tsmult&#39;</span>
+        <span class="p">}</span>
 
-    <span class="c1"># set up the perioddata table from the groups</span>
-    <span class="n">perioddata</span> <span class="o">=</span> <span class="n">concat_periodata_groups</span><span class="p">(</span><span class="n">perioddata_groups</span><span class="p">,</span> <span class="n">time_units</span><span class="p">)</span>
+        <span class="n">csv_config</span> <span class="o">=</span> <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;csvfile&#39;</span><span class="p">]</span>
+        <span class="n">renames</span> <span class="o">=</span> <span class="p">{</span><span class="n">csv_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">v</span>
+                   <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">csv_config</span><span class="p">}</span>
+        <span class="n">perioddata</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">renames</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">required_cols</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">required_cols</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> column missing in supplied stress &quot;</span>
+                               <span class="sa">f</span><span class="s2">&quot;period table </span><span class="si">{</span><span class="n">csvfile</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">])</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">])</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">))</span>
+        <span class="n">perlen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">]</span> <span class="o">-</span>
+                          <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span>
+                          <span class="n">model</span><span class="o">.</span><span class="n">time_units</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># set initial steady-state stress period to at least length 1</span>
+        <span class="k">if</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perlen</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">]</span>
+        <span class="c1"># option to supply Output Contorl INstructions as well</span>
+        <span class="k">if</span> <span class="s1">&#39;oc&#39;</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;oc&#39;</span><span class="p">)</span>
+        <span class="n">perioddata</span> <span class="o">=</span> <span class="n">perioddata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
+        <span class="c1"># some validation</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># define stress periods from perioddata group blocks in configuration file</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">perioddata_groups</span> <span class="o">=</span> <span class="n">parse_perioddata_groups</span><span class="p">(</span><span class="n">tdis_perioddata_config</span><span class="p">,</span>
+                                                    <span class="n">nper</span><span class="o">=</span><span class="n">nper</span><span class="p">,</span> <span class="n">steady</span><span class="o">=</span><span class="n">steady</span><span class="p">,</span>
+                                                    <span class="n">start_date_time</span><span class="o">=</span><span class="n">default_start_datetime</span><span class="p">)</span>
+        <span class="c1"># set up the perioddata table from the groups</span>
+        <span class="n">perioddata</span> <span class="o">=</span> <span class="n">concat_periodata_groups</span><span class="p">(</span><span class="n">perioddata_groups</span><span class="p">,</span> <span class="n">time_units</span><span class="p">)</span>
 
     <span class="c1"># assign parent model stress periods to each inset model stress period</span>
     <span class="n">parent_sp</span> <span class="o">=</span> <span class="kc">None</span>
@@ -942,7 +985,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 21, 2023.
+      <span class="lastupdated">Last updated on Nov 16, 2023.
       </span></p>
   </div>
 

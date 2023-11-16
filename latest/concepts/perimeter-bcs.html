@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -26,7 +26,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Input instructions by package" href="../input/index.html" />
-    <link rel="prev" title="Modflow-setup concepts and methods" href="index.html" /> 
+    <link rel="prev" title="Interpolating data to the model grid" href="interp.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,7 +41,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post15+gdb03604
+                0.3.0.post24+g585fe20
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -64,10 +64,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html"> Concepts and methods</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="interp.html">Interpolation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">     Specifying perimeter boundary conditions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#features-and-limitations">Features and Limitations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#input">Input</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#time-discretization">Time discretization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-input">Configuration input</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-the-time-discretization">Specifying the time discretization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#specifying-the-locations-of-perimeter-boundary-cells">Specifying the locations of perimeter boundary cells</a></li>
 </ul>
 </li>
@@ -123,14 +124,14 @@
 <li><p>The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.</p></li>
 <li><p>The parent model may have different length units.</p></li>
 <li><p>The parent model may be of a different MODFLOW version (e.g. MODFLOW 6 inset with a MODFLOW-NWT parent)</p></li>
-<li><p>For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.11.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
+<li><p>For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.11.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
 <li><p>Specified flux boundaries are currently limited to the parent and inset models being colinear.</p></li>
 <li><p>The perimeter may be irregular. For example, the edge of the model active area may follow a major surface water feature along the opposite side.</p></li>
 <li><p>Specified perimeter heads in MODFLOW-NWT models will have ending heads for each stress period assigned from the starting head of the next stress period (with the last period having the same starting and ending heads). The MODFLOW 6 Constant Head Package only supports assignment of a single head per stress period. This distinction only matters for models where stress periods are subdivided by multiple timesteps.</p></li>
 </ul>
 </section>
-<section id="input">
-<h2>Input<a class="headerlink" href="#input" title="Permalink to this heading">¶</a></h2>
+<section id="configuration-input">
+<h2>Configuration input<a class="headerlink" href="#configuration-input" title="Permalink to this heading">¶</a></h2>
 <p>Input to set up perimeter boundaries are specified in two places:</p>
 <ol class="arabic">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">parent:</span></code> model block, in which a parent or source model can be specified. Currently only a single parent or source model is supported. The parent or source model can be used for other properties (e.g. hydraulic conductivity) and stresses (e.g. recharge) in addition to the perimeter boundary.</p>
@@ -169,8 +170,8 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 </li>
 </ol>
 </section>
-<section id="time-discretization">
-<h2>Time discretization<a class="headerlink" href="#time-discretization" title="Permalink to this heading">¶</a></h2>
+<section id="specifying-the-time-discretization">
+<h2>Specifying the time discretization<a class="headerlink" href="#specifying-the-time-discretization" title="Permalink to this heading">¶</a></h2>
 <p>By default, inset model stress period 0 is assumed to align with parent model stress period zero (<code class="docutils literal notranslate"><span class="pre">copy_stress_periods:</span> <span class="pre">'all'</span></code> in the <a class="reference internal" href="../config-file.html#the-configuration-file"><span class="std std-ref">configuration file</span></a> parent block, which is the default). Alternatively, stress periods can be mapped explicitly using a dictionary. For example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">copy_stress_periods</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -202,7 +203,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 </pre></div>
 </div>
 </div></blockquote>
-<p><strong>3) Specification of perimeter boundary cells with a shapefile</strong>. The locations of perimeter cells can be explicitly specified this way, but they still must coincide with the edge of the active extent in each layer (Modflow-setup will not put perimeter cells in the model interior). (Open) Polyline or Polygon shapefiles can be used; in either case a buffer is used to align the supplied features with the active area edge, which is determined using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.sobel.html#scipy.ndimage.sobel" title="(in SciPy v1.11.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">Sobel</span> <span class="pre">edge</span> <span class="pre">detection</span> <span class="pre">filter</span> <span class="pre">in</span> <span class="pre">Scipy</span></code></a>.</p>
+<p><strong>3) Specification of perimeter boundary cells with a shapefile</strong>. The locations of perimeter cells can be explicitly specified this way, but they still must coincide with the edge of the active extent in each layer (Modflow-setup will not put perimeter cells in the model interior). (Open) Polyline or Polygon shapefiles can be used; in either case a buffer is used to align the supplied features with the active area edge, which is determined using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.sobel.html#scipy.ndimage.sobel" title="(in SciPy v1.11.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">Sobel</span> <span class="pre">edge</span> <span class="pre">detection</span> <span class="pre">filter</span> <span class="pre">in</span> <span class="pre">Scipy</span></code></a>.</p>
 <blockquote>
 <div><p>Input example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
@@ -219,7 +220,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Modflow-setup concepts and methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="interp.html" class="btn btn-neutral float-left" title="Interpolating data to the model grid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../input/index.html" class="btn btn-neutral float-right" title="Input instructions by package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
@@ -227,7 +228,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 21, 2023.
+      <span class="lastupdated">Last updated on Nov 16, 2023.
       </span></p>
   </div>
 

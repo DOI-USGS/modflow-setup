@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration File Gallery &mdash; modflow-setup 0.3.0.post15+gdb03604 documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -41,7 +41,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post15+gdb03604
+                0.3.0.post24+g585fe20
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -682,59 +682,43 @@
 <span class="linenos"> 71</span><span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
 <span class="linenos"> 72</span><span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span>
 <span class="linenos"> 73</span><span class="w">  </span><span class="nt">perioddata</span><span class="p">:</span>
-<span class="linenos"> 74</span><span class="w">    </span><span class="c1"># time discretization info can be specified directly under the perioddata key</span>
-<span class="linenos"> 75</span><span class="w">    </span><span class="c1"># or in groups of stress periods that are discretized in a similar way</span>
-<span class="linenos"> 76</span><span class="w">    </span><span class="nt">group 1</span><span class="p">:</span><span class="w"> </span><span class="c1"># initial steady-state period (steady specified under sto package)</span>
-<span class="linenos"> 77</span><span class="w">      </span><span class="c1">#perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq.&quot;</span>
-<span class="linenos"> 78</span><span class="w">      </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 79</span><span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 80</span><span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 81</span><span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># &quot;steady&quot; can be entered here; otherwise the global entry specified in the sto package is used as the default</span>
-<span class="linenos"> 82</span><span class="w">      </span><span class="c1"># oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default</span>
-<span class="linenos"> 83</span><span class="w">    </span><span class="nt">group 2</span><span class="p">:</span><span class="w"> </span><span class="c1"># single long period for spin-up of pumping</span>
-<span class="linenos"> 84</span><span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span><span class="w">  </span><span class="c1"># can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.</span>
-<span class="linenos"> 85</span><span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2007-04-01&#39;</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2007-03-31 would be the last day simulated)</span>
-<span class="linenos"> 86</span><span class="w">      </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 87</span><span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-<span class="linenos"> 88</span><span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
-<span class="linenos"> 89</span><span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos"> 90</span><span class="w">    </span><span class="nt">group 3</span><span class="p">:</span>
-<span class="linenos"> 91</span><span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2007-04-01&#39;</span>
-<span class="linenos"> 92</span><span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2015-09-30&#39;</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2015-09-30 would be the last day simulated)</span>
-<span class="linenos"> 93</span><span class="w">      </span><span class="nt">freq</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;6MS&#39;</span><span class="w"> </span><span class="c1"># same as argument to pandas.date_range; (see &quot;Offset Aliases&quot; at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)</span>
-<span class="linenos"> 94</span><span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="linenos"> 95</span><span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
-<span class="linenos"> 96</span><span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos"> 97</span>
-<span class="linenos"> 98</span><span class="nt">sfr</span><span class="p">:</span>
-<span class="linenos"> 99</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">100</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">101</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">102</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="linenos">103</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span>
-<span class="linenos">104</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
-<span class="linenos">105</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
-<span class="linenos">106</span><span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
-<span class="linenos">107</span><span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
-<span class="linenos">108</span><span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
-<span class="linenos">109</span><span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
-<span class="linenos">110</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
-<span class="linenos">111</span><span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
-<span class="linenos">112</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
-<span class="linenos">113</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
-<span class="linenos">114</span><span class="w">    </span><span class="c1"># convert reaches corresponding to these LineString identifiers</span>
-<span class="linenos">115</span><span class="w">    </span><span class="c1"># (in the flowlines id_column), and all downstream reaches</span>
-<span class="linenos">116</span><span class="w">    </span><span class="c1"># to the MODFLOW River package</span>
-<span class="linenos">117</span><span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047212</span><span class="p p-Indicator">]</span>
-<span class="linenos">118</span>
-<span class="linenos">119</span><span class="nt">wel</span><span class="p">:</span>
-<span class="linenos">120</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="linenos">121</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
-<span class="linenos">122</span><span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span>
-<span class="linenos">123</span><span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span>
-<span class="linenos">124</span><span class="w">    </span><span class="c1"># parent model head solution</span>
-<span class="linenos">125</span><span class="w">    </span><span class="c1"># for determining boundary fluxes based on saturated thickness</span>
-<span class="linenos">126</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span>
+<span class="linenos"> 74</span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
+<span class="linenos"> 75</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/tables/stress_period_data.csv&#39;</span>
+<span class="linenos"> 76</span><span class="w">      </span><span class="nt">start_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="linenos"> 77</span><span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="linenos"> 78</span><span class="w">      </span><span class="nt">steady_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;steady&#39;</span>
+<span class="linenos"> 79</span><span class="w">      </span><span class="nt">nstp_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nstp&#39;</span>
+<span class="linenos"> 80</span><span class="w">      </span><span class="nt">tsmult_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tsmult&#39;</span>
+<span class="linenos"> 81</span>
+<span class="linenos"> 82</span><span class="nt">sfr</span><span class="p">:</span>
+<span class="linenos"> 83</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos"> 84</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos"> 85</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos"> 86</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="linenos"> 87</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span>
+<span class="linenos"> 88</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
+<span class="linenos"> 89</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
+<span class="linenos"> 90</span><span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
+<span class="linenos"> 91</span><span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
+<span class="linenos"> 92</span><span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
+<span class="linenos"> 93</span><span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
+<span class="linenos"> 94</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="linenos"> 95</span><span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="linenos"> 96</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="linenos"> 97</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
+<span class="linenos"> 98</span><span class="w">    </span><span class="c1"># convert reaches corresponding to these LineString identifiers</span>
+<span class="linenos"> 99</span><span class="w">    </span><span class="c1"># (in the flowlines id_column), and all downstream reaches</span>
+<span class="linenos">100</span><span class="w">    </span><span class="c1"># to the MODFLOW River package</span>
+<span class="linenos">101</span><span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047212</span><span class="p p-Indicator">]</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span><span class="nt">wel</span><span class="p">:</span>
+<span class="linenos">104</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
+<span class="linenos">105</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="linenos">106</span><span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span>
+<span class="linenos">107</span><span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span>
+<span class="linenos">108</span><span class="w">    </span><span class="c1"># parent model head solution</span>
+<span class="linenos">109</span><span class="w">    </span><span class="c1"># for determining boundary fluxes based on saturated thickness</span>
+<span class="linenos">110</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span>
 </pre></div>
 </div>
 </section>
@@ -1376,160 +1360,159 @@
 <span class="linenos"> 42</span><span class="c1"># Inset model settings and</span>
 <span class="linenos"> 43</span><span class="c1"># arguments to flopy.modflow.ModflowDis</span>
 <span class="linenos"> 44</span><span class="nt">dis</span><span class="p">:</span>
-<span class="linenos"> 45</span><span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos"> 46</span><span class="w">  </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="linenos"> 47</span><span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="linenos"> 48</span><span class="w">  </span><span class="nt">perlen</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">]</span>
-<span class="linenos"> 49</span><span class="w">  </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">25</span><span class="p p-Indicator">]</span>
-<span class="linenos"> 50</span><span class="w">  </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1.5</span><span class="p p-Indicator">]</span>
-<span class="linenos"> 51</span><span class="w">  </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">True</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">False</span><span class="p p-Indicator">]</span>
-<span class="linenos"> 52</span><span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify lenuni: 2</span>
-<span class="linenos"> 53</span><span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify itmuni: 4</span>
-<span class="linenos"> 54</span><span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2011-01-01&#39;</span>
-<span class="linenos"> 55</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos"> 56</span><span class="w">    </span><span class="nt">top</span><span class="p">:</span>
-<span class="linenos"> 57</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/dem10m.tif&#39;</span>
-<span class="linenos"> 58</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="linenos"> 59</span><span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
-<span class="linenos"> 60</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
-<span class="linenos"> 61</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span><span class="w"> </span><span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span>
-<span class="linenos"> 62</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent</span>
-<span class="linenos"> 63</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 64</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="linenos"> 65</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="linenos"> 66</span>
-<span class="linenos"> 67</span><span class="nt">bas6</span><span class="p">:</span>
-<span class="linenos"> 68</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos"> 69</span><span class="w">    </span><span class="nt">strt</span><span class="p">:</span>
-<span class="linenos"> 70</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
-<span class="linenos"> 71</span><span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
-<span class="linenos"> 72</span><span class="w">        </span><span class="nt">stress_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos"> 73</span>
-<span class="linenos"> 74</span><span class="nt">upw</span><span class="p">:</span>
-<span class="linenos"> 75</span><span class="w">  </span><span class="nt">ipakcb</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"> </span><span class="c1"># unit for writing cell budget output</span>
-<span class="linenos"> 76</span><span class="w">  </span><span class="nt">hdry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-9999</span>
-<span class="linenos"> 77</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos"> 78</span><span class="w">    </span><span class="nt">hk</span><span class="p">:</span>
-<span class="linenos"> 79</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
-<span class="linenos"> 80</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer zero in pfl_nwt has values of parent layer zero</span>
-<span class="linenos"> 81</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer one in pfl_nwt has values of parent layer zero</span>
-<span class="linenos"> 82</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 83</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="linenos"> 84</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="linenos"> 85</span><span class="w">    </span><span class="nt">vka</span><span class="p">:</span>
-<span class="linenos"> 86</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
-<span class="linenos"> 87</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer zero in pfl_nwt has values of parent layer zero</span>
-<span class="linenos"> 88</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer one in pfl_nwt has values of parent layer zero</span>
-<span class="linenos"> 89</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 90</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="linenos"> 91</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="linenos"> 92</span><span class="w">  </span><span class="nt">sy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="linenos"> 93</span><span class="w">  </span><span class="nt">ss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span>
+<span class="linenos"> 45</span><span class="w">  </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos"> 46</span><span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="linenos"> 47</span><span class="w">  </span><span class="nt">perlen</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 48</span><span class="w">  </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">25</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 49</span><span class="w">  </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1.5</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 50</span><span class="w">  </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">True</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">False</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 51</span><span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify lenuni: 2</span>
+<span class="linenos"> 52</span><span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify itmuni: 4</span>
+<span class="linenos"> 53</span><span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2011-01-01&#39;</span>
+<span class="linenos"> 54</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos"> 55</span><span class="w">    </span><span class="nt">top</span><span class="p">:</span>
+<span class="linenos"> 56</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/dem10m.tif&#39;</span>
+<span class="linenos"> 57</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos"> 58</span><span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
+<span class="linenos"> 59</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="linenos"> 60</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span><span class="w"> </span><span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span>
+<span class="linenos"> 61</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent</span>
+<span class="linenos"> 62</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 63</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos"> 64</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span><span class="nt">bas6</span><span class="p">:</span>
+<span class="linenos"> 67</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos"> 68</span><span class="w">    </span><span class="nt">strt</span><span class="p">:</span>
+<span class="linenos"> 69</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="linenos"> 70</span><span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
+<span class="linenos"> 71</span><span class="w">        </span><span class="nt">stress_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos"> 72</span>
+<span class="linenos"> 73</span><span class="nt">upw</span><span class="p">:</span>
+<span class="linenos"> 74</span><span class="w">  </span><span class="nt">ipakcb</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53</span><span class="w"> </span><span class="c1"># unit for writing cell budget output</span>
+<span class="linenos"> 75</span><span class="w">  </span><span class="nt">hdry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-9999</span>
+<span class="linenos"> 76</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos"> 77</span><span class="w">    </span><span class="nt">hk</span><span class="p">:</span>
+<span class="linenos"> 78</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="linenos"> 79</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer zero in pfl_nwt has values of parent layer zero</span>
+<span class="linenos"> 80</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer one in pfl_nwt has values of parent layer zero</span>
+<span class="linenos"> 81</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 82</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos"> 83</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="linenos"> 84</span><span class="w">    </span><span class="nt">vka</span><span class="p">:</span>
+<span class="linenos"> 85</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="linenos"> 86</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer zero in pfl_nwt has values of parent layer zero</span>
+<span class="linenos"> 87</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># layer one in pfl_nwt has values of parent layer zero</span>
+<span class="linenos"> 88</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 89</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos"> 90</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="linenos"> 91</span><span class="w">  </span><span class="nt">sy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="linenos"> 92</span><span class="w">  </span><span class="nt">ss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span>
+<span class="linenos"> 93</span>
 <span class="linenos"> 94</span>
-<span class="linenos"> 95</span>
-<span class="linenos"> 96</span><span class="c1"># in lieu of an infiltration in source_dara</span>
-<span class="linenos"> 97</span><span class="c1"># recharge can be entered directly as &quot;rech&quot;</span>
-<span class="linenos"> 98</span><span class="c1"># (scalar, external file, or list of those)</span>
-<span class="linenos"> 99</span><span class="nt">rch</span><span class="p">:</span>
-<span class="linenos">100</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">101</span><span class="w">    </span><span class="nt">rech</span><span class="p">:</span>
-<span class="linenos">102</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="c1"># by stress period</span>
-<span class="linenos">103</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif&#39;</span>
-<span class="linenos">104</span><span class="w">      </span><span class="nt">mult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.805</span>
-<span class="linenos">105</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
-<span class="linenos">106</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;years&#39;</span>
-<span class="linenos">107</span>
-<span class="linenos">108</span><span class="nt">wel</span><span class="p">:</span>
-<span class="linenos">109</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">110</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">111</span><span class="w">    </span><span class="nt">wells</span><span class="p">:</span><span class="w"> </span><span class="c1"># name: per, x, y or i, j location; layer (k), q (flux); or csv file with these columns</span>
-<span class="linenos">112</span><span class="w">      </span><span class="nt">well1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">per</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> x</span><span class="p">:</span><span class="w"> </span><span class="nv">563343.92</span><span class="p p-Indicator">,</span><span class="nt"> y</span><span class="p">:</span><span class="w"> </span><span class="nv">414988.09</span><span class="p p-Indicator">,</span><span class="nt"> k</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nt"> q</span><span class="p">:</span><span class="w"> </span><span class="nv">-2000</span><span class="p p-Indicator">}</span>
-<span class="linenos">113</span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span>
-<span class="linenos">114</span><span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span>
-<span class="linenos">115</span><span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/wu_points.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span>
-<span class="linenos">116</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period &#39;mean&#39; to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. &#39;august&#39;)</span>
-<span class="linenos">117</span><span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;august&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span>
-<span class="linenos">118</span><span class="w">      </span><span class="p p-Indicator">}</span>
-<span class="linenos">119</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
-<span class="linenos">120</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;wel_lookup.csv&#39;</span><span class="w"> </span><span class="c1"># mapping of wel package data to site numbers</span>
-<span class="linenos">121</span>
-<span class="linenos">122</span><span class="nt">mnw</span><span class="p">:</span>
-<span class="linenos">123</span><span class="w">  </span><span class="nt">added_wells</span><span class="p">:</span>
-<span class="linenos">124</span><span class="w">    </span><span class="nt">well1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">per</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> x</span><span class="p">:</span><span class="w"> </span><span class="nv">563343.92</span><span class="p p-Indicator">,</span><span class="nt"> y</span><span class="p">:</span><span class="w"> </span><span class="nv">414988.09</span><span class="p p-Indicator">,</span>
-<span class="linenos">125</span><span class="nt">            depth</span><span class="p">:</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># m</span>
-<span class="linenos">126</span><span class="nt">            flux</span><span class="p">:</span><span class="w"> </span><span class="nv">-2000</span><span class="p p-Indicator">,</span><span class="w">  </span><span class="c1"># pumping rate, in model units</span>
-<span class="linenos">127</span><span class="nt">            rw</span><span class="p">:</span><span class="w"> </span><span class="nv">0.1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># well radius, m</span>
-<span class="linenos">128</span><span class="nt">            rskin</span><span class="p">:</span><span class="w"> </span><span class="nv">0.1524</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># radius to outer limit of skin</span>
-<span class="linenos">129</span><span class="nt">            kskin</span><span class="p">:</span><span class="w"> </span><span class="nv">50</span><span class="w"> </span><span class="c1"># m/day</span>
-<span class="linenos">130</span><span class="w">    </span><span class="p p-Indicator">}</span>
-<span class="linenos">131</span>
-<span class="linenos">132</span><span class="c1"># option to simulate lakes as zones of high hydraulic conductivity</span>
-<span class="linenos">133</span><span class="c1"># (see Anderson and others (2002) in the references)</span>
-<span class="linenos">134</span><span class="nt">high_k_lakes</span><span class="p">:</span>
-<span class="linenos">135</span><span class="w">  </span><span class="nt">simulate_high_k_lakes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">136</span><span class="w">  </span><span class="nt">high_k_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+4</span>
-<span class="linenos">137</span><span class="w">  </span><span class="nt">sy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
-<span class="linenos">138</span><span class="w">  </span><span class="nt">ss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.e-10</span><span class="w">  </span><span class="c1"># (approx. compressibility of water in Pa-1 or m2/N)</span>
-<span class="linenos">139</span><span class="w">  </span><span class="nt">precipitation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.002276</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 32.7 in/yr; from LPR report average value</span>
-<span class="linenos">140</span><span class="w">                  </span><span class="nv">0.003646</span><span class="w"> </span><span class="c1"># average for August, 2012-2018 (4.45 in for the month)</span>
-<span class="linenos">141</span><span class="w">  </span><span class="p p-Indicator">]</span>
-<span class="linenos">142</span><span class="w">  </span><span class="nt">evaporation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.001649</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 23.7 in/yr; ballpark value from LPR report</span>
-<span class="linenos">143</span><span class="w">                </span><span class="nv">0.00338</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 3.38 mm/day; average August rate for Sparkling Lake from Lenters and others (2005; table 2)</span>
-<span class="linenos">144</span><span class="w">  </span><span class="p p-Indicator">]</span>
-<span class="linenos">145</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">146</span><span class="w">    </span><span class="c1"># shapefile defining the extents of the lakes to include</span>
-<span class="linenos">147</span><span class="w">    </span><span class="c1"># Note: lakes that are also simulated with the Lake Package will be excluded</span>
-<span class="linenos">148</span><span class="w">    </span><span class="nt">lakes_shapefile</span><span class="p">:</span>
-<span class="linenos">149</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes.shp&#39;</span>
-<span class="linenos">150</span>
-<span class="linenos">151</span><span class="nt">lak</span><span class="p">:</span>
-<span class="linenos">152</span><span class="w">  </span><span class="nt">theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.7</span><span class="w">  </span><span class="c1"># semi-implicit; negative value indicates that surfdep is read</span>
-<span class="linenos">153</span><span class="w">  </span><span class="nt">nssitr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">800</span><span class="w">  </span><span class="c1"># number of Newton iterations for solution of lake stage, for each MODFLOW iteration.</span>
-<span class="linenos">154</span><span class="w">  </span><span class="nt">sscncr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0000001</span><span class="w">  </span><span class="c1"># lake stage convergence criterion</span>
-<span class="linenos">155</span><span class="w">  </span><span class="nt">surfdep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">  </span><span class="c1"># undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)</span>
-<span class="linenos">156</span><span class="w">  </span><span class="nt">precipitation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.002276</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 32.7 in/yr; from LPR report average value</span>
-<span class="linenos">157</span><span class="w">           </span><span class="nv">0.003646</span><span class="w"> </span><span class="c1"># average for August, 2012-2018 (4.45 in for the month)</span>
-<span class="linenos">158</span><span class="w">           </span><span class="p p-Indicator">]</span>
-<span class="linenos">159</span><span class="w">  </span><span class="nt">evaporation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.001649</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 23.7 in/yr; ballpark value from LPR report</span>
-<span class="linenos">160</span><span class="w">         </span><span class="nv">0.00338</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 3.38 mm/day; average August rate for Sparkling Lake from Lenters and others (2005; table 2)</span>
-<span class="linenos">161</span><span class="w">         </span><span class="p p-Indicator">]</span>
-<span class="linenos">162</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">163</span><span class="w">    </span><span class="nt">littoral_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.045</span><span class="w"> </span><span class="c1"># 1/d</span>
-<span class="linenos">164</span><span class="w">    </span><span class="nt">profundal_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.025</span><span class="w"> </span><span class="c1"># 1/d</span>
-<span class="linenos">165</span><span class="w">    </span><span class="nt">littoral_zone_buffer_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
-<span class="linenos">166</span><span class="w">    </span><span class="nt">lakes_shapefile</span><span class="p">:</span>
-<span class="linenos">167</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes.shp&#39;</span>
-<span class="linenos">168</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span>
-<span class="linenos">169</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600054357</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054355</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054434</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054319</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># list of WDNR HYDROIDs</span>
-<span class="linenos">170</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Name&#39;</span>
-<span class="linenos">171</span><span class="w">    </span><span class="nt">bathymetry_raster</span><span class="p">:</span>
-<span class="linenos">172</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/pfl_bathymetry.tif&#39;</span>
-<span class="linenos">173</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="linenos">174</span><span class="w">    </span><span class="nt">stage_area_volume_file</span><span class="p">:</span>
-<span class="linenos">175</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes_stage_area_volume.csv&#39;</span><span class="w"> </span><span class="c1">#&#39;../../bcs/lakes/area_stage_vol_Long.csv&#39;</span>
-<span class="linenos">176</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="linenos">177</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hydroid&#39;</span>
-<span class="linenos">178</span><span class="w">      </span><span class="nt">column_mappings</span><span class="p">:</span>
-<span class="linenos">179</span><span class="w">        </span><span class="nt">volume_m3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;volume&#39;</span>
-<span class="linenos">180</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
-<span class="linenos">181</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;lak_lookup.csv&#39;</span>
-<span class="linenos">182</span>
-<span class="linenos">183</span><span class="nt">nwt</span><span class="p">:</span>
-<span class="linenos">184</span><span class="w">  </span><span class="nt">headtol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span><span class="w"> </span><span class="c1"># read remaining parameters from default cfg</span>
-<span class="linenos">185</span>
-<span class="linenos">186</span><span class="nt">hyd</span><span class="p">:</span>
-<span class="linenos">187</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">188</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;plainfieldlakes/source_data/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">189</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">190</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">191</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/uwsp_heads.csv&#39;</span>
-<span class="linenos">192</span><span class="w">                </span><span class="p p-Indicator">]</span>
-<span class="linenos">193</span><span class="w">    </span><span class="nt">x_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x_utm&#39;</span><span class="w"> </span><span class="c1"># x coordinates in wtm</span>
-<span class="linenos">194</span><span class="w">    </span><span class="nt">y_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y_utm&#39;</span><span class="w"> </span><span class="c1"># y coordinates in wtm</span>
-<span class="linenos">195</span>
-<span class="linenos">196</span><span class="nt">chd</span><span class="p">:</span>
-<span class="linenos">197</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="linenos">198</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
+<span class="linenos"> 95</span><span class="c1"># in lieu of an infiltration in source_dara</span>
+<span class="linenos"> 96</span><span class="c1"># recharge can be entered directly as &quot;rech&quot;</span>
+<span class="linenos"> 97</span><span class="c1"># (scalar, external file, or list of those)</span>
+<span class="linenos"> 98</span><span class="nt">rch</span><span class="p">:</span>
+<span class="linenos"> 99</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">100</span><span class="w">    </span><span class="nt">rech</span><span class="p">:</span>
+<span class="linenos">101</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="c1"># by stress period</span>
+<span class="linenos">102</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif&#39;</span>
+<span class="linenos">103</span><span class="w">      </span><span class="nt">mult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.805</span>
+<span class="linenos">104</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
+<span class="linenos">105</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;years&#39;</span>
+<span class="linenos">106</span>
+<span class="linenos">107</span><span class="nt">wel</span><span class="p">:</span>
+<span class="linenos">108</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;SPECIFY&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;0.01&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">109</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">110</span><span class="w">    </span><span class="nt">wells</span><span class="p">:</span><span class="w"> </span><span class="c1"># name: per, x, y or i, j location; layer (k), q (flux); or csv file with these columns</span>
+<span class="linenos">111</span><span class="w">      </span><span class="nt">well1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">per</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> x</span><span class="p">:</span><span class="w"> </span><span class="nv">563343.92</span><span class="p p-Indicator">,</span><span class="nt"> y</span><span class="p">:</span><span class="w"> </span><span class="nv">414988.09</span><span class="p p-Indicator">,</span><span class="nt"> k</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nt"> q</span><span class="p">:</span><span class="w"> </span><span class="nv">-2000</span><span class="p p-Indicator">}</span>
+<span class="linenos">112</span><span class="w">    </span><span class="nt">wdnr_dataset</span><span class="p">:</span>
+<span class="linenos">113</span><span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span>
+<span class="linenos">114</span><span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/wu_points.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span>
+<span class="linenos">115</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period &#39;mean&#39; to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. &#39;august&#39;)</span>
+<span class="linenos">116</span><span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;august&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span>
+<span class="linenos">117</span><span class="w">      </span><span class="p p-Indicator">}</span>
+<span class="linenos">118</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
+<span class="linenos">119</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;wel_lookup.csv&#39;</span><span class="w"> </span><span class="c1"># mapping of wel package data to site numbers</span>
+<span class="linenos">120</span>
+<span class="linenos">121</span><span class="nt">mnw</span><span class="p">:</span>
+<span class="linenos">122</span><span class="w">  </span><span class="nt">added_wells</span><span class="p">:</span>
+<span class="linenos">123</span><span class="w">    </span><span class="nt">well1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">per</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> x</span><span class="p">:</span><span class="w"> </span><span class="nv">563343.92</span><span class="p p-Indicator">,</span><span class="nt"> y</span><span class="p">:</span><span class="w"> </span><span class="nv">414988.09</span><span class="p p-Indicator">,</span>
+<span class="linenos">124</span><span class="nt">            depth</span><span class="p">:</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># m</span>
+<span class="linenos">125</span><span class="nt">            flux</span><span class="p">:</span><span class="w"> </span><span class="nv">-2000</span><span class="p p-Indicator">,</span><span class="w">  </span><span class="c1"># pumping rate, in model units</span>
+<span class="linenos">126</span><span class="nt">            rw</span><span class="p">:</span><span class="w"> </span><span class="nv">0.1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># well radius, m</span>
+<span class="linenos">127</span><span class="nt">            rskin</span><span class="p">:</span><span class="w"> </span><span class="nv">0.1524</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># radius to outer limit of skin</span>
+<span class="linenos">128</span><span class="nt">            kskin</span><span class="p">:</span><span class="w"> </span><span class="nv">50</span><span class="w"> </span><span class="c1"># m/day</span>
+<span class="linenos">129</span><span class="w">    </span><span class="p p-Indicator">}</span>
+<span class="linenos">130</span>
+<span class="linenos">131</span><span class="c1"># option to simulate lakes as zones of high hydraulic conductivity</span>
+<span class="linenos">132</span><span class="c1"># (see Anderson and others (2002) in the references)</span>
+<span class="linenos">133</span><span class="nt">high_k_lakes</span><span class="p">:</span>
+<span class="linenos">134</span><span class="w">  </span><span class="nt">simulate_high_k_lakes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">135</span><span class="w">  </span><span class="nt">high_k_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+4</span>
+<span class="linenos">136</span><span class="w">  </span><span class="nt">sy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="linenos">137</span><span class="w">  </span><span class="nt">ss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.e-10</span><span class="w">  </span><span class="c1"># (approx. compressibility of water in Pa-1 or m2/N)</span>
+<span class="linenos">138</span><span class="w">  </span><span class="nt">precipitation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.002276</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 32.7 in/yr; from LPR report average value</span>
+<span class="linenos">139</span><span class="w">                  </span><span class="nv">0.003646</span><span class="w"> </span><span class="c1"># average for August, 2012-2018 (4.45 in for the month)</span>
+<span class="linenos">140</span><span class="w">  </span><span class="p p-Indicator">]</span>
+<span class="linenos">141</span><span class="w">  </span><span class="nt">evaporation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.001649</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 23.7 in/yr; ballpark value from LPR report</span>
+<span class="linenos">142</span><span class="w">                </span><span class="nv">0.00338</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 3.38 mm/day; average August rate for Sparkling Lake from Lenters and others (2005; table 2)</span>
+<span class="linenos">143</span><span class="w">  </span><span class="p p-Indicator">]</span>
+<span class="linenos">144</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">145</span><span class="w">    </span><span class="c1"># shapefile defining the extents of the lakes to include</span>
+<span class="linenos">146</span><span class="w">    </span><span class="c1"># Note: lakes that are also simulated with the Lake Package will be excluded</span>
+<span class="linenos">147</span><span class="w">    </span><span class="nt">lakes_shapefile</span><span class="p">:</span>
+<span class="linenos">148</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes.shp&#39;</span>
+<span class="linenos">149</span>
+<span class="linenos">150</span><span class="nt">lak</span><span class="p">:</span>
+<span class="linenos">151</span><span class="w">  </span><span class="nt">theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.7</span><span class="w">  </span><span class="c1"># semi-implicit; negative value indicates that surfdep is read</span>
+<span class="linenos">152</span><span class="w">  </span><span class="nt">nssitr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">800</span><span class="w">  </span><span class="c1"># number of Newton iterations for solution of lake stage, for each MODFLOW iteration.</span>
+<span class="linenos">153</span><span class="w">  </span><span class="nt">sscncr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0000001</span><span class="w">  </span><span class="c1"># lake stage convergence criterion</span>
+<span class="linenos">154</span><span class="w">  </span><span class="nt">surfdep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">  </span><span class="c1"># undulations in lake bottom that affect GW discharge. Range in online instructions is 0.01-0.5. (Value from Trout Lake)</span>
+<span class="linenos">155</span><span class="w">  </span><span class="nt">precipitation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.002276</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 32.7 in/yr; from LPR report average value</span>
+<span class="linenos">156</span><span class="w">           </span><span class="nv">0.003646</span><span class="w"> </span><span class="c1"># average for August, 2012-2018 (4.45 in for the month)</span>
+<span class="linenos">157</span><span class="w">           </span><span class="p p-Indicator">]</span>
+<span class="linenos">158</span><span class="w">  </span><span class="nt">evaporation</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.001649</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 23.7 in/yr; ballpark value from LPR report</span>
+<span class="linenos">159</span><span class="w">         </span><span class="nv">0.00338</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># 3.38 mm/day; average August rate for Sparkling Lake from Lenters and others (2005; table 2)</span>
+<span class="linenos">160</span><span class="w">         </span><span class="p p-Indicator">]</span>
+<span class="linenos">161</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">162</span><span class="w">    </span><span class="nt">littoral_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.045</span><span class="w"> </span><span class="c1"># 1/d</span>
+<span class="linenos">163</span><span class="w">    </span><span class="nt">profundal_leakance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.025</span><span class="w"> </span><span class="c1"># 1/d</span>
+<span class="linenos">164</span><span class="w">    </span><span class="nt">littoral_zone_buffer_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="linenos">165</span><span class="w">    </span><span class="nt">lakes_shapefile</span><span class="p">:</span>
+<span class="linenos">166</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes.shp&#39;</span>
+<span class="linenos">167</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HYDROID&#39;</span>
+<span class="linenos">168</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">600054357</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054355</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054434</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">600054319</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># list of WDNR HYDROIDs</span>
+<span class="linenos">169</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Name&#39;</span>
+<span class="linenos">170</span><span class="w">    </span><span class="nt">bathymetry_raster</span><span class="p">:</span>
+<span class="linenos">171</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/pfl_bathymetry.tif&#39;</span>
+<span class="linenos">172</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos">173</span><span class="w">    </span><span class="nt">stage_area_volume_file</span><span class="p">:</span>
+<span class="linenos">174</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/all_lakes_stage_area_volume.csv&#39;</span><span class="w"> </span><span class="c1">#&#39;../../bcs/lakes/area_stage_vol_Long.csv&#39;</span>
+<span class="linenos">175</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos">176</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;hydroid&#39;</span>
+<span class="linenos">177</span><span class="w">      </span><span class="nt">column_mappings</span><span class="p">:</span>
+<span class="linenos">178</span><span class="w">        </span><span class="nt">volume_m3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;volume&#39;</span>
+<span class="linenos">179</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
+<span class="linenos">180</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;lak_lookup.csv&#39;</span>
+<span class="linenos">181</span>
+<span class="linenos">182</span><span class="nt">nwt</span><span class="p">:</span>
+<span class="linenos">183</span><span class="w">  </span><span class="nt">headtol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span><span class="w"> </span><span class="c1"># read remaining parameters from default cfg</span>
+<span class="linenos">184</span>
+<span class="linenos">185</span><span class="nt">hyd</span><span class="p">:</span>
+<span class="linenos">186</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">187</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;plainfieldlakes/source_data/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">188</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">189</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">190</span><span class="w">                </span><span class="s">&#39;plainfieldlakes/source_data/uwsp_heads.csv&#39;</span>
+<span class="linenos">191</span><span class="w">                </span><span class="p p-Indicator">]</span>
+<span class="linenos">192</span><span class="w">    </span><span class="nt">x_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x_utm&#39;</span><span class="w"> </span><span class="c1"># x coordinates in wtm</span>
+<span class="linenos">193</span><span class="w">    </span><span class="nt">y_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y_utm&#39;</span><span class="w"> </span><span class="c1"># y coordinates in wtm</span>
+<span class="linenos">194</span>
+<span class="linenos">195</span><span class="nt">chd</span><span class="p">:</span>
+<span class="linenos">196</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
+<span class="linenos">197</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
 </pre></div>
 </div>
 </section>
@@ -1547,7 +1530,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 21, 2023.
+      <span class="lastupdated">Last updated on Nov 16, 2023.
       </span></p>
   </div>
 
