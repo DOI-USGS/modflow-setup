@@ -4,7 +4,7 @@ Modflow-setup
 Modflow-setup is a Python package for automating the setup of MODFLOW groundwater models from grid-independent source data including shapefiles, rasters, and other MODFLOW models that are geo-located. Input data and model construction options are summarized in a single configuration file. Source data are read from their native formats and mapped to a regular finite difference grid specified in the configuration file. An external array-based [Flopy](https://github.com/modflowpy/flopy) model instance with the desired packages is created from the sampled source data and configuration settings. MODFLOW input can then be written from the flopy model instance.
 
 
-### Version 0.3
+### Version 0.4
 ![Tests](https://github.com/doi-usgs/modflow-setup/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/doi-usgs/modflow-setup/branch/develop/graph/badge.svg?token=aWN47DYeIv)](https://codecov.io/gh/doi-usgs/modflow-setup)
 [![PyPI version](https://badge.fury.io/py/modflow-setup.svg)](https://badge.fury.io/py/modflow-setup)
@@ -56,10 +56,17 @@ Leaf, A.T. and Fienen, M.N. (2022). Modflow-setup version 0.1, U.S. Geological S
 
 Applications of Modflow-setup
 -----------------------------------------------
+Fienen, M.N., Corson-Dosch, N.T., White, J.T., Leaf, A.T. and Hunt, R.J. (2022), Risk-Based Wellhead Protection Decision Support: A Repeatable Workflow Approach. Groundwater, 60: 71-86. https://doi.org/10.1111/gwat.13129
 
+Fienen, M.N., Haserodt, M.J., Leaf, A.T., and Westenbroek, S.M., 2022, Simulation of regional groundwater flow and groundwater/lake interactions in the Central Sands, Wisconsin: U.S. Geological Survey Scientific Investigations Report 2022–5046, 111 p., https://doi.org/10.3133/sir20225046.
+
+Leaf, A.T., Duncan, L.L., Haugh, C.J., Hunt, R.J., and Rigby, J.R., 2023, Simulating groundwater flow in the Mississippi Alluvial Plain with a focus on the Mississippi Delta: U.S. Geological Survey Scientific Investigations Report 2023–5100, 143 p., https://doi.org/10.3133/sir20235100.
+
+Workflow examples
+-----------------------------------------------
 Fienen, M.N, and Corson-Dosch, N.T., 2021, Groundwater Model Archive and Workflow for Neversink/Rondout Basin, New York, Source Water Delineation: U.S. Geological Survey data release, https://doi.org/10.5066/P9HWSOHP.
 
-Fienen, M.N., Corson-Dosch, N.T., White, J.T., Leaf, A.T. and Hunt, R.J. (2022), Risk-Based Wellhead Protection Decision Support: A Repeatable Workflow Approach. Groundwater, 60: 71-86. https://doi.org/10.1111/gwat.13129
+Leaf, A.T., Duncan, L.L., and Haugh, C.J., 2023, MODFLOW 6 models for simulating groundwater flow in the Mississippi Embayment with a focus on the Mississippi Delta: U.S. Geological Survey data release, https://doi.org/10.5066/P971LPOB.
 
 MODFLOW Resources
 -----------------------------------------------

@@ -22,8 +22,24 @@ Hunt, R.J. and Zheng, C. (2012), The Current State of Modeling. Groundwater, 50:
 
 Langevin, C.D., Hughes, J.D., Banta, E.R., Niswonger, R.G., Panday, Sorab, and Provost, A.M., 2017, Documentation for the MODFLOW 6 Groundwater Flow Model: U.S. Geological Survey Techniques and Methods, book 6, chap. A55, 197 p., https://doi.org/10.3133/tm6A55.
 
+Leaf AT and Fienen MN (2022) Modflow-setup: Robust automation of groundwater model construction. Front. Earth Sci. 10:903965. https://doi.org/10.3389/feart.2022.903965
+
 Niswonger, R.G., Panday, S., and Ibaraki, M., 2011, MODFLOW–NWT—A Newton formulation for MODFLOW–2005: U.S. Geological Survey Techniques and Methods, book 6, chap. A37, 44 p. https://doi.org/10.3133/tm6A45
 
 Westenbroek, S.M., Engott, J.A., Kelson, V.A., and Hunt, R.J., 2018, SWB Version 2.0—A soil-water-balance code for estimating net infiltration and other water-budget components: U.S. Geological Survey Techniques and Methods, book 6, chap. A59, 118 p., https://doi.org/10.3133/tm6A59.
 
 Wisconsin Department of Natural Resources (WDNR), 2021. Central Sands Lake Study Report: Findings and Recommendations. Report to the Wisconsin State Legislature. https://doi.org/10.5281/zenodo.5708791
+
+Modflow-setup applications
+######################################
+Fienen, M.N., Corson-Dosch, N.T., White, J.T., Leaf, A.T. and Hunt, R.J. (2022), Risk-Based Wellhead Protection Decision Support: A Repeatable Workflow Approach. Groundwater, 60: 71-86. https://doi.org/10.1111/gwat.13129
+
+Fienen, M.N., Haserodt, M.J., Leaf, A.T., and Westenbroek, S.M., 2022, Simulation of regional groundwater flow and groundwater/lake interactions in the Central Sands, Wisconsin: U.S. Geological Survey Scientific Investigations Report 2022–5046, 111 p., https://doi.org/10.3133/sir20225046.
+
+Leaf, A.T., Duncan, L.L., Haugh, C.J., Hunt, R.J., and Rigby, J.R., 2023, Simulating groundwater flow in the Mississippi Alluvial Plain with a focus on the Mississippi Delta: U.S. Geological Survey Scientific Investigations Report 2023–5100, 143 p., https://doi.org/10.3133/sir20235100.
+
+Workflow examples
+################################
+Fienen, M.N, and Corson-Dosch, N.T., 2021, Groundwater Model Archive and Workflow for Neversink/Rondout Basin, New York, Source Water Delineation: U.S. Geological Survey data release, https://doi.org/10.5066/P9HWSOHP.
+
+Leaf, A.T., Duncan, L.L., and Haugh, C.J., 2023, MODFLOW 6 models for simulating groundwater flow in the Mississippi Embayment with a focus on the Mississippi Delta: U.S. Geological Survey data release, https://doi.org/10.5066/P971LPOB.
