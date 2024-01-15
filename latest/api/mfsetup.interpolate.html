@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.interpolate module &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <title>mfsetup.interpolate module &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -96,7 +95,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -125,16 +126,16 @@
            <div itemprop="articleBody">
              
   <section id="module-mfsetup.interpolate">
-<span id="mfsetup-interpolate-module"></span><h1>mfsetup.interpolate module<a class="headerlink" href="#module-mfsetup.interpolate" title="Permalink to this heading">¶</a></h1>
+<span id="mfsetup-interpolate-module"></span><h1>mfsetup.interpolate module<a class="headerlink" href="#module-mfsetup.interpolate" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.interpolate.Interpolator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">Interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_values_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#Interpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.Interpolator" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">Interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_values_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#Interpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.Interpolator" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Speed up barycentric interpolation similar to scipy.interpolate.griddata
 (method=’linear’), by computing the weights once and then re-using them for
 successive interpolation with the same source and destination points.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>xyz</strong><span class="classifier">ndarray or tuple</span></dt><dd><p>x, y, z, … locations of source data.
 (shape n source points x ndims)</p>
@@ -156,18 +157,18 @@ with the same number of active values as the size of <cite>xyz</cite>.</p>
 <a class="reference external" href="https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids">https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids</a></p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.interpolate.Interpolator.interp_weights">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interp_weights</span></span><a class="headerlink" href="#mfsetup.interpolate.Interpolator.interp_weights" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interp_weights</span></span><a class="headerlink" href="#mfsetup.interpolate.Interpolator.interp_weights" title="Link to this definition">¶</a></dt>
 <dd><p>Calculate the interpolation weights.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.interpolate.Interpolator.interpolate">
-<span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#Interpolator.interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.Interpolator.interpolate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#Interpolator.interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.Interpolator.interpolate" title="Link to this definition">¶</a></dt>
 <dd><p>Interpolate values in source_values to the destination points in the <em>uvw</em> attribute.
 using modelgrid instances
 attached to the source and destination models.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>source_values</strong><span class="classifier">ndarray</span></dt><dd><p>Values to be interpolated to destination points. Array must be the same size as
 the number of source points, or the number of active points within source points,
@@ -180,7 +181,7 @@ are computed. With ‘nearest’, the input is simply passed to <code class="xre
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>interpolated</strong><span class="classifier">1D numpy array</span></dt><dd><p>Array of interpolated values at the destination locations.</p>
 </dd>
@@ -191,17 +192,17 @@ are computed. With ‘nearest’, the input is simply passed to <code class="xre
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.interpolate.Interpolator.source_values_mask">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_values_mask</span></span><a class="headerlink" href="#mfsetup.interpolate.Interpolator.source_values_mask" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_values_mask</span></span><a class="headerlink" href="#mfsetup.interpolate.Interpolator.source_values_mask" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.interpolate.get_source_dest_model_xys">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">get_source_dest_model_xys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#get_source_dest_model_xys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.get_source_dest_model_xys" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">get_source_dest_model_xys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#get_source_dest_model_xys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.get_source_dest_model_xys" title="Link to this definition">¶</a></dt>
 <dd><p>Get the xyz and uvw inputs to the interp_weights function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>source_model</strong><span class="classifier">flopy.modeflow.Modflow, flopy.mf6.MFModel, or MFsetupGrid instance</span></dt><dd></dd>
 <dt><strong>dest_model</strong><span class="classifier">mfsetup.MFnwtModel, mfsetup.MF6model instance</span></dt><dd></dd>
@@ -212,12 +213,12 @@ are computed. With ‘nearest’, the input is simply passed to <code class="xre
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.interpolate.interp_weights">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">interp_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#interp_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.interp_weights" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">interp_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#interp_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.interp_weights" title="Link to this definition">¶</a></dt>
 <dd><p>Speed up interpolation vs scipy.interpolate.griddata (method=’linear’),
 by only computing the weights once:
 <a class="reference external" href="https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids">https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>xyz</strong><span class="classifier">ndarray or tuple</span></dt><dd><p>x, y, z, … locations of source data.
 (shape n source points x ndims)</p>
@@ -229,7 +230,7 @@ by only computing the weights once:
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>indices</strong><span class="classifier">ndarray of shape n destination points x 3</span></dt><dd><p>Index positions in flattened (1D) xyz array</p>
 </dd>
@@ -244,10 +245,10 @@ across the 3 columns.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.interpolate.interpolate">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vtx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.interpolate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vtx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.interpolate" title="Link to this definition">¶</a></dt>
 <dd><p>Apply the interpolation weights to a set of values.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>values</strong><span class="classifier">1D array of length n source points (same as xyz in interp_weights)</span></dt><dd></dd>
 <dt><strong>vtx</strong><span class="classifier">indices returned by interp_weights</span></dt><dd></dd>
@@ -266,11 +267,11 @@ If not provided, then the default is nan.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.interpolate.regrid">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">regrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#regrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.regrid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">regrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#regrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.regrid" title="Link to this definition">¶</a></dt>
 <dd><p>Interpolate array values from one model grid to another,
 using scipy.interpolate.griddata.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>arr</strong><span class="classifier">2D numpy array</span></dt><dd><p>Source data</p>
 </dd>
@@ -294,11 +295,11 @@ is used (not for integer/categorical arrays).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.interpolate.regrid3d">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">regrid3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#regrid3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.regrid3d" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">regrid3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#regrid3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.regrid3d" title="Link to this definition">¶</a></dt>
 <dd><p>Interpolate array values from one model grid to another,
 using scipy.interpolate.griddata.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>arr</strong><span class="classifier">3D numpy array</span></dt><dd><p>Source data</p>
 </dd>
@@ -317,7 +318,7 @@ is used (not for integer/categorical arrays).</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>arr</strong><span class="classifier">3D numpy array</span></dt><dd><p>Interpolated values at the x, y, z locations in grid2.</p>
 </dd>
@@ -339,8 +340,8 @@ is used (not for integer/categorical arrays).</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

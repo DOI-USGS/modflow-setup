@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interpolating data to the model grid &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <title>Interpolating data to the model grid &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -80,7 +79,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -109,8 +110,8 @@
            <div itemprop="articleBody">
              
   <section id="interpolating-data-to-the-model-grid">
-<h1>Interpolating data to the model grid<a class="headerlink" href="#interpolating-data-to-the-model-grid" title="Permalink to this heading">¶</a></h1>
-<p>For most interpolation operations where geo-located data are sampled to the model grid, Modflow-setup uses a barycentric (triangular) interpolation scheme similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.11.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. This n-dimensional unstructured method allows for interpolation between grids that are aligned with different coordinate references systems, as well as interpolation between unstructured grids. As described <a class="reference external" href="https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids">here</a>, setup of the barycentric interpolation involves:</p>
+<h1>Interpolating data to the model grid<a class="headerlink" href="#interpolating-data-to-the-model-grid" title="Link to this heading">¶</a></h1>
+<p>For most interpolation operations where geo-located data are sampled to the model grid, Modflow-setup uses a barycentric (triangular) interpolation scheme similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.11.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. This n-dimensional unstructured method allows for interpolation between grids that are aligned with different coordinate references systems, as well as interpolation between unstructured grids. As described <a class="reference external" href="https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids">here</a>, setup of the barycentric interpolation involves:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>Construction of a triangular mesh linking the source points</p></li>
@@ -123,7 +124,7 @@
 <dl>
 <dt>A few more notes:</dt><dd><ul class="simple">
 <li><p>Linear interpolation is the default method in most instances, except for recharge, which is often based on categorical data such as land cover and soil types, and therefore has nearest-neighbor as the default method.</p></li>
-<li><p>The interpolation method can generally be specified explicitly for a given dataset by including a <code class="docutils literal notranslate"><span class="pre">resample_method</span></code> argument. Available methods are listed in the documentation for <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.11.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. For example, if we wanted to override the <code class="docutils literal notranslate"><span class="pre">'nearest'</span></code> default for the Recharge Package:</p></li>
+<li><p>The interpolation method can generally be specified explicitly for a given dataset by including a <code class="docutils literal notranslate"><span class="pre">resample_method</span></code> argument. Available methods are listed in the documentation for <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.11.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. For example, if we wanted to override the <code class="docutils literal notranslate"><span class="pre">'nearest'</span></code> default for the Recharge Package:</p></li>
 </ul>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
@@ -160,8 +161,8 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

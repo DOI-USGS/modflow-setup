@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>10 Minutes to Modflow-setup &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <title>10 Minutes to Modflow-setup &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
-        <script src="_static/clipboard.min.js"></script>
-        <script src="_static/copybutton.js"></script>
+        <script src="_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -41,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -90,7 +89,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -118,10 +119,10 @@
            <div itemprop="articleBody">
              
   <section id="minutes-to-modflow-setup">
-<h1>10 Minutes to Modflow-setup<a class="headerlink" href="#minutes-to-modflow-setup" title="Permalink to this heading">¶</a></h1>
+<h1>10 Minutes to Modflow-setup<a class="headerlink" href="#minutes-to-modflow-setup" title="Link to this heading">¶</a></h1>
 <p>This is a short introduction to help get you up and running with Modflow-setup. A complete workflow can be found in the <a class="reference internal" href="notebooks/Pleasant_lake_lgr_example.html#Pleasant-Lake-Example"><span class="std std-ref">Pleasant Lake Example</span></a>; additional examples of working configuration files can be found in the <a class="reference internal" href="config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a>.</p>
 <section id="define-the-model-active-area-and-coordinate-reference-system">
-<h2>1) Define the model active area and coordinate reference system<a class="headerlink" href="#define-the-model-active-area-and-coordinate-reference-system" title="Permalink to this heading">¶</a></h2>
+<h2>1) Define the model active area and coordinate reference system<a class="headerlink" href="#define-the-model-active-area-and-coordinate-reference-system" title="Link to this heading">¶</a></h2>
 <p>Depending on the problem, the model area might simply be a box enclosing features of interest and any relevant hydrologic boundaries, or an irregular shape surrounding a watershed or other feature. In either case, it may be helpful to <a class="reference internal" href="#develop-flowlines-to-represent-streams"><span class="std std-ref">download hydrography first</span></a>, to ensure that the model area includes all important features. The model should be referenced to a <a class="reference external" href="https://en.wikipedia.org/wiki/Projected_coordinate_system">projected coordinate reference system (CRS)</a>, ideally with length units of meters and an authority code (such as an <a class="reference external" href="https://en.wikipedia.org/wiki/EPSG_Geodetic_Parameter_Dataset">EPSG code</a>) that unambiguously defines it.</p>
 <p>Modflow-setup provides two ways to define a model grid:</p>
 <blockquote>
@@ -143,7 +144,7 @@
 </div></blockquote>
 </section>
 <section id="create-a-setup-script-and-configuration-file">
-<h2>2) Create a setup script and configuration file<a class="headerlink" href="#create-a-setup-script-and-configuration-file" title="Permalink to this heading">¶</a></h2>
+<h2>2) Create a setup script and configuration file<a class="headerlink" href="#create-a-setup-script-and-configuration-file" title="Link to this heading">¶</a></h2>
 <p>Usually creating the desired grid requires some iteration. We can get started on this by making a model setup script and corresponding configuration file.</p>
 <p>An initial model setup script for making the model grid:</p>
 <blockquote>
@@ -215,7 +216,7 @@
 <p>Now <code class="docutils literal notranslate"><span class="pre">initial_setup_script.py</span></code> can be run repeatedly to explore different grids.</p>
 </section>
 <section id="develop-flowlines-to-represent-streams">
-<h2>3) Develop flowlines to represent streams<a class="headerlink" href="#develop-flowlines-to-represent-streams" title="Permalink to this heading">¶</a></h2>
+<h2>3) Develop flowlines to represent streams<a class="headerlink" href="#develop-flowlines-to-represent-streams" title="Link to this heading">¶</a></h2>
 <p>Next, let’s get some data for setting up boundary conditions. For streams, Modflow-setup can accept any linestring shapefile that has a routing column indicating how the lines connect to one another. This can be created by hand, or in the United States, obtained from the National Hydrography Dataset Plus (NHDPlus). There are two types of NHDPlus:</p>
 <blockquote>
 <div><ul class="simple">
@@ -224,11 +225,11 @@
 </ul>
 </div></blockquote>
 <section id="preprocessing-nhdplus-hr">
-<h3>Preprocessing NHDPlus HR<a class="headerlink" href="#preprocessing-nhdplus-hr" title="Permalink to this heading">¶</a></h3>
+<h3>Preprocessing NHDPlus HR<a class="headerlink" href="#preprocessing-nhdplus-hr" title="Link to this heading">¶</a></h3>
 <p>Currently, NHDPlus HR data, which comes in a file geodatabase (GDB), must be preprocessed into a shapefile for input to Modflow-setup and <a class="reference external" href="https://github.com/DOI-USGS/sfrmaker">SFRmaker</a> (which Modflow-setup uses to build the stream network). In many cases, multiple GDBs may need to be combined and undesired line features such as storm sewers culled. The <a class="reference external" href="https://doi-usgs.github.io/sfrmaker/latest/index.html">SFRmaker documentation</a> has examples for how to read and preprocesses NHDPlus HR.</p>
 </section>
 <section id="preprocessing-nhdplus-version-2">
-<h3>Preprocessing NHDPlus version 2<a class="headerlink" href="#preprocessing-nhdplus-version-2" title="Permalink to this heading">¶</a></h3>
+<h3>Preprocessing NHDPlus version 2<a class="headerlink" href="#preprocessing-nhdplus-version-2" title="Link to this heading">¶</a></h3>
 <p>Depending on the application, NHDPlus version 2 may not need to be preprocessed. Reasons to preprocess include:</p>
 <ul>
 <li><p>the model area is large, and</p>
@@ -246,11 +247,11 @@
 </section>
 </section>
 <section id="get-a-dem">
-<h2>4) Get a DEM<a class="headerlink" href="#get-a-dem" title="Permalink to this heading">¶</a></h2>
+<h2>4) Get a DEM<a class="headerlink" href="#get-a-dem" title="Link to this heading">¶</a></h2>
 <p>The <a class="reference external" href="https://apps.nationalmap.gov/downloader/">National Map Downloader</a> has 10 meter DEMs for the United States, with finer resolutions available in many areas. Typically, these come in 1 degree x 1 degree tiles. If many tiles are needed, the uGet Download Manager linked to on the National Map site can automate downloading many tiles. Alternatively, links to the files follow a consistent format, and are therefore amenable to scripted or manual downloads. For example, the tile located between -88 and -87 west and 43 and 44 north is available at:</p>
 <p><a class="reference external" href="https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/current/n44w088/USGS_13_n44w088.tif">https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/current/n44w088/USGS_13_n44w088.tif</a></p>
 <section id="making-a-virtual-raster">
-<h3>Making a virtual raster<a class="headerlink" href="#making-a-virtual-raster" title="Permalink to this heading">¶</a></h3>
+<h3>Making a virtual raster<a class="headerlink" href="#making-a-virtual-raster" title="Link to this heading">¶</a></h3>
 <p>Once all of the tiles are downloaded, a virtual raster can be made that allows them to be treated as a single file, without any modifications to the original data. This is required for input to SFRmaker and Modflow-setup. For example, in <a class="reference external" href="https://qgis.org/">QGIS</a>:</p>
 <blockquote>
 <div><ol class="loweralpha simple">
@@ -261,7 +262,7 @@
 </section>
 </section>
 <section id="make-a-minimum-working-configuration-file-and-model-build-script">
-<h2>5) Make a minimum working configuration file and model build script<a class="headerlink" href="#make-a-minimum-working-configuration-file-and-model-build-script" title="Permalink to this heading">¶</a></h2>
+<h2>5) Make a minimum working configuration file and model build script<a class="headerlink" href="#make-a-minimum-working-configuration-file-and-model-build-script" title="Link to this heading">¶</a></h2>
 <p>Now that we have a set of flowlines and a DEM (and perhaps shapefiles for other surface water boundaries), we can fill out the rest of the configuration file to get an initial working model. Later, additional details such as more layers, a well package, observations, or other features can be added in a stepwise approach (Haitjema, 1995).</p>
 <blockquote>
 <div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="nt">simulation</span><span class="p">:</span>
@@ -442,8 +443,8 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -100,7 +99,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -129,11 +130,11 @@
            <div itemprop="articleBody">
              
   <section id="specifying-boundary-conditions-with-the-basic-modflow-stress-packages">
-<h1>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages<a class="headerlink" href="#specifying-boundary-conditions-with-the-basic-modflow-stress-packages" title="Permalink to this heading">¶</a></h1>
+<h1>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages<a class="headerlink" href="#specifying-boundary-conditions-with-the-basic-modflow-stress-packages" title="Link to this heading">¶</a></h1>
 <p>This page describes configuration file input for the basic MODFLOW stress packages, including
 the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently supported by Modflow-setup. The supported packages can be broadly placed into two categories. Feature or list-based packages such as CHD, DRN, GHB, RIV and WEL often represent discrete phenomena such as surface water features, pumping wells, or even lines that denote a perimeter boundary. Input to  these packages in MODFLOW is tabular, consisting of a table for each stress period, with rows specifying stresses at individual grid cells representing the boundary features. In contrast, continuous or grid-based packages represent a stress field that applies to a large area, such as areal recharge. In past versions of MODFLOW, input to these packages was array-based, with values specified for all model cells, at each stress period. In MODFLOW 6, input to these packages can be array or list-based. The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup. In keeping with the current structured grid-based paradigm of Modflow-setup, Modflow 6 recharge input is generated for the array-based recharge package (Langevin and others, 2017).</p>
 <section id="list-based-basic-stress-packages">
-<h2>List-based basic stress packages<a class="headerlink" href="#list-based-basic-stress-packages" title="Permalink to this heading">¶</a></h2>
+<h2>List-based basic stress packages<a class="headerlink" href="#list-based-basic-stress-packages" title="Link to this heading">¶</a></h2>
 <p>Input for list-based basic stress packages follows a similar pattern to other packages.</p>
 <ul>
 <li><p>Package blocks are named using the 3 letter MODFLOW abbrieviation for the Package in lower case (e.g. <code class="docutils literal notranslate"><span class="pre">chd:</span></code>, <code class="docutils literal notranslate"><span class="pre">ghb:</span></code>, etc.).</p></li>
@@ -257,7 +258,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </li>
 </ul>
 <section id="constant-head-chd-package">
-<h3>Constant Head (CHD) Package<a class="headerlink" href="#constant-head-chd-package" title="Permalink to this heading">¶</a></h3>
+<h3>Constant Head (CHD) Package<a class="headerlink" href="#constant-head-chd-package" title="Link to this heading">¶</a></h3>
 <p>Input consists of specified head values that may vary in time or space.</p>
 <blockquote>
 <div><p><strong>Required input</strong></p>
@@ -312,7 +313,7 @@ and time-varing heads specified in a csvfile:</p>
 </div></blockquote>
 </section>
 <section id="drain-drn-package">
-<h3>Drain DRN Package<a class="headerlink" href="#drain-drn-package" title="Permalink to this heading">¶</a></h3>
+<h3>Drain DRN Package<a class="headerlink" href="#drain-drn-package" title="Link to this heading">¶</a></h3>
 <p>Input consists of elevations and conductances that may vary in time or space.</p>
 <blockquote>
 <div><p><strong>Required input</strong></p>
@@ -350,7 +351,7 @@ and time-varing heads specified in a csvfile:</p>
 </div></blockquote>
 </section>
 <section id="general-head-boundary-ghb-package">
-<h3>General Head Boundary (GHB) Package<a class="headerlink" href="#general-head-boundary-ghb-package" title="Permalink to this heading">¶</a></h3>
+<h3>General Head Boundary (GHB) Package<a class="headerlink" href="#general-head-boundary-ghb-package" title="Link to this heading">¶</a></h3>
 <p>Input consists of head elevations and conductances that may vary in time or space.</p>
 <blockquote>
 <div><p><strong>Required input</strong></p>
@@ -408,7 +409,7 @@ and time-varing heads specified in a csvfile:</p>
 </div></blockquote>
 </section>
 <section id="river-riv-package">
-<h3>River (RIV) package<a class="headerlink" href="#river-riv-package" title="Permalink to this heading">¶</a></h3>
+<h3>River (RIV) package<a class="headerlink" href="#river-riv-package" title="Link to this heading">¶</a></h3>
 <dl>
 <dt>Input consists of stages, river bottom elevations and conductances,</dt><dd><p>that may vary in time or space.</p>
 <blockquote>
@@ -477,7 +478,7 @@ and time-varing heads specified in a csvfile:</p>
 </dl>
 </section>
 <section id="well-wel-package">
-<h3>Well (WEL) Package<a class="headerlink" href="#well-wel-package" title="Permalink to this heading">¶</a></h3>
+<h3>Well (WEL) Package<a class="headerlink" href="#well-wel-package" title="Link to this heading">¶</a></h3>
 <p>Input consists of flux rates that may vary in time or space.</p>
 <blockquote>
 <div><p><strong>Required input</strong></p>
@@ -620,12 +621,12 @@ and time-varing heads specified in a csvfile:</p>
 </section>
 </section>
 <section id="grid-based-basic-stress-packages">
-<h2>Grid-based basic stress packages<a class="headerlink" href="#grid-based-basic-stress-packages" title="Permalink to this heading">¶</a></h2>
+<h2>Grid-based basic stress packages<a class="headerlink" href="#grid-based-basic-stress-packages" title="Link to this heading">¶</a></h2>
 <p>The Recharge (RCH) Package is currently the only grid-based stress package supported by Modflow-setup.</p>
 <section id="recharge-rch-package">
-<h3>Recharge (RCH) Package<a class="headerlink" href="#recharge-rch-package" title="Permalink to this heading">¶</a></h3>
+<h3>Recharge (RCH) Package<a class="headerlink" href="#recharge-rch-package" title="Link to this heading">¶</a></h3>
 <section id="direct-input">
-<h4>Direct input<a class="headerlink" href="#direct-input" title="Permalink to this heading">¶</a></h4>
+<h4>Direct input<a class="headerlink" href="#direct-input" title="Link to this heading">¶</a></h4>
 <p>As with other grid-based input such as aquifer properties, input to the recharge package can be specified directly as it would in Flopy. This may be useful for setting up a test model quickly. For example, a single scalar value could be entered to apply to all locations across all periods:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">recharge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
@@ -641,7 +642,7 @@ and time-varing heads specified in a csvfile:</p>
 <p>In the above example, <code class="docutils literal notranslate"><span class="pre">0.01</span></code> would be also be applied to all subsequent stress periods.</p>
 </section>
 <section id="grid-independent-input">
-<h4>Grid-independent input<a class="headerlink" href="#grid-independent-input" title="Permalink to this heading">¶</a></h4>
+<h4>Grid-independent input<a class="headerlink" href="#grid-independent-input" title="Link to this heading">¶</a></h4>
 <p>Modflow-setup currently supports three methods for entering spatially-referenced recharge input not mapped to the model grid.</p>
 <blockquote>
 <div><ul>
@@ -756,8 +757,8 @@ and time-varing heads specified in a csvfile:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

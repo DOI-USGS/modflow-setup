@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <title>Release History &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
-        <script src="_static/clipboard.min.js"></script>
-        <script src="_static/copybutton.js"></script>
+        <script src="_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -41,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -72,6 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-4-0-2024-01-15">Version 0.4.0 (2024-01-15)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-3-1-2023-08-17">Version 0.3.1 (2023-08-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-3-0-2023-07-25">Version 0.3.0 (2023-07-25)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-2-0-2023-02-06">Version 0.2.0 (2023-02-06)</a></li>
@@ -82,7 +82,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -110,9 +112,35 @@
            <div itemprop="articleBody">
              
   <section id="release-history">
-<h1>Release History<a class="headerlink" href="#release-history" title="Permalink to this heading">¶</a></h1>
+<h1>Release History<a class="headerlink" href="#release-history" title="Link to this heading">¶</a></h1>
+<section id="version-0-4-0-2024-01-15">
+<h2>Version 0.4.0 (2024-01-15)<a class="headerlink" href="#version-0-4-0-2024-01-15" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Improvements to lake package</p>
+<ul>
+<li><p>Add automatic writing of lake polygon and lake cell connection shapefiles</p></li>
+<li><p>Add name_column arg to shapefile input (which adds names to lake auxiliary tables)</p></li>
+<li><p>Allow PRISM input to be specified for all lakes (via single filename instead of dictionary)</p></li>
+<li><p>Allow specification of lakes_shapefile: without include_ids: item</p></li>
+<li><p>Move output tables to tables/ folder</p></li>
+</ul>
+</li>
+<li><p>Pre-defined stress periods</p>
+<ul>
+<li><p>Allow stress period data to be pre-defined in a CSV file, which allows for more complicated or irregular stress period configurations that would otherwise require many group blocks; for example 7-day periods that always start on the same day of the year, which results in an extra period of 1 or 2 days at the end of each year.</p></li>
+</ul>
+</li>
+<li><p>Bug fixes</p>
+<ul>
+<li><p>fix issue with identifier column dtypes, so that NHDPlus Hi-Res COMIDs (which require 64-bits as integers) work more robustly on Windows.</p></li>
+<li><p>in case of pre-defined (csvfile) stress periods, base perlen on end_datetime - start_datetime (what you see is what you get, and so that gaps between stress periods don’t affect perlen); add trap for missing required columns</p></li>
+<li><p>see commit history for other misc. fixes</p></li>
+</ul>
+</li>
+</ul>
+</section>
 <section id="version-0-3-1-2023-08-17">
-<h2>Version 0.3.1 (2023-08-17)<a class="headerlink" href="#version-0-3-1-2023-08-17" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.3.1 (2023-08-17)<a class="headerlink" href="#version-0-3-1-2023-08-17" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>change ‘boundname_col’ argument in basic stress CSV input to ‘boundname_column’ for consistency with other inputs.</p></li>
 <li><p>fix issue with layer assignment in SFR Package setup where idomain/ibound array wasn’t getting passed to the SFRmaker <cite>assign_layers()</cite> function, which can be problematic for models with extensive inactive cells in their upper layers.</p></li>
@@ -123,7 +151,7 @@
 </ul>
 </section>
 <section id="version-0-3-0-2023-07-25">
-<h2>Version 0.3.0 (2023-07-25)<a class="headerlink" href="#version-0-3-0-2023-07-25" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.3.0 (2023-07-25)<a class="headerlink" href="#version-0-3-0-2023-07-25" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Transient input to basic stress packages can now be supplied via a <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block. Transient
 values for the package variables are associated with the shapefile feature extents via an
@@ -145,7 +173,7 @@ where coordinate reference information can’t be parsed.</p></li>
 </ul>
 </section>
 <section id="version-0-2-0-2023-02-06">
-<h2>Version 0.2.0 (2023-02-06)<a class="headerlink" href="#version-0-2-0-2023-02-06" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.2.0 (2023-02-06)<a class="headerlink" href="#version-0-2-0-2023-02-06" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><dl class="simple">
 <dt>add minimal support for MODFLOW-2000 parent models and variably-spaced structured grids</dt><dd><ul>
@@ -163,7 +191,7 @@ where coordinate reference information can’t be parsed.</p></li>
 </ul>
 </section>
 <section id="version-0-1-0-initial-release-2022-09-30">
-<h2>Version 0.1.0 Initial release (2022-09-30)<a class="headerlink" href="#version-0-1-0-initial-release-2022-09-30" title="Permalink to this heading">¶</a></h2>
+<h2>Version 0.1.0 Initial release (2022-09-30)<a class="headerlink" href="#version-0-1-0-initial-release-2022-09-30" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>support for constructing MODFLOW-NWT or MODFLOW-6 models from scratch</p></li>
 <li><p>supported source dataset formats include GeoTiff, Arc-Ascii grids, shapefiles, NetCDF, and CSV files</p></li>
@@ -204,8 +232,8 @@ where coordinate reference information can’t be parsed.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

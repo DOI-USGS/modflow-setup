@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MFsetupMixin class &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <title>MFsetupMixin class &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -88,7 +87,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -117,20 +118,20 @@
            <div itemprop="articleBody">
              
   <section id="module-mfsetup.mfmodel">
-<span id="mfsetupmixin-class"></span><h1>MFsetupMixin class<a class="headerlink" href="#module-mfsetup.mfmodel" title="Permalink to this heading">¶</a></h1>
+<span id="mfsetupmixin-class"></span><h1>MFsetupMixin class<a class="headerlink" href="#module-mfsetup.mfmodel" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.mfmodel.</span></span><span class="sig-name descname"><span class="pre">MFsetupMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.mfmodel.</span></span><span class="sig-name descname"><span class="pre">MFsetupMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Mixin class for shared functionality between MF6model and MFnwtModel.
 Meant to be inherited by both those classes and not be called directly.</p>
 <p><a class="reference external" href="https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-are-they-useful">https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-are-they-useful</a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.get_boundary_cells">
-<span class="sig-name descname"><span class="pre">get_boundary_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exclude_inactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.get_boundary_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.get_boundary_cells" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_boundary_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exclude_inactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.get_boundary_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.get_boundary_cells" title="Link to this definition">¶</a></dt>
 <dd><p>Get the i, j locations of cells along the model perimeter.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>k, i, j</strong><span class="classifier">1D numpy arrays of ints</span></dt><dd><p>zero-based layer, row, column locations of boundary cells</p>
 </dd>
@@ -141,20 +142,20 @@ Meant to be inherited by both those classes and not be called directly.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.high_k_lake_recharge">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">high_k_lake_recharge</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.high_k_lake_recharge" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">high_k_lake_recharge</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.high_k_lake_recharge" title="Link to this definition">¶</a></dt>
 <dd><p>Recharge value to apply to high-K lakes, in model units.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.interp_weights">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interp_weights</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.interp_weights" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interp_weights</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.interp_weights" title="Link to this definition">¶</a></dt>
 <dd><p>For a given parent, only calculate interpolation weights
 once to speed up re-gridding of arrays to pfl_nwt.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.isbc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isbc</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.isbc" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isbc</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.isbc" title="Link to this definition">¶</a></dt>
 <dd><p>3D array indicating which cells have a lake in each layer.
 -1 : well
 0 : no lake
@@ -168,7 +169,7 @@ once to speed up re-gridding of arrays to pfl_nwt.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.lakarr">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lakarr</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.lakarr" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lakarr</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.lakarr" title="Link to this definition">¶</a></dt>
 <dd><p>3-D array of lake extents in each layer. Non-zero values
 correspond to lak package IDs. Extent of lake in
 each layer is based on bathymetry and model layer thickness.</p>
@@ -176,24 +177,24 @@ each layer is based on bathymetry and model layer thickness.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.lake_bathymetry">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lake_bathymetry</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.lake_bathymetry" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lake_bathymetry</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.lake_bathymetry" title="Link to this definition">¶</a></dt>
 <dd><p>Put lake bathymetry setup logic here instead of DIS package.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.load_cfg">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.load_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.load_cfg" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.load_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.load_cfg" title="Link to this definition">¶</a></dt>
 <dd><p>Loads a configuration file, with default settings
 specific to the MFnwtModel or MF6model class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>yamlfile</strong><span class="classifier">str (filepath)</span></dt><dd><p>Configuration file in YAML format with pfl_nwt setup information.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">bool</span></dt><dd></dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>cfg</strong><span class="classifier">dict (configuration dictionary)</span></dt><dd></dd>
 </dl>
@@ -203,20 +204,20 @@ specific to the MFnwtModel or MF6model class.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.load_features">
-<span class="sig-name descname"><span class="pre">load_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.load_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.load_features" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.load_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.load_features" title="Link to this definition">¶</a></dt>
 <dd><p>Load vector and attribute data from a shapefile;
 cache it to the _features dictionary.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.load_grid">
-<span class="sig-name descname"><span class="pre">load_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gridfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.load_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.load_grid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gridfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.load_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.load_grid" title="Link to this definition">¶</a></dt>
 <dd><p>Load model grid information from a json or yml file.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.model_version">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_version</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.model_version" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_version</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.model_version" title="Link to this definition">¶</a></dt>
 <dd><p>Semantic version of model, using a hacked version of the versioneer.
 Version is reported using git tags for the model repository
 or a start_version: key specified in the configuration file (default 0).
@@ -230,18 +231,18 @@ for the model repository + “dirty” if the model repository has uncommited ch
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.package_list">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">package_list</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.package_list" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">package_list</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.package_list" title="Link to this definition">¶</a></dt>
 <dd><p>Definitive list of packages. Get from namefile input first
 (as in mf6 input), then look under model input.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.parent_layers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_layers</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.parent_layers" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_layers</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.parent_layers" title="Link to this definition">¶</a></dt>
 <dd><p>Mapping between layers in source model and
 layers in destination model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>parent_layers</strong><span class="classifier">dict</span></dt><dd><p>{inset layer : parent layer}</p>
 </dd>
@@ -252,7 +253,7 @@ layers in destination model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.parent_mask">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_mask</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.parent_mask" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_mask</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.parent_mask" title="Link to this definition">¶</a></dt>
 <dd><p>Boolean array indicating window in parent model grid (subset of cells)
 that encompass the inset model domain, with a surrounding buffer.
 Used to speed up interpolation of parent grid values onto inset model grid.</p>
@@ -260,11 +261,11 @@ Used to speed up interpolation of parent grid values onto inset model grid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.parent_stress_periods">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_stress_periods</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.parent_stress_periods" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_stress_periods</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.parent_stress_periods" title="Link to this definition">¶</a></dt>
 <dd><p>Mapping between stress periods in source model and
 stress periods in destination model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>parent_stress_periods</strong><span class="classifier">dict</span></dt><dd><p>{inset stress period : parent stress period}</p>
 </dd>
@@ -275,7 +276,7 @@ stress periods in destination model.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.perimeter_bc_type">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">perimeter_bc_type</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.perimeter_bc_type" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">perimeter_bc_type</span></span><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.perimeter_bc_type" title="Link to this definition">¶</a></dt>
 <dd><p>Dictates how perimeter boundaries are set up.</p>
 <dl class="simple">
 <dt>if ‘head’; a constant head package is created</dt><dd><p>from the parent model starting heads</p>
@@ -287,12 +288,12 @@ stress periods in destination model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.regrid_from_parent">
-<span class="sig-name descname"><span class="pre">regrid_from_parent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.regrid_from_parent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.regrid_from_parent" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">regrid_from_parent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.regrid_from_parent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.regrid_from_parent" title="Link to this definition">¶</a></dt>
 <dd><p>Interpolate values in parent array onto
 the pfl_nwt model grid, using model grid instances
 attached to the parent and pfl_nwt models.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>parent_array</strong><span class="classifier">ndarray</span></dt><dd><p>Values from parent model to be interpolated to pfl_nwt grid.
 1 or 2-D numpy array of same sizes as a
@@ -313,7 +314,7 @@ dropped.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.setup_external_filepaths">
-<span class="sig-name descname"><span class="pre">setup_external_filepaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_external_filepaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_external_filepaths" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">setup_external_filepaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_external_filepaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_external_filepaths" title="Link to this definition">¶</a></dt>
 <dd><p>Set up external file paths for a MODFLOW package variable. Sets paths
 for intermediate files, which are written from the (processed) source data.
 Intermediate files are supplied to Flopy as external files for a given package
@@ -322,7 +323,7 @@ package file is written. This method gets the external file paths that
 will be written by FloPy, and puts them in the configuration dictionary
 under their respective variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>package</strong><span class="classifier">str</span></dt><dd><p>Three-letter package abreviation (e.g. ‘DIS’ for discretization)</p>
 </dd>
@@ -352,17 +353,17 @@ otherwise, they will be absolute paths</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.setup_from_cfg">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_from_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_from_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_from_cfg" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_from_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_from_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_from_cfg" title="Link to this definition">¶</a></dt>
 <dd><p>Make a model from scratch, using information in a configuration dictionary.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>cfg</strong><span class="classifier">dict</span></dt><dd><p>Configuration dictionary, as produced by the model.load_cfg method.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">bool</span></dt><dd></dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>m</strong><span class="classifier">model instance</span></dt><dd></dd>
 </dl>
@@ -372,17 +373,17 @@ otherwise, they will be absolute paths</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.setup_from_yaml">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_from_yaml" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_from_yaml" title="Link to this definition">¶</a></dt>
 <dd><p>Make a model from scratch, using information in a yamlfile.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>yamlfile</strong><span class="classifier">str (filepath)</span></dt><dd><p>Configuration file in YAML format with pfl_nwt setup information.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">bool</span></dt><dd></dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>m</strong><span class="classifier">model instance</span></dt><dd></dd>
 </dl>
@@ -392,13 +393,13 @@ otherwise, they will be absolute paths</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.setup_grid">
-<span class="sig-name descname"><span class="pre">setup_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_grid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">setup_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mfmodel.html#MFsetupMixin.setup_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.setup_grid" title="Link to this definition">¶</a></dt>
 <dd><p>Set up the attached modelgrid instance from configuration input</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="mfsetup.mfmodel.MFsetupMixin.source_path">
-<span class="sig-name descname"><span class="pre">source_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/work/modflow-setup/modflow-setup/mfsetup'</span></em><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.source_path" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">source_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/work/modflow-setup/modflow-setup/mfsetup'</span></em><a class="headerlink" href="#mfsetup.mfmodel.MFsetupMixin.source_path" title="Link to this definition">¶</a></dt>
 <dd><p>-1 : well
 0 : no lake
 1 : lak package lake (lakarr &gt; 0)
@@ -422,8 +423,8 @@ otherwise, they will be absolute paths</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

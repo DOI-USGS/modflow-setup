@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.fileio module &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <title>mfsetup.fileio module &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -114,7 +113,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -143,11 +144,11 @@
            <div itemprop="articleBody">
              
   <section id="module-mfsetup.fileio">
-<span id="mfsetup-fileio-module"></span><h1>mfsetup.fileio module<a class="headerlink" href="#module-mfsetup.fileio" title="Permalink to this heading">¶</a></h1>
+<span id="mfsetup-fileio-module"></span><h1>mfsetup.fileio module<a class="headerlink" href="#module-mfsetup.fileio" title="Link to this heading">¶</a></h1>
 <p>Functions for reading and writing stuff to disk, and working with file paths.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.add_version_to_fileheader">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">add_version_to_fileheader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#add_version_to_fileheader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.add_version_to_fileheader" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">add_version_to_fileheader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#add_version_to_fileheader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.add_version_to_fileheader" title="Link to this definition">¶</a></dt>
 <dd><p>Add modflow-setup, flopy and optionally model
 version info to an existing file header denoted by
 the comment characters <code class="docutils literal notranslate"><span class="pre">#</span></code>, <code class="docutils literal notranslate"><span class="pre">!</span></code>, or <code class="docutils literal notranslate"><span class="pre">//</span></code>.</p>
@@ -155,7 +156,7 @@ the comment characters <code class="docutils literal notranslate"><span class="p
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.append_csv">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">append_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#append_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.append_csv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">append_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#append_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.append_csv" title="Link to this definition">¶</a></dt>
 <dd><p>Read data from filename,
 append to dataframe, and write appended dataframe
 back to filename.</p>
@@ -163,69 +164,69 @@ back to filename.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.check_source_files">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">check_source_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileslist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#check_source_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.check_source_files" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">check_source_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileslist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#check_source_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.check_source_files" title="Link to this definition">¶</a></dt>
 <dd><p>Check that the files in fileslist exist.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.dump">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.dump" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.dump" title="Link to this definition">¶</a></dt>
 <dd><p>Write a dictionary to a configuration file.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.dump_json">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">dump_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#dump_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.dump_json" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">dump_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#dump_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.dump_json" title="Link to this definition">¶</a></dt>
 <dd><p>Write a dictionary to a json file.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.dump_yml">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">dump_yml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yml_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#dump_yml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.dump_yml" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">dump_yml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yml_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#dump_yml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.dump_yml" title="Link to this definition">¶</a></dt>
 <dd><p>Write a dictionary to a yaml file.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.exe_exists">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">exe_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exe_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#exe_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.exe_exists" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">exe_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exe_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#exe_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.exe_exists" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.flopy_mf2005_load">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">flopy_mf2005_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forgive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#flopy_mf2005_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.flopy_mf2005_load" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">flopy_mf2005_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forgive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#flopy_mf2005_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.flopy_mf2005_load" title="Link to this definition">¶</a></dt>
 <dd><p>Execute the code in flopy.modflow.Modflow.load on an existing
 flopy.modflow.Modflow instance.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.flopy_mf6model_load">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">flopy_mf6model_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_rel_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#flopy_mf6model_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.flopy_mf6model_load" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">flopy_mf6model_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_rel_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#flopy_mf6model_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.flopy_mf6model_load" title="Link to this definition">¶</a></dt>
 <dd><p>Execute the code in flopy.mf6.MFmodel.load_base on an
 existing instance of MF6model.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.flopy_mfsimulation_load">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">flopy_mfsimulation_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#flopy_mfsimulation_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.flopy_mfsimulation_load" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">flopy_mfsimulation_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#flopy_mfsimulation_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.flopy_mfsimulation_load" title="Link to this definition">¶</a></dt>
 <dd><p>Execute the code in flopy.mf6.MFSimulation.load on
 existing instances of flopy.mf6.MFSimulation and flopy.mf6.MF6model</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.load">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load" title="Link to this definition">¶</a></dt>
 <dd><p>Load a configuration file.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.load_array">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_array" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_array" title="Link to this definition">¶</a></dt>
 <dd><p>Load an array, ensuring the correct shape.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.load_cfg">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfgfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_cfg" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfgfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_cfg" title="Link to this definition">¶</a></dt>
 <dd><p>This method loads a YAML or JSON configuration file,
 applies configuration defaults from a default_file if specified,
 adds the absolute file path of the configuration file
@@ -234,13 +235,13 @@ relative paths in the configuration dictionary to
 absolute paths, assuming the paths are relative to
 the configuration file location.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>cfgfile</strong><span class="classifier">str</span></dt><dd><p>Path to MFsetup configuration file (json or yaml)</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>cfg</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of configuration data</p>
 </dd>
@@ -256,41 +257,41 @@ constructor and the model constructor.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.load_json">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_json" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jsonfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_json" title="Link to this definition">¶</a></dt>
 <dd><p>Convenience function to load a json file; replacing
 some escaped characters.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.load_modelgrid">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_modelgrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_modelgrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_modelgrid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_modelgrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_modelgrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_modelgrid" title="Link to this definition">¶</a></dt>
 <dd><p>Create a MFsetupGrid instance from model config json file.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.load_yml">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_yml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yml_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_yml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_yml" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">load_yml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yml_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#load_yml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.load_yml" title="Link to this definition">¶</a></dt>
 <dd><p>Load yaml file into a dictionary.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.read_ggofile">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">read_ggofile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gagefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1970-01-01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_only_last_timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#read_ggofile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.read_ggofile" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">read_ggofile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gagefile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1970-01-01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_only_last_timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#read_ggofile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.read_ggofile" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.read_lak_ggo">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">read_lak_ggo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1970-01-01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_only_last_timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#read_lak_ggo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.read_lak_ggo" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">read_lak_ggo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1970-01-01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_only_last_timestep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#read_lak_ggo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.read_lak_ggo" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.read_mf6_block">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">read_mf6_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blockname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#read_mf6_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.read_mf6_block" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">read_mf6_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blockname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#read_mf6_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.read_mf6_block" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.remove_file_header">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">remove_file_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#remove_file_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.remove_file_header" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">remove_file_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#remove_file_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.remove_file_header" title="Link to this definition">¶</a></dt>
 <dd><p>Remove the header of a MODFLOW input file,
 to allow comparison betwee files that have different
 headers but are otherwise the same, for example.</p>
@@ -298,18 +299,18 @@ headers but are otherwise the same, for example.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.save_array">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">save_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#save_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.save_array" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">save_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-9999</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#save_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.save_array" title="Link to this definition">¶</a></dt>
 <dd><p>Save and array and print that it was written.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.set_cfg_paths_to_absolute">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">set_cfg_paths_to_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file_location</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#set_cfg_paths_to_absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.set_cfg_paths_to_absolute" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">set_cfg_paths_to_absolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file_location</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#set_cfg_paths_to_absolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.set_cfg_paths_to_absolute" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.setup_external_filepaths">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">setup_external_filepaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_external_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#setup_external_filepaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.setup_external_filepaths" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">setup_external_filepaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_numbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_external_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#setup_external_filepaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.setup_external_filepaths" title="Link to this definition">¶</a></dt>
 <dd><p>Set up external file paths for a MODFLOW package variable. Sets paths
 for intermediate files, which are written from the (processed) source data.
 Intermediate files are supplied to Flopy as external files for a given package
@@ -318,7 +319,7 @@ package file is written. This method gets the external file paths that
 will be written by FloPy, and puts them in the configuration dictionary
 under their respective variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>model</strong><span class="classifier">mfsetup.MF6model or mfsetup.MFnwtModel instance</span></dt><dd><p>Model with cfg attribute to update.</p>
 </dd>
@@ -336,7 +337,7 @@ layers or stress periods.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>filepaths</strong><span class="classifier">list</span></dt><dd><p>List of external file paths</p>
 </dd>
@@ -349,7 +350,7 @@ layers or stress periods.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.fileio.which">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">which</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#which"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.which" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.fileio.</span></span><span class="sig-name descname"><span class="pre">which</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/fileio.html#which"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.fileio.which" title="Link to this definition">¶</a></dt>
 <dd><p>Check for existance of executable.
 <a class="reference external" href="https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python">https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python</a></p>
 </dd></dl>
@@ -367,8 +368,8 @@ layers or stress periods.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 

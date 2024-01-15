@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.3.0.post24+g585fe20 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <title>mfsetup.grid &mdash; modflow-setup 0.3.0.post27+g62abc8d documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/documentation_options.js?v=a3d399dd"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -38,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.3.0.post24+g585fe20
+                0.3.0.post27+g62abc8d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -73,7 +72,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../references.html"> References cited</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html#workflow-examples">Workflow examples</a></li>
 </ul>
 
         </div>
@@ -132,7 +133,9 @@
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span>
 
 
-<div class="viewcode-block" id="MFsetupGrid"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid">[docs]</a><span class="k">class</span> <span class="nc">MFsetupGrid</span><span class="p">(</span><span class="n">StructuredGrid</span><span class="p">):</span>
+<div class="viewcode-block" id="MFsetupGrid">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid">[docs]</a>
+<span class="k">class</span> <span class="nc">MFsetupGrid</span><span class="p">(</span><span class="n">StructuredGrid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a structured grid. Extends flopy.discretization.StructuredGrid</span>
 <span class="sd">    to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).</span>
 
@@ -405,7 +408,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_laycbd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">botm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_botm</span> <span class="o">=</span> <span class="n">botm</span>
 
-<div class="viewcode-block" id="MFsetupGrid.get_intercell_connections"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_intercell_connections">[docs]</a>    <span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MFsetupGrid.get_intercell_connections">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_intercell_connections">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 
 <span class="sd">        Parameters</span>
@@ -444,7 +449,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span> <span class="o">=</span> <span class="n">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_grid_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span></div>
 
-<div class="viewcode-block" id="MFsetupGrid.get_dataframe"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MFsetupGrid.get_dataframe">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_dataframe">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a pandas DataFrame of grid cell polygons</span>
 <span class="sd">        with i, j locations.</span>
 
@@ -478,10 +486,16 @@
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="MFsetupGrid.write_bbox_shapefile"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_bbox_shapefile">[docs]</a>    <span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid_bbox.shp&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MFsetupGrid.write_bbox_shapefile">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_bbox_shapefile">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid_bbox.shp&#39;</span><span class="p">):</span>
         <span class="n">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MFsetupGrid.write_shapefile"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_shapefile">[docs]</a>    <span class="k">def</span> <span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid.shp&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MFsetupGrid.write_shapefile">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_shapefile">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid.shp&#39;</span><span class="p">):</span>
         <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">))),</span>
                            <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
@@ -489,6 +503,7 @@
                            <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span>
                            <span class="p">})</span>
         <span class="n">df2shp</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_set_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -509,9 +524,12 @@
     <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">angrot</span>
 
-<div class="viewcode-block" id="MFsetupGrid.get_vertices"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+<div class="viewcode-block" id="MFsetupGrid.get_vertices">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_vertices">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get vertices for a single cell or sequence if i, j locations.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell_vert_list</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_set_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -520,6 +538,7 @@
         <span class="n">jj</span><span class="p">,</span> <span class="n">ii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">))</span>
         <span class="n">jj</span><span class="p">,</span> <span class="n">ii</span> <span class="o">=</span> <span class="n">jj</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">ii</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell_vert_list</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">jj</span><span class="p">)</span></div>
+
 
 
 <span class="c1"># definition of national hydrogeologic grid</span>
@@ -534,7 +553,9 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="get_crs"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs">[docs]</a><span class="k">def</span> <span class="nf">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_crs">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs">[docs]</a>
+<span class="k">def</span> <span class="nf">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a pyproj CRS instance from various CRS representations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -561,7 +582,10 @@
     <span class="k">return</span> <span class="n">crs</span></div>
 
 
-<div class="viewcode-block" id="get_crs_length_units"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs_length_units">[docs]</a><span class="k">def</span> <span class="nf">get_crs_length_units</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_crs_length_units">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs_length_units">[docs]</a>
+<span class="k">def</span> <span class="nf">get_crs_length_units</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
     <span class="n">length_units</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
     <span class="k">if</span> <span class="s1">&#39;foot&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;feet&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
         <span class="n">length_units</span> <span class="o">=</span> <span class="s1">&#39;feet&#39;</span>
@@ -570,7 +594,10 @@
     <span class="k">return</span> <span class="n">length_units</span></div>
 
 
-<div class="viewcode-block" id="get_ij"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_ij">[docs]</a><span class="k">def</span> <span class="nf">get_ij</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_ij">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_ij">[docs]</a>
+<span class="k">def</span> <span class="nf">get_ij</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the row and column of a point or sequence of points</span>
 <span class="sd">    in real-world coordinates.</span>
 
@@ -601,7 +628,10 @@
     <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
 
 
-<div class="viewcode-block" id="get_kij_from_node3d"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_kij_from_node3d">[docs]</a><span class="k">def</span> <span class="nf">get_kij_from_node3d</span><span class="p">(</span><span class="n">node3d</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_kij_from_node3d">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_kij_from_node3d">[docs]</a>
+<span class="k">def</span> <span class="nf">get_kij_from_node3d</span><span class="p">(</span><span class="n">node3d</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;For a consecutive cell number in row-major order</span>
 <span class="sd">    (row, column, layer), get the zero-based row, column position.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -612,7 +642,10 @@
     <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span></div>
 
 
-<div class="viewcode-block" id="get_grid_bounding_box"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_grid_bounding_box">[docs]</a><span class="k">def</span> <span class="nf">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_grid_bounding_box">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_grid_bounding_box">[docs]</a>
+<span class="k">def</span> <span class="nf">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get bounding box of potentially rotated modelgrid</span>
 <span class="sd">    as a shapely Polygon object.</span>
 
@@ -654,7 +687,10 @@
                     <span class="p">(</span><span class="n">x0r</span><span class="p">,</span> <span class="n">y0r</span><span class="p">)])</span></div>
 
 
-<div class="viewcode-block" id="get_nearest_point_on_grid"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_nearest_point_on_grid">[docs]</a><span class="k">def</span> <span class="nf">get_nearest_point_on_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="get_nearest_point_on_grid">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_nearest_point_on_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">get_nearest_point_on_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                               <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -717,7 +753,10 @@
     <span class="k">return</span> <span class="n">x_nearest</span><span class="p">,</span> <span class="n">y_nearest</span></div>
 
 
-<div class="viewcode-block" id="get_point_on_national_hydrogeologic_grid"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_point_on_national_hydrogeologic_grid">[docs]</a><span class="k">def</span> <span class="nf">get_point_on_national_hydrogeologic_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_point_on_national_hydrogeologic_grid">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_point_on_national_hydrogeologic_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">get_point_on_national_hydrogeologic_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given an x, y location representing the upper left</span>
 <span class="sd">    corner of a model grid, return the upper left corner</span>
 <span class="sd">    of the cell in the National Hydrogeologic Grid that</span>
@@ -727,7 +766,10 @@
     <span class="k">return</span> <span class="n">get_nearest_point_on_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="write_bbox_shapefile"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.write_bbox_shapefile">[docs]</a><span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">outshp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="write_bbox_shapefile">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.write_bbox_shapefile">[docs]</a>
+<span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">outshp</span><span class="p">):</span>
     <span class="n">outline</span> <span class="o">=</span> <span class="n">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">)</span>
     <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;model bounding box&#39;</span><span class="p">],</span>
                             <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">outline</span><span class="p">]},</span>
@@ -735,7 +777,10 @@
     <span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">outshp</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="rasterize"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.rasterize">[docs]</a><span class="k">def</span> <span class="nf">rasterize</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="rasterize">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.rasterize">[docs]</a>
+<span class="k">def</span> <span class="nf">rasterize</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rasterize a feature onto the model grid, using</span>
@@ -875,7 +920,10 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="setup_structured_grid"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.setup_structured_grid">[docs]</a><span class="k">def</span> <span class="nf">setup_structured_grid</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="setup_structured_grid">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.setup_structured_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_structured_grid</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">nrow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nlay</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">dxy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1135,7 +1183,10 @@
     <span class="k">return</span> <span class="n">modelgrid</span></div>
 
 
-<div class="viewcode-block" id="get_cellface_midpoint"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_cellface_midpoint">[docs]</a><span class="k">def</span> <span class="nf">get_cellface_midpoint</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_cellface_midpoint">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_cellface_midpoint">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cellface_midpoint</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the midpoint of vertical cell face within a structured grid.</span>
 <span class="sd">    For example, the midpoint for the right cell face is halfway between</span>
 <span class="sd">    the upper and lower right corners of the cell, halfway between the</span>
@@ -1179,7 +1230,10 @@
     <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
 
 
-<div class="viewcode-block" id="get_intercell_connections"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_intercell_connections">[docs]</a><span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="n">binary_grid_file</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_intercell_connections">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_intercell_connections">[docs]</a>
+<span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="n">binary_grid_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all of the connections between cells in a</span>
 <span class="sd">    MODFLOW 6 structured grid.</span>
 
@@ -1241,7 +1295,10 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="get_transform"><a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_transform">[docs]</a><span class="k">def</span> <span class="nf">get_transform</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_transform">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_transform">[docs]</a>
+<span class="k">def</span> <span class="nf">get_transform</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a rasterio Affine object from a Flopy modelgrid</span>
 <span class="sd">    (same as transform attribute of rasters).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1254,6 +1311,7 @@
     <span class="k">return</span> <span class="n">Affine</span><span class="p">(</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">xul</span><span class="p">,</span>
                     <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">yul</span><span class="p">)</span> <span class="o">*</span> \
             <span class="n">Affine</span><span class="o">.</span><span class="n">rotation</span><span class="p">(</span><span class="o">-</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">angrot</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -1263,8 +1321,8 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2023, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 16, 2023.
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Jan 15, 2024.
       </span></p>
   </div>
 
