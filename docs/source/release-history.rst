@@ -2,6 +2,24 @@
 Release History
 ===============
 
+Version 0.4.0 (2024-01-15)
+----------------------------------------
+* Improvements to lake package
+
+  * Add automatic writing of lake polygon and lake cell connection shapefiles
+  * Add name_column arg to shapefile input (which adds names to lake auxiliary tables)
+  * Allow PRISM input to be specified for all lakes (via single filename instead of dictionary)
+  * Allow specification of lakes_shapefile: without include_ids: item
+  * Move output tables to tables/ folder
+* Pre-defined stress periods
+
+  * Allow stress period data to be pre-defined in a CSV file, which allows for more complicated or irregular stress period configurations that would otherwise require many group blocks; for example 7-day periods that always start on the same day of the year, which results in an extra period of 1 or 2 days at the end of each year.
+* Bug fixes
+
+  * fix issue with identifier column dtypes, so that NHDPlus Hi-Res COMIDs (which require 64-bits as integers) work more robustly on Windows.
+  * in case of pre-defined (csvfile) stress periods, base perlen on end_datetime - start_datetime (what you see is what you get, and so that gaps between stress periods don't affect perlen); add trap for missing required columns
+  * see commit history for other misc. fixes
+
 Version 0.3.1 (2023-08-17)
 ----------------------------------------
 * change 'boundname_col' argument in basic stress CSV input to 'boundname_column' for consistency with other inputs.
@@ -10,7 +28,6 @@ Version 0.3.1 (2023-08-17)
 * bug fixes for compatibility with `flopy>=3.4``
 * fixes to `grid.rasterize()` to better handle 64-bit integer and `object` dtypes
 * update example configuration files to use new length unit arguments in `sfrmaker>=0.11.1`
-
 
 Version 0.3.0 (2023-07-25)
 ----------------------------------------
