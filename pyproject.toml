@@ -1,6 +1,88 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = [
+    "setuptools >= 61",
+    #"wheel"
+    #'tomli; python_version < "3.11"',
+]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "modflow-setup"
+dynamic = ["version"]
+authors = [
+    { name = "Andrew Leaf", email = "aleaf@usgs.gov" },
+    { name = "Mike Fienen", email = "mnfienen@usgs.gov" },
+]
+description = "Rapid and robust construction of MODFLOW groundwater flow models"
+readme = "Readme.md"
+keywords = ["MODFLOW", "groundwater", "hydrogeology"]
+license = {file = "LICENSE.md"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Hydrology",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "geopandas",
+    "gis-utils",
+    "fiona",
+    "flopy",
+    "modflow-export",
+    "netcdf4",
+    "numpy",
+    "pandas",
+    "pyproj",
+    "pyyaml",
+    "rasterio",
+    "rasterstats",
+    "rtree",
+    "scipy",
+    "sfrmaker",
+    "shapely",
+    "xarray",
+]
+
+[project.optional-dependencies]
+optional = [
+    "matplotlib",
+
+]
+test = [
+    "codecov",
+    "coverage",
+    "pytest",
+    "pytest-timeout"
+]
+docs = [
+    "matplotlib",
+    "modflow-export[optional]",
+    "ipython[kernel]",
+    "sphinx",
+    "numpydoc",
+    "nbsphinx",
+    "sphinx-copybutton",
+    "sphinx-rtd-theme"
+]
+
+[project.scripts]
+get-modflow = "flopy.utils.get_modflow:cli_main"
+
+[project.urls]
+documentation = "https://doi-usgs.github.io/modflow-setup/latest/"
+repository = "https://github.com/doi-usgs/modflow-setup"
+
+[tool.setuptools.packages.find]
+include = ["mfsetup", "mfsetup.*"]
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440-post"
+versionfile_source = "mfsetup/_version.py"
+versionfile_build = "mfsetup/_version.py"
+tag_prefix = "v"
+parentdir_prefix = "mfsetup-"
 
 [tool.isort]
 default_section = "THIRDPARTY"
