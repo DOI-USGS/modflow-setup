@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.4.0.post2+g6f434e9 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.4.0.post3+gd2d459e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=dd686b1d"></script>
+        <script src="../../_static/documentation_options.js?v=f3a8e391"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.4.0.post2+g6f434e9
+                0.4.0.post3+gd2d459e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -1654,28 +1654,21 @@
                                          <span class="n">idomain</span><span class="o">=</span><span class="n">idomain</span><span class="p">)</span>
         <span class="n">sfr</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span>
         <span class="k">if</span> <span class="n">new_botm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;botm&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
-                                                  <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;botm_filename_fmt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                                                  <span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">save_array</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">new_botm</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;(new model botm after assigning SFR reaches to layers)&#39;</span><span class="p">)</span>
-            <span class="n">botm</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_botm</span>
             <span class="c1"># run thru setup_array so that DIS input remains open/close</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span>
-                              <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">arr</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">botm</span><span class="p">)},</span>
+                              <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">arr</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_botm</span><span class="p">)},</span>
                               <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-            <span class="c1"># reset the bottom array</span>
-            <span class="c1"># is this necessary?</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="n">botm</span>
+            <span class="c1"># reset the bottom array in flopy (and in memory)</span>
+            <span class="c1"># is this necessary? =</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="n">new_botm</span>
             <span class="c1"># set bottom array to external files</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Model cell bottom elevations adjusted after assigning &#39;</span>
+                  <span class="s1">&#39;SFR reaches to layers</span><span class="se">\n</span><span class="s1">(to accommodate SFR reach bottoms &#39;</span>
+                  <span class="s1">&#39;below the previous model bottom)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="c1"># option to convert reaches to the River Package</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;to_riv&#39;</span><span class="p">):</span>
@@ -1943,7 +1936,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 14, 2024.
+      <span class="lastupdated">Last updated on Feb 15, 2024.
       </span></p>
   </div>
 
