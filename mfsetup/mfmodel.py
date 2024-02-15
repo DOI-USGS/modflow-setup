@@ -1530,28 +1530,21 @@ class MFsetupMixin():
                                          idomain=idomain)
         sfr.reach_data['k'] = layers
         if new_botm is not None:
-            if self.cfg['intermediate_data'].get('botm') is None:
-                f = os.path.normpath(os.path.join(self.model_ws,
-                                                  self.external_path,
-                                                  self.cfg['dis']['botm_filename_fmt'].format(self.nlay - 1)
-                                                  ))
-            else:
-                f = self.cfg['intermediate_data']['botm'][-1]
-            save_array(f, new_botm, fmt='%.2f')
-            print('(new model botm after assigning SFR reaches to layers)')
-            botm[-1] = new_botm
             # run thru setup_array so that DIS input remains open/close
             self._setup_array('dis', 'botm',
-                              data={i: arr for i, arr in enumerate(botm)},
+                              data={i: arr for i, arr in enumerate(new_botm)},
                               datatype='array3d', write_fmt='%.2f', dtype=int)
-            # reset the bottom array
-            # is this necessary?
-            self.dis.botm = botm
+            # reset the bottom array in flopy (and in memory)
+            # is this necessary? =
+            self.dis.botm = new_botm
             # set bottom array to external files
             if self.version == 'mf6':
                 self.dis.botm = self.cfg['dis']['griddata']['botm']
             else:
                 self.dis.botm = self.cfg['dis']['botm']
+            print('\nModel cell bottom elevations adjusted after assigning '
+                  'SFR reaches to layers\n(to accommodate SFR reach bottoms '
+                  'below the previous model bottom)\n')
 
         # option to convert reaches to the River Package
         if self.cfg['sfr'].get('to_riv'):
