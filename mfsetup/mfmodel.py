@@ -560,14 +560,6 @@ class MFsetupMixin():
             if f not in self._features.keys():
                 if os.path.exists(f):
                     features_crs = get_shapefile_crs(f)
-                    #try:
-                    #    from gisutils import get_shapefile_crs
-                    #    features_crs = get_shapefile_crs(kwargs['shapefile'])
-                    #except Exception as e:
-                    #    features_crs = pyproj.crs.CRS.from_proj4(get_proj_str(f))
-                    #authority = features_crs.to_authority()
-                    #if authority is not None:
-                    #    features_crs = pyproj.CRS.from_user_input(features_crs.to_authority())
                     if bbox_filter is None:
                         if self.bbox is not None:
                             bbox = self.bbox
@@ -583,12 +575,6 @@ class MFsetupMixin():
 
                     # implement automatic reprojection in gis-utils
                     # maintaining backwards compatibility
-                    #kwargs = {'dest_crs': self.modelgrid.crs}
-                    #kwargs = get_input_arguments(kwargs, shp2df)
-                    #df = shp2df(f, filter=filter, **kwargs)
-                    #df.columns = [c.lower() for c in df.columns]
-                    #if 'dest_crs' not in kwargs and features_crs != self.modelgrid.crs:
-                    #    df['geometry'] = project(df['geometry'], features_crs, self.modelgrid.crs)
                     df = gpd.read_file(f)
                     df.to_crs(self.modelgrid.crs, inplace=True)
                     df.columns = [c.lower() for c in df.columns]
@@ -1090,13 +1076,19 @@ class MFsetupMixin():
                 # load only specified packages that the parent model has
                 packages_in_parent_namefile = get_packages(os.path.join(kwargs['model_ws'],
                                                                         kwargs['namefile']))
+                # load at least these packages
+                # so that there is complete information on model time and space dis
+                default_parent_packages = {'dis', 'tdis'}
                 specified_packages = set(self.cfg['model'].get('packages', set()))
+                specified_packages.update(default_parent_packages)
 
                 # get equivalent packages to load if parent is another MODFLOW version;
                 # then flatten (a package may have more than one equivalent)
                 parent_packages = [get_package_name(p, kwargs['version'])
                                    for p in specified_packages]
                 parent_packages = {item for subset in parent_packages for item in subset}
+                if kwargs['version'] == 'mf6':
+                    parent_packages.add('sto')
                 load_only = list(set(packages_in_parent_namefile).intersection(parent_packages))
                 if 'load_only' not in kwargs:
                     kwargs['load_only'] = load_only
@@ -1163,9 +1155,11 @@ class MFsetupMixin():
 
                 # set number of layers from parent if not specified
                 if self.version == 'mf6' and self.cfg['dis']['dimensions'].get('nlay') is None:
-                    self.cfg['dis']['dimensions']['nlay'] = self.parent.dis.nlay
+                    self.cfg['dis']['dimensions']['nlay'] = getattr(self.parent.dis.nlay, 'array',
+                                                                    self.parent.dis.nlay)
                 elif self.cfg['dis'].get('nlay') is None:
-                    self.cfg['dis']['nlay'] = self.parent.dis.nlay
+                    self.cfg['dis']['nlay'] = getattr(self.parent.dis.nlay, 'array',
+                                                      self.parent.dis.nlay)
 
                 # set start date/time from parent if not specified
                 if not self._is_lgr:
@@ -1397,11 +1391,10 @@ class MFsetupMixin():
             if not self.lgr:
                 self.lgr = True
             for key, cfg in self.cfg['setup_grid']['lgr'].items():
-                config_file = cfg['filename']
-                existing_inset_config_files = set()
+                existing_inset_models = set()
                 if isinstance(self.inset, dict):
-                    existing_inset_config_files = {v.cfg['filename'] for k, v in self.inset.items()}
-                if config_file not in existing_inset_config_files:
+                    existing_inset_models = {k for k, v in self.inset.items()}
+                if key not in existing_inset_models:
                     self.create_lgr_models()
 
     def load_grid(self, gridfile=None):

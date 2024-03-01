@@ -332,8 +332,16 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
     def create_lgr_models(self):
         for k, v in self.cfg['setup_grid']['lgr'].items():
             # load the config file for lgr inset model
-            inset_cfg = load_cfg(v['filename'],
-                                 default_file='/mf6_defaults.yml')
+            if 'filename' in v:
+                inset_cfg = load_cfg(v['filename'],
+                                    default_file='/mf6_defaults.yml')
+            elif 'cfg' in v:
+                inset_cfg = copy.deepcopy(v['cfg'])
+            else:
+                raise ValueError('Unrecognized input in subblock lgr: '
+                                 'Supply either a configuration filename: '
+                                 'or additional yaml configuration under cfg:'
+                                 )
             # if lgr inset has already been created
             if inset_cfg['model']['modelname'] in self.simulation._models:
                 return
@@ -560,7 +568,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         kwargs.update(self.cfg[package]['griddata'].copy())
         # get steady/transient info from perioddata table
         # which parses it from either DIS or STO input (to allow consistent input structure with mf2005)
-        kwargs['steady_state'] = {k: v for k, v in zip(self.perioddata['per'], self.perioddata['steady'])}
+        kwargs['steady_state'] = {k: v for k, v in zip(self.perioddata['per'], self.perioddata['steady']) if v}
         kwargs['transient'] = {k: not v for k, v in zip(self.perioddata['per'], self.perioddata['steady'])}
         kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsto)
         sto = mf6.ModflowGwfsto(self, **kwargs)
