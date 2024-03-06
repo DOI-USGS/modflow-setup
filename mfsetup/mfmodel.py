@@ -1123,6 +1123,28 @@ class MFsetupMixin():
             # otherwise, convert parent model grid to MFsetupGrid
             mg_kwargs = self.cfg['parent'].get('SpatialReference',
                                           self.cfg['parent'].get('modelgrid', None))
+            # check configuration file input
+            # for consistency with parent model DIS package input
+            # (configuration file input may be different if an existing model
+            # doesn't have a valid spatial reference in the DIS package)
+            mf6_names = {
+                'rotation': 'angrot',
+                'xoff': 'xorigin',
+                'yoff': 'yorigin'
+            }
+            if mg_kwargs is not None and (self.parent.version == 'mf6') and not\
+                            mg_kwargs.get('override_dis_package_input', False):
+                for variable, mf6_name in mf6_names.items():
+                    if (variable in mg_kwargs) and\
+                        ('DIS' in self.parent.get_package_list()):
+                        dis_value = getattr(self.parent.dis, mf6_name).array
+                        if not np.allclose(mg_kwargs[variable], dis_value):
+                            raise ValueError(
+                "Configuration file entry parent: SpatialReference: "
+                f"{variable}: {mg_kwargs[variable]} does not match {mf6_name}={dis_value} "
+                "specified in the parent model DIS package file. Either make "
+                "these consistent or specify override_dis_package_input: True "
+                "in the parent: SpatialReference: configuration block.")
             self._set_parent_modelgrid(mg_kwargs)
 
             # setup parent model perioddata table
