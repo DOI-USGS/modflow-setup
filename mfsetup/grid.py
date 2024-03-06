@@ -13,6 +13,7 @@ import gisutils
 import numpy as np
 import pandas as pd
 import pyproj
+import shapely
 from flopy.discretization import StructuredGrid
 from flopy.mf6.utils.binarygrid_util import MfGrdFile
 from geopandas.geodataframe import GeoDataFrame
@@ -20,7 +21,7 @@ from gisutils import df2shp, get_proj_str, project, shp2df
 from packaging import version
 from rasterio import Affine
 from scipy import spatial
-from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry import MultiPolygon, Point, Polygon, box
 
 from mfsetup import fileio as fileio
 
@@ -772,6 +773,77 @@ def rasterize(feature, grid, id_column=None,
     return result
 
 
+def snap_to_cell_corner(x, y, modelgrid, corner='upper left'):
+    """Move an x, y location to the nearest cell corner on
+    a rectilinear modelgrid.
+
+    Parameters
+    ----------
+    x : float
+        x coordinate in coordinate reference system of modelgrid.
+    y : _type_
+        y coordinate in coordinate reference system of modelgrid.
+    modelgrid : Flopy StructuredGrid instance
+    corner : str, optional
+        'upper left' or 'lower right', by default 'upper left'
+
+    Returns
+    -------
+    x_corner, y_corner
+        x, y location of cell corner in coordinate reference system
+        of modelgrid.
+
+    Raises
+    ------
+    ValueError
+        If x, y are outside of the model domain, or if an invalid
+        cell corner is specified.
+    """
+    x_model, y_model = modelgrid.get_local_coords(x, y)
+
+    # move away from the corner of a cell
+    # delr: column spacing along a row
+    # delc: row spacing along a column
+    # use .min() values of delr/delc because
+    # we may not be able to get the i, j location
+    # from Flopy without first backing the point away from the corner
+    # (if the x, y is initially very close to the cell corner)
+    if corner == 'upper left':
+        x_model += 1e-6 #(modelgrid.delr.min() * 0.25)
+        y_model -= 1e-6 #(modelgrid.delc.min() * 0.25)
+    elif corner == 'lower right':
+        x_model -= 1e-6 #(modelgrid.delr.min() * 0.25)
+        y_model += 1e-6 #(modelgrid.delc.min() * 0.25)
+    else:
+        raise ValueError("Only snapping to 'upper left' and "
+                            "'lower right' corners is supported")
+    # flip back to world coords
+    #x1, y1 = modelgrid.get_coords(x_model, y_model)
+    # get corresponding cell
+    pi, pj = modelgrid.intersect(x_model, y_model, local=True, forgive=True)
+    #pi, pj = modelgrid.intersect(x1, y1, forgive=True)
+    if any(np.isnan([pi, pj])):
+        raise ValueError(f"Point {x:.2f}, {y:.2f} "
+                            "is outside of the model domain!")
+    # find the vertices of that cell
+    verts = np.array(modelgrid.get_cell_vertices(pi, pj))
+    # flip to model space to easily locate the corner
+    verts_model_space = np.array([modelgrid.get_local_coords(xv ,yv)
+                                    for xv, yv in verts])
+    if corner == 'upper left':
+        x_corner_model = verts_model_space[:, 0].min()
+        y_corner_model = verts_model_space[:, 1].max()
+    elif corner == 'lower right':
+        x_corner_model = verts_model_space[:,0].max()
+        y_corner_model = verts_model_space[:,1].min()
+    else:
+        raise ValueError("Only snapping to 'upper left' and "
+                            "'lower right' corners is supported")
+    # finally, back to world space
+    x_corner, y_corner = modelgrid.get_coords(x_corner_model, y_corner_model)
+    return x_corner, y_corner
+
+
 def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           nrow=None, ncol=None, nlay=None,
                           dxy=None, delr=None, delc=None,
@@ -785,9 +857,99 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                           model_length_units=None,
                           grid_file='grid.json',
                           bbox_shapefile=None, **kwargs):
-    """"""
+    """_summary_
+
+    Parameters
+    ----------
+    xoff : _type_, optional
+        _description_, by default None
+    yoff : _type_, optional
+        _description_, by default None
+    xul : _type_, optional
+        _description_, by default None
+    yul : _type_, optional
+        _description_, by default None
+    nrow : _type_, optional
+        _description_, by default None
+    ncol : _type_, optional
+        _description_, by default None
+    nlay : _type_, optional
+        _description_, by default None
+    dxy : _type_, optional
+        Specified uniform row/column spacing, in model grid
+        (coordinate reference system) units, by default None
+    delr : scalar or sequence, optional
+        Column spacing along a row, in model grid
+        (coordinate reference system) units,
+        by default None
+    delc : scalar or sequence, optional
+        Row spacing along a column, in model grid
+        (coordinate reference system) units,
+        by default None
+    top : _type_, optional
+        _description_, by default None
+    botm : _type_, optional
+        _description_, by default None
+    rotation : _type_, optional
+        _description_, by default 0.
+    parent_model : _type_, optional
+        _description_, by default None
+    snap_to_parent : bool, optional
+        _description_, by default True
+    snap_to_NHG : bool, optional
+        _description_, by default False
+    features : _type_, optional
+        _description_, by default None
+    features_shapefile : _type_, optional
+        _description_, by default None
+    id_column : _type_, optional
+        _description_, by default None
+    include_ids : _type_, optional
+        _description_, by default None
+    buffer : int, optional
+        _description_, by default 1000
+    crs : _type_, optional
+        _description_, by default None
+    epsg : _type_, optional
+        _description_, by default None
+    prj : _type_, optional
+        _description_, by default None
+    wkt : _type_, optional
+        _description_, by default None
+    model_length_units : _type_, optional
+        _description_, by default None
+    grid_file : str, optional
+        _description_, by default 'grid.json'
+    bbox_shapefile : _type_, optional
+        _description_, by default None
+
+    Returns
+    -------
+    _type_
+        _description_
+
+    Raises
+    ------
+    ValueError
+        _description_
+    ValueError
+        _description_
+    ValueError
+        _description_
+    ValueError
+        _description_
+    ValueError
+        _description_
+    ValueError
+        _description_
+    """    """"""
     print('setting up model grid...')
     t0 = time.time()
+
+    if parent_model is None:
+        snap_to_parent = False
+    elif not np.allclose(parent_model.modelgrid.rotation, rotation):
+        snap_to_parent = False
 
     # make sure crs is populated, then get CRS units for the grid
     crs = get_crs(crs=crs, epsg=epsg, prj=prj, wkt=wkt)
@@ -798,8 +960,8 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     if grid_units not in {'feet', 'meters'}:
         raise ValueError(f'unrecognized CRS units {grid_units}: CRS must be projected in feet or meters')
 
-    # conversions for model/parent model units to meters
-    # set regular flag for handling delc/delr
+    # conversion from model length units
+    # to model grid (coordinate reference system) units
     to_grid_units_inset = convert_length_units(model_length_units, grid_units)
 
     regular = True
@@ -807,16 +969,17 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         delr_grid = np.round(dxy, 4) # dxy is specified in CRS units
         delc_grid = delr_grid
     if delr is not None:
-        delr_grid = np.round(delr * to_grid_units_inset, 4)  # delr is specified in model units
+        # delr is expected to be in model grid (CRS) units
+        delr_grid = np.round(np.array(delr), 4)
         if not np.isscalar(delr_grid):
-            if (set(delr_grid)) == 1:
+            if len(set(delr_grid)) == 1:
                 delr_grid = delr_grid[0]
             else:
                 regular = False
     if delc is not None:
-        delc_grid = np.round(delc * to_grid_units_inset, 4) # delc is specified in model units
+        delc_grid = np.round(np.array(delc), 4)
         if not np.isscalar(delc_grid):
-            if (set(delc_grid)) == 1:
+            if len(set(delc_grid)) == 1:
                 delc_grid = delc_grid[0]
             else:
                 regular = False
@@ -846,136 +1009,140 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         # optionally align grid with national hydrologic grid
         # grids snapping to NHD must have spacings that are a factor of 1 km
         if snap_to_NHG:
-            assert regular and np.allclose(1000 % delc_grid, 0, atol=1e-4)
+            if rotation != 0:
+                raise ValueError(f'rotation = {rotation}: snap_to_NHD option '
+                                 'only compatible with unrotated grids!')
+            if not (regular and np.allclose(1000 % delc_grid, 0, atol=1e-4)):
+                raise ValueError(f'snap_to_NHD option '
+                                 'only compatible with uniformly spaced '
+                                 'structured grids!')
             x, y = get_point_on_national_hydrogeologic_grid(xoff, yoff,
                                                             offset='edge', op=np.floor)
             xoff = x
             yoff = y
-            rotation = 0.
 
-        # need to specify xul, yul in case snapping to parent
-        # todo: allow snapping to parent grid on xoff, yoff
-        if rotation != 0:
-            rotation_rads = rotation * np.pi/180
-            # note rotating around xoff,yoff not the origin!
-            xul = xoff - (height_grid) * np.sin(rotation_rads)
-            yul = yoff + (height_grid) * np.cos(rotation_rads)
-        else:
-            xul = xoff
-            yul = yoff + height_grid
+
+        # make a bounding box so that other important corners can be specified
+        lower_left_corner = Point(xoff, yoff)
+        unrotated_bbox = box(xoff, yoff, xoff + width_grid, yoff + height_grid)
+        # get the upper right corner
+        ur = shapely.affinity.rotate(Point(xoff, yoff + height_grid), rotation,
+                                    origin=lower_left_corner)
+        xul, yul = ur.x, ur.y
 
     # option 2: make grid using buffered feature bounding box
     else:
+        # read in the feature from a shapefile
         if features is None and features_shapefile is not None:
-            # Make sure shapefile and bbox filter are in dest (model) CRS
-            # TODO: CRS wrangling could be added to shp2df as a feature
-            reproject_filter = False
-            try:
-                from gisutils import get_shapefile_crs
-                features_crs = get_shapefile_crs(features_shapefile)
-                if features_crs != crs:
-                    reproject_filter = True
-            except:
-                features_crs = get_proj_str(features_shapefile)
-                reproject_filter = True
             bbox_filter = None
             if parent_model is not None:
-                if reproject_filter:
-                    bbox_filter = project(parent_model.modelgrid.bbox,
-                                     parent_model.modelgrid.crs, features_crs).bounds
-                else:
-                    bbox_filter = parent_model.modelgrid.bbox.bounds
-            shp2df_kwargs = {'dest_crs': crs}
-            shp2df_kwargs = get_input_arguments(shp2df_kwargs, shp2df)
-            df = shp2df(features_shapefile,
-                        filter=bbox_filter, **shp2df_kwargs)
-
-            # optionally subset shapefile data to specified features
+                pmg_l, pmg_r, pmg_b, pmg_t = parent_model.modelgrid.extent
+                bbox_filter = gpd.GeoSeries(box(pmg_l, pmg_b, pmg_r, pmg_t),
+                                            crs=parent_model.modelgrid.crs)
+            df = gpd.read_file(features_shapefile, bbox=bbox_filter)
             if id_column is not None and include_ids is not None:
-                df = df.loc[df[id_column].isin(include_ids)]
+                datatype = set(type(s) for s in include_ids)
+                if len(datatype) > 1:
+                    raise ValueError(f"Inconsistent datatypes in include_ids: {include_ids}")
+                datatype = datatype.pop()
+                dtype = {id_column: datatype}
+                df = df.loc[df[id_column].astype(dtype).isin(include_ids)]
+            # inexplicable shapely.errors.GEOSException: IllegalArgumentException:
+            # Points of LinearRing do not form a closed linestring
+            # error resolved by calling to_crs twice
+            # (for mfsetup/tests/test_grid.py::test_grid_crs_units[3696-feet-meters])
+            try:
+                df.to_crs(crs, inplace=True)
+            except:
+                df.to_crs(crs, inplace=True)
             # use all features by default
             features = df.geometry.tolist()
+        # alternatively, accept features as an argument
+        # convert multiple features to a MultiPolygon
+        if isinstance(features, list):
+            if len(features) > 1:
+                features = MultiPolygon(features)
+            else:
+                features = features[0]
 
-            # convert multiple features to a MultiPolygon
-            if isinstance(features, list):
-                if len(features) > 1:
-                    features = MultiPolygon(features)
-                else:
-                    features = features[0]
-
-            # size the grid based on the bbox for features
-            x1, y1, x2, y2 = features.bounds
-            L = buffer  # distance from area of interest to boundary
-            xul = x1 - L
-            yul = y2 + L
-            height_grid = np.round(yul - (y1 - L), 4) # initial model height from buffer distance
-            width_grid = np.round((x2 + L) - xul, 4)
-            rotation = 0.  # rotation not supported with this option
-            nrow = int(np.ceil(height_grid / delc_grid))
-            ncol = int(np.ceil(width_grid / delr_grid))
+        # size the grid based on the bbox for features
+        # buffer and then unrotate the feature
+        buffered_features = features.buffer(buffer)
+        unrotated_features = shapely.affinity.rotate(buffered_features, -rotation,
+                                                     origin=buffered_features.centroid)
+        unrotated_bbox = box(*unrotated_features.bounds)
+        # Get important corners
+        # upper left corner
+        xul_ur, yul_ur = unrotated_bbox.bounds[0], unrotated_bbox.bounds[3]
+        ul = shapely.affinity.rotate(Point(xul_ur, yul_ur), rotation,
+                                     origin=buffered_features.centroid)
+        xul, yul = ul.x, ul.y
+        # lower left corner
+        xll_ur, yll_ur = unrotated_bbox.bounds[0], unrotated_bbox.bounds[1]
+        lower_left_corner = shapely.affinity.rotate(
+            Point(xll_ur, yll_ur), rotation, origin=buffered_features.centroid)
+        # xoff, yoff here for consistency with flopy model grid language
+        xoff, yoff = lower_left_corner.x, lower_left_corner.y
+        # Get the initial grid height and width
+        height_grid = np.round(unrotated_bbox.bounds[3] - unrotated_bbox.bounds[1])
+        width_grid = np.round(unrotated_bbox.bounds[2] - unrotated_bbox.bounds[0])
+        # initial rows and columns (prior to snapping, if specified)
+        nrow = int(np.ceil(height_grid / delc_grid))
+        ncol = int(np.ceil(width_grid / delr_grid))
 
     # align model with parent grid if there is a parent model
     # (and not snapping to national hydrologic grid)
+    # for grids created from a buffer around a feature
+    # (without a pre-defined number of rows and columns)
+    # this likely means increasing nrow and ncol
     if parent_model is not None and (snap_to_parent and not snap_to_NHG):
+        xul, yul = snap_to_cell_corner(xul, yul, parent_model.modelgrid,
+                                       corner='upper left')
+        # unrotate to get new dimensions
+        ur_ur = shapely.affinity.rotate(Point(xul, yul), -rotation,
+                                            origin=lower_left_corner)
+        xul_ur, yul_ur = ur_ur.x, ur_ur.y
+        # Get the lower right corner
+        xlr_ur, ylr_ur = unrotated_bbox.bounds[2], unrotated_bbox.bounds[1]
+        # snap the lower right corner if the grid was generated from a feature
+        # (not preset nrow and ncol)
+        if features is not None:
+            lr = shapely.affinity.rotate(Point(xlr_ur, ylr_ur), rotation,
+                                         origin=unrotated_bbox.centroid)
+            xlr, ylr = lr.x, lr.y
+            # snap to the nearest parent lower right corner
+            xlr, ylr = snap_to_cell_corner(xlr, ylr, parent_model.modelgrid,
+                                           corner='lower right')
+            # unrotate to get new dimensions
+            lr_ur = shapely.affinity.rotate(Point(xlr, ylr), -rotation,
+                                            origin=lower_left_corner)
+            xlr_ur, ylr_ur = lr_ur.x, lr_ur.y
 
-        # An alternative method for snapping to the parent grid
-        # if the code below is causing issues
-        # get the parent cell containing
-        # the inset upper left corner
-        # xul_in, yul_in = xul, yul
-        #pi2, pj2 = get_ij(parent_model.modelgrid, xul_in, yul_in)
-        # find the closest vertex
-        #verts2 = np.array(parent_model.modelgrid.get_cell_vertices(pi2, pj2))
-        #closest_pos = np.argmin(np.sqrt((xul-verts2[:,0])**2 +
-        #                                (yul-verts2[:,0])**2))
-        #xul, yul = verts2[closest_pos]
+            # calculate a new height and width for the grid now that the corners are snapped
+            height_grid = yul_ur - ylr_ur
+            width_grid = xlr_ur - xul_ur
+            # snap_to_parent assumes a regular grid
+            nrow = int(round(height_grid / delc_grid))
+            ncol = int(round(width_grid / delr_grid))
 
-        # get location of coinciding cell in parent model for upper left
-        # first make sure not sitting at the top of a cell (which can shift into wrong parent cell)
-        # move to model coords
-        xul_mod, yul_mod = parent_model.modelgrid.get_local_coords(xul, yul)
-        # move away from the edge of a cell
-        xul_mod += (delr_grid * 0.25)
-        yul_mod -= (delc_grid * 0.25)
-        # flip back to world coords
-        xul, yul = parent_model.modelgrid.get_coords(xul_mod, yul_mod)
-        # get corresponding cell
-        pi, pj = parent_model.modelgrid.intersect(xul, yul)
-        # find the vertices of that cell
-        verts = np.array(parent_model.modelgrid.get_cell_vertices(pi, pj))
-        # flip to model space to easily locate upper left corner
-        verts_model_space = np.array([parent_model.modelgrid.get_local_coords(x,y) for x,y in verts])
-        # finally, back to world space
-        xul,yul = parent_model.modelgrid.get_coords(verts_model_space[:,0].min(),verts_model_space[:,1].max())
+        # recalculate xoff, yoff
+        lower_left_corner = shapely.affinity.rotate(Point(xul_ur, ylr_ur), rotation,
+                                                    origin=lower_left_corner)
+        xoff, yoff = lower_left_corner.x, lower_left_corner.y
 
-        # adjust the dimensions to align remaining corners
-        def roundup(number, increment):
-            return int(np.ceil(number / increment) * increment)
-        height_grid = roundup(height_grid, parent_delr_grid)
-        width_grid = roundup(width_grid, parent_delc_grid)
-
-        # update nrow, ncol after snapping to parent grid
-        if regular:
-            nrow = int(height_grid / delc_grid) # h is in meters
-            ncol = int(width_grid / delr_grid)
-
-    if xoff is None:
-        xoff = xul + (np.sin(np.radians(rotation)) * height_grid)
-    if yoff is None:
-        yoff = yul - (np.cos(np.radians(rotation)) * height_grid)
+    assert xoff is not None
+    #    xoff = xul + (np.sin(np.radians(rotation)) * height_grid)
+    assert yoff is not None
+    #    yoff = yul - (np.cos(np.radians(rotation)) * height_grid)
     # set the grid configuration dictionary
-    # spacing is in meters (consistent with projected CRS)
-    # (modelgrid object will be updated automatically from this dictionary)
-    #if rotation == 0.:
-    #    xll = xul
-    #    yll = yul - model.height
     grid_cfg = {'nrow': int(nrow), 'ncol': int(ncol),
                 'nlay': nlay,
                 'delr': delr_grid, 'delc': delc_grid,
                 'xoff': xoff, 'yoff': yoff,
                 'xul': xul, 'yul': yul,
                 'rotation': rotation,
-                'lenuni': 2
+                #'lenuni': 2,
+                'structured': True
                 }
 
     if regular:
@@ -995,11 +1162,6 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         grid_cfg['crs'] = crs
     elif epsg is not None:
         grid_cfg['epsg'] = epsg
-    #elif crs is not None:
-    #    if 'epsg' in crs.srs.lower():
-    #        grid_cfg['epsg'] = int(crs.srs.split(':')[1])
-    #    else:
-    #        grid_cfg['wkt'] = crs.srs
     else:
         warnings.warn(("Coordinate Reference System information must be supplied via"
                       "the 'crs'' argument."))
