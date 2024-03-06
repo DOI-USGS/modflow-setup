@@ -234,8 +234,16 @@ class MFsetupMixin():
         # because of NotImplementedError in base class
         elif self._modelgrid.grid_type is None:
             pass
+        # add layer tops and bottoms and idomain to the model grid
+        # if they haven't been yet
         elif self._modelgrid.nlay is None and 'DIS' in self.get_package_list():
-            self.setup_grid()
+            self._modelgrid._top = self.dis.top.array
+            self._modelgrid._botm = self.dis.botm.array
+            if self.version == 'mf6':
+                self._modelgrid._idomain = self.dis.idomain.array
+            elif 'bas6' in self.get_package_list():
+                self._modelgrid._idomain = self.bas6.ibound.array
+            #self.setup_grid()
         return self._modelgrid
 
     @property
@@ -1365,7 +1373,11 @@ class MFsetupMixin():
     def setup_grid(self):
         """Set up the attached modelgrid instance from configuration input
         """
-        cfg = self.cfg['setup_grid'] #.copy()
+        if self.cfg['grid']:
+            cfg = self.cfg['grid']
+            cfg['rotation'] = self.cfg['grid']['angrot']
+        else:
+            cfg = self.cfg['setup_grid'] #.copy()
         # update grid configuration with any information supplied to dis package
         # (so that settings specified for DIS package have priority)
         self._update_grid_configuration_with_dis()
@@ -1378,12 +1390,21 @@ class MFsetupMixin():
             cfg.update(features_shapefile)
         cfg['parent_model'] = self.parent
         cfg['model_length_units'] = self.length_units
-        cfg['grid_file'] = cfg['output_files']['grid_file'].format(self.name)
-        bbox_shapefile_name = Path(cfg['output_files']['bbox_shapefile'].format(self.name)).name
+        output_files = self.cfg['setup_grid']['output_files']
+        cfg['grid_file'] = output_files['grid_file'].format(self.name)
+        bbox_shapefile_name = Path(output_files['bbox_shapefile'].format(self.name)).name
         cfg['bbox_shapefile'] = Path(self._shapefiles_path) / bbox_shapefile_name
         if 'DIS' in self.get_package_list():
             cfg['top'] = self.dis.top.array
             cfg['botm'] = self.dis.botm.array
+
+        # if model is an LGR inset with the default rotation=0
+        # and the LGR parent is rotated
+        # assume that the inset model rotation should == parent
+        # (different LGR parent/inset rotations not allowed)
+        if self._is_lgr and (cfg['rotation'] == 0) and\
+            self.parent.modelgrid.angrot != 0:
+                cfg['rotation'] = self.parent.modelgrid.angrot
 
         if os.path.exists(cfg['grid_file']) and self._load:
             print('Loading model grid definition from {}'.format(cfg['grid_file']))

@@ -202,8 +202,9 @@ def test_dis_setup(pfl_nwt_with_grid):
     botm_m = dis.botm.array.copy()
     m.cfg['dis']['top'] = None  # arrays don't get remade if this has data
     m.cfg['dis']['botm'] = None
-    del m.cfg['setup_grid']['top']
-    del m.cfg['setup_grid']['botm']
+    for var in 'top', 'botm':
+        if var in m.cfg['setup_grid']:
+            del m.cfg['setup_grid'][var]
     m.cfg['dis']['remake_top'] = True
     m.cfg['dis']['lenuni'] = 1 # feet
     m.cfg['dis']['minimum_layer_thickness'] = 1/.3048 # feet

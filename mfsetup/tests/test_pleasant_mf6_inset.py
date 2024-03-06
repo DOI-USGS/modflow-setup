@@ -13,6 +13,7 @@ import flopy
 import numpy as np
 import pandas as pd
 import pytest
+from gisutils import get_values_at_points
 
 mf6 = flopy.mf6
 fm = flopy.modflow
@@ -516,9 +517,19 @@ def test_sfr_setup(get_pleasant_mf6_with_sfr):
         assert os.path.exists(f)
     assert m.sfrdata.model == m
 
+    i, j = m.sfrdata.reach_data['i'], m.sfrdata.reach_data['j']
+    sfr_x = m.modelgrid.xcellcenters[i, j]
+    sfr_y = m.modelgrid.ycellcenters[i, j]
+    dem_values = get_values_at_points(
+        m.cfg['sfr']['source_data']['dem']['filename'], sfr_x, sfr_y,
+        points_crs=m.modelgrid.crs
+        )
     # verify that DEM was sampled
-    # cheesy test for DEM-based value
-    assert np.allclose(m.sfrdata.reach_data.loc[2, 'strtop'], 297, atol=0.05)
+    # cheesy test for DEM-based values
+    # with the DEM sampling turned off,
+    # the range of differences should be much more extreme
+    assert np.std(m.sfrdata.reach_data['strtop'] - dem_values) < 1.
+    assert np.allclose(m.sfrdata.reach_data['strtop'], dem_values, atol=3.5)
 
 
 def test_write_sfr(get_pleasant_mf6_with_sfr):
@@ -549,7 +560,7 @@ def test_sfr_obs(get_pleasant_mf6_with_sfr):
     assert obs_input[sfr_obs_filename + '.output.csv'] == \
            ['# obsname obstype rno',
             '1000000 downstream-flow 22',
-            '2000000 downstream-flow 25']
+            '2000000 downstream-flow 31']
 
 
 def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):

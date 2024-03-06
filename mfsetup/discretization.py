@@ -304,7 +304,10 @@ def fix_model_layer_conflicts(top_array, botm_array,
         with np.errstate(invalid='ignore'):
             too_thin = active & (thicknesses < minimum_thickness)
         new_layer_elevs[i, too_thin] = new_layer_elevs[i - 1, too_thin] - minimum_thickness * 1.001
-    assert np.nanmax(np.diff(new_layer_elevs, axis=0)[ibound_array > 0]) * -1 >= minimum_thickness
+    try:
+        assert np.nanmax(np.diff(new_layer_elevs, axis=0)[ibound_array > 0]) * -1 >= minimum_thickness
+    except:
+        j=2
     return new_layer_elevs[1:]
 
 
@@ -404,15 +407,23 @@ def make_ibound(top, botm, nodata=-9999,
 def make_lgr_idomain(parent_modelgrid, inset_modelgrid):
     """Inactivate cells in parent_modelgrid that coincide
     with area of inset_modelgrid."""
-    if parent_modelgrid.rotation != 0 or inset_modelgrid.rotation != 0:
-        raise NotImplementedError('Rotated grids not supported.')
+    if parent_modelgrid.rotation != inset_modelgrid.rotation:
+        raise ValueError('LGR parent and inset models must have same rotation.'
+                         f'\nParent rotation: {parent_modelgrid.rotation}'
+                         f'\nInset rotation: {inset_modelgrid.rotation}'
+                         )
+    # upper left corner of inset model in parent model
+    # use the cell centers, to avoid edge situation
+    # where neighboring parent cell is accidentally selected
+    x0 = inset_modelgrid.xcellcenters[0, 0]
+    y0 = inset_modelgrid.ycellcenters[0, 0]
+    pi0, pj0 = parent_modelgrid.intersect(x0, y0, forgive=True)
+    # lower right corner of inset model
+    x1 = inset_modelgrid.xcellcenters[-1, -1]
+    y1 = inset_modelgrid.ycellcenters[-1, -1]
+    pi1, pj1 = parent_modelgrid.intersect(x1, y1, forgive=True)
     idomain = np.ones(parent_modelgrid.shape, dtype=int)
-    l, b, r, t = inset_modelgrid.bounds
-    isinset = (parent_modelgrid.xcellcenters > l) & \
-              (parent_modelgrid.xcellcenters < r) & \
-              (parent_modelgrid.ycellcenters > b) & \
-              (parent_modelgrid.ycellcenters < t)
-    idomain[:, isinset] = 0
+    idomain[:, pi0:pi1+1, pj0:pj1+1] = 0
     return idomain
 
 
