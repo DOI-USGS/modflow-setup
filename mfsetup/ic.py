@@ -53,6 +53,8 @@ def setup_strt(model, package, strt=None, source_data_config=None,
     # data read from binary file with parent model head solution
     elif binary_file:
         kwargs = get_input_arguments(kwargs, MFBinaryArraySourceData)
+        if 'resample_method' not in kwargs:
+            kwargs['resample_method'] = 'linear'
         sd = MFBinaryArraySourceData(variable='strt', filename=binary_file,
                                      datatype=datatype,
                                      dest_model=model,
