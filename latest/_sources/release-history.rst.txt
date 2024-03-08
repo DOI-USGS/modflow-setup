@@ -2,6 +2,16 @@
 Release History
 ===============
 
+Version 0.5.0 (2024-03-08)
+----------------------------------------
+* Improvements to rotated grid generation
+  * add support for generating grids with a specified rotation around features of interest
+  * add support for rotated LGR models (LGR parent and inset with same rotation)
+  * add additional validation checks in grid setup
+  * fix issue related to SFR layer assignment in cases with multiple inactive layers below the lowest active cell
+  * fix issue with reading transient array-based source data from multiple rasters
+  * other miscellaneous fixes
+
 Version 0.4.0 (2024-01-15)
 ----------------------------------------
 * Improvements to lake package
