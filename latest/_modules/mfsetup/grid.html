@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.4.0.post3+gd2d459e documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.4.0.post7+g63ba038 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=f3a8e391"></script>
+        <script src="../../_static/documentation_options.js?v=75abe509"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.4.0.post3+gd2d459e
+                0.4.0.post7+g63ba038
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -117,6 +117,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">pyproj</span>
+<span class="kn">import</span> <span class="nn">shapely</span>
 <span class="kn">from</span> <span class="nn">flopy.discretization</span> <span class="kn">import</span> <span class="n">StructuredGrid</span>
 <span class="kn">from</span> <span class="nn">flopy.mf6.utils.binarygrid_util</span> <span class="kn">import</span> <span class="n">MfGrdFile</span>
 <span class="kn">from</span> <span class="nn">geopandas.geodataframe</span> <span class="kn">import</span> <span class="n">GeoDataFrame</span>
@@ -124,7 +125,7 @@
 <span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 <span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">Affine</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">spatial</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">box</span>
 
 <span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">fileio</span> <span class="k">as</span> <span class="n">fileio</span>
 
@@ -921,6 +922,80 @@
 
 
 
+<div class="viewcode-block" id="snap_to_cell_corner">
+<a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.snap_to_cell_corner">[docs]</a>
+<span class="k">def</span> <span class="nf">snap_to_cell_corner</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">modelgrid</span><span class="p">,</span> <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Move an x, y location to the nearest cell corner on</span>
+<span class="sd">    a rectilinear modelgrid.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : float</span>
+<span class="sd">        x coordinate in coordinate reference system of modelgrid.</span>
+<span class="sd">    y : _type_</span>
+<span class="sd">        y coordinate in coordinate reference system of modelgrid.</span>
+<span class="sd">    modelgrid : Flopy StructuredGrid instance</span>
+<span class="sd">    corner : str, optional</span>
+<span class="sd">        &#39;upper left&#39; or &#39;lower right&#39;, by default &#39;upper left&#39;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x_corner, y_corner</span>
+<span class="sd">        x, y location of cell corner in coordinate reference system</span>
+<span class="sd">        of modelgrid.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If x, y are outside of the model domain, or if an invalid</span>
+<span class="sd">        cell corner is specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_model</span><span class="p">,</span> <span class="n">y_model</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">get_local_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># move away from the corner of a cell</span>
+    <span class="c1"># delr: column spacing along a row</span>
+    <span class="c1"># delc: row spacing along a column</span>
+    <span class="c1"># use .min() values of delr/delc because</span>
+    <span class="c1"># we may not be able to get the i, j location</span>
+    <span class="c1"># from Flopy without first backing the point away from the corner</span>
+    <span class="c1"># (if the x, y is initially very close to the cell corner)</span>
+    <span class="k">if</span> <span class="n">corner</span> <span class="o">==</span> <span class="s1">&#39;upper left&#39;</span><span class="p">:</span>
+        <span class="n">x_model</span> <span class="o">+=</span> <span class="mf">1e-6</span> <span class="c1">#(modelgrid.delr.min() * 0.25)</span>
+        <span class="n">y_model</span> <span class="o">-=</span> <span class="mf">1e-6</span> <span class="c1">#(modelgrid.delc.min() * 0.25)</span>
+    <span class="k">elif</span> <span class="n">corner</span> <span class="o">==</span> <span class="s1">&#39;lower right&#39;</span><span class="p">:</span>
+        <span class="n">x_model</span> <span class="o">-=</span> <span class="mf">1e-6</span> <span class="c1">#(modelgrid.delr.min() * 0.25)</span>
+        <span class="n">y_model</span> <span class="o">+=</span> <span class="mf">1e-6</span> <span class="c1">#(modelgrid.delc.min() * 0.25)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only snapping to &#39;upper left&#39; and &quot;</span>
+                            <span class="s2">&quot;&#39;lower right&#39; corners is supported&quot;</span><span class="p">)</span>
+    <span class="c1"># flip back to world coords</span>
+    <span class="c1">#x1, y1 = modelgrid.get_coords(x_model, y_model)</span>
+    <span class="c1"># get corresponding cell</span>
+    <span class="n">pi</span><span class="p">,</span> <span class="n">pj</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">x_model</span><span class="p">,</span> <span class="n">y_model</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">forgive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">#pi, pj = modelgrid.intersect(x1, y1, forgive=True)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">([</span><span class="n">pi</span><span class="p">,</span> <span class="n">pj</span><span class="p">])):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Point </span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> &quot;</span>
+                            <span class="s2">&quot;is outside of the model domain!&quot;</span><span class="p">)</span>
+    <span class="c1"># find the vertices of that cell</span>
+    <span class="n">verts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_cell_vertices</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="n">pj</span><span class="p">))</span>
+    <span class="c1"># flip to model space to easily locate the corner</span>
+    <span class="n">verts_model_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_local_coords</span><span class="p">(</span><span class="n">xv</span> <span class="p">,</span><span class="n">yv</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="ow">in</span> <span class="n">verts</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">corner</span> <span class="o">==</span> <span class="s1">&#39;upper left&#39;</span><span class="p">:</span>
+        <span class="n">x_corner_model</span> <span class="o">=</span> <span class="n">verts_model_space</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">y_corner_model</span> <span class="o">=</span> <span class="n">verts_model_space</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">corner</span> <span class="o">==</span> <span class="s1">&#39;lower right&#39;</span><span class="p">:</span>
+        <span class="n">x_corner_model</span> <span class="o">=</span> <span class="n">verts_model_space</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">y_corner_model</span> <span class="o">=</span> <span class="n">verts_model_space</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only snapping to &#39;upper left&#39; and &quot;</span>
+                            <span class="s2">&quot;&#39;lower right&#39; corners is supported&quot;</span><span class="p">)</span>
+    <span class="c1"># finally, back to world space</span>
+    <span class="n">x_corner</span><span class="p">,</span> <span class="n">y_corner</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">x_corner_model</span><span class="p">,</span> <span class="n">y_corner_model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x_corner</span><span class="p">,</span> <span class="n">y_corner</span></div>
+
+
+
 <div class="viewcode-block" id="setup_structured_grid">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.setup_structured_grid">[docs]</a>
 <span class="k">def</span> <span class="nf">setup_structured_grid</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -936,9 +1011,99 @@
                           <span class="n">model_length_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">grid_file</span><span class="o">=</span><span class="s1">&#39;grid.json&#39;</span><span class="p">,</span>
                           <span class="n">bbox_shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xoff : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    yoff : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    xul : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    yul : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    nrow : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    ncol : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    nlay : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    dxy : _type_, optional</span>
+<span class="sd">        Specified uniform row/column spacing, in model grid</span>
+<span class="sd">        (coordinate reference system) units, by default None</span>
+<span class="sd">    delr : scalar or sequence, optional</span>
+<span class="sd">        Column spacing along a row, in model grid</span>
+<span class="sd">        (coordinate reference system) units,</span>
+<span class="sd">        by default None</span>
+<span class="sd">    delc : scalar or sequence, optional</span>
+<span class="sd">        Row spacing along a column, in model grid</span>
+<span class="sd">        (coordinate reference system) units,</span>
+<span class="sd">        by default None</span>
+<span class="sd">    top : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    botm : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    rotation : _type_, optional</span>
+<span class="sd">        _description_, by default 0.</span>
+<span class="sd">    parent_model : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    snap_to_parent : bool, optional</span>
+<span class="sd">        _description_, by default True</span>
+<span class="sd">    snap_to_NHG : bool, optional</span>
+<span class="sd">        _description_, by default False</span>
+<span class="sd">    features : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    features_shapefile : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    id_column : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    include_ids : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    buffer : int, optional</span>
+<span class="sd">        _description_, by default 1000</span>
+<span class="sd">    crs : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    epsg : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    prj : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    wkt : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    model_length_units : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+<span class="sd">    grid_file : str, optional</span>
+<span class="sd">        _description_, by default &#39;grid.json&#39;</span>
+<span class="sd">    bbox_shapefile : _type_, optional</span>
+<span class="sd">        _description_, by default None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    _type_</span>
+<span class="sd">        _description_</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>    <span class="s2">&quot;&quot;&quot;&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setting up model grid...&#39;</span><span class="p">)</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">snap_to_parent</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span> <span class="n">rotation</span><span class="p">):</span>
+        <span class="n">snap_to_parent</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># make sure crs is populated, then get CRS units for the grid</span>
     <span class="n">crs</span> <span class="o">=</span> <span class="n">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="n">prj</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="n">wkt</span><span class="p">)</span>
@@ -949,8 +1114,8 @@
     <span class="k">if</span> <span class="n">grid_units</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;feet&#39;</span><span class="p">,</span> <span class="s1">&#39;meters&#39;</span><span class="p">}:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unrecognized CRS units </span><span class="si">{</span><span class="n">grid_units</span><span class="si">}</span><span class="s1">: CRS must be projected in feet or meters&#39;</span><span class="p">)</span>
 
-    <span class="c1"># conversions for model/parent model units to meters</span>
-    <span class="c1"># set regular flag for handling delc/delr</span>
+    <span class="c1"># conversion from model length units</span>
+    <span class="c1"># to model grid (coordinate reference system) units</span>
     <span class="n">to_grid_units_inset</span> <span class="o">=</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="n">model_length_units</span><span class="p">,</span> <span class="n">grid_units</span><span class="p">)</span>
 
     <span class="n">regular</span> <span class="o">=</span> <span class="kc">True</span>
@@ -958,16 +1123,17 @@
         <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dxy</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># dxy is specified in CRS units</span>
         <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">delr_grid</span>
     <span class="k">if</span> <span class="n">delr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delr</span> <span class="o">*</span> <span class="n">to_grid_units_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># delr is specified in model units</span>
+        <span class="c1"># delr is expected to be in model grid (CRS) units</span>
+        <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delr</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">delr_grid</span> <span class="o">=</span> <span class="n">delr_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">regular</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">delc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">delc</span> <span class="o">*</span> <span class="n">to_grid_units_inset</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># delc is specified in model units</span>
+        <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">delc</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">delc_grid</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">delc_grid</span> <span class="o">=</span> <span class="n">delc_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">regular</span> <span class="o">=</span> <span class="kc">False</span>
@@ -997,136 +1163,140 @@
         <span class="c1"># optionally align grid with national hydrologic grid</span>
         <span class="c1"># grids snapping to NHD must have spacings that are a factor of 1 km</span>
         <span class="k">if</span> <span class="n">snap_to_NHG</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">regular</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="mi">1000</span> <span class="o">%</span> <span class="n">delc_grid</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;rotation = </span><span class="si">{</span><span class="n">rotation</span><span class="si">}</span><span class="s1">: snap_to_NHD option &#39;</span>
+                                 <span class="s1">&#39;only compatible with unrotated grids!&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">regular</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="mi">1000</span> <span class="o">%</span> <span class="n">delc_grid</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;snap_to_NHD option &#39;</span>
+                                 <span class="s1">&#39;only compatible with uniformly spaced &#39;</span>
+                                 <span class="s1">&#39;structured grids!&#39;</span><span class="p">)</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">get_point_on_national_hydrogeologic_grid</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="p">,</span>
                                                             <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">)</span>
             <span class="n">xoff</span> <span class="o">=</span> <span class="n">x</span>
             <span class="n">yoff</span> <span class="o">=</span> <span class="n">y</span>
-            <span class="n">rotation</span> <span class="o">=</span> <span class="mf">0.</span>
 
-        <span class="c1"># need to specify xul, yul in case snapping to parent</span>
-        <span class="c1"># todo: allow snapping to parent grid on xoff, yoff</span>
-        <span class="k">if</span> <span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">rotation_rads</span> <span class="o">=</span> <span class="n">rotation</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
-            <span class="c1"># note rotating around xoff,yoff not the origin!</span>
-            <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span> <span class="o">-</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
-            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="p">(</span><span class="n">height_grid</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">rotation_rads</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">xul</span> <span class="o">=</span> <span class="n">xoff</span>
-            <span class="n">yul</span> <span class="o">=</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_grid</span>
+
+        <span class="c1"># make a bounding box so that other important corners can be specified</span>
+        <span class="n">lower_left_corner</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="p">)</span>
+        <span class="n">unrotated_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="p">,</span> <span class="n">xoff</span> <span class="o">+</span> <span class="n">width_grid</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_grid</span><span class="p">)</span>
+        <span class="c1"># get the upper right corner</span>
+        <span class="n">ur</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">height_grid</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span>
+                                    <span class="n">origin</span><span class="o">=</span><span class="n">lower_left_corner</span><span class="p">)</span>
+        <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">ur</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ur</span><span class="o">.</span><span class="n">y</span>
 
     <span class="c1"># option 2: make grid using buffered feature bounding box</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># read in the feature from a shapefile</span>
         <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">features_shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Make sure shapefile and bbox filter are in dest (model) CRS</span>
-            <span class="c1"># TODO: CRS wrangling could be added to shp2df as a feature</span>
-            <span class="n">reproject_filter</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_shapefile_crs</span>
-                <span class="n">features_crs</span> <span class="o">=</span> <span class="n">get_shapefile_crs</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">features_crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
-                    <span class="n">reproject_filter</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">features_crs</span> <span class="o">=</span> <span class="n">get_proj_str</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">)</span>
-                <span class="n">reproject_filter</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">bbox_filter</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">reproject_filter</span><span class="p">:</span>
-                    <span class="n">bbox_filter</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span>
-                                     <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">features_crs</span><span class="p">)</span><span class="o">.</span><span class="n">bounds</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">bbox_filter</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">bounds</span>
-            <span class="n">shp2df_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dest_crs&#39;</span><span class="p">:</span> <span class="n">crs</span><span class="p">}</span>
-            <span class="n">shp2df_kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">shp2df_kwargs</span><span class="p">,</span> <span class="n">shp2df</span><span class="p">)</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">shp2df</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">,</span>
-                        <span class="nb">filter</span><span class="o">=</span><span class="n">bbox_filter</span><span class="p">,</span> <span class="o">**</span><span class="n">shp2df_kwargs</span><span class="p">)</span>
-
-            <span class="c1"># optionally subset shapefile data to specified features</span>
+                <span class="n">pmg_l</span><span class="p">,</span> <span class="n">pmg_r</span><span class="p">,</span> <span class="n">pmg_b</span><span class="p">,</span> <span class="n">pmg_t</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">extent</span>
+                <span class="n">bbox_filter</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">box</span><span class="p">(</span><span class="n">pmg_l</span><span class="p">,</span> <span class="n">pmg_b</span><span class="p">,</span> <span class="n">pmg_r</span><span class="p">,</span> <span class="n">pmg_t</span><span class="p">),</span>
+                                            <span class="n">crs</span><span class="o">=</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">features_shapefile</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_filter</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">id_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">include_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">include_ids</span><span class="p">)]</span>
+                <span class="n">datatype</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">include_ids</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inconsistent datatypes in include_ids: </span><span class="si">{</span><span class="n">include_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="n">id_column</span><span class="p">:</span> <span class="n">datatype</span><span class="p">}</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">id_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">include_ids</span><span class="p">)]</span>
+            <span class="c1"># inexplicable shapely.errors.GEOSException: IllegalArgumentException:</span>
+            <span class="c1"># Points of LinearRing do not form a closed linestring</span>
+            <span class="c1"># error resolved by calling to_crs twice</span>
+            <span class="c1"># (for mfsetup/tests/test_grid.py::test_grid_crs_units[3696-feet-meters])</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="c1"># use all features by default</span>
             <span class="n">features</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># alternatively, accept features as an argument</span>
+        <span class="c1"># convert multiple features to a MultiPolygon</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">features</span> <span class="o">=</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="c1"># convert multiple features to a MultiPolygon</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">features</span> <span class="o">=</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-            <span class="c1"># size the grid based on the bbox for features</span>
-            <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">bounds</span>
-            <span class="n">L</span> <span class="o">=</span> <span class="n">buffer</span>  <span class="c1"># distance from area of interest to boundary</span>
-            <span class="n">xul</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">L</span>
-            <span class="n">yul</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">L</span>
-            <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">yul</span> <span class="o">-</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">L</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># initial model height from buffer distance</span>
-            <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">x2</span> <span class="o">+</span> <span class="n">L</span><span class="p">)</span> <span class="o">-</span> <span class="n">xul</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-            <span class="n">rotation</span> <span class="o">=</span> <span class="mf">0.</span>  <span class="c1"># rotation not supported with this option</span>
-            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
-            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
+        <span class="c1"># size the grid based on the bbox for features</span>
+        <span class="c1"># buffer and then unrotate the feature</span>
+        <span class="n">buffered_features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+        <span class="n">unrotated_features</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">buffered_features</span><span class="p">,</span> <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
+                                                     <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+        <span class="n">unrotated_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">unrotated_features</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="c1"># Get important corners</span>
+        <span class="c1"># upper left corner</span>
+        <span class="n">xul_ur</span><span class="p">,</span> <span class="n">yul_ur</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ul</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xul_ur</span><span class="p">,</span> <span class="n">yul_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span>
+                                     <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+        <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">ul</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ul</span><span class="o">.</span><span class="n">y</span>
+        <span class="c1"># lower left corner</span>
+        <span class="n">xll_ur</span><span class="p">,</span> <span class="n">yll_ur</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">lower_left_corner</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span>
+            <span class="n">Point</span><span class="p">(</span><span class="n">xll_ur</span><span class="p">,</span> <span class="n">yll_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+        <span class="c1"># xoff, yoff here for consistency with flopy model grid language</span>
+        <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">=</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">y</span>
+        <span class="c1"># Get the initial grid height and width</span>
+        <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># initial rows and columns (prior to snapping, if specified)</span>
+        <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
+        <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
 
     <span class="c1"># align model with parent grid if there is a parent model</span>
     <span class="c1"># (and not snapping to national hydrologic grid)</span>
+    <span class="c1"># for grids created from a buffer around a feature</span>
+    <span class="c1"># (without a pre-defined number of rows and columns)</span>
+    <span class="c1"># this likely means increasing nrow and ncol</span>
     <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">snap_to_parent</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">snap_to_NHG</span><span class="p">):</span>
+        <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">snap_to_cell_corner</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+                                       <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+        <span class="c1"># unrotate to get new dimensions</span>
+        <span class="n">ur_ur</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">),</span> <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
+                                            <span class="n">origin</span><span class="o">=</span><span class="n">lower_left_corner</span><span class="p">)</span>
+        <span class="n">xul_ur</span><span class="p">,</span> <span class="n">yul_ur</span> <span class="o">=</span> <span class="n">ur_ur</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ur_ur</span><span class="o">.</span><span class="n">y</span>
+        <span class="c1"># Get the lower right corner</span>
+        <span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># snap the lower right corner if the grid was generated from a feature</span>
+        <span class="c1"># (not preset nrow and ncol)</span>
+        <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lr</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span>
+                                         <span class="n">origin</span><span class="o">=</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+            <span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lr</span><span class="o">.</span><span class="n">y</span>
+            <span class="c1"># snap to the nearest parent lower right corner</span>
+            <span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span> <span class="o">=</span> <span class="n">snap_to_cell_corner</span><span class="p">(</span><span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+                                           <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;lower right&#39;</span><span class="p">)</span>
+            <span class="c1"># unrotate to get new dimensions</span>
+            <span class="n">lr_ur</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span><span class="p">),</span> <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
+                                            <span class="n">origin</span><span class="o">=</span><span class="n">lower_left_corner</span><span class="p">)</span>
+            <span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span> <span class="o">=</span> <span class="n">lr_ur</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lr_ur</span><span class="o">.</span><span class="n">y</span>
 
-        <span class="c1"># An alternative method for snapping to the parent grid</span>
-        <span class="c1"># if the code below is causing issues</span>
-        <span class="c1"># get the parent cell containing</span>
-        <span class="c1"># the inset upper left corner</span>
-        <span class="c1"># xul_in, yul_in = xul, yul</span>
-        <span class="c1">#pi2, pj2 = get_ij(parent_model.modelgrid, xul_in, yul_in)</span>
-        <span class="c1"># find the closest vertex</span>
-        <span class="c1">#verts2 = np.array(parent_model.modelgrid.get_cell_vertices(pi2, pj2))</span>
-        <span class="c1">#closest_pos = np.argmin(np.sqrt((xul-verts2[:,0])**2 +</span>
-        <span class="c1">#                                (yul-verts2[:,0])**2))</span>
-        <span class="c1">#xul, yul = verts2[closest_pos]</span>
+            <span class="c1"># calculate a new height and width for the grid now that the corners are snapped</span>
+            <span class="n">height_grid</span> <span class="o">=</span> <span class="n">yul_ur</span> <span class="o">-</span> <span class="n">ylr_ur</span>
+            <span class="n">width_grid</span> <span class="o">=</span> <span class="n">xlr_ur</span> <span class="o">-</span> <span class="n">xul_ur</span>
+            <span class="c1"># snap_to_parent assumes a regular grid</span>
+            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
+            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
 
-        <span class="c1"># get location of coinciding cell in parent model for upper left</span>
-        <span class="c1"># first make sure not sitting at the top of a cell (which can shift into wrong parent cell)</span>
-        <span class="c1"># move to model coords</span>
-        <span class="n">xul_mod</span><span class="p">,</span> <span class="n">yul_mod</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_local_coords</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
-        <span class="c1"># move away from the edge of a cell</span>
-        <span class="n">xul_mod</span> <span class="o">+=</span> <span class="p">(</span><span class="n">delr_grid</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span>
-        <span class="n">yul_mod</span> <span class="o">-=</span> <span class="p">(</span><span class="n">delc_grid</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span>
-        <span class="c1"># flip back to world coords</span>
-        <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">xul_mod</span><span class="p">,</span> <span class="n">yul_mod</span><span class="p">)</span>
-        <span class="c1"># get corresponding cell</span>
-        <span class="n">pi</span><span class="p">,</span> <span class="n">pj</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">)</span>
-        <span class="c1"># find the vertices of that cell</span>
-        <span class="n">verts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_cell_vertices</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="n">pj</span><span class="p">))</span>
-        <span class="c1"># flip to model space to easily locate upper left corner</span>
-        <span class="n">verts_model_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_local_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="n">verts</span><span class="p">])</span>
-        <span class="c1"># finally, back to world space</span>
-        <span class="n">xul</span><span class="p">,</span><span class="n">yul</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">verts_model_space</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">verts_model_space</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="c1"># recalculate xoff, yoff</span>
+        <span class="n">lower_left_corner</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xul_ur</span><span class="p">,</span> <span class="n">ylr_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span>
+                                                    <span class="n">origin</span><span class="o">=</span><span class="n">lower_left_corner</span><span class="p">)</span>
+        <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">=</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">y</span>
 
-        <span class="c1"># adjust the dimensions to align remaining corners</span>
-        <span class="k">def</span> <span class="nf">roundup</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">increment</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">number</span> <span class="o">/</span> <span class="n">increment</span><span class="p">)</span> <span class="o">*</span> <span class="n">increment</span><span class="p">)</span>
-        <span class="n">height_grid</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">height_grid</span><span class="p">,</span> <span class="n">parent_delr_grid</span><span class="p">)</span>
-        <span class="n">width_grid</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">width_grid</span><span class="p">,</span> <span class="n">parent_delc_grid</span><span class="p">)</span>
-
-        <span class="c1"># update nrow, ncol after snapping to parent grid</span>
-        <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
-            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">)</span> <span class="c1"># h is in meters</span>
-            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">xoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">xoff</span> <span class="o">=</span> <span class="n">xul</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation</span><span class="p">))</span> <span class="o">*</span> <span class="n">height_grid</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">yoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">yoff</span> <span class="o">=</span> <span class="n">yul</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">rotation</span><span class="p">))</span> <span class="o">*</span> <span class="n">height_grid</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">xoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="c1">#    xoff = xul + (np.sin(np.radians(rotation)) * height_grid)</span>
+    <span class="k">assert</span> <span class="n">yoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="c1">#    yoff = yul - (np.cos(np.radians(rotation)) * height_grid)</span>
     <span class="c1"># set the grid configuration dictionary</span>
-    <span class="c1"># spacing is in meters (consistent with projected CRS)</span>
-    <span class="c1"># (modelgrid object will be updated automatically from this dictionary)</span>
-    <span class="c1">#if rotation == 0.:</span>
-    <span class="c1">#    xll = xul</span>
-    <span class="c1">#    yll = yul - model.height</span>
     <span class="n">grid_cfg</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nrow&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nrow</span><span class="p">),</span> <span class="s1">&#39;ncol&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncol</span><span class="p">),</span>
                 <span class="s1">&#39;nlay&#39;</span><span class="p">:</span> <span class="n">nlay</span><span class="p">,</span>
                 <span class="s1">&#39;delr&#39;</span><span class="p">:</span> <span class="n">delr_grid</span><span class="p">,</span> <span class="s1">&#39;delc&#39;</span><span class="p">:</span> <span class="n">delc_grid</span><span class="p">,</span>
                 <span class="s1">&#39;xoff&#39;</span><span class="p">:</span> <span class="n">xoff</span><span class="p">,</span> <span class="s1">&#39;yoff&#39;</span><span class="p">:</span> <span class="n">yoff</span><span class="p">,</span>
                 <span class="s1">&#39;xul&#39;</span><span class="p">:</span> <span class="n">xul</span><span class="p">,</span> <span class="s1">&#39;yul&#39;</span><span class="p">:</span> <span class="n">yul</span><span class="p">,</span>
                 <span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="n">rotation</span><span class="p">,</span>
-                <span class="s1">&#39;lenuni&#39;</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="c1">#&#39;lenuni&#39;: 2,</span>
+                <span class="s1">&#39;structured&#39;</span><span class="p">:</span> <span class="kc">True</span>
                 <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">regular</span><span class="p">:</span>
@@ -1146,11 +1316,6 @@
         <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crs</span>
     <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">grid_cfg</span><span class="p">[</span><span class="s1">&#39;epsg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epsg</span>
-    <span class="c1">#elif crs is not None:</span>
-    <span class="c1">#    if &#39;epsg&#39; in crs.srs.lower():</span>
-    <span class="c1">#        grid_cfg[&#39;epsg&#39;] = int(crs.srs.split(&#39;:&#39;)[1])</span>
-    <span class="c1">#    else:</span>
-    <span class="c1">#        grid_cfg[&#39;wkt&#39;] = crs.srs</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">((</span><span class="s2">&quot;Coordinate Reference System information must be supplied via&quot;</span>
                       <span class="s2">&quot;the &#39;crs&#39;&#39; argument.&quot;</span><span class="p">))</span>
@@ -1322,7 +1487,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 15, 2024.
+      <span class="lastupdated">Last updated on Mar 08, 2024.
       </span></p>
   </div>
 

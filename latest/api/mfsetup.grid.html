@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid module &mdash; modflow-setup 0.4.0.post3+gd2d459e documentation</title>
+  <title>mfsetup.grid module &mdash; modflow-setup 0.4.0.post7+g63ba038 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=f3a8e391"></script>
+        <script src="../_static/documentation_options.js?v=75abe509"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -40,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.4.0.post3+gd2d459e
+                0.4.0.post7+g63ba038
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -87,6 +87,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.get_transform"><code class="docutils literal notranslate"><span class="pre">get_transform()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.rasterize"><code class="docutils literal notranslate"><span class="pre">rasterize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.setup_structured_grid"><code class="docutils literal notranslate"><span class="pre">setup_structured_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.snap_to_cell_corner"><code class="docutils literal notranslate"><span class="pre">snap_to_cell_corner()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.grid.write_bbox_shapefile"><code class="docutils literal notranslate"><span class="pre">write_bbox_shapefile()</span></code></a></li>
 </ul>
 </li>
@@ -640,7 +641,131 @@ Can be any of:</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.grid.setup_structured_grid">
 <span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">setup_structured_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_to_parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_to_NHG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wkt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_length_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_shapefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#setup_structured_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.setup_structured_grid" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>xoff</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>yoff</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>xul</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>yul</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>nrow</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>ncol</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>nlay</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>dxy</strong><span class="classifier">_type_, optional</span></dt><dd><p>Specified uniform row/column spacing, in model grid
+(coordinate reference system) units, by default None</p>
+</dd>
+<dt><strong>delr</strong><span class="classifier">scalar or sequence, optional</span></dt><dd><p>Column spacing along a row, in model grid
+(coordinate reference system) units,
+by default None</p>
+</dd>
+<dt><strong>delc</strong><span class="classifier">scalar or sequence, optional</span></dt><dd><p>Row spacing along a column, in model grid
+(coordinate reference system) units,
+by default None</p>
+</dd>
+<dt><strong>top</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>botm</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>rotation</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default 0.</p>
+</dd>
+<dt><strong>parent_model</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>snap_to_parent</strong><span class="classifier">bool, optional</span></dt><dd><p>_description_, by default True</p>
+</dd>
+<dt><strong>snap_to_NHG</strong><span class="classifier">bool, optional</span></dt><dd><p>_description_, by default False</p>
+</dd>
+<dt><strong>features</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>features_shapefile</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>id_column</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>include_ids</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>buffer</strong><span class="classifier">int, optional</span></dt><dd><p>_description_, by default 1000</p>
+</dd>
+<dt><strong>crs</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>epsg</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>prj</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>wkt</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>model_length_units</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+<dt><strong>grid_file</strong><span class="classifier">str, optional</span></dt><dd><p>_description_, by default ‘grid.json’</p>
+</dd>
+<dt><strong>bbox_shapefile</strong><span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default None</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>_type_</dt><dd><p>_description_</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>_description_</p>
+</dd>
+<dt>ValueError</dt><dd><p>_description_</p>
+</dd>
+<dt>ValueError</dt><dd><p>_description_</p>
+</dd>
+<dt>ValueError</dt><dd><p>_description_</p>
+</dd>
+<dt>ValueError</dt><dd><p>_description_</p>
+</dd>
+<dt>ValueError</dt><dd><p>_description_</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.grid.snap_to_cell_corner">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.grid.</span></span><span class="sig-name descname"><span class="pre">snap_to_cell_corner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'upper</span> <span class="pre">left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/grid.html#snap_to_cell_corner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.grid.snap_to_cell_corner" title="Link to this definition">¶</a></dt>
+<dd><p>Move an x, y location to the nearest cell corner on
+a rectilinear modelgrid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>x coordinate in coordinate reference system of modelgrid.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">_type_</span></dt><dd><p>y coordinate in coordinate reference system of modelgrid.</p>
+</dd>
+<dt><strong>modelgrid</strong><span class="classifier">Flopy StructuredGrid instance</span></dt><dd></dd>
+<dt><strong>corner</strong><span class="classifier">str, optional</span></dt><dd><p>‘upper left’ or ‘lower right’, by default ‘upper left’</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>x_corner, y_corner</dt><dd><p>x, y location of cell corner in coordinate reference system
+of modelgrid.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If x, y are outside of the model domain, or if an invalid
+cell corner is specified.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.grid.write_bbox_shapefile">
@@ -661,7 +786,7 @@ Can be any of:</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 15, 2024.
+      <span class="lastupdated">Last updated on Mar 08, 2024.
       </span></p>
   </div>
 

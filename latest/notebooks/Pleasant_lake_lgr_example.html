@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pleasant Lake Example &mdash; modflow-setup 0.4.0.post3+gd2d459e documentation</title>
+  <title>Pleasant Lake Example &mdash; modflow-setup 0.4.0.post7+g63ba038 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=f3a8e391"></script>
+        <script src="../_static/documentation_options.js?v=75abe509"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -43,7 +43,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.4.0.post3+gd2d459e
+                0.4.0.post7+g63ba038
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -140,7 +140,7 @@
 needed, to simulate farfield water-use activity (chiefly irrigated agriculture) in order to delineate a limit of connection, as well as to incorporate distant hydrologic boundaries. Adopting a fine enough discretization for the lake detail throughout the farfield would have resulted in a model with more cells than could be practically managed. To mitigate this, three models were combined: a large regional model built with MODFLOW-NWT (Niswonger et al. 2011), an intermediate MODFLOW 6 model inset
 within the regional model to simulate the irrigated agriculture area, and a refined MODFLOW 6 inset model (nested within the intermediate model) to simulate the lake. Regional groundwater flow and the effects of distant boundaries were simulated with the MODFLOW-NWT model, which was coupled sequentially (one-way) to the MODFLOW 6 models through time-varying specified head boundaries along the intermediate MODFLOW 6 model perimeter. The two MODFLOW 6 models were coupled dynamically (both ways)
 within the groundwater flow solution, allowing for feedback between the models. Estimates of groundwater recharge for the MODFLOW models were provided by a soil water balance code (SWB; Westenbroek et al 2018) simulation that could consider alternative assumptions of climate and land use. Net infiltration estimates from the SWB model were conveyed to the Recharge Packages in the MODFLOW models using the NetCDF functionality in Modflow-setup.</p>
-<p><img alt="193ff4fefe994ce1a41b62cf5b853ef6" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
+<p><img alt="3764c445df424bdab50de0696da7e005" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
 <p><strong>Figure 1</strong>: The full Pleasant Lake model domain with location map, showing the relationship between the regional, intermediate and LGR inset models, as well as the irrigation wells considered.</p>
 <p>Most details of the Fienen et al (2021) model are included here, but to reduce file sizes and execution time, a smaller Modflow-6 simulation domain is used. The smaller domain is for illustration purposes only, and is not intended to be adequate for representing pumping impacts or providing a sufficient distance to the perimeter boundaries.</p>
 <ul class="simple">
@@ -216,8 +216,8 @@ added functionality.</p>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 5 layer(s), 25 row(s), 25 column(s)
-delr: [200.00...200.00] meters
-delc: [200.00...200.00] meters
+delr: [200.00...200.00] undefined
+delc: [200.00...200.00] undefined
 CRS: EPSG:3070
 length units: meters
 xll: 553000.0; yll: 388000.0; rotation: 0.0
@@ -238,13 +238,13 @@ Bounds: (553000.0, 558000.0, 388000.0, 393000.0)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-70 row(s), 80 column(s)
-delr: [40.00...40.00] meters
-delc: [40.00...40.00] meters
+75 row(s), 85 column(s)
+delr: [40.00...40.00] undefined
+delc: [40.00...40.00] undefined
 CRS: EPSG:3070
 length units: meters
-xll: 554200.0; yll: 389000.0; rotation: 0.0
-Bounds: (554200.0, 557400.0, 389000.0, 391800.0)
+xll: 554200.0; yll: 388800.0; rotation: 0
+Bounds: (554200.0, 557600.0, 388800.0, 391800.0)
 </pre></div></div>
 </div>
 </section>
@@ -298,7 +298,7 @@ creating shapely Polygons of grid cells...
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-finished in 0.18s
+finished in 0.19s
 
 </pre></div></div>
 </div>
@@ -348,11 +348,11 @@ writing postproc/shps/plsnt_lgr_inset_grid.shp... Done
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Pleasant Lake test case version 0.1.post3+gd2d459e
+Pleasant Lake test case version 0.1.post7+g63ba038
 Parent model: /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/pleasant
 5 layer(s), 25 row(s), 25 column(s)
-delr: [200.00...200.00] meters
-delc: [200.00...200.00] meters
+delr: [200.00...200.00] undefined
+delc: [200.00...200.00] undefined
 CRS: EPSG:3070
 length units: meters
 xll: 553000.0; yll: 388000.0; rotation: 0.0
@@ -444,15 +444,15 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.4.0.post3+gd2d459e
+{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.4.0.post7+g63ba038
  Parent model: ./plsnt_lgr_parent
- 5 layer(s), 70 row(s), 80 column(s)
- delr: [40.00...40.00] meters
- delc: [40.00...40.00] meters
+ 5 layer(s), 75 row(s), 85 column(s)
+ delr: [40.00...40.00] undefined
+ delc: [40.00...40.00] undefined
  CRS: EPSG:3070
  length units: meters
- xll: 554200.0; yll: 389000.0; rotation: 0.0
- Bounds: (554200.0, 557400.0, 389000.0, 391800.0)
+ xll: 554200.0; yll: 388800.0; rotation: 0
+ Bounds: (554200.0, 557600.0, 388800.0, 391800.0)
  Packages: dis ic npf sto rcha_0 oc sfr_0 lak_0 obs_0 obs_1
  13 period(s):
   per start_datetime end_datetime  perlen  steady  nstp
@@ -505,7 +505,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7faca140f410&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f3b5ff97f80&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -608,23 +608,21 @@ isfropt setting of 1,2 or 3 requires strtop information!
 
 
 Checking segment_data for downstream rises in streambed elevation...
-Segment elevup and elevdn not specified for nstrm=-13 and isfropt=1
+Segment elevup and elevdn not specified for nstrm=-9 and isfropt=1
 passed.
 
 Checking reach_data for downstream rises in streambed elevation...
-3 reaches encountered with strtop &lt; strtop of downstream reach.
+1 reaches encountered with strtop &lt; strtop of downstream reach.
 Elevation rises:
 k i j iseg ireach strtop strtopdn d_strtop reachID diff
-4 20 16 2 1 290.3638610839844 294.76507568359375 4.401214599609375 5 -4.401214599609375
-4 20 17 2 2 290.3638610839844 293.5867614746094 3.222900390625 6 -3.222900390625
-4 21 17 2 3 290.3638610839844 292.6883850097656 2.32452392578125 7 -2.32452392578125
+4 21 17 2 1 290.66015625 292.6883850097656 2.028228759765625 3 -2.028228759765625
 
 
 Checking reach_data for inconsistencies between streambed elevations and the model grid...
 passed.
 
 Checking segment_data for inconsistencies between segment end elevations and the model grid...
-Segment elevup and elevdn not specified for nstrm=-13 and isfropt=1
+Segment elevup and elevdn not specified for nstrm=-9 and isfropt=1
 passed.
 
 Checking for streambed slopes of less than 0.0001...
@@ -680,7 +678,7 @@ liable for any damages resulting from the authorized or unauthorized
 use of the software.
 
 
- Run start date and time (yyyy/mm/dd hh:mm:ss): 2024/02/15 18:15:20
+ Run start date and time (yyyy/mm/dd hh:mm:ss): 2024/03/08 21:06:00
 
  Writing simulation list file: mfsim.lst
  Using Simulation name file: mfsim.nam
@@ -701,6 +699,13 @@ use of the software.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
     Solving:  Stress period:     2    Time step:     1
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
     Solving:  Stress period:     3    Time step:     1
 </pre></div></div>
 </div>
@@ -719,6 +724,13 @@ use of the software.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
     Solving:  Stress period:     6    Time step:     1
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
     Solving:  Stress period:     7    Time step:     1
 </pre></div></div>
 </div>
@@ -728,6 +740,13 @@ use of the software.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
     Solving:  Stress period:     8    Time step:     1
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
     Solving:  Stress period:     9    Time step:     1
 </pre></div></div>
 </div>
@@ -737,6 +756,13 @@ use of the software.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
     Solving:  Stress period:    10    Time step:     1
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
     Solving:  Stress period:    11    Time step:     1
 </pre></div></div>
 </div>
@@ -746,6 +772,13 @@ use of the software.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
     Solving:  Stress period:    12    Time step:     1
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
     Solving:  Stress period:    13    Time step:     1
 </pre></div></div>
 </div>
@@ -755,8 +788,8 @@ use of the software.
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
- Run end date and time (yyyy/mm/dd hh:mm:ss): 2024/02/15 18:15:23
- Elapsed run time:  2.832 Seconds
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2024/03/08 21:06:03
+ Elapsed run time:  3.478 Seconds
 
  Normal termination of simulation.
 </pre></div></div>
@@ -990,7 +1023,6 @@ wrote postproc/plsnt_lgr_parent/rasters/botm_lay1.tif
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 wrote postproc/plsnt_lgr_parent/rasters/botm_lay2.tif
-wrote postproc/plsnt_lgr_parent/rasters/botm_lay3.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -998,6 +1030,7 @@ wrote postproc/plsnt_lgr_parent/rasters/botm_lay3.tif
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+wrote postproc/plsnt_lgr_parent/rasters/botm_lay3.tif
 wrote postproc/plsnt_lgr_parent/rasters/botm_lay4.tif
 </pre></div></div>
 </div>
@@ -1088,7 +1121,6 @@ wrote postproc/plsnt_lgr_parent/rasters/k_lay0.tif
 <div class="highlight"><pre>
 wrote postproc/plsnt_lgr_parent/rasters/k_lay1.tif
 wrote postproc/plsnt_lgr_parent/rasters/k_lay2.tif
-wrote postproc/plsnt_lgr_parent/rasters/k_lay3.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1096,6 +1128,7 @@ wrote postproc/plsnt_lgr_parent/rasters/k_lay3.tif
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+wrote postproc/plsnt_lgr_parent/rasters/k_lay3.tif
 wrote postproc/plsnt_lgr_parent/rasters/k_lay4.tif
 </pre></div></div>
 </div>
@@ -1213,7 +1246,6 @@ recharge:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 wrote postproc/plsnt_lgr_parent/rasters/recharge_per0.tif
-wrote postproc/plsnt_lgr_parent/rasters/recharge_per1.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1221,6 +1253,7 @@ wrote postproc/plsnt_lgr_parent/rasters/recharge_per1.tif
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+wrote postproc/plsnt_lgr_parent/rasters/recharge_per1.tif
 wrote postproc/plsnt_lgr_parent/rasters/recharge_per2.tif
 </pre></div></div>
 </div>
@@ -1318,6 +1351,13 @@ wel_0 package...
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 writing postproc/plsnt_lgr_parent/shps/wel0_stress_period_data.shp... Done
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
 q:
 </pre></div></div>
 </div>
@@ -1536,7 +1576,6 @@ wrote postproc/plsnt_lgr_inset/rasters/iconvert_lay3.tif
 <div class="highlight"><pre>
 wrote postproc/plsnt_lgr_inset/rasters/iconvert_lay4.tif
 ss:
-wrote postproc/plsnt_lgr_inset/rasters/ss_lay0.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1544,6 +1583,7 @@ wrote postproc/plsnt_lgr_inset/rasters/ss_lay0.tif
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+wrote postproc/plsnt_lgr_inset/rasters/ss_lay0.tif
 wrote postproc/plsnt_lgr_inset/rasters/ss_lay1.tif
 </pre></div></div>
 </div>
@@ -1738,7 +1778,7 @@ skipped, not implemented yet
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 15, 2024.
+      <span class="lastupdated">Last updated on Mar 08, 2024.
       </span></p>
   </div>
 

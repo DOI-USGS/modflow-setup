@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.4.0.post3+gd2d459e documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.4.0.post7+g63ba038 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=f3a8e391"></script>
+        <script src="../../_static/documentation_options.js?v=75abe509"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.4.0.post3+gd2d459e
+                0.4.0.post7+g63ba038
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -450,8 +450,16 @@
     <span class="k">def</span> <span class="nf">create_lgr_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="s1">&#39;lgr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># load the config file for lgr inset model</span>
-            <span class="n">inset_cfg</span> <span class="o">=</span> <span class="n">load_cfg</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span>
-                                 <span class="n">default_file</span><span class="o">=</span><span class="s1">&#39;/mf6_defaults.yml&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;filename&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="n">inset_cfg</span> <span class="o">=</span> <span class="n">load_cfg</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span>
+                                    <span class="n">default_file</span><span class="o">=</span><span class="s1">&#39;/mf6_defaults.yml&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">&#39;cfg&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="n">inset_cfg</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;cfg&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognized input in subblock lgr: &#39;</span>
+                                 <span class="s1">&#39;Supply either a configuration filename: &#39;</span>
+                                 <span class="s1">&#39;or additional yaml configuration under cfg:&#39;</span>
+                                 <span class="p">)</span>
             <span class="c1"># if lgr inset has already been created</span>
             <span class="k">if</span> <span class="n">inset_cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;modelname&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">_models</span><span class="p">:</span>
                 <span class="k">return</span>
@@ -689,7 +697,7 @@
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
         <span class="c1"># get steady/transient info from perioddata table</span>
         <span class="c1"># which parses it from either DIS or STO input (to allow consistent input structure with mf2005)</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;steady_state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">])}</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;steady_state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">v</span><span class="p">}</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;transient&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="ow">not</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">])}</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfsto</span><span class="p">)</span>
         <span class="n">sto</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfsto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -1179,7 +1187,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Feb 15, 2024.
+      <span class="lastupdated">Last updated on Mar 08, 2024.
       </span></p>
   </div>
 
