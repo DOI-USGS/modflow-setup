@@ -1212,6 +1212,8 @@ def setup_array(model, package, var, data=None,
     # data specified as source_data
     elif cfg is not None and var in cfg:
 
+        from_model = False
+
         # get the source data block
         # determine if source data is from another model
         source_data_input = cfg.get(var)

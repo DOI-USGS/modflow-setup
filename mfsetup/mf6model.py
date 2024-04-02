@@ -479,7 +479,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return dis
 
-    def setup_tdis(self):
+    #def setup_tdis(self):
+    def setup_tdis(self, **kwargs):
         """
         Sets up the TDIS package.
         """
