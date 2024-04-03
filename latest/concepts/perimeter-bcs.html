@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.5.0.post1+g4bfd847 documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.5.0.post2+g5c55095 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=9fa60870"></script>
+        <script src="../_static/documentation_options.js?v=2f435f50"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -40,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post1+g4bfd847
+                0.5.0.post2+g5c55095
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -125,7 +125,7 @@
 <li><p>The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.</p></li>
 <li><p>The parent model may have different length units.</p></li>
 <li><p>The parent model may be of a different MODFLOW version (e.g. MODFLOW 6 inset with a MODFLOW-NWT parent)</p></li>
-<li><p>For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.12.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
+<li><p>For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.13.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
 <li><p>Specified flux boundaries are currently limited to the parent and inset models being colinear.</p></li>
 <li><p>The perimeter may be irregular. For example, the edge of the model active area may follow a major surface water feature along the opposite side.</p></li>
 <li><p>Specified perimeter heads in MODFLOW-NWT models will have ending heads for each stress period assigned from the starting head of the next stress period (with the last period having the same starting and ending heads). The MODFLOW 6 Constant Head Package only supports assignment of a single head per stress period. This distinction only matters for models where stress periods are subdivided by multiple timesteps.</p></li>
@@ -204,7 +204,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 </pre></div>
 </div>
 </div></blockquote>
-<p><strong>3) Specification of perimeter boundary cells with a shapefile</strong>. The locations of perimeter cells can be explicitly specified this way, but they still must coincide with the edge of the active extent in each layer (Modflow-setup will not put perimeter cells in the model interior). (Open) Polyline or Polygon shapefiles can be used; in either case a buffer is used to align the supplied features with the active area edge, which is determined using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.sobel.html#scipy.ndimage.sobel" title="(in SciPy v1.12.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">Sobel</span> <span class="pre">edge</span> <span class="pre">detection</span> <span class="pre">filter</span> <span class="pre">in</span> <span class="pre">Scipy</span></code></a>.</p>
+<p><strong>3) Specification of perimeter boundary cells with a shapefile</strong>. The locations of perimeter cells can be explicitly specified this way, but they still must coincide with the edge of the active extent in each layer (Modflow-setup will not put perimeter cells in the model interior). (Open) Polyline or Polygon shapefiles can be used; in either case a buffer is used to align the supplied features with the active area edge, which is determined using the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.sobel.html#scipy.ndimage.sobel" title="(in SciPy v1.13.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">Sobel</span> <span class="pre">edge</span> <span class="pre">detection</span> <span class="pre">filter</span> <span class="pre">in</span> <span class="pre">Scipy</span></code></a>.</p>
 <blockquote>
 <div><p>Input example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
@@ -229,7 +229,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Mar 28, 2024.
+      <span class="lastupdated">Last updated on Apr 03, 2024.
       </span></p>
   </div>
 
