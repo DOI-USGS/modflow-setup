@@ -166,7 +166,11 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                 if meta['transform'][0] > m.modelgrid.delr[0]:
                     all_touched = True
                 stat = entry['stat']
-                results = zonal_stats(polygons, filename, stats=stat,
+                # load raster and specify affine transform to avoid issues with proj
+                with rasterio.open(filename) as src:
+                    affine = src.transform
+                    array = src.read(1)
+                results = zonal_stats(polygons, array, affine=affine, stats=stat,
                                     all_touched=all_touched)
                 #values = np.ones((m.nrow * m.ncol), dtype=float) * np.nan
                 #values[cells_with_bc] = np.array([r[stat] for r in results])
