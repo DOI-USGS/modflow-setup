@@ -552,11 +552,16 @@ def test_rch_setup(shellmound_model_with_dis):
     unit_conversion = convert_length_units('inches', 'meters')
 
     def get_period_values(start, end):
-        period_data = ds['net_infiltration'].loc[start:end].mean(axis=0)
-        dsi = period_data.interp(x=x, y=y, method='linear',
+        #period_data = ds['net_infiltration'].loc[start:end].mean(axis=0)
+        #dsi = period_data.interp(x=x, y=y, method='linear',
+        #                         kwargs={'fill_value': np.nan,
+        #                                 'bounds_error': True})
+        dsi = ds.interp(x=x, y=y, method='linear',
                                  kwargs={'fill_value': np.nan,
                                          'bounds_error': True})
-        data = dsi.values * unit_conversion
+        period_data = dsi['net_infiltration'].loc[start:end].mean(axis=0)
+        data = period_data.values * unit_conversion
+        #data = dsi.values * unit_conversion
         return np.reshape(data, (m.nrow, m.ncol))
 
     # test steady-state avg. across all data
@@ -564,8 +569,9 @@ def test_rch_setup(shellmound_model_with_dis):
 
     #assert np.allclose(values, m.rch.recharge.array[0, 0])
     # test period 1 avg. for those times
-    values1 = get_period_values(m.perioddata['start_datetime'].values[1],
-                                m.perioddata['end_datetime'].values[1])
+    start = m.cfg['rch']['source_data']['recharge']['period_stats'][1][0]
+    end = m.cfg['rch']['source_data']['recharge']['period_stats'][1][1]
+    values1 = get_period_values(start, end)
     assert testing.rpd(values1.mean(), m.rch.recharge.array[1, 0].mean()) < 0.01
 
     # check that nodata are written as 0.
