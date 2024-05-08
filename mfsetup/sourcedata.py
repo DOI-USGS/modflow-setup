@@ -1425,6 +1425,25 @@ def setup_array(model, package, var, data=None,
                                                 model.cfg['dis']['top_filename_fmt'])
             top = model.load_array(model.cfg['dis']['griddata']['top'][0]['filename'])
 
+        # special case of LGR models
+        # with bottom connections to underlying parent cells
+        if model.version == 'mf6':
+            # (if model is an lgr inset model)
+            if model._is_lgr:
+                # regardless of what is specified for inset model bottom
+                # use top elevations of underlying parent model cells
+                nlay = model.cfg['dis']['dimensions']['nlay']
+                if (nlay < model.parent.modelgrid.nlay):
+                    # use the parent model bottoms
+                    # mapped to the inset model grid by the Flopy Lgr util
+                    lgr = model.parent.lgr[model.name]  # Flopy Lgr inst.
+                    data[nlay-1] = lgr.botm[nlay-1]
+                    # set parent model top to top of
+                    # first active parent model layer below this lgr domain
+                    kp = lgr.get_parent_indices(nlay-1, 0, 0)[0]
+                    model.parent.dis.top = lgr.botmp[kp]
+                    j=2
+
         # fill missing layers if any
         if len(data) < model.nlay:
             all_surfaces = np.zeros((model.nlay + 1, model.nrow, model.ncol), dtype=float) * np.nan

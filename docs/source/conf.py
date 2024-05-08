@@ -236,3 +236,5 @@ intersphinx_mapping = {
     'matplotlib': ('https://matplotlib.org/stable/', None),
     'rasterio': ('https://rasterio.readthedocs.io/en/latest/', None)
 }
+
+tls_verify = False
