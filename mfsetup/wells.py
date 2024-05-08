@@ -83,7 +83,8 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
 
         # map wells to inset model layers if different from parent
         to_inset_layers = {v:k for k, v in model.parent_layers.items()}
-        spd['k'] = [to_inset_layers[k] for k in spd['k']]
+        spd['k'] = [to_inset_layers.get(k, -9999) for k in spd['k']]
+        spd = spd.loc[spd['k'] >= 0].copy()
 
         df = pd.concat([df, spd], axis=0)
 
