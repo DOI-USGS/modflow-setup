@@ -107,8 +107,54 @@ def test_make_lgr_idomain(get_pleasant_lgr_parent_with_grid):
     assert np.all(idomain[:, ~isinset] >= 1)
 
 
-def test_lgr_grid_setup(get_pleasant_lgr_parent_with_grid):
-    m = get_pleasant_lgr_parent_with_grid
+@pytest.mark.parametrize(
+    'lgr_grid_spacing,parent_start_end_layers,inset_nlay', [
+    # parent layers 0 through 3
+    # are specified in pleasant_lgr_parent.yml
+    (40, 'use configuration', 4),
+    (40, (0, 2), 3),
+    # special case to test setup
+    # with no parent start/end layers specified
+    (40, None, 5),
+    pytest.param(35, None, 5, marks=pytest.mark.xfail(
+        reason='inset spacing not a factor of parent spacing')),
+    pytest.param(40, None, 4, marks=pytest.mark.xfail(
+        reason='inset nlay inconsistent with parent layers')),
+    ]
+    )
+def test_lgr_grid_setup(lgr_grid_spacing, parent_start_end_layers,
+                        inset_nlay,
+                        pleasant_lgr_cfg, pleasant_simulation,
+                        project_root_path):
+
+    # apply test parameters to inset/parent configurations
+    inset_cfg_path = project_root_path + '/examples/pleasant_lgr_inset.yml'
+    inset_cfg = load_cfg(inset_cfg_path,
+                         default_file='/mf6_defaults.yml')
+    inset_cfg['setup_grid']['dxy'] = lgr_grid_spacing
+    inset_cfg['dis']['dimensions']['nlay'] = inset_nlay
+
+    cfg = pleasant_lgr_cfg.copy()
+    lgr_cfg = cfg['setup_grid']['lgr']['pleasant_lgr_inset']
+    lgr_cfg['cfg'] = inset_cfg
+    del lgr_cfg['filename']
+    if parent_start_end_layers is None:
+        del lgr_cfg['parent_start_layer']
+        del lgr_cfg['parent_end_layer']
+        k0, k1 = 0, None
+    elif parent_start_end_layers == 'use configuration':
+        k0 = lgr_cfg['parent_start_layer']
+        k1 = lgr_cfg['parent_end_layer']
+    else:
+        k0, k1 = parent_start_end_layers
+        lgr_cfg['parent_start_layer'] = k0
+        lgr_cfg['parent_end_layer'] = k1
+
+    cfg['model']['simulation'] = pleasant_simulation
+    kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
+    m = MF6model(cfg=cfg, **kwargs)
+    m.setup_grid()
+
     inset_model = m.inset['plsnt_lgr_inset']
     assert isinstance(inset_model, MF6model)
     assert inset_model.parent is m
@@ -120,10 +166,27 @@ def test_lgr_grid_setup(get_pleasant_lgr_parent_with_grid):
         inset_model.modelgrid.write_shapefile(outfolder / 'pleasant_lgr_inset_grid.shp')
 
     # verify that lgr area was removed from parent idomain
-    lgr_idomain = make_lgr_idomain(m.modelgrid, inset_model.modelgrid)
+    lgr_idomain = make_lgr_idomain(m.modelgrid, inset_model.modelgrid,
+                                   k0, k1)
     idomain = m.idomain
     assert idomain[lgr_idomain == 0].sum() == 0
-
+    inset_cells_per_layer = inset_model.modelgrid.shape[1] *\
+        inset_model.modelgrid.shape[2]
+    refinement_factor = int(cfg['setup_grid']['dxy'] / lgr_grid_spacing)
+    nparent_cells_within_lgr_per_layer = inset_cells_per_layer / refinement_factor**2
+    # for each layer where lgr is specified,
+    # there should be at least enough inactive cells to cover the lrg grid area
+    if k1 is None:
+        k1 = m.modelgrid.nlay -1
+    layers_with_lgr = (lgr_idomain == 0).sum(axis=(1, 2)) >=\
+        nparent_cells_within_lgr_per_layer
+    assert all(layers_with_lgr[k0:k1])
+    # layers outside of the specified lgr range should have
+    # less inactive cells than the size of the lgr grid area
+    # (specific to this test case with a large LGR extent relative to the total grid)
+    assert not any(layers_with_lgr[k1+1:])
+    assert not any(layers_with_lgr[:k0])
+    j=2
     # todo: add test that grids are aligned
 
 

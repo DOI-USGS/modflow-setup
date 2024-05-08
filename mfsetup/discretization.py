@@ -226,7 +226,7 @@ def fill_empty_layers(array):
 
 
 def fill_cells_vertically(top, botm):
-    """In MODFLOW 6, cells where idomain != 1 are excluded from the solution.
+    """In MODFLOW 6, cells where idomain < 1 are excluded from the solution.
     However, in the botm array, values are needed in overlying cells to
     compute layer thickness (cells with idomain != 1 overlying cells with idomain >= 1 need
     values in botm). Given a 3D numpy array with nan values indicating excluded cells,
@@ -404,7 +404,8 @@ def make_ibound(top, botm, nodata=-9999,
     return idomain
 
 
-def make_lgr_idomain(parent_modelgrid, inset_modelgrid):
+def make_lgr_idomain(parent_modelgrid, inset_modelgrid,
+                     parent_start_layer=0, parent_end_layer=None):
     """Inactivate cells in parent_modelgrid that coincide
     with area of inset_modelgrid."""
     if parent_modelgrid.rotation != inset_modelgrid.rotation:
@@ -412,6 +413,8 @@ def make_lgr_idomain(parent_modelgrid, inset_modelgrid):
                          f'\nParent rotation: {parent_modelgrid.rotation}'
                          f'\nInset rotation: {inset_modelgrid.rotation}'
                          )
+    if parent_end_layer is None:
+        parent_end_layer = parent_modelgrid.nlay -1
     # upper left corner of inset model in parent model
     # use the cell centers, to avoid edge situation
     # where neighboring parent cell is accidentally selected
@@ -423,7 +426,8 @@ def make_lgr_idomain(parent_modelgrid, inset_modelgrid):
     y1 = inset_modelgrid.ycellcenters[-1, -1]
     pi1, pj1 = parent_modelgrid.intersect(x1, y1, forgive=True)
     idomain = np.ones(parent_modelgrid.shape, dtype=int)
-    idomain[:, pi0:pi1+1, pj0:pj1+1] = 0
+    idomain[parent_start_layer:parent_end_layer,
+            pi0:pi1+1, pj0:pj1+1] = 0
     return idomain
 
 

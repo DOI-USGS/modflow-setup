@@ -375,11 +375,38 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             self.inset[inset_model.name] = inset_model
             #self.inset[inset_model.name]._is_lgr = True
 
-            # create idomain indicating area of parent grid that is LGR
-            lgr_idomain = make_lgr_idomain(self.modelgrid, self.inset[inset_model.name].modelgrid)
-
-            ncpp = int(self.modelgrid.delr[0] / self.inset[inset_model.name].modelgrid.delr[0])
+            # establish inset model layering within parent model
+            parent_start_layer = v.get('parent_start_layer', 0)
+            # parent_end_layer is specified as the last zero-based
+            # parent layer that includes LGR refinement (not as a slice end)
+            parent_end_layer = v.get('parent_end_layer', self.nlay - 1) + 1
             ncppl = v.get('layer_refinement', 1)
+            specified_nlay_lgr = ncppl * (parent_end_layer - parent_start_layer)
+            specified_nlay_dis = inset_cfg['dis']['dimensions']['nlay']
+            if specified_nlay_lgr != specified_nlay_dis:
+                raise ValueError(
+                    f"Parent model layers of {parent_start_layer} to {parent_end_layer} "
+                    f"and layer refinement of {ncppl} implies {specified_nlay_lgr} inset model layers.\n"
+                    f"{specified_nlay_dis} inset model layers specified in DIS package.")
+            # mapping between parent and inset model layers
+            # that is used for copying input from parent model
+            parent_inset_layer_mapping = dict()
+            inset_k = -1
+            for parent_k in range(parent_start_layer, parent_end_layer):
+                for i in range(ncppl):
+                    inset_k += 1
+                    parent_inset_layer_mapping[parent_k] = inset_k
+            self.inset[inset_model.name].cfg['parent']['inset_layer_mapping'] =\
+                parent_inset_layer_mapping
+            # create idomain indicating area of parent grid that is LGR
+            lgr_idomain = make_lgr_idomain(self.modelgrid, self.inset[inset_model.name].modelgrid,
+                                           parent_start_layer, parent_end_layer)
+
+            # inset model horizontal refinement from parent resolution
+            refinement = self.modelgrid.delr[0] / self.inset[inset_model.name].modelgrid.delr[0]
+            if not np.round(refinement, 4).is_integer():
+                raise ValueError(f"LGR inset model spacing must be a factor of the parent model spacing.")
+            ncpp = int(refinement)
             self.lgr[inset_model.name] = Lgr(self.nlay, self.nrow, self.ncol,
                                              self.dis.delr.array, self.dis.delc.array,
                                              self.dis.top.array, self.dis.botm.array,
