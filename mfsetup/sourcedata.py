@@ -1381,7 +1381,7 @@ def setup_array(model, package, var, data=None,
     # special handling of some variables
     # (for lakes)
     simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
-    if var == 'botm':
+    if var == 'botm' and simulate_high_k_lakes:
         # only execute this code if building the model (not loading)
         if not model._load:
             bathy = model.lake_bathymetry
@@ -1605,7 +1605,9 @@ def setup_array(model, package, var, data=None,
 
     # write the top array again, because top was filled
     # with botm array above
-    if var == 'botm':
+    # NOTE: that tends to corrupt the top array, 
+    # is that only applicable to simulate_high_k_lakes ?)
+    if var == 'botm' and simulate_high_k_lakes:
         top_filepath = model.setup_external_filepaths(package, 'top',
                                                       model.cfg[package]['top_filename_fmt'])[0]
         save_array(top_filepath, top,
