@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Time and space discretization &mdash; modflow-setup 0.5.0.post4+g869e1af documentation</title>
+  <title>Time and space discretization &mdash; modflow-setup 0.5.0.post10+g45683b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=c2f9c8d0"></script>
+        <script src="../_static/documentation_options.js?v=fa88a7cc"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -40,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post4+g869e1af
+                0.5.0.post10+g45683b6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -247,7 +247,7 @@
 </section>
 <section id="modflow-2005-ntw-input">
 <h3>MODFLOW-2005/NTW input<a class="headerlink" href="#modflow-2005-ntw-input" title="Link to this heading">¶</a></h3>
-<p>Specification of <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> blocks is the same for MODFLOW 6 and MODFLOW-2005 style models, except the latter wouldn’t contain an <code class="docutils literal notranslate"><span class="pre">idomain:</span></code> subblock. Specification of other inputs generally follows Flopy (for example, <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.7.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>). A <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block equivalent to the first example give would look like:</p>
+<p>Specification of <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> blocks is the same for MODFLOW 6 and MODFLOW-2005 style models, except the latter wouldn’t contain an <code class="docutils literal notranslate"><span class="pre">idomain:</span></code> subblock. Specification of other inputs generally follows Flopy (for example, <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.8.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>). A <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block equivalent to the first example give would look like:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
 <span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
@@ -277,7 +277,7 @@
 <p>In MODFLOW 6, time discretization is specified at the simulation level, it its own Time Discretization (TDIS) Package. In MODFLOW-2005/NWT, time discretization is specified in the Discretization Package. Accordingly, in Modflow-setup, time discretization in specified in the appropriate package block for the model version.</p>
 <section id="specifying-stress-period-information-directly">
 <h3>Specifying stress period information directly<a class="headerlink" href="#specifying-stress-period-information-directly" title="Link to this heading">¶</a></h3>
-<p>Input to the DIS and TDIS packages follows the MODFLOW structure. For simple steady-state models, time discretization could be specified directly to the DIS or TDIS packages using there respective the Flopy inputs (<a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.7.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>; <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mftdis.html#flopy.mf6.modflow.mftdis.ModflowTdis" title="(in FloPy v3.7.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowTdis</span></code></a>). This example from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> shows direct specification of stress period information to the Discretization Package:</p>
+<p>Input to the DIS and TDIS packages follows the MODFLOW structure. For simple steady-state models, time discretization could be specified directly to the DIS or TDIS packages using there respective the Flopy inputs (<a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.8.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>; <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mftdis.html#flopy.mf6.modflow.mftdis.ModflowTdis" title="(in FloPy v3.8.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowTdis</span></code></a>). This example from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> shows direct specification of stress period information to the Discretization Package:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
@@ -598,7 +598,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 07, 2024.
+      <span class="lastupdated">Last updated on Jul 09, 2024.
       </span></p>
   </div>
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.5.0.post4+g869e1af documentation</title>
+  <title>mfsetup.mfnwtmodel &mdash; modflow-setup 0.5.0.post10+g45683b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=c2f9c8d0"></script>
+        <script src="../../_static/documentation_options.js?v=fa88a7cc"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post4+g869e1af
+                0.5.0.post10+g45683b6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -196,6 +196,9 @@
 
         <span class="c1"># set the list file path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lst</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;list_filename_fmt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+
+        <span class="c1"># the &quot;drop thin cells&quot; option is not available for MODFLOW-2005 models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_drop_thin_cells</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># property arrays</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ibound</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1036,7 +1039,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 07, 2024.
+      <span class="lastupdated">Last updated on Jul 09, 2024.
       </span></p>
   </div>
 
