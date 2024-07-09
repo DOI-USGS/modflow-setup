@@ -138,6 +138,9 @@ def save_array(filename, arr, nodata=-9999,
     if isinstance(filename, dict) and 'filename' in filename.keys():
         filename = filename.copy().pop('filename')
     t0 = time.time()
+    if np.issubdtype(arr.dtype, np.unsignedinteger):
+        arr = arr.copy()
+        arr = arr.astype(int)
     arr[np.isnan(arr)] = nodata
     np.savetxt(filename, arr, **kwargs)
     print('wrote {}'.format(filename), end=', ')
