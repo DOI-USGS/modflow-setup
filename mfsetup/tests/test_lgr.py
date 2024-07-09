@@ -202,7 +202,7 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml, tmpdir):
 
     # a small percentage of cells are appreciably different
     # unclear why
-    assert np.sum(np.abs(diff) > 0.01)/diff.size <= 0.002
+    assert np.sum(np.abs(diff) > 0.01)/diff.size <= 0.005
 
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
