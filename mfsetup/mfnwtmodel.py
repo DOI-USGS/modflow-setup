@@ -91,6 +91,9 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # set the list file path
         self.lst.file_name = [self.cfg['model']['list_filename_fmt'].format(self.name)]
 
+        # the "drop thin cells" option is not available for MODFLOW-2005 models
+        self._drop_thin_cells = False
+
         # property arrays
         self._ibound = None
 
