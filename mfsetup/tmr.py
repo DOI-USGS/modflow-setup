@@ -525,7 +525,7 @@ class Tmr:
                                    self.inset.modelgrid.delc.mean()])
             perimeter['geometry'] = [g.buffer(buffer_dist * 0.5) for g in geoms]
             grid_df = self.inset.modelgrid.get_dataframe(layers=False)
-            df = gp.sjoin(grid_df, perimeter, op='intersects', how='inner')
+            df = gp.sjoin(grid_df, perimeter, predicate='intersects', how='inner')
             # add layers
             dfs = []
             for k in range(self.inset.modelgrid.nlay):
