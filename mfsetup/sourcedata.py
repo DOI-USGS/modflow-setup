@@ -1381,9 +1381,16 @@ def setup_array(model, package, var, data=None,
     # special handling of some variables
     # (for lakes)
     simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
-    if var == 'botm' and simulate_high_k_lakes:
-        # only execute this code if building the model (not loading)
-        if not model._load:
+    apply_lake_bathymetry_to_model_top = False
+    if var == 'botm':
+        if 'lak' in model.cfg['model']['packages'] and not model._load and\
+            np.sum(model.lake_bathymetry) != 0:
+            # only execute this code if building the model (not loading)
+            # and if lake bathymetry was supplied
+            # (bathymetry is loaded from the configuration file input
+            #  when the model.lake_bathymetry property is called for the first time;
+            #  see MFsetupMixin._set_lake_bathymetry)
+            apply_lake_bathymetry_to_model_top = True
             bathy = model.lake_bathymetry
 
             # save a copy of original top elevations
@@ -1417,7 +1424,6 @@ def setup_array(model, package, var, data=None,
                 shutil.copy(model.cfg['intermediate_data']['top'][0],
                             original_top_file)
                 top = model.load_array(original_top_file)
-            lake_botm_elevations = top[bathy != 0] - bathy[bathy != 0]
             if model.version == 'mf6':
                 # reset the model top to the lake bottom
                 top[bathy != 0] -= bathy[bathy != 0]
@@ -1427,7 +1433,11 @@ def setup_array(model, package, var, data=None,
             if top_filename is None:
                 model.setup_external_filepaths('dis', 'top',
                                                 model.cfg['dis']['top_filename_fmt'])
-            top = model.load_array(model.cfg['dis']['griddata']['top'][0]['filename'])
+            if model.version == 'mf6':
+                top_filename = model.cfg['dis']['griddata']['top'][0]['filename']
+            else:
+                top_filename = model.cfg['dis']['top'][0]
+            top = model.load_array(top_filename)
 
         # fill missing layers if any
         if len(data) < model.nlay:
@@ -1605,9 +1615,9 @@ def setup_array(model, package, var, data=None,
 
     # write the top array again, because top was filled
     # with botm array above
-    # NOTE: that tends to corrupt the top array, 
+    # NOTE: that tends to corrupt the top array,
     # is that only applicable to simulate_high_k_lakes ?)
-    if var == 'botm' and simulate_high_k_lakes:
+    if var == 'botm' and apply_lake_bathymetry_to_model_top:
         top_filepath = model.setup_external_filepaths(package, 'top',
                                                       model.cfg[package]['top_filename_fmt'])[0]
         save_array(top_filepath, top,
