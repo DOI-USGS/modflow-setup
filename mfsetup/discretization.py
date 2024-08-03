@@ -201,7 +201,7 @@ def fill_empty_layers(array):
                 return item
 
     def get_next_above(seq, value):
-        for item in sorted(seq[::-1]):
+        for item in sorted(seq)[::-1]:
             if item < value:
                 return item
 
@@ -264,9 +264,13 @@ def fill_cells_vertically(top, botm):
     # add in the model bottom elevations
     # use the minimum values instead of the bottom layer,
     # in case there are nans in the bottom layer
-    filled += np.nanmin(botm, axis=0)  # botm[-1]
+    # include the top, in case there are nans in all botms
+    # introducing nans into the top can cause issues
+    # with partical vertical LGR
+    all_surfaces = np.stack([top] + [arr2d for arr2d in botm])
+    filled += np.nanmin(all_surfaces, axis=0)  # botm[-1]
     # append the model bottom elevations
-    filled = np.append(filled, [np.nanmin(botm, axis=0)], axis=0)
+    filled = np.append(filled, [np.nanmin(all_surfaces, axis=0)], axis=0)
     return filled[0].copy(), filled[1:].copy()
 
 
@@ -405,7 +409,7 @@ def make_ibound(top, botm, nodata=-9999,
 
 
 def make_lgr_idomain(parent_modelgrid, inset_modelgrid,
-                     parent_start_layer=0, parent_end_layer=None):
+                     ncppl):
     """Inactivate cells in parent_modelgrid that coincide
     with area of inset_modelgrid."""
     if parent_modelgrid.rotation != inset_modelgrid.rotation:
@@ -413,8 +417,6 @@ def make_lgr_idomain(parent_modelgrid, inset_modelgrid,
                          f'\nParent rotation: {parent_modelgrid.rotation}'
                          f'\nInset rotation: {inset_modelgrid.rotation}'
                          )
-    if parent_end_layer is None:
-        parent_end_layer = parent_modelgrid.nlay -1
     # upper left corner of inset model in parent model
     # use the cell centers, to avoid edge situation
     # where neighboring parent cell is accidentally selected
@@ -426,7 +428,7 @@ def make_lgr_idomain(parent_modelgrid, inset_modelgrid,
     y1 = inset_modelgrid.ycellcenters[-1, -1]
     pi1, pj1 = parent_modelgrid.intersect(x1, y1, forgive=True)
     idomain = np.ones(parent_modelgrid.shape, dtype=int)
-    idomain[parent_start_layer:parent_end_layer,
+    idomain[0:(np.array(ncppl) > 0).sum(),
             pi0:pi1+1, pj0:pj1+1] = 0
     return idomain
 
