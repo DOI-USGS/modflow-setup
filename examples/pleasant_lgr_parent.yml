@@ -79,9 +79,12 @@ setup_grid:
   lgr:
     pleasant_lgr_inset:
       filename: 'pleasant_lgr_inset.yml'
-      layer_refinement: 1  # number of lgr model layers per parent model layer
-      parent_start_layer: 0 # uppermost parent model layer to include in lgr
-      parent_end_layer: 3 # lowermost parent model layer to include in lgr
+      # number of inset layers for each parent layer
+      # this can be an integer (vertically uniform refinement)
+      # a list (with an entry for each parent layer)
+      # or a dictionary (with entries for each parent layer that is refined;
+      # unlisted layers will default to zero)
+      layer_refinement: [1, 1, 1, 1, 1]  # number of lgr model layers per parent model layer
 
 # Structured Discretization Package
 dis:

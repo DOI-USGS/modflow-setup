@@ -11,13 +11,13 @@ metadata:
 
 # input for MODFLOW 6 simulation
 simulation:
-  sim_name: 'pleasant_lgr'
+  sim_name: 'pleasant_vlgr'
   version: 'mf6'
-  sim_ws: 'pleasant_lgr/'
+  sim_ws: '../tmp/pleasant_vlgr/'
 
 # input for MODFLOW 6 model
 model:
-  simulation: 'pleasant_lgr'
+  simulation: 'pleasant_vlgr'
   modelname: 'plsnt_lgr_parent'
   options:
     print_input: True
@@ -46,7 +46,7 @@ model:
 parent:
   # argments to flopy.modflow.Modflow.load for parent model
   namefile: 'pleasant.nam'
-  model_ws: 'data/pleasant/'
+  model_ws: '../../../examples/data/pleasant/'
   version: 'mfnwt'
   # information for modflow-setup
   # note: parent model is geo-located in namfile header
@@ -56,11 +56,10 @@ parent:
   copy_stress_periods: 'all'
   inset_layer_mapping:  # mapping between inset and parent model layers
     0: 0  # inset: parent  (inset layers 1 and 0 copied from parent layer 0)
-    1: 0
-    2: 1
-    3: 2
+    1: 1
+    2: 2
+    3: 3
     4: 3
-    5: 3
   start_date_time: '2012-01-01'
   length_units: 'meters'
   time_units: 'days'
@@ -79,14 +78,13 @@ setup_grid:
   # is set up in tandem and connected in the same MODFLOW 6 simulation
   lgr:
     pleasant_lgr_inset:
-      filename: 'pleasant_lgr_inset.yml'
+      filename: 'pleasant_vertical_lgr_inset.yml'
       # number of inset layers for each parent layer
       # this can be an integer (vertically uniform refinement)
       # a list (with an entry for each parent layer)
-      # or a dictionary (with entries for each parent layer that is refined; 
+      # or a dictionary (with entries for each parent layer that is refined;
       # unlisted layers will default to zero)
-      # only a 
-      layer_refinement: [1, 1, 1, 1, 1, 0]
+      layer_refinement: [2, 2, 2, 3, 0]
 
 # Structured Discretization Package
 dis:
@@ -94,7 +92,7 @@ dis:
     length_units: 'meters'
   dimensions:
     # if nrow and ncol are not specified here, the entries above in setup_grid are used
-    nlay: 6
+    nlay: 5
     nrow: 25
     ncol: 25
   # griddata:
@@ -103,14 +101,15 @@ dis:
   # idomain is developed from layer pinch-outs and boundary condition locations
   source_data:
     top:
-      filename: 'data/pleasant/source_data/rasters/dem40m.tif' # DEM file; path relative to setup script
+      filename: '../../../examples/data/pleasant/source_data/rasters/dem40m.tif' # DEM file; path relative to setup script
       elevation_units: 'meters'
     botm:
       filenames:
-        1: 'data/pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
-        2: 'data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
-        3: 'data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
-        5: 'data/pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
+        0: '../../../examples/data/pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
+        1: '../../../examples/data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
+        2: '../../../examples/data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
+        # bottom of layer 3 set halfway between layers 2 and 5
+        4: '../../../examples/data/pleasant/source_data/rasters/botm3.tif'  # preprocessed surface for parent model layer 3 bottom
 
 # Temporal Discretization Package
 tdis:
@@ -141,7 +140,7 @@ ic:
   source_data:
     strt:
       from_parent:
-        binaryfile: 'data/pleasant/pleasant.hds'
+        binaryfile: '../../../examples/data/pleasant/pleasant.hds'
         stress_period: 0
 
 # Node Property Flow Package
@@ -180,16 +179,16 @@ sfr:
   source_data:
     flowlines:
       # path to NHDPlus version 2 dataset
-      nhdplus_paths: ['data/pleasant/source_data/shps']
+      nhdplus_paths: ['../../../examples/data/pleasant/source_data/shps']
     # if a DEM is included, streambed top elevations will be sampled
     # from the minimum DEM values within a 100 meter buffer around each stream reach
     dem:
-      filename: 'data/pleasant/source_data/rasters/dem40m.tif'
+      filename: '../../../examples/data/pleasant/source_data/rasters/dem40m.tif'
       elevation_units: 'meters'
     # SFR observations can be automatically setup from a CSV file
     # of x, y locations and fluxes
     observations:  # see sfrmaker.observations.add_observations for arguments
-      filename: 'data/pleasant/source_data/tables/gages.csv'
+      filename: '../../../examples/data/pleasant/source_data/tables/gages.csv'
       obstype: 'downstream-flow'  # modflow-6 observation type
       x_location_column: 'x'
       y_location_column: 'y'
@@ -221,11 +220,11 @@ obs:
     # observations at each location can subsequently be processed
     # to represent a given screened interval
     # for example, using modflow-obs (https://github.com/aleaf/modflow-obs)
-    filenames: ['data/pleasant/source_data/tables/nwis_heads_info_file.csv',
-                'data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
-                'data/pleasant/source_data/tables/wdnr_gw_sites.csv',
-                'data/pleasant/source_data/tables/uwsp_heads.csv',
-                'data/pleasant/source_data/tables/wgnhs_head_targets.csv'
+    filenames: ['../../../examples/data/pleasant/source_data/tables/nwis_heads_info_file.csv',
+                '../../../examples/data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
+                '../../../examples/data/pleasant/source_data/tables/wdnr_gw_sites.csv',
+                '../../../examples/data/pleasant/source_data/tables/uwsp_heads.csv',
+                '../../../examples/data/pleasant/source_data/tables/wgnhs_head_targets.csv'
                      ]
     column_mappings:
       obsname: ['obsprefix', 'obsnme', 'common_name']
@@ -235,4 +234,4 @@ obs:
 
 chd:
   perimeter_boundary:
-    parent_head_file: 'data/pleasant/pleasant.hds'  # needed for the perimeter boundary setup
+    parent_head_file: '../../../examples/data/pleasant/pleasant.hds'  # needed for the perimeter boundary setup

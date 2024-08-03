@@ -502,7 +502,10 @@ class ArraySourceData(SourceData):
                                                               weight0=weight0)
 
             # repeat last layer if length of data is less than number of layers
-            if self.datatype == 'array3d' and i < (self.dest_model.nlay - 1):
+            # we probably don't want to do this for layer bottoms,
+            # but may want to for aquifer properties
+            if (self.variable != 'botm') and (self.datatype == 'array3d')\
+                and (i < (self.dest_model.nlay - 1)):
                 for j in range(i, self.dest_model.nlay):
                     data[j] = data[i]
 
@@ -1425,28 +1428,18 @@ def setup_array(model, package, var, data=None,
                                                 model.cfg['dis']['top_filename_fmt'])
             top = model.load_array(model.cfg['dis']['griddata']['top'][0]['filename'])
 
-        # special case of LGR models
-        # with bottom connections to underlying parent cells
-        if model.version == 'mf6':
-            # (if model is an lgr inset model)
-            if model._is_lgr:
-                # regardless of what is specified for inset model bottom
-                # use top elevations of underlying parent model cells
-                nlay = model.cfg['dis']['dimensions']['nlay']
-                if (nlay < model.parent.modelgrid.nlay):
-                    # use the parent model bottoms
-                    # mapped to the inset model grid by the Flopy Lgr util
-                    lgr = model.parent.lgr[model.name]  # Flopy Lgr inst.
-                    data[nlay-1] = lgr.botm[nlay-1]
-                    # set parent model top to top of
-                    # first active parent model layer below this lgr domain
-                    kp = lgr.get_parent_indices(nlay-1, 0, 0)[0]
-                    model.parent.dis.top = lgr.botmp[kp]
-                    j=2
-
         # fill missing layers if any
         if len(data) < model.nlay:
             all_surfaces = np.zeros((model.nlay + 1, model.nrow, model.ncol), dtype=float) * np.nan
+            # for LGR models, populate any missing bottom layer(s)
+            # from the refined parent grid
+            # this allows for the LGR model to be
+            # bounded on the bottom by a sub-divided parent layer surface
+            last_specified_layer = max(data.keys())
+            if model._is_lgr and last_specified_layer < (model.nlay - 1):
+                #for k in range(last_specified_layer + 1, model.nlay):
+                #    all_surfaces[k+1:] = model.parent.lgr[model.name].botm[k]
+                all_surfaces[model.nlay] = model.parent.lgr[model.name].botm[model.nlay -1]
             all_surfaces[0] = top
             for k, botm in data.items():
                 all_surfaces[k + 1] = botm
@@ -1476,8 +1469,8 @@ def setup_array(model, package, var, data=None,
         # (so they won't get expanded again by fix_model_layer_conflicts)
         # only do this for mf6, where pinched out cells are allowed
         min_thickness = model.cfg['dis'].get('minimum_layer_thickness', 1)
-#        if model.version == 'mf6':
-#            botm[botm >= (top - min_thickness)] = np.nan
+        if model.version == 'mf6':
+            botm[botm >= (top - min_thickness)] = np.nan
 
         #for k, kbotm in enumerate(botm):
         #    inlayer = lake_botm_elevations > kbotm[bathy != 0]
@@ -1512,26 +1505,74 @@ def setup_array(model, package, var, data=None,
             else:
                 model.dis.top = model.cfg['dis']['top'][0]
         data = {i: arr for i, arr in enumerate(botm)}
-    elif var in ['rech', 'recharge'] and simulate_high_k_lakes:
-        for per in range(model.nper):
-            if per == 0 and per not in data:
-                raise KeyError("No recharge input specified for first stress period.")
-            if per in data:
-                # assign high-k lake recharge for stress period
-                # only assign if precip and open water evaporation data were read
-                # (otherwise keep original values in recharge array)
-                last_data_array = data[per].copy()
-                if model.high_k_lake_recharge is not None:
-                    data[per][model.isbc[0] == 2] = model.high_k_lake_recharge[per]
-                # zero-values to lak package lakes
-                data[per][model.isbc[0] == 1] = 0.
-            else:
-                if model.high_k_lake_recharge is not None:
-                    # start with the last period with recharge data; update the high-k lake recharge
-                    last_data_array[model.isbc[0] == 2] = model.high_k_lake_recharge[per]
-                last_data_array[model.isbc[0] == 1] = 0.
-                # assign to current per
-                data[per] = last_data_array
+
+        # special case of LGR models
+        # with bottom connections to underlying parent cells
+        if model.version == 'mf6':
+            # (if model is an lgr inset model)
+            if model._is_lgr:
+                # regardless of what is specified for inset model bottom
+                # use top elevations of underlying parent model cells
+                nlay = model.cfg['dis']['dimensions']['nlay']
+                lgr = model.parent.lgr[model.name]  # Flopy Lgr inst.
+                n_refined = (np.array(lgr.ncppl) > 0).astype(int).sum()
+                # check if LGR model has connections to underlying parent cells
+                if (n_refined < model.parent.modelgrid.nlay):
+                    # use the parent model bottoms
+                    # mapped to the inset model grid by the Flopy Lgr util
+                    #data[nlay-1] = lgr.botm[nlay-1]
+                    # set the inset and parent model botms
+                    # to the mean elevations of the inset cells
+                    # connecting to each parent cell
+                    ncpp = lgr.ncpp
+                    nrowp = int(data[nlay-1].shape[0]/ncpp)
+                    ncolp = int(data[nlay-1].shape[1]/ncpp)
+                    lgr_inset_botm = data[nlay-1]
+                    if any(np.isnan(lgr_inset_botm.flat)):
+                        raise ValueError(
+                            "Nan values in LGR inset model bottom; "
+                            "can't use this to make the top of the parent model."
+                            )
+                    # average each nccp x nccp block of inset model cells
+                    topp = np.reshape(lgr_inset_botm,
+                                   (nrowp, ncpp, ncolp, ncpp)).mean(axis=(1, 3))
+                    n_parent_lgr_layers = np.sum(np.array(lgr.ncppl) > 0)
+                    # remap averages back to the inset model shape
+                    data[nlay-1] = np.repeat(np.repeat(topp, 5, axis=0), 5, axis=1)
+                    # set the parent model botm in this area to be the same
+                    lgr_area = model.parent.lgr[model.name].idomain == 0
+                    model.parent.dis.top[lgr_area[0]] = topp.ravel()
+                    # set parent model layers in LGR area to zero-thickness
+                    new_parent_botm = model.parent.dis.botm.array.copy()
+                    for k in range(n_parent_lgr_layers):
+                        new_parent_botm[k][lgr_area[0]] = topp.ravel()
+                    model.parent.dis.botm = new_parent_botm
+                    model.parent._update_top_botm_external_files()
+
+    elif var in ['rech', 'recharge']:
+        if simulate_high_k_lakes:
+            for per in range(model.nper):
+                if per == 0 and per not in data:
+                    raise KeyError("No recharge input specified for first stress period.")
+                if per in data:
+                    # assign high-k lake recharge for stress period
+                    # only assign if precip and open water evaporation data were read
+                    # (otherwise keep original values in recharge array)
+                    last_data_array = data[per].copy()
+                    if model.high_k_lake_recharge is not None:
+                        data[per][model.isbc[0] == 2] = model.high_k_lake_recharge[per]
+                    # zero-values to lak package lakes
+                    data[per][model.isbc[0] == 1] = 0.
+                else:
+                    if model.high_k_lake_recharge is not None:
+                        # start with the last period with recharge data; update the high-k lake recharge
+                        last_data_array[model.isbc[0] == 2] = model.high_k_lake_recharge[per]
+                    last_data_array[model.isbc[0] == 1] = 0.
+                    # assign to current per
+                    data[per] = last_data_array
+        if model.lgr:
+            for per, rech_array in data.items():
+                rech_array[model._lgr_idomain2d == 0] = 0
     elif var in ['hk', 'k'] and simulate_high_k_lakes:
         for i, arr in data.items():
             data[i][model.isbc[i] == 2] = model.cfg['high_k_lakes']['high_k_value']
