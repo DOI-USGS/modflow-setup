@@ -208,3 +208,28 @@ def make_obsname(name, unique_names={},
         if name[slc] not in unique_names:
             return name[slc]
     return name[-maxlen:]
+
+
+def remove_inactive_obs(obs_package_instance):
+    """Remove boundary conditions from cells that are inactive.
+
+    Parameters
+    ----------
+    obs_package_instance : flopy Modflow-6 Observation package instance
+    """
+    model = obs_package_instance.parent
+    idomain = model.dis.idomain.array
+    if model.version != 'mf6':
+        raise NotImplementedError(
+            "obs.py::remove_inactive_obs(): "
+            "Support for removing MODFLOW 2005 not implemented.")
+    for obsfile, recarray in obs_package_instance.continuous.data.items():
+        try:
+            k, i, j = zip(*recarray['id'])
+        except:
+            # for now, only support obs defined by k, i, j cellids
+            return
+        # cull any observations in inactive cells
+        is_active = idomain[k, i, j] > 0
+        # update the flopy dataset
+        obs_package_instance.continuous.set_data({obsfile: recarray[is_active]})

@@ -2,6 +2,7 @@ import copy
 import os
 import shutil
 import time
+from pathlib import Path
 
 import flopy
 import numpy as np
@@ -36,7 +37,7 @@ from mfsetup.lakes import (
 )
 from mfsetup.mfmodel import MFsetupMixin
 from mfsetup.mover import get_mover_sfr_package_input
-from mfsetup.obs import setup_head_observations
+from mfsetup.obs import remove_inactive_obs, setup_head_observations
 from mfsetup.oc import parse_oc_period_input
 from mfsetup.tdis import add_date_comments_to_tdis, setup_perioddata
 from mfsetup.units import convert_time_units
@@ -200,6 +201,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         if isinstance(self.lgr, dict):
             for k, v in self.lgr.items():
                 lgr_idomain[v.idomain == 0] = 0
+            self._lgr_idomain2d = lgr_idomain[0]
         idomain_from_layer_elevations = make_idomain(self.dis.top.array,
                                                      self.dis.botm.array,
                                                      nodata=self._nodata_value,
@@ -379,28 +381,55 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             parent_start_layer = v.get('parent_start_layer', 0)
             # parent_end_layer is specified as the last zero-based
             # parent layer that includes LGR refinement (not as a slice end)
-            parent_end_layer = v.get('parent_end_layer', self.nlay - 1) + 1
-            ncppl = v.get('layer_refinement', 1)
-            specified_nlay_lgr = ncppl * (parent_end_layer - parent_start_layer)
-            specified_nlay_dis = inset_cfg['dis']['dimensions']['nlay']
-            if specified_nlay_lgr != specified_nlay_dis:
+            parent_end_layer = v.get('parent_end_layer', self.nlay - 1)
+            # the layer refinement can be specified as an int, a list or a dict
+            ncppl_input = v.get('layer_refinement', 1)
+            if np.isscalar(ncppl_input):
+                ncppl = np.array([0] * self.modelgrid.nlay)
+                ncppl[parent_start_layer:parent_end_layer+1] = ncppl_input
+            elif isinstance(ncppl_input, list):
+                if not len(ncppl_input) == self.modelgrid.nlay:
+                    raise ValueError(
+                        "Configuration input: layer_refinement specified as"
+                        "a list must include a value for every layer."
+                    )
+                ncppl = ncppl_input.copy()
+            elif isinstance(ncppl_input, dict):
+                ncppl = [ncppl_input.get(i, 0) for i in range(self.modelgrid.nlay)]
+            else:
+                raise ValueError("Configuration input: Unsupported input for "
+                                 "layer_refinement: supply an int, list or dict.")
+
+            # refined layers must be consecutive, starting from layer 1
+            is_refined = (np.array(ncppl) > 0).astype(int)
+            last_refined_layer = max(np.where(is_refined > 0)[0])
+            consecutive = all(np.diff(is_refined)[:last_refined_layer] == 0)
+            if (is_refined[0] != 1) | (not consecutive):
+                raise ValueError("Configuration input: layer_refinement must"
+                                 "include consecutive sequence of layers, "
+                                 "starting with the top layer.")
+            # check the specified DIS package input is consistent
+            # with the specified layer_refinement
+            specified_nlay_dis = inset_cfg['dis']['dimensions'].get('nlay')
+            # skip this check if nlay hasn't been entered into the configuration file yet
+            if specified_nlay_dis and (np.sum(ncppl) != specified_nlay_dis):
                 raise ValueError(
-                    f"Parent model layers of {parent_start_layer} to {parent_end_layer} "
-                    f"and layer refinement of {ncppl} implies {specified_nlay_lgr} inset model layers.\n"
+                    f"Configuration input: layer_refinement  of {ncppl} "
+                    f"implies {is_refined.sum()} inset model layers.\n"
                     f"{specified_nlay_dis} inset model layers specified in DIS package.")
             # mapping between parent and inset model layers
             # that is used for copying input from parent model
-            parent_inset_layer_mapping = dict()
+            inset_parent_layer_mapping = dict()
             inset_k = -1
-            for parent_k in range(parent_start_layer, parent_end_layer):
-                for i in range(ncppl):
+            for parent_k, n_inset_lay in enumerate(ncppl):
+                for i in range(n_inset_lay):
                     inset_k += 1
-                    parent_inset_layer_mapping[parent_k] = inset_k
+                    inset_parent_layer_mapping[inset_k] = parent_k
             self.inset[inset_model.name].cfg['parent']['inset_layer_mapping'] =\
-                parent_inset_layer_mapping
+                inset_parent_layer_mapping
             # create idomain indicating area of parent grid that is LGR
             lgr_idomain = make_lgr_idomain(self.modelgrid, self.inset[inset_model.name].modelgrid,
-                                           parent_start_layer, parent_end_layer)
+                                           ncppl)
 
             # inset model horizontal refinement from parent resolution
             refinement = self.modelgrid.delr[0] / self.inset[inset_model.name].modelgrid.delr[0]
@@ -412,10 +441,55 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                              self.dis.top.array, self.dis.botm.array,
                                              lgr_idomain, ncpp, ncppl)
             inset_model._perioddata = self.perioddata
-            self._set_idomain()
+            # set parent model top in LGR area to bottom of LGR area
+            # this is an initial draft;
+            # bottom elevations are readjusted in sourcedata.py
+            # when inset model DIS package botm array is set up
+            # (set to mean of inset model bottom elevations
+            #  within each parent cell)
+            # number of layers in parent model with LGR
+            n_parent_lgr_layers = np.sum(np.array(ncppl) > 0)
+            lgr_area = self.lgr[inset_model.name].idomain == 0
+            self.dis.top[lgr_area[0]] =\
+                self.lgr[inset_model.name].botmp[n_parent_lgr_layers -1][lgr_area[0]]
+            # set parent model layers in LGR area to zero-thickness
+            new_parent_botm = self.dis.botm.array.copy()
+            for k in range(n_parent_lgr_layers):
+                new_parent_botm[k][lgr_area[0]] = self.dis.top[lgr_area[0]]
+            self.dis.botm = new_parent_botm
+            self._update_top_botm_external_files()
+
+
+    def _update_top_botm_external_files(self):
+        """Update the external files after assigning new elevations to the
+        Discretization Package top and botm arrays; adjust idomain as needed."""
+        # reset the model top
+        # (this step may not be needed if the "original top" functionality
+        # is limited to cases where there is a lake package,
+        # or if the "original top"/"lake bathymetry" functionality is eliminated
+        # and we instead require the top to be pre-processed)
+        original_top_file = Path(self.external_path,
+                    f"{self.name}_{self.cfg['dis']['top_filename_fmt']}.original")
+        original_top_file.unlink(missing_ok=True)
+        self._setup_array('dis', 'top',
+                            data={0: self.dis.top.array},
+                datatype='array2d', resample_method='linear',
+                write_fmt='%.2f', dtype=float)
+        # _set_idomain() regerates external files for bottom array
+        self._set_idomain()
+
 
     def setup_lgr_exchanges(self):
         for inset_name, inset_model in self.inset.items():
+
+            # update cell information for computing any bottom exchanges
+            self.lgr[inset_name].top = inset_model.dis.top.array
+            self.lgr[inset_name].botm = inset_model.dis.botm.array
+            # update only the layers of the parent model below the child model
+            parent_top_below_child = np.sum(self.lgr[inset_name].ncppl > 0) -1
+            self.lgr[inset_name].botmp[parent_top_below_child:] =\
+                self.dis.botm.array[parent_top_below_child:]
+
             # get the exchange data
             exchangelist = self.lgr[inset_name].get_exchange_data(angldegx=True, cdist=True)
 
@@ -426,7 +500,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             # unpack the cellids and get their respective ibound values
             k1, i1, j1 = zip(*exchangedf['cellidm1'])
             k2, i2, j2 = zip(*exchangedf['cellidm2'])
+            # limit connections to
             active1 = self.idomain[k1, i1, j1] >= 1
+
             active2 = inset_model.idomain[k2, i2, j2] >= 1
 
             # screen out connections involving an inactive cell
@@ -453,6 +529,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             # set up the exchange package
             kwargs = get_input_arguments(kwargs, mf6.ModflowGwfgwf)
             gwfe = mf6.ModflowGwfgwf(self.simulation, **kwargs)
+
 
     def setup_dis(self, **kwargs):
         """"""
@@ -623,7 +700,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         self._setup_array(package, 'recharge', datatype='transient2d',
                           resample_method='nearest', write_fmt='%.6e',
                           write_nodata=0.)
-
 
         kwargs = self.cfg[package].copy()
         kwargs.update(self.cfg[package]['options'])
@@ -901,6 +977,9 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 external_files = self.cfg[pckg.lower()]['stress_period_data']
                 remove_inactive_bcs(package_instance,
                                     external_files=external_files)
+        if hasattr(self, 'obs'):
+            for obs_package_instance in self.obs:
+                remove_inactive_obs(obs_package_instance)
 
         # write the model with flopy
         # but skip the sfr package

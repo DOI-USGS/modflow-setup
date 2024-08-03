@@ -394,7 +394,6 @@ def remove_inactive_bcs(pckg, external_files=False):
 
     Parameters
     ----------
-    model : flopy model instance
     pckg : flopy package instance
     """
     model = pckg.parent
