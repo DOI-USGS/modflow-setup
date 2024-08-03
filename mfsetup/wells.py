@@ -382,34 +382,6 @@ def assign_layers_from_screen_top_botm(data, model,
             T_r = T[::-1]
             data['k'] = len(T_r) - np.argmax(T_r, axis=0) - 1
 
-            # get thicknesses for all layers
-            # (including portions of layers outside open interval)
-            all_layers = np.zeros((model.nlay + 1, model.nrow, model.ncol))
-            all_layers[0] = model.dis.top.array
-            all_layers[1:] = model.dis.botm.array
-            all_layer_thicknesses = np.abs(np.diff(all_layers, axis=0))
-            layer_thicknesses = -np.diff(all_layers[:, i, j], axis=0)
-
-            # only include thicknesses for valid layers
-            # reset thicknesses to sat. thickness
-            if strt3D is not None:
-                sat_thickness = strt3D - model.dis.botm.array
-                # cells where the head is above the layer top
-                no_unsat = sat_thickness > all_layer_thicknesses
-                sat_thickness[no_unsat] = all_layer_thicknesses[no_unsat]
-                # cells where the head is below the cell bottom
-                sat_thickness[sat_thickness < 0] = 0
-                layer_thicknesses = sat_thickness[:, i, j]
-
-            # set inactive cells to 0 thickness for the purpose or relocating wells
-            layer_thicknesses[idomain[:, i, j] < 1] = 0
-            data['idomain'] = idomain[data['k'], i, j]
-            data['laythick'] = layer_thicknesses[data['k'].values,
-                                                 list(range(layer_thicknesses.shape[1]))]
-            # flag layers that are too thin or inactive
-            inactive = idomain[data.k, data.i, data.j] < 1
-            invalid_open_interval = (data['laythick'] < minimum_layer_thickness) | inactive
-
             outfile = model.cfg['wel']['output_files']['dropped_wells_file'].format(model.name)
             bad_wells = pd.DataFrame()
             # for LGR parent models, remove wells with >50% of their open interval within the LGR area
@@ -438,6 +410,36 @@ def assign_layers_from_screen_top_botm(data, model,
                     "should be checked)."
                 )
                 data = data.loc[in_model].copy()
+
+
+            # get thicknesses for all layers
+            # (including portions of layers outside open interval)
+            k, i, j = data['k'].values, data['i'].values, data['j'].values
+            all_layers = np.zeros((model.nlay + 1, model.nrow, model.ncol))
+            all_layers[0] = model.dis.top.array
+            all_layers[1:] = model.dis.botm.array
+            all_layer_thicknesses = np.abs(np.diff(all_layers, axis=0))
+            layer_thicknesses = -np.diff(all_layers[:, i, j], axis=0)
+
+            # only include thicknesses for valid layers
+            # reset thicknesses to sat. thickness
+            if strt3D is not None:
+                sat_thickness = strt3D - model.dis.botm.array
+                # cells where the head is above the layer top
+                no_unsat = sat_thickness > all_layer_thicknesses
+                sat_thickness[no_unsat] = all_layer_thicknesses[no_unsat]
+                # cells where the head is below the cell bottom
+                sat_thickness[sat_thickness < 0] = 0
+                layer_thicknesses = sat_thickness[:, i, j]
+
+            # set inactive cells to 0 thickness for the purpose or relocating wells
+            layer_thicknesses[idomain[:, i, j] < 1] = 0
+            data['idomain'] = idomain[k, i, j]
+            data['laythick'] = layer_thicknesses[k, list(range(layer_thicknesses.shape[1]))]
+            # flag layers that are too thin or inactive
+            inactive = idomain[data.k, data.i, data.j] < 1
+            invalid_open_interval = (data['laythick'] < minimum_layer_thickness) | inactive
+
             if any(invalid_open_interval):
 
                 # move wells that are still in a thin layer to the thickest active layer
@@ -483,14 +485,14 @@ def assign_layers_from_screen_top_botm(data, model,
                                       minimum_layer_thickness,
                                       model.length_units))
                     if flux_col in data.columns:
-                        pct_flux_below = 100 * bad_wells.loc[still_below_minimum, flux_col].sum()/data[flux_col].sum()
+                        pct_flux_below = 100 * wells_in_too_thin_layers.loc[still_below_minimum, flux_col].sum()/data[flux_col].sum()
                         msg +=  ', \nrepresenting {:.2f} %% of total flux,'.format(pct_flux_below)
 
                     msg += '\nwere dropped. See {} for details.'.format(outfile)
                     print(msg)
 
                 # write shapefile and CSV output for wells that were dropped
-                bad_wells = pd.concat([bad_wells, data.loc[invalid_open_interval].copy()])
+                bad_wells = pd.concat([bad_wells, wells_in_too_thin_layers])
                 bad_wells['routine'] = __name__ + '.assign_layers_from_screen_top_botm'
                 cols = ['k', 'i', 'j', 'boundname',
                         'category', 'laythick', 'idomain', 'reason', 'routine', 'x', 'y']

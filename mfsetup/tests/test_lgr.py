@@ -1,11 +1,11 @@
 import copy
 import glob
 import os
-import shutil
 from pathlib import Path
 
 import flopy
 import numpy as np
+import pandas as pd
 import pytest
 
 mf6 = flopy.mf6
@@ -15,7 +15,7 @@ from flopy.utils import binaryfile as bf
 from mfsetup import MF6model
 from mfsetup.discretization import make_lgr_idomain
 from mfsetup.fileio import dump, exe_exists, load, load_cfg, read_mf6_block
-from mfsetup.interpolate import regrid3d
+from mfsetup.grid import get_ij
 from mfsetup.mover import get_sfr_package_connections
 from mfsetup.testing import compare_inset_parent_values
 from mfsetup.utils import get_input_arguments
@@ -25,6 +25,9 @@ from mfsetup.utils import get_input_arguments
 def pleasant_lgr_test_cfg_path(project_root_path):
     return project_root_path + '/examples/pleasant_lgr_parent.yml'
 
+@pytest.fixture(scope="session")
+def pleasant_vertical_lgr_test_cfg_path(test_data_path):
+    return test_data_path / 'pleasant_vertical_lgr_parent.yml'
 
 @pytest.fixture(scope="function")
 def pleasant_lgr_cfg(pleasant_lgr_test_cfg_path):
@@ -34,6 +37,13 @@ def pleasant_lgr_cfg(pleasant_lgr_test_cfg_path):
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
 
+@pytest.fixture(scope="function")
+def pleasant_vertical_lgr_cfg(pleasant_vertical_lgr_test_cfg_path):
+    cfg = load_cfg(pleasant_vertical_lgr_test_cfg_path,
+                   default_file='/mf6_defaults.yml')
+    # add some stuff just for the tests
+    cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
+    return cfg
 
 @pytest.fixture(scope="function")
 def pleasant_simulation(pleasant_lgr_cfg):
@@ -67,6 +77,11 @@ def pleasant_lgr_setup_from_yaml(pleasant_lgr_cfg):
     m.write_input()
     return m
 
+@pytest.fixture(scope="function")
+def pleasant_vertical_lgr_setup_from_yaml(pleasant_vertical_lgr_cfg):
+    m = MF6model.setup_from_cfg(pleasant_vertical_lgr_cfg)
+    m.write_input()
+    return m
 
 @pytest.fixture(scope="function")
 def pleasant_lgr_stand_alone_parent(pleasant_lgr_test_cfg_path, tmpdir):
@@ -96,7 +111,8 @@ def pleasant_lgr_stand_alone_parent(pleasant_lgr_test_cfg_path, tmpdir):
 def test_make_lgr_idomain(get_pleasant_lgr_parent_with_grid):
     m = get_pleasant_lgr_parent_with_grid
     inset_model = m.inset['plsnt_lgr_inset']
-    idomain = make_lgr_idomain(m.modelgrid, inset_model.modelgrid)
+    idomain = make_lgr_idomain(m.modelgrid, inset_model.modelgrid,
+                               m.lgr['plsnt_lgr_inset'].ncppl)
     assert idomain.shape == m.modelgrid.shape
     l, b, r, t = inset_model.modelgrid.bounds
     isinset = (m.modelgrid.xcellcenters > l) & \
@@ -108,21 +124,34 @@ def test_make_lgr_idomain(get_pleasant_lgr_parent_with_grid):
 
 
 @pytest.mark.parametrize(
-    'lgr_grid_spacing,parent_start_end_layers,inset_nlay', [
+    'lgr_grid_spacing,layer_refinement_input,inset_nlay', [
     # parent layers 0 through 3
     # are specified in pleasant_lgr_parent.yml
-    (40, 'use configuration', 4),
-    (40, (0, 2), 3),
+    (40, 'use configuration', 5),
+    (40, [1, 1, 1, 1, 0], 4),
+    (40, [2, 1, 1, 1, 0], 5),
+    # dictionary input option
+    (40, {0:1, 1:1, 2:1}, 3),
+    # integer layer refinement input option
+    (40, 1, 5),
     # special case to test setup
-    # with no parent start/end layers specified
+    # with no layer refinement specified
     (40, None, 5),
     pytest.param(35, None, 5, marks=pytest.mark.xfail(
         reason='inset spacing not a factor of parent spacing')),
     pytest.param(40, None, 4, marks=pytest.mark.xfail(
         reason='inset nlay inconsistent with parent layers')),
+    pytest.param(40, [1, 1, 1, 1], 5, marks=pytest.mark.xfail(
+        reason='List layer_refinement input must include a value for each layer')),
+    pytest.param(40, [0, 1, 1, 1, 1], 5, marks=pytest.mark.xfail(
+        reason='LGR child grid must start at model top')),
+    pytest.param(40, {1: 1}, 5, marks=pytest.mark.xfail(
+        reason='LGR child grid must start at model top')),
+    pytest.param(40, [1, 1, 0, 1, 1], 5, marks=pytest.mark.xfail(
+        reason='LGR child grid must be contiguous')),
     ]
     )
-def test_lgr_grid_setup(lgr_grid_spacing, parent_start_end_layers,
+def test_lgr_grid_setup(lgr_grid_spacing, layer_refinement_input,
                         inset_nlay,
                         pleasant_lgr_cfg, pleasant_simulation,
                         project_root_path):
@@ -138,17 +167,14 @@ def test_lgr_grid_setup(lgr_grid_spacing, parent_start_end_layers,
     lgr_cfg = cfg['setup_grid']['lgr']['pleasant_lgr_inset']
     lgr_cfg['cfg'] = inset_cfg
     del lgr_cfg['filename']
-    if parent_start_end_layers is None:
-        del lgr_cfg['parent_start_layer']
-        del lgr_cfg['parent_end_layer']
-        k0, k1 = 0, None
-    elif parent_start_end_layers == 'use configuration':
-        k0 = lgr_cfg['parent_start_layer']
-        k1 = lgr_cfg['parent_end_layer']
+    if layer_refinement_input is None:
+        del lgr_cfg['layer_refinement']
+        layer_refinement = [1] * cfg['dis']['dimensions']['nlay']
+    elif layer_refinement_input == 'use configuration':
+        layer_refinement = lgr_cfg['layer_refinement']
     else:
-        k0, k1 = parent_start_end_layers
-        lgr_cfg['parent_start_layer'] = k0
-        lgr_cfg['parent_end_layer'] = k1
+        lgr_cfg['layer_refinement'] = layer_refinement_input
+        layer_refinement = layer_refinement_input
 
     cfg['model']['simulation'] = pleasant_simulation
     kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf, exclude='packages')
@@ -165,9 +191,14 @@ def test_lgr_grid_setup(lgr_grid_spacing, parent_start_end_layers,
         m.modelgrid.write_shapefile(outfolder / 'pleasant_lgr_parent_grid.shp')
         inset_model.modelgrid.write_shapefile(outfolder / 'pleasant_lgr_inset_grid.shp')
 
+    if np.isscalar(layer_refinement):
+        layer_refinement = np.array([1] * m.modelgrid.nlay)
+    elif isinstance(layer_refinement, dict):
+        layer_refinement = [layer_refinement.get(i, 0) for i in range(m.modelgrid.nlay)]
+    layer_refinement = np.array(layer_refinement)
     # verify that lgr area was removed from parent idomain
     lgr_idomain = make_lgr_idomain(m.modelgrid, inset_model.modelgrid,
-                                   k0, k1)
+                                   layer_refinement)
     idomain = m.idomain
     assert idomain[lgr_idomain == 0].sum() == 0
     inset_cells_per_layer = inset_model.modelgrid.shape[1] *\
@@ -176,18 +207,28 @@ def test_lgr_grid_setup(lgr_grid_spacing, parent_start_end_layers,
     nparent_cells_within_lgr_per_layer = inset_cells_per_layer / refinement_factor**2
     # for each layer where lgr is specified,
     # there should be at least enough inactive cells to cover the lrg grid area
-    if k1 is None:
-        k1 = m.modelgrid.nlay -1
     layers_with_lgr = (lgr_idomain == 0).sum(axis=(1, 2)) >=\
         nparent_cells_within_lgr_per_layer
-    assert all(layers_with_lgr[k0:k1])
+    assert all(layers_with_lgr[layer_refinement > 0])
     # layers outside of the specified lgr range should have
     # less inactive cells than the size of the lgr grid area
     # (specific to this test case with a large LGR extent relative to the total grid)
-    assert not any(layers_with_lgr[k1+1:])
-    assert not any(layers_with_lgr[:k0])
-    j=2
-    # todo: add test that grids are aligned
+    assert not any(layers_with_lgr[layer_refinement == 0])
+
+    # make a plot for the docs
+    if layer_refinement_input == 'use configuration':
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(figsize=(10, 10))
+        parent_mv = flopy.plot.PlotMapView(model=m, ax=ax, layer=0)
+        inset_mv = flopy.plot.PlotMapView(model=inset_model, ax=ax, layer=0)
+        l, r, b, t = m.modelgrid.extent
+        lcp = parent_mv.plot_grid(lw=0.5, ax=ax)
+        lci = inset_mv.plot_grid(lw=0.5)
+        ax.set_ylim(b, t)
+        ax.set_xlim(l, r)
+        ax.set_aspect(1)
+        plt.savefig(project_root_path + '/docs/source/_static/pleasant_lgr.png',
+                    bbox_inches='tight')
 
 
 def test_setup_mover(pleasant_lgr_setup_from_yaml):
@@ -199,6 +240,51 @@ def test_setup_mover(pleasant_lgr_setup_from_yaml):
     for model in m, m.inset['plsnt_lgr_inset']:
         options = read_mf6_block(model.sfr.filename, 'options')
         assert 'mover' in options
+
+
+def test_lgr_parent_bcs_in_lgr_area(pleasant_vertical_lgr_setup_from_yaml):
+    """Test that boundary conditions specified in the parent model
+    inside of the LGR area don't get created
+    (these should be represented in the LGR inset/child model instead."""
+    m = pleasant_vertical_lgr_setup_from_yaml
+    ghb_source_data = {
+        'shapefile': { # pond near pleasant lake
+            'filename': '../../../../examples/data/pleasant/source_data/shps/all_lakes.shp',
+            'id_column': 'HYDROID',
+            'include_ids': [600059161],
+            'all_touched': True
+            },
+        'bhead': {
+            'filename': '../../../../examples/data/pleasant/source_data/rasters/dem40m.tif',
+            'elevation_units': 'meters',
+            'stat': 'mean'
+            },
+        'cond': 9,  # m2/d
+    }
+    m.setup_ghb(source_data=ghb_source_data)
+    # there should be no GHB Package, because this feature is inside of the LGR area
+    # (and should therefore be represented in the LGR inset/child model)
+    assert not hasattr(m, 'ghb')
+    wel_source_data = {
+        'wells': {
+            # well with screen mostly in LGR area (should not be represented)
+            'well1': {'per': 1, 'x': 555910.8, 'y': 389618.3,
+                      'screen_top': 300, 'screen_botm': 260, 'q': -2000},
+            # well with screen mostly in parent model below LGR area (should be represented)
+            'well2': {'per': 1, 'x': 555910.8, 'y': 389618.3,
+                      'screen_top': 250, 'screen_botm': 200, 'q': -2000}
+        }
+    }
+    added_wells = m.setup_wel(source_data=wel_source_data)
+    # well1 should not be in the parent model (open interval within LGR area)
+    assert 'well1' not in added_wells.stress_period_data.data[1]['boundname']
+    assert 'well2' in added_wells.stress_period_data.data[1]['boundname']
+    inset = m.inset['plsnt_lgr_inset']
+    inset.setup_ghb(source_data=ghb_source_data)
+    assert hasattr(inset, 'ghb')
+    inset_added_wells = inset.setup_wel(source_data=wel_source_data)
+    assert 'well1' in inset_added_wells.stress_period_data.data[1]['boundname']
+    assert 'well2' not in inset_added_wells.stress_period_data.data[1]['boundname']
 
 
 def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
@@ -223,6 +309,109 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     # plot the shapefiles in a GIS environment to verify the connections in to_parent
     # {inset_reach: parent_reach, ...}
     assert to_parent == {29: 8, 41: 1}
+
+
+def test_lgr_bottom_elevations(pleasant_vertical_lgr_setup_from_yaml, mf6_exe):
+    """Test that boundary elevations specified in the LGR area
+    are the same as the top of the underlying active area in
+    the parent model (so there aren't gaps or overlap in the
+    numerical grid)."""
+    m = pleasant_vertical_lgr_setup_from_yaml
+    inset = m.inset['plsnt_lgr_inset']
+    x = inset.modelgrid.xcellcenters
+    y = inset.modelgrid.ycellcenters
+    pi, pj = get_ij(m.modelgrid, x.ravel(), y.ravel(),
+                    local=False)
+    pi = np.reshape(pi, x.shape)
+    pj = np.reshape(pj, x.shape)
+    parent_model_top = np.reshape(m.dis.top.array[pi, pj], x.shape)
+
+    # LGR child bottom and parent top should be aligned
+    assert np.allclose(inset.dis.botm.array[-1],
+                       parent_model_top)
+
+    # check exchange data
+    exchange_data = pd.DataFrame(m.simulation.gwfgwf.exchangedata.array)
+    k1, i1, j1 = zip(*exchange_data['cellidm1'])
+    k2, i2, j2 = zip(*exchange_data['cellidm2'])
+    exchange_data = exchange_data.assign(
+        k1=k1, i1=i1, j1=j1, k2=k2, i2=i2, j2=j2)
+    vertical_connections = exchange_data.loc[exchange_data['ihc'] == 0]
+
+    lgr = m.lgr[inset.name] # Flopy Lgr utility instance
+    active_cells = np.sum(inset.dis.idomain.array > 0, axis=0) > 0
+    has_vertical_connection = np.zeros_like(active_cells)
+    has_vertical_connection[vertical_connections['i2'], vertical_connections['j2']] = 1
+    # all active cells should have a vertical connection
+    assert all(has_vertical_connection[active_cells] == 1)
+    # each active horizontal location should only have 1 vertical connection
+    assert np.sum(has_vertical_connection[active_cells] == 1) == len(vertical_connections)
+    # check connection distances
+    all_layers = np.stack([m.dis.top.array] + [arr for arr in m.dis.botm.array])
+    cell_thickness1 = -np.diff(all_layers, axis=0)
+    all_layers2 = np.stack([inset.dis.top.array] + [arr for arr in inset.dis.botm.array])
+    cell_thickness2 = -np.diff(all_layers2, axis=0)
+    vertical_connections['layer_thick1'] = cell_thickness1[vertical_connections['k1'],
+                                                           vertical_connections['i1'],
+                                                           vertical_connections['j1']]
+    vertical_connections['layer_thick2'] = cell_thickness2[vertical_connections['k2'],
+                                                    vertical_connections['i2'],
+                                                    vertical_connections['j2']]
+    #  cl1 should be 0.5 x parent cell thickness
+    assert np.allclose(vertical_connections['cl1'], vertical_connections['layer_thick1']/2)
+    #  cl2 should be 0.5 x inset/child cell thickness
+    assert np.allclose(vertical_connections['cl2'], vertical_connections['layer_thick2']/2)
+    # hwva should equal inset cell bottom face area
+    inset_cell_areas = inset.dis.delc.array[vertical_connections['i2']] *\
+        inset.dis.delr.array[vertical_connections['j2']]
+    assert np.allclose(vertical_connections['hwva'], inset_cell_areas)
+
+    # test the horizontal connections too
+    horizontal_connections_ns = exchange_data.loc[(exchange_data['ihc'] > 0) & exchange_data['angldegx'].isin([0., 180.])]
+    horizontal_connections_ew = exchange_data.loc[(exchange_data['ihc'] > 0) & exchange_data['angldegx'].isin([90., 270.])]
+    # cl1 should be 0.5 x parent cell width
+    assert np.allclose(horizontal_connections_ns['cl1'], m.dis.delc.array[horizontal_connections_ns['i1']]/2)
+    assert np.allclose(horizontal_connections_ew['cl1'], m.dis.delr.array[horizontal_connections_ew['j1']]/2)
+    #cl2—is the distance between the center of cell 2 and the its shared face with cell 1.
+    assert np.allclose(horizontal_connections_ns['cl2'], inset.dis.delc.array[horizontal_connections_ns['i2']]/2)
+    assert np.allclose(horizontal_connections_ew['cl2'], inset.dis.delr.array[horizontal_connections_ew['j2']]/2)
+    #hwva is the parent cell width perpendicular to the connection
+    assert np.allclose(horizontal_connections_ns['hwva'], inset.dis.delr.array[horizontal_connections_ns['j2']])
+    assert np.allclose(horizontal_connections_ew['hwva'], inset.dis.delc.array[horizontal_connections_ew['i2']])
+
+    # verify that the model runs
+    success = False
+    if exe_exists(mf6_exe):
+        success, buff = m.simulation.run_simulation()
+        if not success:
+            list_file = m.name_file.list.array
+            with open(list_file) as src:
+                list_output = src.read()
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+
+    # make a cross section plot for the documentation
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(14, 5))
+    # plot cross section through an area prone to mis-patch
+    # because of inconsistencies in input raster layer surfaces,
+    # and sub-200m variability in topography
+    #xs_line = [(553000, 390900), (558000, 390900)]
+    # line thru the lake
+    xs_line = [(553000, 390200), (558000, 390200)]
+    xs = flopy.plot.PlotCrossSection(model=m,
+                                    line={"line": xs_line}, ax=ax,
+                                    geographic_coords=True)
+    lc = xs.plot_grid(zorder=4)
+    xs2 = flopy.plot.PlotCrossSection(model=inset,
+                                    line={"line": xs_line}, ax=ax,
+                                    geographic_coords=True)
+    lc = xs2.plot_grid(zorder=4)
+    #xs2.plot_surface(inset.ic.strt.array, c='b')
+    #xs.plot_surface(m.ic.strt.array, c='b')
+    plt.savefig('../../../../docs/source/_static/pleasant_vlgr_xsection.png',
+                bbox_inches='tight')
+    plt.close()
+
 
 
 def test_lgr_model_setup(pleasant_lgr_setup_from_yaml, tmpdir):

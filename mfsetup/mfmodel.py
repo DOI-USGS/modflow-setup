@@ -120,6 +120,7 @@ class MFsetupMixin():
         self.inset = None  # dictionary of inset models attached to LGR parent
         self._is_lgr = False  # flag for lgr inset models
         self.lgr = None  # holds flopy Lgr utility object
+        self._lgr_idomain2d = None # array of Lgr inset model locations within parent grid
         self.tmr = None  # holds TMR class instance for TMR-type perimeter boundaries
         self._load = False  # whether model is being made or loaded from existing files
         self.lake_info = None
@@ -1301,12 +1302,13 @@ class MFsetupMixin():
         if 'source_data' in kwargs:
             if package == 'wel':
                 dropped_wells_file =\
-                    kwargs['output_files']['dropped_wells_file'].format(self.name)
+                    kwargs.get('output_files', {})\
+                    .get('dropped_wells_file', '{}_dropped_wells.csv').format(self.name)
                 df_sd = setup_wel_data(self,
                                        source_data=kwargs['source_data'],
                                        dropped_wells_file=dropped_wells_file)
             else:
-                df_sd = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs['mfsetup_options'])
+                df_sd = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs.get('mfsetup_options', dict()))
             if df_sd is not None and len(df_sd) > 0:
                 dfs.append(df_sd)
         # set up package from parent model
@@ -1514,7 +1516,13 @@ class MFsetupMixin():
         # create isfr array (where SFR cells will be populated)
         if self.version == 'mf6':
             active_cells = np.sum(self.idomain >= 1, axis=0) > 0
-            #active_cells = self.idomain.sum(axis=0) > 0
+            # For models with LGR, set the LGR area to isfr=0
+            # to prevent SFR from being generated within the LGR area
+            # needed for LGR models that only have refinement
+            # in some layers (in other words, active parent model cells
+            # below the LGR inset)
+            if self.lgr:
+                active_cells[self._lgr_idomain2d == 0] = 0
         else:
             active_cells = np.sum(self.ibound >= 1, axis=0) > 0
             #active_cells = self.ibound.sum(axis=0) > 0

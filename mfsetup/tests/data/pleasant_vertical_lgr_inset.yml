@@ -1,10 +1,10 @@
 simulation:
-  sim_name: 'pleasant_lgr'
+  sim_name: 'pleasant_vlgr'
   version: 'mf6'
-  sim_ws: 'pleasant_lgr/'
+  sim_ws: '../tmp/pleasant_vlgr/'
 
 model:
-  simulation: 'pleasant_lgr'
+  simulation: 'pleasant_vlgr'
   modelname: 'plsnt_lgr_inset'
   options:
     print_input: True
@@ -32,7 +32,7 @@ model:
 setup_grid:
   source_data:
     features_shapefile:
-      filename: 'data/pleasant/source_data/shps/all_lakes.shp'
+      filename: '../../../examples/data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
   dxy: 40  # grid spacing, in CRS units (meters)
@@ -44,16 +44,21 @@ dis:
     length_units: 'meters'
   dimensions:
     # nrow and ncol are based on the buffer distance and grid spacing
-    nlay: 5
+    nlay: 9
   source_data:
     top:
-      filename: 'data/pleasant/source_data/rasters/dem40m.tif' # DEM file; path relative to setup script
+      filename: '../../../examples/data/pleasant/source_data/rasters/dem40m.tif' # DEM file; path relative to setup script
       elevation_units: 'meters'
     botm:
       filenames:
-        1: 'data/pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
-        2: 'data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
-        3: 'data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
+        # bottom of layer 0 set halfway between layer 1 bottom and model top (layer_refinement[0] == 2)
+        1: '../../../examples/data/pleasant/source_data/rasters/botm0.tif'  # preprocessed surface for parent model layer 0 bottom
+        # bottom of layer 2 set halfway between layers 1 and 3 (layer_refinement[1] == 2)
+        3: '../../../examples/data/pleasant/source_data/rasters/botm1.tif'  # preprocessed surface for parent model layer 1 bottom
+        # bottom of layer 4 set halfway between layers 3 and 5 (layer_refinement[2] == 2)
+        5: '../../../examples/data/pleasant/source_data/rasters/botm2.tif'  # preprocessed surface for parent model layer 2 bottom
+        # bottoms of layers 6 and 7 equally subdivide layers 5 and 8 (layer_refinement[3] == 3)
+        # bottom of layer 8 set from parent model layer 3 bottom
 
 # Recharge and Well packages are inherited from the parent model
 # (since this is an LGR model
@@ -74,13 +79,13 @@ lak:
     # polygon shapefile of lake footprints
     littoral_zone_buffer_width: 40
     lakes_shapefile:
-      filename: 'data/pleasant/source_data/shps/all_lakes.shp'
+      filename: '../../../examples/data/pleasant/source_data/shps/all_lakes.shp'
       id_column: 'HYDROID'
       include_ids: [600059060] # pleasant lake
     # setup lake precipitation and evaporation from PRISM data
     climate:
       filenames:
-        600059060: 'data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
+        600059060: '../../../examples/data/pleasant/source_data/PRISM_ppt_tmean_stable_4km_189501_201901_43.9850_-89.5522.csv'
       format: 'prism'
       period_stats:
         # for period 0, use average precip and evap for dates below
@@ -90,11 +95,11 @@ lak:
         1: 'mean'  # average daily rate or value for each month
     # bathymetry file with lake depths to subtract off model top
     bathymetry_raster:
-      filename: 'data/pleasant/source_data/rasters/pleasant_bathymetry.tif'
+      filename: '../../../examples/data/pleasant/source_data/rasters/pleasant_bathymetry.tif'
       length_units: 'meters'
     # bathymetry file with stage/area/volume relationship
     stage_area_volume_file:
-      filename: 'data/pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
+      filename: '../../../examples/data/pleasant/source_data/tables/area_stage_vol_Pleasant.csv'
       length_units: 'meters'
       id_column: 'hydroid'
       column_mappings:
@@ -106,9 +111,9 @@ sfr:
     save_flows: True
   source_data:
     flowlines:
-      nhdplus_paths: ['data/pleasant/source_data/shps']
+      nhdplus_paths: ['../../../examples/data/pleasant/source_data/shps']
     dem:
-      filename: 'data/pleasant/source_data/rasters/dem40m.tif'
+      filename: '../../../examples/data/pleasant/source_data/rasters/dem40m.tif'
       elevation_units: 'meters'
   sfrmaker_options:
     set_streambed_top_elevations_from_dem: True
@@ -118,11 +123,11 @@ obs:
   # any observations not within the LGR extent are culled
   source_data:
     filenames: [
-      #'data/pleasant/source_data/tables/nwis_heads_info_file.csv',
-                'data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
-                'data/pleasant/source_data/tables/wdnr_gw_sites.csv',
-                #'data/pleasant/source_data/tables/uwsp_heads.csv',
-                #'data/pleasant/source_data/tables/wgnhs_head_targets.csv'
+      #'../../../examples/data/pleasant/source_data/tables/nwis_heads_info_file.csv',
+                '../../../examples/data/pleasant/source_data/tables/lake_sites.csv',  # some lakes are high-k; obs need to be in hydmod
+                '../../../examples/data/pleasant/source_data/tables/wdnr_gw_sites.csv',
+                #'../../../examples/data/pleasant/source_data/tables/uwsp_heads.csv',
+                #'../../../examples/data/pleasant/source_data/tables/wgnhs_head_targets.csv'
                      ]
     column_mappings:
       obsname: ['obsprefix', 'common_name']
