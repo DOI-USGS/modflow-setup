@@ -244,6 +244,16 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
     # drop locations that are completely inactive
     df = df.loc[df['k'].isin(range(idomain.shape[0]))]
 
+    # for models with LGR:
+    # drop non-well BCs within LGR areas
+    # (assumes that CHD, DRN, GHB, and RIV cells
+    # all represent surface or near-surface features
+    # that are represented in the LGR models;
+    # the Well Package is set up using other code in wells.py)
+    if model.lgr:
+        df['lgr_idomain'] = model._lgr_idomain2d[df['i'], df['j']]
+        df = df.loc[df['lgr_idomain'] > 0].copy()
+
     # sort the columns
     col_order = ['per', 'k', 'i', 'j', 'head', 'elev', 'bhead', 'stage',
                  'cond', 'rbot', 'boundname']
