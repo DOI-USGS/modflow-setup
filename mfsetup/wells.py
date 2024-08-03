@@ -128,6 +128,15 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                   aw['x'].values,
                                                   aw['y'].values)
                     aw['per'] = aw['per'].astype(int)
+                    if 'k' not in aw.columns:
+                        if model.nlay > 1:
+                            vfd = vfd_defaults.copy()
+                            vfd.update(v.get('vertical_flux_distribution', {}))
+                            aw = assign_layers_from_screen_top_botm(aw,
+                                                                    model,
+                                                                    **vfd)
+                        else:
+                            aw['k'] = 0
                     aw['k'] = aw['k'].astype(int)
                     df = pd.concat([df, aw], axis=0)
 
@@ -401,8 +410,35 @@ def assign_layers_from_screen_top_botm(data, model,
             inactive = idomain[data.k, data.i, data.j] < 1
             invalid_open_interval = (data['laythick'] < minimum_layer_thickness) | inactive
 
+            outfile = model.cfg['wel']['output_files']['dropped_wells_file'].format(model.name)
+            bad_wells = pd.DataFrame()
+            # for LGR parent models, remove wells with >50% of their open interval within the LGR area
+            # (these should be represented in the LGR child model)
+            if model.lgr:
+                data['model_top'] = model.dis.top.array[data['i'], data['j']]
+                data['frac_in_model'] = (data['model_top'] - data['screen_botm'])/\
+                    (data['screen_top'] - data['screen_botm'])
+                in_model = data['frac_in_model'] > 0.5
+                bad_wells = pd.concat([bad_wells, data.loc[~in_model].copy()])
+                bad_wells['category'] = 'dropped'
+                bad_wells['reason'] =\
+                    ">50%% of well in LGR area (should be represented in LGR child model)"
+                data = data.loc[in_model].copy()
+            # for LGR child models, remove wells with <50% of their open interval within the LGR area
+            if model._is_lgr:
+                data['model_botm'] = model.dis.botm.array[-1, data['i'], data['j']]
+                data['frac_in_model'] = (data['screen_top'] - data['model_botm'])/\
+                    (data['screen_top'] - data['screen_botm'])
+                in_model = data['frac_in_model'] > 0.5
+                bad_wells = pd.concat([bad_wells, data.loc[~in_model].copy()])
+                bad_wells['category'] = 'dropped'
+                bad_wells['reason'] = (
+                    ">50%% of well below LGR area (should be represented in "
+                    "underlying parent model, or model bottom and open interval "
+                    "should be checked)."
+                )
+                data = data.loc[in_model].copy()
             if any(invalid_open_interval):
-                outfile = model.cfg['wel']['output_files']['dropped_wells_file'].format(model.name)
 
                 # move wells that are still in a thin layer to the thickest active layer
                 data['orig_layer'] = data['k']
@@ -422,22 +458,21 @@ def assign_layers_from_screen_top_botm(data, model,
                 data['idomain'] = idomain[data['k'], i, j]
 
                 # record which wells were moved or dropped, and why
-                bad_wells = data.loc[invalid_open_interval].copy()
-                bad_wells['category'] = 'moved'
-                bad_wells['reason'] = (f'longest open interval thickness < {minimum_layer_thickness} '
+                wells_in_too_thin_layers = data.loc[invalid_open_interval].copy()
+                wells_in_too_thin_layers['category'] = 'moved'
+                wells_in_too_thin_layers['reason'] = (f'longest open interval thickness < {minimum_layer_thickness} '
                                       f'{model.length_units} minimum '
                                       'or open interval placed well in inactive layer.'
                                       )
-                bad_wells['routine'] = __name__ + '.assign_layers_from_screen_top_botm'
                 msg = ('Warning: {} of {} wells in layers less than '
                        'specified minimum thickness of {} {}\n'
                        'were moved to the thickest layer at their i, j locations.\n'.format(invalid_open_interval.sum(),
                                                                         len(data),
                                                                         minimum_layer_thickness,
                                                                         model.length_units))
-                still_below_minimum = bad_wells['laythick'] < minimum_layer_thickness
-                bad_wells.loc[still_below_minimum, 'category'] = 'dropped'
-                bad_wells.loc[still_below_minimum, 'reason'] = 'no layer above minimum thickness of {} {}'.format(minimum_layer_thickness,
+                still_below_minimum = wells_in_too_thin_layers['laythick'] < minimum_layer_thickness
+                wells_in_too_thin_layers.loc[still_below_minimum, 'category'] = 'dropped'
+                wells_in_too_thin_layers.loc[still_below_minimum, 'reason'] = 'no layer above minimum thickness of {} {}'.format(minimum_layer_thickness,
                                                                                           model.length_units)
                 n_below = np.sum(still_below_minimum)
                 if n_below > 0:
@@ -455,6 +490,8 @@ def assign_layers_from_screen_top_botm(data, model,
                     print(msg)
 
                 # write shapefile and CSV output for wells that were dropped
+                bad_wells = pd.concat([bad_wells, data.loc[invalid_open_interval].copy()])
+                bad_wells['routine'] = __name__ + '.assign_layers_from_screen_top_botm'
                 cols = ['k', 'i', 'j', 'boundname',
                         'category', 'laythick', 'idomain', 'reason', 'routine', 'x', 'y']
                 cols = [c for c in cols if c in bad_wells.columns]
