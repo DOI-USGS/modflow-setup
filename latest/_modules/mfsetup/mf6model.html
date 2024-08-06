@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.5.0.post10+g45683b6 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.5.0.post15+gc303cf1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=fa88a7cc"></script>
+        <script src="../../_static/documentation_options.js?v=8d3116ea"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post10+g45683b6
+                0.5.0.post15+gc303cf1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -106,6 +106,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">flopy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -140,7 +141,7 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">mfsetup.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
 <span class="kn">from</span> <span class="nn">mfsetup.mover</span> <span class="kn">import</span> <span class="n">get_mover_sfr_package_input</span>
-<span class="kn">from</span> <span class="nn">mfsetup.obs</span> <span class="kn">import</span> <span class="n">setup_head_observations</span>
+<span class="kn">from</span> <span class="nn">mfsetup.obs</span> <span class="kn">import</span> <span class="n">remove_inactive_obs</span><span class="p">,</span> <span class="n">setup_head_observations</span>
 <span class="kn">from</span> <span class="nn">mfsetup.oc</span> <span class="kn">import</span> <span class="n">parse_oc_period_input</span>
 <span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="n">add_date_comments_to_tdis</span><span class="p">,</span> <span class="n">setup_perioddata</span>
 <span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_time_units</span>
@@ -306,6 +307,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">lgr_idomain</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">idomain</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lgr_idomain2d</span> <span class="o">=</span> <span class="n">lgr_idomain</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">idomain_from_layer_elevations</span> <span class="o">=</span> <span class="n">make_idomain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                                                      <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                                                      <span class="n">nodata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodata_value</span><span class="p">,</span>
@@ -493,20 +495,119 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">inset_model</span>
             <span class="c1">#self.inset[inset_model.name]._is_lgr = True</span>
 
-            <span class="c1"># create idomain indicating area of parent grid that is LGR</span>
-            <span class="n">lgr_idomain</span> <span class="o">=</span> <span class="n">make_lgr_idomain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">)</span>
+            <span class="c1"># establish inset model layering within parent model</span>
+            <span class="n">parent_start_layer</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parent_start_layer&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># parent_end_layer is specified as the last zero-based</span>
+            <span class="c1"># parent layer that includes LGR refinement (not as a slice end)</span>
+            <span class="n">parent_end_layer</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parent_end_layer&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># the layer refinement can be specified as an int, a list or a dict</span>
+            <span class="n">ncppl_input</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;layer_refinement&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">ncppl_input</span><span class="p">):</span>
+                <span class="n">ncppl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">)</span>
+                <span class="n">ncppl</span><span class="p">[</span><span class="n">parent_start_layer</span><span class="p">:</span><span class="n">parent_end_layer</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncppl_input</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ncppl_input</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">ncppl_input</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Configuration input: layer_refinement specified as&quot;</span>
+                        <span class="s2">&quot;a list must include a value for every layer.&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">ncppl</span> <span class="o">=</span> <span class="n">ncppl_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ncppl_input</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">ncppl</span> <span class="o">=</span> <span class="p">[</span><span class="n">ncppl_input</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Configuration input: Unsupported input for &quot;</span>
+                                 <span class="s2">&quot;layer_refinement: supply an int, list or dict.&quot;</span><span class="p">)</span>
 
-            <span class="n">ncpp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">ncppl</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;layer_refinement&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># refined layers must be consecutive, starting from layer 1</span>
+            <span class="n">is_refined</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ncppl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">last_refined_layer</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_refined</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">consecutive</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">is_refined</span><span class="p">)[:</span><span class="n">last_refined_layer</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">is_refined</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="ow">not</span> <span class="n">consecutive</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Configuration input: layer_refinement must&quot;</span>
+                                 <span class="s2">&quot;include consecutive sequence of layers, &quot;</span>
+                                 <span class="s2">&quot;starting with the top layer.&quot;</span><span class="p">)</span>
+            <span class="c1"># check the specified DIS package input is consistent</span>
+            <span class="c1"># with the specified layer_refinement</span>
+            <span class="n">specified_nlay_dis</span> <span class="o">=</span> <span class="n">inset_cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nlay&#39;</span><span class="p">)</span>
+            <span class="c1"># skip this check if nlay hasn&#39;t been entered into the configuration file yet</span>
+            <span class="k">if</span> <span class="n">specified_nlay_dis</span> <span class="ow">and</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ncppl</span><span class="p">)</span> <span class="o">!=</span> <span class="n">specified_nlay_dis</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Configuration input: layer_refinement  of </span><span class="si">{</span><span class="n">ncppl</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;implies </span><span class="si">{</span><span class="n">is_refined</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> inset model layers.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">specified_nlay_dis</span><span class="si">}</span><span class="s2"> inset model layers specified in DIS package.&quot;</span><span class="p">)</span>
+            <span class="c1"># mapping between parent and inset model layers</span>
+            <span class="c1"># that is used for copying input from parent model</span>
+            <span class="n">inset_parent_layer_mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">inset_k</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">for</span> <span class="n">parent_k</span><span class="p">,</span> <span class="n">n_inset_lay</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ncppl</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_inset_lay</span><span class="p">):</span>
+                    <span class="n">inset_k</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">inset_parent_layer_mapping</span><span class="p">[</span><span class="n">inset_k</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_k</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="s1">&#39;inset_layer_mapping&#39;</span><span class="p">]</span> <span class="o">=</span>\
+                <span class="n">inset_parent_layer_mapping</span>
+            <span class="c1"># create idomain indicating area of parent grid that is LGR</span>
+            <span class="n">lgr_idomain</span> <span class="o">=</span> <span class="n">make_lgr_idomain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+                                           <span class="n">ncppl</span><span class="p">)</span>
+
+            <span class="c1"># inset model horizontal refinement from parent resolution</span>
+            <span class="n">refinement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">refinement</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LGR inset model spacing must be a factor of the parent model spacing.&quot;</span><span class="p">)</span>
+            <span class="n">ncpp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">refinement</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Lgr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">,</span>
                                              <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                                              <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                                              <span class="n">lgr_idomain</span><span class="p">,</span> <span class="n">ncpp</span><span class="p">,</span> <span class="n">ncppl</span><span class="p">)</span>
             <span class="n">inset_model</span><span class="o">.</span><span class="n">_perioddata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_idomain</span><span class="p">()</span>
+            <span class="c1"># set parent model top in LGR area to bottom of LGR area</span>
+            <span class="c1"># this is an initial draft;</span>
+            <span class="c1"># bottom elevations are readjusted in sourcedata.py</span>
+            <span class="c1"># when inset model DIS package botm array is set up</span>
+            <span class="c1"># (set to mean of inset model bottom elevations</span>
+            <span class="c1">#  within each parent cell)</span>
+            <span class="c1"># number of layers in parent model with LGR</span>
+            <span class="n">n_parent_lgr_layers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ncppl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">lgr_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">idomain</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="p">[</span><span class="n">lgr_area</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span>\
+                <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">botmp</span><span class="p">[</span><span class="n">n_parent_lgr_layers</span> <span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">lgr_area</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="c1"># set parent model layers in LGR area to zero-thickness</span>
+            <span class="n">new_parent_botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_parent_lgr_layers</span><span class="p">):</span>
+                <span class="n">new_parent_botm</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">lgr_area</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="p">[</span><span class="n">lgr_area</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="n">new_parent_botm</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_top_botm_external_files</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_update_top_botm_external_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the external files after assigning new elevations to the</span>
+<span class="sd">        Discretization Package top and botm arrays; adjust idomain as needed.&quot;&quot;&quot;</span>
+        <span class="c1"># reset the model top</span>
+        <span class="c1"># (this step may not be needed if the &quot;original top&quot; functionality</span>
+        <span class="c1"># is limited to cases where there is a lake package,</span>
+        <span class="c1"># or if the &quot;original top&quot;/&quot;lake bathymetry&quot; functionality is eliminated</span>
+        <span class="c1"># and we instead require the top to be pre-processed)</span>
+        <span class="n">original_top_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;top_filename_fmt&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.original&quot;</span><span class="p">)</span>
+        <span class="n">original_top_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
+                            <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">},</span>
+                <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span> <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="c1"># _set_idomain() regerates external files for bottom array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_idomain</span><span class="p">()</span>
+
 
     <span class="k">def</span> <span class="nf">setup_lgr_exchanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">inset_name</span><span class="p">,</span> <span class="n">inset_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="c1"># update cell information for computing any bottom exchanges</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_name</span><span class="p">]</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">inset_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_name</span><span class="p">]</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="n">inset_model</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span>
+            <span class="c1"># update only the layers of the parent model below the child model</span>
+            <span class="n">parent_top_below_child</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_name</span><span class="p">]</span><span class="o">.</span><span class="n">ncppl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_name</span><span class="p">]</span><span class="o">.</span><span class="n">botmp</span><span class="p">[</span><span class="n">parent_top_below_child</span><span class="p">:]</span> <span class="o">=</span>\
+                <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">parent_top_below_child</span><span class="p">:]</span>
+
             <span class="c1"># get the exchange data</span>
             <span class="n">exchangelist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">[</span><span class="n">inset_name</span><span class="p">]</span><span class="o">.</span><span class="n">get_exchange_data</span><span class="p">(</span><span class="n">angldegx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cdist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -517,7 +618,9 @@
             <span class="c1"># unpack the cellids and get their respective ibound values</span>
             <span class="n">k1</span><span class="p">,</span> <span class="n">i1</span><span class="p">,</span> <span class="n">j1</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">exchangedf</span><span class="p">[</span><span class="s1">&#39;cellidm1&#39;</span><span class="p">])</span>
             <span class="n">k2</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j2</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">exchangedf</span><span class="p">[</span><span class="s1">&#39;cellidm2&#39;</span><span class="p">])</span>
+            <span class="c1"># limit connections to</span>
             <span class="n">active1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">k1</span><span class="p">,</span> <span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+
             <span class="n">active2</span> <span class="o">=</span> <span class="n">inset_model</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">k2</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">1</span>
 
             <span class="c1"># screen out connections involving an inactive cell</span>
@@ -544,6 +647,7 @@
             <span class="c1"># set up the exchange package</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfgwf</span><span class="p">)</span>
             <span class="n">gwfe</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfgwf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
 
     <span class="k">def</span> <span class="nf">setup_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
@@ -728,7 +832,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="s1">&#39;recharge&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;transient2d&#39;</span><span class="p">,</span>
                           <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.6e</span><span class="s1">&#39;</span><span class="p">,</span>
                           <span class="n">write_nodata</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
-
 
         <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">])</span>
@@ -1039,6 +1142,9 @@
                 <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">pckg</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span>
                 <span class="n">remove_inactive_bcs</span><span class="p">(</span><span class="n">package_instance</span><span class="p">,</span>
                                     <span class="n">external_files</span><span class="o">=</span><span class="n">external_files</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;obs&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">obs_package_instance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">:</span>
+                <span class="n">remove_inactive_obs</span><span class="p">(</span><span class="n">obs_package_instance</span><span class="p">)</span>
 
         <span class="c1"># write the model with flopy</span>
         <span class="c1"># but skip the sfr package</span>
@@ -1188,7 +1294,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 09, 2024.
+      <span class="lastupdated">Last updated on Aug 06, 2024.
       </span></p>
   </div>
 

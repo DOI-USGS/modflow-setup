@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization &mdash; modflow-setup 0.5.0.post10+g45683b6 documentation</title>
+  <title>mfsetup.discretization &mdash; modflow-setup 0.5.0.post15+gc303cf1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=fa88a7cc"></script>
+        <script src="../../_static/documentation_options.js?v=8d3116ea"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post10+g45683b6
+                0.5.0.post15+gc303cf1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -325,7 +325,7 @@
                 <span class="k">return</span> <span class="n">item</span>
 
     <span class="k">def</span> <span class="nf">get_next_above</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">seq</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">seq</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">item</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">item</span>
 
@@ -353,7 +353,7 @@
 <div class="viewcode-block" id="fill_cells_vertically">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.fill_cells_vertically">[docs]</a>
 <span class="k">def</span> <span class="nf">fill_cells_vertically</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;In MODFLOW 6, cells where idomain != 1 are excluded from the solution.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;In MODFLOW 6, cells where idomain &lt; 1 are excluded from the solution.</span>
 <span class="sd">    However, in the botm array, values are needed in overlying cells to</span>
 <span class="sd">    compute layer thickness (cells with idomain != 1 overlying cells with idomain &gt;= 1 need</span>
 <span class="sd">    values in botm). Given a 3D numpy array with nan values indicating excluded cells,</span>
@@ -391,9 +391,13 @@
     <span class="c1"># add in the model bottom elevations</span>
     <span class="c1"># use the minimum values instead of the bottom layer,</span>
     <span class="c1"># in case there are nans in the bottom layer</span>
-    <span class="n">filled</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">botm</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># botm[-1]</span>
+    <span class="c1"># include the top, in case there are nans in all botms</span>
+    <span class="c1"># introducing nans into the top can cause issues</span>
+    <span class="c1"># with partical vertical LGR</span>
+    <span class="n">all_surfaces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">top</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">arr2d</span> <span class="k">for</span> <span class="n">arr2d</span> <span class="ow">in</span> <span class="n">botm</span><span class="p">])</span>
+    <span class="n">filled</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">all_surfaces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># botm[-1]</span>
     <span class="c1"># append the model bottom elevations</span>
-    <span class="n">filled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">botm</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">filled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">all_surfaces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">filled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">filled</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
 
@@ -546,7 +550,8 @@
 
 <div class="viewcode-block" id="make_lgr_idomain">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.make_lgr_idomain">[docs]</a>
-<span class="k">def</span> <span class="nf">make_lgr_idomain</span><span class="p">(</span><span class="n">parent_modelgrid</span><span class="p">,</span> <span class="n">inset_modelgrid</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">make_lgr_idomain</span><span class="p">(</span><span class="n">parent_modelgrid</span><span class="p">,</span> <span class="n">inset_modelgrid</span><span class="p">,</span>
+                     <span class="n">ncppl</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Inactivate cells in parent_modelgrid that coincide</span>
 <span class="sd">    with area of inset_modelgrid.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">parent_modelgrid</span><span class="o">.</span><span class="n">rotation</span> <span class="o">!=</span> <span class="n">inset_modelgrid</span><span class="o">.</span><span class="n">rotation</span><span class="p">:</span>
@@ -565,7 +570,8 @@
     <span class="n">y1</span> <span class="o">=</span> <span class="n">inset_modelgrid</span><span class="o">.</span><span class="n">ycellcenters</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">pi1</span><span class="p">,</span> <span class="n">pj1</span> <span class="o">=</span> <span class="n">parent_modelgrid</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">forgive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">idomain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">parent_modelgrid</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    <span class="n">idomain</span><span class="p">[:,</span> <span class="n">pi0</span><span class="p">:</span><span class="n">pi1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pj0</span><span class="p">:</span><span class="n">pj1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">idomain</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ncppl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+            <span class="n">pi0</span><span class="p">:</span><span class="n">pi1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pj0</span><span class="p">:</span><span class="n">pj1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">idomain</span></div>
 
 
@@ -919,7 +925,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 09, 2024.
+      <span class="lastupdated">Last updated on Aug 06, 2024.
       </span></p>
   </div>
 

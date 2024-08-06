@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.5.0.post10+g45683b6 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.5.0.post15+gc303cf1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=fa88a7cc"></script>
+        <script src="../../_static/documentation_options.js?v=8d3116ea"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post10+g45683b6
+                0.5.0.post15+gc303cf1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -226,6 +226,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inset</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># dictionary of inset models attached to LGR parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_lgr</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># flag for lgr inset models</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># holds flopy Lgr utility object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lgr_idomain2d</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># array of Lgr inset model locations within parent grid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tmr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># holds TMR class instance for TMR-type perimeter boundaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether model is being made or loaded from existing files</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lake_info</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1419,12 +1420,13 @@
         <span class="k">if</span> <span class="s1">&#39;source_data&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;wel&#39;</span><span class="p">:</span>
                 <span class="n">dropped_wells_file</span> <span class="o">=</span>\
-                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;output_files&#39;</span><span class="p">][</span><span class="s1">&#39;dropped_wells_file&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;output_files&#39;</span><span class="p">,</span> <span class="p">{})</span>\
+                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dropped_wells_file&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_dropped_wells.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">df_sd</span> <span class="o">=</span> <span class="n">setup_wel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                        <span class="n">source_data</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">],</span>
                                        <span class="n">dropped_wells_file</span><span class="o">=</span><span class="n">dropped_wells_file</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">df_sd</span> <span class="o">=</span> <span class="n">setup_basic_stress_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">])</span>
+                <span class="n">df_sd</span> <span class="o">=</span> <span class="n">setup_basic_stress_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;source_data&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">()))</span>
             <span class="k">if</span> <span class="n">df_sd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_sd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_sd</span><span class="p">)</span>
         <span class="c1"># set up package from parent model</span>
@@ -1638,7 +1640,13 @@
         <span class="c1"># create isfr array (where SFR cells will be populated)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
             <span class="n">active_cells</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="c1">#active_cells = self.idomain.sum(axis=0) &gt; 0</span>
+            <span class="c1"># For models with LGR, set the LGR area to isfr=0</span>
+            <span class="c1"># to prevent SFR from being generated within the LGR area</span>
+            <span class="c1"># needed for LGR models that only have refinement</span>
+            <span class="c1"># in some layers (in other words, active parent model cells</span>
+            <span class="c1"># below the LGR inset)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lgr</span><span class="p">:</span>
+                <span class="n">active_cells</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_lgr_idomain2d</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">active_cells</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ibound</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
             <span class="c1">#active_cells = self.ibound.sum(axis=0) &gt; 0</span>
@@ -1972,7 +1980,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 09, 2024.
+      <span class="lastupdated">Last updated on Aug 06, 2024.
       </span></p>
   </div>
 

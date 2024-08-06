@@ -6,4 +6,5 @@ Modflow-setup concepts and methods
    :maxdepth: 1
 
    Interpolation <interp.rst>
+   Local grid refinement <lgr.rst>
 	Specifying perimeter boundary conditions <perimeter-bcs.rst>

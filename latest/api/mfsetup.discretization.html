@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization module &mdash; modflow-setup 0.5.0.post10+g45683b6 documentation</title>
+  <title>mfsetup.discretization module &mdash; modflow-setup 0.5.0.post15+gc303cf1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=fa88a7cc"></script>
+        <script src="../_static/documentation_options.js?v=8d3116ea"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -40,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post10+g45683b6
+                0.5.0.post15+gc303cf1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -237,7 +237,7 @@ must be run.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.discretization.fill_cells_vertically">
 <span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">fill_cells_vertically</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">botm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#fill_cells_vertically"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.fill_cells_vertically" title="Link to this definition">¶</a></dt>
-<dd><p>In MODFLOW 6, cells where idomain != 1 are excluded from the solution.
+<dd><p>In MODFLOW 6, cells where idomain &lt; 1 are excluded from the solution.
 However, in the botm array, values are needed in overlying cells to
 compute layer thickness (cells with idomain != 1 overlying cells with idomain &gt;= 1 need
 values in botm). Given a 3D numpy array with nan values indicating excluded cells,
@@ -458,7 +458,7 @@ valid layer numbers in the irch array).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.discretization.make_lgr_idomain">
-<span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">make_lgr_idomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_modelgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_modelgrid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#make_lgr_idomain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.make_lgr_idomain" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">make_lgr_idomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_modelgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inset_modelgrid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncppl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#make_lgr_idomain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.make_lgr_idomain" title="Link to this definition">¶</a></dt>
 <dd><p>Inactivate cells in parent_modelgrid that coincide
 with area of inset_modelgrid.</p>
 </dd></dl>
@@ -580,7 +580,7 @@ by default 0.01.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jul 09, 2024.
+      <span class="lastupdated">Last updated on Aug 06, 2024.
       </span></p>
   </div>
 
