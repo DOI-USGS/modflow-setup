@@ -1417,6 +1417,12 @@ class MFsetupMixin():
             self._modelgrid.cfg = self.cfg['grid']
         else:
             kwargs = get_input_arguments(cfg, setup_structured_grid)
+            if not set(kwargs.keys()).intersection({
+                'features_shapefile', 'features', 'xoff', 'yoff', 'xul', 'yul'}):
+                raise ValueError(
+                    "No features_shapefile or xoff, yoff supplied "
+                    "to setup_grid: block. Check configuration file input, "
+                    "including for accidental indentation of the setup_grid: block.")
             self._modelgrid = setup_structured_grid(**kwargs)
             self.cfg['grid'] = self._modelgrid.cfg
             # update DIS package configuration
