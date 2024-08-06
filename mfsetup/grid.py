@@ -986,14 +986,14 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     if parent_model is not None and snap_to_parent:
         to_grid_units_parent = convert_length_units(get_model_length_units(parent_model), grid_units)
         # parent model grid spacing in meters
-        parent_delr_grid = np.round(parent_model.dis.delr.array[0] * to_grid_units_parent, 4)
-        if not parent_delr_grid % delr_grid % parent_delr_grid == 0:
-            raise ValueError('inset delr spacing of {} must be factor of parent spacing of {}'.format(delr_grid,
-                                                                                                      parent_delr_grid))
-        parent_delc_grid = np.round(parent_model.dis.delc.array[0] * to_grid_units_parent, 4)
-        if not parent_delc_grid % delc_grid % parent_delc_grid == 0:
-            raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_grid,
-                                                                                                      parent_delc_grid))
+        #parent_delr_grid = np.round(parent_model.dis.delr.array[0] * to_grid_units_parent, 4)
+        #if not parent_delr_grid % delr_grid % parent_delr_grid == 0:
+        #    raise ValueError('inset delr spacing of {} must be factor of parent spacing of {}'.format(delr_grid,
+        #                                                                                              parent_delr_grid))
+        #parent_delc_grid = np.round(parent_model.dis.delc.array[0] * to_grid_units_parent, 4)
+        #if not parent_delc_grid % delc_grid % parent_delc_grid == 0:
+        #    raise ValueError('inset delc spacing of {} must be factor of parent spacing of {}'.format(delc_grid,
+        #                                                                                              parent_delc_grid))
 
     # option 1: make grid from xoff, yoff and specified dimensions
     if xoff is not None and yoff is not None:
@@ -1057,6 +1057,10 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
                 df.to_crs(crs, inplace=True)
             # use all features by default
             features = df.geometry.tolist()
+        elif features is None and features_shapefile is not None:
+            raise ValueError(
+                "setup_grid: need one of xoff/yoff, xul/yul, features_shapefile or "
+                "features inputs")
         # alternatively, accept features as an argument
         # convert multiple features to a MultiPolygon
         if isinstance(features, list):
