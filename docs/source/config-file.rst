@@ -143,8 +143,25 @@ Some additional notes on YAML
     * ``[12,1.2]`` parses to ``[12,1.2]``
     * ``(12,1.2)`` parses to ``"(12,1.2)"``
     * ``{12,1.2}`` parses to ``{12: None, 1.2: None}``
+* dictionaries can be represented with indentation, but spaces are needed after the colon(s):
 
+  .. code-block:: yaml
 
+      items:
+        0:1
+        1:2
+
+  parses to ``'0:1 1:2'``
+
+  .. code-block:: yaml
+
+      items:
+        0: 1
+        1: 2
+
+  parses to ``{0:1, 1:2}``
+
+Using a YAML-aware text editor such as VS Code can help with these issues, for example by changing the highlighting color to indicate a string in the first dictionary example above and an interpreted python data structure in the second dictionary example.
 
 .. _JSON: https://www.json.org/json-en.html
 .. _pyyaml: https://pyyaml.org/
