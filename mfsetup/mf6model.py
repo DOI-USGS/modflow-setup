@@ -405,7 +405,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             last_refined_layer = max(np.where(is_refined > 0)[0])
             consecutive = all(np.diff(is_refined)[:last_refined_layer] == 0)
             if (is_refined[0] != 1) | (not consecutive):
-                raise ValueError("Configuration input: layer_refinement must"
+                raise ValueError("Configuration input: layer_refinement must "
                                  "include consecutive sequence of layers, "
                                  "starting with the top layer.")
             # check the specified DIS package input is consistent
