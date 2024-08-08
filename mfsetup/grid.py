@@ -634,7 +634,7 @@ def write_bbox_shapefile(modelgrid, outshp):
 
 
 def rasterize(feature, grid, id_column=None,
-              include_ids=None, names_column=None,
+              include_ids=None, exclude_ids=None, names_column=None,
               crs=None, **kwargs):
     """Rasterize a feature onto the model grid, using
     the rasterio.features.rasterize method. Features are intersected
@@ -649,6 +649,8 @@ def rasterize(feature, grid, id_column=None,
         from this column will be assigned to the output raster.
     include_ids : sequence
         Subset of IDs in id_column to include
+    exclude_ids : sequence
+        Subset of IDs in id_column to exclude
     names_column : str, optional
         By default, the IDs in id_column, or sequential integers
         are returned. This option allows another column of strings
@@ -738,7 +740,8 @@ def rasterize(feature, grid, id_column=None,
     # subset to include_ids
     if id_column is not None and include_ids is not None:
         df = df.loc[df[id_column].isin(include_ids)].copy()
-
+    if id_column is not None and exclude_ids is not None:
+        df = df.loc[~df[id_column].isin(exclude_ids)].copy()
     # create list of GeoJSON features, with unique value for each feature
     if id_column is None:
         numbers = list(range(1, len(df)+1))

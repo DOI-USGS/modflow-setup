@@ -650,6 +650,11 @@ def test_basic_stress_package_setup(shellmound_model_with_dis, pckg_abbrv,
         # heads in CHD package should match the CSV input,
         # after conversion to meters
         assert np.allclose(in_df['head'].values, spd_heads[1:]/.3048)
+    if pckg_abbrv == 'drn':
+        exclude_ids = list(map(str, m.cfg[pckg_abbrv]['source_data']['shapefile']['exclude_ids']))
+        comids = [s.replace('feature-','') for s in np.unique(m.drn.stress_period_data.data[0]['boundname'])]
+        assert not set(exclude_ids).intersection(comids)
+        assert comids == ['18046236', '18047154']
     # more advanced transient input case with csv
     # and conductance values specified via a raster
     if pckg_abbrv == 'ghb':

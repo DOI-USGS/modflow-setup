@@ -317,10 +317,10 @@ drn:
     shapefile:
       filename: '../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'
       id_column: 'COMID'
-      # Note: to include all features in a shapefile,
-      # simply omit the include_ids: key
-      # id_column: can also be omitted
-      include_ids: [18047154, 18046236]
+      # Include all features in the above shapefile,
+      # except those associated with these COMIDs
+      exclude_ids: [18046230, 18046226, 18046238, 17953939, 18046140, 18046162]
+      boundname_column: 'COMID'
     elev:
       filename: 'shellmound/rasters/meras_100m_dem.tif'
       elevation_units: 'feet'
