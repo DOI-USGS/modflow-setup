@@ -191,6 +191,8 @@ def test_lgr_grid_setup(lgr_grid_spacing, layer_refinement_input,
         m.modelgrid.write_shapefile(outfolder / 'pleasant_lgr_parent_grid.shp')
         inset_model.modelgrid.write_shapefile(outfolder / 'pleasant_lgr_inset_grid.shp')
 
+    # convert layer_refinement to a list
+    # (mimicking what is done internally in modflow-setup)
     if np.isscalar(layer_refinement):
         layer_refinement = np.array([1] * m.modelgrid.nlay)
     elif isinstance(layer_refinement, dict):
@@ -289,13 +291,19 @@ def test_lgr_parent_bcs_in_lgr_area(pleasant_vertical_lgr_setup_from_yaml):
 
 def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     m = pleasant_lgr_setup_from_yaml
+    inset_model = m.inset['plsnt_lgr_inset']
+
+    # check that packagedata for both models was written to external files
+    assert Path(m.external_path, f"{m.name}_packagedata.dat").exists()
+    assert Path(inset_model.external_path, f"{inset_model.name}_packagedata.dat").exists()
+
     parent_reach_data = m.sfrdata.reach_data
-    inset_reach_data = m.inset['plsnt_lgr_inset'].sfrdata.reach_data
+    inset_reach_data = inset_model.sfrdata.reach_data
     to_inset, to_parent = get_sfr_package_connections(parent_reach_data, inset_reach_data,
                                                       distance_threshold=200)
     assert len(to_inset) == 0
     # verify that the last reaches in the two segments are keys
-    last_reaches = m.inset['plsnt_lgr_inset'].sfrdata.reach_data.groupby('iseg').last().rno
+    last_reaches = inset_model.sfrdata.reach_data.groupby('iseg').last().rno
     assert not any(set(to_parent.keys()).difference(last_reaches))
     # verify that the first reaches are headwaters
     outreaches = set(m.sfrdata.reach_data.outreach)
