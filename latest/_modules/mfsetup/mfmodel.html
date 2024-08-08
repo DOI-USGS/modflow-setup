@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.5.0.post15+gc303cf1 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.5.0.post18+g77c050e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=8d3116ea"></script>
+        <script src="../../_static/documentation_options.js?v=966db15f"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post15+gc303cf1
+                0.5.0.post18+g77c050e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -1537,6 +1537,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">setup_structured_grid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">intersection</span><span class="p">({</span>
+                <span class="s1">&#39;features_shapefile&#39;</span><span class="p">,</span> <span class="s1">&#39;features&#39;</span><span class="p">,</span> <span class="s1">&#39;xoff&#39;</span><span class="p">,</span> <span class="s1">&#39;yoff&#39;</span><span class="p">,</span> <span class="s1">&#39;xul&#39;</span><span class="p">,</span> <span class="s1">&#39;yul&#39;</span><span class="p">}):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;No features_shapefile or xoff, yoff supplied &quot;</span>
+                    <span class="s2">&quot;to setup_grid: block. Check configuration file input, &quot;</span>
+                    <span class="s2">&quot;including for accidental indentation of the setup_grid: block.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span> <span class="o">=</span> <span class="n">setup_structured_grid</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelgrid</span><span class="o">.</span><span class="n">cfg</span>
             <span class="c1"># update DIS package configuration</span>
@@ -1980,7 +1986,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 06, 2024.
+      <span class="lastupdated">Last updated on Aug 08, 2024.
       </span></p>
   </div>
 
