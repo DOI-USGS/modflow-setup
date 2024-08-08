@@ -970,50 +970,64 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         """
         # prior to writing output
         # remove any BCs in inactive cells
-        pckgs = ['chd', 'drn', 'ghb', 'riv', 'wel']
-        for pckg in pckgs:
-            package_instance = getattr(self, pckg.lower(), None)
-            if package_instance is not None:
-                external_files = self.cfg[pckg.lower()]['stress_period_data']
-                remove_inactive_bcs(package_instance,
-                                    external_files=external_files)
-        if hasattr(self, 'obs'):
-            for obs_package_instance in self.obs:
-                remove_inactive_obs(obs_package_instance)
+        # handle cases of single model or multi-model LGR simulation
+        # by working with the simulation-level model dictionary
+        for model_name, model in self.simulation.model_dict.items():
+            pckgs = ['chd', 'drn', 'ghb', 'riv', 'wel']
+            for pckg in pckgs:
+                package_instance = getattr(model, pckg.lower(), None)
+                if package_instance is not None:
+                    external_files = model.cfg[pckg.lower()]['stress_period_data']
+                    remove_inactive_bcs(package_instance,
+                                        external_files=external_files)
+            if hasattr(model, 'obs'):
+                for obs_package_instance in model.obs:
+                    remove_inactive_obs(obs_package_instance)
 
-        # write the model with flopy
-        # but skip the sfr package
-        # by monkey-patching the write method
-        def skip_write(**kwargs):
-            pass
-        if hasattr(self, 'sfr'):
-            self.sfr.write = skip_write
+            # write the model with flopy
+            # but skip the sfr package
+            # by monkey-patching the write method
+            def skip_write(**kwargs):
+                pass
+            if hasattr(model, 'sfr'):
+                model.sfr.write = skip_write
         self.simulation.write_simulation()
 
-        # write the sfr package with SFRmaker
-        if 'SFR' in ' '.join(self.get_package_list()):
-            options = []
-            for k, b in self.cfg['sfr']['options'].items():
-                if k == 'mover':
-                    if 'mvr' not in self.simulation.package_key_dict:
-                        continue
-                options.append(k)
-            if 'save_flows' in options:
-                budget_fileout = '{}.{}'.format(self.name,
-                                                self.cfg['sfr']['budget_fileout'])
-                stage_fileout = '{}.{}'.format(self.name,
-                                               self.cfg['sfr']['stage_fileout'])
-                options.append('budget fileout {}'.format(budget_fileout))
-                options.append('stage fileout {}'.format(stage_fileout))
-            if len(self.sfrdata.observations) > 0:
-                options.append('obs6 filein {}.{}'.format(self.name,
-                                                          self.cfg['sfr']['obs6_filein_fmt'])
-                               )
-            self.sfrdata.write_package(idomain=self.idomain,
-                                       version='mf6',
-                                       options=options,
-                                       external_files_path=self.external_path
-                                       )
+        # post-flopy write actions
+        for model_name, model in self.simulation.model_dict.items():
+            # write the sfr package with SFRmaker
+            if 'SFR' in ' '.join(model.get_package_list()):
+                options = []
+                for k, b in model.cfg['sfr']['options'].items():
+                    if k == 'mover':
+                        if 'mvr' not in model.simulation.package_key_dict:
+                            continue
+                    options.append(k)
+                if 'save_flows' in options:
+                    budget_fileout = '{}.{}'.format(model_name,
+                                                    model.cfg['sfr']['budget_fileout'])
+                    stage_fileout = '{}.{}'.format(model_name,
+                                                model.cfg['sfr']['stage_fileout'])
+                    options.append('budget fileout {}'.format(budget_fileout))
+                    options.append('stage fileout {}'.format(stage_fileout))
+                if len(model.sfrdata.observations) > 0:
+                    options.append('obs6 filein {}.{}'.format(model_name,
+                                                            model.cfg['sfr']['obs6_filein_fmt'])
+                                )
+                model.sfrdata.write_package(idomain=model.idomain,
+                                        version='mf6',
+                                        options=options,
+                                        external_files_path=model.external_path
+                                        )
+            # add version info to package file headers
+            files = [model.namefile]
+            files += [p.filename for p in model.packagelist]
+            files += [p[0].filename for k, p in model.simulation.package_key_dict.items()]
+            for f in files:
+                add_version_to_fileheader(f, model_info=model.header)
+
+            if not model.cfg['mfsetup_options']['keep_original_arrays']:
+                shutil.rmtree(model.tmpdir)
 
         # label stress periods in tdis file with comments
         self.perioddata.sort_values(by='per', inplace=True)
@@ -1021,15 +1035,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                   self.perioddata.start_datetime,
                                   self.perioddata.end_datetime
                                   )
-        # add version info to file headers
-        files = [self.namefile]
-        files += [p.filename for p in self.packagelist]
-        files += [p[0].filename for k, p in self.simulation.package_key_dict.items()]
-        for f in files:
-            add_version_to_fileheader(f, model_info=self.header)
 
-        if not self.cfg['mfsetup_options']['keep_original_arrays']:
-            shutil.rmtree(self.tmpdir)
 
 
     @staticmethod
