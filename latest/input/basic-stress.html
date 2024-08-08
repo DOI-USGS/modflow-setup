@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.5.0.post18+g77c050e documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.5.0.post19+g85b7816 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=966db15f"></script>
+        <script src="../_static/documentation_options.js?v=0d1152b1"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -40,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post18+g77c050e
+                0.5.0.post19+g85b7816
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -338,10 +338,10 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
 <span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
-<span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span>
-<span class="w">      </span><span class="c1"># simply omit the include_ids: key</span>
-<span class="w">      </span><span class="c1"># id_column: can also be omitted</span>
-<span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047154</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046236</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="c1"># Include all features in the above shapefile,</span>
+<span class="w">      </span><span class="c1"># except those associated with these COMIDs</span>
+<span class="w">      </span><span class="nt">exclude_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046226</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046238</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">17953939</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046140</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046162</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
 <span class="w">    </span><span class="nt">elev</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
 <span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
