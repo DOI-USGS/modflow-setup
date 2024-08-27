@@ -243,7 +243,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         # re-write the input files
         # todo: integrate this better with setup_dis
         # to reduce the number of times the arrays need to be remade
-
         self._setup_array('dis', 'botm',
                         data={i: arr for i, arr in enumerate(botm)},
                         datatype='array3d', resample_method='linear',
@@ -981,7 +980,14 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                     remove_inactive_bcs(package_instance,
                                         external_files=external_files)
             if hasattr(model, 'obs'):
-                for obs_package_instance in model.obs:
+                # handle case of single obs package, in which case model.obs
+                # will be a ModflowUtlobs package instance
+                try:
+                    len(model.obs)
+                    obs_packages = model.obs
+                except:
+                    obs_packages = [model.obs]
+                for obs_package_instance in obs_packages:
                     remove_inactive_obs(obs_package_instance)
 
             # write the model with flopy
