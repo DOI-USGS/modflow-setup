@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.5.0.post19+g85b7816 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.5.0.post22+g0215fb8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=0d1152b1"></script>
+        <script src="../../_static/documentation_options.js?v=721bde57"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post19+g85b7816
+                0.5.0.post22+g0215fb8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -349,7 +349,6 @@
         <span class="c1"># re-write the input files</span>
         <span class="c1"># todo: integrate this better with setup_dis</span>
         <span class="c1"># to reduce the number of times the arrays need to be remade</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span>
                         <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">arr</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">botm</span><span class="p">)},</span>
                         <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">resample_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
@@ -1135,66 +1134,79 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># prior to writing output</span>
         <span class="c1"># remove any BCs in inactive cells</span>
-        <span class="n">pckgs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;chd&#39;</span><span class="p">,</span> <span class="s1">&#39;drn&#39;</span><span class="p">,</span> <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;riv&#39;</span><span class="p">,</span> <span class="s1">&#39;wel&#39;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">pckg</span> <span class="ow">in</span> <span class="n">pckgs</span><span class="p">:</span>
-            <span class="n">package_instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pckg</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">package_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">external_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">pckg</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span>
-                <span class="n">remove_inactive_bcs</span><span class="p">(</span><span class="n">package_instance</span><span class="p">,</span>
-                                    <span class="n">external_files</span><span class="o">=</span><span class="n">external_files</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;obs&#39;</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">obs_package_instance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">:</span>
-                <span class="n">remove_inactive_obs</span><span class="p">(</span><span class="n">obs_package_instance</span><span class="p">)</span>
+        <span class="c1"># handle cases of single model or multi-model LGR simulation</span>
+        <span class="c1"># by working with the simulation-level model dictionary</span>
+        <span class="k">for</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">model_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pckgs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;chd&#39;</span><span class="p">,</span> <span class="s1">&#39;drn&#39;</span><span class="p">,</span> <span class="s1">&#39;ghb&#39;</span><span class="p">,</span> <span class="s1">&#39;riv&#39;</span><span class="p">,</span> <span class="s1">&#39;wel&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">pckg</span> <span class="ow">in</span> <span class="n">pckgs</span><span class="p">:</span>
+                <span class="n">package_instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pckg</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">package_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">external_files</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">pckg</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="s1">&#39;stress_period_data&#39;</span><span class="p">]</span>
+                    <span class="n">remove_inactive_bcs</span><span class="p">(</span><span class="n">package_instance</span><span class="p">,</span>
+                                        <span class="n">external_files</span><span class="o">=</span><span class="n">external_files</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;obs&#39;</span><span class="p">):</span>
+                <span class="c1"># handle case of single obs package, in which case model.obs</span>
+                <span class="c1"># will be a ModflowUtlobs package instance</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span>
+                    <span class="n">obs_packages</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">obs</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">obs_packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">obs</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">obs_package_instance</span> <span class="ow">in</span> <span class="n">obs_packages</span><span class="p">:</span>
+                    <span class="n">remove_inactive_obs</span><span class="p">(</span><span class="n">obs_package_instance</span><span class="p">)</span>
 
-        <span class="c1"># write the model with flopy</span>
-        <span class="c1"># but skip the sfr package</span>
-        <span class="c1"># by monkey-patching the write method</span>
-        <span class="k">def</span> <span class="nf">skip_write</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="k">pass</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sfr</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">skip_write</span>
+            <span class="c1"># write the model with flopy</span>
+            <span class="c1"># but skip the sfr package</span>
+            <span class="c1"># by monkey-patching the write method</span>
+            <span class="k">def</span> <span class="nf">skip_write</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">):</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">sfr</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">skip_write</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">write_simulation</span><span class="p">()</span>
 
-        <span class="c1"># write the sfr package with SFRmaker</span>
-        <span class="k">if</span> <span class="s1">&#39;SFR&#39;</span> <span class="ow">in</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">()):</span>
-            <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;mover&#39;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s1">&#39;mvr&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="p">:</span>
-                        <span class="k">continue</span>
-                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s1">&#39;save_flows&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-                <span class="n">budget_fileout</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                                                <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;budget_fileout&#39;</span><span class="p">])</span>
-                <span class="n">stage_fileout</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;stage_fileout&#39;</span><span class="p">])</span>
-                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;budget fileout </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">budget_fileout</span><span class="p">))</span>
-                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;stage fileout </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stage_fileout</span><span class="p">))</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">observations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obs6 filein </span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                                                          <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;obs6_filein_fmt&#39;</span><span class="p">])</span>
-                               <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">idomain</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">,</span>
-                                       <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
-                                       <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
-                                       <span class="n">external_files_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">external_path</span>
-                                       <span class="p">)</span>
+        <span class="c1"># post-flopy write actions</span>
+        <span class="k">for</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">model_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># write the sfr package with SFRmaker</span>
+            <span class="k">if</span> <span class="s1">&#39;SFR&#39;</span> <span class="ow">in</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">()):</span>
+                <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;mover&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s1">&#39;mvr&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;save_flows&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                    <span class="n">budget_fileout</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span>
+                                                    <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;budget_fileout&#39;</span><span class="p">])</span>
+                    <span class="n">stage_fileout</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span>
+                                                <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;stage_fileout&#39;</span><span class="p">])</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;budget fileout </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">budget_fileout</span><span class="p">))</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;stage fileout </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stage_fileout</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">observations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;obs6 filein </span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span>
+                                                            <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;obs6_filein_fmt&#39;</span><span class="p">])</span>
+                                <span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_package</span><span class="p">(</span><span class="n">idomain</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">idomain</span><span class="p">,</span>
+                                        <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
+                                        <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
+                                        <span class="n">external_files_path</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">external_path</span>
+                                        <span class="p">)</span>
+            <span class="c1"># add version info to package file headers</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">namefile</span><span class="p">]</span>
+            <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">packagelist</span><span class="p">]</span>
+            <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">add_version_to_fileheader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">][</span><span class="s1">&#39;keep_original_arrays&#39;</span><span class="p">]:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">)</span>
 
         <span class="c1"># label stress periods in tdis file with comments</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">add_date_comments_to_tdis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">tdis</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">start_datetime</span><span class="p">,</span>
                                   <span class="bp">self</span><span class="o">.</span><span class="n">perioddata</span><span class="o">.</span><span class="n">end_datetime</span>
-                                  <span class="p">)</span>
-        <span class="c1"># add version info to file headers</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">namefile</span><span class="p">]</span>
-        <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagelist</span><span class="p">]</span>
-        <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">add_version_to_fileheader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+                                  <span class="p">)</span></div>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;mfsetup_options&#39;</span><span class="p">][</span><span class="s1">&#39;keep_original_arrays&#39;</span><span class="p">]:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">)</span></div>
 
 
 
@@ -1294,7 +1306,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 08, 2024.
+      <span class="lastupdated">Last updated on Aug 27, 2024.
       </span></p>
   </div>
 
