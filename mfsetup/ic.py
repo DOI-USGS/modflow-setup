@@ -19,6 +19,13 @@ def setup_strt(model, package, strt=None, source_data_config=None,
                write_nodata=None,
                **kwargs):
 
+    # default arguments to ArraySourceData
+    default_kwargs = {
+        'resample_method': 'linear'
+    }
+    for k, v in default_kwargs.items():
+        if k not in kwargs:
+            kwargs[k] = v
     var = 'strt'
     datatype = 'array3d'
     # model that strt values could come from
@@ -53,8 +60,6 @@ def setup_strt(model, package, strt=None, source_data_config=None,
     # data read from binary file with parent model head solution
     elif binary_file:
         kwargs = get_input_arguments(kwargs, MFBinaryArraySourceData)
-        if 'resample_method' not in kwargs:
-            kwargs['resample_method'] = 'linear'
         sd = MFBinaryArraySourceData(variable='strt', filename=binary_file,
                                      datatype=datatype,
                                      dest_model=model,
@@ -79,14 +84,19 @@ def setup_strt(model, package, strt=None, source_data_config=None,
                              time_units=model.time_units,
                              **kwargs)
     # data from files
-    elif source_data_config[var] is not None:
-        #ext = get_source_data_file_ext(source_data_config, package, var)
-        kwargs = get_input_arguments(kwargs, ArraySourceData)
-        sd = ArraySourceData.from_config(source_data_config,
-                                         datatype=datatype,
-                                         variable=var,
-                                         dest_model=model,
-                                         **kwargs)
+    elif source_data_config:
+        if source_data_config.get(var) is not None:
+            #ext = get_source_data_file_ext(source_data_config, package, var)
+            source_data_files = source_data_config.get(var)
+            kwargs = get_input_arguments(kwargs, ArraySourceData)
+            sd = ArraySourceData.from_config(source_data_files,
+                                            datatype=datatype,
+                                            variable=var,
+                                            dest_model=model,
+                                            **kwargs)
+        else:
+            raise ValueError(f"Invalid configuration input: {package}: source_data:\n"
+                             f"Need a {var}: sub-block")
 
     # default to setting strt from model top
     else:

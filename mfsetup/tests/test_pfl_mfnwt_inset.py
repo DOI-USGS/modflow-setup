@@ -5,6 +5,7 @@ import filecmp
 import glob
 import os
 import shutil
+from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 
@@ -18,7 +19,7 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MFnwtModel
 from mfsetup.checks import check_external_files_for_nans
-from mfsetup.fileio import exe_exists, load_cfg, remove_file_header
+from mfsetup.fileio import exe_exists, load, load_cfg, remove_file_header
 from mfsetup.grid import MFsetupGrid, get_ij
 from mfsetup.units import convert_length_units, convert_time_units
 from mfsetup.utils import get_input_arguments
@@ -226,32 +227,115 @@ def test_dis_setup(pfl_nwt_with_grid):
     assert Path(m.cfg['intermediate_data']['output_folder']).is_dir()
 
 
-def test_bas_setup(pfl_nwt_with_dis):
-
-    m = pfl_nwt_with_dis  #deepcopy(pfl_nwt_with_dis)
-
-    # test intermediate array creation
-    bas = m.setup_bas6()
-    arrayfiles = m.cfg['intermediate_data']['strt'] + \
-                 m.cfg['intermediate_data']['ibound']
-                 #m.cfg['intermediate_data']['lakarr']
-    for f in arrayfiles:
-        assert os.path.exists(f)
-
-    # test using previously made external files as input
-    if m.version == 'mf6':
-        assert m.cfg['bas6']['strt'] == m.cfg['external_files']['strt']
-        assert m.cfg['bas6']['ibound'] == m.cfg['external_files']['ibound']
+@pytest.mark.parametrize('bas6_config,default_parent_source_data', (
+    ('config file',True),  # test whatever is in the configuration file
+    # with default_parent_source_data
+    # starting heads are automatically resampled from parent model
+    # unless a strt array or binary head file is provided
+    #
+    # test case of default configuration (no bas: block on configuration file)
+    # starting heads are set to the model top
+    ('defaults', False),
+    # test case where just bas: (None configuration) is argued in configration file
+    # (this overrides the defaults)
+    # starting heads are set to the model top
+    (None, False),
+    # starting heads from a raster
+    ({'source_data': {
+        'strt': {
+            'filename': 'plainfieldlakes/source_data/dem10m.tif'
+        }
+        }}, False),
+    # need a strt variable
+    pytest.param({'source_data': {
+        'filename': 'plainfieldlakes/source_data/dem10m.tif'
+        }}, False, marks=pytest.mark.xfail(reason='some bug')),
+    # with a layer specified (gets repeated)
+    ({'source_data': {
+        'strt': {
+            'filenames': {
+                0: 'plainfieldlakes/source_data/dem10m.tif'
+            }
+        }
+    }}, False),
+    # starting heads from MODFLOW binary head output
+    ({'source_data': {
+        'strt': {
+            'from_parent': {
+                'binaryfile': 'plainfieldlakes/pfl.hds',
+                'stress_period': 0
+            }
+        }
+        }}, False)
+)
+                         )
+def test_bas_setup(pfl_nwt_cfg, pfl_nwt_with_dis, bas6_config,
+                   default_parent_source_data, project_root_path):
+    """Test setup of the BAS6 package, especially the starting heads."""
+    cfg = pfl_nwt_cfg.copy()
+    project_root_path = Path(project_root_path)
+    # load defaults here
+    default_cfg = project_root_path / 'mfsetup/mfnwt_defaults.yml'
+    defaults = load(default_cfg)
+    if bas6_config == 'config file':
+        pass
+    elif bas6_config == 'defaults':
+        cfg['bas6'] = defaults['bas6']
+    elif bas6_config is None:
+        cfg['bas6'] = defaultdict(dict)
     else:
-        assert m.cfg['bas6']['strt'] == m.cfg['intermediate_data']['strt']
-        assert m.cfg['bas6']['ibound'] == m.cfg['intermediate_data']['ibound']
+        cfg['bas6'] = bas6_config
+    cfg['parent']['default_source_data'] = default_parent_source_data
+
+    m = MFnwtModel(cfg=cfg, **cfg['model'])
+    m.setup_grid()
+    m.setup_dis()
+
     bas = m.setup_bas6()
-    bas.write_file()
-    arrayfiles = m.cfg['bas6']['strt'] + \
-                 m.cfg['bas6']['ibound']
-    for f in arrayfiles:
-        assert os.path.exists(f)
-    assert os.path.exists(bas.fn_path)
+
+    assert bas.strt.array.shape == m.modelgrid.shape
+    assert not np.isnan(bas.strt.array).any(axis=(0, 1, 2))
+
+    # In the absence of a parent model with default_source_data
+    # or input to strt
+    # check that strt was set from model top
+    if bas6_config in ('defaults', None):
+        assert np.allclose(bas.strt.array,
+                           np.array([m.dis.top.array] * m.modelgrid.nlay))
+    # assumes that all rasters being tested
+    # are the same as the dem used to make the model top
+    elif isinstance(bas6_config, dict):
+        if 'filename' in bas6_config.get('source_data', dict()) or\
+            'filenames' in bas6_config.get('source_data', dict()):
+            assert np.allclose(bas.strt.array,
+                            np.array([m.dis.top.array] * m.modelgrid.nlay))
+    # TODO: placeholder for more rigorous test that starting heads
+    # are consistent with parent model head solution
+    else:
+        pass
+
+    if bas6_config == 'defaults':
+        # test intermediate array creation
+        arrayfiles = m.cfg['intermediate_data']['strt'] + \
+                    m.cfg['intermediate_data']['ibound']
+                    #m.cfg['intermediate_data']['lakarr']
+        for f in arrayfiles:
+            assert os.path.exists(f)
+
+        # test using previously made external files as input
+        if m.version == 'mf6':
+            assert m.cfg['bas6']['strt'] == m.cfg['external_files']['strt']
+            assert m.cfg['bas6']['ibound'] == m.cfg['external_files']['ibound']
+        else:
+            assert m.cfg['bas6']['strt'] == m.cfg['intermediate_data']['strt']
+            assert m.cfg['bas6']['ibound'] == m.cfg['intermediate_data']['ibound']
+        bas = m.setup_bas6()
+        bas.write_file()
+        arrayfiles = m.cfg['bas6']['strt'] + \
+                    m.cfg['bas6']['ibound']
+        for f in arrayfiles:
+            assert os.path.exists(f)
+        assert os.path.exists(bas.fn_path)
 
 
 @pytest.mark.parametrize('simulate_high_k_lakes', (False, True))
