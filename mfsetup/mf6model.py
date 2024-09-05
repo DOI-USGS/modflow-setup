@@ -47,7 +47,7 @@ from mfsetup.utils import flatten, get_input_arguments
 class MF6model(MFsetupMixin, mf6.ModflowGwf):
     """Class representing a MODFLOW-6 model.
     """
-    default_file = '/mf6_defaults.yml'
+    default_file = 'mf6_defaults.yml'
 
     def __init__(self, simulation=None, modelname='model', parent=None, cfg=None,
                  exe_name='mf6', load=False,
@@ -80,7 +80,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                      'wel', 'maw', 'obs']
         # set up the model configuration dictionary
         # start with the defaults
-        self.cfg = load_config(self.source_path + self.default_file) #'/mf6_defaults.yml')
+        self.cfg = load_config(self.source_path / self.default_file) #'mf6_defaults.yml')
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         # set the model workspace and change working directory to there
         self.model_ws = self._get_model_ws(cfg=cfg)
@@ -335,7 +335,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             # load the config file for lgr inset model
             if 'filename' in v:
                 inset_cfg = load_cfg(v['filename'],
-                                    default_file='/mf6_defaults.yml')
+                                    default_file='mf6_defaults.yml')
             elif 'cfg' in v:
                 inset_cfg = copy.deepcopy(v['cfg'])
             else:
@@ -1102,7 +1102,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print('\nLoading simulation in {}\n'.format(yamlfile))
         t0 = time.time()
 
-        #cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mf6_defaults.yml')
+        #cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # 'mf6_defaults.yml')
         #cfg = cls._parse_model_kwargs(cfg)
         #kwargs = get_input_arguments(cfg['model'], mf6.ModflowGwf,
         #                             exclude='packages')

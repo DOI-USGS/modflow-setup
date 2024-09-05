@@ -19,7 +19,7 @@ from mfsetup.utils import get_input_arguments
 
 @pytest.fixture(scope="session")
 def shellmound_tmr_cfg_path(project_root_path):
-    return project_root_path + '/mfsetup/tests/data/shellmound_tmr_inset.yml'
+    return project_root_path / 'mfsetup/tests/data/shellmound_tmr_inset.yml'
 
 
 @pytest.fixture(scope="function")
@@ -29,7 +29,7 @@ def shellmound_tmr_datapath(shellmound_tmr_cfg_path):
 
 @pytest.fixture(scope="module")
 def shellmound_tmr_cfg(shellmound_tmr_cfg_path):
-    cfg = load_cfg(shellmound_tmr_cfg_path, default_file='/mf6_defaults.yml')
+    cfg = load_cfg(shellmound_tmr_cfg_path, default_file='mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
