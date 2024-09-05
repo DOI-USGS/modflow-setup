@@ -184,14 +184,15 @@ def load_cfg(cfgfile, verbose=False, default_file=None):
     constructor and the model constructor.
     """
     print('loading configuration file {}...'.format(cfgfile))
-    source_path = os.path.split(__file__)[0]
-    check_source_files([cfgfile, source_path + default_file])
+    source_path = Path(__file__).parent
+    default_file = Path(default_file)
+    check_source_files([cfgfile, source_path / default_file])
 
     # default configuration
     default_cfg = {}
     if default_file is not None:
-        default_cfg = load(source_path + default_file)
-        default_cfg['filename'] = source_path + default_file
+        default_cfg = load(source_path / default_file)
+        default_cfg['filename'] = source_path / default_file
 
         # for now, only apply defaults for the model and simulation blocks
         # which are needed for the model instance constructor

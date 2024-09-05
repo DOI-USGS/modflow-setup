@@ -75,7 +75,7 @@ class MFsetupMixin():
 
     https://stackoverflow.com/questions/533631/what-is-a-mixin-and-why-are-they-useful
     """
-    source_path = os.path.split(__file__)[0]
+    source_path = Path(__file__).parent
     """        -1 : well
         0 : no lake
         1 : lak package lake (lakarr > 0)

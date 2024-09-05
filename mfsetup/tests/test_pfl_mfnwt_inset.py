@@ -602,7 +602,7 @@ def test_lak_setup(pfl_nwt_with_dis):
 
 def test_nwt_setup(pfl_nwt, project_root_path):
     m = pfl_nwt  #deepcopy(pfl_nwt)
-    m.cfg['nwt']['use_existing_file'] = project_root_path + '/mfsetup/tests/data/RGN_rjh_3_23_18.NWT'
+    m.cfg['nwt']['use_existing_file'] = project_root_path / 'mfsetup/tests/data/RGN_rjh_3_23_18.NWT'
     nwt = m.setup_nwt()
     nwt.write_file()
     m.cfg['nwt']['use_existing_file'] = None
@@ -807,7 +807,7 @@ def model_setup_and_run(pfl_nwt_setup_from_yaml, mfnwt_exe):
 
 
 def test_packagelist(pfl_nwt_test_cfg_path):
-    cfg = load_cfg(pfl_nwt_test_cfg_path, default_file='/mfnwt_defaults.yml')
+    cfg = load_cfg(pfl_nwt_test_cfg_path, default_file='mfnwt_defaults.yml')
 
     assert len(cfg['model']['packages']) > 0
     kwargs = get_input_arguments(cfg['model'], MFnwtModel)

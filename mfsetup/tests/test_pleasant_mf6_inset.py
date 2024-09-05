@@ -27,13 +27,13 @@ from mfsetup.utils import get_input_arguments
 
 @pytest.fixture(scope="session")
 def pleasant_mf6_test_cfg_path(project_root_path):
-    return project_root_path + '/mfsetup/tests/data/pleasant_mf6_test.yml'
+    return project_root_path / 'mfsetup/tests/data/pleasant_mf6_test.yml'
 
 
 @pytest.fixture(scope="function")
 def pleasant_mf6_cfg(pleasant_mf6_test_cfg_path):
     cfg = load_cfg(pleasant_mf6_test_cfg_path,
-                   default_file='/mf6_defaults.yml')
+                   default_file='mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg

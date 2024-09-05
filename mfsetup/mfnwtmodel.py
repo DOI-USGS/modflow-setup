@@ -45,7 +45,7 @@ from mfsetup.utils import get_input_arguments, get_packages
 
 class MFnwtModel(MFsetupMixin, Modflow):
     """Class representing a MODFLOW-NWT model"""
-    default_file = '/mfnwt_defaults.yml'
+    default_file = 'mfnwt_defaults.yml'
 
     def __init__(self, parent=None, cfg=None,
                  modelname='model', exe_name='mfnwt',
@@ -80,7 +80,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
                                      'gag', 'hyd']
         # set up the model configuration dictionary
         # start with the defaults
-        self.cfg = load(self.source_path + self.default_file)  # '/mf6_defaults.yml')
+        self.cfg = load(self.source_path / self.default_file)  # 'mf6_defaults.yml')
         self.relative_external_paths = self.cfg.get('model', {}).get('relative_external_paths', True)
         # set the model workspace and change working directory to there
         self.model_ws = self._get_model_ws(cfg=cfg)
@@ -875,7 +875,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
     def load(cls, yamlfile, load_only=None, verbose=False, forgive=False, check=False):
         """Load a model from a config file and set of MODFLOW files.
         """
-        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # '/mfnwt_defaults.yml')
+        cfg = load_cfg(yamlfile, verbose=verbose, default_file=cls.default_file) # 'mfnwt_defaults.yml')
         print('\nLoading {} model from data in {}\n'.format(cfg['model']['modelname'], yamlfile))
         t0 = time.time()
 

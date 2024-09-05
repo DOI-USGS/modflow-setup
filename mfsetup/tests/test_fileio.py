@@ -85,7 +85,7 @@ def test_load_grid(project_root_path):
 
 
 def test_load_cfg(pfl_nwt_test_cfg_path):
-    cfg_pathed = load_cfg(pfl_nwt_test_cfg_path, default_file='/mfnwt_defaults.yml')
+    cfg_pathed = load_cfg(pfl_nwt_test_cfg_path, default_file='mfnwt_defaults.yml')
     cfg = load(pfl_nwt_test_cfg_path)
     config_file_location = os.path.split(os.path.abspath(pfl_nwt_test_cfg_path))[0]
     assert cfg_pathed['nwt'].get('use_existing_file') is None
