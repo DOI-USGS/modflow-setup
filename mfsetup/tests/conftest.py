@@ -26,7 +26,8 @@ from mfsetup.utils import get_input_arguments
 @pytest.fixture(scope="session")
 def project_root_path():
     filepath = os.path.split(os.path.abspath(__file__))[0]
-    return os.path.normpath(os.path.join(filepath, '../../'))
+    filepath = os.path.normpath(os.path.join(filepath, '../../'))
+    return Path(filepath)
 
 
 @pytest.fixture(scope="session")
@@ -39,13 +40,13 @@ def test_data_path(project_root_path):
 
 @pytest.fixture(scope="session", autouse=True)
 def tmpdir(project_root_path):
-    folder = project_root_path + '/mfsetup/tests/tmp'
+    folder = project_root_path / 'mfsetup/tests/tmp'
     reset = True
     if reset:
         if os.path.isdir(folder):
             shutil.rmtree(folder, ignore_errors=True)
         os.makedirs(folder, exist_ok=True)
-    return folder
+    return Path(folder)
 
 
 def get_model(model):
@@ -70,7 +71,7 @@ def bin_path(project_root_path):
         bin_path = os.path.join(bin_path, "mac")
     else:
         bin_path = os.path.join(bin_path, "win")
-    return bin_path
+    return Path(bin_path)
 
 
 @pytest.fixture(scope="session")
@@ -102,18 +103,18 @@ def mfnwt_exe(bin_path):
 
 @pytest.fixture(scope="session")
 def demfile(project_root_path):
-    return project_root_path + '/mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif'
+    return project_root_path / 'mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif'
 
 
 @pytest.fixture(scope="session")
 def pfl_nwt_test_cfg_path(project_root_path):
-    return project_root_path + '/mfsetup/tests/data/pfl_nwt_test.yml'
+    return project_root_path / 'mfsetup/tests/data/pfl_nwt_test.yml'
 
 
 @pytest.fixture(scope="function")
 def pfl_nwt_cfg(pfl_nwt_test_cfg_path):
     cfg = load_cfg(pfl_nwt_test_cfg_path,
-                   default_file='/mfnwt_defaults.yml')
+                   default_file='mfnwt_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
     return cfg
@@ -154,7 +155,7 @@ def pfl_nwt_with_dis_bas6(pfl_nwt_with_dis):
 
 @pytest.fixture(scope="session")
 def shellmound_cfg_path(project_root_path):
-    return project_root_path + '/mfsetup/tests/data/shellmound.yml'
+    return project_root_path / 'mfsetup/tests/data/shellmound.yml'
 
 
 @pytest.fixture(scope="function")
@@ -164,7 +165,7 @@ def shellmound_datapath(shellmound_cfg_path):
 
 @pytest.fixture(scope="module")
 def shellmound_cfg(shellmound_cfg_path):
-    cfg = load_cfg(shellmound_cfg_path, default_file='/mf6_defaults.yml')
+    cfg = load_cfg(shellmound_cfg_path, default_file='mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
@@ -209,12 +210,12 @@ def shellmound_model_with_dis(shellmound_model_with_grid):
 
 @pytest.fixture(scope="session")
 def pleasant_nwt_test_cfg_path(project_root_path):
-    return project_root_path + '/mfsetup/tests/data/pleasant_nwt_test.yml'
+    return project_root_path / 'mfsetup/tests/data/pleasant_nwt_test.yml'
 
 
 @pytest.fixture(scope="session")
 def pleasant_nwt_cfg(pleasant_nwt_test_cfg_path):
-    cfg = load_cfg(pleasant_nwt_test_cfg_path, default_file='/mfnwt_defaults.yml')
+    cfg = load_cfg(pleasant_nwt_test_cfg_path, default_file='mfnwt_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['model']['model_ws'], 'gis')
     return cfg

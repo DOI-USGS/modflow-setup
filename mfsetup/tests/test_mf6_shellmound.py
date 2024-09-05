@@ -1001,7 +1001,7 @@ def test_load(model_setup, shellmound_cfg_path, load_only):
 
 def test_packagelist(shellmound_cfg_path):
 
-    cfg = load_cfg(shellmound_cfg_path, default_file='/mf6_defaults.yml')
+    cfg = load_cfg(shellmound_cfg_path, default_file='mf6_defaults.yml')
 
     packages = cfg['model']['packages']
     kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation)

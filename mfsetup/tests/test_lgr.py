@@ -1,6 +1,7 @@
 import copy
 import glob
 import os
+from copy import deepcopy
 from pathlib import Path
 
 import flopy
@@ -18,12 +19,12 @@ from mfsetup.fileio import dump, exe_exists, load, load_cfg, read_mf6_block
 from mfsetup.grid import get_ij
 from mfsetup.mover import get_sfr_package_connections
 from mfsetup.testing import compare_inset_parent_values
-from mfsetup.utils import get_input_arguments
+from mfsetup.utils import get_input_arguments, update
 
 
 @pytest.fixture(scope="session")
 def pleasant_lgr_test_cfg_path(project_root_path):
-    return project_root_path + '/examples/pleasant_lgr_parent.yml'
+    return project_root_path / 'examples/pleasant_lgr_parent.yml'
 
 @pytest.fixture(scope="session")
 def pleasant_vertical_lgr_test_cfg_path(test_data_path):
@@ -32,7 +33,7 @@ def pleasant_vertical_lgr_test_cfg_path(test_data_path):
 @pytest.fixture(scope="function")
 def pleasant_lgr_cfg(pleasant_lgr_test_cfg_path):
     cfg = load_cfg(pleasant_lgr_test_cfg_path,
-                   default_file='/mf6_defaults.yml')
+                   default_file='mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
@@ -40,7 +41,7 @@ def pleasant_lgr_cfg(pleasant_lgr_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_vertical_lgr_cfg(pleasant_vertical_lgr_test_cfg_path):
     cfg = load_cfg(pleasant_vertical_lgr_test_cfg_path,
-                   default_file='/mf6_defaults.yml')
+                   default_file='mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
@@ -157,9 +158,9 @@ def test_lgr_grid_setup(lgr_grid_spacing, layer_refinement_input,
                         project_root_path):
 
     # apply test parameters to inset/parent configurations
-    inset_cfg_path = project_root_path + '/examples/pleasant_lgr_inset.yml'
+    inset_cfg_path = project_root_path / 'examples/pleasant_lgr_inset.yml'
     inset_cfg = load_cfg(inset_cfg_path,
-                         default_file='/mf6_defaults.yml')
+                         default_file='mf6_defaults.yml')
     inset_cfg['setup_grid']['dxy'] = lgr_grid_spacing
     inset_cfg['dis']['dimensions']['nlay'] = inset_nlay
 
@@ -229,7 +230,7 @@ def test_lgr_grid_setup(lgr_grid_spacing, layer_refinement_input,
         ax.set_ylim(b, t)
         ax.set_xlim(l, r)
         ax.set_aspect(1)
-        plt.savefig(project_root_path + '/docs/source/_static/pleasant_lgr.png',
+        plt.savefig(project_root_path / '/docs/source/_static/pleasant_lgr.png',
                     bbox_inches='tight')
 
 
@@ -317,6 +318,64 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     # plot the shapefiles in a GIS environment to verify the connections in to_parent
     # {inset_reach: parent_reach, ...}
     assert to_parent == {29: 8, 41: 1}
+
+
+def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
+    """Test for SFR routing continuity in LGR cases
+    where SFR streams meander back and forth
+    between parent and child models."""
+    cfg = deepcopy(shellmound_cfg)
+    default_cfg = load(project_root_path / 'mfsetup/mf6_defaults.yml')
+    lgr_inset_cfg = deepcopy(default_cfg)
+    specified_lgr_inset_cfg = {
+        'simulation': {
+        'sim_name': 'shellmound',
+        'version': 'mf6',
+        'sim_ws': tmpdir / 'shellmound_lgr',
+        'options': {}
+        },
+        'model': {
+        'simulation': 'shellmound',
+        'modelname': 'shellmound_lgr',
+        'packages': ['dis'],
+        'list_filename_fmt': '{}.list'
+        },
+        'setup_grid': {
+            'xoff': 526958.20, # lower left x-coordinate
+            'yoff': 1183288.00, # lower left y-coordinate
+            'rotation': 0.,
+            'dxy': 500,  # in CRS units of meters
+            'crs': 5070
+        },
+        'dis': {
+            'dimensions': {
+                # if nrow and ncol are not specified here, the entries above in setup_grid are used
+                'nlay': cfg['dis']['dimensions']['nlay'],
+                'nrow': 4,
+                'ncol': 16
+            },
+            # 'griddata':
+        }
+    }
+    update(lgr_inset_cfg, specified_lgr_inset_cfg)
+
+    cfg['simulation']['sim_ws'] = tmpdir / 'shellmound_lgr'
+    cfg['setup_grid']['lgr'] = {
+        'shellmound_lgr': {
+            'cfg': lgr_inset_cfg
+    }}
+    m = MF6model(cfg=cfg)
+    m.setup_grid()
+    m.setup_tdis()
+    m.inset['shellmound_lgr'].modelgrid.write_shapefile()
+    m.setup_dis()
+    m.setup_sfr()
+    for k, v in m.inset.items():
+        if v._is_lgr:
+            v.setup_dis()
+            v.setup_sfr()
+    m.setup_simulation_mover()
+    j=2
 
 
 def test_lgr_bottom_elevations(pleasant_vertical_lgr_setup_from_yaml, mf6_exe):

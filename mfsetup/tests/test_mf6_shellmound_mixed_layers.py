@@ -15,8 +15,8 @@ from mfsetup.utils import get_input_arguments
 
 @pytest.fixture(scope="module")
 def shellmound_cfg(project_root_path):
-    shellmound_cfg_path = project_root_path + '/mfsetup/tests/data/shellmound_flat_layers.yml'
-    cfg = load_cfg(shellmound_cfg_path, default_file='/mf6_defaults.yml')
+    shellmound_cfg_path = project_root_path / 'mfsetup/tests/data/shellmound_flat_layers.yml'
+    cfg = load_cfg(shellmound_cfg_path, default_file='mf6_defaults.yml')
     # add some stuff just for the tests
     cfg['gisdir'] = os.path.join(cfg['simulation']['sim_ws'], 'gis')
     return cfg
