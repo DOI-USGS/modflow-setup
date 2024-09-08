@@ -258,7 +258,16 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
         if isinstance(pckg, dict):
             for input_block in look_for_files_in:
                 if input_block in pckg.keys():
-                    file_keys = _parse_file_path_keys_from_source_data(pckg[input_block])
+                    # handle LGR sub-blocks separately
+                    # if LGR configuration is specified within the yaml file
+                    # (or as a dictionary), we don't want to touch it at this point
+                    # (just convert filepaths to configuration files for sub-models)
+                    if input_block == 'lgr':
+                        for model_name, config in pckg[input_block].items():
+                            if 'filename' in config:
+                                file_keys = _parse_file_path_keys_from_source_data(config)
+                    else:
+                        file_keys = _parse_file_path_keys_from_source_data(pckg[input_block])
                     for key in file_keys:
                         file_path_keys_relative_to_config. \
                             append('.'.join([pckgname, input_block, key]))
