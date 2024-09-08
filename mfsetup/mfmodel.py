@@ -1836,8 +1836,8 @@ class MFsetupMixin():
             for k, v in m.inset.items():
                 if v._is_lgr:
                     v.setup_packages()
-            m.setup_simulation_mover()
             m.setup_lgr_exchanges()
+            m.setup_simulation_mover()
 
         print('finished setting up model in {:.2f}s'.format(time.time() - t0))
         print('\n{}'.format(m))

@@ -4,6 +4,8 @@ Get connections between packages to keep 'er movin'
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import cdist
+from sfrmaker.routing import find_path
+from shapely.geometry import Point
 
 
 def get_connections(from_features, to_features, distance_threshold=250):
@@ -36,19 +38,22 @@ def get_connections(from_features, to_features, distance_threshold=250):
     return connections
 
 
-def get_sfr_package_connections(reach_data1, reach_data2, distance_threshold=1000):
-    """Connect SFR reaches between two packages (for example, in a parent and inset model).
-    Connections are made when a headwater reach in one package is within distance_threshold
-    of an outlet in the other package.
+def get_sfr_package_connections(gwfgwf_exchangedata,
+                                reach_data1, reach_data2, distance_threshold=1000):
+    """Connect SFR reaches between SFR packages in a pair of groundwater flow models linked
+    by the GWFGWF (simulation-level mover) Package.
 
     Parameters
     ----------
+    gwfgwf_exchangedata : flopy recarray or pandas DataFrame
+        Exchange data from the GWFGWF package
+        (listing cell connections between two groundwater flow models).
     reach_data1 : DataFrame, similar to sfrmaker.SFRData.reach_data
-        Reach information for first package to connect.
+        SFR reach information for model 1 in gwfgwf_exchangedata.
         Must contain reach numbers and 'geometry' column of shapely geometries
         for each reach (can be LineStrings or Polygons)
     reach_data2 : DataFrame, similar to sfrmaker.SFRData.reach_data
-        Reach information for second package to connect.
+        SFR reach information for model 2 in gwfgwf_exchangedata.
         Must contain reach numbers and 'geometry' column of shapely geometries
         for each reach (can be LineStrings or Polygons)
     distance_threshold : float
@@ -60,34 +65,104 @@ def get_sfr_package_connections(reach_data1, reach_data2, distance_threshold=100
     connections1 : dictionary of connections from package 1 to package 2
     connections2 : dictionary of connections from package 2 to package 1
     """
-    outlets1 = reach_data1.loc[reach_data1.outreach == 0]
-    headwaters1 = set(reach_data1.rno).difference(reach_data1.outreach)
-    headwaters1 = reach_data1.loc[reach_data1.rno.isin(headwaters1)]
-    outlets2 = reach_data2.loc[reach_data2.outreach == 0]
-    headwaters2 = set(reach_data2.rno).difference(reach_data2.outreach)
-    headwaters2 = reach_data2.loc[reach_data2.rno.isin(headwaters2)]
+    gwfgwf_exchangedata = pd.DataFrame(gwfgwf_exchangedata)
+    all_reach_data1 = reach_data1.copy()
+    all_reach_data2 = reach_data2.copy()
 
-    # get the connections between outlets and headwaters that are less than distance_threshold
-    connections1_idx = get_connections(outlets1.geometry, headwaters2.geometry,
-                                       distance_threshold=distance_threshold)
-    connections2_idx = get_connections(outlets2.geometry, headwaters1.geometry,
-                                       distance_threshold=distance_threshold)
-    # map those back to actual reach numbers
-    connections1 = {outlets1.rno.values[k]: headwaters2.rno.values[v]
-                    for k, v in connections1_idx.items()}
-    connections2 = {outlets2.rno.values[k]: headwaters1.rno.values[v]
-                    for k, v in connections2_idx.items()}
+    # add cellids to connect reaches with GWFGWF exchanges
+    # ignore layers in case there are any mismatches
+    # due to pinchouts at the different model resolutions
+    # or different layer assignments by SFRmaker
+    # and because we only expect one SFR reach at each i, j location
+    gwfgwf_exchangedata['cellidm1_2d'] =\
+        [(i, j) for k, i, j in gwfgwf_exchangedata['cellidm1']]
+    gwfgwf_exchangedata['cellidm2_2d'] =\
+        [(i, j) for k, i, j in gwfgwf_exchangedata['cellidm2']]
+    for df in all_reach_data1, all_reach_data2:
+        if 'cellid' not in df.columns and\
+            {'k', 'i', 'j'}.intersection(df.columns):
+                df['cellid_2d'] =\
+                    list(df[['i', 'j']].itertuples(index=False, name=None))
+        else:
+            df['cellid_2d'] = [(i, j) for k, i, j in df['cellid']]
+    reach_data1 = all_reach_data1.loc[all_reach_data1['cellid_2d'].isin(
+        gwfgwf_exchangedata['cellidm1_2d'])]
+    reach_data2 = all_reach_data2.loc[all_reach_data2['cellid_2d'].isin(
+        gwfgwf_exchangedata['cellidm2_2d'])]
 
-    return connections1, connections2
+    # starting locations of each reach along the parent/inset interface
+    reach_data1['reach_start'] = [Point(g.coords[0]) for g in reach_data1['geometry']]
+    reach_data2['reach_start'] = [Point(g.coords[0]) for g in reach_data2['geometry']]
+
+    # neighboring cells (in a structured grid)
+    def neighbors(i, j):
+        return {(i-1, j-1), (i-1, j), (i-1, j+1),
+                (i, j+1), (i+1, j+1), (i+1, j),
+                (i+1, j-1), (i, j-1)}
+
+    # make the connections
+    parent_to_inset = dict()
+    inset_to_parent = dict()
+    for _, r in reach_data1.iterrows():
+        # check for connections to the other model
+        # if the next reach is in another cell
+        # along the parent/inset model interface,
+        # or if the curret reach is an outlet
+        if r['outreach'] in reach_data1['rno'].values or r['outreach'] == 0:
+            # if the outreach is in a neighboring cell,
+            # assume it is correct
+            # (that the next reach is not in the other model)
+            out_reach = reach_data1.loc[reach_data1['rno'] == r['outreach']]
+            if r['outreach'] != 0 and\
+                out_reach['cellid_2d'].iloc[0] in neighbors(*r['cellid_2d']):
+                continue
+            # if the distance to the next reach is greater than 1 cell
+            # consider this each to be an outlet
+            reach_end = Point(r['geometry'].coords[-1])
+            distances = reach_end.distance(reach_data2['reach_start'])
+            if np.min(distances) < distance_threshold:
+                next_reach = reach_data2.iloc[np.argmin(distances)]
+                parent_to_inset[r['rno']] = next_reach['rno']
+        # next reach is somewhere else in the parent model
+        else:
+            continue
+    # repeat for inset to parent connections
+    for i, r in reach_data2.iterrows():
+        # check for connections to the other model
+        # if the next reach is in another cell
+        # along the parent/inset model interface,
+        # or if the curret reach is an outlet
+        if r['outreach'] in reach_data2['rno'].values or r['outreach'] == 0:
+            # if the outreach is in a neighboring cell,
+            # assume it is correct
+            # (that the next reach is not in the other model)
+            out_reach = reach_data2.loc[reach_data2['rno'] == r['outreach']]
+            if r['outreach'] != 0 and\
+                out_reach['cellid_2d'].iloc[0] in neighbors(*r['cellid_2d']):
+                continue
+            # if the distance to the next reach is greater than 1 cell
+            # consider this each to be an outlet
+            reach_end = Point(r['geometry'].coords[-1])
+            distances = reach_end.distance(reach_data1['reach_start'])
+            if np.min(distances) < distance_threshold:
+                next_reach = reach_data1.iloc[np.argmin(distances)]
+                inset_to_parent[r['rno']] = next_reach['rno']
+        # next reach is somewhere else in this model
+        else:
+            continue
+    return parent_to_inset, inset_to_parent
 
 
 def get_mover_sfr_package_input(parent, inset, convert_to_zero_based=True):
 
     grid_spacing = parent.dis.delc.array[0]
     connections = []
-    to_inset, to_parent = get_sfr_package_connections(parent.sfrdata.reach_data,
+    # use 2x grid spacing for distance threshold
+    # because reaches could be small fragments in opposite corners of two adjacent cells
+    to_inset, to_parent = get_sfr_package_connections(parent.simulation.gwfgwf.exchangedata.array,
+                                                      parent.sfrdata.reach_data,
                                                       inset.sfrdata.reach_data,
-                                                      distance_threshold=grid_spacing)
+                                                      distance_threshold=2*grid_spacing)
     # convert to zero-based if reach_data aren't
     # corrections are quantities to subtract off
     parent_rno_correction = parent.sfrdata.reach_data.rno.min()

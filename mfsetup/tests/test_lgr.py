@@ -230,7 +230,7 @@ def test_lgr_grid_setup(lgr_grid_spacing, layer_refinement_input,
         ax.set_ylim(b, t)
         ax.set_xlim(l, r)
         ax.set_aspect(1)
-        plt.savefig(project_root_path / '/docs/source/_static/pleasant_lgr.png',
+        plt.savefig(project_root_path / 'docs/source/_static/pleasant_lgr.png',
                     bbox_inches='tight')
 
 
@@ -300,8 +300,9 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
 
     parent_reach_data = m.sfrdata.reach_data
     inset_reach_data = inset_model.sfrdata.reach_data
-    to_inset, to_parent = get_sfr_package_connections(parent_reach_data, inset_reach_data,
-                                                      distance_threshold=200)
+    to_inset, to_parent = get_sfr_package_connections(
+        m.simulation.gwfgwf.exchangedata.array,
+        parent_reach_data, inset_reach_data, distance_threshold=200)
     assert len(to_inset) == 0
     # verify that the last reaches in the two segments are keys
     last_reaches = inset_model.sfrdata.reach_data.groupby('iseg').last().rno
@@ -326,7 +327,12 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
     between parent and child models."""
     cfg = deepcopy(shellmound_cfg)
     default_cfg = load(project_root_path / 'mfsetup/mf6_defaults.yml')
+    del cfg['dis']['source_data']['idomain']
+    cfg['dis']['griddata']['idomain'] = 1
     lgr_inset_cfg = deepcopy(default_cfg)
+    del cfg['sfr']['sfrmaker_options']['to_riv']
+    inset_sfr_config = deepcopy(cfg['sfr'])
+    del inset_sfr_config['sfrmaker_options']['add_outlets']
     specified_lgr_inset_cfg = {
         'simulation': {
         'sim_name': 'shellmound',
@@ -337,7 +343,7 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
         'model': {
         'simulation': 'shellmound',
         'modelname': 'shellmound_lgr',
-        'packages': ['dis'],
+        'packages': ['dis', 'sfr'],
         'list_filename_fmt': '{}.list'
         },
         'setup_grid': {
@@ -354,11 +360,18 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
                 'nrow': 4,
                 'ncol': 16
             },
-            # 'griddata':
-        }
+            'griddata': {
+                'delr': 500,
+                'delc': 500,
+                'idomain': 1
+            },
+            'source_data': deepcopy(cfg['dis']['source_data'])
+
+        },
+        'sfr': inset_sfr_config
+
     }
     update(lgr_inset_cfg, specified_lgr_inset_cfg)
-
     cfg['simulation']['sim_ws'] = tmpdir / 'shellmound_lgr'
     cfg['setup_grid']['lgr'] = {
         'shellmound_lgr': {
@@ -374,8 +387,38 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
         if v._is_lgr:
             v.setup_dis()
             v.setup_sfr()
-    m.setup_simulation_mover()
-    j=2
+    gwfgwf = m.setup_lgr_exchanges()
+    mvr = m.setup_simulation_mover()
+
+    # just test the connections for period 0
+    exchangedata = pd.DataFrame(m.simulation.mvr.perioddata.array[0])
+    # the reach numbers for these are liable to change
+    # check SFR package shapefile output in test output folder
+    # to verify that these are correct
+    expected_connections = {
+    ('shellmound', 173, 'shellmound_lgr', 7),
+    ('shellmound', 235, 'shellmound_lgr', 0),
+    ('shellmound', 293, 'shellmound_lgr', 5),
+    ('shellmound_lgr', 4, 'shellmound', 258),
+    ('shellmound_lgr', 14, 'shellmound', 186),
+    ('shellmound_lgr', 17, 'shellmound', 170)
+    }
+    assert set(exchangedata[['mname1', 'id1', 'mname2', 'id2']].
+               itertuples(index=False, name=None)) == expected_connections
+    cd1 = pd.DataFrame(m.simulation.get_model('shellmound').sfr.connectiondata.array)
+    cd1.index = cd1['ifno']
+    # None of the reaches should have downstream connections
+    # within their SFR Package
+    # (no negative numbers indicates an outlet condition)
+    assert not any(cd1.loc[[173, 235, 293]].iloc[:, 1] < 0)
+    rd1 = m.sfrdata.reach_data
+    assert all(rd1.loc[rd1['rno'].isin(np.array([173, 235, 293])+1), 'outreach'] == 0)
+    inset = m.simulation.get_model('shellmound_lgr')
+    cd2 = pd.DataFrame(inset.sfr.connectiondata.array)
+    cd2.index = cd2['ifno']
+    assert not any(cd2.loc[[4, 14, 17]].iloc[:, 1] < 0)
+    rd2 = inset.sfrdata.reach_data
+    assert all(rd2.loc[rd2['rno'].isin(np.array([4, 14, 17])+1), 'outreach'] == 0)
 
 
 def test_lgr_bottom_elevations(pleasant_vertical_lgr_setup_from_yaml, mf6_exe):
