@@ -1201,7 +1201,8 @@ def setup_array(model, package, var, data=None,
     # if default_source_data: True in parent model options
     # default to source_data from parent model
     cfg = model.cfg[package].get('source_data')
-    if cfg is None and model.cfg['parent'].get('default_source_data'):
+    if cfg is None and model.cfg['parent'].get('default_source_data')\
+        and not (model._is_lgr and var == 'idomain'):
         cfg = {var: 'from_parent'}
 
     # data specified directly
