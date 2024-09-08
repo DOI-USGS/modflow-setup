@@ -265,7 +265,8 @@ def set_cfg_paths_to_absolute(cfg, config_file_location):
                     if input_block == 'lgr':
                         for model_name, config in pckg[input_block].items():
                             if 'filename' in config:
-                                file_keys = _parse_file_path_keys_from_source_data(config)
+                                file_keys = _parse_file_path_keys_from_source_data(
+                                    {model_name: config})
                     else:
                         file_keys = _parse_file_path_keys_from_source_data(pckg[input_block])
                     for key in file_keys:
