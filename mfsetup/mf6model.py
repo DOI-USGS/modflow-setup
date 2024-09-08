@@ -939,6 +939,25 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                     if inset.get_package('sfr'):
                         inset_perioddata = get_mover_sfr_package_input(self, inset)
                         perioddata_dfs.append(inset_perioddata)
+                        # for each SFR reach with a connection
+                        # to a reach in another model
+                        # set the SFR Package downstream connection to 0
+                        for i, r in inset_perioddata.iterrows():
+                            rd = self.simulation.get_model(r['mname1']).sfrdata.reach_data
+                            rd.loc[rd['rno'] == r['id1']+1, 'outreach'] = 0
+                            # fix flopy connectiondata as well
+                            sfr_package = self.simulation.get_model(r['mname1']).sfr
+                            cd = sfr_package.connectiondata.array.tolist()
+                            # there should be no downstream reaches
+                            # (indicated by negative numbers)
+                            cd[r['id1']] = tuple(v for v in cd[r['id1']] if v > 0)
+                            sfr_package.connectiondata = cd
+                        # re-write the shapefile exports with corrected routing
+                        inset.sfrdata.write_shapefiles(f'{inset._shapefiles_path}/{inset_name}')
+
+                self.sfrdata.write_shapefiles(f'{self._shapefiles_path}/{self.name}')
+
+
         if len(perioddata_dfs) > 0:
             perioddata = pd.concat(perioddata_dfs)
             if len(perioddata) > 0:
