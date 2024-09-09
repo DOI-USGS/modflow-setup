@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.fileio &mdash; modflow-setup 0.5.0.post23+g5177a31 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.5.0.post27+gc10c32d documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=5c2e109c"></script>
+        <script src="../../_static/documentation_options.js?v=126a16d0"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post23+g5177a31
+                0.5.0.post27+gc10c32d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -323,14 +323,15 @@
 <span class="sd">    constructor and the model constructor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loading configuration file </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cfgfile</span><span class="p">))</span>
-    <span class="n">source_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">check_source_files</span><span class="p">([</span><span class="n">cfgfile</span><span class="p">,</span> <span class="n">source_path</span> <span class="o">+</span> <span class="n">default_file</span><span class="p">])</span>
+    <span class="n">source_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">default_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">default_file</span><span class="p">)</span>
+    <span class="n">check_source_files</span><span class="p">([</span><span class="n">cfgfile</span><span class="p">,</span> <span class="n">source_path</span> <span class="o">/</span> <span class="n">default_file</span><span class="p">])</span>
 
     <span class="c1"># default configuration</span>
     <span class="n">default_cfg</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">default_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">default_cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">source_path</span> <span class="o">+</span> <span class="n">default_file</span><span class="p">)</span>
-        <span class="n">default_cfg</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_path</span> <span class="o">+</span> <span class="n">default_file</span>
+        <span class="n">default_cfg</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">source_path</span> <span class="o">/</span> <span class="n">default_file</span><span class="p">)</span>
+        <span class="n">default_cfg</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_path</span> <span class="o">/</span> <span class="n">default_file</span>
 
         <span class="c1"># for now, only apply defaults for the model and simulation blocks</span>
         <span class="c1"># which are needed for the model instance constructor</span>
@@ -399,7 +400,17 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pckg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">input_block</span> <span class="ow">in</span> <span class="n">look_for_files_in</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">input_block</span> <span class="ow">in</span> <span class="n">pckg</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">file_keys</span> <span class="o">=</span> <span class="n">_parse_file_path_keys_from_source_data</span><span class="p">(</span><span class="n">pckg</span><span class="p">[</span><span class="n">input_block</span><span class="p">])</span>
+                    <span class="c1"># handle LGR sub-blocks separately</span>
+                    <span class="c1"># if LGR configuration is specified within the yaml file</span>
+                    <span class="c1"># (or as a dictionary), we don&#39;t want to touch it at this point</span>
+                    <span class="c1"># (just convert filepaths to configuration files for sub-models)</span>
+                    <span class="k">if</span> <span class="n">input_block</span> <span class="o">==</span> <span class="s1">&#39;lgr&#39;</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">pckg</span><span class="p">[</span><span class="n">input_block</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="k">if</span> <span class="s1">&#39;filename&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                                <span class="n">file_keys</span> <span class="o">=</span> <span class="n">_parse_file_path_keys_from_source_data</span><span class="p">(</span>
+                                    <span class="p">{</span><span class="n">model_name</span><span class="p">:</span> <span class="n">config</span><span class="p">})</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">file_keys</span> <span class="o">=</span> <span class="n">_parse_file_path_keys_from_source_data</span><span class="p">(</span><span class="n">pckg</span><span class="p">[</span><span class="n">input_block</span><span class="p">])</span>
                     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">file_keys</span><span class="p">:</span>
                         <span class="n">file_path_keys_relative_to_config</span><span class="o">.</span> \
                             <span class="n">append</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pckgname</span><span class="p">,</span> <span class="n">input_block</span><span class="p">,</span> <span class="n">key</span><span class="p">]))</span>
@@ -1405,7 +1416,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 28, 2024.
+      <span class="lastupdated">Last updated on Sep 09, 2024.
       </span></p>
   </div>
 
