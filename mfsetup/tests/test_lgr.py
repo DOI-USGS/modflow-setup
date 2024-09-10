@@ -243,6 +243,11 @@ def test_setup_mover(pleasant_lgr_setup_from_yaml):
     for model in m, m.inset['plsnt_lgr_inset']:
         options = read_mf6_block(model.sfr.filename, 'options')
         assert 'mover' in options
+    # verify that the mover file is referenced in the gwfgwf file
+    gwfgwf_file = Path(m._abs_model_ws, m.simulation.gwfgwf.filename)
+    with open(gwfgwf_file) as src:
+        contents = src.read()
+        assert m.simulation.mvr.filename in contents
 
 
 def test_lgr_parent_bcs_in_lgr_area(pleasant_vertical_lgr_setup_from_yaml):
@@ -300,8 +305,9 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
 
     parent_reach_data = m.sfrdata.reach_data
     inset_reach_data = inset_model.sfrdata.reach_data
+    gwfgwf_exchangedata = m.simulation.gwfgwf.exchangedata.array
     to_inset, to_parent = get_sfr_package_connections(
-        m.simulation.gwfgwf.exchangedata.array,
+        gwfgwf_exchangedata,
         parent_reach_data, inset_reach_data, distance_threshold=200)
     assert len(to_inset) == 0
     # verify that the last reaches in the two segments are keys
@@ -388,7 +394,6 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
             v.setup_dis()
             v.setup_sfr()
     gwfgwf = m.setup_lgr_exchanges()
-    mvr = m.setup_simulation_mover()
 
     # just test the connections for period 0
     exchangedata = pd.DataFrame(m.simulation.mvr.perioddata.array[0])
