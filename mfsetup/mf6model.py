@@ -479,6 +479,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
 
     def setup_lgr_exchanges(self):
+
         for inset_name, inset_model in self.inset.items():
 
             # update cell information for computing any bottom exchanges
@@ -511,23 +512,19 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
             # arguments to ModflowGwfgwf
             kwargs = {'exgtype': 'gwf6-gwf6',
-                      'exgmnamea': self.name,
-                      'exgmnameb': inset_name,
-                      'nexg': nexg,
-                      'auxiliary': [('angldegx', 'cdist')],
-                      'exchangedata': active_exchangelist
-                      }
-            # add water mover files if there's a mover package
-            # not sure if one mover file can be used for multiple exchange files or not
-            # if separate (simulation) water mover files are needed,
-            # than this would have to be restructured
-            if 'mvr' in self.simulation.package_key_dict:
-                if inset_name in self.simulation.mvr.packages.array['mname']:
-                    kwargs['mvr_filerecord'] = self.simulation.mvr.filename
+                        'exgmnamea': self.name,
+                        'exgmnameb': inset_name,
+                        'nexg': nexg,
+                        'auxiliary': [('angldegx', 'cdist')],
+                        'exchangedata': active_exchangelist
+                        }
+            kwargs = get_input_arguments(kwargs, mf6.ModflowGwfgwf)
 
             # set up the exchange package
-            kwargs = get_input_arguments(kwargs, mf6.ModflowGwfgwf)
-            gwfe = mf6.ModflowGwfgwf(self.simulation, **kwargs)
+            gwfgwf = mf6.ModflowGwfgwf(self.simulation, **kwargs)
+
+            # set up a Mover Package if needed
+            self.setup_simulation_mover(gwfgwf)
 
 
     def setup_dis(self, **kwargs):
@@ -921,11 +918,17 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return ims
 
-    def setup_simulation_mover(self):
+    def setup_simulation_mover(self, gwfgwf):
         """Set up the MODFLOW-6 water mover package at the simulation level.
         Automate set-up of the mover between SFR packages in LGR parent and inset models.
         todo: automate set-up of mover between SFR and lakes (within a model).
 
+        Parameters
+        ----------
+        gwfgwf : Flopy :class:`~flopy.mf6.modflow.mfgwfgwf.ModflowGwfgwf` package instance
+
+        Notes
+        ------
         Other uses of the water mover need to be configured manually using flopy.
         """
         package = 'mvr'
@@ -937,7 +940,8 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             if self.inset is not None:
                 for inset_name, inset in self.inset.items():
                     if inset.get_package('sfr'):
-                        inset_perioddata = get_mover_sfr_package_input(self, inset)
+                        inset_perioddata = get_mover_sfr_package_input(
+                            self, inset, gwfgwf.exchangedata.array)
                         perioddata_dfs.append(inset_perioddata)
                         # for each SFR reach with a connection
                         # to a reach in another model
@@ -977,7 +981,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                 kwargs['packages'] = list(packages)
                 kwargs['perioddata'] = {0: perioddata.values.tolist()}  # assumes that input for period 0 applies to all periods
                 kwargs = get_input_arguments(kwargs, mf6.ModflowGwfmvr)
-                mvr = mf6.ModflowMvr(self.simulation, **kwargs)
+                mvr = mf6.ModflowMvr(gwfgwf, **kwargs)
                 print("finished in {:.2f}s\n".format(time.time() - t0))
                 return mvr
         else:

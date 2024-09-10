@@ -1701,7 +1701,6 @@ class MFsetupMixin():
             observations_input['data'] = observations_input[key]
             kwargs = get_input_arguments(observations_input.copy(), sfr.add_observations)
             obsdata = sfr.add_observations(**kwargs)
-            j=2
             # resample observations to model stress periods; write to table
 
         # write reach and segment data tables
@@ -1837,7 +1836,6 @@ class MFsetupMixin():
                 if v._is_lgr:
                     v.setup_packages()
             m.setup_lgr_exchanges()
-            m.setup_simulation_mover()
 
         print('finished setting up model in {:.2f}s'.format(time.time() - t0))
         print('\n{}'.format(m))
