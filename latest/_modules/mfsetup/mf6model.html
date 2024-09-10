@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.5.0.post27+gc10c32d documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.5.0.post28+g094a04e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=126a16d0"></script>
+        <script src="../../_static/documentation_options.js?v=4cefe738"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post27+gc10c32d
+                0.5.0.post28+g094a04e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -597,6 +597,7 @@
 
 
     <span class="k">def</span> <span class="nf">setup_lgr_exchanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
         <span class="k">for</span> <span class="n">inset_name</span><span class="p">,</span> <span class="n">inset_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
             <span class="c1"># update cell information for computing any bottom exchanges</span>
@@ -629,23 +630,19 @@
 
             <span class="c1"># arguments to ModflowGwfgwf</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;exgtype&#39;</span><span class="p">:</span> <span class="s1">&#39;gwf6-gwf6&#39;</span><span class="p">,</span>
-                      <span class="s1">&#39;exgmnamea&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                      <span class="s1">&#39;exgmnameb&#39;</span><span class="p">:</span> <span class="n">inset_name</span><span class="p">,</span>
-                      <span class="s1">&#39;nexg&#39;</span><span class="p">:</span> <span class="n">nexg</span><span class="p">,</span>
-                      <span class="s1">&#39;auxiliary&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;angldegx&#39;</span><span class="p">,</span> <span class="s1">&#39;cdist&#39;</span><span class="p">)],</span>
-                      <span class="s1">&#39;exchangedata&#39;</span><span class="p">:</span> <span class="n">active_exchangelist</span>
-                      <span class="p">}</span>
-            <span class="c1"># add water mover files if there&#39;s a mover package</span>
-            <span class="c1"># not sure if one mover file can be used for multiple exchange files or not</span>
-            <span class="c1"># if separate (simulation) water mover files are needed,</span>
-            <span class="c1"># than this would have to be restructured</span>
-            <span class="k">if</span> <span class="s1">&#39;mvr&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">package_key_dict</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">inset_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">mvr</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="s1">&#39;mname&#39;</span><span class="p">]:</span>
-                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;mvr_filerecord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">mvr</span><span class="o">.</span><span class="n">filename</span>
+                        <span class="s1">&#39;exgmnamea&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s1">&#39;exgmnameb&#39;</span><span class="p">:</span> <span class="n">inset_name</span><span class="p">,</span>
+                        <span class="s1">&#39;nexg&#39;</span><span class="p">:</span> <span class="n">nexg</span><span class="p">,</span>
+                        <span class="s1">&#39;auxiliary&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;angldegx&#39;</span><span class="p">,</span> <span class="s1">&#39;cdist&#39;</span><span class="p">)],</span>
+                        <span class="s1">&#39;exchangedata&#39;</span><span class="p">:</span> <span class="n">active_exchangelist</span>
+                        <span class="p">}</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfgwf</span><span class="p">)</span>
 
             <span class="c1"># set up the exchange package</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfgwf</span><span class="p">)</span>
-            <span class="n">gwfe</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfgwf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">gwfgwf</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfgwf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="c1"># set up a Mover Package if needed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_simulation_mover</span><span class="p">(</span><span class="n">gwfgwf</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">setup_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1083,11 +1080,17 @@
 
 <div class="viewcode-block" id="MF6model.setup_simulation_mover">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_simulation_mover">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_simulation_mover</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setup_simulation_mover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gwfgwf</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the MODFLOW-6 water mover package at the simulation level.</span>
 <span class="sd">        Automate set-up of the mover between SFR packages in LGR parent and inset models.</span>
 <span class="sd">        todo: automate set-up of mover between SFR and lakes (within a model).</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        gwfgwf : Flopy :class:`~flopy.mf6.modflow.mfgwfgwf.ModflowGwfgwf` package instance</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        ------</span>
 <span class="sd">        Other uses of the water mover need to be configured manually using flopy.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;mvr&#39;</span>
@@ -1099,7 +1102,8 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">inset_name</span><span class="p">,</span> <span class="n">inset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">inset</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="s1">&#39;sfr&#39;</span><span class="p">):</span>
-                        <span class="n">inset_perioddata</span> <span class="o">=</span> <span class="n">get_mover_sfr_package_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inset</span><span class="p">)</span>
+                        <span class="n">inset_perioddata</span> <span class="o">=</span> <span class="n">get_mover_sfr_package_input</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="p">,</span> <span class="n">inset</span><span class="p">,</span> <span class="n">gwfgwf</span><span class="o">.</span><span class="n">exchangedata</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>
                         <span class="n">perioddata_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inset_perioddata</span><span class="p">)</span>
                         <span class="c1"># for each SFR reach with a connection</span>
                         <span class="c1"># to a reach in another model</span>
@@ -1139,7 +1143,7 @@
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;packages&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">packages</span><span class="p">)</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;perioddata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()}</span>  <span class="c1"># assumes that input for period 0 applies to all periods</span>
                 <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfmvr</span><span class="p">)</span>
-                <span class="n">mvr</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowMvr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">mvr</span> <span class="o">=</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowMvr</span><span class="p">(</span><span class="n">gwfgwf</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
                 <span class="k">return</span> <span class="n">mvr</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1325,7 +1329,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 09, 2024.
+      <span class="lastupdated">Last updated on Sep 10, 2024.
       </span></p>
   </div>
 
