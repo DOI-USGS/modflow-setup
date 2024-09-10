@@ -153,13 +153,23 @@ def get_sfr_package_connections(gwfgwf_exchangedata,
     return parent_to_inset, inset_to_parent
 
 
-def get_mover_sfr_package_input(parent, inset, convert_to_zero_based=True):
+def get_mover_sfr_package_input(parent, inset, gwfgwf_exchangedata):
+    """Set up the MODFLOW-6 water mover package at the simulation level.
+    Automate set-up of the mover between SFR packages in LGR parent and inset models.
+    todo: automate set-up of mover between SFR and lakes (within a model).
+
+    Parameters
+    ----------
+    gwfgwf_exchangedata : flopy recarray or pandas DataFrame
+        Exchange data from the GWFGWF package
+        (listing cell connections between two groundwater flow models).
+        """
 
     grid_spacing = parent.dis.delc.array[0]
     connections = []
     # use 2x grid spacing for distance threshold
     # because reaches could be small fragments in opposite corners of two adjacent cells
-    to_inset, to_parent = get_sfr_package_connections(parent.simulation.gwfgwf.exchangedata.array,
+    to_inset, to_parent = get_sfr_package_connections(gwfgwf_exchangedata,
                                                       parent.sfrdata.reach_data,
                                                       inset.sfrdata.reach_data,
                                                       distance_threshold=2*grid_spacing)
