@@ -770,6 +770,7 @@ def aggregate_xarray_to_stress_period(data, datetime_coords_name='time',
                                       start_datetime=None, end_datetime=None,
                                       period_stat='mean'):
 
+    period_stat = copy.copy(period_stat)
     if isinstance(start_datetime, pd.Timestamp):
         start_datetime = start_datetime.strftime('%Y-%m-%d')
     if isinstance(end_datetime, pd.Timestamp):
