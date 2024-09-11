@@ -579,8 +579,8 @@ def test_rch_setup(shellmound_model_with_dis):
 
     #assert np.allclose(values, m.rch.recharge.array[0, 0])
     # test period 1 avg. for those times
-    start = m.cfg['rch']['source_data']['recharge']['period_stats'][1][0]
-    end = m.cfg['rch']['source_data']['recharge']['period_stats'][1][1]
+    start = m.cfg['rch']['source_data']['recharge']['period_stats'][1][1]
+    end = m.cfg['rch']['source_data']['recharge']['period_stats'][1][2]
     values1 = get_period_values(start, end)
     assert testing.rpd(values1.mean(), m.rch.recharge.array[1, 0].mean()) < 0.01
 
