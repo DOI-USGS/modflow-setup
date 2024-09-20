@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Time and space discretization &mdash; modflow-setup 0.5.0.post29+g31a3c11 documentation</title>
+  <title>Time and space discretization &mdash; modflow-setup 0.5.0.post30+g7c2e389 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/documentation_options.js?v=447ee079"></script>
+        <script src="../_static/documentation_options.js?v=f2e984cb"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -40,7 +40,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post29+g31a3c11
+                0.5.0.post30+g7c2e389
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -304,7 +304,7 @@
 </section>
 <section id="specifying-uniform-stress-periods-frequencies-by-group">
 <h3>Specifying uniform stress periods frequencies by group<a class="headerlink" href="#specifying-uniform-stress-periods-frequencies-by-group" title="Link to this heading">¶</a></h3>
-<p>For transient models, we often want to combine an initial steady-state period with subsequent transient periods, which may be of variable lengths. To facilitate this, Modflow-setup has a <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block that can in turn contain multiple sub-blocks representing stress period “groups”. Each group in the <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block contains information to generate one or more stress periods at a specified frequency and time datum (for example, months, days, every 7 days, etc.). Input to transient groups is based on the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.2.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a> function, where three of the four <code class="docutils literal notranslate"><span class="pre">start_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">freq</span></code> and <code class="docutils literal notranslate"><span class="pre">nper</span></code> parameters must be defined. For example, this sequence of blocks from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> generates an initial steady-state period, followed by a 9 year “spin-up” period between two dates, and then biannual stress periods spanning another specified set of sets. Time-step information is also specified, using the MODFLOW variable names.</p>
+<p>For transient models, we often want to combine an initial steady-state period with subsequent transient periods, which may be of variable lengths. To facilitate this, Modflow-setup has a <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block that can in turn contain multiple sub-blocks representing stress period “groups”. Each group in the <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block contains information to generate one or more stress periods at a specified frequency and time datum (for example, months, days, every 7 days, etc.). Input to transient groups is based on the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a> function, where three of the four <code class="docutils literal notranslate"><span class="pre">start_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">freq</span></code> and <code class="docutils literal notranslate"><span class="pre">nper</span></code> parameters must be defined. For example, this sequence of blocks from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> generates an initial steady-state period, followed by a 9 year “spin-up” period between two dates, and then biannual stress periods spanning another specified set of sets. Time-step information is also specified, using the MODFLOW variable names.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">tdis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
@@ -598,7 +598,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 12, 2024.
+      <span class="lastupdated">Last updated on Sep 20, 2024.
       </span></p>
   </div>
 
