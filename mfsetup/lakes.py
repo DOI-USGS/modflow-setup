@@ -134,16 +134,16 @@ def get_littoral_profundal_zones(lakzones):
     return zones
 
 
-def get_flux_variable_from_config(variable, model):
-    data = model.cfg['lak'][variable]
+def get_flux_variable_from_config(variable, config, nper):
+    data = config[variable]
     # copy to all stress periods
     # single scalar value
     if np.isscalar(data):
-        data = [data] * model.nper
+        data = [data] * nper
     # flat list of global values by stress period
     elif isinstance(data, list) and np.isscalar(data[0]):
-        if len(data) < model.nper:
-            for i in range(model.nper - len(data)):
+        if len(data) < nper:
+            for i in range(nper - len(data)):
                 data.append(data[-1])
     # dict of lists, or nested dict of values by lake, stress_period
     else:
@@ -244,10 +244,18 @@ def setup_lake_fluxes(model, block='lak'):
     # option 1; precip and evaporation specified directly
     # values are assumed to be in model units
     for variable in variables:
+        # MODFLOW 2005 models
         if variable in model.cfg[block]:
-            values = get_flux_variable_from_config(variable, model)
-            # repeat values for each lake
-            df[variable] = values * len(model.lake_info['lak_id'])
+            config = model.cfg[block]
+        # MODFLOW 6 Lake Package
+        elif variable in model.cfg[block].get('perioddata', {}):
+            config = model.cfg[block]['perioddata']
+        # no direct perioddata input
+        else:
+            continue
+        values = get_flux_variable_from_config(variable, config, model.nper)
+        # repeat values for each lake
+        df[variable] = values * len(model.lake_info['lak_id'])
 
     # option 2; precip and temp specified from PRISM output
     # compute evaporation from temp using Hamon method
