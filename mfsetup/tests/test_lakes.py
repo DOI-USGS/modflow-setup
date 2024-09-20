@@ -10,6 +10,7 @@ import pytest
 from mfsetup.fileio import load_array
 from mfsetup.lakes import (
     PrismSourceData,
+    get_flux_variable_from_config,
     get_horizontal_connections,
     setup_lake_connectiondata,
     setup_lake_info,
@@ -191,3 +192,17 @@ def test_get_horizontal_connections(tmpdir, connection_info):
 
         ncon = np.sum(np.abs(sobel_x) > 1) + np.sum(np.abs(sobel_y) > 1)
         assert ncon == np.sum(connections['k'] == k)
+
+
+def test_get_flux_variable_from_config(get_pleasant_mf6_with_dis):
+    model = get_pleasant_mf6_with_dis
+    model.setup_lak()
+    variable = 'precipitation'
+    config = {
+        'perioddata': {
+            variable : [0.01]
+        }
+    }
+    results = get_flux_variable_from_config(variable, config)
+        # repeat values for each lake
+    df[variable] = results * len(model.lake_info['lak_id'])
