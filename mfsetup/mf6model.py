@@ -1028,9 +1028,6 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
             if 'SFR' in ' '.join(model.get_package_list()):
                 options = []
                 for k, b in model.cfg['sfr']['options'].items():
-                    if k == 'mover':
-                        if 'mvr' not in model.simulation.package_key_dict:
-                            continue
                     options.append(k)
                 if 'save_flows' in options:
                     budget_fileout = '{}.{}'.format(model_name,
