@@ -271,7 +271,7 @@ def fill_cells_vertically(top, botm):
     filled += np.nanmin(all_surfaces, axis=0)  # botm[-1]
     # append the model bottom elevations
     filled = np.append(filled, [np.nanmin(all_surfaces, axis=0)], axis=0)
-    return filled[0].copy(), filled[1:].copy()
+    return filled[1:].copy()
 
 
 def fix_model_layer_conflicts(top_array, botm_array,
@@ -748,6 +748,6 @@ def voxels_to_layers(voxel_array, z_edges, model_top=None, model_botm=None, no_d
 
     # finally, fill any remaining nans with next layer elevation (going upward)
     # might still have nans in areas where there are no voxel values, but model top and botm values
-    top, botm = fill_cells_vertically(layers[0], layers[1:])
-    layers = np.vstack([np.reshape(top, (1, *top.shape)), botm])
+    botm = fill_cells_vertically(layers[0], layers[1:])
+    layers = np.vstack([np.reshape(layers[0], (1, *layers[0].shape)), botm])
     return layers
