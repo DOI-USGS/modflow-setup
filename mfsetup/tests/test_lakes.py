@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from mfsetup import MF6model
 from mfsetup.fileio import load_array
 from mfsetup.lakes import (
     PrismSourceData,
@@ -15,6 +16,7 @@ from mfsetup.lakes import (
     setup_lake_connectiondata,
     setup_lake_info,
 )
+from mfsetup.tests.test_pleasant_mf6_inset import pleasant_mf6_cfg
 
 
 @pytest.fixture
@@ -232,3 +234,28 @@ def test_get_flux_variable_from_config(modflow_version, config, nlakes, nper, ex
     results = get_flux_variable_from_config(variable, config, nlakes, nper)
     # repeat values for each lake
     assert results == expected
+
+
+def test_lake_idomain(pleasant_mf6_cfg):
+    """For MODFLOW 6 models (at least), if no bathymetry raster is supplied,
+    the lake should be simulated 'above' the grid, connecting vertically with
+    the top model layer, and cells within the lake footprint should only
+    be inactive if they are pinched out based on the original layer surfaces
+    (cells containing lake shouldn't be inactive).
+    """
+    cfg = pleasant_mf6_cfg.copy()
+    del cfg['lak']['source_data']['bathymetry_raster']
+    m = MF6model(cfg=cfg)
+    m.setup_dis()
+    m.setup_tdis()
+    m.setup_lak()
+
+
+    k, i, j = zip(*m.lak.connectiondata.array['cellid'])
+    # only a small number of cells
+    # should have connections to layers below the top layer
+    # note that this 5% criterian might change
+    # if the test problem changes substantially
+    assert np.sum(np.array(k) > 0)/np.sum(np.array(k) == 0) < 0.05
+    # all connections should be to active cells
+    assert all(m.dis.idomain.array[k, i, j] == 1)

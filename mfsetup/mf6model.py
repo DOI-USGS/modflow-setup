@@ -216,7 +216,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
         idomain = idomain.astype(int)
 
         # remove cells that conincide with lakes
-        idomain[self.isbc == 1] = 0.
+        # idomain[self.isbc == 1] = 0.
 
         # remove cells that are above stream cells
         if self.get_package('sfr') is not None:
