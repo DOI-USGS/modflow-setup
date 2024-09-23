@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization &mdash; modflow-setup 0.5.0.post32+gc66aab9 documentation</title>
+  <title>mfsetup.discretization &mdash; modflow-setup 0.5.0.post36+g9f53a9c documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=08170279"></script>
+        <script src="../../_static/documentation_options.js?v=a6c39caa"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             modflow-setup
           </a>
               <div class="version">
-                0.5.0.post32+gc66aab9
+                0.5.0.post36+g9f53a9c
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -398,7 +398,7 @@
     <span class="n">filled</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">all_surfaces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># botm[-1]</span>
     <span class="c1"># append the model bottom elevations</span>
     <span class="n">filled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">all_surfaces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">filled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">filled</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">filled</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
 
 
@@ -911,8 +911,8 @@
 
     <span class="c1"># finally, fill any remaining nans with next layer elevation (going upward)</span>
     <span class="c1"># might still have nans in areas where there are no voxel values, but model top and botm values</span>
-    <span class="n">top</span><span class="p">,</span> <span class="n">botm</span> <span class="o">=</span> <span class="n">fill_cells_vertically</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-    <span class="n">layers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">top</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span> <span class="n">botm</span><span class="p">])</span>
+    <span class="n">botm</span> <span class="o">=</span> <span class="n">fill_cells_vertically</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span> <span class="n">botm</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">layers</span></div>
 
 </pre></div>
