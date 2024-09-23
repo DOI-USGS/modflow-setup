@@ -118,12 +118,16 @@ def test_fill_na(all_layers):
     botm[-2] = 2
     botm[-2, 2, 2] = np.nan
 
-    top, botm = fill_cells_vertically(top, botm)
+    botm = fill_cells_vertically(top, botm)
     filled = all_layers.copy()
     filled[0] = top
     filled[1:] = botm
     assert filled[:, 2, 2].tolist() == [10., 10.,  8.,  8.,  8.,  5.,  5.,  5.,  5, 1.]
-    assert filled[:, 0, 0].tolist() == [8] * 8 + [2, 1]
+    # only compare layers 1:
+    # because fill_cells_vertically doesn't modify the model top
+    # (assuming that in most cases, there will be value
+    # for the model top elevation at each cell location)
+    assert filled[1:, 0, 0].tolist() == [8.] * 7 + [2., 1.]
 
 
 def test_make_ibound(all_layers):
@@ -134,7 +138,7 @@ def test_make_ibound(all_layers):
     botm[-2] = 2
     botm[-2, 2, 2] = np.nan
     botm[:, 3, 3] = np.arange(1, 10)[::-1] # column of cells all eq. to min thickness
-    filled_top, filled_botm = fill_cells_vertically(top, botm)
+    filled_botm = fill_cells_vertically(top, botm)
     ibound = make_ibound(top, botm, nodata=nodata,
                            minimum_layer_thickness=1,
                            drop_thin_cells=True,
