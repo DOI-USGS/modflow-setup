@@ -134,22 +134,43 @@ def get_littoral_profundal_zones(lakzones):
     return zones
 
 
-def get_flux_variable_from_config(variable, config, nper):
+def get_flux_variable_from_config(variable, config, nlakes, nper):
+    # MODFLOW 6 models
+    if 'perioddata' in config:
+        config = config['perioddata']
     data = config[variable]
     # copy to all stress periods
     # single scalar value
     if np.isscalar(data):
-        data = [data] * nper
+        values = [data] * nper * nlakes
     # flat list of global values by stress period
     elif isinstance(data, list) and np.isscalar(data[0]):
+        values = data.copy()
         if len(data) < nper:
             for i in range(nper - len(data)):
-                data.append(data[-1])
+                values.append(data[-1])
+        # repeat stress period data for all lakes
+        values = values * nlakes
+    elif isinstance(data, dict):
+        values = []
+        lake_numbers = list(sorted(data.keys()))
+        if not len(lake_numbers) == nlakes and all(np.diff(lake_numbers) == 1):
+            raise ValueError(
+                f"Lake Package {variable}: Dictionary-style input "
+                "requires consecutive lake numbers and an entry for each lake")
+        for lake_no in lake_numbers:
+            lake_values = data[lake_no]
+            if np.isscalar(lake_values):
+                lake_values = [lake_values] * nper
+            elif len(lake_values) < nper:
+                for i in range(nper - len(lake_values)):
+                    lake_values.append(lake_values[-1])
+            values += lake_values
     # dict of lists, or nested dict of values by lake, stress_period
     else:
-        raise NotImplementedError('Direct input of {} by lake.'.format(variable))
-    assert isinstance(data, list)
-    return data
+        raise ValueError(f"Invalid Lake Package {variable}: input:\n{config}")
+    assert isinstance(values, list)
+    return values
 
 
 def setup_lake_info(model):
@@ -239,23 +260,17 @@ def setup_lake_fluxes(model, block='lak'):
     df = pd.DataFrame(np.zeros((nlakes * model.nper, len(columns)), dtype=float),
                       columns=columns)
     df['per'] = list(range(model.nper)) * nlakes
+    # lake dataframe sorted by lake id and then period
     df['lak_id'] = sorted(model.lake_info['lak_id'].tolist() * model.nper)
 
     # option 1; precip and evaporation specified directly
     # values are assumed to be in model units
     for variable in variables:
-        # MODFLOW 2005 models
-        if variable in model.cfg[block]:
-            config = model.cfg[block]
-        # MODFLOW 6 Lake Package
-        elif variable in model.cfg[block].get('perioddata', {}):
-            config = model.cfg[block]['perioddata']
-        # no direct perioddata input
-        else:
-            continue
-        values = get_flux_variable_from_config(variable, config, model.nper)
-        # repeat values for each lake
-        df[variable] = values * len(model.lake_info['lak_id'])
+        # MODFLOW 2005 models or MODFLOW 6 Lake Package
+        if variable in model.cfg[block] or\
+            variable in model.cfg[block].get('perioddata', {}):
+            values = get_flux_variable_from_config(variable, model.cfg[block], nlakes, model.nper)
+            df[variable] = values
 
     # option 2; precip and temp specified from PRISM output
     # compute evaporation from temp using Hamon method

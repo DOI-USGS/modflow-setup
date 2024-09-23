@@ -194,15 +194,41 @@ def test_get_horizontal_connections(tmpdir, connection_info):
         assert ncon == np.sum(connections['k'] == k)
 
 
-def test_get_flux_variable_from_config(get_pleasant_mf6_with_dis):
-    model = get_pleasant_mf6_with_dis
-    model.setup_lak()
+@pytest.mark.parametrize('modflow_version', ('mf2005', 'mf6'))
+@pytest.mark.parametrize('config, nlakes, nper, expected', (
+    # single global value; gets repeated to all lakes and periods
+    ({'precipitation': 0.01}, 1, 1, [0.01]),
+    ({'precipitation': 0.01}, 2, 1, [0.01] * 2),
+    ({'precipitation': 0.01}, 2, 2, [0.01] * 4),
+    # steady value for each lake
+    ({'precipitation': {0: 0.01, 1: 0.02}}, 2, 2, [0.01]*2 + [0.02]*2),
+    ({'precipitation': [0.01, 0.02]}, 2, 2, [0.01, 0.02]*2),
+    #pytest.param({'precipitation': [0.01, 0.02]}, 2, 2, None,
+    #             marks=pytest.mark.xfail(reason='multiple lakes require dictionary input')),
+    # time-varying values for one or more lakes
+    ({'precipitation': [0.01, 0.011]}, 1, 2, [0.01, 0.011]),
+    ({'precipitation': [0.01, 0.011]}, 1, 3, [0.01, 0.011, 0.011]),
+    pytest.param({'precipitation': [0.01, 0.011, 0.012]}, 1, 2, None,
+                 marks=pytest.mark.xfail(reason='more values than periods')),
+    ({'precipitation': {0: [0.01, 0.011],
+                        1: [0.02, 0.021]}}, 2, 2, [0.01, 0.011, 0.02, 0.021]),
+    # last value gets repeated to remaining stress periods
+    ({'precipitation': {0: [0.01, 0.011],
+                        1: [0.02, 0.021]}}, 2, 3,
+     [0.01, 0.011, 0.011, 0.02, 0.021, 0.021]),
+    pytest.param({'precipitation': {0: [0.01, 0.011],
+                        1: [0.02, 0.021]}}, 3, 3, None,
+                 marks=pytest.mark.xfail(reason='no values for lake 3')),
+    pytest.param({'precipitation': {0: [0.01, 0.011],
+                        2: [0.02, 0.021]}}, 2, 3, None,
+                 marks=pytest.mark.xfail(reason='no values for lake 1 or nonconsecutive lake numbers')),
+
+))
+def test_get_flux_variable_from_config(modflow_version, config, nlakes, nper, expected
+                                       ):
     variable = 'precipitation'
-    config = {
-        'perioddata': {
-            variable : [0.01]
-        }
-    }
-    results = get_flux_variable_from_config(variable, config)
-        # repeat values for each lake
-    df[variable] = results * len(model.lake_info['lak_id'])
+    if modflow_version == 'mf6':
+        config = {'perioddata': config}
+    results = get_flux_variable_from_config(variable, config, nlakes, nper)
+    # repeat values for each lake
+    assert results == expected
