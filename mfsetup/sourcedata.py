@@ -1381,7 +1381,6 @@ def setup_array(model, package, var, data=None,
     # special handling of some variables
     # (for lakes)
     simulate_high_k_lakes = model.cfg['high_k_lakes']['simulate_high_k_lakes']
-    apply_lake_bathymetry_to_model_top = False
     if var == 'botm':
         if 'lak' in model.cfg['model']['packages'] and not model._load and\
             np.sum(model.lake_bathymetry) != 0:
@@ -1390,7 +1389,6 @@ def setup_array(model, package, var, data=None,
             # (bathymetry is loaded from the configuration file input
             #  when the model.lake_bathymetry property is called for the first time;
             #  see MFsetupMixin._set_lake_bathymetry)
-            apply_lake_bathymetry_to_model_top = True
             bathy = model.lake_bathymetry
 
             # save a copy of original top elevations
@@ -1427,6 +1425,25 @@ def setup_array(model, package, var, data=None,
             if model.version == 'mf6':
                 # reset the model top to the lake bottom
                 top[bathy != 0] -= bathy[bathy != 0]
+
+                # update the top in the model
+                # todo: refactor this code to be consolidated with _set_idomain and setup_dis
+                model._setup_array('dis', 'top',
+                        data={0: top},
+                        datatype='array2d', resample_method='linear',
+                        write_fmt='%.2f', dtype=float)
+                if hasattr(model, 'dis') and model.dis is not None:
+                    if model.version == 'mf6':
+                        model.dis.top = model.cfg['dis']['griddata']['top']
+                    else:
+                        model.dis.top = model.cfg['dis']['top'][0]
+
+                # write the top array again
+                top_filepath = model.setup_external_filepaths(package, 'top',
+                                                            model.cfg[package]['top_filename_fmt'])[0]
+                save_array(top_filepath, top,
+                        nodata=write_nodata,
+                        fmt=write_fmt)
         # if loading the model; use the model top that was just loaded in
         else:
             top_filename = model.cfg['dis']['griddata'].get('top')
@@ -1502,19 +1519,8 @@ def setup_array(model, package, var, data=None,
                 raise Exception('Model layers less than {} {} thickness'.format(min_thickness,
                                                                             model.length_units))
         # fill any nan values that are above or below active cells to avoid cell thickness errors
-        top, botm = fill_cells_vertically(top, botm)
-        # the top may have been modified by fill_cells_vertically
-        # update the top in the model
-        # todo: refactor this code to be consolidated with _set_idomain and setup_dis
-        model._setup_array('dis', 'top',
-                data={0: top},
-                datatype='array2d', resample_method='linear',
-                write_fmt='%.2f', dtype=float)
-        if hasattr(model, 'dis') and model.dis is not None:
-            if model.version == 'mf6':
-                model.dis.top = model.cfg['dis']['griddata']['top']
-            else:
-                model.dis.top = model.cfg['dis']['top'][0]
+        botm = fill_cells_vertically(top, botm)
+
         data = {i: arr for i, arr in enumerate(botm)}
 
         # special case of LGR models
@@ -1608,21 +1614,6 @@ def setup_array(model, package, var, data=None,
                 fmt=write_fmt)
         # still write intermediate files for MODFLOW-6
         # even though input and output filepaths are same
-        if model.version == 'mf6':
-            src = filepaths[i]['filename']
-            dst = model.cfg['intermediate_data'][var][i]
-            shutil.copy(src, dst)
-
-    # write the top array again, because top was filled
-    # with botm array above
-    # NOTE: that tends to corrupt the top array,
-    # is that only applicable to simulate_high_k_lakes ?)
-    if var == 'botm' and apply_lake_bathymetry_to_model_top:
-        top_filepath = model.setup_external_filepaths(package, 'top',
-                                                      model.cfg[package]['top_filename_fmt'])[0]
-        save_array(top_filepath, top,
-                   nodata=write_nodata,
-                   fmt=write_fmt)
         if model.version == 'mf6':
             src = filepaths[i]['filename']
             dst = model.cfg['intermediate_data'][var][i]
