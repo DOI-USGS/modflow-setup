@@ -776,7 +776,7 @@ def rasterize(feature, grid, id_column=None,
     return result
 
 
-def snap_to_cell_corner(x, y, modelgrid, corner='upper left'):
+def snap_to_cell_corner(x, y, modelgrid, corner='nearest'):
     """Move an x, y location to the nearest cell corner on
     a rectilinear modelgrid.
 
@@ -788,7 +788,7 @@ def snap_to_cell_corner(x, y, modelgrid, corner='upper left'):
         y coordinate in coordinate reference system of modelgrid.
     modelgrid : Flopy StructuredGrid instance
     corner : str, optional
-        'upper left' or 'lower right', by default 'upper left'
+        'upper left', 'lower right' or 'nearest', by default 'nearest'
 
     Returns
     -------
@@ -802,6 +802,12 @@ def snap_to_cell_corner(x, y, modelgrid, corner='upper left'):
         If x, y are outside of the model domain, or if an invalid
         cell corner is specified.
     """
+    if corner == 'nearest':
+        vx, vy, vz = modelgrid.xyzvertices
+        loc = np.argmin(np.sqrt((x-vx)**2 + (y-vy)**2))
+        x_corner, y_corner = vx.flat[loc], vy.flat[loc]
+        return x_corner, y_corner
+
     x_model, y_model = modelgrid.get_local_coords(x, y)
 
     # move away from the corner of a cell
@@ -1078,6 +1084,19 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
         unrotated_features = shapely.affinity.rotate(buffered_features, -rotation,
                                                      origin=buffered_features.centroid)
         unrotated_bbox = box(*unrotated_features.bounds)
+        # Get the initial grid height and width
+        height_grid = np.round(unrotated_bbox.bounds[3] - unrotated_bbox.bounds[1])
+        width_grid = np.round(unrotated_bbox.bounds[2] - unrotated_bbox.bounds[0])
+        # initial rows and columns (prior to snapping, if specified)
+        nrow = int(np.ceil(height_grid / delc_grid))
+        ncol = int(np.ceil(width_grid / delr_grid))
+        # correct the height and width to be consistent with nrow, ncol
+        height_grid = nrow * delc_grid
+        width_grid = ncol * delr_grid
+        # make a new box with the corrected height
+        unrotated_bbox = box(unrotated_bbox.bounds[0], unrotated_bbox.bounds[1],
+                             unrotated_bbox.bounds[0] + width_grid,
+                             unrotated_bbox.bounds[1] + height_grid)
         # Get important corners
         # upper left corner
         xul_ur, yul_ur = unrotated_bbox.bounds[0], unrotated_bbox.bounds[3]
@@ -1090,12 +1109,7 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             Point(xll_ur, yll_ur), rotation, origin=buffered_features.centroid)
         # xoff, yoff here for consistency with flopy model grid language
         xoff, yoff = lower_left_corner.x, lower_left_corner.y
-        # Get the initial grid height and width
-        height_grid = np.round(unrotated_bbox.bounds[3] - unrotated_bbox.bounds[1])
-        width_grid = np.round(unrotated_bbox.bounds[2] - unrotated_bbox.bounds[0])
-        # initial rows and columns (prior to snapping, if specified)
-        nrow = int(np.ceil(height_grid / delc_grid))
-        ncol = int(np.ceil(width_grid / delr_grid))
+
 
     # align model with parent grid if there is a parent model
     # (and not snapping to national hydrologic grid)
@@ -1103,14 +1117,19 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
     # (without a pre-defined number of rows and columns)
     # this likely means increasing nrow and ncol
     if parent_model is not None and (snap_to_parent and not snap_to_NHG):
-        xul, yul = snap_to_cell_corner(xul, yul, parent_model.modelgrid,
-                                       corner='upper left')
+        #xul, yul = snap_to_cell_corner(xul, yul, parent_model.modelgrid,
+        #                               corner='nearest')
+        xoff, yoff = snap_to_cell_corner(xoff, yoff, parent_model.modelgrid,
+                                         corner='nearest')
         # unrotate to get new dimensions
-        ur_ur = shapely.affinity.rotate(Point(xul, yul), -rotation,
-                                            origin=lower_left_corner)
-        xul_ur, yul_ur = ur_ur.x, ur_ur.y
+        #ul_ur = shapely.affinity.rotate(Point(xul, yul), -rotation,
+        #                                    origin=lower_left_corner)
+
+        xul_ur, yul_ur = xoff, yoff + (unrotated_bbox.bounds[3] -\
+                                       unrotated_bbox.bounds[1])  #ul_ur.x, ul_ur.y
         # Get the lower right corner
-        xlr_ur, ylr_ur = unrotated_bbox.bounds[2], unrotated_bbox.bounds[1]
+        xlr_ur= xoff + (unrotated_bbox.bounds[2] - unrotated_bbox.bounds[0])
+        ylr_ur  = yoff
         # snap the lower right corner if the grid was generated from a feature
         # (not preset nrow and ncol)
         if features is not None:
@@ -1133,14 +1152,21 @@ def setup_structured_grid(xoff=None, yoff=None, xul=None, yul=None,
             ncol = int(round(width_grid / delr_grid))
 
         # recalculate xoff, yoff
-        lower_left_corner = shapely.affinity.rotate(Point(xul_ur, ylr_ur), rotation,
-                                                    origin=lower_left_corner)
-        xoff, yoff = lower_left_corner.x, lower_left_corner.y
+        upper_left_corner = shapely.affinity.rotate(Point(xul_ur, yul_ur), rotation,
+                                                    origin=Point(xoff, yoff))
+        xul, yul = upper_left_corner.x, upper_left_corner.y
 
     assert xoff is not None
     #    xoff = xul + (np.sin(np.radians(rotation)) * height_grid)
     assert yoff is not None
     #    yoff = yul - (np.cos(np.radians(rotation)) * height_grid)
+    # check that the top left and bottom left corners are consistent with discretization
+    if np.isscalar(delr_grid):
+        assert np.allclose(np.sqrt((yul - yoff)**2 + (xul - xoff)**2),
+                           nrow * delc_grid)
+    else:
+        assert np.allclose(np.sqrt((yul - yoff)**2 + (xul - xoff)**2),
+                           delc_grid.sum())
     # set the grid configuration dictionary
     grid_cfg = {'nrow': int(nrow), 'ncol': int(ncol),
                 'nlay': nlay,

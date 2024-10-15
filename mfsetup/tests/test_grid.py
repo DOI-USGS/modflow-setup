@@ -20,9 +20,13 @@ from mfsetup.grid import (
     get_ij,
     get_nearest_point_on_grid,
     get_point_on_national_hydrogeologic_grid,
-    rasterize
+    rasterize,
 )
 from mfsetup.testing import point_is_on_nhg
+from mfsetup.tests.test_mf6_tmr_shellmound import (
+    shellmound_tmr_cfg,
+    shellmound_tmr_cfg_path,
+)
 from mfsetup.units import convert_length_units
 from mfsetup.utils import get_input_arguments
 
@@ -216,6 +220,10 @@ def check_grid(m):
     if fp_info['xul'] is not None:
         assert fp_info['xul'] == xul
         assert fp_info['yul'] == yul
+    # upper left corner should be consistent with
+    # the number of rows and cell spacings
+    assert np.allclose(np.sqrt((yul - yll)**2 + (xul - xll)**2),
+                       m.modelgrid.delc.sum())
 
 
 @pytest.mark.parametrize('snap_to_parent', (True, False))
@@ -257,6 +265,41 @@ def test_grid_corners_sm(shellmound_model_with_grid):
     and is snapped to NHG.
     """
     m = shellmound_model_with_grid
+    m.setup_tdis()
+    m.write_input()
+    check_grid(m)
+
+
+@pytest.mark.parametrize('snap_to_parent', (True, False))
+def test_grid_corners_sm_tmr(shellmound_tmr_cfg, snap_to_parent):
+    """Test model grid corner locations for a shellmound tmr model,
+    which is specified from xoff, yoff
+    and is snapped to a parent model.
+    """
+    cfg = copy.deepcopy(shellmound_tmr_cfg)
+    cfg['setup_grid'] = {
+            'xoff': 526958.20, # lower left x-coordinate
+            'yoff': 1183288.00, # lower left y-coordinate
+            'rotation': 0.,
+            'dxy': 500,  # in CRS units of meters
+            'crs': 5070,
+            'snap_to_parent': snap_to_parent
+        }
+    cfg['dis'] = {
+            'dimensions': {
+                # if nrow and ncol are not specified here, the entries above in setup_grid are used
+                'nlay': cfg['dis']['dimensions']['nlay'],
+                'nrow': 4,
+                'ncol': 16
+            },
+            'griddata': {
+                'delr': 500,
+                'delc': 500,
+                'idomain': 1
+            },
+            'source_data': copy.deepcopy(cfg['dis']['source_data'])}
+    m = MF6model(cfg=cfg)
+    m.setup_grid()
     m.setup_tdis()
     m.write_input()
     check_grid(m)
@@ -329,8 +372,8 @@ def test_get_intercell_connections(test_data_path):
     q = flowja[cn['qidx']]
     assert len(cn) == len(q)
 
-@pytest.mark.parametrize('id', 
-                         (0, 
+@pytest.mark.parametrize('id',
+                         (0,
                           75004400017127.0,
                           ))
 @pytest.mark.parametrize('id_col_dtype',
@@ -345,7 +388,7 @@ def test_rasterize(shellmound_model,
     else:
         id_column = 'id'
         gdf[id_column] = id_col_dtype(id)
-    results = rasterize(gdf, 
+    results = rasterize(gdf,
                         shellmound_model.modelgrid,
                         id_column=id_column
                         )
