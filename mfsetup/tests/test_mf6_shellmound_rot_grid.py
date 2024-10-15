@@ -241,16 +241,17 @@ def test_rotated_lgr_grid_setup(rotated_parent_small,
                  for model_x, model_y in perimeter])
     assert all(buffered.within(perimeter))
 
-    #import matplotlib.pyplot as plt
-    #import flopy
-    #fig, ax = plt.subplots(figsize=(6, 6))
-    #pmv = flopy.plot.PlotMapView(m, ax=ax)
-    #pmv2 = flopy.plot.PlotMapView(m.inset['rt-lgr30-inset'], ax=ax)
-    #lc = pmv.plot_grid()
-    #lc2 = pmv2.plot_grid()
-    #feature.plot(ax=ax, color='b')
-    #buffered.plot(ax=ax, fc='none', ec='b')
-    #gpd.GeoSeries(perimeter).plot(ax=ax, fc='none', ec='b', zorder=10)
+    import flopy
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(6, 6))
+    pmv = flopy.plot.PlotMapView(m, ax=ax)
+    pmv2 = flopy.plot.PlotMapView(m.inset['rt-lgr30-inset'], ax=ax)
+    lc = pmv.plot_grid()
+    lc2 = pmv2.plot_grid()
+    feature.plot(ax=ax, color='b')
+    buffered.plot(ax=ax, fc='none', ec='b')
+    gpd.GeoSeries(perimeter).plot(ax=ax, fc='none', ec='b', zorder=10)
+    plt.pause(1)
     # write out the shapefiles to visually inspect results
     m.parent.modelgrid.write_shapefile('tmr_parent_grid.shp')
     m.modelgrid.write_shapefile('lgr_parent_grid.shp')
