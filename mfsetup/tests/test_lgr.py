@@ -323,6 +323,8 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     # run the test, then from the project root folder, go to
     # examples/pleasant_lgr/postproc/shps
     # plot the shapefiles in a GIS environment to verify the connections in to_parent
+    # m.modelgrid.write_shapefile('inset_model_grid.shp')
+    # m.parent.modelgrid.write_shapefile('parent_model_grid.shp')
     # {inset_reach: parent_reach, ...}
     assert to_parent == {29: 8, 41: 1}
 
@@ -353,8 +355,8 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
         'list_filename_fmt': '{}.list'
         },
         'setup_grid': {
-            'xoff': 526958.20, # lower left x-coordinate
-            'yoff': 1183288.00, # lower left y-coordinate
+            'xoff': 526958.2, # lower left x-coordinate
+            'yoff': 1184284.0, # lower left y-coordinate
             'rotation': 0.,
             'dxy': 500,  # in CRS units of meters
             'crs': 5070
