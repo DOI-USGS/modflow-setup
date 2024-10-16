@@ -14,7 +14,15 @@ import numpy as np
 import pandas as pd
 import yaml
 from flopy.mf6.data import mfstructure
-from flopy.mf6.mfbase import MFDataException, VerbosityLevel
+from flopy.mf6.mfbase import (
+    ExtFileAction,
+    FlopyException,
+    MFDataException,
+    MFFileMgmt,
+    PackageContainer,
+    PackageContainerType,
+    VerbosityLevel,
+)
 from flopy.mf6.modflow import mfims, mftdis
 from flopy.modflow.mf import ModflowGlobal
 from flopy.utils import TemporalReference, mfreadnam
@@ -801,7 +809,7 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
         print('loading simulation...')
 
     # build case consistent load_only dictionary for quick lookups
-    load_only = instance._load_only_dict(load_only)
+    load_only = PackageContainer._load_only_dict(load_only)
 
     # load simulation name file
     if verbosity_level.value >= VerbosityLevel.normal.value:
@@ -885,7 +893,7 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
                                   message=message)
         for exgfile in exch_data:
             if load_only is not None and not \
-                    instance._in_pkg_list(load_only, exgfile[0],
+                    PackageContainer._in_pkg_list(load_only, exgfile[0],
                                           exgfile[2]):
                 if instance.simulation_data.verbosity_level.value >= \
                         VerbosityLevel.normal.value:
@@ -906,7 +914,7 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
             exchange_name = '{}_EXG_{}'.format(exchange_type,
                                                exchange_file_num)
             # find package class the corresponds to this exchange type
-            package_obj = instance.package_factory(
+            package_obj = PackageContainer.package_factory(
                 exchange_type.replace('-', '').lower(), '')
             if not package_obj:
                 message = 'An error occurred while loading the ' \
@@ -933,6 +941,7 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
                 print('  loading exchange package {}..'
                       '.'.format(exchange_file._get_pname()))
             exchange_file.load(strict)
+            instance._package_container.add_package(exchange_file)
             instance._exchange_files[exgfile[1]] = exchange_file
 
     # load simulation packages
@@ -952,10 +961,8 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
                               message=message)
     for solution_group in solution_group_dict.values():
         for solution_info in solution_group:
-            if load_only is not None and \
-                    not instance._in_pkg_list(load_only,
-                                              solution_info[0],
-                                              solution_info[2]):
+            if load_only is not None and not PackageContainer._in_pkg_list(
+                    load_only, solution_info[0], solution_info[2]):
                 if instance.simulation_data.verbosity_level.value >= \
                         VerbosityLevel.normal.value:
                     print('    skipping package {}..'
@@ -982,6 +989,9 @@ def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.',
     instance = model
     modelname = model.name
     structure = model.structure
+
+    # build case consistent load_only dictionary for quick lookups
+    load_only = PackageContainer._load_only_dict(load_only)
 
     # load name file
     instance.name_file.load(strict)
@@ -1011,10 +1021,10 @@ def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.',
                 sim_struct.utl_struct_objs:
             if (
                 load_only is not None
-                and not instance._in_pkg_list(
+                and not PackageContainer._in_pkg_list(
                     priority_packages, ftype_orig, pname
                 )
-                and not instance._in_pkg_list(load_only, ftype_orig, pname)
+                and not PackageContainer._in_pkg_list(load_only, ftype_orig, pname)
             ):
                 if (
                     simulation.simulation_data.verbosity_level.value
