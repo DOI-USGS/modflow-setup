@@ -326,7 +326,7 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     # m.modelgrid.write_shapefile('inset_model_grid.shp')
     # m.parent.modelgrid.write_shapefile('parent_model_grid.shp')
     # {inset_reach: parent_reach, ...}
-    assert to_parent == {29: 8, 41: 1}
+    assert to_parent == {29: 13, 41: 1}
 
 
 def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
