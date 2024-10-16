@@ -37,10 +37,9 @@ def package_eq(pk1, pk2):
                  'structure'
                  ]:
             continue
-        elif isinstance(v, mf6.mfbase.PackageContainer):
-            if not package_eq(v, v2):
-                return False
-        elif isinstance(v, mf6.mfpackage.MFPackage):
+        # skip packages within packages to avoid RecursionError
+        elif isinstance(v, mf6.mfpackage.MFPackage) or\
+            isinstance(v, mf6.mfbase.PackageContainer):
             continue
         elif isinstance(v, mf6.mfpackage.MFChildPackages):
             if not package_eq(v, v2):
@@ -50,7 +49,16 @@ def package_eq(pk1, pk2):
         elif type(v) == bool:
             if not v == v2:
                 return False
-        elif type(v) in [str, int, float, dict, list]:
+        elif type(v) == dict:
+            for v_k, v_v in v.items():
+                if v_k not in v2:
+                    return False
+                # skip packages within packages to avoid RecursionError
+                if isinstance(v_v, mf6.mfpackage.MFPackage):
+                    continue
+                elif v[v_k] != v2[v_k]:
+                    return False
+        elif type(v) in [str, int, float, list]:
             if v != v2:
                 return False
         elif isinstance(v, ModelInterface):
