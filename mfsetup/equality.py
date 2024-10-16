@@ -37,6 +37,9 @@ def package_eq(pk1, pk2):
                  'structure'
                  ]:
             continue
+        elif isinstance(v, mf6.mfbase.PackageContainer):
+            if not package_eq(v, v2):
+                return False
         elif isinstance(v, mf6.mfpackage.MFPackage):
             continue
         elif isinstance(v, mf6.mfpackage.MFChildPackages):
