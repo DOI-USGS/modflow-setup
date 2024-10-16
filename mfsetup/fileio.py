@@ -941,7 +941,9 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
                 print('  loading exchange package {}..'
                       '.'.format(exchange_file._get_pname()))
             exchange_file.load(strict)
-            instance._package_container.add_package(exchange_file)
+            # Flopy>=3.9
+            if hasattr(instance, '_package_container'):
+                instance._package_container.add_package(exchange_file)
             instance._exchange_files[exgfile[1]] = exchange_file
 
     # load simulation packages
