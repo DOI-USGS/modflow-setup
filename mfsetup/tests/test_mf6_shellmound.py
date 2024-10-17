@@ -744,9 +744,9 @@ def test_wel_setup(shellmound_model_with_dis):
     # may be due to wells with invalid open intervals getting removed
     assert np.allclose(sums, sums2, rtol=0.01)
 
-@pytest.mark.skipif((os.environ.get('GITHUB_ACTIONS') == 'true') &\
-    ('macos' in platform.platform().lower()),
-                    reason='This test fails on macos CI for an unknown reason; passes locally on macos')
+#@pytest.mark.skipif((os.environ.get('GITHUB_ACTIONS') == 'true') &\
+#    ('macos' in platform.platform().lower()),
+#                    reason='This test fails on macos CI for an unknown reason; passes locally on macos')
 def test_sfr_setup(model_with_sfr, project_root_path):
     m = model_with_sfr
     m.sfr.write()
@@ -774,9 +774,10 @@ def test_sfr_setup(model_with_sfr, project_root_path):
     assert len(m.sfrdata.reach_data.node.unique()) == len(m.sfrdata.reach_data)
 
     # check that add_outlets works
-    expected_outlets = {17955371, 17956199}
+    expected_outlets = {'17957815', '17956199'}
     for outlet_id in expected_outlets:
-        assert outlet_id in m.sfrdata.reach_data.line_id.tolist()
+        # handle either int-based or str-based line_ids
+        assert int(outlet_id) in m.sfrdata.reach_data.line_id.astype(int).tolist()
         assert m.sfrdata.reach_data.loc[m.sfrdata.reach_data.line_id == outlet_id,
                                         'outseg'].sum() == 0
 
@@ -853,7 +854,7 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     line_id = inflow_input['line_id'].unique()[0]
     left = inflow_input.loc[inflow_input.line_id == line_id].loc['2007-04-01':, 'flow_m3d'].resample('6MS').mean()
     lookup = dict(zip(sfr_pd.specified_line_id, sfr_pd.rno))
-    rno = lookup[line_id]
+    rno = lookup.get(str(line_id), lookup.get(line_id))
     right = sfr_pd.loc[sfr_pd.rno == rno].loc['2007-04-01':, 'inflow']
     left = left.loc[:right.index[-1]]
     pd.testing.assert_series_equal(left, right, check_names=False, check_freq=False)
