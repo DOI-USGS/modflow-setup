@@ -1,25 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.5.0.post37+g3142198 documentation</title>
+  <title>mfsetup.grid &mdash; modflow-setup 0.5.0.post48+gccfbed8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/documentation_options.js?v=66669e7a"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=a6609535"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -36,9 +36,6 @@
           <a href="../../index.html" class="icon icon-home">
             modflow-setup
           </a>
-              <div class="version">
-                0.5.0.post37+g3142198
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -927,7 +924,7 @@
 
 <div class="viewcode-block" id="snap_to_cell_corner">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.snap_to_cell_corner">[docs]</a>
-<span class="k">def</span> <span class="nf">snap_to_cell_corner</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">modelgrid</span><span class="p">,</span> <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">snap_to_cell_corner</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">modelgrid</span><span class="p">,</span> <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Move an x, y location to the nearest cell corner on</span>
 <span class="sd">    a rectilinear modelgrid.</span>
 
@@ -939,7 +936,7 @@
 <span class="sd">        y coordinate in coordinate reference system of modelgrid.</span>
 <span class="sd">    modelgrid : Flopy StructuredGrid instance</span>
 <span class="sd">    corner : str, optional</span>
-<span class="sd">        &#39;upper left&#39; or &#39;lower right&#39;, by default &#39;upper left&#39;</span>
+<span class="sd">        &#39;upper left&#39;, &#39;lower right&#39; or &#39;nearest&#39;, by default &#39;nearest&#39;</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -953,6 +950,12 @@
 <span class="sd">        If x, y are outside of the model domain, or if an invalid</span>
 <span class="sd">        cell corner is specified.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">corner</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
+        <span class="n">vx</span><span class="p">,</span> <span class="n">vy</span><span class="p">,</span> <span class="n">vz</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">xyzvertices</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="n">vx</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">vy</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">x_corner</span><span class="p">,</span> <span class="n">y_corner</span> <span class="o">=</span> <span class="n">vx</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">loc</span><span class="p">],</span> <span class="n">vy</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">x_corner</span><span class="p">,</span> <span class="n">y_corner</span>
+
     <span class="n">x_model</span><span class="p">,</span> <span class="n">y_model</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">get_local_coords</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
     <span class="c1"># move away from the corner of a cell</span>
@@ -1232,6 +1235,20 @@
         <span class="n">unrotated_features</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">buffered_features</span><span class="p">,</span> <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
                                                      <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
         <span class="n">unrotated_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">unrotated_features</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+
+        <span class="c1"># Get the initial grid height and width</span>
+        <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># initial rows and columns (prior to snapping, if specified)</span>
+        <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
+        <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
+        <span class="c1"># correct the height and width to be consistent with nrow, ncol</span>
+        <span class="n">height_grid</span> <span class="o">=</span> <span class="n">nrow</span> <span class="o">*</span> <span class="n">delc_grid</span>
+        <span class="n">width_grid</span> <span class="o">=</span> <span class="n">ncol</span> <span class="o">*</span> <span class="n">delr_grid</span>
+        <span class="c1"># make a new box with the corrected height</span>
+        <span class="n">unrotated_bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                             <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">width_grid</span><span class="p">,</span>
+                             <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">height_grid</span><span class="p">)</span>
         <span class="c1"># Get important corners</span>
         <span class="c1"># upper left corner</span>
         <span class="n">xul_ur</span><span class="p">,</span> <span class="n">yul_ur</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
@@ -1242,14 +1259,13 @@
         <span class="n">xll_ur</span><span class="p">,</span> <span class="n">yll_ur</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">lower_left_corner</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span>
             <span class="n">Point</span><span class="p">(</span><span class="n">xll_ur</span><span class="p">,</span> <span class="n">yll_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+        <span class="c1"># lower right corner</span>
+        <span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">lower_right_corner</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span>
+            <span class="n">Point</span><span class="p">(</span><span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
         <span class="c1"># xoff, yoff here for consistency with flopy model grid language</span>
         <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">=</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">y</span>
-        <span class="c1"># Get the initial grid height and width</span>
-        <span class="n">height_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">width_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="c1"># initial rows and columns (prior to snapping, if specified)</span>
-        <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
-        <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
+
 
     <span class="c1"># align model with parent grid if there is a parent model</span>
     <span class="c1"># (and not snapping to national hydrologic grid)</span>
@@ -1257,44 +1273,55 @@
     <span class="c1"># (without a pre-defined number of rows and columns)</span>
     <span class="c1"># this likely means increasing nrow and ncol</span>
     <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">snap_to_parent</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">snap_to_NHG</span><span class="p">):</span>
-        <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">snap_to_cell_corner</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
-                                       <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
-        <span class="c1"># unrotate to get new dimensions</span>
-        <span class="n">ur_ur</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">),</span> <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
-                                            <span class="n">origin</span><span class="o">=</span><span class="n">lower_left_corner</span><span class="p">)</span>
-        <span class="n">xul_ur</span><span class="p">,</span> <span class="n">yul_ur</span> <span class="o">=</span> <span class="n">ur_ur</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ur_ur</span><span class="o">.</span><span class="n">y</span>
-        <span class="c1"># Get the lower right corner</span>
-        <span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="c1"># snap the lower right corner if the grid was generated from a feature</span>
-        <span class="c1"># (not preset nrow and ncol)</span>
+
         <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lr</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span>
-                                         <span class="n">origin</span><span class="o">=</span><span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
-            <span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lr</span><span class="o">.</span><span class="n">y</span>
-            <span class="c1"># snap to the nearest parent lower right corner</span>
-            <span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span> <span class="o">=</span> <span class="n">snap_to_cell_corner</span><span class="p">(</span><span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+            <span class="c1"># snap the upper left corner</span>
+            <span class="c1"># to ensure that grid perimeter is at least buffer distance from feature(s)</span>
+            <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">snap_to_cell_corner</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+                                            <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+            <span class="n">ul_ur</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xul</span><span class="p">,</span> <span class="n">yul</span><span class="p">),</span>
+                                                     <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
+                                                     <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+            <span class="c1"># snap the lower right corner for the same reason</span>
+            <span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span> <span class="o">=</span> <span class="n">snap_to_cell_corner</span><span class="p">(</span><span class="n">lower_right_corner</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lower_right_corner</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                                           <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
                                            <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;lower right&#39;</span><span class="p">)</span>
-            <span class="c1"># unrotate to get new dimensions</span>
-            <span class="n">lr_ur</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span><span class="p">),</span> <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
-                                            <span class="n">origin</span><span class="o">=</span><span class="n">lower_left_corner</span><span class="p">)</span>
-            <span class="n">xlr_ur</span><span class="p">,</span> <span class="n">ylr_ur</span> <span class="o">=</span> <span class="n">lr_ur</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lr_ur</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">lr_ur</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xlr</span><span class="p">,</span> <span class="n">ylr</span><span class="p">),</span>
+                                                     <span class="o">-</span><span class="n">rotation</span><span class="p">,</span>
+                                                     <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+            <span class="n">grid_height</span> <span class="o">=</span> <span class="n">ul_ur</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">lr_ur</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">grid_width</span> <span class="o">=</span> <span class="n">lr_ur</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">ul_ur</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">grid_height</span><span class="p">)</span> <span class="o">%</span> <span class="n">delc_grid</span> <span class="o">==</span> <span class="mf">0.</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">grid_width</span><span class="p">)</span> <span class="o">%</span> <span class="n">delr_grid</span> <span class="o">==</span> <span class="mf">0.</span>
+            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">grid_height</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
+            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">grid_width</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
 
-            <span class="c1"># calculate a new height and width for the grid now that the corners are snapped</span>
-            <span class="n">height_grid</span> <span class="o">=</span> <span class="n">yul_ur</span> <span class="o">-</span> <span class="n">ylr_ur</span>
-            <span class="n">width_grid</span> <span class="o">=</span> <span class="n">xlr_ur</span> <span class="o">-</span> <span class="n">xul_ur</span>
-            <span class="c1"># snap_to_parent assumes a regular grid</span>
-            <span class="n">nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">height_grid</span> <span class="o">/</span> <span class="n">delc_grid</span><span class="p">))</span>
-            <span class="n">ncol</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">width_grid</span> <span class="o">/</span> <span class="n">delr_grid</span><span class="p">))</span>
+            <span class="c1"># get revised lower left corner (offset)</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">ul_ur</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lr_ur</span><span class="o">.</span><span class="n">y</span><span class="p">),</span>
+                                         <span class="n">rotation</span><span class="p">,</span>
+                                         <span class="n">origin</span><span class="o">=</span><span class="n">buffered_features</span><span class="o">.</span><span class="n">centroid</span><span class="p">)</span>
+            <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">=</span> <span class="n">ll</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">ll</span><span class="o">.</span><span class="n">y</span>
 
-        <span class="c1"># recalculate xoff, yoff</span>
-        <span class="n">lower_left_corner</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xul_ur</span><span class="p">,</span> <span class="n">ylr_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span>
-                                                    <span class="n">origin</span><span class="o">=</span><span class="n">lower_left_corner</span><span class="p">)</span>
-        <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">=</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lower_left_corner</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">=</span> <span class="n">snap_to_cell_corner</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
+                                            <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+            <span class="n">grid_height</span> <span class="o">=</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">unrotated_bbox</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">xul_ur</span><span class="p">,</span> <span class="n">yul_ur</span> <span class="o">=</span> <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span> <span class="o">+</span> <span class="n">grid_height</span>
+            <span class="n">upper_left_corner</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">xul_ur</span><span class="p">,</span> <span class="n">yul_ur</span><span class="p">),</span> <span class="n">rotation</span><span class="p">,</span>
+                                                        <span class="n">origin</span><span class="o">=</span><span class="n">Point</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="p">))</span>
+            <span class="n">xul</span><span class="p">,</span> <span class="n">yul</span> <span class="o">=</span> <span class="n">upper_left_corner</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">upper_left_corner</span><span class="o">.</span><span class="n">y</span>
 
     <span class="k">assert</span> <span class="n">xoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="c1">#    xoff = xul + (np.sin(np.radians(rotation)) * height_grid)</span>
     <span class="k">assert</span> <span class="n">yoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="c1">#    yoff = yul - (np.cos(np.radians(rotation)) * height_grid)</span>
+    <span class="c1"># check that the top left and bottom left corners are consistent with discretization</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">delr_grid</span><span class="p">):</span>
+        <span class="k">pass</span><span class="c1">#assert np.allclose(np.sqrt((yul - yoff)**2 + (xul - xoff)**2),</span>
+        <span class="c1">#                   nrow * delc_grid)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">yul</span> <span class="o">-</span> <span class="n">yoff</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">xul</span> <span class="o">-</span> <span class="n">xoff</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
+                           <span class="n">delc_grid</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
     <span class="c1"># set the grid configuration dictionary</span>
     <span class="n">grid_cfg</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nrow&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nrow</span><span class="p">),</span> <span class="s1">&#39;ncol&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncol</span><span class="p">),</span>
                 <span class="s1">&#39;nlay&#39;</span><span class="p">:</span> <span class="n">nlay</span><span class="p">,</span>
@@ -1494,7 +1521,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 23, 2024.
+      <span class="lastupdated">Last updated on Oct 17, 2024.
       </span></p>
   </div>
 

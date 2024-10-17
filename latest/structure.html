@@ -1,26 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic program structure and usage &mdash; modflow-setup 0.5.0.post37+g3142198 documentation</title>
+  <title>Basic program structure and usage &mdash; modflow-setup 0.5.0.post48+gccfbed8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/documentation_options.js?v=66669e7a"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="_static/copybutton.js?v=f281be69"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=a6609535"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -39,9 +39,6 @@
           <a href="index.html" class="icon icon-home">
             modflow-setup
           </a>
-              <div class="version">
-                0.5.0.post37+g3142198
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -110,7 +107,7 @@
            <div itemprop="articleBody">
              
   <section id="basic-program-structure-and-usage">
-<h1>Basic program structure and usage<a class="headerlink" href="#basic-program-structure-and-usage" title="Link to this heading">¶</a></h1>
+<h1>Basic program structure and usage<a class="headerlink" href="#basic-program-structure-and-usage" title="Link to this heading"></a></h1>
 <p>Modflow-setup is intended to provide both a collection of python modules with functions for performing various model construction tasks and a boiler plate workflow for automated construction of a working MODFLOW model from a configuration file. The latter goal is implemented in the <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> and <code class="docutils literal notranslate"><span class="pre">MFnwtModel</span></code> classes, which can both be imported at the top level.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MF6model</span>
 <span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MFnwtModel</span>
@@ -119,14 +116,14 @@
 <p>MF6model extends the <code class="docutils literal notranslate"><span class="pre">mf6.ModflowGwf</span></code> (MODFLOW-6 groundwater flow model) class in Flopy; MFnwtModel extends the <code class="docutils literal notranslate"><span class="pre">modflow.Modflow</span></code> (pre-MODFLOW-6 groundwater flow model) class in Flopy. These two classes are intended to provide methods and attributes specific to MODFLOW-6 or MODFLOW-NWT. A third <a class="reference external" href="https://en.wikipedia.org/wiki/Mixin">mixin class</a> (<code class="docutils literal notranslate"><span class="pre">MFsetupMixin</span></code>) contains methods and attributes that are general to both MODFLOW-6 and MODFLOW-NWT (and therefore used by both MF6model and MFnwtModel). The goal in this is to make modflow-setup be agnostic to MODFLOW version to the extent feasible.</p>
 <p>The above three model classes extend Flopy with methods and property attributes that perform various model construction tasks, such as creating a model grid, creating arrays from source data, managing dependencies between packages, and setting up individual packages. Information for creating the model is stored in a python dictionary under the attribute <code class="docutils literal notranslate"><span class="pre">cfg</span></code>, which is attached to the model classes. The <code class="docutils literal notranslate"><span class="pre">cfg</span></code> dictionary is populated from a configuration file containing all of the information needed to build the model. More about the configuration file in the configuration file section.</p>
 <section id="setting-up-a-full-model">
-<h2>Setting up a full model<a class="headerlink" href="#setting-up-a-full-model" title="Link to this heading">¶</a></h2>
+<h2>Setting up a full model<a class="headerlink" href="#setting-up-a-full-model" title="Link to this heading"></a></h2>
 <p>Instances of <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> and <code class="docutils literal notranslate"><span class="pre">MFnwtModel</span></code> can be created by setting up full model from a configuration file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="s1">&#39;config_file.yml&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="loading-a-model">
-<h2>Loading a model<a class="headerlink" href="#loading-a-model" title="Link to this heading">¶</a></h2>
+<h2>Loading a model<a class="headerlink" href="#loading-a-model" title="Link to this heading"></a></h2>
 <p>Instances of <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> and <code class="docutils literal notranslate"><span class="pre">MFnwtModel</span></code> can also be created by loading an existing model that has a configuration file (usually this is a model created by modflow-setup):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;config_file.yml&#39;</span><span class="p">)</span>
 </pre></div>
@@ -134,7 +131,7 @@
 <p>In the latter case, the model is simply loaded with flopy and the <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> instance created with the <code class="docutils literal notranslate"><span class="pre">cfg</span></code> dictionary populated from the configuration file, as well as other attributes specific to modflow-setup.</p>
 </section>
 <section id="setting-up-individual-packages">
-<h2>Setting up individual packages<a class="headerlink" href="#setting-up-individual-packages" title="Link to this heading">¶</a></h2>
+<h2>Setting up individual packages<a class="headerlink" href="#setting-up-individual-packages" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">.setup_from_yaml</span></code> method above calls individual package setup methods for all of the packages specified in the configuration file. Alternatively, these package setup methods (with contain the suffix “setup”) can be called individually to make or remake a package.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;config_file.yml&#39;</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">setup_dis</span><span class="p">()</span>
@@ -156,7 +153,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 23, 2024.
+      <span class="lastupdated">Last updated on Oct 17, 2024.
       </span></p>
   </div>
 

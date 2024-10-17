@@ -1,26 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.5.0.post37+g3142198 documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.5.0.post48+gccfbed8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/documentation_options.js?v=66669e7a"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../_static/copybutton.js?v=f281be69"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a6609535"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,9 +39,6 @@
           <a href="../index.html" class="icon icon-home">
             modflow-setup
           </a>
-              <div class="version">
-                0.5.0.post37+g3142198
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -117,10 +114,10 @@
            <div itemprop="articleBody">
              
   <section id="specifying-perimeter-boundary-conditions-from-another-model">
-<h1>Specifying perimeter boundary conditions from another model<a class="headerlink" href="#specifying-perimeter-boundary-conditions-from-another-model" title="Link to this heading">¶</a></h1>
+<h1>Specifying perimeter boundary conditions from another model<a class="headerlink" href="#specifying-perimeter-boundary-conditions-from-another-model" title="Link to this heading"></a></h1>
 <p>Often the area we are trying to model is part of a larger flow system, and we must account for groundwater flow across the model boundaries. Modflow-setup allows for perimeter boundary conditions to be specified from the groundwater flow solution of another Modflow model.</p>
 <section id="features-and-limitations">
-<h2>Features and Limitations<a class="headerlink" href="#features-and-limitations" title="Link to this heading">¶</a></h2>
+<h2>Features and Limitations<a class="headerlink" href="#features-and-limitations" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Currently, specified head perimeter boundaries are supported via the MODFLOW Constant Head (CHD) Package; specified flux boundaries are supported via the MODFLOW Well (WEL) Package.</p></li>
 <li><p>The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.</p></li>
@@ -133,7 +130,7 @@
 </ul>
 </section>
 <section id="configuration-input">
-<h2>Configuration input<a class="headerlink" href="#configuration-input" title="Link to this heading">¶</a></h2>
+<h2>Configuration input<a class="headerlink" href="#configuration-input" title="Link to this heading"></a></h2>
 <p>Input to set up perimeter boundaries are specified in two places:</p>
 <ol class="arabic">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">parent:</span></code> model block, in which a parent or source model can be specified. Currently only a single parent or source model is supported. The parent or source model can be used for other properties (e.g. hydraulic conductivity) and stresses (e.g. recharge) in addition to the perimeter boundary.</p>
@@ -173,7 +170,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 </ol>
 </section>
 <section id="specifying-the-time-discretization">
-<h2>Specifying the time discretization<a class="headerlink" href="#specifying-the-time-discretization" title="Link to this heading">¶</a></h2>
+<h2>Specifying the time discretization<a class="headerlink" href="#specifying-the-time-discretization" title="Link to this heading"></a></h2>
 <p>By default, inset model stress period 0 is assumed to align with parent model stress period zero (<code class="docutils literal notranslate"><span class="pre">copy_stress_periods:</span> <span class="pre">'all'</span></code> in the <a class="reference internal" href="../config-file.html#the-configuration-file"><span class="std std-ref">configuration file</span></a> parent block, which is the default). Alternatively, stress periods can be mapped explicitly using a dictionary. For example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">copy_stress_periods</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -184,7 +181,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 <p>where <code class="docutils literal notranslate"><span class="pre">0:</span> <span class="pre">1</span></code> indicates that the first stress period in the inset model aligns with the second stress period in the parent model (stress period 1), etc.</p>
 </section>
 <section id="specifying-the-locations-of-perimeter-boundary-cells">
-<h2>Specifying the locations of perimeter boundary cells<a class="headerlink" href="#specifying-the-locations-of-perimeter-boundary-cells" title="Link to this heading">¶</a></h2>
+<h2>Specifying the locations of perimeter boundary cells<a class="headerlink" href="#specifying-the-locations-of-perimeter-boundary-cells" title="Link to this heading"></a></h2>
 <p>Modflow-setup provides 3 primary options for specifying the locations of perimeter cells. In all cases, boundary cells are produced by the <code class="xref py py-meth docutils literal notranslate"><span class="pre">mfsetup.tmr.TmrNew.get_inset_boundary_cells()</span></code> method, and the resulting cells (including the boundary faces) can be visualized in a GIS environment with the <code class="docutils literal notranslate"><span class="pre">boundary_cells.shp</span></code> shapefile that gets written to the <code class="docutils literal notranslate"><span class="pre">tables/</span></code> folder by default.</p>
 <p><strong>1) No specification of where the perimeter boundary should be applied</strong> (e.g. a shapefile) and <code class="docutils literal notranslate"><span class="pre">by_layer=False:</span></code> (the default). Perimeter BC cells are applied to active cells that coincide with the edge of the maximum areal footprint of the active model area. In places where the edge of the active area is inside of the max active footprint, no perimeter cells are applied.</p>
 <blockquote>
@@ -230,7 +227,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 23, 2024.
+      <span class="lastupdated">Last updated on Oct 17, 2024.
       </span></p>
   </div>
 

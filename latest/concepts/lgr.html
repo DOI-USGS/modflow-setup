@@ -1,26 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Local grid refinement &mdash; modflow-setup 0.5.0.post37+g3142198 documentation</title>
+  <title>Local grid refinement &mdash; modflow-setup 0.5.0.post48+gccfbed8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/documentation_options.js?v=66669e7a"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../_static/copybutton.js?v=f281be69"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a6609535"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,9 +39,6 @@
           <a href="../index.html" class="icon icon-home">
             modflow-setup
           </a>
-              <div class="version">
-                0.5.0.post37+g3142198
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -114,7 +111,7 @@
            <div itemprop="articleBody">
              
   <section id="local-grid-refinement">
-<h1>Local grid refinement<a class="headerlink" href="#local-grid-refinement" title="Link to this heading">¶</a></h1>
+<h1>Local grid refinement<a class="headerlink" href="#local-grid-refinement" title="Link to this heading"></a></h1>
 <p>In MODFLOW 6, two groundwater models can be tightly coupled in the same simulation, which allows for efficient “local grid refinement” (LGR; Mehl and others, 2006) and “semistructured” (Feinstein and others, 2016) configurations that combine multiple structured model layers at different resolutions (Langevin and others, 2017). Locally refined areas are conceptualized as separate “child” models that are linked to the surrounding (usually coarser) “parent” model through the GWF Model Exchange (GWFGWF) Package. Similarly, “semistructured” configurations are represented by multiple linked models for each layer or group of layers with the same resolution.</p>
 <p>Modflow-setup supports local grid refinment via an <code class="docutils literal notranslate"><span class="pre">lgr:</span></code> subblock within the <code class="docutils literal notranslate"><span class="pre">setup_grid:</span></code> block of the configuration file. The <code class="docutils literal notranslate"><span class="pre">lgr:</span></code> subblock consists of one of more subblocks, each keyed by a linked model name and containing configuration input for that linked model. Vertical layer refinement relative to the “parent” model is also specified for each layer of the parent model.</p>
 <p>For example, the following “parent” configuration for the <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">Pleasant Lake Example</span></a> creates a local refinement model named “<code class="docutils literal notranslate"><span class="pre">pleasant_lgr_inset</span></code>” that spans all layers of the parent model, at the same vertical resolution (1 inset model layer per parent model layer).</p>
@@ -130,15 +127,17 @@
 </pre></div>
 </div>
 <p>The horizontal location and resolution of the inset model are specified in the <a class="reference internal" href="../config-file-gallery.html#pleasant-lgr-inset-yml"><span class="std std-ref">inset model configuration file</span></a>, in the same way that they are specified for any model. In this example, the parent model has a uniform horizontal resolution of 200 meters, and the inset a uniform resolution of 40 meters (a horizontal refinement of 5 inset model cells per parent model cells). The inset model resolution must be a factor of the parent model resolution.</p>
-<a class="reference internal image-reference" href="../_images/pleasant_lgr.png"><img alt="Example of LGR refinement in all layers." src="../_images/pleasant_lgr.png" style="width: 1200px;" /></a>
-<a class="reference internal image-reference" href="../_images/pleasant_lgr_xsection.png"><img alt="Example of LGR refinement in all layers." src="../_images/pleasant_lgr_xsection.png" style="width: 1200px;" /></a>
-<p>Input from the <code class="docutils literal notranslate"><span class="pre">lgr:</span></code> subblock and the inset model configuration file(s) is passed to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.utils.lgrutil.html#flopy.utils.lgrutil.Lgr" title="(in FloPy v3.9.0.dev1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flopy</span> <span class="pre">Lgr</span> <span class="pre">Utility</span></code></a>, which helps create input for the GWF Model Exchange Package.</p>
+<a class="reference internal image-reference" href="../_images/pleasant_lgr.png"><img alt="Example of LGR refinement in all layers." src="../_images/pleasant_lgr.png" style="width: 1200px;" />
+</a>
+<a class="reference internal image-reference" href="../_images/pleasant_lgr_xsection.png"><img alt="Example of LGR refinement in all layers." src="../_images/pleasant_lgr_xsection.png" style="width: 1200px;" />
+</a>
+<p>Input from the <code class="docutils literal notranslate"><span class="pre">lgr:</span></code> subblock and the inset model configuration file(s) is passed to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.utils.lgrutil.html#flopy.utils.lgrutil.Lgr" title="(in FloPy v3.9.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flopy</span> <span class="pre">Lgr</span> <span class="pre">Utility</span></code></a>, which helps create input for the GWF Model Exchange Package.</p>
 <p>Within the context of a Python session, inset model information is stored in a dictionary under an <code class="docutils literal notranslate"><span class="pre">inset</span></code> attribute attached to the parent model. For example, to access a Flopy model object for the above inset model from a parent model named <code class="docutils literal notranslate"><span class="pre">model</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inset_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">&#39;pleasant_lgr_inset&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 <section id="specification-of-vertical-refinement">
-<h2>Specification of vertical refinement<a class="headerlink" href="#specification-of-vertical-refinement" title="Link to this heading">¶</a></h2>
+<h2>Specification of vertical refinement<a class="headerlink" href="#specification-of-vertical-refinement" title="Link to this heading"></a></h2>
 <p>Vertical refinement in the LGR child grid is specified in the <code class="docutils literal notranslate"><span class="pre">layer_refinement:</span></code> item, as the number of child layers in each parent model layer. Currently vertical refinement is limited to even subdivision of parent model layers. Vertical refinement can be specified as an integer for uniform refinement across all parent model layers:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">layer_refinement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
@@ -190,7 +189,8 @@
 </pre></div>
 </div>
 <p>The figure below shows a cross section through the model grid resulting from this configuration:</p>
-<a class="reference internal image-reference" href="../_images/pleasant_vlgr_xsection.png"><img alt="Example of partial vertical LGR refinement with layer subdivision." src="../_images/pleasant_vlgr_xsection.png" style="width: 1500px;" /></a>
+<a class="reference internal image-reference" href="../_images/pleasant_vlgr_xsection.png"><img alt="Example of partial vertical LGR refinement with layer subdivision." src="../_images/pleasant_vlgr_xsection.png" style="width: 1500px;" />
+</a>
 <p><strong>A few notes about LGR functionality in Modflow-setup</strong></p>
 <ul class="simple">
 <li><p><strong>Locally refined “inset” models must be aligned with the parent model grid</strong>, which also means that their horizontal resolution must be a factor of the “parent” model resolution. Modflow-setup handles the alignment automatically by “snapping” inset model grids to the lower left corner of the parent cell containing the lower left corner of the inset model grid (the inset model origin in real-world coordinates).</p></li>
@@ -216,7 +216,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Sep 23, 2024.
+      <span class="lastupdated">Last updated on Oct 17, 2024.
       </span></p>
   </div>
 
