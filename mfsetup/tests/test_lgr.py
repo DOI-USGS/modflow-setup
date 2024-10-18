@@ -403,29 +403,27 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
     # check SFR package shapefile output in test output folder
     # to verify that these are correct
     expected_connections = {
-    ('shellmound', 173, 'shellmound_lgr', 7),
-    ('shellmound', 235, 'shellmound_lgr', 0),
-    ('shellmound', 293, 'shellmound_lgr', 5),
-    ('shellmound_lgr', 4, 'shellmound', 258),
-    ('shellmound_lgr', 14, 'shellmound', 186),
-    ('shellmound_lgr', 17, 'shellmound', 170)
+    ('shellmound', 167, 'shellmound_lgr', 7),
+    ('shellmound', 229, 'shellmound_lgr', 0),
+    ('shellmound', 288, 'shellmound_lgr', 5),
+    ('shellmound_lgr', 4, 'shellmound', 252),
+    ('shellmound_lgr', 14, 'shellmound', 180),
+    ('shellmound_lgr', 17, 'shellmound', 164)
     }
     assert set(exchangedata[['mname1', 'id1', 'mname2', 'id2']].
                itertuples(index=False, name=None)) == expected_connections
-    cd1 = pd.DataFrame(m.simulation.get_model('shellmound').sfr.connectiondata.array)
-    cd1.index = cd1['ifno']
-    # None of the reaches should have downstream connections
-    # within their SFR Package
-    # (no negative numbers indicates an outlet condition)
-    assert not any(cd1.loc[[173, 235, 293]].iloc[:, 1] < 0)
-    rd1 = m.sfrdata.reach_data
-    assert all(rd1.loc[rd1['rno'].isin(np.array([173, 235, 293])+1), 'outreach'] == 0)
-    inset = m.simulation.get_model('shellmound_lgr')
-    cd2 = pd.DataFrame(inset.sfr.connectiondata.array)
-    cd2.index = cd2['ifno']
-    assert not any(cd2.loc[[4, 14, 17]].iloc[:, 1] < 0)
-    rd2 = inset.sfrdata.reach_data
-    assert all(rd2.loc[rd2['rno'].isin(np.array([4, 14, 17])+1), 'outreach'] == 0)
+    for modelname in 'shellmound', 'shellmound_lgr':
+        model = m.simulation.get_model(modelname)
+        cd1 = pd.DataFrame(m.simulation.get_model(modelname).sfr.connectiondata.array)
+        cd1.index = cd1['ifno']
+        # None of the reaches should have downstream connections
+        # within their SFR Package
+        # (no negative numbers indicates an outlet condition)
+        connections_to_other_model = [cn[1] for cn in expected_connections
+                                    if cn[0] == modelname]
+        assert not any(cd1.loc[connections_to_other_model].iloc[:, 1] < 0)
+        rd1 = model.sfrdata.reach_data
+        assert all(rd1.loc[rd1['rno'].isin(np.array(connections_to_other_model)+1), 'outreach'] == 0)
 
 
 def test_lgr_bottom_elevations(pleasant_vertical_lgr_setup_from_yaml, mf6_exe):
