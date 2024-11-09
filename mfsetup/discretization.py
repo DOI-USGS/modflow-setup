@@ -428,6 +428,16 @@ def make_lgr_idomain(parent_modelgrid, inset_modelgrid,
     y1 = inset_modelgrid.ycellcenters[-1, -1]
     pi1, pj1 = parent_modelgrid.intersect(x1, y1, forgive=True)
     idomain = np.ones(parent_modelgrid.shape, dtype=int)
+    if any(np.isnan([pi0, pj0])):
+        raise ValueError(f"LGR model upper left corner {pi0}, {pj0} "
+                         "is outside of the parent model domain! "
+                         "Check the grid offset and dimensions."
+                         )
+    if any(np.isnan([pi1, pj1])):
+        raise ValueError(f"LGR model lower right corner {pi0}, {pj0} "
+                         "is outside of the parent model domain! "
+                         "Check the grid offset and dimensions."
+                         )
     idomain[0:(np.array(ncppl) > 0).sum(),
             pi0:pi1+1, pj0:pj1+1] = 0
     return idomain
