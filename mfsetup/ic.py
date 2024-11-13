@@ -47,9 +47,12 @@ def setup_strt(model, package, strt=None, source_data_config=None,
                 raise ValueError(("'from_parent' in configuration by no parent model."
                                 f"{package} package, {model.name} model.\n"
                                 f"source_data config:\n{source_data_config}"))
-            from_parent_cfg = source_data_config['strt'].get('from_parent', {})
-            binary_file = from_parent_cfg.get('binaryfile', False)
-            kwargs.update(from_parent_cfg)
+            if strt_config == 'from_parent':
+                default_parent_source_data = True
+            else:
+                from_parent_cfg = source_data_config['strt'].get('from_parent', {})
+                binary_file = from_parent_cfg.get('binaryfile', False)
+                kwargs.update(from_parent_cfg)
         elif 'from_model_top' in strt_config:
             default_parent_source_data = False
 
