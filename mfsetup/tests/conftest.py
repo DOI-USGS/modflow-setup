@@ -10,7 +10,7 @@ import pytest
 fm = flopy.modflow
 mf6 = flopy.mf6
 from mfsetup import MF6model, MFnwtModel
-from mfsetup.fileio import exe_exists, load_cfg
+from mfsetup.fileio import exe_exists, load, load_cfg
 from mfsetup.tests.test_pleasant_mf6_inset import (
     get_pleasant_mf6,
     get_pleasant_mf6_with_dis,
@@ -356,3 +356,39 @@ def basic_model_instance(request,
             'pleasant_nwt': pleasant_nwt,
             'get_pleasant_mf6': get_pleasant_mf6
             }[request.param]
+
+
+@pytest.fixture
+def cfg_2x2x3_with_dis(project_root_path):
+    cfg = load(Path(project_root_path) / 'mfsetup/mf6_defaults.yml')
+    specified_cfg = {
+        'setup_grid': {
+            'xoff': 0.,
+            'yoff': 0.,
+            'nrow': 3,
+            'ncol': 2,
+            'dxy': 100.,
+            'rotation': 0.,
+            'crs': 26915
+                    },
+        'dis': {
+            'options': {
+                'length_units': 'meters'
+            },
+            'dimensions': {
+                'nlay': 2,
+                'nrow': 3,
+                'ncol': 2
+            },
+            'griddata': {
+                'delr': 100.,
+                'delc': 100.,
+                'top': 20.,
+                'botm': [15., 0.]
+            },
+            }}
+    cfg.update(specified_cfg)
+    kwargs = get_input_arguments(cfg['simulation'], mf6.MFSimulation)
+    sim = mf6.MFSimulation(**kwargs)
+    cfg['model']['simulation'] = sim
+    return cfg
