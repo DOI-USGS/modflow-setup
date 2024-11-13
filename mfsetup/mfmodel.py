@@ -292,12 +292,16 @@ class MFsetupMixin():
         if self._parent_layers is None:
             parent_layers = None
             botm_source_data = self.cfg['dis'].get('source_data', {}).get('botm', {})
+            nlay = self.modelgrid.nlay
+            if nlay is None:
+                nlay = self.cfg['dis']['dimensions']['nlay']
             if self.cfg['parent'].get('inset_layer_mapping') is not None:
                 parent_layers = self.cfg['parent'].get('inset_layer_mapping')
             elif isinstance(botm_source_data, dict) and 'from_parent' in botm_source_data:
                 parent_layers = botm_source_data.get('from_parent')
-            elif self.parent is not None:
-                parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
+            elif self.parent is not None and (self.parent.modelgrid.nlay == nlay):
+                parent_layers = dict(zip(range(self.parent.modelgrid.nlay),
+                                         range(nlay)))
             else:
                 #parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))
                 parent_layers = None
@@ -1640,6 +1644,15 @@ class MFsetupMixin():
             sd = TransientTabularSourceData.from_config(inflows_input,
                                                         dest_model=self)
             inflows_by_stress_period = sd.get_data()
+
+            missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \
+                                difference(routing.keys())
+            if any(missing_sites):
+                # cast IDs to strings for compatibility with SFRmaker > 0.11.3
+                # for now, assume IDs are numeric; future updates to SFRmaker
+                # may eventually allow for alpha numeric IDs
+                inflows_by_stress_period[inflows_input['id_column']] =\
+                    inflows_by_stress_period[inflows_input['id_column']].astype(int).astype(str)
 
             # check if all inflow sites are included in sfr network
             missing_sites = set(inflows_by_stress_period[inflows_input['id_column']]). \

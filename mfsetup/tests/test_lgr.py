@@ -573,6 +573,42 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml, tmpdir):
 
     # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
+@pytest.mark.parametrize('ic_cfg,default_source_data,expected', (
+    (None, False, 'top'),
+    ({'source_data': {
+        'strt': {
+            'from_parent': {
+                'binaryfile': '/Users/aleaf/Documents/GitHub/modflow-setup/examples/data/pleasant/pleasant.hds',
+                'stress_period': 0}}}}, True, 'parent heads'),
+    ({'source_data': {
+        'strt': 'from_model_top'}}, True, 'top'),
+    ({'mfsetup_options': {},
+     'griddata': {},
+     'source_data': {},
+     'source_data_config': {},
+     'strt_filename_fmt': {},
+     'filename_fmt': {}}, True, 'parent starting heads')
+))
+def test_pleasant_vertical_lgr_ic_strt(pleasant_vertical_lgr_cfg, ic_cfg, default_source_data, expected):
+    cfg = copy.deepcopy(pleasant_vertical_lgr_cfg)
+    cfg['ic'] = ic_cfg
+    if not default_source_data:
+        cfg['parent']['default_source_data'] = False
+    m = MF6model(cfg=cfg)
+    m.setup_dis()
+    m.setup_ic()
+    assert m.ic.strt.array.shape == m.modelgrid.shape
+    if expected == 'top':
+        top3d = np.array([m.dis.top.array] * m.modelgrid.nlay)
+        assert np.allclose(m.ic.strt.array, top3d)
+    elif expected == 'parent starting heads':
+        np.allclose(m.ic.strt.array.mean(),
+                    m.parent.bas6.strt.array.mean(), rtol=0.01)
+    else:
+        parent_headsfile = ic_cfg['source_data']['strt']['from_parent']['binaryfile']
+        hds = flopy.utils.binaryfile.HeadFile(parent_headsfile).get_data()
+        assert np.allclose(m.ic.strt.array.mean(), hds.mean(), rtol=0.01)
+
 
 #def test_stand_alone_parent(pleasant_lgr_stand_alone_parent):
 #    # todo: move test_stand_alone_parent test to test_lgr_model_run

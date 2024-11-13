@@ -135,12 +135,11 @@ tdis:
 
 # Initial Conditions Package
 ic:
-  # starting heads sampled from parent model
+  # override default_source_data: True setting
+  # (to set starting heads from the parent model starting heads)
+  # set starting heads to the model top
   source_data:
-    strt:
-      from_parent:
-        binaryfile: 'data/pleasant/pleasant.hds'
-        stress_period: 0
+    strt: from_model_top
 
 # Node Property Flow Package
 npf:
