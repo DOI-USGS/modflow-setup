@@ -39,16 +39,19 @@ def setup_strt(model, package, strt=None, source_data_config=None,
 
     # check for parent model and a binary file
     binary_file = False
-    if strt_config is not None and 'from_parent' in strt_config:
-        if model._is_lgr:
-            source_model = source_model.parent
-        if source_model is None:
-            raise ValueError(("'from_parent' in configuration by no parent model."
-                              f"{package} package, {model.name} model.\n"
-                              f"source_data config:\n{source_data_config}"))
-        from_parent_cfg = source_data_config['strt'].get('from_parent', {})
-        binary_file = from_parent_cfg.get('binaryfile', False)
-        kwargs.update(from_parent_cfg)
+    if strt_config is not None:
+        if 'from_parent' in strt_config:
+            if model._is_lgr:
+                source_model = source_model.parent
+            if source_model is None:
+                raise ValueError(("'from_parent' in configuration by no parent model."
+                                f"{package} package, {model.name} model.\n"
+                                f"source_data config:\n{source_data_config}"))
+            from_parent_cfg = source_data_config['strt'].get('from_parent', {})
+            binary_file = from_parent_cfg.get('binaryfile', False)
+            kwargs.update(from_parent_cfg)
+        elif 'from_model_top' in strt_config:
+            default_parent_source_data = False
 
     sd = None  # source data instance
     # data specified directly
@@ -79,13 +82,18 @@ def setup_strt(model, package, strt=None, source_data_config=None,
                              dest_model=model,
                              source_modelgrid=source_model.modelgrid,
                              source_array=source_array,
-                             from_source_model_layers=None,
+                             from_source_model_layers=model.parent_layers,
                              length_units=model.length_units,
                              time_units=model.time_units,
                              **kwargs)
+    # default to setting strt from model top
+    elif strt_config is None or 'from_model_top' in strt_config:
+        sd = MFArrayData(variable=var,
+                         values=[model.dis.top.array] * model.nlay,
+                         datatype=datatype,
+                         dest_model=model, **kwargs)
     # data from files
-    elif source_data_config:
-        if source_data_config.get(var) is not None:
+    elif isinstance(source_data_config, dict) and source_data_config.get(var) is not None:
             #ext = get_source_data_file_ext(source_data_config, package, var)
             source_data_files = source_data_config.get(var)
             kwargs = get_input_arguments(kwargs, ArraySourceData)
@@ -94,16 +102,6 @@ def setup_strt(model, package, strt=None, source_data_config=None,
                                             variable=var,
                                             dest_model=model,
                                             **kwargs)
-        else:
-            raise ValueError(f"Invalid configuration input: {package}: source_data:\n"
-                             f"Need a {var}: sub-block")
-
-    # default to setting strt from model top
-    else:
-        sd = MFArrayData(variable=var,
-                         values=[model.dis.top.array] * model.nlay,
-                         datatype=datatype,
-                         dest_model=model, **kwargs)
 
     if sd is None:
         raise ValueError((f'Unrecognized input for variable {var}, '
