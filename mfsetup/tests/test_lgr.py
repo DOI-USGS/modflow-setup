@@ -528,7 +528,6 @@ def test_lgr_bottom_elevations(pleasant_vertical_lgr_setup_from_yaml, mf6_exe):
     plt.close()
 
 
-
 def test_lgr_model_setup(pleasant_lgr_setup_from_yaml, tmpdir):
     m = pleasant_lgr_setup_from_yaml
     assert isinstance(m.inset, dict)
@@ -555,23 +554,9 @@ def test_lgr_model_setup(pleasant_lgr_setup_from_yaml, tmpdir):
             continue
         assert m.name in f or 'plsnt_lgr_inset' in f
 
-    binaryfile = m.cfg['ic']['source_data']['strt']['from_parent']['binaryfile']
-    kper = m.cfg['ic']['source_data']['strt']['from_parent']['stress_period']
-    phds = bf.HeadFile(binaryfile)
-    kstpkper = [kstpkper for kstpkper in phds.get_kstpkper() if kstpkper[1] == kper][-1]
+    top3d = np.array([m.dis.top.array] * m.modelgrid.nlay)
+    assert np.allclose(m.ic.strt.array, top3d)
 
-    from mfsetup.interpolate import regrid3d
-    resampled_parent_heads = regrid3d(phds.get_data(kstpkper),
-                          m.parent.modelgrid,
-                          m.inset['plsnt_lgr_inset'].modelgrid,
-                          mask1=None, mask2=None, method='linear')
-    diff = m.inset['plsnt_lgr_inset'].ic.strt.array - resampled_parent_heads
-
-    # a small percentage of cells are appreciably different
-    # unclear why
-    assert np.sum(np.abs(diff) > 0.01)/diff.size <= 0.005
-
-    # todo: test_lgr_model_setup could use some more tests; although many potential issues will be tested by test_lgr_model_run
 
 @pytest.mark.parametrize('ic_cfg,default_source_data,expected', (
     (None, False, 'top'),
@@ -605,14 +590,49 @@ def test_pleasant_vertical_lgr_ic_strt(pleasant_vertical_lgr_cfg, ic_cfg, defaul
         np.allclose(m.ic.strt.array.mean(),
                     m.parent.bas6.strt.array.mean(), rtol=0.01)
     else:
+        # check LGR parent heads against parent heads
         parent_headsfile = ic_cfg['source_data']['strt']['from_parent']['binaryfile']
-        hds = flopy.utils.binaryfile.HeadFile(parent_headsfile).get_data()
+        hds = flopy.utils.binaryfile.HeadFile(parent_headsfile).get_data(kstpkper=(0, 0))
         assert np.allclose(m.ic.strt.array.mean(), hds.mean(), rtol=0.01)
 
+        # check for consistency between MFBinaryArraySourceData
+        # and regridded results
+        from mfsetup.interpolate import regrid3d
+        resampled_parent_heads = regrid3d(hds,
+                            m.parent.modelgrid,
+                            m.modelgrid,
+                            mask1=None, mask2=None, method='linear')
 
-#def test_stand_alone_parent(pleasant_lgr_stand_alone_parent):
-#    # todo: move test_stand_alone_parent test to test_lgr_model_run
-#    j=2
+        assert np.allclose(m.ic.strt.array,
+                           np.round(resampled_parent_heads, 2))
+
+        from mfsetup.sourcedata import MFBinaryArraySourceData
+        sd = MFBinaryArraySourceData(variable='strt', filename=parent_headsfile,
+                                     datatype='array3d',
+                                     dest_model=m,
+                                     source_modelgrid=m.parent.modelgrid,
+                                     from_source_model_layers=None,
+                                     length_units=m.length_units,
+                                     time_units=m.time_units,
+                                     resample_method='linear', stress_period=0,
+                                     )
+        data = sd.get_data()
+        assert np.allclose(m.ic.strt.array,
+                           np.round(np.array(list(data.values())), 2))
+
+        # check LGR inset heads against parent heads
+        m.inset['plsnt_lgr_inset'].setup_dis()
+        m.inset['plsnt_lgr_inset'].setup_ic()
+        resampled_parent_heads_lgr_inset = regrid3d(hds,
+                            m.parent.modelgrid,
+                            m.inset['plsnt_lgr_inset'].modelgrid,
+                            mask1=None, mask2=None, method='linear')
+        diff = m.inset['plsnt_lgr_inset'].ic.strt.array -\
+            np.round(resampled_parent_heads_lgr_inset, 2)
+
+        # a small percentage of cells are appreciably different
+        # unclear why
+        assert np.sum(np.abs(diff) > 0.01)/diff.size <= 0.0005
 
 
 @pytest.mark.skip('need to add lake to stand-alone parent model')
