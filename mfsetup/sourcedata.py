@@ -1551,18 +1551,21 @@ def setup_array(model, package, var, data=None,
                             "can't use this to make the top of the parent model."
                             )
                     # average each nccp x nccp block of inset model cells
-                    topp = np.reshape(lgr_inset_botm,
+                    # nccp = number of child cells per parent cell
+                    new_parent_top = np.reshape(lgr_inset_botm,
                                    (nrowp, ncpp, ncolp, ncpp)).mean(axis=(1, 3))
                     n_parent_lgr_layers = np.sum(np.array(lgr.ncppl) > 0)
                     # remap averages back to the inset model shape
-                    data[nlay-1] = np.repeat(np.repeat(topp, 5, axis=0), 5, axis=1)
-                    # set the parent model botm in this area to be the same
+                    # and assign to inset model bottom
+                    data[nlay-1] = np.repeat(np.repeat(new_parent_top, ncpp, axis=0),
+                                             ncpp, axis=1)
+                    # set the parent model top in this area to be the same
                     lgr_area = model.parent.lgr[model.name].idomain == 0
-                    model.parent.dis.top[lgr_area[0]] = topp.ravel()
+                    model.parent.dis.top[lgr_area[0]] = new_parent_top.ravel()
                     # set parent model layers in LGR area to zero-thickness
                     new_parent_botm = model.parent.dis.botm.array.copy()
                     for k in range(n_parent_lgr_layers):
-                        new_parent_botm[k][lgr_area[0]] = topp.ravel()
+                        new_parent_botm[k][lgr_area[0]] = new_parent_top.ravel()
                     model.parent.dis.botm = new_parent_botm
                     model.parent._update_top_botm_external_files()
 
