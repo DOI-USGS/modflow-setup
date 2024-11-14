@@ -1,0 +1,619 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Time and space discretization &mdash; modflow-setup 0.5.0.post59+g65803fd documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4370c7ca"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Initial Conditions" href="ic.html" />
+    <link rel="prev" title="Specifying boundary conditions with the ‘basic’ MODFLOW stress packages" href="basic-stress.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10min.html"> 10 Minutes to Modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Input instructions by package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="props.html">Specifying Aquifer Properties (UPW, NPF, STO)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic-stress.html">Basic stress packages (CHD, DRN, GHB, RCH, RIV, WEL)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The Discretization Package (DIS, TDIS, BAS6)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#spatial-discretization">Spatial Discretization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#adopting-layering-from-a-parent-model">Adopting layering from a parent model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#modflow-2005-ntw-input">MODFLOW-2005/NTW input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#modflow-setup-specific-input">Modflow-setup specific input</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#time-discretization">Time Discretization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-stress-period-information-directly">Specifying stress period information directly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-uniform-stress-periods-frequencies-by-group">Specifying uniform stress periods frequencies by group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-pre-defined-stress-periods-from-a-csv-file">Specifying pre-defined stress periods from a CSV file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ic.html">Initial Conditions (IC, BAS6)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lak.html">The Lake Package (LAK)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfr.html">The Streamflow Routing Package (SFR, GAGE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="obs.html">Head observations (OBS, HYD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oc.html">     Output Control (OC)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Input instructions by package</a></li>
+      <li class="breadcrumb-item active">Time and space discretization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/input/dis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="time-and-space-discretization">
+<h1>Time and space discretization<a class="headerlink" href="#time-and-space-discretization" title="Link to this heading"></a></h1>
+<p>This page describes spatial and temporal discretization input options to the Discretization (DIS) and Time Discretization (TDIS) Packages. Specification of the model active area in the DIS Package (MODFLOW 6) and BAS6 Package (MODFLOW-2005/NWT) is also covered. As always, additional input examples can be found in the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> and <a class="reference internal" href="../config-file-defaults.html#configuration-defaults"><span class="std std-ref">Configuration defaults</span></a> pages.</p>
+<p>As stated previously, a key paradigm of Modflow-setup is setup of space and time discretization during the automated model build, from grid-independent inputs. This allows different discretization schemes to be readily tested without extensive modifications to the inputs.</p>
+<section id="spatial-discretization">
+<h2>Spatial Discretization<a class="headerlink" href="#spatial-discretization" title="Link to this heading"></a></h2>
+<p>Similar to other packages, input to the Discretization Package follows the structure of MODFLOW and Flopy. For MODFLOW 6 models, the “Options”, “Dimensions” and “Griddata” input blocks are represented as sub-blocks within the <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block. Within these blocks, model inputs can be specified directly, as long as they are consistent with the definition of the model grid. For example, if <code class="docutils literal notranslate"><span class="pre">nlay:</span> <span class="pre">2</span></code> is specified, then the model bottom must be specified as two scalar values, or two <code class="docutils literal notranslate"><span class="pre">nrow</span></code> x <code class="docutils literal notranslate"><span class="pre">ncol</span></code> arrays:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">35</span>
+<span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">delr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span>
+<span class="w">    </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span>
+<span class="w">    </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.</span>
+<span class="w">    </span><span class="nt">botm</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>More commonly, only <code class="docutils literal notranslate"><span class="pre">delr</span></code> and <code class="docutils literal notranslate"><span class="pre">delc</span></code> are specified in the <code class="docutils literal notranslate"><span class="pre">griddata:</span></code> block, and geolocated, grid-independent raster surfaces are supplied in a <code class="docutils literal notranslate"><span class="pre">source_data</span></code> sub-block. Modflow-setup then interpolates values from these surfaces to the grid cell centers.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">13</span>
+<span class="w">    </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">35</span>
+<span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">delr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span>
+<span class="w">    </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">top</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"> </span><span class="c1"># DEM file; path relative to setup script</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/vkbg_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group (top)</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/ucaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer (top)</span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mccu_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit (top)</span>
+<span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mcaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer (top)</span>
+<span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lccu_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit (top)</span>
+<span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lcaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer (top)</span>
+<span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mwaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer (top)</span>
+<span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lwaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer (top)</span>
+<span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mdwy_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Midway confining unit (top)</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">    </span><span class="nt">idomain</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/active_area.shp&#39;</span>
+<span class="w">  </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># layers less than this thickness are converted to vertical pass-through cells</span>
+<span class="w">  </span><span class="nt">drop_thin_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+<p><strong>A few notes:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>by default, linear interpolation is used, as described <a class="reference internal" href="../concepts/interp.html#interpolating-data-to-the-model-grid"><span class="std std-ref">here</span></a>.</p></li>
+<li><p>If a more sophisticated sampling strategy is desired, for example computing mean elevations with zonal statistics for the model top, the respective layers should be pre-processed prior to input to Modflow-setup. This is by design, as it avoids adding additional complexity to the Modflow-setup codebase, and expensive operations like zonal statistics can greatly slow a model build time and often only need to be done infrequently (in contrast to other changes where rapid iteration may be helpful).</p></li>
+<li><p>GeoTIFFs are generally best, because they include complete projection information (including the coordinate reference system) and generally use less disk space than other raster types.</p></li>
+<li><p>if an <code class="docutils literal notranslate"><span class="pre">elevation_units:</span></code> item is included, elevation values in the rasters will be converted to the model units</p></li>
+<li><p>the most straightforward way to input layer elevations is to simply assign a raster surface to each layer:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">botm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">filenames</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bottom_of_layer_0.tif</span>
+<span class="w">    </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bottom_of_layer_1.tif</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Alternatively, multiple model layers can be inserted between key layer surfaces by simply skipping those numbers. In this exampmle, Modflow-setup creates three layers of equal thickness between the two specified surfaces:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">botm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">filenames</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bottom_of_layer_0.tif</span>
+<span class="w">    </span><span class="c1"># layer 1 bottom is created by Modflow-setup</span>
+<span class="w">    </span><span class="c1"># layer 2 bottom is created by Modflow-setup</span>
+<span class="w">    </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bottom_of_layer_3.tif</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+</div></blockquote>
+<section id="adopting-layering-from-a-parent-model">
+<h3>Adopting layering from a parent model<a class="headerlink" href="#adopting-layering-from-a-parent-model" title="Link to this heading"></a></h3>
+<p>Similar to other input, layer bottoms can be resampled from a parent model. This <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> block would simply adopt the same layering scheme as the parent model:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_parent</span>
+<span class="w">  </span><span class="nt">botm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_parent</span>
+</pre></div>
+</div>
+<p>The parent model layering can also be subdivided by mapping pairs of <code class="docutils literal notranslate"><span class="pre">inset:</span> <span class="pre">parent</span></code> model layers using a dictionary (YAML sub-block):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_parent</span>
+<span class="w">  </span><span class="nt">botm</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span><span class="w"> </span><span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span>
+<span class="w">      </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># bottom of layer 1 corresponds to bottom of layer 0 in parent</span>
+<span class="w">      </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">      </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</pre></div>
+</div>
+<p>In this case, the top layer of the parent model is subdivded into two layers in the inset model. A negative number is used on the parent model side because layer 0 (the first layer bottom) of the parent model coincides with the second layer bottom of the inset model (layer 1). A value of <code class="docutils literal notranslate"><span class="pre">-0.5</span></code> places the first inset model layer bottom at half the thickness of the parent model layer; different values between <code class="docutils literal notranslate"><span class="pre">-1.</span></code> and <code class="docutils literal notranslate"><span class="pre">0.</span></code> could be used to move this surface up or down within the parent model layer, or multiple inset model layers could be specified within the first parent model layer:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_parent</span>
+<span class="w">  </span><span class="nt">botm</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.9</span><span class="w"> </span><span class="c1"># bottom of layer 1 set at 10% of the depth of layer 0 in the parent</span>
+<span class="w">      </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.3</span><span class="w"> </span><span class="c1"># bottom of layer 2 set at 70% of the depth of layer 0 in the parent</span>
+<span class="w">      </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">      </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+<section id="modflow-2005-ntw-input">
+<h3>MODFLOW-2005/NTW input<a class="headerlink" href="#modflow-2005-ntw-input" title="Link to this heading"></a></h3>
+<p>Specification of <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> blocks is the same for MODFLOW 6 and MODFLOW-2005 style models, except the latter wouldn’t contain an <code class="docutils literal notranslate"><span class="pre">idomain:</span></code> subblock. Specification of other inputs generally follows Flopy (for example, <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.9.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>). A <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block equivalent to the first example give would look like:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">  </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">35</span>
+<span class="w">  </span><span class="nt">delr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span>
+<span class="w">  </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span>
+<span class="w">  </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.</span>
+<span class="w">  </span><span class="nt">botm</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">length_units:</span></code> item is specific to Modflow-setup; in a MODFLOW-2005 context, Modflow-setup takes this input and enters the appropriate value of <code class="docutils literal notranslate"><span class="pre">lenuni</span></code> to Flopy (which writes the MODFLOW input).</p>
+</div>
+</section>
+<section id="modflow-setup-specific-input">
+<h3>Modflow-setup specific input<a class="headerlink" href="#modflow-setup-specific-input" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">drop_thin_cells</span></code>: Option in MODFLOW 6 models to remove cells less than a minimum layer thickness from the model solution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minimum_layer_thickness:</span></code> Minimum layer thickness to allow in model. In MODFLOW 6 models, if <code class="docutils literal notranslate"><span class="pre">drop_thin_cells:</span> <span class="pre">True</span></code>, layers thinner than this will be collapsed to zero thickness, and their cells either made inactive (<code class="docutils literal notranslate"><span class="pre">idomain=0</span></code>) or, if they are between two layers greater than the minimum thickness, converted to vertical pass-through cells (<code class="docutils literal notranslate"><span class="pre">idomain=1</span></code>). In MODFLOW-2005 models or if <code class="docutils literal notranslate"><span class="pre">drop_thin_cells:</span> <span class="pre">False</span></code>, thin layers will be expanded downward to the minimum thicknesses.</p></li>
+</ul>
+</section>
+</section>
+<section id="time-discretization">
+<h2>Time Discretization<a class="headerlink" href="#time-discretization" title="Link to this heading"></a></h2>
+<p>In MODFLOW 6, time discretization is specified at the simulation level, it its own Time Discretization (TDIS) Package. In MODFLOW-2005/NWT, time discretization is specified in the Discretization Package. Accordingly, in Modflow-setup, time discretization in specified in the appropriate package block for the model version.</p>
+<section id="specifying-stress-period-information-directly">
+<h3>Specifying stress period information directly<a class="headerlink" href="#specifying-stress-period-information-directly" title="Link to this heading"></a></h3>
+<p>Input to the DIS and TDIS packages follows the MODFLOW structure. For simple steady-state models, time discretization could be specified directly to the DIS or TDIS packages using there respective the Flopy inputs (<a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.9.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>; <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mftdis.html#flopy.mf6.modflow.mftdis.ModflowTdis" title="(in FloPy v3.9.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowTdis</span></code></a>). This example from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> shows direct specification of stress period information to the Discretization Package:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">perlen</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">25</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1.5</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">True</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">False</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify lenuni: 2</span>
+<span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify itmuni: 4</span>
+<span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2011-01-01&#39;</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">top</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/dem10m.tif&#39;</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span><span class="w"> </span><span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"> </span><span class="c1"># bottom of layer 1 in pfl_nwt corresponds to bottom of layer 0 in parent</span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</pre></div>
+</div>
+</section>
+<section id="specifying-uniform-stress-periods-frequencies-by-group">
+<h3>Specifying uniform stress periods frequencies by group<a class="headerlink" href="#specifying-uniform-stress-periods-frequencies-by-group" title="Link to this heading"></a></h3>
+<p>For transient models, we often want to combine an initial steady-state period with subsequent transient periods, which may be of variable lengths. To facilitate this, Modflow-setup has a <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block that can in turn contain multiple sub-blocks representing stress period “groups”. Each group in the <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block contains information to generate one or more stress periods at a specified frequency and time datum (for example, months, days, every 7 days, etc.). Input to transient groups is based on the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a> function, where three of the four <code class="docutils literal notranslate"><span class="pre">start_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">freq</span></code> and <code class="docutils literal notranslate"><span class="pre">nper</span></code> parameters must be defined. For example, this sequence of blocks from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> generates an initial steady-state period, followed by a 9 year “spin-up” period between two dates, and then biannual stress periods spanning another specified set of sets. Time-step information is also specified, using the MODFLOW variable names.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">tdis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span>
+<span class="w">  </span><span class="nt">perioddata</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># time discretization info can be specified directly under the perioddata key</span>
+<span class="w">    </span><span class="c1"># or in groups of stress periods that are discretized in a similar way</span>
+<span class="w">    </span><span class="nt">group 1</span><span class="p">:</span><span class="w"> </span><span class="c1"># initial steady-state period (steady specified under sto package)</span>
+<span class="w">      </span><span class="c1">#perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq.&quot;</span>
+<span class="w">      </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># &quot;steady&quot; can be entered here; otherwise the global entry specified in the sto package is used as the default</span>
+<span class="w">      </span><span class="c1"># oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default</span>
+<span class="w">    </span><span class="nt">group 2</span><span class="p">:</span><span class="w"> </span><span class="c1"># single long period for spin-up of pumping</span>
+<span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span><span class="w">  </span><span class="c1"># can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.</span>
+<span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2007-04-01&#39;</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2007-03-31 would be the last day simulated)</span>
+<span class="w">      </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
+<span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">group 3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2007-04-01&#39;</span>
+<span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2015-10-01&#39;</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2015-09-30 would be the last day simulated)</span>
+<span class="w">      </span><span class="nt">freq</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;6MS&#39;</span><span class="w"> </span><span class="c1"># same as argument to pandas.date_range; (see &quot;Offset Aliases&quot; at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)</span>
+<span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
+<span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block can be used within a <code class="docutils literal notranslate"><span class="pre">tdis:</span></code> block for MODFLOW 6 models, or a <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block for MODFLOW-2005 style models.</p>
+</section>
+<section id="specifying-pre-defined-stress-periods-from-a-csv-file">
+<h3>Specifying pre-defined stress periods from a CSV file<a class="headerlink" href="#specifying-pre-defined-stress-periods-from-a-csv-file" title="Link to this heading"></a></h3>
+<p>In some model applications, irregular stress periods may be needed that would require many groups to be specifed using the above <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block. In these cases, a stress period data table can be pre-defined and input as a CSV file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">tdis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span>
+<span class="w">  </span><span class="nt">perioddata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/tables/stress_period_data.csv&#39;</span>
+<span class="w">      </span><span class="nt">start_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="w">      </span><span class="nt">steady_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;steady&#39;</span>
+<span class="w">      </span><span class="nt">nstp_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nstp&#39;</span>
+<span class="w">      </span><span class="nt">tsmult_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tsmult&#39;</span>
+</pre></div>
+</div>
+<p>An example of a valid table is shown below. Note that only the columns listed in the above <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block are actually needed. <code class="docutils literal notranslate"><span class="pre">perlen</span></code> and <code class="docutils literal notranslate"><span class="pre">time</span></code> are calculated internally by Modflow-setup; output control (<code class="docutils literal notranslate"><span class="pre">oc</span></code>) can be specified here or in the <code class="docutils literal notranslate"><span class="pre">oc:</span></code> package block.</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Example Stress period data</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>time</p></th>
+<th class="head"><p>per</p></th>
+<th class="head"><p>perlen</p></th>
+<th class="head"><p>nstp</p></th>
+<th class="head"><p>tsmult</p></th>
+<th class="head"><p>steady</p></th>
+<th class="head"><p>oc</p></th>
+<th class="head"><p>start_datetime</p></th>
+<th class="head"><p>end_datetime</p></th>
+<th class="head"><p>parent_sp</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.0</p></td>
+<td><p>0</p></td>
+<td><p>1.0</p></td>
+<td><p>1</p></td>
+<td><p>1.0</p></td>
+<td><p>True</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>1998-04-01</p></td>
+<td><p>1998-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3288.0</p></td>
+<td><p>1</p></td>
+<td><p>3287.0</p></td>
+<td><p>10</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>1998-04-01</p></td>
+<td><p>2007-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>3471.0</p></td>
+<td><p>2</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2007-04-01</p></td>
+<td><p>2007-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>3654.0</p></td>
+<td><p>3</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2007-10-01</p></td>
+<td><p>2008-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>3837.0</p></td>
+<td><p>4</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2008-04-01</p></td>
+<td><p>2008-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>4019.0</p></td>
+<td><p>5</p></td>
+<td><p>182.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2008-10-01</p></td>
+<td><p>2009-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>4202.0</p></td>
+<td><p>6</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2009-04-01</p></td>
+<td><p>2009-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>4384.0</p></td>
+<td><p>7</p></td>
+<td><p>182.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2009-10-01</p></td>
+<td><p>2010-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>4567.0</p></td>
+<td><p>8</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2010-04-01</p></td>
+<td><p>2010-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>4749.0</p></td>
+<td><p>9</p></td>
+<td><p>182.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2010-10-01</p></td>
+<td><p>2011-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>4932.0</p></td>
+<td><p>10</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2011-04-01</p></td>
+<td><p>2011-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>5115.0</p></td>
+<td><p>11</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2011-10-01</p></td>
+<td><p>2012-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>5298.0</p></td>
+<td><p>12</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2012-04-01</p></td>
+<td><p>2012-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>5480.0</p></td>
+<td><p>13</p></td>
+<td><p>182.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2012-10-01</p></td>
+<td><p>2013-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>5663.0</p></td>
+<td><p>14</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2013-04-01</p></td>
+<td><p>2013-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>5845.0</p></td>
+<td><p>15</p></td>
+<td><p>182.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2013-10-01</p></td>
+<td><p>2014-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>6028.0</p></td>
+<td><p>16</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2014-04-01</p></td>
+<td><p>2014-10-01</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>6210.0</p></td>
+<td><p>17</p></td>
+<td><p>182.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2014-10-01</p></td>
+<td><p>2015-04-01</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>6393.0</p></td>
+<td><p>18</p></td>
+<td><p>183.0</p></td>
+<td><p>5</p></td>
+<td><p>1.5</p></td>
+<td><p>False</p></td>
+<td><p>{‘head’: ‘last’, ‘budget’: ‘last’}</p></td>
+<td><p>2015-04-01</p></td>
+<td><p>2015-10-01</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basic-stress.html" class="btn btn-neutral float-left" title="Specifying boundary conditions with the ‘basic’ MODFLOW stress packages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ic.html" class="btn btn-neutral float-right" title="Initial Conditions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

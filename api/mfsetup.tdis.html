@@ -1,0 +1,487 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mfsetup.tdis module &mdash; modflow-setup 0.5.0.post59+g65803fd documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4370c7ca"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mfsetup.tmr module" href="mfsetup.tmr.html" />
+    <link rel="prev" title="mfsetup.interpolate module" href="mfsetup.interpolate.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10min.html"> 10 Minutes to Modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#model-classes">Model classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#supporting-modules">Supporting modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html">mfsetup.interpolate module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mfsetup.tdis module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.add_date_comments_to_tdis"><code class="docutils literal notranslate"><span class="pre">add_date_comments_to_tdis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.aggregate_dataframe_to_stress_period"><code class="docutils literal notranslate"><span class="pre">aggregate_dataframe_to_stress_period()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.aggregate_xarray_to_stress_period"><code class="docutils literal notranslate"><span class="pre">aggregate_xarray_to_stress_period()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.concat_periodata_groups"><code class="docutils literal notranslate"><span class="pre">concat_periodata_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.convert_freq_to_period_start"><code class="docutils literal notranslate"><span class="pre">convert_freq_to_period_start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.get_parent_stress_periods"><code class="docutils literal notranslate"><span class="pre">get_parent_stress_periods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.parse_perioddata_groups"><code class="docutils literal notranslate"><span class="pre">parse_perioddata_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.setup_perioddata"><code class="docutils literal notranslate"><span class="pre">setup_perioddata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.tdis.setup_perioddata_group"><code class="docutils literal notranslate"><span class="pre">setup_perioddata_group()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.tmr.html">mfsetup.tmr module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code Reference</a></li>
+      <li class="breadcrumb-item active">mfsetup.tdis module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/mfsetup.tdis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mfsetup.tdis">
+<span id="mfsetup-tdis-module"></span><h1>mfsetup.tdis module<a class="headerlink" href="#module-mfsetup.tdis" title="Link to this heading"></a></h1>
+<p>Functions related to temporal discretization</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.add_date_comments_to_tdis">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">add_date_comments_to_tdis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tdis_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_dates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#add_date_comments_to_tdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.add_date_comments_to_tdis" title="Link to this definition"></a></dt>
+<dd><p>Add stress period start and end dates to a tdis file as comments;
+add modflow-setup version info to tdis file header.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.aggregate_dataframe_to_stress_period">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">aggregate_dataframe_to_stress_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'datetime'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolve_duplicates_with</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raise</span> <span class="pre">error'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_dataframe_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_dataframe_to_stress_period" title="Link to this definition"></a></dt>
+<dd><p>Aggregate time-series data in a DataFrame to a single value representing
+a period defined by a start and end date.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data</strong><span class="classifier">DataFrame</span></dt><dd><p>Must have an id_column, data_column, datetime_column, and optionally,
+an end_datetime_column.</p>
+</dd>
+<dt><strong>id_column</strong><span class="classifier">str</span></dt><dd><p>Column in data with location identifier (e.g. node or well id).</p>
+</dd>
+<dt><strong>data_column</strong><span class="classifier">str or list</span></dt><dd><p>Column(s) in data with values to aggregate.</p>
+</dd>
+<dt><strong>datetime_column</strong><span class="classifier">str</span></dt><dd><p>Column in data with times for each value. For downsampling of multiple values in data
+to a longer period represented by start_datetime and end_datetime, this is all that is needed.
+Aggregated values will include values in datetime_column that are &gt;= start_datetime and &lt; end_datetime.
+In other words, datetime_column represents the start of each time interval in data.
+Values can be strings (e.g. YYYY-MM-DD) or pandas Timestamps. By default, None.</p>
+</dd>
+<dt><strong>end_datetime_column</strong><span class="classifier">str</span></dt><dd><p>Column in data with end times for period represented by each value. This is only needed
+for upsampling, where the interval defined by start_datetime and end_datetime is smaller
+than the time intervals in data. The row(s) in data that have a datetime_column value &lt; end_datetime,
+and an end_datetime_column value &gt; start_datetime will be retained in aggregated.
+Values can be strings (e.g. YYYY-MM-DD) or pandas Timestamps. By default, None.</p>
+</dd>
+<dt><strong>start_datetime</strong><span class="classifier">str or pandas.Timestamp</span></dt><dd><p>Start time of aggregation period. Only used if an aggregation start
+and end time are not given in period_stat. If None, and no start
+and end time are specified in period_stat, the first time in datetime_column is used.
+By default, None.</p>
+</dd>
+<dt><strong>end_datetime</strong><span class="classifier">str or pandas.Timestamp</span></dt><dd><p>End time of aggregation period. Only used if an aggregation start
+and end time are not given in period_stat. If None, and no start
+and end time are specified in period_stat, the last time in datetime_column is used.
+By default, None.</p>
+</dd>
+<dt><strong>period_stat</strong><span class="classifier">str, list, or NoneType</span></dt><dd><p>Method for aggregating data. By default, ‘mean’.</p>
+<ul class="simple">
+<li><p>Strings will be passed to DataFrame.groupby
+as the aggregation method. For example, <code class="docutils literal notranslate"><span class="pre">'mean'</span></code> would result in DataFrame.groupby().mean().</p></li>
+<li><p>If period_stat is None, <code class="docutils literal notranslate"><span class="pre">'mean'</span></code> is used.</p></li>
+<li><p>Lists of length 2 can be used to specify a statistic for a month (e.g. <code class="docutils literal notranslate"><span class="pre">['mean',</span> <span class="pre">'august']</span></code>),
+or for a time period that can be represented as a single string in pandas.
+For example, <code class="docutils literal notranslate"><span class="pre">['mean',</span> <span class="pre">'2014']</span></code> would average all values in the year 2014; <code class="docutils literal notranslate"><span class="pre">['mean',</span> <span class="pre">'2014-01']</span></code>
+would average all values in January of 2014, etc. Basically, if the string
+can be used to slice a DataFrame or Series, it can be used here.</p></li>
+<li><p>Lists of length 3 can be used to specify a statistic and a start and end date.
+For example, <code class="docutils literal notranslate"><span class="pre">['mean',</span> <span class="pre">'2014-01-01',</span> <span class="pre">'2014-03-31']</span></code> would average the values for
+the first three months of 2014.</p></li>
+</ul>
+</dd>
+<dt><strong>resolve_duplicates_with</strong><span class="classifier">{‘sum’, ‘mean’, ‘first’, ‘raise error’}</span></dt><dd><p>Method for reducing duplicates (of times, sites and measured or estimated category).
+By default, ‘raise error’ will result in a ValueError if duplicates are encountered.
+Otherwise any aggregate method in pandas can be used (e.g. DataFrame.groupby().&lt;method&gt;())</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>aggregated</strong><span class="classifier">DataFrame</span></dt><dd><p>Aggregated values. Columns are the same as data, except the time column
+is named ‘start_datetime’. In other words, aggregated periods are represented by
+their start dates (as opposed to midpoint dates or end dates).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.aggregate_xarray_to_stress_period">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">aggregate_xarray_to_stress_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_coords_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_stat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#aggregate_xarray_to_stress_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.aggregate_xarray_to_stress_period" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.concat_periodata_groups">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">concat_periodata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#concat_periodata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.concat_periodata_groups" title="Link to this definition"></a></dt>
+<dd><p>Concatenate multiple perioddata DataFrames, but sort
+result on (absolute) datetimes and increment model time and stress period
+numbers accordingly.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.convert_freq_to_period_start">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">convert_freq_to_period_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#convert_freq_to_period_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.convert_freq_to_period_start" title="Link to this definition"></a></dt>
+<dd><p>convert pandas frequency to period start</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.get_parent_stress_periods">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">get_parent_stress_periods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_stress_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#get_parent_stress_periods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.get_parent_stress_periods" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.parse_perioddata_groups">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">parse_perioddata_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perioddata_dict</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#parse_perioddata_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.parse_perioddata_groups" title="Link to this definition"></a></dt>
+<dd><p>Reorganize input in perioddata dict into
+a list of groups (dicts).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.setup_perioddata">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">setup_perioddata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tdis_perioddata_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_start_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steady</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oc_saverecord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_stress_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata" title="Link to this definition"></a></dt>
+<dd><p>Sets up the perioddata DataFrame that is used to reference model
+stress period start and end times to real date time.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model</strong><span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+<dt><strong>tdis_perioddata_config</strong><span class="classifier">dict</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">perioddata:</span></code>, <code class="docutils literal notranslate"><span class="pre">tdis:</span></code> (MODFLOW 6 models) or <code class="docutils literal notranslate"><span class="pre">dis:</span></code> (MODFLOW-2005 models)
+block from the Modflow-setup configuration file.</p>
+</dd>
+<dt><strong>default_start_datetime</strong><span class="classifier">str, optional</span></dt><dd><p>Start date for model from the tdis: options: block in the configuration file,
+or <code class="docutils literal notranslate"><span class="pre">model.modeltime.start_datetime</span></code> Flopy attribute. Only used
+where start_datetime information is missing, for example if a group
+for an initial steady-state period in <code class="docutils literal notranslate"><span class="pre">tdis_perioddata_config</span></code>
+doesn’t have a start_datetime: entry. By default, None, in which case
+the default start_datetime of 1970-01-01 may be applied by
+py:func:<cite>setup_perioddata_group</cite>.</p>
+</dd>
+<dt><strong>nper</strong><span class="classifier">int, optional</span></dt><dd><p>Number of stress periods. Only used if nper is specified in the
+tdis: dimensions: block of the configuration file and
+not in a perioddata group.</p>
+</dd>
+<dt><strong>steady</strong><span class="classifier">bool, sequence or dict</span></dt><dd><p>Whether each period is steady-state or transient. Only used
+if steady is specified in the tdis: or sto: configuration file
+blocks (MODFLOW 6 models) or the dis: block (MODFLOW-2005 models),
+and not in perioddata groups.</p>
+</dd>
+<dt><strong>time_units</strong><span class="classifier">str, optional</span></dt><dd><p>Model time units, by default ‘days’.</p>
+</dd>
+<dt><strong>oc_saverecord</strong><span class="classifier">dict, optional</span></dt><dd><p>Output control settings, keyed by stress period. Only
+used to record this information in the stress period data table.</p>
+</dd>
+<dt><strong>parent_model</strong><span class="classifier">flopy model instance, optional</span></dt><dd><p>Parent model, if model is an inset.</p>
+</dd>
+<dt><strong>parent_stress_periods</strong><span class="classifier">list of ints, optional</span></dt><dd><p>Parent model stress periods to apply to the inset model
+(read from the parent: copy_stress_periods: item in the
+configuration file).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>perioddata</strong><span class="classifier">DataFrame</span></dt><dd><p>Table of stress period information with columns:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>start_datetime</p></td>
+<td><p>Start date of each model stress period</p></td>
+</tr>
+<tr class="row-even"><td><p>end_datetime</p></td>
+<td><p>End date of each model stress period</p></td>
+</tr>
+<tr class="row-odd"><td><p>time</p></td>
+<td><p>MODFLOW elapsed time, in days <a class="footnote-reference brackets" href="#f1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>per</p></td>
+<td><p>Model stress period number</p></td>
+</tr>
+<tr class="row-odd"><td><p>perlen</p></td>
+<td><p>Stress period length (days)</p></td>
+</tr>
+<tr class="row-even"><td><p>nstp</p></td>
+<td><p>Number of timesteps in stress period</p></td>
+</tr>
+<tr class="row-odd"><td><p>tsmult</p></td>
+<td><p>Timestep multiplier</p></td>
+</tr>
+<tr class="row-even"><td><p>steady</p></td>
+<td><p>Steady-state or transient</p></td>
+</tr>
+<tr class="row-odd"><td><p>oc</p></td>
+<td><p>Output control setting for MODFLOW</p></td>
+</tr>
+<tr class="row-even"><td><p>parent_sp</p></td>
+<td><p>Corresponding parent model stress period</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>perioddata is also saved to stress_period_data.csv in the tables folder
+(usually <cite>/tables</cite>).</p>
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Modflow elapsed time includes the time lengths specified for
+any steady-state periods (at least 1 day). Therefore if the model
+has an initial steady-state period with a <code class="docutils literal notranslate"><span class="pre">perlen</span></code> of one day,
+the elapsed time at the model start date will already be 1 day.</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.tdis.setup_perioddata_group">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.tdis.</span></span><span class="sig-name descname"><span class="pre">setup_perioddata_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perlen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_time_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'days'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steady</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{0:</span> <span class="pre">True,</span> <span class="pre">1:</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nstp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsmult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oc_saverecord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{0:</span> <span class="pre">['save</span> <span class="pre">head</span> <span class="pre">last',</span> <span class="pre">'save</span> <span class="pre">budget</span> <span class="pre">last']}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/tdis.html#setup_perioddata_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.tdis.setup_perioddata_group" title="Link to this definition"></a></dt>
+<dd><p>Sets up time discretization for a model; outputs a DataFrame with
+stress period dates/times and properties. Stress periods can be established
+by explicitly specifying perlen as a list of period lengths in
+model units. Or, stress periods can be generated via <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>,
+using three of the start_date_time, end_date_time, nper, and freq arguments.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>start_date_time</strong><span class="classifier">str or datetime-like</span></dt><dd><p>Left bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
+</dd>
+<dt><strong>end_date_time</strong><span class="classifier">str or datetime-like, optional</span></dt><dd><p>Right bound for generating stress period dates. See <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v2.2.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a>.</p>
+</dd>
+<dt><strong>nper</strong><span class="classifier">int, optional</span></dt><dd><p>Number of stress periods. Only used if perlen is None, or in combination with freq
+if an end_date_time isn’t specified.</p>
+</dd>
+<dt><strong>perlen</strong><span class="classifier">sequence or None, optional</span></dt><dd><p>A list of stress period lengths in model time units. Or specify as None and
+specify 3 of start_date_time, end_date_time, nper and/or freq.</p>
+</dd>
+<dt><strong>model_time_units</strong><span class="classifier">str, optional</span></dt><dd><p>‘days’ or ‘seconds’.
+By default, ‘days’.</p>
+</dd>
+<dt><strong>freq</strong><span class="classifier">str or DateOffset, default None</span></dt><dd><p>For setting up uniform stress periods between a start and end date, or of length nper.
+Same as argument to pandas.date_range. Frequency strings can have multiples,
+e.g. ‘6MS’ for a 6 month interval on the start of each month.
+See the pandas documentation for a list of frequency aliases. Note: Only “start”
+frequences (e.g. MS vs M for “month end”) are supported.</p>
+</dd>
+<dt><strong>steady</strong><span class="classifier">dict</span></dt><dd><p>Dictionary with zero-based stress periods as keys and boolean values. Similar to MODFLOW-6
+input, the information specified for a period will continue to apply until
+information for another period is specified.</p>
+</dd>
+<dt><strong>nstp</strong><span class="classifier">int or sequence</span></dt><dd><p>Number of timesteps in a stress period. Must be an integer if perlen=None.</p>
+</dd>
+<dt><strong>nstp</strong><span class="classifier">int or sequence</span></dt><dd><p>Timestep multiplier for a stress period. Must be an integer if perlen=None.</p>
+</dd>
+<dt><strong>oc_saverecord</strong><span class="classifier">dict</span></dt><dd><p>Dictionary with zero-based stress periods as keys and output control options as values.
+Similar to MODFLOW-6 input, the information specified for a period will
+continue to apply until information for another period is specified.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>perioddata</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>DataFrame summarizing stress period information. Data columns:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>start_datetime</strong></p></td>
+<td><p>pandas datetimes</p></td>
+<td><p>start date/time of each stress period</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>end_datetime</strong></p></td>
+<td><p>pandas datetimes</p></td>
+<td><p>end date/time of each stress period</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>time</strong></p></td>
+<td><p>float</p></td>
+<td><p>cumulative MODFLOW time at end of period</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>per</strong></p></td>
+<td><p>int</p></td>
+<td><p>zero-based stress period</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>perlen</strong></p></td>
+<td><p>float</p></td>
+<td><p>stress period length in model time units</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>nstp</strong></p></td>
+<td><p>int</p></td>
+<td><p>number of timesteps in the stress period</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>tsmult</strong></p></td>
+<td><p>int</p></td>
+<td><p>timestep multiplier for stress period</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>steady</strong></p></td>
+<td><p>bool</p></td>
+<td><p>True=steady-state, False=Transient</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>oc</strong></p></td>
+<td><p>dict</p></td>
+<td><p>MODFLOW-6 output control options</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><em>Initial steady-state period</em></p>
+<p>If the first stress period is specified as steady-state (<code class="docutils literal notranslate"><span class="pre">steady[0]</span> <span class="pre">==</span> <span class="pre">True</span></code>),
+the period length (perlen) in MODFLOW time is automatically set to 1. If subsequent
+stress periods are specified, or if no end-date is specified, the end date for
+the initial steady-state stress period is set equal to the start date. In the latter case,
+the assumption is that the specified start date represents the start of the transient simulation,
+and the initial steady-state (which is time-invarient anyways) is intended to produce a valid
+starting condition. If only a single steady-state stress period is specified with an end date,
+then that end date is retained.</p>
+<p><em>MODFLOW time vs real time</em></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">time</span></code> column of the output DataFrame represents time in the MODFLOW simulation,
+which cannot have zero-lengths for any period. Therefore, initial steady-state periods
+are automatically assigned lengths of one (as described above), and MODFLOW time is incremented
+accordingly. If the model has an initial steady-state period, this means that subsequent MODFLOW
+times will be 1 time unit greater than the acutal date-times.</p>
+<p><em>End-dates</em></p>
+<p>Specified <code class="docutils literal notranslate"><span class="pre">end_date_time</span></code> represents the right bound of the time discretization,
+or in other words, the time increment <em>after</em> the last time increment to be
+simulated. For example, <code class="docutils literal notranslate"><span class="pre">end_date_time='2019-01-01'</span></code> would mean that
+<code class="docutils literal notranslate"><span class="pre">'2018-12-31'</span></code> is the last date simulated by the model
+(which ends at <code class="docutils literal notranslate"><span class="pre">2019-01-01</span> <span class="pre">00:00:00</span></code>).</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mfsetup.interpolate.html" class="btn btn-neutral float-left" title="mfsetup.interpolate module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mfsetup.tmr.html" class="btn btn-neutral float-right" title="mfsetup.tmr module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

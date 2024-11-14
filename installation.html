@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; modflow-setup 0.5.0.post59+g65803fd documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4370c7ca"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="10 Minutes to Modflow-setup" href="10min.html" />
+    <link rel="prev" title="Philosophy" href="philosophy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            modflow-setup
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#download-and-install-a-python-distribution-and-conda-like-package-installer">Download and install a python distribution and Conda-like package installer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-an-environment-file">Download an environment file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-conda-environment-using-mamba">Creating a Conda environment using Mamba</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keeping-the-conda-environment-up-to-date">Keeping the Conda environment up to date</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-modflow-setup">Installing Modflow-setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-and-updating-modflow-setup-from-pypi">Installing and updating Modflow-setup from PyPI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-latest-develop-version-of-modflow-setup">Installing the latest develop version of Modflow-setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-modflow-setup-source-code-in-place">Installing the Modflow-setup source code in-place</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks">Installing the IPython kernel to use Modflow-setup in Jupyter Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Considerations for USGS Users</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Installing the DOI SSL certificate for use with pip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda">Installing the DOI SSL certificate for use with conda</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting-issues-with-the-usgs-network">Troubleshooting issues with the USGS network</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-conda">SSL-related error messages when using conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssl-related-error-messages-when-using-pip">SSL-related error messages when using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message">If you are on the USGS network, using Windows, and you get this error message:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="10min.html"> 10 Minutes to Modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<section id="installing-python-dependencies-with-conda">
+<h2>Installing python dependencies with Conda<a class="headerlink" href="#installing-python-dependencies-with-conda" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Modflow-setup</span></code> depends on a number of python packages, many of which have external C library dependencies. The easiest way to install most of these is through a  <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a>, using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a> as the package manager. A few packages are not available via Conda, and must be installed with <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a>. If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
+<section id="download-and-install-a-python-distribution-and-conda-like-package-installer">
+<h3>Download and install a python distribution and Conda-like package installer<a class="headerlink" href="#download-and-install-a-python-distribution-and-conda-like-package-installer" title="Link to this heading"></a></h3>
+<p>There are many ways to do this:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The <a class="reference external" href="https://www.anaconda.com/distribution/">Anaconda python distribution</a> comes with a large selection of popular data science and scientific packages pre-installed.</p></li>
+<li><p><a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> is a minimal installer with a much smaller footprint, making it ideal for creating python environments dedicated to specific tasks (a recommended practice).</p></li>
+<li><p><a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Mambaforge</a> is like Miniconda, but pre-configured to use the <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a> installer, and only the <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> channel for getting packages (more below). If the above two options don’t work (for example, the Conda installer fails or gets stuck on the “solve” step), this may be your best option.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Make sure to install Anaconda or Miniconda to your username</strong> (not at the system level). More often than not, installing at the system level (for all users) seems to result in issues with library dependencies (for example, import of <code class="docutils literal notranslate"><span class="pre">fiona</span></code> or <code class="docutils literal notranslate"><span class="pre">rasterio</span></code> failing because gdal isn’t found). It is also good practice to periodically do a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a> of Anaconda, which at the system level requires admin. privileges.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>In the installer, at the “Destination Select” step, select “Install for me only.” It should say something about how the software will be installed to your home folder.</p></li>
+<li><p>If your installer skips the “Destination Select” step, when you get to “Installation Type”, click “Change Install Location” and then “Install for me only.”</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="download-an-environment-file">
+<h3>Download an environment file<a class="headerlink" href="#download-an-environment-file" title="Link to this heading"></a></h3>
+<blockquote>
+<div><ul>
+<li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/requirements.yml">requirements.yml</a> for a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> with the minimum packages required to run Modflow-setup, or</p></li>
+<li><p><a class="reference external" href="https://raw.githubusercontent.com/aleaf/modflow-setup/master/gis.yml">gis.yml</a> for a more full set of packages in the python geospatial stack, including Jupyter Notebooks and packages needed for testing, documentation and packaging. Note that the environment described by <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> is called <cite>mfsetup</cite>, while the environment in <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> is called <cite>gis</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To download the above YAML files, simply follow the links to get the raw text and then go to File &gt; Save within your web browser, and save the text as a YAML file (with the <cite>.yaml</cite> or <cite>.yml</cite> extension).</p>
+</div>
+</li>
+<li><p>Alternatively, clone (<a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">using git</a>) or <a class="reference external" href="https://github.com/aleaf/modflow-setup/archive/master.zip">download</a> the <code class="docutils literal notranslate"><span class="pre">modflow-setup</span></code> repository, which includes the two environment files at the root level.</p></li>
+<li><p>Note that both of these environment files contain a <code class="docutils literal notranslate"><span class="pre">pip</span></code> section of packages that will be installed with pip, after the <code class="docutils literal notranslate"><span class="pre">Conda</span></code> packages are installed.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="creating-a-conda-environment-using-mamba">
+<h3>Creating a <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html">Conda environment</a> using <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a><a class="headerlink" href="#creating-a-conda-environment-using-mamba" title="Link to this heading"></a></h3>
+<p>If you are on the USGS internal network, see the <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> section below first.</p>
+<p>Before using Mamba, you will need to <a class="reference external" href="https://mamba.readthedocs.io/en/latest/installation.html">install it first</a>.</p>
+<p>Python packages are available from conda via channels. Conda comes preconfigured to install packages from the default channel, which is maintained by Anaconda, Inc. In general, you may have better luck exclusively using the <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> channel instead, which is community-based and intended to provide a single location to get any package, with a minimum of hassle. In general, it is bad practice to mix package channels within a single environment. You can read more <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">here</a>, but to set conda-forge as the default:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>config<span class="w"> </span>--add<span class="w"> </span>channels<span class="w"> </span>conda-forge
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are having trouble installing Mamba (for example, the conda package solver fails when you try to install it, or takes an excessively long time), you may have better luck uninstalling <a class="reference external" href="cleanuninstall">Anaconda completely</a> and installing <a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Mambaforge</a> instead, as directed in the Mamba install instructions. Mambaforge solves both of the above problems by providing a minimal python distribution and conda-style package installer that is preconfigured to use both <a class="reference external" href="https://conda-forge.org/docs/user/introduction.html">conda-forge</a> and <a class="reference external" href="https://mamba.readthedocs.io/en/latest/">Mamba</a>.</p>
+</div>
+<p>Once you have a python distribution and mamba installed, to create the conda environment, open a new Anaconda Command Prompt on Windows or a new terminal window on OSX and point it to the location of <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> or <code class="docutils literal notranslate"><span class="pre">gis.yml</span></code> and enter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>requirements.yml
+</pre></div>
+</div>
+<p>Building the environment will probably take a while. If the build fails because of an SSL error, fix the problem (see <a class="reference internal" href="#considerations-for-usgs-users">Considerations for USGS Users</a> below) and either:</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Creating the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> environment (or any environment with <code class="docutils literal notranslate"><span class="pre">git+https:</span> <span class="pre">...</span></code> installs) requires Git to be installed and visible in the system path where <code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">create</span></code> is being run. If Git is installed and somehow not in the system path, it can be added to the system path on Windows 10 without admin. rights via the “environment variables” editor under User Accounts in the Control Panel (Google it).</p>
+</div>
+<ol class="loweralpha">
+<li><p>Update the environment</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>-f<span class="w"> </span>requirements.yml
+</pre></div>
+</div>
+</li>
+<li><p>or remove and reinstall it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>-n<span class="w"> </span>mfsetup
+mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>requirements.yml
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+</section>
+<section id="keeping-the-conda-environment-up-to-date">
+<h3>Keeping the Conda environment up to date<a class="headerlink" href="#keeping-the-conda-environment-up-to-date" title="Link to this heading"></a></h3>
+<p>The python packages and other open source software libraries that Modflow-setup depends on are continually changing. Modflow-setup aims to mostly follow the <a class="reference external" href="https://numpy.org/neps/nep-0029-deprecation_policy.html">Numpy guidelines for package support</a>, which effectively means that the two latest minor versions of Python (e.g. 3.11 and 3.10) and their associated Numpy versions will be supported. However, occasionally backwards compatability with a particular package may be broken in a shorter timeframe, in which case the minimum required version of that package will be specified in the <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code> file. All of this to say that your Conda environment will eventually get out of date. The <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">Conda documentation</a> has instructions for updating packages within a Conda environment, but at some point (perhaps a few times a year) it is good practice to simply delete the environment and rebuild it from the <cite>.yml</cite> file. Every so often, you may also want to reinstall Anaconda after a <a class="reference external" href="https://docs.anaconda.com/anaconda/install/uninstall/">clean uninstall</a>.</p>
+</section>
+</section>
+<section id="installing-modflow-setup">
+<h2>Installing Modflow-setup<a class="headerlink" href="#installing-modflow-setup" title="Link to this heading"></a></h2>
+<p>There are several ways to install Modflow-setup. Regardless of the method, the installation must be performed in a python
+environment with the required dependencies. In the case of the Conda environment created above, the environment must be activated, so that right version of python is called when <code class="docutils literal notranslate"><span class="pre">python</span></code> is entered at the command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>mfsetup
+</pre></div>
+</div>
+<p>(note that even with Mamba, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate/deactivate</span></code> are still used)</p>
+<section id="installing-and-updating-modflow-setup-from-pypi">
+<h3>Installing and updating Modflow-setup from <a class="reference external" href="https://pypi.org/">PyPI</a><a class="headerlink" href="#installing-and-updating-modflow-setup-from-pypi" title="Link to this heading"></a></h3>
+<p>Once a suitable conda environment (that contains ALL of the dependencies) is made and activated, the simplest way to install Modflow-setup is from the Python Package Index using pip.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>modflow-setup
+</pre></div>
+</div>
+<p>Subsequent releases of Modflow-setup to PyPI can then be installed with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>modflow-setup
+</pre></div>
+</div>
+<p>Note that in some situations you may have to <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">uninstall</span> <span class="pre">modflow-setup</span></code> and then <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">modflow-setup</span></code>. You can always check
+what version of Modflow-setup you have within a python session with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mfsetup</span>
+<span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+<p>Or if you are using Conda, at the command line with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>list
+</pre></div>
+</div>
+</section>
+<section id="installing-the-latest-develop-version-of-modflow-setup">
+<h3>Installing the latest develop version of Modflow-setup<a class="headerlink" href="#installing-the-latest-develop-version-of-modflow-setup" title="Link to this heading"></a></h3>
+<p>In some situations you may want the bleeding-edge version of Modflow-setup that is being actively developed on GitHub. For example,
+to incorporate a bug fix that was made after the latest release. Pip can also be used to fetch Modflow-setup directly from GitHub:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/aleaf/modflow-setup@develop
+</pre></div>
+</div>
+<p>(for the develop branch). Subsequent updates can then be made with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>uninstall<span class="w"> </span>modflow-setup
+pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/aleaf/modflow-setup@develop
+</pre></div>
+</div>
+</section>
+<section id="installing-the-modflow-setup-source-code-in-place">
+<h3>Installing the Modflow-setup source code in-place<a class="headerlink" href="#installing-the-modflow-setup-source-code-in-place" title="Link to this heading"></a></h3>
+<p>Alternatively, if you intend to contribute to Modflow-setup (please do!) or update your install frequently, the best route is probably to clone the source code from git and install it in place.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/aleaf/modflow-setup.git
+<span class="nb">cd</span><span class="w"> </span>modflow-setup
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Don’t forget the <code class="docutils literal notranslate"><span class="pre">.</span></code> after <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span></code>!</p>
+</div>
+<p>Your local copy of the Modflow-setup repository can then be subsequently updated with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>master
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are making local changes to Modflow-setup that you want to contribute, the workflow is slightly different. See the <a class="reference internal" href="contributing.html#contributing-to-modflow-setup"><span class="std std-ref">Contributing to modflow-setup</span></a> page for more details.</p>
+</div>
+<p>The advantage of installing the source code in-place is that any changes you make are automatically incorporated into your python environment, without any additional install commands. When debugging in an interactive development environment (IDE) such as Pycharm or VS Code, error tracebacks and inspection features go to the actual source code, not the version installed in the <code class="docutils literal notranslate"><span class="pre">site-packages</span></code> folder. Additionally, since this install is done through pip, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">uninstall</span></code>
+will work to remove the package, and the current version of the package (including the latest commit information) will be visible with <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">list</span></code>.</p>
+</section>
+</section>
+<section id="installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks">
+<h2>Installing the IPython kernel to use Modflow-setup in Jupyter Notebooks<a class="headerlink" href="#installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks" title="Link to this heading"></a></h2>
+<p>This step may not be needed if you already have an existing Python environment with the packages required by Modflow-setup <em>and</em> Jupyter Notebook installed. However, if you’d like to use Modflow-setup in a Jupyter Notebook with the included <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> environment (specified in <code class="docutils literal notranslate"><span class="pre">requirements.yml</span></code>), you’ll most likely need to install the IPython kernel in that environment. You can do this at the command line or terminal window (with <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> activated):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>ipykernel<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--name<span class="w"> </span>mfsetup<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;mfsetup&quot;</span>
+</pre></div>
+</div>
+<p>The first instance of <code class="docutils literal notranslate"><span class="pre">mfsetup</span></code> in this command is the environment to install the kernel to, and the second instance (in quotes) is the name that will appear in the <code class="docutils literal notranslate"><span class="pre">Kernel</span></code> menu within Jupyter Notebook. To use the kernel, simply select it from the <code class="docutils literal notranslate"><span class="pre">Kernel</span> <span class="pre">&gt;</span> <span class="pre">Change</span> <span class="pre">kernel</span></code> menu within  Jupyter Notebook.</p>
+</section>
+<section id="best-practices">
+<h2>Best practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Install the *conda distribution of your choice to your user account, NOT at the system level. Installing to your user means you have rights to delete and reinstall Anaconda as-needed, as well as to edit any configuration files for pip, Conda, etc. Installing at the system level also just seems to lead to more confusing problems with dependencies, at least in the USGS.</p></li>
+<li><p>Periodically (maybe a few times a year?) fully remove your *conda distribution and reinstall it. If you just can’t get things to work (packages won’t import or produce DLL errors on import, adding or upgrading a package takes a very long time or results in excessive upgrades or downgrades of other packages, etc.), fully removing and reinstalling *conda just may resolve your issues.</p></li>
+<li><p>Don’t use your base environment; create and delete environments as needed. Conda is generally pretty good about managing packages between environments without wasting a lot of disk space.</p></li>
+<li><p>Use an environment file (as above) to create a conda environment, instead of installing packages ad-hoc.</p></li>
+<li><p>Use Mamba instead of Conda; it just works better for environments with a lot of packages.</p></li>
+<li><p>After setting up the above conda environment, scan the screen output to make sure that everything installed correctly, especially the packages installed through pip.</p></li>
+<li><p>Avoid mixing package channels within a Conda environment. Strictly sticking to conda-forge may yield the best results.</p></li>
+<li><p>Use <a class="reference external" href="https://conda.github.io/conda-pack/">conda-pack</a>, rather than an overly-detailed environment file, to guarantee reproducibility.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2><span class="target" id="considerations-for-usgs-users">Considerations for USGS Users</span><a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p>Using conda or pip on the USGS network requires SSL verification, which can cause a number of issues.
+If you are encountering persistant issues with creating the conda environment,
+you may have better luck trying the install off of the USGS network (e.g. at home).
+See <a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">here</a> for more information
+about SSL verification on the USGS network, and to download the DOI SSL certificate.</p>
+<section id="id5">
+<h3><span class="target" id="installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</span><a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><a class="reference external" href="https://tst.usgs.gov/applications/application-and-script-signing/">Download the DOI SSL certificate</a></p></li>
+<li><p><a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#config-file">Create a pip configuration file</a>, which may be specified at the user, environment, or system level. At the user level:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>On Windows: <code class="docutils literal notranslate"><span class="pre">%APPDATA%\pip\pip.ini</span></code> or <code class="docutils literal notranslate"><span class="pre">%APPDATA%\Roaming\pip\pip.ini</span></code>, where <code class="docutils literal notranslate"><span class="pre">%APPDATA%</span></code> is most likely <code class="docutils literal notranslate"><span class="pre">C:\Users\&lt;your</span> <span class="pre">username&gt;\AppData</span></code></p></li>
+<li><p>On OSX, create <code class="docutils literal notranslate"><span class="pre">$HOME/Library/Application</span> <span class="pre">Support/pip/pip.conf</span></code> if directory <code class="docutils literal notranslate"><span class="pre">$HOME/Library/Application</span> <span class="pre">Support/pip</span></code> exists else <code class="docutils literal notranslate"><span class="pre">$HOME/.config/pip/pip.conf.</span></code>,
+where <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> is most likely <code class="docutils literal notranslate"><span class="pre">/Users/&lt;your</span> <span class="pre">username&gt;</span></code>.</p></li>
+<li><p>On Linux: <code class="docutils literal notranslate"><span class="pre">$HOME/.config/pip/pip.conf</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+<p>For more details about the configuration file, see <a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#config-file">the pip documentation</a>.</p>
+<p>Include the following in this file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="k">global</span><span class="p">]</span>
+<span class="n">cert</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">DOI</span> <span class="n">certificate</span> <span class="n">file</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">DOIRootCA2</span><span class="o">.</span><span class="n">cer</span><span class="p">)</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Note that when you are off the USGS network, you may have to comment out the <code class="docutils literal notranslate"><span class="pre">cert=</span></code> line in the above pip configuration file to get <code class="docutils literal notranslate"><span class="pre">pip</span></code> to work.</p>
+</section>
+<section id="installing-the-doi-ssl-certificate-for-use-with-conda">
+<h3>Installing the DOI SSL certificate for use with conda<a class="headerlink" href="#installing-the-doi-ssl-certificate-for-use-with-conda" title="Link to this heading"></a></h3>
+<p>See <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html#ssl-verification-ssl-verify">these instructions</a>.
+This may or may not work. Basically, <code class="docutils literal notranslate"><span class="pre">ssl_verify:</span></code> needs to be set in your <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a> file to point
+to a valid SSL certificate, which may be different from the basic <code class="docutils literal notranslate"><span class="pre">DOIRootCA2.cer</span></code> file.</p>
+<p>You can find the location of your <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a> file with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">info</span> <span class="o">-</span><span class="n">a</span>
+</pre></div>
+</div>
+<p>which displays information about how Conda is configured. Note that you may have multiple <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a>
+files at the system, user and possibly project levels.</p>
+<p>Common issues:</p>
+<ul>
+<li><p>Conda Install fails on the USGS network without a certificate, or with an incorrectly formatted certificate.
+Possible solutions are to either get a correctly formatted SSL certificate from your IT person, or try installing off the network.</p></li>
+<li><p>Conda Install fails off the USGS network with a certificate (may or may not be correctly formatted). Solution:
+open your <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html">condarc</a> file
+and comment out the SSL certificate file, if it is specified. E.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssl_verify</span><span class="p">:</span> <span class="c1">#D:\certificates\DOIRootCA2.cer</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="troubleshooting-issues-with-the-usgs-network">
+<h3>Troubleshooting issues with the USGS network<a class="headerlink" href="#troubleshooting-issues-with-the-usgs-network" title="Link to this heading"></a></h3>
+<section id="ssl-related-error-messages-when-using-conda">
+<h4>SSL-related error messages when using conda<a class="headerlink" href="#ssl-related-error-messages-when-using-conda" title="Link to this heading"></a></h4>
+<p>(with <code class="docutils literal notranslate"><span class="pre">SSL</span></code> mentioned in the message and possibly <code class="docutils literal notranslate"><span class="pre">bad</span> <span class="pre">handshake</span></code>)</p>
+<p>Make sure that the <code class="docutils literal notranslate"><span class="pre">conda</span></code> package installer is configured to use the USGS certificate
+(see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-conda"><span class="std std-ref">Installing the DOI SSL certificate for use with conda</span></a> above).</p>
+</section>
+<section id="ssl-related-error-messages-when-using-pip">
+<h4>SSL-related error messages when using pip<a class="headerlink" href="#ssl-related-error-messages-when-using-pip" title="Link to this heading"></a></h4>
+<p>(something similar to <code class="docutils literal notranslate"><span class="pre">SSL:</span> <span class="pre">CERTIFICATE_VERIFY_FAILED</span></code>).</p>
+<p>Make sure that the <code class="docutils literal notranslate"><span class="pre">pip</span></code> package installer is configured to use the USGS certificate
+(see <a class="reference internal" href="#installing-the-doi-ssl-certificate-for-use-with-pip">Installing the DOI SSL certificate for use with pip</a> above).</p>
+</section>
+<section id="if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message">
+<h4>If you are on the USGS network, using Windows, and you get this error message:<a class="headerlink" href="#if-you-are-on-the-usgs-network-using-windows-and-you-get-this-error-message" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>CondaHTTPError: HTTP 500 INTERNAL ERROR for url &lt;<a class="reference external" href="https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2">https://repo.anaconda.com/pkgs/msys2/win-64/m2w64-gettext-0.19.7-2.tar.bz2</a>&gt;
+Elapsed: 00:30.647993</p>
+<p>An HTTP error occurred when trying to retrieve this URL.
+HTTP errors are often intermittent, and a simple retry will get you on your way.</p>
+</div></blockquote>
+<p>Adding the following line to <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> should work:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">msys2::m2w64-gettext</span>
+</pre></div>
+</div>
+<p>This tells conda to fetch <code class="docutils literal notranslate"><span class="pre">m2w64-gettext</span></code> from the <code class="docutils literal notranslate"><span class="pre">msys2</span></code> channel instead. Note that this is only a dependency on Windows,
+so it needs to be commented out on other operating systems (normally it wouldn’t need to be listed, but the above HTTP 500 error indicates that installation from the default source location failed.)</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="philosophy.html" class="btn btn-neutral float-left" title="Philosophy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="10min.html" class="btn btn-neutral float-right" title="10 Minutes to Modflow-setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

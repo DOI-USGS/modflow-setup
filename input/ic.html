@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Initial Conditions &mdash; modflow-setup 0.5.0.post59+g65803fd documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4370c7ca"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Lake (LAK) Package" href="lak.html" />
+    <link rel="prev" title="Time and space discretization" href="dis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10min.html"> 10 Minutes to Modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Input instructions by package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="props.html">Specifying Aquifer Properties (UPW, NPF, STO)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic-stress.html">Basic stress packages (CHD, DRN, GHB, RCH, RIV, WEL)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dis.html">The Discretization Package (DIS, TDIS, BAS6)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Initial Conditions (IC, BAS6)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#starting-heads-defaults">Starting heads defaults</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-starting-heads-directly">Specifying starting heads directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-starting-heads-from-grid-independent-sources">Specifying starting heads from grid-independent sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-script-for-updating-starting-heads-from-a-previous-run">Example script for updating starting heads from a previous run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="lak.html">The Lake Package (LAK)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sfr.html">The Streamflow Routing Package (SFR, GAGE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="obs.html">Head observations (OBS, HYD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oc.html">     Output Control (OC)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Input instructions by package</a></li>
+      <li class="breadcrumb-item active">Initial Conditions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/input/ic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="initial-conditions">
+<h1>Initial Conditions<a class="headerlink" href="#initial-conditions" title="Link to this heading"></a></h1>
+<p>Similar to other packages, input of initial conditions follows the structure of MODFLOW and Flopy. Setting the starting heads from the model top is often a good way to go initially. After the model has been run, starting heads can then be <a class="reference internal" href="#example-script-for-updating-starting-heads-from-a-previous-run"><span class="std std-ref">updated from the initial model head output</span></a> to improve convergence on subsequent runs.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>With any transient model, an <a class="reference internal" href="dis.html#time-discretization"><span class="std std-ref">initial steady-state stress period</span></a> is recommended, regardless of initial conditions. Specification of initial conditions is mostly a consideration for improving model convergence.</p>
+</div>
+</div></blockquote>
+<section id="starting-heads-defaults">
+<h2>Starting heads defaults<a class="headerlink" href="#starting-heads-defaults" title="Link to this heading"></a></h2>
+<p>Omitting or leaving the <code class="docutils literal notranslate"><span class="pre">ic:</span></code> block blank triggers one of two default actions:</p>
+<ul class="simple">
+<li><p>If there is no parent model, or a parent model with the <code class="docutils literal notranslate"><span class="pre">default_source_data</span></code> option turned off, starting heads are set to the model top.</p></li>
+<li><p>If there is a parent model with the <code class="docutils literal notranslate"><span class="pre">default_source_data</span></code> option turned on, starting heads are set from the parent model starting heads.</p></li>
+</ul>
+</section>
+<section id="specifying-starting-heads-directly">
+<h2>Specifying starting heads directly<a class="headerlink" href="#specifying-starting-heads-directly" title="Link to this heading"></a></h2>
+<p>For MODFLOW 6 models, the “Options” and “Griddata” input blocks are represented as sub-blocks within the <code class="docutils literal notranslate"><span class="pre">ic:</span></code> block. Within the <code class="docutils literal notranslate"><span class="pre">griddata:</span></code> block, model inputs can be specified directly, as long as they are consistent with the definition of the model grid. For example, if <code class="docutils literal notranslate"><span class="pre">strt:</span> <span class="pre">[100.,</span> <span class="pre">100.]</span></code> is specified, the model must be either two layers (for “LAYERED” input; see MODFLOW input instructions) or two cells. An example of specifying a uniform starting head condition for a model of any size:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.</span>
+</pre></div>
+</div>
+<p>Or specifying uniform starting heads by layer:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">100.</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">99.</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>External files can also be supplied, following the Flopy format:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">strt</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">&#39;filename&#39;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&#39;strt_000.dat&#39;</span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">&#39;filename&#39;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&#39;strt_001.dat&#39;</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+</section>
+<section id="specifying-starting-heads-from-grid-independent-sources">
+<h2>Specifying starting heads from grid-independent sources<a class="headerlink" href="#specifying-starting-heads-from-grid-independent-sources" title="Link to this heading"></a></h2>
+<p>Similar to other packages, input specified via a <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> sub-block can be mapped to the model grid from a variety of sources.</p>
+<p>Explicitly setting starting heads to the model top (for example, to override the default behavior with <code class="docutils literal notranslate"><span class="pre">default_source_data</span></code> from a parent model):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;from_model_top&#39;</span>
+</pre></div>
+</div>
+<p>Setting starting heads from a binary head save file (pathed relative to the configuration file):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">strt</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/pleasant.hds&#39;</span>
+<span class="w">        </span><span class="nt">stress_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
+<p>Explicitly setting starting heads to the parent model starting heads (for example, to override the default behavior if <code class="docutils literal notranslate"><span class="pre">default_source_data</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_parent</span>
+</pre></div>
+</div>
+</section>
+<section id="example-script-for-updating-starting-heads-from-a-previous-run">
+<h2>Example script for updating starting heads from a previous run<a class="headerlink" href="#example-script-for-updating-starting-heads-from-a-previous-run" title="Link to this heading"></a></h2>
+<p>The following example script opens MODFLOW binary head results using Flopy, and writes them to external files that can then be input to the IC or BAS6 Packages (for MODFLOW 6 or MODFLOW-NWT models, respectively). If you followed the Modflow-setup defaults to write external files to an <code class="docutils literal notranslate"><span class="pre">external/</span></code> folder, with starting head files named as shown in the script, this will overwrite your previous starting head files, requiring no additional action after running the script.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;Update model starting heads from previous (initial steady-state) solution</span>
+<span class="linenos"> 2</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="linenos"> 6</span><span class="kn">from</span> <span class="nn">flopy.utils</span> <span class="kn">import</span> <span class="n">binaryfile</span> <span class="k">as</span> <span class="n">bf</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="n">model_ws</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">headfile</span> <span class="o">=</span> <span class="n">model_ws</span> <span class="o">/</span> <span class="s1">&#39;model.hds&#39;</span>
+<span class="linenos">10</span><span class="n">starting_heads_file_fmt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_ws</span> <span class="o">/</span> <span class="s1">&#39;external/strt_</span><span class="si">{:03d}</span><span class="s1">.dat&#39;</span><span class="p">)</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">hdsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="n">headfile</span><span class="p">)</span>
+<span class="linenos">14</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;reading </span><span class="si">{</span><span class="n">headfile</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="n">initial_ss_heads</span> <span class="o">=</span> <span class="n">hdsobj</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">kstpkper</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="linenos">17</span><span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">layer_heads</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">initial_ss_heads</span><span class="p">):</span>
+<span class="linenos">18</span>    <span class="n">outfile</span> <span class="o">=</span> <span class="n">starting_heads_file_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span><span class="p">)</span>
+<span class="linenos">19</span>    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">starting_heads_file_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span><span class="p">),</span> <span class="n">layer_heads</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos">20</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Download the file:
+<a class="reference download internal" download="" href="../_downloads/6ba4574d50dc50b6efce72feea6132c7/update_starting_heads_from_previous.py"><code class="xref download docutils literal notranslate"><span class="pre">update_starting_heads_from_previous.py</span></code></a></p>
+</div></blockquote>
+<p><strong>Note:</strong> This script can be run as soon as the initial steady-state stress period is done solving. The current MODFLOW run can then be canceled and MODFLOW restarted, hopefully with improved convergence in the initial period.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dis.html" class="btn btn-neutral float-left" title="Time and space discretization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lak.html" class="btn btn-neutral float-right" title="The Lake (LAK) Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

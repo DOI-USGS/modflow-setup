@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MF6model class &mdash; modflow-setup 0.5.0.post59+g65803fd documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4370c7ca"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MFnwtModel class" href="mfsetup.mfnwtmodel.html" />
+    <link rel="prev" title="Code Reference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10min.html"> 10 Minutes to Modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html"> Code reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#model-classes">Model classes</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">MF6model class</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.mf6model.MF6model"><code class="docutils literal notranslate"><span class="pre">MF6model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html">MFnwtModel class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html">MFsetupMixin class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#supporting-modules">Supporting modules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code Reference</a></li>
+      <li class="breadcrumb-item active">MF6model class</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/mfsetup.mf6model.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mfsetup.mf6model">
+<span id="mf6model-class"></span><h1>MF6model class<a class="headerlink" href="#module-mfsetup.mf6model" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfsetup.mf6model.</span></span><span class="sig-name descname"><span class="pre">MF6model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exe_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf6'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf6'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin" title="mfsetup.mfmodel.MFsetupMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">MFsetupMixin</span></code></a>, <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwf.html#flopy.mf6.modflow.mfgwf.ModflowGwf" title="(in FloPy v3.9.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowGwf</span></code></a></p>
+<p>Class representing a MODFLOW-6 model.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.get_flopy_external_file_input">
+<span class="sig-name descname"><span class="pre">get_flopy_external_file_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.get_flopy_external_file_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.get_flopy_external_file_input" title="Link to this definition"></a></dt>
+<dd><p>Repath intermediate external file input to the
+external file path that MODFLOW will use. Copy the
+file because MF6 flopy reads and writes to the same location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>var</strong><span class="classifier">str</span></dt><dd><p>key in self.cfg[‘intermediate_data’] dict</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>input</strong><span class="classifier">dict or list of dicts</span></dt><dd><p>MODFLOW6 external file input format
+{‘filename’: &lt;filename&gt;}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.get_package_list">
+<span class="sig-name descname"><span class="pre">get_package_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.get_package_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.get_package_list" title="Link to this definition"></a></dt>
+<dd><p>Replicate this method in flopy.modflow.Modflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.get_raster_statistics_for_cells">
+<span class="sig-name descname"><span class="pre">get_raster_statistics_for_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.get_raster_statistics_for_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.get_raster_statistics_for_cells" title="Link to this definition"></a></dt>
+<dd><p>Compute zonal statics for raster pixels within
+each model cell.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.get_raster_values_at_cell_centers">
+<span class="sig-name descname"><span class="pre">get_raster_values_at_cell_centers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raster</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_of_bounds_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'coerce'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.get_raster_values_at_cell_centers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.get_raster_values_at_cell_centers" title="Link to this definition"></a></dt>
+<dd><p>Sample raster values at centroids
+of model grid cells.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.idomain">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">idomain</span></span><a class="headerlink" href="#mfsetup.mf6model.MF6model.idomain" title="Link to this definition"></a></dt>
+<dd><p>3D array indicating which cells will be included in the simulation.
+Made a property so that it can be easily updated when any packages
+it depends on change.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.load_from_config">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.load_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.load_from_config" title="Link to this definition"></a></dt>
+<dd><p>Load a model from a configuration file and set of MODFLOW files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>yamlfile</strong><span class="classifier">pathlike</span></dt><dd><p>Modflow setup YAML format configuration file</p>
+</dd>
+<dt><strong>load_only</strong><span class="classifier">list</span></dt><dd><p>List of package abbreviations or package names corresponding to
+packages that flopy will load. default is None, which loads all
+packages. the discretization packages will load regardless of this
+setting. subpackages, like time series and observations, will also
+load regardless of this setting.
+example list: [‘ic’, ‘maw’, ‘npf’, ‘oc’, ‘ims’, ‘gwf6-gwf6’]</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>m</strong><span class="classifier">mfsetup.MF6model instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.perioddata">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">perioddata</span></span><a class="headerlink" href="#mfsetup.mf6model.MF6model.perioddata" title="Link to this definition"></a></dt>
+<dd><p>DataFrame summarizing stress period information.
+Columns:
+============== =========================================
+start_datetime Start date of each model stress period
+end_datetime   End date of each model stress period
+time           MODFLOW elapsed time, in days*
+per            Model stress period number
+perlen         Stress period length (days)
+nstp           Number of timesteps in stress period
+tsmult         Timestep multiplier
+steady         Steady-state or transient
+oc             Output control setting for MODFLOW
+parent_sp      Corresponding parent model stress period
+============== =========================================</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_chd">
+<span class="sig-name descname"><span class="pre">setup_chd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_chd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_chd" title="Link to this definition"></a></dt>
+<dd><p>Set up the CHD Package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_drn">
+<span class="sig-name descname"><span class="pre">setup_drn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_drn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_drn" title="Link to this definition"></a></dt>
+<dd><p>Set up the Drain Package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_ghb">
+<span class="sig-name descname"><span class="pre">setup_ghb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_ghb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_ghb" title="Link to this definition"></a></dt>
+<dd><p>Set up the General Head Boundary Package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_ic">
+<span class="sig-name descname"><span class="pre">setup_ic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_ic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_ic" title="Link to this definition"></a></dt>
+<dd><p>Sets up the IC package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_ims">
+<span class="sig-name descname"><span class="pre">setup_ims</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_ims"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_ims" title="Link to this definition"></a></dt>
+<dd><p>Sets up the IMS package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_lak">
+<span class="sig-name descname"><span class="pre">setup_lak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_lak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_lak" title="Link to this definition"></a></dt>
+<dd><p>Sets up the Lake package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_npf">
+<span class="sig-name descname"><span class="pre">setup_npf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_npf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_npf" title="Link to this definition"></a></dt>
+<dd><p>Sets up the NPF package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_obs">
+<span class="sig-name descname"><span class="pre">setup_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_obs" title="Link to this definition"></a></dt>
+<dd><p>Sets up the OBS utility.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_oc">
+<span class="sig-name descname"><span class="pre">setup_oc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_oc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_oc" title="Link to this definition"></a></dt>
+<dd><p>Sets up the OC package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_rch">
+<span class="sig-name descname"><span class="pre">setup_rch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_rch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_rch" title="Link to this definition"></a></dt>
+<dd><p>Sets up the RCH package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_riv">
+<span class="sig-name descname"><span class="pre">setup_riv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rivdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_riv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_riv" title="Link to this definition"></a></dt>
+<dd><p>Set up the River Package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_simulation_mover">
+<span class="sig-name descname"><span class="pre">setup_simulation_mover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gwfgwf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_simulation_mover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_simulation_mover" title="Link to this definition"></a></dt>
+<dd><p>Set up the MODFLOW-6 water mover package at the simulation level.
+Automate set-up of the mover between SFR packages in LGR parent and inset models.
+todo: automate set-up of mover between SFR and lakes (within a model).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>gwfgwf</strong><span class="classifier">Flopy <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfgwf.html#flopy.mf6.modflow.mfgwfgwf.ModflowGwfgwf" title="(in FloPy v3.9.0.dev2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowGwfgwf</span></code></a> package instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Other uses of the water mover need to be configured manually using flopy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_sto">
+<span class="sig-name descname"><span class="pre">setup_sto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_sto"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_sto" title="Link to this definition"></a></dt>
+<dd><p>Sets up the STO package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_tdis">
+<span class="sig-name descname"><span class="pre">setup_tdis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_tdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_tdis" title="Link to this definition"></a></dt>
+<dd><p>Sets up the TDIS package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.setup_wel">
+<span class="sig-name descname"><span class="pre">setup_wel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.setup_wel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.setup_wel" title="Link to this definition"></a></dt>
+<dd><p>Set up the Well Package.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfsetup.mf6model.MF6model.write_input">
+<span class="sig-name descname"><span class="pre">write_input</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/mf6model.html#MF6model.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.mf6model.MF6model.write_input" title="Link to this definition"></a></dt>
+<dd><p>Write the model input.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Code Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mfsetup.mfnwtmodel.html" class="btn btn-neutral float-right" title="MFnwtModel class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

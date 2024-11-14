@@ -1,0 +1,24 @@
+simulation:
+  sim_name: 'shellmound'
+  version: 'mf6'
+  sim_ws: 'model'
+
+model:
+  simulation: 'shellmound'
+  modelname: 'shellmound'
+  options:
+    print_input: True
+    save_flows: True
+    newton: True
+  packages: [
+  ]
+
+setup_grid:
+  source_data:
+    features_shapefile:
+      filename: '../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp'
+  buffer: 0
+  dxy: 1000  # Uniform x, y spacing in meters
+  rotation: 0.
+  crs: 5070  # EPSG code for NAD83 CONUS Albers (meters)
+  snap_to_NHG: True  # option to snap to the USGS National Hydrogeologic Grid

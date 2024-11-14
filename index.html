@@ -1,1 +1,236 @@
-<meta http-equiv="refresh" content="0; url=./latest/" />
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>modflow-setup 0.5.0.post59+g65803fd &mdash; modflow-setup 0.5.0.post59+g65803fd documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4370c7ca"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Philosophy" href="philosophy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            modflow-setup
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10min.html"> 10 Minutes to Modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">modflow-setup 0.5.0.post59+g65803fd</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="modflow-setup-version">
+<h1>modflow-setup 0.5.0.post59+g65803fd<a class="headerlink" href="#modflow-setup-version" title="Link to this heading"></a></h1>
+<p>Modflow-setup is a Python package for automating the setup of MODFLOW groundwater models from grid-independent source data including shapefiles, rasters, and other MODFLOW models that are geo-located. Input data and model construction options are summarized in a single configuration file. Source data are read from their native formats and mapped to a regular finite difference grid specified in the configuration file. An external array-based <a class="reference external" href="https://github.com/modflowpy/flopy">Flopy</a> model instance with the desired packages is created from the sampled source data and configuration settings. MODFLOW input can then be written from the flopy model instance.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="philosophy.html">     Philosophy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="philosophy.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy.html#what-modflow-setup-does">What modflow-setup does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy.html#what-modflow-setup-doesnt-do">What modflow-setup doesn’t do</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-python-dependencies-with-conda">Installing python dependencies with Conda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-modflow-setup">Installing Modflow-setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-the-ipython-kernel-to-use-modflow-setup-in-jupyter-notebooks">Installing the IPython kernel to use Modflow-setup in Jupyter Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#best-practices">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#id4">Considerations for USGS Users</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="10min.html"> 10 Minutes to Modflow-setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="10min.html#define-the-model-active-area-and-coordinate-reference-system">1) Define the model active area and coordinate reference system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10min.html#create-a-setup-script-and-configuration-file">2) Create a setup script and configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10min.html#develop-flowlines-to-represent-streams">3) Develop flowlines to represent streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10min.html#get-a-dem">4) Get a DEM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="10min.html#make-a-minimum-working-configuration-file-and-model-build-script">5) Make a minimum working configuration file and model build script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html"> Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/Pleasant_lake_lgr_example.html">Pleasant Lake Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-gallery.html"> Configuration File Gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="config-file-gallery.html#shellmound-test-case">Shellmound test case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config-file-gallery.html#shellmound-tmr-inset-test-case">Shellmound TMR inset test case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config-file-gallery.html#pleasant-lake-test-case">Pleasant Lake test case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config-file-gallery.html#pleasant-lake-modflow-nwt-test-case">Pleasant Lake MODFLOW-NWT test case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config-file-gallery.html#plainfield-lakes-modflow-nwt-test-case">Plainfield Lakes MODFLOW-NWT test case</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structure.html"> Basic program structure and usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="structure.html#setting-up-a-full-model">Setting up a full model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structure.html#loading-a-model">Loading a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structure.html#setting-up-individual-packages">Setting up individual packages</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config-file.html"> The configuration file</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="config-file.html#the-yaml-format">The YAML format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config-file.html#configuration-file-structure">Configuration file structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config-file.html#some-additional-notes-on-yaml">Some additional notes on YAML</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="concepts/index.html"> Concepts and methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="concepts/interp.html">Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/lgr.html">Local grid refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/perimeter-bcs.html">     Specifying perimeter boundary conditions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="input/index.html"> Input instructions by package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input/props.html">Specifying Aquifer Properties (UPW, NPF, STO)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input/basic-stress.html">Basic stress packages (CHD, DRN, GHB, RCH, RIV, WEL)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input/dis.html">The Discretization Package (DIS, TDIS, BAS6)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input/ic.html">Initial Conditions (IC, BAS6)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input/lak.html">The Lake Package (LAK)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input/sfr.html">The Streamflow Routing Package (SFR, GAGE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input/obs.html">Head observations (OBS, HYD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input/oc.html">     Output Control (OC)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html"> Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#my-script-doesn-t-run">My script doesn’t run</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="philosophy.html" class="btn btn-neutral float-right" title="Philosophy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

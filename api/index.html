@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Reference &mdash; modflow-setup 0.5.0.post59+g65803fd documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4370c7ca"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MF6model class" href="mfsetup.mf6model.html" />
+    <link rel="prev" title="Troubleshooting" href="../troubleshooting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            modflow-setup
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy.html">     Philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10min.html"> 10 Minutes to Modflow-setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html"> Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-gallery.html"> Configuration File Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../structure.html"> Basic program structure and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file.html"> The configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts/index.html"> Concepts and methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input/index.html"> Input instructions by package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html"> Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> Code reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-classes">Model classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html">MF6model class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html">MFnwtModel class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html">MFsetupMixin class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#supporting-modules">Supporting modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html">mfsetup.interpolate module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.tmr.html">mfsetup.tmr module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../config-file-defaults.html"> Configuration file defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-history.html"> Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html"> Contributing to modflow-setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#modflow-setup-applications">Modflow-setup applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html#workflow-examples">Workflow examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">modflow-setup</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Code Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="code-reference">
+<h1>Code Reference<a class="headerlink" href="#code-reference" title="Link to this heading"></a></h1>
+<section id="model-classes">
+<h2>Model classes<a class="headerlink" href="#model-classes" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.mf6model.html">MF6model class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model"><code class="docutils literal notranslate"><span class="pre">MF6model</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_flopy_external_file_input"><code class="docutils literal notranslate"><span class="pre">MF6model.get_flopy_external_file_input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_package_list"><code class="docutils literal notranslate"><span class="pre">MF6model.get_package_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_raster_statistics_for_cells"><code class="docutils literal notranslate"><span class="pre">MF6model.get_raster_statistics_for_cells()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_raster_values_at_cell_centers"><code class="docutils literal notranslate"><span class="pre">MF6model.get_raster_values_at_cell_centers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.idomain"><code class="docutils literal notranslate"><span class="pre">MF6model.idomain</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.load_from_config"><code class="docutils literal notranslate"><span class="pre">MF6model.load_from_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.perioddata"><code class="docutils literal notranslate"><span class="pre">MF6model.perioddata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_chd"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_chd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_drn"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_drn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_ghb"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_ghb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_ic"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_ic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_ims"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_ims()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_lak"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_lak()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_npf"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_npf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_obs"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_obs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_oc"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_oc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_rch"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_rch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_riv"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_riv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_simulation_mover"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_simulation_mover()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_sto"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_sto()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_tdis"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_tdis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_wel"><code class="docutils literal notranslate"><span class="pre">MF6model.setup_wel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mf6model.html#mfsetup.mf6model.MF6model.write_input"><code class="docutils literal notranslate"><span class="pre">MF6model.write_input()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.mfnwtmodel.html">MFnwtModel class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel"><code class="docutils literal notranslate"><span class="pre">MFnwtModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.ibound"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.ibound</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.ipakcb"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.ipakcb</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.load"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.perioddata"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.perioddata</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_chd"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_chd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_drn"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_drn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_ghb"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_ghb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_hyd"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_hyd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_riv"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_riv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_tdis"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_tdis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_upw"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_upw()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.setup_wel"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.setup_wel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfnwtmodel.html#mfsetup.mfnwtmodel.MFnwtModel.write_input"><code class="docutils literal notranslate"><span class="pre">MFnwtModel.write_input()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.mfmodel.html">MFsetupMixin class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.get_boundary_cells"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.get_boundary_cells()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.high_k_lake_recharge"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.high_k_lake_recharge</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.interp_weights"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.interp_weights</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.isbc"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.isbc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.lakarr"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.lakarr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.lake_bathymetry"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.lake_bathymetry</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.load_cfg"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.load_cfg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.load_features"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.load_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.load_grid"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.load_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.model_version"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.model_version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.package_list"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.package_list</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.parent_layers"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.parent_layers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.parent_mask"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.parent_mask</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.parent_stress_periods"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.parent_stress_periods</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.perimeter_bc_type"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.perimeter_bc_type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.regrid_from_parent"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.regrid_from_parent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_external_filepaths"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.setup_external_filepaths()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_from_cfg"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.setup_from_cfg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_from_yaml"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.setup_from_yaml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_grid"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.setup_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.source_path"><code class="docutils literal notranslate"><span class="pre">MFsetupMixin.source_path</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="supporting-modules">
+<h2>Supporting modules<a class="headerlink" href="#supporting-modules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.discretization.html">mfsetup.discretization module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.ModflowGwfdis"><code class="docutils literal notranslate"><span class="pre">ModflowGwfdis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.ModflowGwfdis.thickness"><code class="docutils literal notranslate"><span class="pre">ModflowGwfdis.thickness</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.adjust_layers"><code class="docutils literal notranslate"><span class="pre">adjust_layers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.cellids_to_kij"><code class="docutils literal notranslate"><span class="pre">cellids_to_kij()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.create_vertical_pass_through_cells"><code class="docutils literal notranslate"><span class="pre">create_vertical_pass_through_cells()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.deactivate_idomain_above"><code class="docutils literal notranslate"><span class="pre">deactivate_idomain_above()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.fill_cells_vertically"><code class="docutils literal notranslate"><span class="pre">fill_cells_vertically()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.fill_empty_layers"><code class="docutils literal notranslate"><span class="pre">fill_empty_layers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.find_remove_isolated_cells"><code class="docutils literal notranslate"><span class="pre">find_remove_isolated_cells()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.fix_model_layer_conflicts"><code class="docutils literal notranslate"><span class="pre">fix_model_layer_conflicts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.get_highest_active_layer"><code class="docutils literal notranslate"><span class="pre">get_highest_active_layer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.get_layer"><code class="docutils literal notranslate"><span class="pre">get_layer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.get_layer_thicknesses"><code class="docutils literal notranslate"><span class="pre">get_layer_thicknesses()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.make_ibound"><code class="docutils literal notranslate"><span class="pre">make_ibound()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.make_idomain"><code class="docutils literal notranslate"><span class="pre">make_idomain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.make_irch"><code class="docutils literal notranslate"><span class="pre">make_irch()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.make_lgr_idomain"><code class="docutils literal notranslate"><span class="pre">make_lgr_idomain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.populate_values"><code class="docutils literal notranslate"><span class="pre">populate_values()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.verify_minimum_layer_thickness"><code class="docutils literal notranslate"><span class="pre">verify_minimum_layer_thickness()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.voxels_to_layers"><code class="docutils literal notranslate"><span class="pre">voxels_to_layers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.discretization.html#mfsetup.discretization.weighted_average_between_layers"><code class="docutils literal notranslate"><span class="pre">weighted_average_between_layers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.fileio.html">mfsetup.fileio module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.add_version_to_fileheader"><code class="docutils literal notranslate"><span class="pre">add_version_to_fileheader()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.append_csv"><code class="docutils literal notranslate"><span class="pre">append_csv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.check_source_files"><code class="docutils literal notranslate"><span class="pre">check_source_files()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.dump"><code class="docutils literal notranslate"><span class="pre">dump()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.dump_json"><code class="docutils literal notranslate"><span class="pre">dump_json()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.dump_yml"><code class="docutils literal notranslate"><span class="pre">dump_yml()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.exe_exists"><code class="docutils literal notranslate"><span class="pre">exe_exists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.flopy_mf2005_load"><code class="docutils literal notranslate"><span class="pre">flopy_mf2005_load()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.flopy_mf6model_load"><code class="docutils literal notranslate"><span class="pre">flopy_mf6model_load()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.flopy_mfsimulation_load"><code class="docutils literal notranslate"><span class="pre">flopy_mfsimulation_load()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.load_array"><code class="docutils literal notranslate"><span class="pre">load_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.load_cfg"><code class="docutils literal notranslate"><span class="pre">load_cfg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.load_json"><code class="docutils literal notranslate"><span class="pre">load_json()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.load_modelgrid"><code class="docutils literal notranslate"><span class="pre">load_modelgrid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.load_yml"><code class="docutils literal notranslate"><span class="pre">load_yml()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.read_ggofile"><code class="docutils literal notranslate"><span class="pre">read_ggofile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.read_lak_ggo"><code class="docutils literal notranslate"><span class="pre">read_lak_ggo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.read_mf6_block"><code class="docutils literal notranslate"><span class="pre">read_mf6_block()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.remove_file_header"><code class="docutils literal notranslate"><span class="pre">remove_file_header()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.save_array"><code class="docutils literal notranslate"><span class="pre">save_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.set_cfg_paths_to_absolute"><code class="docutils literal notranslate"><span class="pre">set_cfg_paths_to_absolute()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.setup_external_filepaths"><code class="docutils literal notranslate"><span class="pre">setup_external_filepaths()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.fileio.html#mfsetup.fileio.which"><code class="docutils literal notranslate"><span class="pre">which()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.grid.html">mfsetup.grid module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.bbox"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.bbox</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.botm"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.botm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.bounds"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.bounds</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.crs"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.crs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.dataframe"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.dataframe</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_dataframe"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.get_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_intercell_connections"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.get_intercell_connections()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_vertices"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.get_vertices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.intercell_connections"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.intercell_connections</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.length_multiplier"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.length_multiplier</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.length_units"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.length_units</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.polygons"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.polygons</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.proj_str"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.proj_str</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.rotation"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.rotation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.size"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.top"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.transform"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.transform</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.vertices"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.vertices</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.wkt"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.wkt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_bbox_shapefile"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.write_bbox_shapefile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_shapefile"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.write_shapefile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.xul"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.xul</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.MFsetupGrid.yul"><code class="docutils literal notranslate"><span class="pre">MFsetupGrid.yul</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_cellface_midpoint"><code class="docutils literal notranslate"><span class="pre">get_cellface_midpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_crs"><code class="docutils literal notranslate"><span class="pre">get_crs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_crs_length_units"><code class="docutils literal notranslate"><span class="pre">get_crs_length_units()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_grid_bounding_box"><code class="docutils literal notranslate"><span class="pre">get_grid_bounding_box()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_ij"><code class="docutils literal notranslate"><span class="pre">get_ij()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_intercell_connections"><code class="docutils literal notranslate"><span class="pre">get_intercell_connections()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_kij_from_node3d"><code class="docutils literal notranslate"><span class="pre">get_kij_from_node3d()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_nearest_point_on_grid"><code class="docutils literal notranslate"><span class="pre">get_nearest_point_on_grid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_point_on_national_hydrogeologic_grid"><code class="docutils literal notranslate"><span class="pre">get_point_on_national_hydrogeologic_grid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.get_transform"><code class="docutils literal notranslate"><span class="pre">get_transform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.rasterize"><code class="docutils literal notranslate"><span class="pre">rasterize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.setup_structured_grid"><code class="docutils literal notranslate"><span class="pre">setup_structured_grid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.snap_to_cell_corner"><code class="docutils literal notranslate"><span class="pre">snap_to_cell_corner()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.grid.html#mfsetup.grid.write_bbox_shapefile"><code class="docutils literal notranslate"><span class="pre">write_bbox_shapefile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.interpolate.html">mfsetup.interpolate module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.Interpolator"><code class="docutils literal notranslate"><span class="pre">Interpolator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.Interpolator.interp_weights"><code class="docutils literal notranslate"><span class="pre">Interpolator.interp_weights</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.Interpolator.interpolate"><code class="docutils literal notranslate"><span class="pre">Interpolator.interpolate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.Interpolator.source_values_mask"><code class="docutils literal notranslate"><span class="pre">Interpolator.source_values_mask</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.get_source_dest_model_xys"><code class="docutils literal notranslate"><span class="pre">get_source_dest_model_xys()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.interp_weights"><code class="docutils literal notranslate"><span class="pre">interp_weights()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.interpolate"><code class="docutils literal notranslate"><span class="pre">interpolate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.regrid"><code class="docutils literal notranslate"><span class="pre">regrid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.interpolate.html#mfsetup.interpolate.regrid3d"><code class="docutils literal notranslate"><span class="pre">regrid3d()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.tdis.html">mfsetup.tdis module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.add_date_comments_to_tdis"><code class="docutils literal notranslate"><span class="pre">add_date_comments_to_tdis()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period"><code class="docutils literal notranslate"><span class="pre">aggregate_dataframe_to_stress_period()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.aggregate_xarray_to_stress_period"><code class="docutils literal notranslate"><span class="pre">aggregate_xarray_to_stress_period()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.concat_periodata_groups"><code class="docutils literal notranslate"><span class="pre">concat_periodata_groups()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.convert_freq_to_period_start"><code class="docutils literal notranslate"><span class="pre">convert_freq_to_period_start()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.get_parent_stress_periods"><code class="docutils literal notranslate"><span class="pre">get_parent_stress_periods()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.parse_perioddata_groups"><code class="docutils literal notranslate"><span class="pre">parse_perioddata_groups()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.setup_perioddata"><code class="docutils literal notranslate"><span class="pre">setup_perioddata()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tdis.html#mfsetup.tdis.setup_perioddata_group"><code class="docutils literal notranslate"><span class="pre">setup_perioddata_group()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mfsetup.tmr.html">mfsetup.tmr module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mfsetup.tmr.html#mfsetup.tmr.get_qx_qy_qz"><code class="docutils literal notranslate"><span class="pre">get_qx_qy_qz()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../troubleshooting.html" class="btn btn-neutral float-left" title="Troubleshooting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mfsetup.mf6model.html" class="btn btn-neutral float-right" title="MF6model class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
