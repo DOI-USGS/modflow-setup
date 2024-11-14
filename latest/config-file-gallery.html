@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration File Gallery &mdash; modflow-setup 0.5.0.post50+g346edf0 documentation</title>
+  <title>Configuration File Gallery &mdash; modflow-setup 0.5.0.post58+g45e95f4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=374c9353"></script>
+      <script src="_static/documentation_options.js?v=14b17a75"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -270,327 +270,328 @@
 <span class="linenos">141</span><span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="linenos">142</span>
 <span class="linenos">143</span><span class="c1"># Initial Conditions Package</span>
-<span class="linenos">144</span><span class="c1"># if no starting head values are specified, they are set</span>
-<span class="linenos">145</span><span class="c1"># to the model top by default</span>
-<span class="linenos">146</span><span class="nt">ic</span><span class="p">:</span>
-<span class="linenos">147</span><span class="w">  </span><span class="c1"># optional format for writing external files</span>
-<span class="linenos">148</span><span class="w">  </span><span class="c1"># e.g. (strt_001.dat)</span>
-<span class="linenos">149</span><span class="w">  </span><span class="c1"># default is strt_{:03d}.dat</span>
-<span class="linenos">150</span><span class="w">  </span><span class="nt">strt_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;strt_{:03d}.dat&quot;</span>
-<span class="linenos">151</span>
-<span class="linenos">152</span><span class="c1"># Node Property Flow Package</span>
-<span class="linenos">153</span><span class="nt">npf</span><span class="p">:</span>
-<span class="linenos">154</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">155</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">156</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
-<span class="linenos">157</span><span class="w">    </span><span class="nt">icelltype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># variable sat. thickness in all layers</span>
-<span class="linenos">158</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">159</span><span class="w">    </span><span class="nt">k</span><span class="p">:</span>
-<span class="linenos">160</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
-<span class="linenos">161</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k0.tif&#39;</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group</span>
-<span class="linenos">162</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k1.tif&#39;</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer</span>
-<span class="linenos">163</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k2.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit</span>
-<span class="linenos">164</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
-<span class="linenos">165</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
-<span class="linenos">166</span><span class="w">        </span><span class="nt">5</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
-<span class="linenos">167</span><span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k4.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
-<span class="linenos">168</span><span class="w">        </span><span class="nt">7</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k4.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
-<span class="linenos">169</span><span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k5.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer</span>
-<span class="linenos">170</span><span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k6.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer</span>
-<span class="linenos">171</span><span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k10.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
-<span class="linenos">172</span><span class="w">        </span><span class="nt">11</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k10.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
-<span class="linenos">173</span><span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k12.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
-<span class="linenos">174</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
-<span class="linenos">175</span><span class="w">    </span><span class="nt">k33</span><span class="p">:</span>
-<span class="linenos">176</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
-<span class="linenos">177</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k330.tif&#39;</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group</span>
-<span class="linenos">178</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k331.tif&#39;</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer</span>
-<span class="linenos">179</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k332.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit</span>
-<span class="linenos">180</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k333.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
-<span class="linenos">181</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k333.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
-<span class="linenos">182</span><span class="w">        </span><span class="nt">5</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k333.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
-<span class="linenos">183</span><span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k334.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
-<span class="linenos">184</span><span class="w">        </span><span class="nt">7</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k334.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
-<span class="linenos">185</span><span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k335.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer</span>
-<span class="linenos">186</span><span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k336.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer</span>
-<span class="linenos">187</span><span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3310.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
-<span class="linenos">188</span><span class="w">        </span><span class="nt">11</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3310.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
-<span class="linenos">189</span><span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3312.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
-<span class="linenos">190</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
-<span class="linenos">191</span><span class="w">  </span><span class="nt">k_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;k_{:03d}.dat&quot;</span>
-<span class="linenos">192</span><span class="w">  </span><span class="nt">k33_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;k33_{:03d}.dat&quot;</span>
-<span class="linenos">193</span>
-<span class="linenos">194</span><span class="c1"># Storage Package</span>
-<span class="linenos">195</span><span class="nt">sto</span><span class="p">:</span>
-<span class="linenos">196</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">197</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">198</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
-<span class="linenos">199</span><span class="w">    </span><span class="nt">iconvert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">  </span><span class="c1"># convertible layers</span>
-<span class="linenos">200</span><span class="w">    </span><span class="c1"># initial global values for storage</span>
-<span class="linenos">201</span><span class="w">    </span><span class="nt">sy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
-<span class="linenos">202</span><span class="w">    </span><span class="nt">ss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span>
-<span class="linenos">203</span>
-<span class="linenos">204</span><span class="c1"># Recharge Package</span>
-<span class="linenos">205</span><span class="nt">rch</span><span class="p">:</span>
-<span class="linenos">206</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">207</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">208</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos">209</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">210</span><span class="w">    </span><span class="nt">readasarrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">211</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">212</span><span class="w">    </span><span class="c1"># resample recharge from NetCDF file with time-series of grids</span>
-<span class="linenos">213</span><span class="w">    </span><span class="nt">recharge</span><span class="p">:</span>
-<span class="linenos">214</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc&#39;</span>
-<span class="linenos">215</span><span class="w">      </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;net_infiltration&#39;</span>
-<span class="linenos">216</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
-<span class="linenos">217</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
-<span class="linenos">218</span><span class="w">      </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span>
-<span class="linenos">219</span><span class="w">      </span><span class="nt">resample_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;linear&#39;</span>
-<span class="linenos">220</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
-<span class="linenos">221</span><span class="w">        </span><span class="c1"># for the first two stress periods</span>
-<span class="linenos">222</span><span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span>
-<span class="linenos">223</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">224</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">225</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span>
-<span class="linenos">226</span>
-<span class="linenos">227</span><span class="c1"># Streamflow Routing Package</span>
-<span class="linenos">228</span><span class="c1"># SFR input is created using SFRmaker</span>
-<span class="linenos">229</span><span class="c1"># https://github.com/usgs/sfrmaker</span>
-<span class="linenos">230</span><span class="nt">sfr</span><span class="p">:</span>
-<span class="linenos">231</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">232</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">233</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">234</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="linenos">235</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span>
-<span class="linenos">236</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
-<span class="linenos">237</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
-<span class="linenos">238</span><span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
-<span class="linenos">239</span><span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
-<span class="linenos">240</span><span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
-<span class="linenos">241</span><span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
-<span class="linenos">242</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
-<span class="linenos">243</span><span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
-<span class="linenos">244</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
-<span class="linenos">245</span><span class="w">    </span><span class="c1"># specified inflows to SFR network</span>
-<span class="linenos">246</span><span class="w">    </span><span class="nt">inflows</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span>
-<span class="linenos">247</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/inflows.csv&#39;</span>
-<span class="linenos">248</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;datetime&#39;</span>
-<span class="linenos">249</span><span class="w">      </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;line_id&#39;</span>
-<span class="linenos">250</span><span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flow_m3d&#39;</span><span class="w">  </span><span class="c1"># flows are already in cubic meters/day; can therefore skip unit input</span>
-<span class="linenos">251</span><span class="w">      </span><span class="nt">category_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;category&#39;</span>
-<span class="linenos">252</span><span class="w">    </span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span>
-<span class="linenos">253</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shellmound/tables/observations.csv</span>
-<span class="linenos">254</span><span class="w">      </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">downstream-flow</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;stage&#39;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span>
-<span class="linenos">255</span><span class="w">      </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span><span class="w">  </span><span class="c1"># observation locations, in CRS coordinates</span>
-<span class="linenos">256</span><span class="w">      </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">y</span>
-<span class="linenos">257</span><span class="w">      </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site_no</span><span class="w">  </span><span class="c1"># column for naming observations</span>
-<span class="linenos">258</span><span class="w">    </span><span class="c1"># specified runoff</span>
-<span class="linenos">259</span><span class="w">    </span><span class="c1"># that has been reprocessed to units of m3/day per line ID</span>
-<span class="linenos">260</span><span class="w">    </span><span class="nt">runoff</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span>
-<span class="linenos">261</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/swb_runoff_by_nhdplus_comid_m3d.csv&#39;</span>
-<span class="linenos">262</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;time&#39;</span>
-<span class="linenos">263</span><span class="w">      </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
-<span class="linenos">264</span><span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;runoff_m3d&#39;</span>
-<span class="linenos">265</span><span class="w">    </span><span class="c1"># modflow-setup will try to locate the inflows or runoff values</span>
-<span class="linenos">266</span><span class="w">    </span><span class="c1"># using the routing information in the flowlines shapefile</span>
-<span class="linenos">267</span><span class="w">    </span><span class="c1"># however, in some cases an inflow location might be just outside of the flowlines that are provided</span>
-<span class="linenos">268</span><span class="w">    </span><span class="c1"># (for example, if they were clipped to the model grid, or if they are outside of the model bounding box)</span>
-<span class="linenos">269</span><span class="w">    </span><span class="c1"># or a runoff value might be assigned to a line that was culled from the preprocessed flowlines</span>
-<span class="linenos">270</span><span class="w">    </span><span class="c1"># the routing option allows complete routing of the original data to be supplied,</span>
-<span class="linenos">271</span><span class="w">    </span><span class="c1"># so that values associated with missing lines can be assigned to the next existing downstream line</span>
-<span class="linenos">272</span><span class="w">    </span><span class="nt">routing</span><span class="p">:</span>
-<span class="linenos">273</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/flowline_routing.csv&#39;</span>
-<span class="linenos">274</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;FROMCOMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
-<span class="linenos">275</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;TOCOMID&#39;</span>
-<span class="linenos">276</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
-<span class="linenos">277</span><span class="w">    </span><span class="c1"># the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker</span>
-<span class="linenos">278</span><span class="w">    </span><span class="c1"># (see https://doi-usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
-<span class="linenos">279</span><span class="w">    </span><span class="c1"># or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)</span>
-<span class="linenos">280</span><span class="w">    </span><span class="c1"># or to_riv (shellmound_tmr example)</span>
-<span class="linenos">281</span><span class="w">    </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1">#  consolidate SFR reaches to one per i, j location</span>
-<span class="linenos">282</span><span class="w">    </span><span class="nt">add_outlets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17957815</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">17956213</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># add outlets at these line numbers</span>
-<span class="linenos">283</span><span class="w">    </span><span class="nt">minimum_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-5</span>
-<span class="linenos">284</span><span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047206</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># convert this line and all downstream lines to the RIV package</span>
-<span class="linenos">285</span>
-<span class="linenos">286</span><span class="c1"># Constant Head Package</span>
-<span class="linenos">287</span><span class="nt">chd</span><span class="p">:</span>
-<span class="linenos">288</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">289</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">290</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">291</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="linenos">292</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="linenos">293</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
-<span class="linenos">294</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span>
-<span class="linenos">295</span><span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
-<span class="linenos">296</span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
-<span class="linenos">297</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
-<span class="linenos">298</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
-<span class="linenos">299</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
-<span class="linenos">300</span><span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="linenos">301</span><span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
-<span class="linenos">302</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
-<span class="linenos">303</span><span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span>
-<span class="linenos">304</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
-<span class="linenos">305</span><span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span>
-<span class="linenos">306</span><span class="w">          </span><span class="c1"># for the initial steady state</span>
-<span class="linenos">307</span><span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span>
-<span class="linenos">308</span><span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">309</span><span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span>
-<span class="linenos">310</span><span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span>
-<span class="linenos">311</span>
-<span class="linenos">312</span><span class="c1"># Drain Package</span>
-<span class="linenos">313</span><span class="nt">drn</span><span class="p">:</span>
-<span class="linenos">314</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">315</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">316</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">317</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="linenos">318</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="linenos">319</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
-<span class="linenos">320</span><span class="w">      </span><span class="c1"># Include all features in the above shapefile,</span>
-<span class="linenos">321</span><span class="w">      </span><span class="c1"># except those associated with these COMIDs</span>
-<span class="linenos">322</span><span class="w">      </span><span class="nt">exclude_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046226</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046238</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">17953939</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046140</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046162</span><span class="p p-Indicator">]</span>
-<span class="linenos">323</span><span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
-<span class="linenos">324</span><span class="w">    </span><span class="nt">elev</span><span class="p">:</span>
-<span class="linenos">325</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
-<span class="linenos">326</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
-<span class="linenos">327</span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span>
-<span class="linenos">328</span>
-<span class="linenos">329</span><span class="c1"># General Head Boundary Package</span>
-<span class="linenos">330</span><span class="nt">ghb</span><span class="p">:</span>
-<span class="linenos">331</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">332</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">333</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">334</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="linenos">335</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="linenos">336</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
-<span class="linenos">337</span><span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span>
-<span class="linenos">338</span><span class="w">      </span><span class="c1"># simply omit the include_ids: key</span>
-<span class="linenos">339</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">]</span>
-<span class="linenos">340</span><span class="w">      </span><span class="c1"># argument to rasterio.features.rasterize</span>
-<span class="linenos">341</span><span class="w">      </span><span class="c1"># if true, all grid cells touching the feature(s)</span>
-<span class="linenos">342</span><span class="w">      </span><span class="c1"># in the shapefile will be assigned BCs, if False</span>
-<span class="linenos">343</span><span class="w">      </span><span class="c1"># only the cells with centers inside the polygon</span>
-<span class="linenos">344</span><span class="w">      </span><span class="c1"># will be included</span>
-<span class="linenos">345</span><span class="w">      </span><span class="nt">all_touched</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">346</span><span class="w">    </span><span class="c1"># Example of mixed boundary condition input, where</span>
-<span class="linenos">347</span><span class="w">    </span><span class="c1"># a shapefile defines the feature extents</span>
-<span class="linenos">348</span><span class="w">    </span><span class="c1"># a csvfile defines transient head values</span>
-<span class="linenos">349</span><span class="w">    </span><span class="c1"># a raster defines static but spatially varying conductance</span>
-<span class="linenos">350</span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
-<span class="linenos">351</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
-<span class="linenos">352</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
-<span class="linenos">353</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
-<span class="linenos">354</span><span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="linenos">355</span><span class="w">      </span><span class="nt">bhead_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
-<span class="linenos">356</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
-<span class="linenos">357</span><span class="w">      </span><span class="c1"># with no period_stats: block, aggregation defaults</span>
-<span class="linenos">358</span><span class="w">      </span><span class="c1"># to &#39;mean&#39; for each stress period</span>
-<span class="linenos">359</span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span>
-<span class="linenos">360</span><span class="w">      </span><span class="c1"># note: a single global value could also be specified here,</span>
-<span class="linenos">361</span><span class="w">      </span><span class="c1"># as for the Drain Package</span>
-<span class="linenos">362</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shellmound/rasters/k330.tif</span>
-<span class="linenos">363</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span>
-<span class="linenos">364</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">days</span>
-<span class="linenos">365</span>
+<span class="linenos">144</span><span class="c1"># if no starting head values are specified,</span>
+<span class="linenos">145</span><span class="c1"># and there is no parent model,</span>
+<span class="linenos">146</span><span class="c1"># starting heads are set to the model top by default</span>
+<span class="linenos">147</span><span class="nt">ic</span><span class="p">:</span>
+<span class="linenos">148</span><span class="w">  </span><span class="c1"># optional format for writing external files</span>
+<span class="linenos">149</span><span class="w">  </span><span class="c1"># e.g. (strt_001.dat)</span>
+<span class="linenos">150</span><span class="w">  </span><span class="c1"># default is strt_{:03d}.dat</span>
+<span class="linenos">151</span><span class="w">  </span><span class="nt">strt_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;strt_{:03d}.dat&quot;</span>
+<span class="linenos">152</span>
+<span class="linenos">153</span><span class="c1"># Node Property Flow Package</span>
+<span class="linenos">154</span><span class="nt">npf</span><span class="p">:</span>
+<span class="linenos">155</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">156</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">157</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="linenos">158</span><span class="w">    </span><span class="nt">icelltype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># variable sat. thickness in all layers</span>
+<span class="linenos">159</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">160</span><span class="w">    </span><span class="nt">k</span><span class="p">:</span>
+<span class="linenos">161</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
+<span class="linenos">162</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k0.tif&#39;</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group</span>
+<span class="linenos">163</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k1.tif&#39;</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer</span>
+<span class="linenos">164</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k2.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit</span>
+<span class="linenos">165</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
+<span class="linenos">166</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
+<span class="linenos">167</span><span class="w">        </span><span class="nt">5</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
+<span class="linenos">168</span><span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k4.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
+<span class="linenos">169</span><span class="w">        </span><span class="nt">7</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k4.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
+<span class="linenos">170</span><span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k5.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer</span>
+<span class="linenos">171</span><span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k6.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer</span>
+<span class="linenos">172</span><span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k10.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
+<span class="linenos">173</span><span class="w">        </span><span class="nt">11</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k10.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
+<span class="linenos">174</span><span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k12.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
+<span class="linenos">175</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos">176</span><span class="w">    </span><span class="nt">k33</span><span class="p">:</span>
+<span class="linenos">177</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
+<span class="linenos">178</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k330.tif&#39;</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group</span>
+<span class="linenos">179</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k331.tif&#39;</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer</span>
+<span class="linenos">180</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k332.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit</span>
+<span class="linenos">181</span><span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k333.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
+<span class="linenos">182</span><span class="w">        </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k333.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
+<span class="linenos">183</span><span class="w">        </span><span class="nt">5</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k333.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer</span>
+<span class="linenos">184</span><span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k334.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
+<span class="linenos">185</span><span class="w">        </span><span class="nt">7</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k334.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit</span>
+<span class="linenos">186</span><span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k335.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer</span>
+<span class="linenos">187</span><span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k336.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer</span>
+<span class="linenos">188</span><span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3310.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
+<span class="linenos">189</span><span class="w">        </span><span class="nt">11</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3310.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
+<span class="linenos">190</span><span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/k3312.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer</span>
+<span class="linenos">191</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos">192</span><span class="w">  </span><span class="nt">k_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;k_{:03d}.dat&quot;</span>
+<span class="linenos">193</span><span class="w">  </span><span class="nt">k33_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;k33_{:03d}.dat&quot;</span>
+<span class="linenos">194</span>
+<span class="linenos">195</span><span class="c1"># Storage Package</span>
+<span class="linenos">196</span><span class="nt">sto</span><span class="p">:</span>
+<span class="linenos">197</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">198</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">199</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="linenos">200</span><span class="w">    </span><span class="nt">iconvert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">  </span><span class="c1"># convertible layers</span>
+<span class="linenos">201</span><span class="w">    </span><span class="c1"># initial global values for storage</span>
+<span class="linenos">202</span><span class="w">    </span><span class="nt">sy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
+<span class="linenos">203</span><span class="w">    </span><span class="nt">ss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-6</span>
+<span class="linenos">204</span>
+<span class="linenos">205</span><span class="c1"># Recharge Package</span>
+<span class="linenos">206</span><span class="nt">rch</span><span class="p">:</span>
+<span class="linenos">207</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">208</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">209</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos">210</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">211</span><span class="w">    </span><span class="nt">readasarrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">212</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">213</span><span class="w">    </span><span class="c1"># resample recharge from NetCDF file with time-series of grids</span>
+<span class="linenos">214</span><span class="w">    </span><span class="nt">recharge</span><span class="p">:</span>
+<span class="linenos">215</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc&#39;</span>
+<span class="linenos">216</span><span class="w">      </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;net_infiltration&#39;</span>
+<span class="linenos">217</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
+<span class="linenos">218</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="linenos">219</span><span class="w">      </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span>
+<span class="linenos">220</span><span class="w">      </span><span class="nt">resample_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;linear&#39;</span>
+<span class="linenos">221</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
+<span class="linenos">222</span><span class="w">        </span><span class="c1"># for the first two stress periods</span>
+<span class="linenos">223</span><span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span>
+<span class="linenos">224</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">225</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">226</span><span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span>
+<span class="linenos">227</span>
+<span class="linenos">228</span><span class="c1"># Streamflow Routing Package</span>
+<span class="linenos">229</span><span class="c1"># SFR input is created using SFRmaker</span>
+<span class="linenos">230</span><span class="c1"># https://github.com/usgs/sfrmaker</span>
+<span class="linenos">231</span><span class="nt">sfr</span><span class="p">:</span>
+<span class="linenos">232</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">233</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">234</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">235</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="linenos">236</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span>
+<span class="linenos">237</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
+<span class="linenos">238</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
+<span class="linenos">239</span><span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
+<span class="linenos">240</span><span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
+<span class="linenos">241</span><span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
+<span class="linenos">242</span><span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
+<span class="linenos">243</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="linenos">244</span><span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="linenos">245</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="linenos">246</span><span class="w">    </span><span class="c1"># specified inflows to SFR network</span>
+<span class="linenos">247</span><span class="w">    </span><span class="nt">inflows</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span>
+<span class="linenos">248</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/inflows.csv&#39;</span>
+<span class="linenos">249</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;datetime&#39;</span>
+<span class="linenos">250</span><span class="w">      </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;line_id&#39;</span>
+<span class="linenos">251</span><span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flow_m3d&#39;</span><span class="w">  </span><span class="c1"># flows are already in cubic meters/day; can therefore skip unit input</span>
+<span class="linenos">252</span><span class="w">      </span><span class="nt">category_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;category&#39;</span>
+<span class="linenos">253</span><span class="w">    </span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span>
+<span class="linenos">254</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shellmound/tables/observations.csv</span>
+<span class="linenos">255</span><span class="w">      </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">downstream-flow</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;stage&#39;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span>
+<span class="linenos">256</span><span class="w">      </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span><span class="w">  </span><span class="c1"># observation locations, in CRS coordinates</span>
+<span class="linenos">257</span><span class="w">      </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">y</span>
+<span class="linenos">258</span><span class="w">      </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site_no</span><span class="w">  </span><span class="c1"># column for naming observations</span>
+<span class="linenos">259</span><span class="w">    </span><span class="c1"># specified runoff</span>
+<span class="linenos">260</span><span class="w">    </span><span class="c1"># that has been reprocessed to units of m3/day per line ID</span>
+<span class="linenos">261</span><span class="w">    </span><span class="nt">runoff</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.data.add_to_perioddata for arguments</span>
+<span class="linenos">262</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/swb_runoff_by_nhdplus_comid_m3d.csv&#39;</span>
+<span class="linenos">263</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;time&#39;</span>
+<span class="linenos">264</span><span class="w">      </span><span class="nt">line_id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
+<span class="linenos">265</span><span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;runoff_m3d&#39;</span>
+<span class="linenos">266</span><span class="w">    </span><span class="c1"># modflow-setup will try to locate the inflows or runoff values</span>
+<span class="linenos">267</span><span class="w">    </span><span class="c1"># using the routing information in the flowlines shapefile</span>
+<span class="linenos">268</span><span class="w">    </span><span class="c1"># however, in some cases an inflow location might be just outside of the flowlines that are provided</span>
+<span class="linenos">269</span><span class="w">    </span><span class="c1"># (for example, if they were clipped to the model grid, or if they are outside of the model bounding box)</span>
+<span class="linenos">270</span><span class="w">    </span><span class="c1"># or a runoff value might be assigned to a line that was culled from the preprocessed flowlines</span>
+<span class="linenos">271</span><span class="w">    </span><span class="c1"># the routing option allows complete routing of the original data to be supplied,</span>
+<span class="linenos">272</span><span class="w">    </span><span class="c1"># so that values associated with missing lines can be assigned to the next existing downstream line</span>
+<span class="linenos">273</span><span class="w">    </span><span class="nt">routing</span><span class="p">:</span>
+<span class="linenos">274</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/flowline_routing.csv&#39;</span>
+<span class="linenos">275</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;FROMCOMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
+<span class="linenos">276</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;TOCOMID&#39;</span>
+<span class="linenos">277</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
+<span class="linenos">278</span><span class="w">    </span><span class="c1"># the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker</span>
+<span class="linenos">279</span><span class="w">    </span><span class="c1"># (see https://doi-usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
+<span class="linenos">280</span><span class="w">    </span><span class="c1"># or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)</span>
+<span class="linenos">281</span><span class="w">    </span><span class="c1"># or to_riv (shellmound_tmr example)</span>
+<span class="linenos">282</span><span class="w">    </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1">#  consolidate SFR reaches to one per i, j location</span>
+<span class="linenos">283</span><span class="w">    </span><span class="nt">add_outlets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17957815</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">17956213</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># add outlets at these line numbers</span>
+<span class="linenos">284</span><span class="w">    </span><span class="nt">minimum_slope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-5</span>
+<span class="linenos">285</span><span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18047206</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># convert this line and all downstream lines to the RIV package</span>
+<span class="linenos">286</span>
+<span class="linenos">287</span><span class="c1"># Constant Head Package</span>
+<span class="linenos">288</span><span class="nt">chd</span><span class="p">:</span>
+<span class="linenos">289</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">290</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">291</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">292</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="linenos">293</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="linenos">294</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
+<span class="linenos">295</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span>
+<span class="linenos">296</span><span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="linenos">297</span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
+<span class="linenos">298</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
+<span class="linenos">299</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
+<span class="linenos">300</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="linenos">301</span><span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="linenos">302</span><span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
+<span class="linenos">303</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos">304</span><span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span>
+<span class="linenos">305</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
+<span class="linenos">306</span><span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span>
+<span class="linenos">307</span><span class="w">          </span><span class="c1"># for the initial steady state</span>
+<span class="linenos">308</span><span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span>
+<span class="linenos">309</span><span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">310</span><span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span>
+<span class="linenos">311</span><span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span>
+<span class="linenos">312</span>
+<span class="linenos">313</span><span class="c1"># Drain Package</span>
+<span class="linenos">314</span><span class="nt">drn</span><span class="p">:</span>
+<span class="linenos">315</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">316</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">317</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">318</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="linenos">319</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="linenos">320</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="linenos">321</span><span class="w">      </span><span class="c1"># Include all features in the above shapefile,</span>
+<span class="linenos">322</span><span class="w">      </span><span class="c1"># except those associated with these COMIDs</span>
+<span class="linenos">323</span><span class="w">      </span><span class="nt">exclude_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046226</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046238</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">17953939</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046140</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046162</span><span class="p p-Indicator">]</span>
+<span class="linenos">324</span><span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="linenos">325</span><span class="w">    </span><span class="nt">elev</span><span class="p">:</span>
+<span class="linenos">326</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
+<span class="linenos">327</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos">328</span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span>
+<span class="linenos">329</span>
+<span class="linenos">330</span><span class="c1"># General Head Boundary Package</span>
+<span class="linenos">331</span><span class="nt">ghb</span><span class="p">:</span>
+<span class="linenos">332</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">333</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">334</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">335</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="linenos">336</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="linenos">337</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="linenos">338</span><span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span>
+<span class="linenos">339</span><span class="w">      </span><span class="c1"># simply omit the include_ids: key</span>
+<span class="linenos">340</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">]</span>
+<span class="linenos">341</span><span class="w">      </span><span class="c1"># argument to rasterio.features.rasterize</span>
+<span class="linenos">342</span><span class="w">      </span><span class="c1"># if true, all grid cells touching the feature(s)</span>
+<span class="linenos">343</span><span class="w">      </span><span class="c1"># in the shapefile will be assigned BCs, if False</span>
+<span class="linenos">344</span><span class="w">      </span><span class="c1"># only the cells with centers inside the polygon</span>
+<span class="linenos">345</span><span class="w">      </span><span class="c1"># will be included</span>
+<span class="linenos">346</span><span class="w">      </span><span class="nt">all_touched</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">347</span><span class="w">    </span><span class="c1"># Example of mixed boundary condition input, where</span>
+<span class="linenos">348</span><span class="w">    </span><span class="c1"># a shapefile defines the feature extents</span>
+<span class="linenos">349</span><span class="w">    </span><span class="c1"># a csvfile defines transient head values</span>
+<span class="linenos">350</span><span class="w">    </span><span class="c1"># a raster defines static but spatially varying conductance</span>
+<span class="linenos">351</span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
+<span class="linenos">352</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
+<span class="linenos">353</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
+<span class="linenos">354</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="linenos">355</span><span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="linenos">356</span><span class="w">      </span><span class="nt">bhead_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
+<span class="linenos">357</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos">358</span><span class="w">      </span><span class="c1"># with no period_stats: block, aggregation defaults</span>
+<span class="linenos">359</span><span class="w">      </span><span class="c1"># to &#39;mean&#39; for each stress period</span>
+<span class="linenos">360</span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span>
+<span class="linenos">361</span><span class="w">      </span><span class="c1"># note: a single global value could also be specified here,</span>
+<span class="linenos">362</span><span class="w">      </span><span class="c1"># as for the Drain Package</span>
+<span class="linenos">363</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shellmound/rasters/k330.tif</span>
+<span class="linenos">364</span><span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meters</span>
+<span class="linenos">365</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">days</span>
 <span class="linenos">366</span>
-<span class="linenos">367</span><span class="c1"># River Package</span>
-<span class="linenos">368</span><span class="nt">riv</span><span class="p">:</span>
-<span class="linenos">369</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">370</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">371</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">372</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="linenos">373</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="linenos">374</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
-<span class="linenos">375</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17953939</span><span class="p p-Indicator">]</span>
-<span class="linenos">376</span><span class="w">      </span><span class="c1"># option to include feature names from the shapefile</span>
-<span class="linenos">377</span><span class="w">      </span><span class="c1"># as Modflow boundnames</span>
-<span class="linenos">378</span><span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
-<span class="linenos">379</span><span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
-<span class="linenos">380</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
-<span class="linenos">381</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
-<span class="linenos">382</span><span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span>
-<span class="linenos">383</span><span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span>
-<span class="linenos">384</span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span>
-<span class="linenos">385</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
-<span class="linenos">386</span><span class="w">    </span><span class="nt">default_rbot_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span>
-<span class="linenos">387</span>
-<span class="linenos">388</span><span class="c1"># Well Package</span>
-<span class="linenos">389</span><span class="nt">wel</span><span class="p">:</span>
-<span class="linenos">390</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">391</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">392</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">393</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">394</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">395</span><span class="w">    </span><span class="nt">csvfiles</span><span class="p">:</span>
-<span class="linenos">396</span><span class="w">      </span><span class="c1"># pumping input from CSV files</span>
-<span class="linenos">397</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">398</span><span class="w">                  </span><span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">399</span><span class="w">                  </span><span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">400</span><span class="w">      </span><span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span>
-<span class="linenos">401</span><span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="linenos">402</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
-<span class="linenos">403</span><span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flux_m3&#39;</span>
-<span class="linenos">404</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
-<span class="linenos">405</span><span class="w">      </span><span class="c1"># end datetimes only for input data that needs upsampling;</span>
-<span class="linenos">406</span><span class="w">      </span><span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span>
-<span class="linenos">407</span><span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="linenos">408</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;node&#39;</span>
-<span class="linenos">409</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w">  </span><span class="c1"># how fluxes will be distributed across model stress periods</span>
-<span class="linenos">410</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span><span class="w">  </span><span class="c1"># no wells simulated in initial period</span>
-<span class="linenos">411</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># mean pumping rate for period 1 and subsequent periods</span>
-<span class="linenos">412</span><span class="w">      </span><span class="nt">vertical_flux_distribution</span><span class="p">:</span>
-<span class="linenos">413</span><span class="w">        </span><span class="nt">across_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># False to put fluxes in one layer</span>
-<span class="linenos">414</span><span class="w">        </span><span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span>
-<span class="linenos">415</span><span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;transmissivity&#39;</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span>
-<span class="linenos">416</span><span class="w">        </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.</span><span class="w">  </span><span class="c1"># layers must be at 10 length units thick to have a well;</span>
-<span class="linenos">417</span><span class="w">        </span><span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span>
-<span class="linenos">418</span>
-<span class="linenos">419</span><span class="c1"># Output Control Package</span>
-<span class="linenos">420</span><span class="nt">oc</span><span class="p">:</span>
-<span class="linenos">421</span><span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.hds&#39;</span>
-<span class="linenos">422</span><span class="w">  </span><span class="nt">budget_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.cbc&#39;</span>
-<span class="linenos">423</span><span class="w">  </span><span class="c1"># dictionary input similar to flopy</span>
-<span class="linenos">424</span><span class="w">  </span><span class="nt">saverecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">head</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;last&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">425</span><span class="nt">                   budget</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;last&#39;</span><span class="p p-Indicator">}</span>
-<span class="linenos">426</span><span class="w">  </span><span class="p p-Indicator">}</span>
-<span class="linenos">427</span><span class="w">  </span><span class="c1"># MODFLOW 6-style text input can also be used</span>
-<span class="linenos">428</span><span class="w">  </span><span class="c1"># e.g.</span>
-<span class="linenos">429</span><span class="w">  </span><span class="c1"># period_options: {0: [&#39;save head last&#39;,</span>
-<span class="linenos">430</span><span class="w">  </span><span class="c1">#              &#39;save budget last&#39; ]</span>
-<span class="linenos">431</span>
-<span class="linenos">432</span><span class="nt">obs</span><span class="p">:</span>
-<span class="linenos">433</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">434</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/preprocessed_head_obs_info.csv&#39;</span>
-<span class="linenos">435</span><span class="w">    </span><span class="p p-Indicator">]</span>
-<span class="linenos">436</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span>
-<span class="linenos">437</span><span class="w">      </span><span class="nt">obsname</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">438</span>
+<span class="linenos">367</span>
+<span class="linenos">368</span><span class="c1"># River Package</span>
+<span class="linenos">369</span><span class="nt">riv</span><span class="p">:</span>
+<span class="linenos">370</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">371</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">372</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">373</span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
+<span class="linenos">374</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
+<span class="linenos">375</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="linenos">376</span><span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17953939</span><span class="p p-Indicator">]</span>
+<span class="linenos">377</span><span class="w">      </span><span class="c1"># option to include feature names from the shapefile</span>
+<span class="linenos">378</span><span class="w">      </span><span class="c1"># as Modflow boundnames</span>
+<span class="linenos">379</span><span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="linenos">380</span><span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
+<span class="linenos">381</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
+<span class="linenos">382</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos">383</span><span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span>
+<span class="linenos">384</span><span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span>
+<span class="linenos">385</span><span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span>
+<span class="linenos">386</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
+<span class="linenos">387</span><span class="w">    </span><span class="nt">default_rbot_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span>
+<span class="linenos">388</span>
+<span class="linenos">389</span><span class="c1"># Well Package</span>
+<span class="linenos">390</span><span class="nt">wel</span><span class="p">:</span>
+<span class="linenos">391</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">392</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">393</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">394</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">395</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">396</span><span class="w">    </span><span class="nt">csvfiles</span><span class="p">:</span>
+<span class="linenos">397</span><span class="w">      </span><span class="c1"># pumping input from CSV files</span>
+<span class="linenos">398</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">399</span><span class="w">                  </span><span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">400</span><span class="w">                  </span><span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">401</span><span class="w">      </span><span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span>
+<span class="linenos">402</span><span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos">403</span><span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="linenos">404</span><span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flux_m3&#39;</span>
+<span class="linenos">405</span><span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="linenos">406</span><span class="w">      </span><span class="c1"># end datetimes only for input data that needs upsampling;</span>
+<span class="linenos">407</span><span class="w">      </span><span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span>
+<span class="linenos">408</span><span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
+<span class="linenos">409</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;node&#39;</span>
+<span class="linenos">410</span><span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w">  </span><span class="c1"># how fluxes will be distributed across model stress periods</span>
+<span class="linenos">411</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span><span class="w">  </span><span class="c1"># no wells simulated in initial period</span>
+<span class="linenos">412</span><span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># mean pumping rate for period 1 and subsequent periods</span>
+<span class="linenos">413</span><span class="w">      </span><span class="nt">vertical_flux_distribution</span><span class="p">:</span>
+<span class="linenos">414</span><span class="w">        </span><span class="nt">across_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># False to put fluxes in one layer</span>
+<span class="linenos">415</span><span class="w">        </span><span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span>
+<span class="linenos">416</span><span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;transmissivity&#39;</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span>
+<span class="linenos">417</span><span class="w">        </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.</span><span class="w">  </span><span class="c1"># layers must be at 10 length units thick to have a well;</span>
+<span class="linenos">418</span><span class="w">        </span><span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span>
+<span class="linenos">419</span>
+<span class="linenos">420</span><span class="c1"># Output Control Package</span>
+<span class="linenos">421</span><span class="nt">oc</span><span class="p">:</span>
+<span class="linenos">422</span><span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.hds&#39;</span>
+<span class="linenos">423</span><span class="w">  </span><span class="nt">budget_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.cbc&#39;</span>
+<span class="linenos">424</span><span class="w">  </span><span class="c1"># dictionary input similar to flopy</span>
+<span class="linenos">425</span><span class="w">  </span><span class="nt">saverecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">head</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;last&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">426</span><span class="nt">                   budget</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;last&#39;</span><span class="p p-Indicator">}</span>
+<span class="linenos">427</span><span class="w">  </span><span class="p p-Indicator">}</span>
+<span class="linenos">428</span><span class="w">  </span><span class="c1"># MODFLOW 6-style text input can also be used</span>
+<span class="linenos">429</span><span class="w">  </span><span class="c1"># e.g.</span>
+<span class="linenos">430</span><span class="w">  </span><span class="c1"># period_options: {0: [&#39;save head last&#39;,</span>
+<span class="linenos">431</span><span class="w">  </span><span class="c1">#              &#39;save budget last&#39; ]</span>
+<span class="linenos">432</span>
+<span class="linenos">433</span><span class="nt">obs</span><span class="p">:</span>
+<span class="linenos">434</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">435</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/preprocessed_head_obs_info.csv&#39;</span>
+<span class="linenos">436</span><span class="w">    </span><span class="p p-Indicator">]</span>
+<span class="linenos">437</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span>
+<span class="linenos">438</span><span class="w">      </span><span class="nt">obsname</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">]</span>
 <span class="linenos">439</span>
-<span class="linenos">440</span><span class="nt">ims</span><span class="p">:</span>
-<span class="linenos">441</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">442</span><span class="w">    </span><span class="nt">print_option</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span>
-<span class="linenos">443</span><span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;moderate&#39;</span>
-<span class="linenos">444</span><span class="w">    </span><span class="s">&#39;csv_output</span><span class="nv"> </span><span class="s">fileout&#39;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&#39;solver_out.csv&#39;</span>
-<span class="linenos">445</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
-<span class="linenos">446</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
-<span class="linenos">447</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
-<span class="linenos">448</span><span class="w">    </span><span class="nt">under_relaxation</span><span class="p">:</span><span class="w">  </span><span class="s">&#39;dbd&#39;</span>
-<span class="linenos">449</span><span class="w">    </span><span class="nt">under_relaxation_theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
-<span class="linenos">450</span><span class="w">    </span><span class="nt">under_relaxation_kappa</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="linenos">451</span><span class="w">    </span><span class="nt">under_relaxation_gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
-<span class="linenos">452</span><span class="w">    </span><span class="nt">under_relaxation_momentum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
-<span class="linenos">453</span><span class="w">    </span><span class="nt">backtracking_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos">454</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
-<span class="linenos">455</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="linenos">456</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
-<span class="linenos">457</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">458</span><span class="w">    </span><span class="nt">linear_acceleration</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;bicgstab&#39;</span>
-<span class="linenos">459</span><span class="w">    </span><span class="nt">scaling_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">460</span><span class="w">    </span><span class="nt">reordering_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">461</span><span class="w">    </span><span class="nt">relaxation_factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w">  </span><span class="c1"># either ILU(0) or ILUT preconditioning</span>
-<span class="linenos">462</span><span class="w">    </span><span class="nt">number_orthogonalizations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos">463</span><span class="w">    </span><span class="nt">preconditioner_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
-<span class="linenos">464</span><span class="w">    </span><span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="linenos">440</span>
+<span class="linenos">441</span><span class="nt">ims</span><span class="p">:</span>
+<span class="linenos">442</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">443</span><span class="w">    </span><span class="nt">print_option</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span>
+<span class="linenos">444</span><span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;moderate&#39;</span>
+<span class="linenos">445</span><span class="w">    </span><span class="s">&#39;csv_output</span><span class="nv"> </span><span class="s">fileout&#39;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&#39;solver_out.csv&#39;</span>
+<span class="linenos">446</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
+<span class="linenos">447</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
+<span class="linenos">448</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="linenos">449</span><span class="w">    </span><span class="nt">under_relaxation</span><span class="p">:</span><span class="w">  </span><span class="s">&#39;dbd&#39;</span>
+<span class="linenos">450</span><span class="w">    </span><span class="nt">under_relaxation_theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="linenos">451</span><span class="w">    </span><span class="nt">under_relaxation_kappa</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="linenos">452</span><span class="w">    </span><span class="nt">under_relaxation_gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="linenos">453</span><span class="w">    </span><span class="nt">under_relaxation_momentum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="linenos">454</span><span class="w">    </span><span class="nt">backtracking_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos">455</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
+<span class="linenos">456</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">457</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
+<span class="linenos">458</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">459</span><span class="w">    </span><span class="nt">linear_acceleration</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;bicgstab&#39;</span>
+<span class="linenos">460</span><span class="w">    </span><span class="nt">scaling_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">461</span><span class="w">    </span><span class="nt">reordering_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">462</span><span class="w">    </span><span class="nt">relaxation_factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w">  </span><span class="c1"># either ILU(0) or ILUT preconditioning</span>
+<span class="linenos">463</span><span class="w">    </span><span class="nt">number_orthogonalizations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos">464</span><span class="w">    </span><span class="nt">preconditioner_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="linenos">465</span><span class="w">    </span><span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
 </pre></div>
 </div>
 </section>
@@ -875,105 +876,104 @@
 <span class="linenos">135</span>
 <span class="linenos">136</span><span class="c1"># Initial Conditions Package</span>
 <span class="linenos">137</span><span class="nt">ic</span><span class="p">:</span>
-<span class="linenos">138</span><span class="w">  </span><span class="c1"># starting heads sampled from parent model</span>
-<span class="linenos">139</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">140</span><span class="w">    </span><span class="nt">strt</span><span class="p">:</span>
-<span class="linenos">141</span><span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
-<span class="linenos">142</span><span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
-<span class="linenos">143</span><span class="w">        </span><span class="nt">stress_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos">144</span>
-<span class="linenos">145</span><span class="c1"># Node Property Flow Package</span>
-<span class="linenos">146</span><span class="nt">npf</span><span class="p">:</span>
-<span class="linenos">147</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">148</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">149</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
-<span class="linenos">150</span><span class="w">    </span><span class="nt">icelltype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># variable sat. thickness in all layers</span>
-<span class="linenos">151</span><span class="w">  </span><span class="c1"># with parent: default_source_data: True,</span>
-<span class="linenos">152</span><span class="w">  </span><span class="c1"># unspecified variables such as &quot;k&quot; and &quot;k33&quot; are resampled from parent model</span>
-<span class="linenos">153</span>
-<span class="linenos">154</span><span class="c1"># Storage Package</span>
-<span class="linenos">155</span><span class="nt">sto</span><span class="p">:</span>
-<span class="linenos">156</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">157</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">158</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
-<span class="linenos">159</span><span class="w">    </span><span class="nt">iconvert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">  </span><span class="c1"># convertible layers</span>
-<span class="linenos">160</span><span class="w">  </span><span class="c1"># with parent: default_source_data: True,</span>
-<span class="linenos">161</span><span class="w">  </span><span class="c1"># unspecified variables such as &quot;sy&quot; and &quot;ss&quot; are resampled from parent model</span>
-<span class="linenos">162</span>
-<span class="linenos">163</span><span class="w">      </span><span class="c1"># Well Package</span>
-<span class="linenos">164</span><span class="nt">wel</span><span class="p">:</span>
-<span class="linenos">165</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">166</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">167</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">168</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">169</span><span class="w">  </span><span class="c1"># with parent: default_source_data: True,</span>
-<span class="linenos">170</span><span class="w">  </span><span class="c1"># unspecified well fluxes are resampled from parent model</span>
-<span class="linenos">171</span>
-<span class="linenos">172</span><span class="c1"># Streamflow Routing Package</span>
-<span class="linenos">173</span><span class="c1"># SFR input is created using SFRmaker</span>
-<span class="linenos">174</span><span class="c1"># https://github.com/usgs/sfrmaker</span>
-<span class="linenos">175</span><span class="nt">sfr</span><span class="p">:</span>
-<span class="linenos">176</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">177</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">178</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">179</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="linenos">180</span><span class="w">      </span><span class="c1"># path to NHDPlus version 2 dataset</span>
-<span class="linenos">181</span><span class="w">      </span><span class="nt">nhdplus_paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;data/pleasant/source_data/shps&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">182</span><span class="w">    </span><span class="c1"># if a DEM is included, streambed top elevations will be sampled</span>
-<span class="linenos">183</span><span class="w">    </span><span class="c1"># from the minimum DEM values within a 100 meter buffer around each stream reach</span>
-<span class="linenos">184</span><span class="w">    </span><span class="nt">dem</span><span class="p">:</span>
-<span class="linenos">185</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/rasters/dem40m.tif&#39;</span>
-<span class="linenos">186</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="linenos">187</span><span class="w">    </span><span class="c1"># SFR observations can be automatically setup from a CSV file</span>
-<span class="linenos">188</span><span class="w">    </span><span class="c1"># of x, y locations and fluxes</span>
-<span class="linenos">189</span><span class="w">    </span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span>
-<span class="linenos">190</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/tables/gages.csv&#39;</span>
-<span class="linenos">191</span><span class="w">      </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;downstream-flow&#39;</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span>
-<span class="linenos">192</span><span class="w">      </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x&#39;</span>
-<span class="linenos">193</span><span class="w">      </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y&#39;</span>
-<span class="linenos">194</span><span class="w">      </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;site_no&#39;</span>
-<span class="linenos">195</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
-<span class="linenos">196</span><span class="w">    </span><span class="c1"># the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker</span>
-<span class="linenos">197</span><span class="w">    </span><span class="c1"># (see https://doi-usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
-<span class="linenos">198</span><span class="w">    </span><span class="c1"># or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)</span>
-<span class="linenos">199</span><span class="w">    </span><span class="c1"># or to_riv (shellmound_tmr example)</span>
-<span class="linenos">200</span><span class="w">    </span><span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">201</span>
-<span class="linenos">202</span><span class="c1"># Iterative model solution</span>
-<span class="linenos">203</span><span class="nt">ims</span><span class="p">:</span>
-<span class="linenos">204</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">205</span><span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;moderate&#39;</span>
-<span class="linenos">206</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
-<span class="linenos">207</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
-<span class="linenos">208</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
-<span class="linenos">209</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
-<span class="linenos">210</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="linenos">211</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-4</span>
-<span class="linenos">212</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">213</span>
-<span class="linenos">214</span><span class="c1"># Observation (OBS) Utility</span>
-<span class="linenos">215</span><span class="nt">obs</span><span class="p">:</span>
-<span class="linenos">216</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">217</span><span class="w">    </span><span class="c1"># Head observations are supplied via csv files with x, y locations and observation names</span>
-<span class="linenos">218</span><span class="w">    </span><span class="c1"># an observation is generated in each model layer;</span>
-<span class="linenos">219</span><span class="w">    </span><span class="c1"># observations at each location can subsequently be processed</span>
-<span class="linenos">220</span><span class="w">    </span><span class="c1"># to represent a given screened interval</span>
-<span class="linenos">221</span><span class="w">    </span><span class="c1"># for example, using modflow-obs (https://github.com/aleaf/modflow-obs)</span>
-<span class="linenos">222</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;data/pleasant/source_data/tables/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">223</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span><span class="w">  </span><span class="c1"># some lakes are high-k; obs need to be in hydmod</span>
-<span class="linenos">224</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">225</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/uwsp_heads.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">226</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/wgnhs_head_targets.csv&#39;</span>
-<span class="linenos">227</span><span class="w">                     </span><span class="p p-Indicator">]</span>
-<span class="linenos">228</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span>
-<span class="linenos">229</span><span class="w">      </span><span class="nt">obsname</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">230</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
-<span class="linenos">231</span><span class="w">    </span><span class="nt">drop_observations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span><span class="w">  </span><span class="c1"># pleasant lake; monitored via Lake Package observations</span>
-<span class="linenos">232</span><span class="w">    </span><span class="p p-Indicator">]</span>
-<span class="linenos">233</span>
-<span class="linenos">234</span><span class="nt">chd</span><span class="p">:</span>
-<span class="linenos">235</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="linenos">236</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span>
+<span class="linenos">138</span><span class="w">  </span><span class="c1"># override default_source_data: True setting</span>
+<span class="linenos">139</span><span class="w">  </span><span class="c1"># (to set starting heads from the parent model starting heads)</span>
+<span class="linenos">140</span><span class="w">  </span><span class="c1"># set starting heads to the model top</span>
+<span class="linenos">141</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">142</span><span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">from_model_top</span>
+<span class="linenos">143</span>
+<span class="linenos">144</span><span class="c1"># Node Property Flow Package</span>
+<span class="linenos">145</span><span class="nt">npf</span><span class="p">:</span>
+<span class="linenos">146</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">147</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">148</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="linenos">149</span><span class="w">    </span><span class="nt">icelltype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># variable sat. thickness in all layers</span>
+<span class="linenos">150</span><span class="w">  </span><span class="c1"># with parent: default_source_data: True,</span>
+<span class="linenos">151</span><span class="w">  </span><span class="c1"># unspecified variables such as &quot;k&quot; and &quot;k33&quot; are resampled from parent model</span>
+<span class="linenos">152</span>
+<span class="linenos">153</span><span class="c1"># Storage Package</span>
+<span class="linenos">154</span><span class="nt">sto</span><span class="p">:</span>
+<span class="linenos">155</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">156</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">157</span><span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
+<span class="linenos">158</span><span class="w">    </span><span class="nt">iconvert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">  </span><span class="c1"># convertible layers</span>
+<span class="linenos">159</span><span class="w">  </span><span class="c1"># with parent: default_source_data: True,</span>
+<span class="linenos">160</span><span class="w">  </span><span class="c1"># unspecified variables such as &quot;sy&quot; and &quot;ss&quot; are resampled from parent model</span>
+<span class="linenos">161</span>
+<span class="linenos">162</span><span class="w">      </span><span class="c1"># Well Package</span>
+<span class="linenos">163</span><span class="nt">wel</span><span class="p">:</span>
+<span class="linenos">164</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">165</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">166</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">167</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">168</span><span class="w">  </span><span class="c1"># with parent: default_source_data: True,</span>
+<span class="linenos">169</span><span class="w">  </span><span class="c1"># unspecified well fluxes are resampled from parent model</span>
+<span class="linenos">170</span>
+<span class="linenos">171</span><span class="c1"># Streamflow Routing Package</span>
+<span class="linenos">172</span><span class="c1"># SFR input is created using SFRmaker</span>
+<span class="linenos">173</span><span class="c1"># https://github.com/usgs/sfrmaker</span>
+<span class="linenos">174</span><span class="nt">sfr</span><span class="p">:</span>
+<span class="linenos">175</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">176</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">177</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">178</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
+<span class="linenos">179</span><span class="w">      </span><span class="c1"># path to NHDPlus version 2 dataset</span>
+<span class="linenos">180</span><span class="w">      </span><span class="nt">nhdplus_paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;data/pleasant/source_data/shps&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">181</span><span class="w">    </span><span class="c1"># if a DEM is included, streambed top elevations will be sampled</span>
+<span class="linenos">182</span><span class="w">    </span><span class="c1"># from the minimum DEM values within a 100 meter buffer around each stream reach</span>
+<span class="linenos">183</span><span class="w">    </span><span class="nt">dem</span><span class="p">:</span>
+<span class="linenos">184</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/rasters/dem40m.tif&#39;</span>
+<span class="linenos">185</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos">186</span><span class="w">    </span><span class="c1"># SFR observations can be automatically setup from a CSV file</span>
+<span class="linenos">187</span><span class="w">    </span><span class="c1"># of x, y locations and fluxes</span>
+<span class="linenos">188</span><span class="w">    </span><span class="nt">observations</span><span class="p">:</span><span class="w">  </span><span class="c1"># see sfrmaker.observations.add_observations for arguments</span>
+<span class="linenos">189</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/source_data/tables/gages.csv&#39;</span>
+<span class="linenos">190</span><span class="w">      </span><span class="nt">obstype</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;downstream-flow&#39;</span><span class="w">  </span><span class="c1"># modflow-6 observation type</span>
+<span class="linenos">191</span><span class="w">      </span><span class="nt">x_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x&#39;</span>
+<span class="linenos">192</span><span class="w">      </span><span class="nt">y_location_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y&#39;</span>
+<span class="linenos">193</span><span class="w">      </span><span class="nt">obsname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;site_no&#39;</span>
+<span class="linenos">194</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
+<span class="linenos">195</span><span class="w">    </span><span class="c1"># the sfrmaker_options: block can include arguments to the Lines.to_sfr method in SFRmaker</span>
+<span class="linenos">196</span><span class="w">    </span><span class="c1"># (see https://doi-usgs.github.io/sfrmaker/api/sfrmaker.lines.html#sfrmaker.lines.Lines.to_sfr)</span>
+<span class="linenos">197</span><span class="w">    </span><span class="c1"># or other options such as set_streambed_top_elevations_from_dem (see pleasant examples)</span>
+<span class="linenos">198</span><span class="w">    </span><span class="c1"># or to_riv (shellmound_tmr example)</span>
+<span class="linenos">199</span><span class="w">    </span><span class="nt">set_streambed_top_elevations_from_dem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">200</span>
+<span class="linenos">201</span><span class="c1"># Iterative model solution</span>
+<span class="linenos">202</span><span class="nt">ims</span><span class="p">:</span>
+<span class="linenos">203</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">204</span><span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;moderate&#39;</span>
+<span class="linenos">205</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
+<span class="linenos">206</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
+<span class="linenos">207</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="linenos">208</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
+<span class="linenos">209</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">210</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-4</span>
+<span class="linenos">211</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">212</span>
+<span class="linenos">213</span><span class="c1"># Observation (OBS) Utility</span>
+<span class="linenos">214</span><span class="nt">obs</span><span class="p">:</span>
+<span class="linenos">215</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">216</span><span class="w">    </span><span class="c1"># Head observations are supplied via csv files with x, y locations and observation names</span>
+<span class="linenos">217</span><span class="w">    </span><span class="c1"># an observation is generated in each model layer;</span>
+<span class="linenos">218</span><span class="w">    </span><span class="c1"># observations at each location can subsequently be processed</span>
+<span class="linenos">219</span><span class="w">    </span><span class="c1"># to represent a given screened interval</span>
+<span class="linenos">220</span><span class="w">    </span><span class="c1"># for example, using modflow-obs (https://github.com/aleaf/modflow-obs)</span>
+<span class="linenos">221</span><span class="w">    </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;data/pleasant/source_data/tables/nwis_heads_info_file.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">222</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/lake_sites.csv&#39;</span><span class="p p-Indicator">,</span><span class="w">  </span><span class="c1"># some lakes are high-k; obs need to be in hydmod</span>
+<span class="linenos">223</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/wdnr_gw_sites.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">224</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/uwsp_heads.csv&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">225</span><span class="w">                </span><span class="s">&#39;data/pleasant/source_data/tables/wgnhs_head_targets.csv&#39;</span>
+<span class="linenos">226</span><span class="w">                     </span><span class="p p-Indicator">]</span>
+<span class="linenos">227</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span>
+<span class="linenos">228</span><span class="w">      </span><span class="nt">obsname</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">229</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
+<span class="linenos">230</span><span class="w">    </span><span class="nt">drop_observations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;10019209_lk&#39;</span><span class="w">  </span><span class="c1"># pleasant lake; monitored via Lake Package observations</span>
+<span class="linenos">231</span><span class="w">    </span><span class="p p-Indicator">]</span>
+<span class="linenos">232</span>
+<span class="linenos">233</span><span class="nt">chd</span><span class="p">:</span>
+<span class="linenos">234</span><span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
+<span class="linenos">235</span><span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span>
 </pre></div>
 </div>
 </section>
@@ -1532,7 +1532,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Oct 23, 2024.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
       </span></p>
   </div>
 

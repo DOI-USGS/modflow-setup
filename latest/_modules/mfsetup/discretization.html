@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization &mdash; modflow-setup 0.5.0.post50+g346edf0 documentation</title>
+  <title>mfsetup.discretization &mdash; modflow-setup 0.5.0.post58+g45e95f4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=374c9353"></script>
+      <script src="../../_static/documentation_options.js?v=14b17a75"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -567,6 +567,16 @@
     <span class="n">y1</span> <span class="o">=</span> <span class="n">inset_modelgrid</span><span class="o">.</span><span class="n">ycellcenters</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">pi1</span><span class="p">,</span> <span class="n">pj1</span> <span class="o">=</span> <span class="n">parent_modelgrid</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">forgive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">idomain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">parent_modelgrid</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">([</span><span class="n">pi0</span><span class="p">,</span> <span class="n">pj0</span><span class="p">])):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LGR model upper left corner </span><span class="si">{</span><span class="n">pi0</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">pj0</span><span class="si">}</span><span class="s2"> &quot;</span>
+                         <span class="s2">&quot;is outside of the parent model domain! &quot;</span>
+                         <span class="s2">&quot;Check the grid offset and dimensions.&quot;</span>
+                         <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">([</span><span class="n">pi1</span><span class="p">,</span> <span class="n">pj1</span><span class="p">])):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LGR model lower right corner </span><span class="si">{</span><span class="n">pi0</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">pj0</span><span class="si">}</span><span class="s2"> &quot;</span>
+                         <span class="s2">&quot;is outside of the parent model domain! &quot;</span>
+                         <span class="s2">&quot;Check the grid offset and dimensions.&quot;</span>
+                         <span class="p">)</span>
     <span class="n">idomain</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ncppl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
             <span class="n">pi0</span><span class="p">:</span><span class="n">pi1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pj0</span><span class="p">:</span><span class="n">pj1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">idomain</span></div>
@@ -922,7 +932,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Oct 23, 2024.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
       </span></p>
   </div>
 

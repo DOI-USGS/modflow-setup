@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.5.0.post50+g346edf0 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.5.0.post58+g45e95f4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=374c9353"></script>
+      <script src="../../_static/documentation_options.js?v=14b17a75"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -395,12 +395,16 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parent_layers</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">botm_source_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;botm&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">nlay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span>
+            <span class="k">if</span> <span class="n">nlay</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nlay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">][</span><span class="s1">&#39;nlay&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inset_layer_mapping&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">parent_layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;inset_layer_mapping&#39;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">botm_source_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;from_parent&#39;</span> <span class="ow">in</span> <span class="n">botm_source_data</span><span class="p">:</span>
                 <span class="n">parent_layers</span> <span class="o">=</span> <span class="n">botm_source_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_parent&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">parent_layers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">)))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span> <span class="o">==</span> <span class="n">nlay</span><span class="p">):</span>
+                <span class="n">parent_layers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">),</span>
+                                         <span class="nb">range</span><span class="p">(</span><span class="n">nlay</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1">#parent_layers = dict(zip(range(self.parent.modelgrid.nlay), range(self.parent.modelgrid.nlay)))</span>
                 <span class="n">parent_layers</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1762,6 +1766,15 @@
                                                         <span class="n">dest_model</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">inflows_by_stress_period</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
+            <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
+                                <span class="n">difference</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">missing_sites</span><span class="p">):</span>
+                <span class="c1"># cast IDs to strings for compatibility with SFRmaker &gt; 0.11.3</span>
+                <span class="c1"># for now, assume IDs are numeric; future updates to SFRmaker</span>
+                <span class="c1"># may eventually allow for alpha numeric IDs</span>
+                <span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]]</span> <span class="o">=</span>\
+                    <span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
             <span class="c1"># check if all inflow sites are included in sfr network</span>
             <span class="n">missing_sites</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">inflows_by_stress_period</span><span class="p">[</span><span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;id_column&#39;</span><span class="p">]])</span><span class="o">.</span> \
                                 <span class="n">difference</span><span class="p">(</span><span class="n">routing</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -1981,7 +1994,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2024, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Oct 23, 2024.
+      <span class="lastupdated">Last updated on Nov 14, 2024.
       </span></p>
   </div>
 
