@@ -80,7 +80,7 @@ jobs:
         make -C docs html
 
     - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@v4.7.1
+      uses: JamesIves/github-pages-deploy-action@v4.7.2
       if: ${{ github.event_name == 'release' }}
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,7 +90,7 @@ jobs:
         TARGET_FOLDER: ${{ github.ref }}
 
     - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@v4.7.1
+      uses: JamesIves/github-pages-deploy-action@v4.7.2
       if: ${{ github.event_name == 'push' }}
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
