@@ -328,6 +328,14 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     # {inset_reach: parent_reach, ...}
     assert to_parent == {29: 13, 41: 1}
 
+    # test for no circular connections when two outlets are connected
+    # and distance_threshold is large
+    parent_reach_data.loc[parent_reach_data['rno'] == list(to_parent.values())[0], 'outreach'] = 0
+    to_inset, to_parent = get_sfr_package_connections(
+    gwfgwf_exchangedata,
+    parent_reach_data, inset_reach_data, distance_threshold=1e4)
+    assert not any(to_inset)
+
 
 def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
     """Test for SFR routing continuity in LGR cases

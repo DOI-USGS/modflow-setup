@@ -103,6 +103,10 @@ def get_sfr_package_connections(gwfgwf_exchangedata,
     # make the connections
     parent_to_inset = dict()
     inset_to_parent = dict()
+    # record connection distances
+    # for breaking circular routing cases
+    parent_to_inset_distances = dict()
+    inset_to_parent_distances = dict()
     for _, r in reach_data1.iterrows():
         # check for connections to the other model
         # if the next reach is in another cell
@@ -120,9 +124,11 @@ def get_sfr_package_connections(gwfgwf_exchangedata,
             # consider this each to be an outlet
             reach_end = Point(r['geometry'].coords[-1])
             distances = reach_end.distance(reach_data2['reach_start'])
-            if np.min(distances) < distance_threshold:
+            min_distance = np.min(distances)
+            if min_distance < distance_threshold:
                 next_reach = reach_data2.iloc[np.argmin(distances)]
                 parent_to_inset[r['rno']] = next_reach['rno']
+                parent_to_inset_distances[r['rno']] = min_distance
         # next reach is somewhere else in the parent model
         else:
             continue
@@ -144,12 +150,34 @@ def get_sfr_package_connections(gwfgwf_exchangedata,
             # consider this each to be an outlet
             reach_end = Point(r['geometry'].coords[-1])
             distances = reach_end.distance(reach_data1['reach_start'])
-            if np.min(distances) < distance_threshold:
+            min_distance = np.min(distances)
+            if min_distance < distance_threshold:
                 next_reach = reach_data1.iloc[np.argmin(distances)]
                 inset_to_parent[r['rno']] = next_reach['rno']
+                inset_to_parent_distances[r['rno']] = min_distance
         # next reach is somewhere else in this model
         else:
             continue
+    # check for circular connections (going both ways between two models)
+    # retain connection with the smallest distance
+    delete_parent_to_inset_items = set()
+    for parent_reach, inset_reach in parent_to_inset.items():
+        if parent_reach in inset_to_parent.values():
+            parent_to_inset_distance = parent_to_inset_distances[parent_reach]
+            inset_to_parent_distance = inset_to_parent_distances[inset_reach]
+            if inset_to_parent_distance < parent_to_inset_distance:
+                delete_parent_to_inset_items.add(parent_reach)
+            elif parent_to_inset_distance < inset_to_parent_distance:
+                del inset_to_parent[inset_reach]
+            else:
+                raise ValueError("Circular connection between SFR Packages in the Mover Package input.\n"
+                                 f"Connection distance between the end of parent reach {parent_reach} "
+                                 f"in parent model and start of inset reach {inset_reach} in inset model "
+                                 f"is equal to\nthe distance between the end of inset reach {inset_reach} "
+                                 f"and start of parent reach {parent_reach}.\nCheck input linework."
+                                 )
+    for parent_reach in delete_parent_to_inset_items:
+        del parent_to_inset[parent_reach]
     return parent_to_inset, inset_to_parent
 
 
