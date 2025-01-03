@@ -1,3 +1,7 @@
+"""Test functions in the mover.py module. See test_lgr.py for
+a test of the test_mover_get_sfr_package_connections function.
+
+"""
 from copy import deepcopy
 
 import pytest
