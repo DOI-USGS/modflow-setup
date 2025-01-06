@@ -4,7 +4,7 @@ Modflow-setup
 Modflow-setup is a Python package for automating the setup of MODFLOW groundwater models from grid-independent source data including shapefiles, rasters, and other MODFLOW models that are geo-located. Input data and model construction options are summarized in a single configuration file. Source data are read from their native formats and mapped to a regular finite difference grid specified in the configuration file. An external array-based [Flopy](https://github.com/modflowpy/flopy) model instance with the desired packages is created from the sampled source data and configuration settings. MODFLOW input can then be written from the flopy model instance.
 
 
-### Version 0.5
+### Version 0.6
 ![Tests](https://github.com/doi-usgs/modflow-setup/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/doi-usgs/modflow-setup/branch/develop/graph/badge.svg?token=aWN47DYeIv)](https://codecov.io/gh/doi-usgs/modflow-setup)
 [![PyPI version](https://badge.fury.io/py/modflow-setup.svg)](https://badge.fury.io/py/modflow-setup)
