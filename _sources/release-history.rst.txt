@@ -2,6 +2,17 @@
 Release History
 ===============
 
+Version 0.6.0 (2025-01-06)
+----------------------------------------
+
+* Add support for local grid refinement (LGR) in a subset of the parent model layers.
+    * Replace parent_start/end layer configuration input with "vertical_refinement" in each parent layer (int, list or dict), which gets translated to ncppl input to the Flopy Lgr utility.
+    * Child model bottom and parent model top are exactly aligned with no overlap or gaps in numerical grid.
+    * On setup of the LGR grid, the parent model cell tops/bottoms are collapsed to zero thickness within the child model area(s).
+    * Recharge, SFR and non-Well basic stress boundary conditions are only applied to the Child model (assuming that these represent surface or near-surface features that should only be represented in the child model).
+    * Wells with > 50% of their open interval intersecting the child model domain get assigned to the child model.
+    * Wells with > 50% of their open interval intersecting the parent model get assigned to the parent model.
+
 Version 0.5.0 (2024-03-08)
 ----------------------------------------
 * Improvements to rotated grid generation

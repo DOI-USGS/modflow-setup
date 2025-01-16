@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>10 Minutes to Modflow-setup &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+  <title>10 Minutes to Modflow-setup &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -145,10 +145,10 @@
 <p>Usually creating the desired grid requires some iteration. We can get started on this by making a model setup script and corresponding configuration file.</p>
 <p>An initial model setup script for making the model grid:</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MF6model</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">MF6model</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+<span class="linenos"> 4</span><span class="k">def</span><span class="w"> </span><span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
 <span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Just set up (a shapefile of) the model grid.</span>
 <span class="linenos"> 6</span><span class="sd">    For trying different grid configurations.&quot;&quot;&quot;</span>
 <span class="linenos"> 7</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">cfg_file</span><span class="p">)</span>
@@ -391,12 +391,12 @@
 </div></blockquote>
 <p>A setup script for making a minimum working model. Additional functions can be added later to further customize the model outside of the Modflow-setup build step.</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">os</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MF6model</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">MF6model</span>
 <span class="linenos"> 4</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="k">def</span> <span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+<span class="linenos"> 6</span><span class="k">def</span><span class="w"> </span><span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
 <span class="linenos"> 7</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Just set up (a shapefile of) the model grid.</span>
 <span class="linenos"> 8</span><span class="sd">    For trying different grid configurations.&quot;&quot;&quot;</span>
 <span class="linenos"> 9</span>    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
@@ -408,7 +408,7 @@
 <span class="linenos">15</span>    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span>
-<span class="linenos">18</span><span class="k">def</span> <span class="nf">setup_model</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+<span class="linenos">18</span><span class="k">def</span><span class="w"> </span><span class="nf">setup_model</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
 <span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up the whole model.&quot;&quot;&quot;</span>
 <span class="linenos">20</span>    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 <span class="linenos">21</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
@@ -441,7 +441,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

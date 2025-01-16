@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.interpolate &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>mfsetup.interpolate &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="../../_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -99,18 +99,18 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mfsetup.interpolate</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
-<span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">qhull</span> <span class="k">as</span> <span class="n">qhull</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">griddata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">qhull</span> <span class="k">as</span> <span class="n">qhull</span>
 
 
 <div class="viewcode-block" id="get_source_dest_model_xys">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.get_source_dest_model_xys">[docs]</a>
-<span class="k">def</span> <span class="nf">get_source_dest_model_xys</span><span class="p">(</span><span class="n">source_model</span><span class="p">,</span> <span class="n">dest_model</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_source_dest_model_xys</span><span class="p">(</span><span class="n">source_model</span><span class="p">,</span> <span class="n">dest_model</span><span class="p">,</span>
                               <span class="n">source_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the xyz and uvw inputs to the interp_weights function.</span>
 
@@ -146,7 +146,7 @@
 
 <div class="viewcode-block" id="interp_weights">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.interp_weights">[docs]</a>
-<span class="k">def</span> <span class="nf">interp_weights</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">interp_weights</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Speed up interpolation vs scipy.interpolate.griddata (method=&#39;linear&#39;),</span>
 <span class="sd">    by only computing the weights once:</span>
 <span class="sd">    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids</span>
@@ -198,7 +198,7 @@
 
 <div class="viewcode-block" id="interpolate">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.interpolate">[docs]</a>
-<span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">vtx</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">vtx</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply the interpolation weights to a set of values.</span>
 
 <span class="sd">    Parameters</span>
@@ -229,7 +229,7 @@
 
 <div class="viewcode-block" id="regrid">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.regrid">[docs]</a>
-<span class="k">def</span> <span class="nf">regrid</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">grid2</span><span class="p">,</span> <span class="n">mask1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">regrid</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">grid2</span><span class="p">,</span> <span class="n">mask1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate array values from one model grid to another,</span>
 <span class="sd">    using scipy.interpolate.griddata.</span>
 
@@ -252,7 +252,7 @@
 <span class="sd">        interpolation method (&#39;nearest&#39;, &#39;linear&#39;, or &#39;cubic&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">griddata</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scipy not installed</span><span class="se">\n</span><span class="s1">try pip install scipy&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -296,7 +296,7 @@
 
 <div class="viewcode-block" id="regrid3d">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.regrid3d">[docs]</a>
-<span class="k">def</span> <span class="nf">regrid3d</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">grid2</span><span class="p">,</span> <span class="n">mask1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">regrid3d</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">grid2</span><span class="p">,</span> <span class="n">mask1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate array values from one model grid to another,</span>
 <span class="sd">    using scipy.interpolate.griddata.</span>
 
@@ -324,7 +324,7 @@
 <span class="sd">        Interpolated values at the x, y, z locations in grid2.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">griddata</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scipy not installed</span><span class="se">\n</span><span class="s1">try pip install scipy&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -418,7 +418,7 @@
 
 <div class="viewcode-block" id="Interpolator">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.Interpolator">[docs]</a>
-<span class="k">class</span> <span class="nc">Interpolator</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Interpolator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Speed up barycentric interpolation similar to scipy.interpolate.griddata</span>
 <span class="sd">    (method=&#39;linear&#39;), by computing the weights once and then re-using them for</span>
 <span class="sd">    successive interpolation with the same source and destination points.</span>
@@ -444,7 +444,7 @@
 <span class="sd">    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span> <span class="o">=</span> <span class="n">uvw</span>
@@ -456,18 +456,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">source_values_mask</span> <span class="o">=</span> <span class="n">source_values_mask</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the interpolation weights.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">source_values_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">source_values_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_values_mask</span>
 
     <span class="nd">@source_values_mask</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">source_values_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">source_values_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">source_values_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> \
             <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">source_values_mask</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;source_values_mask must contain the same number &#39;</span>
@@ -476,7 +476,7 @@
 
 <div class="viewcode-block" id="Interpolator.interpolate">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.Interpolator.interpolate">[docs]</a>
-    <span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate values in source_values to the destination points in the *uvw* attribute.</span>
 <span class="sd">        using modelgrid instances</span>
 <span class="sd">        attached to the source and destination models.</span>
@@ -536,7 +536,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

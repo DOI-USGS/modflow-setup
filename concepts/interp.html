@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interpolating data to the model grid &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+  <title>Interpolating data to the model grid &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="../_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,7 +109,7 @@
              
   <section id="interpolating-data-to-the-model-grid">
 <h1>Interpolating data to the model grid<a class="headerlink" href="#interpolating-data-to-the-model-grid" title="Link to this heading"></a></h1>
-<p>For most interpolation operations where geo-located data are sampled to the model grid, Modflow-setup uses a barycentric (triangular) interpolation scheme similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.15.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. This n-dimensional unstructured method allows for interpolation between grids that are aligned with different coordinate references systems, as well as interpolation between unstructured grids. As described <a class="reference external" href="https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids">here</a>, setup of the barycentric interpolation involves:</p>
+<p>For most interpolation operations where geo-located data are sampled to the model grid, Modflow-setup uses a barycentric (triangular) interpolation scheme similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.15.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. This n-dimensional unstructured method allows for interpolation between grids that are aligned with different coordinate references systems, as well as interpolation between unstructured grids. As described <a class="reference external" href="https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids">here</a>, setup of the barycentric interpolation involves:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>Construction of a triangular mesh linking the source points</p></li>
@@ -122,7 +122,7 @@
 <dl>
 <dt>A few more notes:</dt><dd><ul class="simple">
 <li><p>Linear interpolation is the default method in most instances, except for recharge, which is often based on categorical data such as land cover and soil types, and therefore has nearest-neighbor as the default method.</p></li>
-<li><p>The interpolation method can generally be specified explicitly for a given dataset by including a <code class="docutils literal notranslate"><span class="pre">resample_method</span></code> argument. Available methods are listed in the documentation for <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.15.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. For example, if we wanted to override the <code class="docutils literal notranslate"><span class="pre">'nearest'</span></code> default for the Recharge Package:</p></li>
+<li><p>The interpolation method can generally be specified explicitly for a given dataset by including a <code class="docutils literal notranslate"><span class="pre">resample_method</span></code> argument. Available methods are listed in the documentation for <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.15.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. For example, if we wanted to override the <code class="docutils literal notranslate"><span class="pre">'nearest'</span></code> default for the Recharge Package:</p></li>
 </ul>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rch</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
@@ -160,7 +160,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

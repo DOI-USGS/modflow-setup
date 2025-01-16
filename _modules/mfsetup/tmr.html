@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>mfsetup.tmr &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="../../_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -99,30 +99,30 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mfsetup.tmr</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gp</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiLineString</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiLineString</span>
 
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
-<span class="kn">from</span> <span class="nn">flopy.discretization</span> <span class="kn">import</span> <span class="n">StructuredGrid</span>
-<span class="kn">from</span> <span class="nn">flopy.mf6.utils.binarygrid_util</span> <span class="kn">import</span> <span class="n">MfGrdFile</span>
-<span class="kn">from</span> <span class="nn">flopy.utils</span> <span class="kn">import</span> <span class="n">binaryfile</span> <span class="k">as</span> <span class="n">bf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flopy.discretization</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredGrid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flopy.mf6.utils.binarygrid_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">MfGrdFile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flopy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">binaryfile</span> <span class="k">as</span> <span class="n">bf</span>
 
-<span class="kn">from</span> <span class="nn">mfsetup.discretization</span> <span class="kn">import</span> <span class="n">find_remove_isolated_cells</span>
-<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">check_source_files</span>
-<span class="kn">from</span> <span class="nn">mfsetup.grid</span> <span class="kn">import</span> <span class="n">get_cellface_midpoint</span><span class="p">,</span> <span class="n">get_ij</span><span class="p">,</span> <span class="n">get_intercell_connections</span>
-<span class="kn">from</span> <span class="nn">mfsetup.interpolate</span> <span class="kn">import</span> <span class="n">Interpolator</span><span class="p">,</span> <span class="n">interp_weights</span>
-<span class="kn">from</span> <span class="nn">mfsetup.lakes</span> <span class="kn">import</span> <span class="n">get_horizontal_connections</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.discretization</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_remove_isolated_cells</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_source_files</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_cellface_midpoint</span><span class="p">,</span> <span class="n">get_ij</span><span class="p">,</span> <span class="n">get_intercell_connections</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interpolator</span><span class="p">,</span> <span class="n">interp_weights</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.lakes</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_horizontal_connections</span>
 
 
 <div class="viewcode-block" id="get_qx_qy_qz">
 <a class="viewcode-back" href="../../api/mfsetup.tmr.html#mfsetup.tmr.get_qx_qy_qz">[docs]</a>
-<span class="k">def</span> <span class="nf">get_qx_qy_qz</span><span class="p">(</span><span class="n">cell_budget_file</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_qx_qy_qz</span><span class="p">(</span><span class="n">cell_budget_file</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">cell_connections_df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
                  <span class="n">kstpkper</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -283,7 +283,7 @@
     <span class="k">return</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span></div>
 
 
-<span class="k">class</span> <span class="nc">Tmr</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Tmr</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for general telescopic mesh refinement of a MODFLOW model. Head or</span>
 <span class="sd">    flux fields from parent model are interpolated to boundary cells of</span>
@@ -319,7 +319,7 @@
 <span class="sd">    -----</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_model</span><span class="p">,</span> <span class="n">inset_model</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_model</span><span class="p">,</span> <span class="n">inset_model</span><span class="p">,</span>
                  <span class="n">parent_head_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent_cell_budget_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">parent_binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">boundary_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inset_parent_period_mapping</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -359,7 +359,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_inset_zone_within_parent</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Active area of the inset model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -373,7 +373,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inset_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inset_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inset_boundary_cells</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">by_layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_connections_by</span> <span class="o">==</span> <span class="s1">&#39;by_layer&#39;</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inset_boundary_cells</span><span class="p">(</span><span class="n">by_layer</span><span class="o">=</span><span class="n">by_layer</span><span class="p">)</span>
@@ -386,7 +386,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inset_boundary_cells</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inset_parent_period_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inset_parent_period_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">nper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">nper</span>
         <span class="c1"># if mapping between source and dest model periods isn&#39;t specified</span>
         <span class="c1"># assume one to one mapping of stress periods between models</span>
@@ -397,11 +397,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inset_parent_period_mapping</span>
 
     <span class="nd">@inset_parent_period_mapping</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">inset_parent_period_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inset_parent_period_mapping</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inset_parent_period_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inset_parent_period_mapping</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_inset_parent_period_mapping</span> <span class="o">=</span> <span class="n">inset_parent_period_mapping</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">interp_weights_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interp_weights_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;For the two main directions of flux (i, j) and the four orientations of</span>
 <span class="sd">        inset faces to interpolate to (right.left,top,bottom</span>
 <span class="sd">        we can precalulate the interpolation weights of the combinations to speed up</span>
@@ -431,7 +431,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">parent_xyzcellcenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parent_xyzcellcenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, y, z locations of parent cells in a buffered area</span>
 <span class="sd">        (defined by the _source_grid_mask property) around the</span>
 <span class="sd">        inset model.&quot;&quot;&quot;</span>
@@ -463,7 +463,7 @@
         <span class="k">return</span> <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">parent_xyzcellfacecenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parent_xyzcellfacecenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, y, z locations of the centroids of the cell faces</span>
 <span class="sd">        in the row and column directions in a buffered area</span>
 <span class="sd">        (defined by the _source_grid_mask property) around the</span>
@@ -511,7 +511,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_inset_max_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_inset_max_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The maximum (2D) footprint of the active area within the inset</span>
 <span class="sd">        model grid, where each i, j location has at least 1 active cell</span>
 <span class="sd">        vertically, excluding any inactive holes that are surrounded by</span>
@@ -538,7 +538,7 @@
         <span class="k">return</span> <span class="n">max_active_area</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inset_zone_within_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inset_zone_within_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The footprint of the inset model maximum active area footprint</span>
 <span class="sd">        (``Tmr._inset_max_active_area``) within the parentmodel grid.</span>
 <span class="sd">        In other words, all parent cells containing one or inset</span>
@@ -557,7 +557,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_source_grid_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_source_grid_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean array indicating window in parent model grid (subset of cells)</span>
 <span class="sd">        that encompass the inset model domain. Used to speed up interpolation</span>
 <span class="sd">        of parent grid values onto inset grid.&quot;&quot;&quot;</span>
@@ -588,7 +588,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span> <span class="o">=</span> <span class="n">mask3d</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span>
 
-    <span class="k">def</span> <span class="nf">get_inset_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">by_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_inset_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">by_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a dataframe of connection information for</span>
 <span class="sd">        horizontal boundary cells.</span>
 
@@ -664,7 +664,7 @@
                 <span class="c1"># just get the perimeter of inactive cells</span>
                 <span class="c1"># (exclude any interior active cells)</span>
                 <span class="c1"># start by filling any interior active cells</span>
-                <span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">binary_fill_holes</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">binary_fill_holes</span>
                 <span class="n">binary_idm</span> <span class="o">=</span> <span class="n">layer_idomain</span> <span class="o">&gt;</span> <span class="mi">0</span>
                 <span class="n">filled</span> <span class="o">=</span> <span class="n">binary_fill_holes</span><span class="p">(</span><span class="n">binary_idm</span><span class="p">)</span>
                 <span class="c1"># pad filled idomain array with zeros around the edge</span>
@@ -719,7 +719,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;perimeter cells took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">df</span>
 
-    <span class="k">def</span> <span class="nf">get_inset_boundary_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_inset_boundary_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">==</span> <span class="s1">&#39;head&#39;</span><span class="p">:</span>
             <span class="n">check_source_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span><span class="p">])</span>
@@ -1097,7 +1097,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

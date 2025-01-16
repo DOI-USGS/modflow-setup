@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>mfsetup.discretization &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="../../_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -102,24 +102,24 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Functions related to the Discretization Package.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="n">L</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">re</span><span class="w"> </span><span class="kn">import</span> <span class="n">L</span>
 
-<span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">flopy.mf6.data.mfdatalist</span> <span class="kn">import</span> <span class="n">MFList</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">convolve2d</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flopy.mf6.data.mfdatalist</span><span class="w"> </span><span class="kn">import</span> <span class="n">MFList</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndimage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">convolve2d</span>
 
 
 <div class="viewcode-block" id="ModflowGwfdis">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.ModflowGwfdis">[docs]</a>
-<span class="k">class</span> <span class="nc">ModflowGwfdis</span><span class="p">(</span><span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfdis</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModflowGwfdis</span><span class="p">(</span><span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfdis</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfdis</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">]</span> <span class="o">+</span>
                                      <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
@@ -127,7 +127,7 @@
 
 <div class="viewcode-block" id="adjust_layers">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.adjust_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">adjust_layers</span><span class="p">(</span><span class="n">dis</span><span class="p">,</span> <span class="n">minimum_thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">adjust_layers</span><span class="p">(</span><span class="n">dis</span><span class="p">,</span> <span class="n">minimum_thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adjust bottom layer elevations to maintain a minimum thickness.</span>
 
@@ -163,7 +163,7 @@
 
 <div class="viewcode-block" id="deactivate_idomain_above">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.deactivate_idomain_above">[docs]</a>
-<span class="k">def</span> <span class="nf">deactivate_idomain_above</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="n">packagedata</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">deactivate_idomain_above</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="n">packagedata</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets ibound to 0 for all cells above active SFR cells.</span>
 
 <span class="sd">    Parameters</span>
@@ -196,7 +196,7 @@
 
 <div class="viewcode-block" id="find_remove_isolated_cells">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.find_remove_isolated_cells">[docs]</a>
-<span class="k">def</span> <span class="nf">find_remove_isolated_cells</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">minimum_cluster_size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_remove_isolated_cells</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">minimum_cluster_size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Identify clusters of isolated cells in a binary array.</span>
 <span class="sd">    Remove clusters less than a specified minimum cluster size.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -237,7 +237,7 @@
 
 <div class="viewcode-block" id="cellids_to_kij">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.cellids_to_kij">[docs]</a>
-<span class="k">def</span> <span class="nf">cellids_to_kij</span><span class="p">(</span><span class="n">cellids</span><span class="p">,</span> <span class="n">drop_inactive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cellids_to_kij</span><span class="p">(</span><span class="n">cellids</span><span class="p">,</span> <span class="n">drop_inactive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpack tuples of MODFLOW-6 cellids (k, i, j) to</span>
 <span class="sd">    lists of k, i, j values; ignoring instances</span>
 <span class="sd">    where cellid is None (unconnected cells).</span>
@@ -266,7 +266,7 @@
 
 <div class="viewcode-block" id="create_vertical_pass_through_cells">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.create_vertical_pass_through_cells">[docs]</a>
-<span class="k">def</span> <span class="nf">create_vertical_pass_through_cells</span><span class="p">(</span><span class="n">idomain</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_vertical_pass_through_cells</span><span class="p">(</span><span class="n">idomain</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Replaces inactive cells with vertical pass-through cells at locations that have an active cell</span>
 <span class="sd">    above and below by setting these cells to -1.</span>
 
@@ -301,7 +301,7 @@
 
 <div class="viewcode-block" id="fill_empty_layers">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.fill_empty_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">fill_empty_layers</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fill_empty_layers</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fill empty layers in a 3D array by linearly interpolating</span>
 <span class="sd">    between the values above and below. Layers are defined</span>
 <span class="sd">    as empty if they contain all nan values. In the example of</span>
@@ -316,12 +316,12 @@
 <span class="sd">    -------</span>
 <span class="sd">    filled : ndarray of same shape as array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">get_next_below</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_next_below</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">item</span> <span class="o">&gt;</span> <span class="n">value</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">item</span>
 
-    <span class="k">def</span> <span class="nf">get_next_above</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_next_above</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">seq</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">item</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">item</span>
@@ -349,7 +349,7 @@
 
 <div class="viewcode-block" id="fill_cells_vertically">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.fill_cells_vertically">[docs]</a>
-<span class="k">def</span> <span class="nf">fill_cells_vertically</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fill_cells_vertically</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;In MODFLOW 6, cells where idomain &lt; 1 are excluded from the solution.</span>
 <span class="sd">    However, in the botm array, values are needed in overlying cells to</span>
 <span class="sd">    compute layer thickness (cells with idomain != 1 overlying cells with idomain &gt;= 1 need</span>
@@ -401,7 +401,7 @@
 
 <div class="viewcode-block" id="fix_model_layer_conflicts">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.fix_model_layer_conflicts">[docs]</a>
-<span class="k">def</span> <span class="nf">fix_model_layer_conflicts</span><span class="p">(</span><span class="n">top_array</span><span class="p">,</span> <span class="n">botm_array</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fix_model_layer_conflicts</span><span class="p">(</span><span class="n">top_array</span><span class="p">,</span> <span class="n">botm_array</span><span class="p">,</span>
                               <span class="n">ibound_array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">minimum_thickness</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare model layer elevations; adjust layer bottoms downward</span>
@@ -445,7 +445,7 @@
 
 <div class="viewcode-block" id="get_layer">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.get_layer">[docs]</a>
-<span class="k">def</span> <span class="nf">get_layer</span><span class="p">(</span><span class="n">botm_array</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">elev</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_layer</span><span class="p">(</span><span class="n">botm_array</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">elev</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the layers for elevations at i, j locations.</span>
 
 <span class="sd">    Parameters</span>
@@ -463,7 +463,7 @@
 <span class="sd">    k : np.ndarray (1-D) or scalar</span>
 <span class="sd">        zero-based layer index</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">to_array</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_array</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">arg</span><span class="p">])</span>
         <span class="c1">#if not isinstance(arg, np.ndarray):</span>
@@ -488,7 +488,7 @@
 
 <div class="viewcode-block" id="verify_minimum_layer_thickness">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.verify_minimum_layer_thickness">[docs]</a>
-<span class="k">def</span> <span class="nf">verify_minimum_layer_thickness</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">isactive</span><span class="p">,</span> <span class="n">minimum_layer_thickness</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_minimum_layer_thickness</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">isactive</span><span class="p">,</span> <span class="n">minimum_layer_thickness</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Verify that model layer thickness is equal to or</span>
 <span class="sd">    greater than a minimum thickness.&quot;&quot;&quot;</span>
     <span class="n">top</span> <span class="o">=</span> <span class="n">top</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -506,7 +506,7 @@
 
 <div class="viewcode-block" id="make_ibound">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.make_ibound">[docs]</a>
-<span class="k">def</span> <span class="nf">make_ibound</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_ibound</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span>
                  <span class="n">minimum_layer_thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">drop_thin_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Make the ibound array that specifies</span>
@@ -547,7 +547,7 @@
 
 <div class="viewcode-block" id="make_lgr_idomain">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.make_lgr_idomain">[docs]</a>
-<span class="k">def</span> <span class="nf">make_lgr_idomain</span><span class="p">(</span><span class="n">parent_modelgrid</span><span class="p">,</span> <span class="n">inset_modelgrid</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_lgr_idomain</span><span class="p">(</span><span class="n">parent_modelgrid</span><span class="p">,</span> <span class="n">inset_modelgrid</span><span class="p">,</span>
                      <span class="n">ncppl</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Inactivate cells in parent_modelgrid that coincide</span>
 <span class="sd">    with area of inset_modelgrid.&quot;&quot;&quot;</span>
@@ -585,7 +585,7 @@
 
 <div class="viewcode-block" id="make_idomain">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.make_idomain">[docs]</a>
-<span class="k">def</span> <span class="nf">make_idomain</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_idomain</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span>
                  <span class="n">minimum_layer_thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">drop_thin_cells</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Make the idomain array for MODFLOW 6 that specifies</span>
@@ -628,7 +628,7 @@
 
 <div class="viewcode-block" id="get_highest_active_layer">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.get_highest_active_layer">[docs]</a>
-<span class="k">def</span> <span class="nf">get_highest_active_layer</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_highest_active_layer</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=-</span><span class="mi">9999</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the highest active model layer at each</span>
 <span class="sd">    i, j location, accounting for inactive and</span>
 <span class="sd">    vertical pass-through cells.&quot;&quot;&quot;</span>
@@ -645,7 +645,7 @@
 
 <div class="viewcode-block" id="make_irch">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.make_irch">[docs]</a>
-<span class="k">def</span> <span class="nf">make_irch</span><span class="p">(</span><span class="n">idomain</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_irch</span><span class="p">(</span><span class="n">idomain</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Make an irch array for the MODFLOW 6 Recharge Package,</span>
 <span class="sd">    which specifies the highest active model layer at each</span>
 <span class="sd">    i, j location, accounting for inactive and</span>
@@ -663,7 +663,7 @@
 
 <div class="viewcode-block" id="get_layer_thicknesses">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.get_layer_thicknesses">[docs]</a>
-<span class="k">def</span> <span class="nf">get_layer_thicknesses</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_layer_thicknesses</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">botm</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;For each i, j location in the grid, get thicknesses</span>
 <span class="sd">    between pairs of subsequent valid elevation values. Make</span>
 <span class="sd">    a thickness array of the same shape as the model grid, assign the</span>
@@ -731,7 +731,7 @@
 
 <div class="viewcode-block" id="weighted_average_between_layers">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.weighted_average_between_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">weighted_average_between_layers</span><span class="p">(</span><span class="n">arr0</span><span class="p">,</span> <span class="n">arr1</span><span class="p">,</span> <span class="n">weight0</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weighted_average_between_layers</span><span class="p">(</span><span class="n">arr0</span><span class="p">,</span> <span class="n">arr1</span><span class="p">,</span> <span class="n">weight0</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">weight0</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">weight0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">([</span><span class="n">arr0</span><span class="p">,</span> <span class="n">arr1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span></div>
@@ -740,7 +740,7 @@
 
 <div class="viewcode-block" id="populate_values">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.populate_values">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_values</span><span class="p">(</span><span class="n">values_dict</span><span class="p">,</span> <span class="n">array_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_values</span><span class="p">(</span><span class="n">values_dict</span><span class="p">,</span> <span class="n">array_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given an input dictionary with non-consecutive keys,</span>
 <span class="sd">    make a second dictionary with consecutive keys, with values</span>
 <span class="sd">    that are linearly interpolated from the first dictionary,</span>
@@ -785,7 +785,7 @@
 
 <div class="viewcode-block" id="voxels_to_layers">
 <a class="viewcode-back" href="../../api/mfsetup.discretization.html#mfsetup.discretization.voxels_to_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">voxels_to_layers</span><span class="p">(</span><span class="n">voxel_array</span><span class="p">,</span> <span class="n">z_edges</span><span class="p">,</span> <span class="n">model_top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_data_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">voxels_to_layers</span><span class="p">(</span><span class="n">voxel_array</span><span class="p">,</span> <span class="n">z_edges</span><span class="p">,</span> <span class="n">model_top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">no_data_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                      <span class="n">extend_top</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extend_botm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
                      <span class="n">minimum_frac_active_cells</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top</span>
@@ -932,7 +932,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

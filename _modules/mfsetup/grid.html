@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.grid &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>mfsetup.grid &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="../../_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -104,36 +104,36 @@
 <span class="sd">the grid in the cartesian plane. For methods involving layering (in the vertical dimension), see</span>
 <span class="sd">the discretization module.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">import</span> <span class="nn">gisutils</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">pyproj</span>
-<span class="kn">import</span> <span class="nn">shapely</span>
-<span class="kn">from</span> <span class="nn">flopy.discretization</span> <span class="kn">import</span> <span class="n">StructuredGrid</span>
-<span class="kn">from</span> <span class="nn">flopy.mf6.utils.binarygrid_util</span> <span class="kn">import</span> <span class="n">MfGrdFile</span>
-<span class="kn">from</span> <span class="nn">geopandas.geodataframe</span> <span class="kn">import</span> <span class="n">GeoDataFrame</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_proj_str</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">shp2df</span>
-<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
-<span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">Affine</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">spatial</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">box</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gisutils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flopy.discretization</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredGrid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flopy.mf6.utils.binarygrid_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">MfGrdFile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gisutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">df2shp</span><span class="p">,</span> <span class="n">get_proj_str</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">shp2df</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">packaging</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio</span><span class="w"> </span><span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">spatial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">box</span>
 
-<span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">fileio</span> <span class="k">as</span> <span class="n">fileio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">fileio</span> <span class="k">as</span> <span class="n">fileio</span>
 
-<span class="kn">from</span> <span class="nn">.mf5to6</span> <span class="kn">import</span> <span class="n">get_model_length_units</span>
-<span class="kn">from</span> <span class="nn">.units</span> <span class="kn">import</span> <span class="n">convert_length_units</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_input_arguments</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mf5to6</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_model_length_units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_length_units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_input_arguments</span>
 
 
 <div class="viewcode-block" id="MFsetupGrid">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid">[docs]</a>
-<span class="k">class</span> <span class="nc">MFsetupGrid</span><span class="p">(</span><span class="n">StructuredGrid</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MFsetupGrid</span><span class="p">(</span><span class="n">StructuredGrid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a structured grid. Extends flopy.discretization.StructuredGrid</span>
 <span class="sd">    to facilitate gis operations in a projected (real-word) coordinate reference system (CRS).</span>
 
@@ -200,7 +200,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delc</span><span class="p">,</span> <span class="n">delr</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delc</span><span class="p">,</span> <span class="n">delr</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idomain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">laycbd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lenuni</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">xoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
@@ -236,7 +236,7 @@
             <span class="n">yll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yul_to_yll</span><span class="p">(</span><span class="n">yul</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_coord_info</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="n">xll</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="n">yll</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj4</span><span class="o">=</span><span class="n">proj_str</span><span class="p">,</span> <span class="n">angrot</span><span class="o">=</span><span class="n">angrot</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">StructuredGrid</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">xoffset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xoffset</span><span class="p">):</span>
@@ -253,7 +253,7 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">txt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nlay</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> layer(s), &#39;</span>
@@ -269,56 +269,56 @@
         <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;Bounds: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">txt</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">StructuredGrid</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">xul</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xul</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">x0r</span><span class="p">,</span> <span class="n">y0r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">x0r</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">yul</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">yul</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyedges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">x0r</span><span class="p">,</span> <span class="n">y0r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y0r</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shapely polygon bounding box of the model grid.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">get_grid_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Grid bounding box in order used by shapely.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span>
         <span class="k">return</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlay</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrow</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rasterio Affine object (same as transform attribute of rasters).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">get_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;pyproj.crs.CRS instance describing the coordinate reference system</span>
 <span class="sd">        for the model grid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span>
 
     <span class="nd">@crs</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a pyproj CRS instance from various inputs</span>
 <span class="sd">        (epsg, proj string, wkt, etc.).</span>
 
@@ -343,35 +343,35 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_crs</span> <span class="o">=</span> <span class="n">crs</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">proj_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">proj_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_proj4</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">(</span><span class="n">pretty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">get_crs_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Vertices for grid cell polygons.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_vertices</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Vertices for grid cell polygons.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_polygons</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygons</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pandas DataFrame of grid cell polygons</span>
 <span class="sd">        with i, j locations.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -379,26 +379,26 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pandas DataFrame of flow connections between grid cells.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_intercell_connections</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercell_connections</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top</span>
 
     <span class="nd">@top</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_top</span> <span class="o">=</span> <span class="n">top</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">botm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">botm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_botm</span>
 
     <span class="nd">@botm</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">botm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">botm</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">botm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">botm</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_StructuredGrid__nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_StructuredGrid__ncol</span><span class="p">)</span> <span class="o">!=</span> <span class="n">botm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;botm array shape is inconsistent with the model grid&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_StructuredGrid__nlay</span> <span class="o">=</span> <span class="n">botm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -408,7 +408,7 @@
 
 <div class="viewcode-block" id="MFsetupGrid.get_intercell_connections">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_intercell_connections">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 
 <span class="sd">        Parameters</span>
@@ -450,7 +450,7 @@
 
 <div class="viewcode-block" id="MFsetupGrid.get_dataframe">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_dataframe">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a pandas DataFrame of grid cell polygons</span>
 <span class="sd">        with i, j locations.</span>
 
@@ -487,13 +487,13 @@
 
 <div class="viewcode-block" id="MFsetupGrid.write_bbox_shapefile">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_bbox_shapefile">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid_bbox.shp&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid_bbox.shp&#39;</span><span class="p">):</span>
         <span class="n">write_bbox_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MFsetupGrid.write_shapefile">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.write_shapefile">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid.shp&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;grid.shp&#39;</span><span class="p">):</span>
         <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">))),</span>
                            <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
@@ -503,7 +503,7 @@
         <span class="n">df2shp</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsg</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proj_str</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_set_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create shapely polygon for each grid cell</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -514,22 +514,22 @@
 
     <span class="c1"># stuff to conform to sr</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">length_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">convert_length_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lenuni</span><span class="p">,</span>
                                     <span class="mi">2</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">angrot</span>
 
 <div class="viewcode-block" id="MFsetupGrid.get_vertices">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.MFsetupGrid.get_vertices">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get vertices for a single cell or sequence if i, j locations.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell_vert_list</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_set_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Populate vertices for the whole grid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -553,7 +553,7 @@
 
 <div class="viewcode-block" id="get_crs">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs">[docs]</a>
-<span class="k">def</span> <span class="nf">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wkt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proj_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a pyproj CRS instance from various CRS representations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -583,7 +583,7 @@
 
 <div class="viewcode-block" id="get_crs_length_units">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_crs_length_units">[docs]</a>
-<span class="k">def</span> <span class="nf">get_crs_length_units</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_crs_length_units</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
     <span class="n">length_units</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">axis_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unit_name</span>
     <span class="k">if</span> <span class="s1">&#39;foot&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;feet&#39;</span> <span class="ow">in</span> <span class="n">length_units</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
         <span class="n">length_units</span> <span class="o">=</span> <span class="s1">&#39;feet&#39;</span>
@@ -595,7 +595,7 @@
 
 <div class="viewcode-block" id="get_ij">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_ij">[docs]</a>
-<span class="k">def</span> <span class="nf">get_ij</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_ij</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the row and column of a point or sequence of points</span>
 <span class="sd">    in real-world coordinates.</span>
 
@@ -629,7 +629,7 @@
 
 <div class="viewcode-block" id="get_kij_from_node3d">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_kij_from_node3d">[docs]</a>
-<span class="k">def</span> <span class="nf">get_kij_from_node3d</span><span class="p">(</span><span class="n">node3d</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_kij_from_node3d</span><span class="p">(</span><span class="n">node3d</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;For a consecutive cell number in row-major order</span>
 <span class="sd">    (row, column, layer), get the zero-based row, column position.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -643,7 +643,7 @@
 
 <div class="viewcode-block" id="get_grid_bounding_box">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_grid_bounding_box">[docs]</a>
-<span class="k">def</span> <span class="nf">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get bounding box of potentially rotated modelgrid</span>
 <span class="sd">    as a shapely Polygon object.</span>
 
@@ -688,7 +688,7 @@
 
 <div class="viewcode-block" id="get_nearest_point_on_grid">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_nearest_point_on_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">get_nearest_point_on_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_nearest_point_on_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                               <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
                               <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -754,7 +754,7 @@
 
 <div class="viewcode-block" id="get_point_on_national_hydrogeologic_grid">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_point_on_national_hydrogeologic_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">get_point_on_national_hydrogeologic_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_point_on_national_hydrogeologic_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given an x, y location representing the upper left</span>
 <span class="sd">    corner of a model grid, return the upper left corner</span>
 <span class="sd">    of the cell in the National Hydrogeologic Grid that</span>
@@ -767,7 +767,7 @@
 
 <div class="viewcode-block" id="write_bbox_shapefile">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.write_bbox_shapefile">[docs]</a>
-<span class="k">def</span> <span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">outshp</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_bbox_shapefile</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">outshp</span><span class="p">):</span>
     <span class="n">outline</span> <span class="o">=</span> <span class="n">get_grid_bounding_box</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">)</span>
     <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;model bounding box&#39;</span><span class="p">],</span>
                             <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">outline</span><span class="p">]},</span>
@@ -778,7 +778,7 @@
 
 <div class="viewcode-block" id="rasterize">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.rasterize">[docs]</a>
-<span class="k">def</span> <span class="nf">rasterize</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rasterize</span><span class="p">(</span><span class="n">feature</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">include_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rasterize a feature onto the model grid, using</span>
@@ -826,7 +826,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">Affine</span><span class="p">,</span> <span class="n">features</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio</span><span class="w"> </span><span class="kn">import</span> <span class="n">Affine</span><span class="p">,</span> <span class="n">features</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This method requires rasterio.&#39;</span><span class="p">)</span>
         <span class="k">return</span>
@@ -834,7 +834,7 @@
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">gisutils</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;0.2.0&#39;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The rasterize function requires gisutils &gt;= 0.2&quot;</span><span class="p">)</span>
-        <span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_authority_crs</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">gisutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_authority_crs</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">get_authority_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
 
     <span class="n">trans</span> <span class="o">=</span> <span class="n">get_transform</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
@@ -924,7 +924,7 @@
 
 <div class="viewcode-block" id="snap_to_cell_corner">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.snap_to_cell_corner">[docs]</a>
-<span class="k">def</span> <span class="nf">snap_to_cell_corner</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">modelgrid</span><span class="p">,</span> <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">snap_to_cell_corner</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">modelgrid</span><span class="p">,</span> <span class="n">corner</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Move an x, y location to the nearest cell corner on</span>
 <span class="sd">    a rectilinear modelgrid.</span>
 
@@ -1004,7 +1004,7 @@
 
 <div class="viewcode-block" id="setup_structured_grid">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.setup_structured_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">setup_structured_grid</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_structured_grid</span><span class="p">(</span><span class="n">xoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">nrow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nlay</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">dxy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">botm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1385,7 +1385,7 @@
 
 <div class="viewcode-block" id="get_cellface_midpoint">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_cellface_midpoint">[docs]</a>
-<span class="k">def</span> <span class="nf">get_cellface_midpoint</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cellface_midpoint</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the midpoint of vertical cell face within a structured grid.</span>
 <span class="sd">    For example, the midpoint for the right cell face is halfway between</span>
 <span class="sd">    the upper and lower right corners of the cell, halfway between the</span>
@@ -1432,7 +1432,7 @@
 
 <div class="viewcode-block" id="get_intercell_connections">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_intercell_connections">[docs]</a>
-<span class="k">def</span> <span class="nf">get_intercell_connections</span><span class="p">(</span><span class="n">binary_grid_file</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_intercell_connections</span><span class="p">(</span><span class="n">binary_grid_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all of the connections between cells in a</span>
 <span class="sd">    MODFLOW 6 structured grid.</span>
 
@@ -1497,7 +1497,7 @@
 
 <div class="viewcode-block" id="get_transform">
 <a class="viewcode-back" href="../../api/mfsetup.grid.html#mfsetup.grid.get_transform">[docs]</a>
-<span class="k">def</span> <span class="nf">get_transform</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_transform</span><span class="p">(</span><span class="n">modelgrid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a rasterio Affine object from a Flopy modelgrid</span>
 <span class="sd">    (same as transform attribute of rasters).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1521,7 +1521,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

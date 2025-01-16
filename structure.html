@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic program structure and usage &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+  <title>Basic program structure and usage &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -109,8 +109,8 @@
   <section id="basic-program-structure-and-usage">
 <h1>Basic program structure and usage<a class="headerlink" href="#basic-program-structure-and-usage" title="Link to this heading"></a></h1>
 <p>Modflow-setup is intended to provide both a collection of python modules with functions for performing various model construction tasks and a boiler plate workflow for automated construction of a working MODFLOW model from a configuration file. The latter goal is implemented in the <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> and <code class="docutils literal notranslate"><span class="pre">MFnwtModel</span></code> classes, which can both be imported at the top level.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MF6model</span>
-<span class="kn">from</span> <span class="nn">mfsetup</span> <span class="kn">import</span> <span class="n">MFnwtModel</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">MF6model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">MFnwtModel</span>
 </pre></div>
 </div>
 <p>MF6model extends the <code class="docutils literal notranslate"><span class="pre">mf6.ModflowGwf</span></code> (MODFLOW-6 groundwater flow model) class in Flopy; MFnwtModel extends the <code class="docutils literal notranslate"><span class="pre">modflow.Modflow</span></code> (pre-MODFLOW-6 groundwater flow model) class in Flopy. These two classes are intended to provide methods and attributes specific to MODFLOW-6 or MODFLOW-NWT. A third <a class="reference external" href="https://en.wikipedia.org/wiki/Mixin">mixin class</a> (<code class="docutils literal notranslate"><span class="pre">MFsetupMixin</span></code>) contains methods and attributes that are general to both MODFLOW-6 and MODFLOW-NWT (and therefore used by both MF6model and MFnwtModel). The goal in this is to make modflow-setup be agnostic to MODFLOW version to the extent feasible.</p>
@@ -153,7 +153,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 

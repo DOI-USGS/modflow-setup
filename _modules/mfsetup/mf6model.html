@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.5.0.post63+g0b77526 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.6.0.post65+gcf49f06 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=8cc7a115"></script>
+      <script src="../../_static/documentation_options.js?v=ffadd0ab"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -99,23 +99,23 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mfsetup.mf6model</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">import</span> <span class="nn">flopy</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="n">fm</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">modflow</span>
 <span class="n">mf6</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">mf6</span>
-<span class="kn">from</span> <span class="nn">flopy.utils.lgrutil</span> <span class="kn">import</span> <span class="n">Lgr</span>
-<span class="kn">from</span> <span class="nn">gisutils</span> <span class="kn">import</span> <span class="n">get_values_at_points</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flopy.utils.lgrutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">Lgr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gisutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_values_at_points</span>
 
-<span class="kn">from</span> <span class="nn">mfsetup.bcs</span> <span class="kn">import</span> <span class="n">remove_inactive_bcs</span>
-<span class="kn">from</span> <span class="nn">mfsetup.discretization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.bcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_inactive_bcs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.discretization</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ModflowGwfdis</span><span class="p">,</span>
     <span class="n">create_vertical_pass_through_cells</span><span class="p">,</span>
     <span class="n">deactivate_idomain_above</span><span class="p">,</span>
@@ -124,11 +124,11 @@
     <span class="n">make_irch</span><span class="p">,</span>
     <span class="n">make_lgr_idomain</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">add_version_to_fileheader</span><span class="p">,</span> <span class="n">flopy_mfsimulation_load</span>
-<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">load_config</span>
-<span class="kn">from</span> <span class="nn">mfsetup.fileio</span> <span class="kn">import</span> <span class="n">load_cfg</span>
-<span class="kn">from</span> <span class="nn">mfsetup.ic</span> <span class="kn">import</span> <span class="n">setup_strt</span>
-<span class="kn">from</span> <span class="nn">mfsetup.lakes</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_version_to_fileheader</span><span class="p">,</span> <span class="n">flopy_mfsimulation_load</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">load_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.fileio</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_cfg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.ic</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_strt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.lakes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_lakeperioddata</span><span class="p">,</span>
     <span class="n">setup_lake_connectiondata</span><span class="p">,</span>
     <span class="n">setup_lake_fluxes</span><span class="p">,</span>
@@ -136,23 +136,23 @@
     <span class="n">setup_lake_tablefiles</span><span class="p">,</span>
     <span class="n">setup_mf6_lake_obs</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mfsetup.mfmodel</span> <span class="kn">import</span> <span class="n">MFsetupMixin</span>
-<span class="kn">from</span> <span class="nn">mfsetup.mover</span> <span class="kn">import</span> <span class="n">get_mover_sfr_package_input</span>
-<span class="kn">from</span> <span class="nn">mfsetup.obs</span> <span class="kn">import</span> <span class="n">remove_inactive_obs</span><span class="p">,</span> <span class="n">setup_head_observations</span>
-<span class="kn">from</span> <span class="nn">mfsetup.oc</span> <span class="kn">import</span> <span class="n">parse_oc_period_input</span>
-<span class="kn">from</span> <span class="nn">mfsetup.tdis</span> <span class="kn">import</span> <span class="n">add_date_comments_to_tdis</span><span class="p">,</span> <span class="n">setup_perioddata</span>
-<span class="kn">from</span> <span class="nn">mfsetup.units</span> <span class="kn">import</span> <span class="n">convert_time_units</span>
-<span class="kn">from</span> <span class="nn">mfsetup.utils</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.mfmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">MFsetupMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.mover</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_mover_sfr_package_input</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.obs</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_inactive_obs</span><span class="p">,</span> <span class="n">setup_head_observations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.oc</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_oc_period_input</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.tdis</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_date_comments_to_tdis</span><span class="p">,</span> <span class="n">setup_perioddata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_time_units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mfsetup.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">get_input_arguments</span>
 
 
 <div class="viewcode-block" id="MF6model">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model">[docs]</a>
-<span class="k">class</span> <span class="nc">MF6model</span><span class="p">(</span><span class="n">MFsetupMixin</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwf</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MF6model</span><span class="p">(</span><span class="n">MFsetupMixin</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwf</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a MODFLOW-6 model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">default_file</span> <span class="o">=</span> <span class="s1">&#39;mf6_defaults.yml&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modelname</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modelname</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">exe_name</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span> <span class="n">lgr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;simulation&#39;</span><span class="p">:</span> <span class="n">simulation</span><span class="p">,</span>
@@ -207,27 +207,27 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_lgr</span><span class="p">:</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MFsetupMixin</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MFsetupMixin</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nlay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nlay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nlay&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">][</span><span class="s1">&#39;length_units&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">time_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">time_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;tdis&#39;</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">][</span><span class="s1">&#39;time_units&#39;</span><span class="p">]</span>
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">perioddata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">perioddata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;DataFrame summarizing stress period information.</span>
 <span class="sd">        Columns:</span>
 <span class="sd">        ============== =========================================</span>
@@ -283,7 +283,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perioddata</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;3D array indicating which cells will be included in the simulation.</span>
 <span class="sd">        Made a property so that it can be easily updated when any packages</span>
 <span class="sd">        it depends on change.</span>
@@ -292,7 +292,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_idomain</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span>
 
-    <span class="k">def</span> <span class="nf">_set_idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remake the idomain array from the source data,</span>
 <span class="sd">        no data values in the top and bottom arrays, and</span>
 <span class="sd">        so that cells above SFR reaches are inactive.</span>
@@ -367,7 +367,7 @@
                                 <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="c1">#self.dis.irch = self.cfg[&#39;dis&#39;][&#39;irch&#39;]</span>
 
-    <span class="k">def</span> <span class="nf">_update_grid_configuration_with_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_grid_configuration_with_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update grid configuration with any information supplied to dis package</span>
 <span class="sd">        (so that settings specified for DIS package have priority). This method</span>
 <span class="sd">        is called by MFsetupMixin.setup_grid.</span>
@@ -381,7 +381,7 @@
 
 <div class="viewcode-block" id="MF6model.get_flopy_external_file_input">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_flopy_external_file_input">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_flopy_external_file_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_flopy_external_file_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Repath intermediate external file input to the</span>
 <span class="sd">        external file path that MODFLOW will use. Copy the</span>
 <span class="sd">        file because MF6 flopy reads and writes to the same location.</span>
@@ -414,7 +414,7 @@
 
 <div class="viewcode-block" id="MF6model.get_package_list">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_package_list">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_package_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_package_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Replicate this method in flopy.modflow.Modflow.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: this should reference namfile dict</span>
@@ -423,7 +423,7 @@
 
 <div class="viewcode-block" id="MF6model.get_raster_values_at_cell_centers">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_raster_values_at_cell_centers">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_raster_values_at_cell_centers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raster</span><span class="p">,</span> <span class="n">out_of_bounds_errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_raster_values_at_cell_centers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raster</span><span class="p">,</span> <span class="n">out_of_bounds_errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample raster values at centroids</span>
 <span class="sd">        of model grid cells.&quot;&quot;&quot;</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">get_values_at_points</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span>
@@ -438,14 +438,14 @@
 
 <div class="viewcode-block" id="MF6model.get_raster_statistics_for_cells">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.get_raster_statistics_for_cells">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_raster_statistics_for_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">stat</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_raster_statistics_for_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">stat</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute zonal statics for raster pixels within</span>
 <span class="sd">        each model cell.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 
-    <span class="k">def</span> <span class="nf">create_lgr_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_lgr_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;setup_grid&#39;</span><span class="p">][</span><span class="s1">&#39;lgr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># load the config file for lgr inset model</span>
             <span class="k">if</span> <span class="s1">&#39;filename&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
@@ -574,7 +574,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_top_botm_external_files</span><span class="p">()</span>
 
 
-    <span class="k">def</span> <span class="nf">_update_top_botm_external_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_top_botm_external_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the external files after assigning new elevations to the</span>
 <span class="sd">        Discretization Package top and botm arrays; adjust idomain as needed.&quot;&quot;&quot;</span>
         <span class="c1"># reset the model top</span>
@@ -593,7 +593,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_idomain</span><span class="p">()</span>
 
 
-    <span class="k">def</span> <span class="nf">setup_lgr_exchanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_lgr_exchanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">inset_name</span><span class="p">,</span> <span class="n">inset_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
@@ -642,7 +642,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_simulation_mover</span><span class="p">(</span><span class="n">gwfgwf</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">setup_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
         <span class="n">package</span> <span class="o">=</span> <span class="s1">&#39;dis&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting up </span><span class="si">{}</span><span class="s1"> package...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
@@ -697,7 +697,7 @@
     <span class="c1">#def setup_tdis(self):</span>
 <div class="viewcode-block" id="MF6model.setup_tdis">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_tdis">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_tdis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_tdis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the TDIS package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -718,7 +718,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_ic">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_ic">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_ic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_ic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the IC package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -741,7 +741,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_npf">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_npf">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_npf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_npf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the NPF package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -770,7 +770,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_sto">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_sto">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_sto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_sto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the STO package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -805,7 +805,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_rch">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_rch">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_rch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_rch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the RCH package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -836,7 +836,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_lak">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_lak">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_lak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_lak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the Lake package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -939,7 +939,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_chd">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_chd">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_chd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_chd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the CHD Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
@@ -949,7 +949,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_drn">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_drn">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_drn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_drn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Drain Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
@@ -959,7 +959,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_ghb">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_ghb">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_ghb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_ghb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the General Head Boundary Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
@@ -969,7 +969,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_riv">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_riv">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_riv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rivdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_riv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rivdata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the River Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
@@ -980,7 +980,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_wel">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_wel">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_wel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_wel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Well Package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_basic_stress_package</span><span class="p">(</span>
@@ -990,7 +990,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_obs">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_obs">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the OBS utility.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1031,7 +1031,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_oc">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_oc">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_oc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_oc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the OC package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1053,7 +1053,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_ims">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_ims">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_ims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_ims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets up the IMS package.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1077,7 +1077,7 @@
 
 <div class="viewcode-block" id="MF6model.setup_simulation_mover">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.setup_simulation_mover">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup_simulation_mover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gwfgwf</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_simulation_mover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gwfgwf</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the MODFLOW-6 water mover package at the simulation level.</span>
 <span class="sd">        Automate set-up of the mover between SFR packages in LGR parent and inset models.</span>
 <span class="sd">        todo: automate set-up of mover between SFR and lakes (within a model).</span>
@@ -1149,7 +1149,7 @@
 
 <div class="viewcode-block" id="MF6model.write_input">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.write_input">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the model input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># prior to writing output</span>
@@ -1178,7 +1178,7 @@
             <span class="c1"># write the model with flopy</span>
             <span class="c1"># but skip the sfr package</span>
             <span class="c1"># by monkey-patching the write method</span>
-            <span class="k">def</span> <span class="nf">skip_write</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">skip_write</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="k">pass</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;sfr&#39;</span><span class="p">):</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">sfr</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">skip_write</span>
@@ -1228,7 +1228,7 @@
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_model_kwargs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">][</span><span class="s1">&#39;simulation&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># assume that simulation for model</span>
@@ -1265,7 +1265,7 @@
 <div class="viewcode-block" id="MF6model.load_from_config">
 <a class="viewcode-back" href="../../api/mfsetup.mf6model.html#mfsetup.mf6model.MF6model.load_from_config">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">load_from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">yamlfile</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">yamlfile</span><span class="p">,</span> <span class="n">load_only</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a model from a configuration file and set of MODFLOW files.</span>
 
 <span class="sd">        Parameters</span>
@@ -1323,7 +1323,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Jan 03, 2025.
+      <span class="lastupdated">Last updated on Jan 16, 2025.
       </span></p>
   </div>
 
