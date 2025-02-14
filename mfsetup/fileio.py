@@ -25,7 +25,7 @@ from flopy.mf6.mfbase import (
 )
 from flopy.mf6.modflow import mfims, mftdis
 from flopy.modflow.mf import ModflowGlobal
-from flopy.utils import TemporalReference, mfreadnam
+from flopy.utils import mfreadnam
 
 import mfsetup
 from mfsetup.grid import MFsetupGrid
