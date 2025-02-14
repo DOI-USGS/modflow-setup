@@ -256,11 +256,6 @@ def fill_cells_vertically(top, botm):
     -------
     top, botm : filled top and botm arrays
     """
-    # check for nans in "top" array, if any nans exist, raise an error
-    # nans in top array could have unexpected effects
-    if np.isnan(top).any():
-        raise ValueError("Error: The top array contains NaN values. Ensure these are defined to prevent unintended results.")
-
     thickness = get_layer_thicknesses(top, botm)
     assert np.all(np.isnan(thickness[np.isnan(thickness)]))
     thickness[np.isnan(thickness)] = 0
