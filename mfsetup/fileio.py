@@ -647,25 +647,6 @@ def flopy_mf2005_load(m, load_only=None, forgive=False, check=False):
     m.setup_grid()  # reset model grid now that DIS package is loaded
     assert m.pop_key_list.pop() == dis_key
     ext_unit_dict.pop(dis_key)  #.filehandle.close()
-    #start_datetime = attribs.pop("start_datetime", "01-01-1970")
-    #itmuni = attribs.pop("itmuni", 4)
-    #ref_source = attribs.pop("source", "defaults")
-    # if m.structured:
-    #    # get model units from usgs.model.reference, if provided
-    #    if ref_source == 'usgs.model.reference':
-    #        pass
-    #    # otherwise get them from the DIS file
-    #    else:
-    #        itmuni = dis.itmuni
-    #        ref_attributes['lenuni'] = dis.lenuni
-    #    sr = SpatialReference(delr=m.dis.delr.array, delc=ml.dis.delc.array,
-    #                          **ref_attributes)
-    # else:
-    #    sr = None
-    #
-    #dis.sr = m.sr
-    #dis.tr = TemporalReference(itmuni=itmuni, start_datetime=start_datetime)
-    #dis.start_datetime = start_datetime
 
     if load_only is None:
         # load all packages/files
