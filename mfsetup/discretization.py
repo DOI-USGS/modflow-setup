@@ -249,12 +249,12 @@ def fill_cells_vertically(top, botm):
 
     Parameters
     ----------
-    top : 2D numpy array; model top elevations
+    top : 2D (nrow, ncol) array; model top elevations
     botm : 3D (nlay, nrow, ncol) array; model bottom elevations
 
     Returns
     -------
-    top, botm : filled top and botm arrays
+    botm : filled botm array
     """
     thickness = get_layer_thicknesses(top, botm)
     assert np.all(np.isnan(thickness[np.isnan(thickness)]))
@@ -271,7 +271,7 @@ def fill_cells_vertically(top, botm):
     filled += np.nanmin(all_surfaces, axis=0)  # botm[-1]
     # append the model bottom elevations
     filled = np.append(filled, [np.nanmin(all_surfaces, axis=0)], axis=0)
-    return top, filled[1:].copy()
+    return filled[1:].copy()
 
 
 def fix_model_layer_conflicts(top_array, botm_array,
