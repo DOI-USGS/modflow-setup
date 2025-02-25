@@ -8,7 +8,6 @@ fm = flopy.modflow
 mf6 = flopy.mf6
 from flopy.datbase import DataInterface, DataType
 from flopy.mbase import ModelInterface
-from flopy.utils import TemporalReference
 
 
 def get_package_list(model):
@@ -81,8 +80,6 @@ def package_eq(pk1, pk2):
                     # TODO: this may return False if there are nans
                     elif not np.allclose(v.array, v2.array):
                         return False
-        elif isinstance(v, TemporalReference):
-            pass
         elif v != v2:
             return False
     return True
