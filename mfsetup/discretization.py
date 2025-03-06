@@ -333,12 +333,11 @@ def get_layer(botm_array, i, j, elev):
     k : np.ndarray (1-D) or scalar
         zero-based layer index
     """
+# convert scalars to 1D numpy arrays
     def to_array(arg):
         if np.isscalar(arg):
-            np.array([arg])
-        #if not isinstance(arg, np.ndarray):
-        #    return np.array([arg])
-        else:
+            return np.array([arg])
+        else: # if already an np.array, return as is
             return np.array(arg)
 
     i = to_array(i)
