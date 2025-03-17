@@ -20,12 +20,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        python-version: ['3.12', '3.11', '3.10']  # ['3.8', '3.x']
+        python-version: [3.13, 3.12, 3.11]  # ['3.8', '3.x']
         exclude:
           # tests with ubuntu-latest, python latest
           # are executed by build_docs.yaml
           - os: ubuntu-latest
-            python-version: 3.12
+            python-version: 3.13
 
     steps:
     - name: Checkout source
@@ -78,22 +78,16 @@ jobs:
         cp -r bin/$d/. "$HOME/.local/bin/"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
         echo $GITHUB_PATH
-    - name: Test install from git
+    # on Windows, test against last Flopy release
+    - name: Install latest PyPI flopy
       shell: bash -l {0}
-      run: |
-        pip install git+https://github.com/aleaf/modflow-setup@develop
-        cd ..
-        python -c "import mfsetup"
-        cd modflow-setup
+      if: contains(matrix.os, 'windows')
+      run: pip install flopy --force-reinstall
     - name: Install Modflow-setup and ipykernel
       shell: bash -l {0}
       run: |
         pip install -e .
         python -m ipykernel install --user --name mfsetup_ci --display-name "mfsetup_ci"
-    - name: Install latest PyPI flopy
-      shell: bash -l {0}
-      if: ${{ matrix.python-version == 3.11}}
-      run: pip install flopy --force-reinstall
     - name: Conda list
       shell: bash -l {0}
       run: |
