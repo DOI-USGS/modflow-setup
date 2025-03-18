@@ -164,18 +164,20 @@ def get_sfr_package_connections(gwfgwf_exchangedata,
     for parent_reach, inset_reach in parent_to_inset.items():
         if parent_reach in inset_to_parent.values():
             parent_to_inset_distance = parent_to_inset_distances[parent_reach]
-            inset_to_parent_distance = inset_to_parent_distances[inset_reach]
-            if inset_to_parent_distance < parent_to_inset_distance:
-                delete_parent_to_inset_items.add(parent_reach)
-            elif parent_to_inset_distance < inset_to_parent_distance:
-                del inset_to_parent[inset_reach]
-            else:
-                raise ValueError("Circular connection between SFR Packages in the Mover Package input.\n"
-                                 f"Connection distance between the end of parent reach {parent_reach} "
-                                 f"in parent model and start of inset reach {inset_reach} in inset model "
-                                 f"is equal to\nthe distance between the end of inset reach {inset_reach} "
-                                 f"and start of parent reach {parent_reach}.\nCheck input linework."
-                                 )
+            if inset_to_parent_distances.get(inset_reach) is not None:
+                inset_to_parent_distance = inset_to_parent_distances[inset_reach]
+                if inset_to_parent_distance < parent_to_inset_distance:
+                    delete_parent_to_inset_items.add(parent_reach)
+                elif parent_to_inset_distance < inset_to_parent_distance:
+                    del inset_to_parent[inset_reach]
+                else:
+                    raise ValueError(
+                        "Circular connection between SFR Packages in the Mover Package input.\n"
+                        f"Connection distance between the end of parent reach {parent_reach} "
+                        f"in parent model and start of inset reach {inset_reach} in inset model "
+                        f"is equal to\nthe distance between the end of inset reach {inset_reach} "
+                        f"and start of parent reach {parent_reach}.\nCheck input linework."
+                        )
     for parent_reach in delete_parent_to_inset_items:
         del parent_to_inset[parent_reach]
     return parent_to_inset, inset_to_parent
