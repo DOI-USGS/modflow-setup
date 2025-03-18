@@ -2,6 +2,11 @@
 Release History
 ===============
 
+Version 0.6.1 (2025-03-17)
+----------------------------------------
+* fix 'TemporalReference' issue related to change in Flopy code
+* fix issue with Mover Package SFR connections across LGR model interfaces (mover.py::get_sfr_package_connections)); follow-up fix to fbe1bb1 to handle cases where parent model SFR reach along the LGR interface has both upstream and downstream connections to the inset model.
+
 Version 0.6.0 (2025-01-06)
 ----------------------------------------
 
