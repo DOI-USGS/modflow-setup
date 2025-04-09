@@ -483,13 +483,12 @@ def setup_external_filepaths(model, package, variable_name,
 
     model.get_package(package)
     # intermediate data
-    filename_format = os.path.split(filename_format)[-1]
-    if not relative_external_paths:
-        intermediate_files = [os.path.normpath(os.path.join(model.tmpdir,
-                              filename_format).format(i)) for i in file_numbers]
-    else:
-        intermediate_files = [os.path.join(model.tmpdir,
-                              filename_format).format(i) for i in file_numbers]
+    filename_format = Path(filename_format).name #os.path.split(filename_format)[-1]
+    # if not relative_external_paths:
+    intermediate_files = [(model.tmpdir / filename_format.format(i)).as_posix() for i in file_numbers]
+    # else:
+        # intermediate_files = [os.path.join(model.tmpdir,
+        #                       filename_format).format(i) for i in file_numbers]
 
     if variable_name in transient2D_variables or variable_name in transient_tabular_variables:
         model.cfg['intermediate_data'][variable_name] = {per: f for per, f in
@@ -503,14 +502,13 @@ def setup_external_filepaths(model, package, variable_name,
 
     # external array(s) read by MODFLOW
     # (set to reflect expected locations where flopy will save them)
-    if not relative_external_paths:
-        external_files = [os.path.normpath(os.path.join(model.model_ws,
-                                       model.external_path,
-                                       filename_format.format(i))) for i in file_numbers]
-    else:
-        external_files = [os.path.join(model.model_ws,
-                                       model.external_path,
-                                       filename_format.format(i)) for i in file_numbers]
+    # if not relative_external_paths:
+    external_files = [(model.model_ws / model.external_path / filename_format.format(i)).as_posix()
+                       for i in file_numbers]
+    # else:
+    #     external_files = [os.path.join(model.model_ws,
+    #                                    model.external_path,
+    #                                    filename_format.format(i)) for i in file_numbers]
 
     if variable_name in transient2D_variables or variable_name in transient_tabular_variables:
         model.cfg['external_files'][variable_name] = {per: f for per, f in
