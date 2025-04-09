@@ -422,7 +422,7 @@ class MFsetupMixin():
             ext_path = os.path.relpath(abspath)
         else:
             ext_path = os.path.normpath(abspath)
-        return ext_path
+        return Path(ext_path)
 
     @external_path.setter
     def external_path(self, x):
