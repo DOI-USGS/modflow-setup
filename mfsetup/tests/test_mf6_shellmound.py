@@ -250,19 +250,15 @@ def test_package_external_file_path_setup(shellmound_model_with_grid,
                     assert not os.path.isabs(path)
 
     assert m.cfg['intermediate_data']['top'] == \
-           [os.path.normpath(os.path.join(m.tmpdir, os.path.split(top_filename)[-1]))]
+           [(m.tmpdir / Path(top_filename).name).as_posix()]
     assert m.cfg['intermediate_data']['botm'] == \
-           [os.path.normpath(os.path.join(m.tmpdir, botm_file_fmt).format(i))
-                                  for i in range(m.nlay)]
+           [(m.tmpdir / botm_file_fmt.format(i)).as_posix() for i in range(m.nlay)]
     if not relative_external_paths:
         assert m.cfg['dis']['griddata']['top'] == \
-               [{'filename': os.path.normpath(os.path.join(m.model_ws,
-                            m.external_path,
-                            os.path.split(top_filename)[-1]))}]
+               [{'filename': (m.model_ws / m.external_path / Path(top_filename).name).as_posix()}]
         assert m.cfg['dis']['griddata']['botm'] == \
-               [{'filename': os.path.normpath(os.path.join(m.model_ws,
-                             m.external_path,
-                             botm_file_fmt.format(i)))} for i in range(m.nlay)]
+               [{'filename': (m.model_ws / m.external_path / botm_file_fmt.format(i)).as_posix()}
+                for i in range(m.nlay)]
 
 
 def test_set_lakarr(shellmound_model_with_dis):
