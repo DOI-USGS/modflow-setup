@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.fileio &mdash; modflow-setup 0.6.1.post4+gc6031d7 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.6.1.post6+g2454c33 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=767e9f8b"></script>
+      <script src="../../_static/documentation_options.js?v=ad29b7ae"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -625,13 +625,12 @@
 
     <span class="n">model</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
     <span class="c1"># intermediate data</span>
-    <span class="n">filename_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename_format</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">relative_external_paths</span><span class="p">:</span>
-        <span class="n">intermediate_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">,</span>
-                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">intermediate_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span><span class="p">,</span>
-                              <span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+    <span class="n">filename_format</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename_format</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="c1">#os.path.split(filename_format)[-1]</span>
+    <span class="c1"># if not relative_external_paths:</span>
+    <span class="n">intermediate_files</span> <span class="o">=</span> <span class="p">[(</span><span class="n">model</span><span class="o">.</span><span class="n">tmpdir</span> <span class="o">/</span> <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+    <span class="c1"># else:</span>
+        <span class="c1"># intermediate_files = [os.path.join(model.tmpdir,</span>
+        <span class="c1">#                       filename_format).format(i) for i in file_numbers]</span>
 
     <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span> <span class="ow">or</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;intermediate_data&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
@@ -645,14 +644,13 @@
 
     <span class="c1"># external array(s) read by MODFLOW</span>
     <span class="c1"># (set to reflect expected locations where flopy will save them)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">relative_external_paths</span><span class="p">:</span>
-        <span class="n">external_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
-                                       <span class="n">model</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
-                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">external_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span><span class="p">,</span>
-                                       <span class="n">model</span><span class="o">.</span><span class="n">external_path</span><span class="p">,</span>
-                                       <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+    <span class="c1"># if not relative_external_paths:</span>
+    <span class="n">external_files</span> <span class="o">=</span> <span class="p">[(</span><span class="n">model</span><span class="o">.</span><span class="n">model_ws</span> <span class="o">/</span> <span class="n">model</span><span class="o">.</span><span class="n">external_path</span> <span class="o">/</span> <span class="n">filename_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+                       <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">file_numbers</span><span class="p">]</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     external_files = [os.path.join(model.model_ws,</span>
+    <span class="c1">#                                    model.external_path,</span>
+    <span class="c1">#                                    filename_format.format(i)) for i in file_numbers]</span>
 
     <span class="k">if</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient2D_variables</span> <span class="ow">or</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">transient_tabular_variables</span><span class="p">:</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;external_files&#39;</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">per</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span>
@@ -1406,7 +1404,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Mar 18, 2025.
+      <span class="lastupdated">Last updated on Apr 21, 2025.
       </span></p>
   </div>
 
