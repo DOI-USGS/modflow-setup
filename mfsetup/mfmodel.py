@@ -1369,6 +1369,12 @@ class MFsetupMixin():
                 obslist.append((bname, package, bname))
         if len(obslist) > 0:
             kwargs['observations'] = {obsfile: obslist}
+        # renames to cover difference between mf6: flopy input
+        renames = {'auto_flow_reduce_csv': 'afrcsv_filerecord',
+                   }
+        for k, v in renames.items():
+            if k in kwargs:
+                kwargs[v] = kwargs[k]
         kwargs = get_input_arguments(kwargs, flopy_package_class)
         if not external_files:
             kwargs['stress_period_data'] = spd

@@ -684,6 +684,10 @@ def test_wel_setup(shellmound_model_with_dis):
     assert isinstance(wel, mf6.ModflowGwfwel)
     assert wel.stress_period_data is not None
 
+    output = read_mf6_block(wel.filename, 'options')
+    assert 'auto_flow_reduce' in output
+    assert output['auto_flow_reduce_csv'] == ['fileout', f"{m.cfg['wel']['options']['auto_flow_reduce_csv']}"]
+
     # verify that periodata blocks were written
     output = read_mf6_block(wel.filename, 'period')
     for per, ra in wel.stress_period_data.data.items():
