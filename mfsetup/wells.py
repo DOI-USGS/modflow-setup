@@ -107,7 +107,11 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                 if 'k' not in csvdata.columns:
                     if model.nlay > 1:
                         vfd = vfd_defaults.copy()
+                        for col in 'screen_top_col', 'screen_botm_col':
+                            if col in v:
+                                vfd[col] = v[col]
                         vfd.update(v.get('vertical_flux_distribution', {}))
+
                         csvdata = assign_layers_from_screen_top_botm(csvdata,
                                                                      model,
                                                                      **vfd)
@@ -131,6 +135,9 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                     if 'k' not in aw.columns:
                         if model.nlay > 1:
                             vfd = vfd_defaults.copy()
+                            for col in 'screen_top_col', 'screen_botm_col':
+                                if col in v:
+                                    vfd[col] = v[col]
                             vfd.update(v.get('vertical_flux_distribution', {}))
                             aw = assign_layers_from_screen_top_botm(aw,
                                                                     model,
