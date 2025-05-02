@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.6.1.post6+g2454c33 documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.6.1.post10+gff95ba5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ad29b7ae"></script>
+      <script src="../_static/documentation_options.js?v=5e34d420"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -523,13 +523,22 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">auto_flow_reduce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">auto_flow_reduce_csv</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;wel_auto_flow_reduce.csv&#39;</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">csvfiles</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># pumping input from CSV files</span>
 <span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
 <span class="w">                  </span><span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
 <span class="w">                  </span><span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="c1"># &#39;x&#39; and &#39;y&#39; are the default names for x and y location columns</span>
+<span class="w">      </span><span class="c1"># Note: since default names are used for x_col, y_col,</span>
+<span class="w">      </span><span class="c1"># screen_top_col and screen_botm_col;</span>
+<span class="w">      </span><span class="c1"># these entries are not needed, but are shown here</span>
+<span class="w">      </span><span class="c1"># to illustrate how other column names might be used</span>
+<span class="w">      </span><span class="nt">x_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span><span class="w">  </span><span class="c1"># default x_col name</span>
+<span class="w">      </span><span class="nt">y_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">y</span><span class="w">  </span><span class="c1"># default y_col name</span>
+<span class="w">      </span><span class="nt">screen_top_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">screen_top</span><span class="w">  </span><span class="c1"># default screen_top name</span>
+<span class="w">      </span><span class="nt">screen_botm_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">screen_botm</span><span class="w">  </span><span class="c1"># default screen_botm name</span>
 <span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
 <span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
 <span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flux_m3&#39;</span>
@@ -755,7 +764,7 @@ and time-varing heads specified in a csvfile:</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 21, 2025.
+      <span class="lastupdated">Last updated on May 02, 2025.
       </span></p>
   </div>
 

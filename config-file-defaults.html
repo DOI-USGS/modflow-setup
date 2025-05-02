@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration defaults &mdash; modflow-setup 0.6.1.post6+g2454c33 documentation</title>
+  <title>Configuration defaults &mdash; modflow-setup 0.6.1.post10+gff95ba5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=ad29b7ae"></script>
+      <script src="_static/documentation_options.js?v=5e34d420"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -332,65 +332,67 @@
 <span class="linenos">220</span><span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="linenos">221</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="linenos">222</span><span class="w">    </span><span class="nt">boundnames</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">223</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
-<span class="linenos">224</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}_wel_lookup.csv&#39;</span><span class="w"> </span><span class="c1"># output file that maps wel package data to site numbers</span>
-<span class="linenos">225</span><span class="w">    </span><span class="nt">dropped_wells_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}_dropped_wells.csv&#39;</span><span class="w"> </span><span class="c1"># output file that records wells that were dropped during model setup</span>
-<span class="linenos">226</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
-<span class="linenos">227</span><span class="w">    </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.</span>
-<span class="linenos">228</span><span class="w">    </span><span class="nt">external_files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># option to write stress_period_data to external files</span>
-<span class="linenos">229</span><span class="w">    </span><span class="nt">external_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;wel_{:03d}.dat&quot;</span>
-<span class="linenos">230</span>
-<span class="linenos">231</span>
+<span class="linenos">223</span><span class="w">    </span><span class="nt">auto_flow_reduce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">224</span><span class="w">    </span><span class="nt">auto_flow_reduce_csv</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;wel_auto_flow_reduce.csv&#39;</span>
+<span class="linenos">225</span><span class="w">  </span><span class="nt">output_files</span><span class="p">:</span>
+<span class="linenos">226</span><span class="w">    </span><span class="nt">lookup_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}_wel_lookup.csv&#39;</span><span class="w"> </span><span class="c1"># output file that maps wel package data to site numbers</span>
+<span class="linenos">227</span><span class="w">    </span><span class="nt">dropped_wells_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}_dropped_wells.csv&#39;</span><span class="w"> </span><span class="c1"># output file that records wells that were dropped during model setup</span>
+<span class="linenos">228</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
+<span class="linenos">229</span><span class="w">    </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.</span>
+<span class="linenos">230</span><span class="w">    </span><span class="nt">external_files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># option to write stress_period_data to external files</span>
+<span class="linenos">231</span><span class="w">    </span><span class="nt">external_filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;wel_{:03d}.dat&quot;</span>
 <span class="linenos">232</span>
-<span class="linenos">233</span><span class="nt">oc</span><span class="p">:</span>
-<span class="linenos">234</span><span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.hds&#39;</span>
-<span class="linenos">235</span><span class="w">  </span><span class="nt">budget_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.cbc&#39;</span>
-<span class="linenos">236</span><span class="w">  </span><span class="c1"># example of using MODFLOW 6-style text input</span>
-<span class="linenos">237</span><span class="w">  </span><span class="nt">period_options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span>
-<span class="linenos">238</span><span class="w">                       </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">239</span><span class="w">  </span><span class="p p-Indicator">}</span>
-<span class="linenos">240</span>
-<span class="linenos">241</span><span class="nt">obs</span><span class="p">:</span>
-<span class="linenos">242</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">243</span><span class="w">    </span><span class="nt">digits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-<span class="linenos">244</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="linenos">245</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="linenos">246</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span>
-<span class="linenos">247</span><span class="w">      </span><span class="nt">hydlbl</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">248</span><span class="w">    </span><span class="nt">x_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x&#39;</span><span class="w"> </span><span class="c1"># x coordinates in wtm</span>
-<span class="linenos">249</span><span class="w">    </span><span class="nt">y_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y&#39;</span><span class="w"> </span><span class="c1"># y coordinates in wtm</span>
-<span class="linenos">250</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
-<span class="linenos">251</span><span class="w">    </span><span class="nt">allow_obs_in_bc_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="linenos">252</span><span class="w">    </span><span class="nt">obsname_character_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w">  </span><span class="c1"># modflow 6 limit</span>
-<span class="linenos">253</span><span class="w">    </span><span class="nt">filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.head.obs&#39;</span><span class="w">  </span><span class="c1"># only head obs supported at this point</span>
-<span class="linenos">254</span>
-<span class="linenos">255</span><span class="nt">ims</span><span class="p">:</span>
-<span class="linenos">256</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">257</span><span class="w">    </span><span class="nt">print_option</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span>
-<span class="linenos">258</span><span class="w">    </span><span class="nt">csv_outer_output</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;solver_outer_out.csv&#39;</span>
-<span class="linenos">259</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
-<span class="linenos">260</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
-<span class="linenos">261</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
-<span class="linenos">262</span><span class="w">    </span><span class="nt">under_relaxation</span><span class="p">:</span><span class="w">  </span><span class="s">&#39;dbd&#39;</span>
-<span class="linenos">263</span><span class="w">    </span><span class="nt">under_relaxation_theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
-<span class="linenos">264</span><span class="w">    </span><span class="nt">under_relaxation_kappa</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
-<span class="linenos">265</span><span class="w">    </span><span class="nt">under_relaxation_gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
-<span class="linenos">266</span><span class="w">    </span><span class="nt">under_relaxation_momentum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
-<span class="linenos">267</span><span class="w">    </span><span class="nt">backtracking_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos">268</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
-<span class="linenos">269</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
-<span class="linenos">270</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
-<span class="linenos">271</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
-<span class="linenos">272</span><span class="w">    </span><span class="nt">linear_acceleration</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;bicgstab&#39;</span>
-<span class="linenos">273</span><span class="w">    </span><span class="nt">relaxation_factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w">  </span><span class="c1"># either ILU(0) or ILUT preconditioning</span>
-<span class="linenos">274</span><span class="w">    </span><span class="nt">preconditioner_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
-<span class="linenos">275</span><span class="w">    </span><span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
-<span class="linenos">276</span><span class="w">    </span><span class="nt">number_orthogonalizations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="linenos">277</span><span class="w">    </span><span class="nt">scaling_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">278</span><span class="w">    </span><span class="nt">reordering_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
-<span class="linenos">279</span>
-<span class="linenos">280</span><span class="nt">mfsetup_options</span><span class="p">:</span>
-<span class="linenos">281</span><span class="w">  </span><span class="nt">keep_original_arrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos">233</span>
+<span class="linenos">234</span>
+<span class="linenos">235</span><span class="nt">oc</span><span class="p">:</span>
+<span class="linenos">236</span><span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.hds&#39;</span>
+<span class="linenos">237</span><span class="w">  </span><span class="nt">budget_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.cbc&#39;</span>
+<span class="linenos">238</span><span class="w">  </span><span class="c1"># example of using MODFLOW 6-style text input</span>
+<span class="linenos">239</span><span class="w">  </span><span class="nt">period_options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span>
+<span class="linenos">240</span><span class="w">                       </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">241</span><span class="w">  </span><span class="p p-Indicator">}</span>
+<span class="linenos">242</span>
+<span class="linenos">243</span><span class="nt">obs</span><span class="p">:</span>
+<span class="linenos">244</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">245</span><span class="w">    </span><span class="nt">digits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="linenos">246</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="linenos">247</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="linenos">248</span><span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span>
+<span class="linenos">249</span><span class="w">      </span><span class="nt">hydlbl</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;obsprefix&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;obsnme&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;common_name&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">250</span><span class="w">    </span><span class="nt">x_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;x&#39;</span><span class="w"> </span><span class="c1"># x coordinates in wtm</span>
+<span class="linenos">251</span><span class="w">    </span><span class="nt">y_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;y&#39;</span><span class="w"> </span><span class="c1"># y coordinates in wtm</span>
+<span class="linenos">252</span><span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
+<span class="linenos">253</span><span class="w">    </span><span class="nt">allow_obs_in_bc_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="linenos">254</span><span class="w">    </span><span class="nt">obsname_character_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span><span class="w">  </span><span class="c1"># modflow 6 limit</span>
+<span class="linenos">255</span><span class="w">    </span><span class="nt">filename_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.head.obs&#39;</span><span class="w">  </span><span class="c1"># only head obs supported at this point</span>
+<span class="linenos">256</span>
+<span class="linenos">257</span><span class="nt">ims</span><span class="p">:</span>
+<span class="linenos">258</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
+<span class="linenos">259</span><span class="w">    </span><span class="nt">print_option</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span>
+<span class="linenos">260</span><span class="w">    </span><span class="nt">csv_outer_output</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;solver_outer_out.csv&#39;</span>
+<span class="linenos">261</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
+<span class="linenos">262</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-1</span>
+<span class="linenos">263</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="linenos">264</span><span class="w">    </span><span class="nt">under_relaxation</span><span class="p">:</span><span class="w">  </span><span class="s">&#39;dbd&#39;</span>
+<span class="linenos">265</span><span class="w">    </span><span class="nt">under_relaxation_theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="linenos">266</span><span class="w">    </span><span class="nt">under_relaxation_kappa</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="linenos">267</span><span class="w">    </span><span class="nt">under_relaxation_gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="linenos">268</span><span class="w">    </span><span class="nt">under_relaxation_momentum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="linenos">269</span><span class="w">    </span><span class="nt">backtracking_number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos">270</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
+<span class="linenos">271</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">272</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e-2</span>
+<span class="linenos">273</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">274</span><span class="w">    </span><span class="nt">linear_acceleration</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;bicgstab&#39;</span>
+<span class="linenos">275</span><span class="w">    </span><span class="nt">relaxation_factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span><span class="w">  </span><span class="c1"># either ILU(0) or ILUT preconditioning</span>
+<span class="linenos">276</span><span class="w">    </span><span class="nt">preconditioner_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="linenos">277</span><span class="w">    </span><span class="nt">preconditioner_drop_tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="linenos">278</span><span class="w">    </span><span class="nt">number_orthogonalizations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="linenos">279</span><span class="w">    </span><span class="nt">scaling_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">280</span><span class="w">    </span><span class="nt">reordering_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="linenos">281</span>
+<span class="linenos">282</span><span class="nt">mfsetup_options</span><span class="p">:</span>
+<span class="linenos">283</span><span class="w">  </span><span class="nt">keep_original_arrays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 </pre></div>
 </div>
 </section>
@@ -641,7 +643,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Apr 21, 2025.
+      <span class="lastupdated">Last updated on May 02, 2025.
       </span></p>
   </div>
 
