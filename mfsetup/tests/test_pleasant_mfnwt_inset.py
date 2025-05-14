@@ -131,6 +131,10 @@ def test_model_setup(full_pleasant_nwt):
         gagedata = src.read()
     assert gagedata == '3 \n-1 -250 1 \n1 22 251 0 \n2 2 252 0 \n'
 
+    # check that streambed elevation data were incorporated correctly
+    reach_data = m.sfrdata.reach_data
+    assert reach_data.loc[reach_data['name'] == 'Chaffee Creek', 'strtop'].max() == 296.9
+
 
 def test_model_setup_and_run(pleasant_nwt_model_run):
     m = pleasant_nwt_model_run
