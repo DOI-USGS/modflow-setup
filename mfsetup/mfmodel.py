@@ -1575,6 +1575,11 @@ class MFsetupMixin():
                     "sfrmaker.SFRData.set_streambed_top_elevations_from_dem")
                 assert 'dem' in self.cfg['sfr'].get('source_data', {}), error_msg
                 dem_kwargs.update(self.cfg['sfr']['source_data']['dem'])
+                if 'elevation_data' in self.cfg['sfr']['source_data']:
+                    elevation_data = self.cfg['sfr']['source_data']['elevation_data']
+                    dem_kwargs['elevation_data'] = elevation_data['filename']
+                    for suffix in 'crs', 'layer':
+                        dem_kwargs[f'elevation_data_{suffix}'] = elevation_data[suffix]
             sfr.set_streambed_top_elevations_from_dem(**dem_kwargs)
         else:
             sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')
