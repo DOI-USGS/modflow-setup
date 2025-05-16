@@ -390,12 +390,12 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
     -------
     keys
     """
-    valid_extensions = ['csv', 'shp', 'tif',
-                        'ref', 'dat',
-                        'nc',
-                        'yml', 'json',
-                        'hds', 'cbb', 'cbc',
-                        'grb']
+    valid_extensions = ['.csv', '.shp', '.tif', '.gpkg',
+                        '.ref', '.dat',
+                        '.nc',
+                        '.yml', '.yaml', '.json',
+                        '.hds', '.cbb', '.cbc',
+                        '.grb']
     file_keys = ['filename',
                  'filenames',
                  'binaryfile',
@@ -413,7 +413,7 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
         if isinstance(v, str):
             if k0 in file_keys:
                 keys.append(k0)
-            elif v[-3:] in valid_extensions or paths:
+            elif Path(v).suffix in valid_extensions or paths:
                 keys.append(k0)
             elif 'output' in source_data:
                 keys.append(k0)
@@ -421,7 +421,7 @@ def _parse_file_path_keys_from_source_data(source_data, prefix=None, paths=False
             for i, v1 in enumerate(v):
                 if k0 in file_keys:
                     keys.append('.'.join([str(k0), str(i)]))
-                elif paths or isinstance(v1, str) and v1[-3:] in valid_extensions:
+                elif paths or isinstance(v1, str) and Path(v1).suffix in valid_extensions:
                     keys.append('.'.join([str(k0), str(i)]))
         elif isinstance(v, dict):
             keys += _parse_file_path_keys_from_source_data(v, prefix=k0, paths=paths)
