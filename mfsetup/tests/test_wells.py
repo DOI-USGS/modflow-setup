@@ -170,7 +170,7 @@ def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
     i = [10] * m.ncol
     j = list(range(m.ncol))
     screen_top = all_layers[0, i, j]
-    screen_botm = all_layers[-1:, i, j]
+    screen_botm = all_layers[-1, i, j]
     b = get_open_interval_thickness(m, i=i, j=j,
                                     screen_top=screen_top,
                                     screen_botm=screen_botm)
@@ -181,6 +181,17 @@ def test_get_open_interval_thicknesses(shellmound_model_with_dis, all_layers):
     assert np.allclose(b[layers, list(range(b.shape[1]))],
                        diffs[layers_from_diffs, list(range(diffs.shape[1]))])
     assert np.allclose(b[:, 0], -np.diff(all_layers[:, i[0], j[0]]))
+
+    # test case where screen top == screen bottom
+    # (for example, when there is only well depth information,
+    # and we want to simply assign pumping to the layers intersecting the well bottoms)
+    # in this case we want the open interval thickness to be equal to those layers
+    screen_botm = all_layers[7, i, j].copy()
+    screen_top = screen_botm.copy()
+    b = get_open_interval_thickness(m, i=i, j=j,
+                                screen_top=screen_botm,
+                                screen_botm=screen_botm)
+    assert np.allclose(b.sum(axis=0), (all_layers[6, i, j] - all_layers[7, i, j]))
     # TODO: test with partially penetrating wells
 
 
