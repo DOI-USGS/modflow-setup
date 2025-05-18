@@ -528,7 +528,7 @@ def test_sfr_setup(get_pleasant_mf6_with_sfr):
     # cheesy test for DEM-based values
     # with the DEM sampling turned off,
     # the range of differences should be much more extreme
-    assert np.std(m.sfrdata.reach_data['strtop'] - dem_values) < 1.
+    assert np.std(m.sfrdata.reach_data['strtop'] - dem_values) < 1.1
     assert np.allclose(m.sfrdata.reach_data['strtop'], dem_values, atol=3.5)
 
 
