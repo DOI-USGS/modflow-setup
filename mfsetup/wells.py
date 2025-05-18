@@ -600,6 +600,10 @@ def get_open_interval_thickness(m,
         raise ValueError('Must specify row, column or x, y locations.')
 
     botm = m.dis.botm.array[:, i, j]
+    # make an array of layer tops
+    tops = np.empty_like(botm, dtype=float)
+    tops[0, :] = m.dis.top.array[i, j]
+    tops[1:, :] = botm[:-1]
 
     if heads is None:
         # use model top elevations; expand to nlay x n locations
@@ -611,15 +615,24 @@ def get_open_interval_thickness(m,
     assert heads.shape == botm.shape, msg
 
     # set open interval tops/bottoms to model top/bottom if None
-    if screen_top is None:
+    if (screen_top is None) and (screen_botm is None):
         screen_top = m.dis.top.array[i, j]
-    if screen_botm is None:
         screen_botm = m.dis.botm.array[-1, i, j]
+    # if there is only screen top or botm information
+    elif ((screen_top is None) and (screen_botm is not None)) |\
+        np.allclose(screen_top, screen_botm, atol=0.01):
+        # screen_top needs it's own array
+        screen_top = screen_botm.copy()
+    elif ((screen_top is not None) and (screen_botm is None)):
+        # screen_top needs it's own array
+        screen_botm = screen_top.copy()
 
-    # make an array of layer tops
-    tops = np.empty_like(botm, dtype=float)
-    tops[0, :] = m.dis.top.array[i, j]
-    tops[1:, :] = botm[:-1]
+    # if no open interval information, set top and bottom
+    # to the layer containing the well bottom
+    if np.allclose(screen_top, screen_botm):
+        well_layer_ind = np.argmax((screen_botm - botm) >= 0, axis=0)
+        screen_botm = botm[well_layer_ind, np.arange(botm.shape[1])]
+        screen_top = tops[well_layer_ind, np.arange(botm.shape[1])]
 
     # expand top and bottom arrays to be same shape as botm, thickness, etc.
     # (so we have an open interval value for each layer)
@@ -629,11 +642,11 @@ def get_open_interval_thickness(m,
     scbotarr[:] = screen_botm
 
     # start with layer tops
+    openinvtop = tops.copy()
     # set tops above heads to heads
+    openinvtop[openinvtop > heads] = heads[openinvtop > heads]
     # set tops above screen top to screen top
     # (we only care about the saturated open interval)
-    openinvtop = tops.copy()
-    openinvtop[openinvtop > heads] = heads[openinvtop > heads]
     openinvtop[openinvtop > sctoparr] = sctoparr[openinvtop > screen_top]
 
     # start with layer bottoms
