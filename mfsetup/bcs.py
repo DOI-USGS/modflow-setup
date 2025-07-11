@@ -67,7 +67,7 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                     shapefile['names_column'] = shapefile.pop('boundname_column')
             bc_cells = rasterize(shapefile_name, m.modelgrid, **shapefile)
             bc_cell_id_kwargs = shapefile.copy()
-            bc_cell_id_kwargs['names_column'] = shapefile['id_column']
+            bc_cell_id_kwargs['names_column'] = shapefile.get('id_column')
             bc_cell_ids = rasterize(shapefile_name, m.modelgrid, **bc_cell_id_kwargs)
             # fill unnamed feature names with id numbers (as strings)
             unnamed = bc_cells == 'nan'
