@@ -796,8 +796,7 @@ def flopy_mfsimulation_load(sim, model, strict=True, load_only=None,
     instance.name_file.load(strict)
 
     # load TDIS file
-    tdis_pkg = 'tdis{}'.format(mfstructure.MFStructure().
-                               get_version_string())
+    tdis_pkg = f"tdis6"
     tdis_attr = getattr(instance.name_file, tdis_pkg)
     instance._tdis_file = mftdis.ModflowTdis(instance,
                                              filename=tdis_attr.get_data())
@@ -978,10 +977,12 @@ def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.',
     instance.name_file.load(strict)
 
     # order packages
-    vnum = mfstructure.MFStructure().get_version_string()
     # FIX: Transport - Priority packages maybe should not be hard coded
-    priority_packages = {'dis{}'.format(vnum): 1, 'disv{}'.format(vnum): 1,
-                         'disu{}'.format(vnum): 1}
+    priority_packages = {
+        f"dis6": 1,
+        f"disv6": 1,
+        f"disu6": 1,
+    }
     packages_ordered = []
     package_recarray = instance.simulation_data.mfdata[(modelname, 'nam',
                                                         'packages',
@@ -993,13 +994,24 @@ def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.',
             packages_ordered.append((item[0], item[1], item[2]))
 
     # load packages
-    sim_struct = mfstructure.MFStructure().sim_struct
+    try:
+        sim_struct = mfstructure.MFStructure().sim_spec
+    except:  # retain support for older versions of Flopy (<3.9.5?)
+        sim_struct = mfstructure.MFStructure().sim_struct
+    try:
+        utl_spec = sim_struct.utl_spec
+    except: # retain support for older versions of Flopy (<3.9.5?)
+        utl_spec = sim_struct.utl_struct_objs
+    try:
+        pkg_spec = structure.pkg_spec
+    except: # retain support for older versions of Flopy (<3.9.5?)
+        pkg_spec = structure.package_struct_objs
     instance._ftype_num_dict = {}
     for ftype, fname, pname in packages_ordered:
         ftype_orig = ftype
         ftype = ftype[0:-1].lower()
-        if ftype in structure.package_struct_objs or ftype in \
-                sim_struct.utl_struct_objs:
+        if ftype in pkg_spec or ftype in \
+                utl_spec:
             if (
                 load_only is not None
                 and not PackageContainer._in_pkg_list(
@@ -1028,8 +1040,8 @@ def flopy_mf6model_load(simulation, model, strict=True, model_rel_path='.',
     if modelname in instance.simulation_data.referenced_files:
         for ref_file in \
                 instance.simulation_data.referenced_files[modelname].values():
-            if (ref_file.file_type in structure.package_struct_objs or
-                ref_file.file_type in sim_struct.utl_struct_objs) and \
+            if (ref_file.file_type in pkg_spec or
+                ref_file.file_type in utl_spec) and \
                     not ref_file.loaded:
                 instance.load_package(ref_file.file_type,
                                       ref_file.file_name, None, strict,
