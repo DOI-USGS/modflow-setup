@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.fileio &mdash; modflow-setup 0.6.1.post15+g32a0e17 documentation</title>
+  <title>mfsetup.fileio &mdash; modflow-setup 0.6.1.post19+ga07b898 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=0ce70065"></script>
+      <script src="../../_static/documentation_options.js?v=b22a053e"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -944,8 +944,7 @@
     <span class="n">instance</span><span class="o">.</span><span class="n">name_file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
 
     <span class="c1"># load TDIS file</span>
-    <span class="n">tdis_pkg</span> <span class="o">=</span> <span class="s1">&#39;tdis</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span>
-                               <span class="n">get_version_string</span><span class="p">())</span>
+    <span class="n">tdis_pkg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tdis6&quot;</span>
     <span class="n">tdis_attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">name_file</span><span class="p">,</span> <span class="n">tdis_pkg</span><span class="p">)</span>
     <span class="n">instance</span><span class="o">.</span><span class="n">_tdis_file</span> <span class="o">=</span> <span class="n">mftdis</span><span class="o">.</span><span class="n">ModflowTdis</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span>
                                              <span class="n">filename</span><span class="o">=</span><span class="n">tdis_attr</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
@@ -1129,10 +1128,12 @@
     <span class="n">instance</span><span class="o">.</span><span class="n">name_file</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
 
     <span class="c1"># order packages</span>
-    <span class="n">vnum</span> <span class="o">=</span> <span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span><span class="n">get_version_string</span><span class="p">()</span>
     <span class="c1"># FIX: Transport - Priority packages maybe should not be hard coded</span>
-    <span class="n">priority_packages</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dis</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vnum</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;disv</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vnum</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>
-                         <span class="s1">&#39;disu</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vnum</span><span class="p">):</span> <span class="mi">1</span><span class="p">}</span>
+    <span class="n">priority_packages</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sa">f</span><span class="s2">&quot;dis6&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;disv6&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;disu6&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">}</span>
     <span class="n">packages_ordered</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">package_recarray</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mfdata</span><span class="p">[(</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;nam&#39;</span><span class="p">,</span>
                                                         <span class="s1">&#39;packages&#39;</span><span class="p">,</span>
@@ -1144,13 +1145,24 @@
             <span class="n">packages_ordered</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
 
     <span class="c1"># load packages</span>
-    <span class="n">sim_struct</span> <span class="o">=</span> <span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span><span class="n">sim_struct</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sim_struct</span> <span class="o">=</span> <span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span><span class="n">sim_spec</span>
+    <span class="k">except</span><span class="p">:</span>  <span class="c1"># retain support for older versions of Flopy (&lt;3.9.5?)</span>
+        <span class="n">sim_struct</span> <span class="o">=</span> <span class="n">mfstructure</span><span class="o">.</span><span class="n">MFStructure</span><span class="p">()</span><span class="o">.</span><span class="n">sim_struct</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">utl_spec</span> <span class="o">=</span> <span class="n">sim_struct</span><span class="o">.</span><span class="n">utl_spec</span>
+    <span class="k">except</span><span class="p">:</span> <span class="c1"># retain support for older versions of Flopy (&lt;3.9.5?)</span>
+        <span class="n">utl_spec</span> <span class="o">=</span> <span class="n">sim_struct</span><span class="o">.</span><span class="n">utl_struct_objs</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pkg_spec</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">pkg_spec</span>
+    <span class="k">except</span><span class="p">:</span> <span class="c1"># retain support for older versions of Flopy (&lt;3.9.5?)</span>
+        <span class="n">pkg_spec</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">package_struct_objs</span>
     <span class="n">instance</span><span class="o">.</span><span class="n">_ftype_num_dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">ftype</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">packages_ordered</span><span class="p">:</span>
         <span class="n">ftype_orig</span> <span class="o">=</span> <span class="n">ftype</span>
         <span class="n">ftype</span> <span class="o">=</span> <span class="n">ftype</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">ftype</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">package_struct_objs</span> <span class="ow">or</span> <span class="n">ftype</span> <span class="ow">in</span> \
-                <span class="n">sim_struct</span><span class="o">.</span><span class="n">utl_struct_objs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ftype</span> <span class="ow">in</span> <span class="n">pkg_spec</span> <span class="ow">or</span> <span class="n">ftype</span> <span class="ow">in</span> \
+                <span class="n">utl_spec</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">load_only</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="ow">and</span> <span class="ow">not</span> <span class="n">PackageContainer</span><span class="o">.</span><span class="n">_in_pkg_list</span><span class="p">(</span>
@@ -1179,8 +1191,8 @@
     <span class="k">if</span> <span class="n">modelname</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">referenced_files</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ref_file</span> <span class="ow">in</span> \
                 <span class="n">instance</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">referenced_files</span><span class="p">[</span><span class="n">modelname</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">package_struct_objs</span> <span class="ow">or</span>
-                <span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span> <span class="ow">in</span> <span class="n">sim_struct</span><span class="o">.</span><span class="n">utl_struct_objs</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="k">if</span> <span class="p">(</span><span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span> <span class="ow">in</span> <span class="n">pkg_spec</span> <span class="ow">or</span>
+                <span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span> <span class="ow">in</span> <span class="n">utl_spec</span><span class="p">)</span> <span class="ow">and</span> \
                     <span class="ow">not</span> <span class="n">ref_file</span><span class="o">.</span><span class="n">loaded</span><span class="p">:</span>
                 <span class="n">instance</span><span class="o">.</span><span class="n">load_package</span><span class="p">(</span><span class="n">ref_file</span><span class="o">.</span><span class="n">file_type</span><span class="p">,</span>
                                       <span class="n">ref_file</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span>
@@ -1404,7 +1416,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on May 19, 2025.
+      <span class="lastupdated">Last updated on Nov 14, 2025.
       </span></p>
   </div>
 
