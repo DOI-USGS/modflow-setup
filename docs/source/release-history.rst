@@ -2,6 +2,23 @@
 Release History
 ===============
 
+Version 0.7.0 (2025-12-31)
+----------------------------------------
+New Features:
+**************
+ * Added partial support for GeoPackages (.gpkg) input
+ * Added support for SFRmaker streambed top field elevations input.
+ * Add auto_flow_reduce = 0.1 by default in MF6 model Well Packages
+
+Bug Fixes:
+*************
+ * Refactor np.in1d to np.isin to resolve numpy error
+ * Refactoring to support various Flopy interface changes
+ * Allow shapefile input with no 'id_column' for basic stress packages
+ * Fix issue with Well Package layer assignment in cases where there is no open interval information (only well bottom). When there is only screen_top or screen_botm, or screen_top == screen_botm, set the screen_top and screen_botm to the top/bottom of layer intersecting the well bottom (i.e. so that the well is placed in this layer). Previously, a zero open interval thickness in these situations was resulting in the well getting re-assigned to the highest transmissivity layer at that i, j location.
+* Fix issue with MODFLOW 6 configuration file defaults: Well Package auto_flow_reduce needs to be a float (not True, which will result in an auto flow reduce value of 1.0 being assigned (almost full suppression of pumping); set auto_flow_reduce default of 0.1
+* Fix issue with Well Package Setup: Pass non-default screen_top_col and screen_botm_col to assign_layers_from_screen_top_botm; otherwise an error results when non-default names for these are used.
+
 Version 0.6.1 (2025-03-17)
 ----------------------------------------
 * fix 'TemporalReference' issue related to change in Flopy code
