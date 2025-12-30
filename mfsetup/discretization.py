@@ -114,7 +114,7 @@ def find_remove_isolated_cells(array, minimum_cluster_size=10):
                                                           structure=structure)
         retain_areas = [c for c in range(1, ncomponents+1)
                         if (labeled == c).sum() >= minimum_cluster_size]
-        retain = np.in1d(labeled.ravel(), retain_areas)
+        retain = np.isin(labeled.ravel(), retain_areas)
         retained = np.reshape(retain, arr.shape).astype(array.dtype)
         retained_arraylist.append(retained)
     if len(array.shape) == 3:
