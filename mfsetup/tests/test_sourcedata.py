@@ -378,7 +378,7 @@ def test_transient_tabular_source_data(tmpdir, project_root_path, shellmound_mod
 
     # verify that first (steady-state) period has data
     # if period is steady and no end_datetime_column is given, default should be to take mean for whole file
-    assert not any(np.in1d([1, 2], data.per.unique()))
+    assert not any(np.isin([1, 2], data.per.unique()))
 
 @pytest.mark.skip(reason='still working on tests for other SourceData classes')
 def test_transient_array_source_data(pfl_nwt_with_dis):
