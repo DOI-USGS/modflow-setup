@@ -22,11 +22,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout master branch
-<<<<<<< HEAD
         uses: actions/checkout@v7
-=======
-        uses: actions/checkout@v6
->>>>>>> f502ba42 (build(deps): bump actions/checkout from 5 to 6)
         with:
           ref: master
       - name: Bump version and push tag
@@ -155,7 +151,11 @@ jobs:
         run: twine check --strict dist/*
 
       - name: Upload package
+<<<<<<< HEAD
         uses: actions/upload-artifact@v7
+=======
+        uses: actions/upload-artifact@v6
+>>>>>>> f021ee36 (build(deps): bump actions/upload-artifact from 4 to 6)
         with:
           name: dist
           path: dist
