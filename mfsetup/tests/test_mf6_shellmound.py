@@ -749,7 +749,7 @@ def test_wel_setup(shellmound_model_with_dis):
 #                    reason='This test fails on macos CI for an unknown reason; passes locally on macos')
 def test_sfr_setup(model_with_sfr, project_root_path):
     m = model_with_sfr
-    m.sfr.write()
+    m.write_input()
     assert os.path.exists(os.path.join(m.model_ws, m.sfr.filename))
     assert isinstance(m.sfr, mf6.ModflowGwfsfr)
     output_path = m._shapefiles_path
@@ -971,7 +971,7 @@ def test_model_setup_no_nans(model_setup):
         assert pckg in package_list
     assert 'RIV_1' not in package_list
     m.write_input()
-    df = pd.read_csv(m.model_ws / 'external/riv_000.dat', delim_whitespace=True)
+    df = pd.read_csv(m.model_ws / 'external/riv_000.dat', sep=r'\s+')
     # single RIV external file should have Lake Henry (from riv: block)
     # and Tallahatchie/Yazoo (via SFRmaker to_riv:)
     # does flopy force boundnames to lower case as of v3.3.7?

@@ -200,7 +200,7 @@ class MFnwtModel(MFsetupMixin, Modflow):
 
         # remove cells that are above stream cells
         if self.get_package('sfr') is not None:
-            ibound = deactivate_idomain_above(ibound, self.sfr.reach_data)
+            ibound = deactivate_idomain_above(ibound, self.sfrdata.reach_data)
         # remove cells that are above ghb cells
         if self.get_package('ghb') is not None:
             ibound = deactivate_idomain_above(ibound, self.ghb.stress_period_data[0])
@@ -214,6 +214,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
                           data={i: arr for i, arr in enumerate(ibound)},
                           datatype='array3d', write_fmt='%d', dtype=int)
         self.bas6.ibound = self.cfg['bas6']['ibound']
+
+        if hasattr(self, 'sfrdata'):
+            self.adjust_sfr_layers_model_bottom()
+
 
     def _set_parent(self):
         """Set attributes related to a parent or source model
@@ -851,6 +855,10 @@ class MFnwtModel(MFsetupMixin, Modflow):
         # gage package was already set-up and then written by Flopy
         if 'SFR' in self.get_package_list():
             self.sfrdata.write_package(write_observations_input=False)
+            # write reach and segment data tables
+            self.sfrdata.write_tables('{}/{}'.format(self._tables_path, self.name))
+            # export shapefiles of lines, routing, cell polygons, inlets and outlets
+            self.sfrdata.write_shapefiles('{}/{}'.format(self._shapefiles_path, self.name))
 
         # add version info to file headers
         files = [self.namefile]

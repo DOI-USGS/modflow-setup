@@ -124,7 +124,7 @@ def load_array(filename, shape=None, nodata=-9999):
         print(txt, end=', ')
         # arr = np.loadtxt
         # pd.read_csv is >3x faster than np.load_txt
-        arr = pd.read_csv(f, delim_whitespace=True, header=None).values
+        arr = pd.read_csv(f, sep=r'\s+', header=None).values
         if shape2d is not None:
             if arr.shape != shape2d:
                 if arr.size == np.prod(shape2d):
@@ -1146,7 +1146,7 @@ def read_ggofile(gagefile, model,
         names = [n.lower() for n in names]
         df = pd.read_csv(src, skiprows=0,
                             header=None,
-                            delim_whitespace=True,
+                            sep=r'\s+',
                             names=names
                             )
     kstp = []
