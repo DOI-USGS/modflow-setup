@@ -220,7 +220,7 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
 
         # remove cells that are above stream cells
         if self.get_package('sfr') is not None:
-            idomain = deactivate_idomain_above(idomain, self.sfr.packagedata)
+            idomain = deactivate_idomain_above(idomain, self.sfrdata.reach_data)
 
         # inactivate any isolated cells that could cause problems with the solution
         idomain = find_remove_isolated_cells(idomain, minimum_cluster_size=20)
@@ -262,7 +262,10 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                 data={0: irch},
                                 datatype='array2d',
                                 write_fmt='%d', dtype=int)
-        #self.dis.irch = self.cfg['dis']['irch']
+
+        if hasattr(self, 'sfrdata'):
+            self.adjust_sfr_layers_model_bottom()
+
 
     def _update_grid_configuration_with_dis(self):
         """Update grid configuration with any information supplied to dis package
@@ -1045,6 +1048,12 @@ class MF6model(MFsetupMixin, mf6.ModflowGwf):
                                         options=options,
                                         external_files_path=model.external_path
                                         )
+                # write reach and segment data tables
+                model.sfrdata.write_tables('{}/{}'.format(self._tables_path, self.name))
+
+                # export shapefiles of lines, routing, cell polygons, inlets and outlets
+                model.sfrdata.write_shapefiles('{}/{}'.format(self._shapefiles_path, self.name))
+
             # add version info to package file headers
             files = [model.namefile]
             files += [p.filename for p in model.packagelist]

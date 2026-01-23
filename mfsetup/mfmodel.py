@@ -1382,6 +1382,36 @@ class MFsetupMixin():
         print("finished in {:.2f}s\n".format(time.time() - t0))
         return pckg
 
+
+    def adjust_sfr_layers_model_bottom(self):
+        # assign layers to the sfr reaches
+        botm = self.dis.botm.array.copy()
+        if self.version == 'mf6':
+            idomain = self.dis.idomain.array
+        else:
+            idomain = self.bas6.ibound.array
+        layers, new_botm = assign_layers(self.sfrdata.reach_data,
+                                         botm_array=botm,
+                                         idomain=idomain)
+        self.sfrdata.reach_data['k'] = layers
+        if new_botm is not None:
+            # run thru setup_array so that DIS input remains open/close
+            self._setup_array('dis', 'botm',
+                              data={i: arr for i, arr in enumerate(new_botm)},
+                              datatype='array3d', write_fmt='%.2f', dtype=int)
+            # reset the bottom array in flopy (and in memory)
+            # is this necessary? =
+            self.dis.botm = new_botm
+            # set bottom array to external files
+            if self.version == 'mf6':
+                self.dis.botm = self.cfg['dis']['griddata']['botm']
+            else:
+                self.dis.botm = self.cfg['dis']['botm']
+            print('\nModel cell bottom elevations adjusted after assigning '
+                  'SFR reaches to layers\n(to accommodate SFR reach bottoms '
+                  'below the previous model bottom)\n')
+
+
     def setup_grid(self):
         """Set up the attached modelgrid instance from configuration input
         """
@@ -1584,32 +1614,10 @@ class MFsetupMixin():
         else:
             sfr.reach_data['strtop'] = sfr.interpolate_to_reaches('elevup', 'elevdn')
 
-        # assign layers to the sfr reaches
-        botm = self.dis.botm.array.copy()
-        if self.version == 'mf6':
-            idomain = self.dis.idomain.array
-        else:
-            idomain = self.bas6.ibound.array
-        layers, new_botm = assign_layers(sfr.reach_data,
-                                         botm_array=botm,
-                                         idomain=idomain)
-        sfr.reach_data['k'] = layers
-        if new_botm is not None:
-            # run thru setup_array so that DIS input remains open/close
-            self._setup_array('dis', 'botm',
-                              data={i: arr for i, arr in enumerate(new_botm)},
-                              datatype='array3d', write_fmt='%.2f', dtype=int)
-            # reset the bottom array in flopy (and in memory)
-            # is this necessary? =
-            self.dis.botm = new_botm
-            # set bottom array to external files
-            if self.version == 'mf6':
-                self.dis.botm = self.cfg['dis']['griddata']['botm']
-            else:
-                self.dis.botm = self.cfg['dis']['botm']
-            print('\nModel cell bottom elevations adjusted after assigning '
-                  'SFR reaches to layers\n(to accommodate SFR reach bottoms '
-                  'below the previous model bottom)\n')
+        # attach the sfrmaker.sfrdata instance as an attribute
+        self.sfrdata = sfr
+
+        self.adjust_sfr_layers_model_bottom()
 
         # option to convert reaches to the River Package
         if self.cfg['sfr'].get('to_riv'):
@@ -1617,7 +1625,7 @@ class MFsetupMixin():
                           DeprecationWarning)
             self.cfg['sfr']['sfrmaker_options']['to_riv'] = self.cfg['sfr'].get('to_riv')
         if self.cfg['sfr'].get('sfrmaker_options', {}).get('to_riv'):
-            rivdata = sfr.to_riv(line_ids=self.cfg['sfr']['sfrmaker_options']['to_riv'],
+            rivdata = self.sfrdata.to_riv(line_ids=self.cfg['sfr']['sfrmaker_options']['to_riv'],
                                  drop_in_sfr=True)
             # setup of RIV package from SFRmaker-derived RIVdata
             # and any user input
@@ -1679,10 +1687,10 @@ class MFsetupMixin():
             inflows_input['flowline_routing'] = routing
             if self.version == 'mf6':
                 inflows_input['variable'] = 'inflow'
-                method = sfr.add_to_perioddata
+                method = self.sfrdata.add_to_perioddata
             else:
                 inflows_input['variable'] = 'flow'
-                method = sfr.add_to_segment_data
+                method = self.sfrdata.add_to_segment_data
             kwargs = get_input_arguments(inflows_input.copy(), method)
             method(**kwargs)
 
@@ -1710,45 +1718,36 @@ class MFsetupMixin():
             runoff_input['variable'] = 'runoff'
             runoff_input['distribute_flows_to_reaches'] = True
             if self.version == 'mf6':
-                method = sfr.add_to_perioddata
+                method = self.sfrdata.add_to_perioddata
             else:
-                method = sfr.add_to_segment_data
+                method = self.sfrdata.add_to_segment_data
             kwargs = get_input_arguments(runoff_input.copy(), method)
             method(**kwargs)
 
         # add observations
         observations_input = self.cfg['sfr'].get('source_data', {}).get('observations')
         if self.version != 'mf6':
-            sfr.gage_starting_unit_number = self.cfg['gag']['starting_unit_number']
+            self.sfrdata.gage_starting_unit_number = self.cfg['gag']['starting_unit_number']
         if observations_input is not None:
             key = 'filename' if 'filename' in observations_input else 'filenames'
             observations_input['data'] = observations_input[key]
-            kwargs = get_input_arguments(observations_input.copy(), sfr.add_observations)
-            obsdata = sfr.add_observations(**kwargs)
+            kwargs = get_input_arguments(observations_input.copy(), self.sfrdata.add_observations)
+            obsdata = self.sfrdata.add_observations(**kwargs)
             # resample observations to model stress periods; write to table
 
-        # write reach and segment data tables
-        sfr.write_tables('{}/{}'.format(self._tables_path, self.name))
-
-        # export shapefiles of lines, routing, cell polygons, inlets and outlets
-        sfr.write_shapefiles('{}/{}'.format(self._shapefiles_path, self.name))
-
         # create the flopy SFR package instance
-        sfr.create_modflow_sfr2(model=self, istcb2=223)
+        self.sfrdata.create_modflow_sfr2(model=self, istcb2=223)
         if self.version != 'mf6':
-            sfr_package = sfr.modflow_sfr2
+            sfr_package = self.sfrdata.modflow_sfr2
         else:
             # pass options kwargs through to mf6 constructor
             kwargs = flatten({k:v for k, v in self.cfg[package].items() if k not in
                               {'source_data', 'flowlines', 'inflows', 'observations',
                                'inflows_routing', 'dem', 'sfrmaker_options'}})
             kwargs = get_input_arguments(kwargs, mf6.ModflowGwfsfr)
-            sfr_package = sfr.create_mf6sfr(model=self, **kwargs)
+            sfr_package = self.sfrdata.create_mf6sfr(model=self, **kwargs)
             # monkey patch ModflowGwfsfr instance to behave like ModflowSfr2
-            sfr_package.reach_data = sfr.modflow_sfr2.reach_data
-
-        # attach the sfrmaker.sfrdata instance as an attribute
-        self.sfrdata = sfr
+            sfr_package.reach_data = self.sfrdata.modflow_sfr2.reach_data
 
         # reset dependent arrays
         self._reset_bc_arrays()
