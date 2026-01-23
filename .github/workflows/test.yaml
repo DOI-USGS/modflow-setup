@@ -82,7 +82,7 @@ jobs:
     - name: Install latest PyPI flopy
       shell: bash -l {0}
       if: contains(matrix.os, 'windows')
-      run: pip install flopy --force-reinstall
+      run: pip install flopy --force-reinstall --no-deps
     - name: Install Modflow-setup and ipykernel
       shell: bash -l {0}
       run: |
