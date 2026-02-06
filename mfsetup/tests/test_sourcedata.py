@@ -148,8 +148,10 @@ def test_parse_source_data(source_data_cases,
     # test conversion to model units
     for i, f in cases[4]['infiltration_arrays']['filenames'].items():
         cases[4]['infiltration_arrays']['filenames'][i] = os.path.join(project_root_path, f)
-    sd = ArraySourceData.from_config(cases[4]['infiltration_arrays'],
-                                     variable=var,
+    sd = TransientArraySourceData.from_config(cases[4]['infiltration_arrays'],
+                                     variable='recharge',
+                                     data_type='transient2d',
+                                     resample_method='nearest',
                                      dest_model=model)
     assert isinstance(sd.filenames, dict)
     assert sd.unit_conversion == convert_length_units('inches', 'meters') /\
