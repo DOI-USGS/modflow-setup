@@ -680,8 +680,10 @@ def aggregate_dataframe_to_stress_period(data, id_column, data_column, datetime_
                 data[end_datetime_column] = pd.to_datetime(data[end_datetime_column])
             if start_datetime is None:
                 start_datetime = data[datetime_column].iloc[0]
+            start_datetime = pd.Timestamp(start_datetime)
             if end_datetime is None:
                 end_datetime = data[datetime_column].iloc[-1]
+            end_datetime = pd.Timestamp(end_datetime)
             # >= includes the start datetime
             # if there is no end_datetime column, select values that have start_datetimes within the period
             # this excludes values that start before the period but don't have an end date
