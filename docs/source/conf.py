@@ -75,6 +75,11 @@ plot_html_show_formats = False
 autosummary_generate = True
 numpydoc_show_class_members = False
 
+# Only generate for top n sections
+# (and then only use sections headers need to be unique;
+#  duplicate headers are allowed below this level)
+#autosectionlabel_maxdepth=2
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

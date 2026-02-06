@@ -68,6 +68,8 @@ class SourceData:
 
         """
         self.filenames = filenames
+        # optional layer names for geopackages parsed from filenames
+        self.file_layers = None
         self.values = values
         self.variable = variable
         self.length_units = length_units
@@ -113,21 +115,35 @@ class SourceData:
 
     def set_filenames(self, filenames):
 
-        def normpath(f):
-            if self.dest_model is not None and isinstance(f, str):
-                path = os.path.join(self.dest_model._config_path, f)
+        def normpath(file_path):
+            if self.dest_model is not None and isinstance(file_path, str):
+                file_path = file_path.split('|')[0]
+                path = os.path.join(self.dest_model._config_path, file_path)
                 normpath = os.path.normpath(path)
                 return normpath
-            return f
+            return file_path
+
+        def get_layer_name(file_path):
+            if isinstance(file_path, str) and len(file_path.split('|')) > 1:
+                layer_name = file_path.split('|')[1]
+                layer_name = layer_name.replace('layer=', '')\
+                    .replace('layername=', '')
+                return layer_name
 
         if isinstance(filenames, str):
             self.filenames = {0: normpath(filenames)}
+            # optional layernames for geopackages, denoted with syntax:
+            # <filename>.gpkg|layername=<layer name>
+            self.file_layers = {0: get_layer_name(filenames)}
         elif isinstance(filenames, list):
             self.filenames = {i: normpath(f) for i, f in enumerate(filenames)}
+            self.file_layers = {i: get_layer_name(f) for i, f in enumerate(filenames)}
         elif isinstance(filenames, dict):
             self.filenames = {i: normpath(f) for i, f in filenames.items()}
+            self.file_layers = {i: get_layer_name(f) for i, f in filenames.items()}
         else:
-            self.filenames = None
+            self.filenames = dict()
+            self.file_layers = dict()
 
     @classmethod
     def from_config(cls, data, **kwargs):
@@ -365,7 +381,7 @@ class ArraySourceData(SourceData):
                                 "but {} are specified: {}"
                                 .format(nlay, nspecified, self.from_source_model_layers))
             return self.from_source_model_layers
-        elif self.filenames is not None:
+        elif self.filenames:
             nspecified = len(self.filenames)
             if self.datatype == 'array3d' and nspecified != nlay:
                 raise Exception("Variable should have {} layers "
@@ -441,7 +457,7 @@ class ArraySourceData(SourceData):
                                            self.dest_modelgrid.ncol))
         return regridded
 
-    def _read_array_from_file(self, filename):
+    def _read_array_from_file(self, filename, layername=None):
         f = filename
         if isinstance(f, numbers.Number):
             data = f
@@ -456,8 +472,9 @@ class ArraySourceData(SourceData):
                                            method=self.resample_method)
                 arr = np.reshape(arr, (self.dest_modelgrid.nrow,
                                        self.dest_modelgrid.ncol))
-            elif f.endswith('.shp'):
-                arr = rasterize(f, self.dest_modelgrid, id_column=self.id_column)
+            elif any([f.lower().endswith(i) for i in ['shp', 'gpkg']]):
+                arr = rasterize(f, self.dest_modelgrid, layer=layername,
+                                id_column=self.id_column)
             # TODO: add code to interpret hds and cbb files
             # interpolate from source model using source model grid
             # otherwise assume the grids are the same
@@ -483,9 +500,9 @@ class ArraySourceData(SourceData):
             data = populate_values(self.values, array_shape=(self.dest_modelgrid.nrow,
                                                              self.dest_modelgrid.ncol))
 
-        if self.filenames is not None:
+        if self.filenames:
             for i, f in self.filenames.items():
-                data[i] = self._read_array_from_file(f)
+                data[i] = self._read_array_from_file(f, layername=self.file_layers.get(i))
 
             # interpolate any missing arrays from consecutive files based on weights
             for i, arr in data.items():
@@ -600,7 +617,7 @@ class TransientArraySourceData(ArraySourceData, TransientSourceDataMixin):
 
         # get data from list of files; one per stress period
         # (files are assumed to be sorted)
-        if self.filenames is not None:
+        if self.filenames:
             source_data = []
             for i, f in self.filenames.items():
                 source_data.append(self._read_array_from_file(f))

@@ -633,7 +633,7 @@ def write_bbox_shapefile(modelgrid, outshp):
     gdf.to_file(outshp, index=False)
 
 
-def rasterize(feature, grid, id_column=None,
+def rasterize(feature, grid, layer=None, id_column=None,
               include_ids=None, exclude_ids=None, names_column=None,
               crs=None, **kwargs):
     """Rasterize a feature onto the model grid, using
@@ -642,8 +642,10 @@ def rasterize(feature, grid, id_column=None,
 
     Parameters
     ----------
-    feature : str (shapefile path), list of shapely objects,
+    feature : str (shapefile or geopackage path), list of shapely objects,
               or dataframe with geometry column
+    layer : str
+        Layer name containing the feature (for example, in a geopackage)
     id_column : str
         Column with unique integer identifying each feature; values
         from this column will be assigned to the output raster.
@@ -695,7 +697,7 @@ def rasterize(feature, grid, id_column=None,
     trans = get_transform(grid)
 
     if isinstance(feature, str) or isinstance(feature, Path):
-        df = gpd.read_file(feature)
+        df = gpd.read_file(feature, layer=layer)
     elif isinstance(feature, pd.DataFrame):
         df = feature.copy()
         df = gpd.GeoDataFrame(df, crs=crs)
