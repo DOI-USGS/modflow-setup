@@ -133,7 +133,7 @@ def test_model_setup(full_pleasant_nwt):
 
     # check that streambed elevation data were incorporated correctly
     reach_data = m.sfrdata.reach_data
-    assert reach_data.loc[reach_data['name'] == 'Chaffee Creek', 'strtop'].max() == 296.9
+    assert np.allclose(reach_data.loc[reach_data['name'] == 'Chaffee Creek', 'strtop'].max(), 296.9)
 
 
 def test_model_setup_and_run(pleasant_nwt_model_run):

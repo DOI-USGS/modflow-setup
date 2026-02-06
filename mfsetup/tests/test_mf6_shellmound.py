@@ -327,9 +327,14 @@ def test_dis_setup(shellmound_model_with_grid):
             model_array = model_array[k]
         assert np.array_equal(model_array, data)
 
-   # test that written idomain array reflects supplied shapefile of active area
-    active_area = rasterize(m.cfg['dis']['source_data']['idomain']['filename'],
-                            m.modelgrid)
+    # test that written idomain array reflects supplied shapefile of active area
+    fpath = m.cfg['dis']['source_data']['idomain']['filename']
+    fname = fpath.split("|")[0]
+    if len(fpath.split('|')) > 1:
+        layer_name = fpath.split('|')[1]
+        layer_name = layer_name.replace('layer=', '')\
+            .replace('layername=', '')
+    active_area = rasterize(fname, m.modelgrid, layer=layer_name)
     isactive = active_area >= 1
     written_idomain = load_array(m.cfg['dis']['griddata']['idomain'])
     assert np.all(written_idomain[:, ~isactive] <= 0)
