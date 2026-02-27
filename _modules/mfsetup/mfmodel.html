@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mfmodel &mdash; modflow-setup 0.6.1.post19+ga07b898 documentation</title>
+  <title>mfsetup.mfmodel &mdash; modflow-setup 0.7.0.post8+gbc64fdb documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=b22a053e"></script>
+      <script src="../../_static/documentation_options.js?v=c5205d29"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -1497,6 +1497,36 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">pckg</span>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">adjust_sfr_layers_model_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># assign layers to the sfr reaches</span>
+        <span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+            <span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span>
+        <span class="n">layers</span><span class="p">,</span> <span class="n">new_botm</span> <span class="o">=</span> <span class="n">assign_layers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="p">,</span>
+                                         <span class="n">botm_array</span><span class="o">=</span><span class="n">botm</span><span class="p">,</span>
+                                         <span class="n">idomain</span><span class="o">=</span><span class="n">idomain</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span>
+        <span class="k">if</span> <span class="n">new_botm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># run thru setup_array so that DIS input remains open/close</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span>
+                              <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">arr</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_botm</span><span class="p">)},</span>
+                              <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="c1"># reset the bottom array in flopy (and in memory)</span>
+            <span class="c1"># is this necessary? =</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="n">new_botm</span>
+            <span class="c1"># set bottom array to external files</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Model cell bottom elevations adjusted after assigning &#39;</span>
+                  <span class="s1">&#39;SFR reaches to layers</span><span class="se">\n</span><span class="s1">(to accommodate SFR reach bottoms &#39;</span>
+                  <span class="s1">&#39;below the previous model bottom)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="MFsetupMixin.setup_grid">
 <a class="viewcode-back" href="../../api/mfsetup.mfmodel.html#mfsetup.mfmodel.MFsetupMixin.setup_grid">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1705,32 +1735,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sfr</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;strtop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">interpolate_to_reaches</span><span class="p">(</span><span class="s1">&#39;elevup&#39;</span><span class="p">,</span> <span class="s1">&#39;elevdn&#39;</span><span class="p">)</span>
 
-        <span class="c1"># assign layers to the sfr reaches</span>
-        <span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-            <span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span>
-        <span class="n">layers</span><span class="p">,</span> <span class="n">new_botm</span> <span class="o">=</span> <span class="n">assign_layers</span><span class="p">(</span><span class="n">sfr</span><span class="o">.</span><span class="n">reach_data</span><span class="p">,</span>
-                                         <span class="n">botm_array</span><span class="o">=</span><span class="n">botm</span><span class="p">,</span>
-                                         <span class="n">idomain</span><span class="o">=</span><span class="n">idomain</span><span class="p">)</span>
-        <span class="n">sfr</span><span class="o">.</span><span class="n">reach_data</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layers</span>
-        <span class="k">if</span> <span class="n">new_botm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># run thru setup_array so that DIS input remains open/close</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_setup_array</span><span class="p">(</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span>
-                              <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">arr</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_botm</span><span class="p">)},</span>
-                              <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array3d&#39;</span><span class="p">,</span> <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-            <span class="c1"># reset the bottom array in flopy (and in memory)</span>
-            <span class="c1"># is this necessary? =</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="n">new_botm</span>
-            <span class="c1"># set bottom array to external files</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;griddata&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">][</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Model cell bottom elevations adjusted after assigning &#39;</span>
-                  <span class="s1">&#39;SFR reaches to layers</span><span class="se">\n</span><span class="s1">(to accommodate SFR reach bottoms &#39;</span>
-                  <span class="s1">&#39;below the previous model bottom)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># attach the sfrmaker.sfrdata instance as an attribute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">sfr</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjust_sfr_layers_model_bottom</span><span class="p">()</span>
 
         <span class="c1"># option to convert reaches to the River Package</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;to_riv&#39;</span><span class="p">):</span>
@@ -1738,7 +1746,7 @@
                           <span class="ne">DeprecationWarning</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">][</span><span class="s1">&#39;to_riv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;to_riv&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;to_riv&#39;</span><span class="p">):</span>
-            <span class="n">rivdata</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">to_riv</span><span class="p">(</span><span class="n">line_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">][</span><span class="s1">&#39;to_riv&#39;</span><span class="p">],</span>
+            <span class="n">rivdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">to_riv</span><span class="p">(</span><span class="n">line_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">][</span><span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">][</span><span class="s1">&#39;to_riv&#39;</span><span class="p">],</span>
                                  <span class="n">drop_in_sfr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="c1"># setup of RIV package from SFRmaker-derived RIVdata</span>
             <span class="c1"># and any user input</span>
@@ -1800,10 +1808,10 @@
             <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;flowline_routing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">routing</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
                 <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;inflow&#39;</span>
-                <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_perioddata</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">add_to_perioddata</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">inflows_input</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;flow&#39;</span>
-                <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_segment_data</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">add_to_segment_data</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">inflows_input</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">method</span><span class="p">)</span>
             <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1831,45 +1839,36 @@
             <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;runoff&#39;</span>
             <span class="n">runoff_input</span><span class="p">[</span><span class="s1">&#39;distribute_flows_to_reaches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-                <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_perioddata</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">add_to_perioddata</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">method</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_to_segment_data</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">add_to_segment_data</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">runoff_input</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">method</span><span class="p">)</span>
             <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># add observations</span>
         <span class="n">observations_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;sfr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;observations&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-            <span class="n">sfr</span><span class="o">.</span><span class="n">gage_starting_unit_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;starting_unit_number&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">gage_starting_unit_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;gag&#39;</span><span class="p">][</span><span class="s1">&#39;starting_unit_number&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">observations_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;filename&#39;</span> <span class="k">if</span> <span class="s1">&#39;filename&#39;</span> <span class="ow">in</span> <span class="n">observations_input</span> <span class="k">else</span> <span class="s1">&#39;filenames&#39;</span>
             <span class="n">observations_input</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observations_input</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">observations_input</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_observations</span><span class="p">)</span>
-            <span class="n">obsdata</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">add_observations</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">observations_input</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">add_observations</span><span class="p">)</span>
+            <span class="n">obsdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">add_observations</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># resample observations to model stress periods; write to table</span>
 
-        <span class="c1"># write reach and segment data tables</span>
-        <span class="n">sfr</span><span class="o">.</span><span class="n">write_tables</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-
-        <span class="c1"># export shapefiles of lines, routing, cell polygons, inlets and outlets</span>
-        <span class="n">sfr</span><span class="o">.</span><span class="n">write_shapefiles</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shapefiles_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-
         <span class="c1"># create the flopy SFR package instance</span>
-        <span class="n">sfr</span><span class="o">.</span><span class="n">create_modflow_sfr2</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">istcb2</span><span class="o">=</span><span class="mi">223</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">create_modflow_sfr2</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">istcb2</span><span class="o">=</span><span class="mi">223</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-            <span class="n">sfr_package</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">modflow_sfr2</span>
+            <span class="n">sfr_package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">modflow_sfr2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># pass options kwargs through to mf6 constructor</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span>
                               <span class="p">{</span><span class="s1">&#39;source_data&#39;</span><span class="p">,</span> <span class="s1">&#39;flowlines&#39;</span><span class="p">,</span> <span class="s1">&#39;inflows&#39;</span><span class="p">,</span> <span class="s1">&#39;observations&#39;</span><span class="p">,</span>
                                <span class="s1">&#39;inflows_routing&#39;</span><span class="p">,</span> <span class="s1">&#39;dem&#39;</span><span class="p">,</span> <span class="s1">&#39;sfrmaker_options&#39;</span><span class="p">}})</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">mf6</span><span class="o">.</span><span class="n">ModflowGwfsfr</span><span class="p">)</span>
-            <span class="n">sfr_package</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">create_mf6sfr</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">sfr_package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">create_mf6sfr</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># monkey patch ModflowGwfsfr instance to behave like ModflowSfr2</span>
-            <span class="n">sfr_package</span><span class="o">.</span><span class="n">reach_data</span> <span class="o">=</span> <span class="n">sfr</span><span class="o">.</span><span class="n">modflow_sfr2</span><span class="o">.</span><span class="n">reach_data</span>
-
-        <span class="c1"># attach the sfrmaker.sfrdata instance as an attribute</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span> <span class="o">=</span> <span class="n">sfr</span>
+            <span class="n">sfr_package</span><span class="o">.</span><span class="n">reach_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">modflow_sfr2</span><span class="o">.</span><span class="n">reach_data</span>
 
         <span class="c1"># reset dependent arrays</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset_bc_arrays</span><span class="p">()</span>
@@ -2004,8 +2003,8 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 14, 2025.
+    <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Feb 27, 2026.
       </span></p>
   </div>
 

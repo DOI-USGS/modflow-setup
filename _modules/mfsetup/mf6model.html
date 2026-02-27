@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.mf6model &mdash; modflow-setup 0.6.1.post19+ga07b898 documentation</title>
+  <title>mfsetup.mf6model &mdash; modflow-setup 0.7.0.post8+gbc64fdb documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=b22a053e"></script>
+      <script src="../../_static/documentation_options.js?v=c5205d29"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -323,7 +323,7 @@
 
         <span class="c1"># remove cells that are above stream cells</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_package</span><span class="p">(</span><span class="s1">&#39;sfr&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">idomain</span> <span class="o">=</span> <span class="n">deactivate_idomain_above</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfr</span><span class="o">.</span><span class="n">packagedata</span><span class="p">)</span>
+            <span class="n">idomain</span> <span class="o">=</span> <span class="n">deactivate_idomain_above</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">reach_data</span><span class="p">)</span>
 
         <span class="c1"># inactivate any isolated cells that could cause problems with the solution</span>
         <span class="n">idomain</span> <span class="o">=</span> <span class="n">find_remove_isolated_cells</span><span class="p">(</span><span class="n">idomain</span><span class="p">,</span> <span class="n">minimum_cluster_size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
@@ -365,7 +365,10 @@
                                 <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">irch</span><span class="p">},</span>
                                 <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;array2d&#39;</span><span class="p">,</span>
                                 <span class="n">write_fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="c1">#self.dis.irch = self.cfg[&#39;dis&#39;][&#39;irch&#39;]</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;sfrdata&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adjust_sfr_layers_model_bottom</span><span class="p">()</span>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_grid_configuration_with_dis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update grid configuration with any information supplied to dis package</span>
@@ -1207,6 +1210,12 @@
                                         <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
                                         <span class="n">external_files_path</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">external_path</span>
                                         <span class="p">)</span>
+                <span class="c1"># write reach and segment data tables</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_tables</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+                <span class="c1"># export shapefiles of lines, routing, cell polygons, inlets and outlets</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">sfrdata</span><span class="o">.</span><span class="n">write_shapefiles</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shapefiles_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
             <span class="c1"># add version info to package file headers</span>
             <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">namefile</span><span class="p">]</span>
             <span class="n">files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">packagelist</span><span class="p">]</span>
@@ -1322,8 +1331,8 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 14, 2025.
+    <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Feb 27, 2026.
       </span></p>
   </div>
 

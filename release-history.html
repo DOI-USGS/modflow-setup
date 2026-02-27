@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; modflow-setup 0.6.1.post19+ga07b898 documentation</title>
+  <title>Release History &mdash; modflow-setup 0.7.0.post8+gbc64fdb documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b22a053e"></script>
+      <script src="_static/documentation_options.js?v=c5205d29"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -68,6 +68,8 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-8-0-2026-02-xx">Version 0.8.0 (2026-02-xx)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-7-0-2025-12-31">Version 0.7.0 (2025-12-31)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-6-1-2025-03-17">Version 0.6.1 (2025-03-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-6-0-2025-01-06">Version 0.6.0 (2025-01-06)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-5-0-2024-03-08">Version 0.5.0 (2024-03-08)</a></li>
@@ -113,6 +115,47 @@
              
   <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Link to this heading"></a></h1>
+<section id="version-0-8-0-2026-02-xx">
+<h2>Version 0.8.0 (2026-02-xx)<a class="headerlink" href="#version-0-8-0-2026-02-xx" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><strong>New Features:</strong></dt><dd><ul class="simple">
+<li><p>Add support for Pandas 3</p></li>
+<li><p>Add support for geopackage input with layernames (specified in format: filename&gt;.gpkg|layername=&lt;layer name&gt; or filename&gt;.gpkg|layer=&lt;layer name&gt;), for example as a way to specify the active model extent (e.g. in the source_data: idomain: block for Modflow 6 models)</p></li>
+</ul>
+</dd>
+<dt><strong>Bug Fixes:</strong></dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>fixes to SFR Package setup:</dt><dd><ul>
+<li><p>re-adjust SFR package layering each time idomain is adjusted, to prevent SFR in inactive cells (SFR reaches with no groundwater connections)</p></li>
+<li><p>write SFR Package shapefiles when MODFLOW input is written, so that the shapefiles reflect the final state of the SFR package</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="version-0-7-0-2025-12-31">
+<h2>Version 0.7.0 (2025-12-31)<a class="headerlink" href="#version-0-7-0-2025-12-31" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><strong>New Features:</strong></dt><dd><ul class="simple">
+<li><p>Added partial support for GeoPackages (.gpkg) input</p></li>
+<li><p>Added support for SFRmaker streambed top field elevations input.</p></li>
+<li><p>Add auto_flow_reduce = 0.1 by default in MF6 model Well Packages</p></li>
+</ul>
+</dd>
+<dt><strong>Bug Fixes:</strong></dt><dd><ul class="simple">
+<li><p>Refactor np.in1d to np.isin to resolve numpy error</p></li>
+<li><p>Refactoring to support various Flopy interface changes</p></li>
+<li><p>Allow shapefile input with no ‘id_column’ for basic stress packages</p></li>
+<li><p>Fix issue with Well Package layer assignment in cases where there is no open interval information (only well bottom). When there is only screen_top or screen_botm, or screen_top == screen_botm, set the screen_top and screen_botm to the top/bottom of layer intersecting the well bottom (i.e. so that the well is placed in this layer). Previously, a zero open interval thickness in these situations was resulting in the well getting re-assigned to the highest transmissivity layer at that i, j location.</p></li>
+<li><p>Fix issue with MODFLOW 6 configuration file defaults: Well Package auto_flow_reduce needs to be a float (not True, which will result in an auto flow reduce value of 1.0 being assigned (almost full suppression of pumping); set auto_flow_reduce default of 0.1.</p></li>
+<li><p>Fix issue with Well Package Setup: Pass non-default screen_top_col and screen_botm_col to assign_layers_from_screen_top_botm; otherwise an error results when non-default names for these are used.</p></li>
+</ul>
+</dd>
+</dl>
+</section>
 <section id="version-0-6-1-2025-03-17">
 <h2>Version 0.6.1 (2025-03-17)<a class="headerlink" href="#version-0-6-1-2025-03-17" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -268,8 +311,8 @@ where coordinate reference information can’t be parsed.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2025, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 14, 2025.
+    <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
+      <span class="lastupdated">Last updated on Feb 27, 2026.
       </span></p>
   </div>
 
