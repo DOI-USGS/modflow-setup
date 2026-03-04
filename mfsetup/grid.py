@@ -749,7 +749,7 @@ def rasterize(feature, grid, layer=None, id_column=None,
         numbers = list(range(1, len(df)+1))
     # if IDs are strings, get a number for each one
     # pd.DataFrame.unique() generally preserves order
-    elif df[id_column].dtype == object:
+    elif pd.api.types.is_string_dtype(df[id_column].dtype):
         unique_values = df[id_column].unique()
         values = dict(zip(unique_values, range(1, len(unique_values) + 1)))
         numbers = [values[n] for n in df[id_column]]
