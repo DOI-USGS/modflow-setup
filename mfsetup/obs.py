@@ -186,7 +186,7 @@ def setup_head_observations(model, filenames=None,
     elif obs_package == 'obs':  # mf6 observation utility
         obstype = {'BAS': 'HEAD'}
         renames = {'pckg': 'obstype'}
-        df.pckg.replace(obstype, inplace=True)
+        df['pckg'] = df['pckg'].replace(obstype)
         df.rename(columns=renames, inplace=True)
         df['id'] = list(zip(df.klay, df.i, df.j))
         # drop observations located in inactive cels
