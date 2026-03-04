@@ -78,11 +78,27 @@ jobs:
         cp -r bin/$d/. "$HOME/.local/bin/"
         echo "$HOME/.local/bin" >> $GITHUB_PATH
         echo $GITHUB_PATH
-    # on Windows, test against last Flopy release
-    - name: Install latest PyPI flopy
+    - name: Test with latest PyPI flopy
       shell: bash -l {0}
-      if: contains(matrix.os, 'windows')
-      run: pip install flopy --force-reinstall --no-deps
+      if: ${{ matrix.python-version == 3.12}}
+      run: |
+        pip install flopy
+        pip install git+https://github.com/aleaf/modflow-export@develop
+        pip install git+https://github.com/usgs/sfrmaker@develop
+    - name: Test with latest conda flopy
+      shell: bash -l {0}
+      if: ${{ matrix.python-version == 3.13}}
+      run: |
+        micromamba install flopy
+        pip install git+https://github.com/aleaf/modflow-export@develop
+        pip install git+https://github.com/usgs/sfrmaker@develop
+    - name: Test with latest develop flopy and pandas 3
+      shell: bash -l {0}
+      if: ${{ matrix.python-version == 3.14}}
+      run: |
+        pip install git+https://github.com/modflowpy/flopy@develop --no-deps
+        pip install git+https://github.com/aleaf/modflow-export@develop
+        pip install git+https://github.com/usgs/sfrmaker@develop
     - name: Install Modflow-setup and ipykernel
       shell: bash -l {0}
       run: |
