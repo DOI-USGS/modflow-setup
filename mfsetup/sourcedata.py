@@ -1116,7 +1116,7 @@ class TransientTabularSourceData(SourceData, TransientSourceDataMixin):
         df.index = pd.to_datetime(df[self.datetime_column])
 
         # convert IDs to strings if any were read in (resulting in object dtype)
-        if df[self.id_column].dtype == object:
+        if pd.api.types.is_string_dtype(df[self.id_column].dtype):
             df[self.id_column] = df[self.id_column].astype(str)
 
         # rename any columns specified in config file to required names

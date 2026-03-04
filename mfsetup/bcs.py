@@ -92,7 +92,7 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
         return
 
     # create polygons of model grid cells
-    if bc_cells.dtype == object:
+    if pd.api.types.is_string_dtype(bc_cells.dtype):
         cells_with_bc = bc_cells.flat != ''
     else:
         cells_with_bc = bc_cells.flat > 0
@@ -108,7 +108,7 @@ def setup_basic_stress_data(model, shapefile=None, csvfile=None,
                        'i': i.flat,
                        'j': j.flat})
     # add the boundnames
-    if bc_cells.dtype == object:
+    if pd.api.types.is_string_dtype(bc_cells.dtype):
         df_0['boundname'] = bc_cells.flat
         nan_boundnames = df_0.boundname.isna() | df_0.boundname.isin({'', 'nan'})
         df_0.loc[nan_boundnames, 'boundname'] = 'unnamed'
