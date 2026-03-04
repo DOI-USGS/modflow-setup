@@ -156,7 +156,7 @@ def setup_head_observations(model, filenames=None,
     df = pd.concat([heads_all_layers, non_heads], axis=0)
 
     # dtypes
-    assert df[obsname_column].dtype == object
+    assert pd.api.types.is_string_dtype(df[obsname_column].dtype)
     df['klay'] = df.klay.astype(int)
 
     print('Culling observations to cells allowed by iobs_domain...')

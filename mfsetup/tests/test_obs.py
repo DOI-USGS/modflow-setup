@@ -1,3 +1,5 @@
+import pandas as pd
+
 from mfsetup.obs import make_obsname, read_observation_data
 
 
@@ -30,5 +32,5 @@ def test_read_observation_data(test_data_path):
     results = read_observation_data(csvfile, column_info={},#'x_location_col', 'x',
                                                           #'y_location_col', 'y'},
                           column_mappings={'obsname': 'comid'})
-    assert results['obsname'].dtype == object
+    assert pd.api.types.is_string_dtype(results['obsname'].dtype)
     assert isinstance(results['obsname'].values[0], str)
