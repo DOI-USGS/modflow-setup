@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis &mdash; modflow-setup 0.7.0.post9+ge556f9e documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.7.0.post10+g26319eb documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=707c1128"></script>
+      <script src="../../_static/documentation_options.js?v=bce9dab1"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -794,10 +794,10 @@
             <span class="k">assert</span> <span class="n">datetime_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
                 <span class="s2">&quot;datetime_column needed for &quot;</span> \
                 <span class="s2">&quot;resampling irregular data to model stress periods&quot;</span>
-            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_string_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">end_datetime_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> \
-                    <span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_string_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -821,7 +821,7 @@
             <span class="c1"># and end datetimes that are after the period start</span>
             <span class="c1"># in other words, include all values that overlap in time with the period</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_string_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
                     <span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">])</span>
                 <span class="n">data_overlaps_period</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">end_datetime</span><span class="p">)</span> <span class="o">&amp;</span> \
                                        <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">start_datetime</span><span class="p">)</span>
@@ -932,7 +932,7 @@
                 <span class="s2">&quot;datetime_column needed for &quot;</span> \
                 <span class="s2">&quot;resampling irregular data to model stress periods&quot;</span>
             <span class="c1"># not sure if this is needed for xarray</span>
-            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_string_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">])</span>
             <span class="c1"># default to aggregating whole dataset</span>
             <span class="c1"># if start_ and end_datetime not provided</span>
