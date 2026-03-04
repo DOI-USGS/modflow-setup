@@ -338,7 +338,8 @@ def resample_pumping_rates(wu_file, wu_points, model,
     for site, sitedata in monthly_data.groupby('site_no'):
         if site not in well_info.index:
             continue
-        sitedata.index = sitedata.datetime
+        sitedata = sitedata.copy()
+        sitedata.set_index('datetime', inplace=True)
         assert not sitedata.index.duplicated().any()
 
         if dropna:
@@ -351,10 +352,8 @@ def resample_pumping_rates(wu_file, wu_points, model,
                 if verbose:
                     years = set(site_period_data.loc[isna, 'year'])
                     years = ', '.join(list(years))
-                    print('Site {} has {} times with nans (in years {})- filling with {}s'.format(site,
-                                                                                    np.sum(isna),
-                                                                                    years,
-                                                                                    na_fill_value))
+                    print(f'Site {site} has {np.sum(isna)} times with nans (in years {years})\n- '
+                          f'filling with {na_fill_value}s')
             site_period_data['site_no'] = site
             site_period_data['year'] = site_period_data.index.year
             site_period_data['month'] = site_period_data.index.month

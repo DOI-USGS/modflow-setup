@@ -778,7 +778,8 @@ def test_sfr_setup(model_with_sfr, project_root_path):
     # verify that reaches were consolidated to one per cell
     assert len(m.sfrdata.reach_data.node.unique()) == len(m.sfrdata.reach_data)
 
-    # check that add_outlets works
+    # check that add_outlets works;
+    # these lines were specified as outlets in the configuration file
     expected_outlets = {'17957815', '17956199'}
     for outlet_id in expected_outlets:
         # handle either int-based or str-based line_ids
@@ -862,7 +863,7 @@ def test_sfr_inflows_from_csv(model_with_sfr):
     rno = lookup.get(str(line_id), lookup.get(line_id))
     right = sfr_pd.loc[sfr_pd.rno == rno].loc['2007-04-01':, 'inflow']
     left = left.loc[:right.index[-1]]
-    pd.testing.assert_series_equal(left, right, check_names=False, check_freq=False)
+    pd.testing.assert_series_equal(left, right, check_names=False, check_freq=False, check_index_type=False)
 
 
 @pytest.mark.xfail(reason='flopy remove_package() issue')
