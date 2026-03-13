@@ -2,7 +2,11 @@
 Release History
 ===============
 
-Version 0.7.1 (2026-03-13)
+Version 0.8.1 (2026-08-07)
+----------------------------------------
+
+
+Version 0.8.0 (2026-03-13)
 ----------------------------------------
 **New Features:**
  * Add support for geopackage input with layernames (specified in format: filename>.gpkg|layername=<layer name> or filename>.gpkg|layer=<layer name>), for example as a way to specify the active model extent (e.g. in the source_data: idomain: block for Modflow 6 models)
