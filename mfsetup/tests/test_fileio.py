@@ -45,8 +45,8 @@ def external_files_path(module_tmpdir):
 
 @pytest.fixture
 def data():
-    return {'a': np.int64(5),
-            'b': np.float64(30.48),
+    return {'a': 5,
+            'b': 30.48,
             'c': 5,
             'e': 5.,
             'f': [1, 2, 3],
@@ -127,7 +127,7 @@ def test_exe_exists(modflow_executable):
                                            ('value: 1e10', '1e10'),
                                            ))
 def test_pyyaml_scientific_notation(data, expected):
-    results = yaml.load(io.StringIO(data), Loader=Loader)
+    results = yaml.safe_load(io.StringIO(data))
     assert results['value'] == expected
 
 
