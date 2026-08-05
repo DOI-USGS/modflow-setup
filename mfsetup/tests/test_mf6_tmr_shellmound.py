@@ -147,7 +147,7 @@ def shellmound_tmr_model_setup(shellmound_tmr_cfg_path):
 @pytest.fixture(scope="module")
 def shellmound_tmr_model_setup_and_run(shellmound_tmr_model_setup, mf6_exe):
     m = shellmound_tmr_model_setup
-    m.simulation.exe_name = mf6_exe
+    #mf6_exe
 
     dis_idomain = m.dis.idomain.array.copy()
     for i, d in enumerate(m.cfg['dis']['griddata']['idomain']):

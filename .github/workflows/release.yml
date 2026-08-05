@@ -76,25 +76,11 @@ jobs:
     - name: Conda info
       shell: bash -l {0}
       run: micromamba info
-    - name: Install dependencies
+    - name: Install Modflow executables
+      uses: modflowpy/install-modflow-action@v1
+    - name: Install Modflow-setup and ipykernel
       shell: bash -l {0}
       run: |
-        if [[ ! -d "$HOME/.local/bin" ]]; then
-            mkdir -p "$HOME/.local/bin";
-        fi
-        # copy modflow bins to local dir to add to PATH later
-        if [ "$RUNNER_OS" == "Windows" ]; then
-            d="win"
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-            d="mac"
-        elif [ "$RUNNER_OS" == "Linux" ]; then
-            d="linux"
-        else
-            d="unexpectedos"
-            exit 1
-        fi
-        echo bin/$d/. >> $GITHUB_PATH
-        echo $GITHUB_PATH
         pip install -e .
         python -m ipykernel install --user --name mfsetup_ci --display-name "mfsetup_ci"
     - name: Conda list
