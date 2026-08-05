@@ -939,7 +939,7 @@ def test_idomain_above_sfr(model_with_sfr):
 @pytest.fixture(scope="module")
 def model_setup_and_run(model_setup, mf6_exe):
     m = model_setup  #deepcopy(model_setup)
-    m.simulation.exe_name = mf6_exe
+    #m.simulation.exe_name = mf6_exe
 
     dis_idomain = m.dis.idomain.array.copy()
     for i, d in enumerate(m.cfg['dis']['griddata']['idomain']):
