@@ -57,27 +57,8 @@ jobs:
     - name: Conda info
       shell: bash -l {0}
       run: micromamba info
-
-    - name: Add executables to path
-      shell: bash
-      run: |
-        if [[ ! -d "$HOME/.local/bin" ]]; then
-            mkdir -p "$HOME/.local/bin";
-        fi
-        # copy modflow bins to local dir to add to PATH later
-        if [ "$RUNNER_OS" == "Windows" ]; then
-            d="win"
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-            d="mac"
-        elif [ "$RUNNER_OS" == "Linux" ]; then
-            d="linux"
-        else
-            d="unexpectedos"
-            exit 1
-        fi
-        cp -r bin/$d/. "$HOME/.local/bin/"
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        echo $GITHUB_PATH
+    - name: Install Modflow executables
+      uses: modflowpy/install-modflow-action@v1
     - name: Test with latest PyPI flopy
       shell: bash -l {0}
       if: ${{ matrix.python-version == 3.12}}

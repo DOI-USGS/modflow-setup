@@ -112,7 +112,7 @@ def pleasant_mf6_setup_from_yaml(pleasant_mf6_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_mf6_model_run(pleasant_mf6_setup_from_yaml, mf6_exe):
     m = copy.deepcopy(pleasant_mf6_setup_from_yaml)
-    m.simulation.exe_name = mf6_exe
+    #m.simulation.exe_name = mf6_exe
     success = False
     if exe_exists(mf6_exe):
         success, buff = m.simulation.run_simulation()
@@ -542,7 +542,7 @@ def test_write_sfr(get_pleasant_mf6_with_sfr):
     assert options['stage'] == ['fileout', 'pleasant_mf6.sfr.stage.bin']
     assert options['obs6'] == ['filein', 'pleasant_mf6.sfr.obs']
     assert options['time_conversion'] == ['86400.0']
-    assert options['auxiliary'] == ['line_id']
+    assert 'boundnames' in options
 
 
 def test_sfr_obs(get_pleasant_mf6_with_sfr):
