@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Release History &mdash; modflow-setup 0.7.0.post14+ge6bcae0 documentation</title>
+  <title>Release History &mdash; modflow-setup 0.8.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=a498a346"></script>
+      <script src="_static/documentation_options.js?v=ec16d22d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -68,7 +68,8 @@
 <li class="toctree-l1"><a class="reference internal" href="api/index.html"> Code reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="config-file-defaults.html"> Configuration file defaults</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Release History</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-8-0-2026-02-xx">Version 0.8.0 (2026-02-xx)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-8-1-2026-08-07">Version 0.8.1 (2026-08-07)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-8-0-2026-03-13">Version 0.8.0 (2026-03-13)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-7-0-2025-12-31">Version 0.7.0 (2025-12-31)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-6-1-2025-03-17">Version 0.6.1 (2025-03-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-6-0-2025-01-06">Version 0.6.0 (2025-01-06)</a></li>
@@ -115,15 +116,24 @@
              
   <section id="release-history">
 <h1>Release History<a class="headerlink" href="#release-history" title="Link to this heading"></a></h1>
-<section id="version-0-8-0-2026-02-xx">
-<h2>Version 0.8.0 (2026-02-xx)<a class="headerlink" href="#version-0-8-0-2026-02-xx" title="Link to this heading"></a></h2>
+<section id="version-0-8-1-2026-08-07">
+<h2>Version 0.8.1 (2026-08-07)<a class="headerlink" href="#version-0-8-1-2026-08-07" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><strong>Bug Fixes:</strong></dt><dd><ul class="simple">
+<li><p>Add perimeter_only option to Well Package block to bypass package setup routine for internal boundary conditions in the case of only perimeter fluxes.</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="version-0-8-0-2026-03-13">
+<h2>Version 0.8.0 (2026-03-13)<a class="headerlink" href="#version-0-8-0-2026-03-13" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt><strong>New Features:</strong></dt><dd><ul class="simple">
-<li><p>Add support for Pandas 3</p></li>
 <li><p>Add support for geopackage input with layernames (specified in format: filename&gt;.gpkg|layername=&lt;layer name&gt; or filename&gt;.gpkg|layer=&lt;layer name&gt;), for example as a way to specify the active model extent (e.g. in the source_data: idomain: block for Modflow 6 models)</p></li>
 </ul>
 </dd>
 <dt><strong>Bug Fixes:</strong></dt><dd><ul class="simple">
+<li><p>Add support for Pandas 3</p></li>
 <li><dl class="simple">
 <dt>fixes to SFR Package setup:</dt><dd><ul>
 <li><p>re-adjust SFR package layering each time idomain is adjusted, to prevent SFR in inactive cells (SFR reaches with no groundwater connections)</p></li>
@@ -312,7 +322,7 @@ where coordinate reference information can’t be parsed.</p></li>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 03, 2026.
+      <span class="lastupdated">Last updated on Aug 07, 2026.
       </span></p>
   </div>
 
