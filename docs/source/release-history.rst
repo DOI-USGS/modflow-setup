@@ -4,7 +4,8 @@ Release History
 
 Version 0.8.1 (2026-08-07)
 ----------------------------------------
-
+**Bug Fixes:**
+ * Add perimeter_only option to Well Package block to bypass package setup routine for internal boundary conditions in the case of only perimeter fluxes.
 
 Version 0.8.0 (2026-03-13)
 ----------------------------------------
