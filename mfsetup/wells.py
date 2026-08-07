@@ -84,7 +84,8 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
         to_inset_layers = {v:k for k, v in model.parent_layers.items()}
         spd['k'] = [to_inset_layers[k] for k in spd['k']]
 
-        df = df.append(spd)
+        # df = df.append(spd)
+        df = pd.concat([df, spd], ignore_index=True)
 
 
     # read source data and map onto model space and time discretization
@@ -102,6 +103,8 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                 csvdata = sd.get_data()
                 csvdata.rename(columns={v['data_column']: 'q',
                                         v['id_column']: 'boundname'}, inplace=True)
+                if v.get('layer_column') and v['layer_column'] in csvdata.columns:
+                    csvdata['k'] = csvdata[v['layer_column']]
                 if 'k' not in csvdata.columns:
                     if model.nlay > 1:
                         vfd = vfd_defaults.copy()
@@ -111,7 +114,8 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                                      **vfd)
                     else:
                         csvdata['k'] = 0
-                df = df.append(csvdata[columns])
+                # df = df.append(csvdata[columns])
+                df = pd.concat([df, csvdata[columns]], ignore_index=True)
 
             elif k.lower() == 'wells':  # generic dict
                 added_wells = {k: v for k, v in v.items() if v is not None}
@@ -127,7 +131,8 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                   aw['y'].values)
                     aw['per'] = aw['per'].astype(int)
                     aw['k'] = aw['k'].astype(int)
-                    df = df.append(aw)
+                    # df = df.append(aw)
+                    df = pd.concat([df, aw], ignore_index=True)
 
             elif k.lower() == 'wdnr_dataset':  # custom input format for WI DNR
                 # Get steady-state pumping rates
@@ -152,14 +157,17 @@ def setup_wel_data(model, source_data=None, #for_external_files=True,
                                                       period_stats=periods_with_dataset_means,
                                                       drop_ids=v.get('drop_ids'),
                                                       model=model)
-                    df = df.append(wu_means)
+                    # df = df.append(wu_means)
+                    df = pd.concat([df, wu_means], ignore_index=True)
+
                 if len(resampled_periods) > 0:
                     wu_resampled = resample_pumping_rates(v['water_use'],
                                                           v['water_use_points'],
                                                           drop_ids=v.get('drop_ids'),
                                                           exclude_steady_state=True,
                                                           model=model)
-                    df = df.append(wu_resampled)
+                    # df = df.append(wu_resampled)
+                    df = pd.concat([df, wu_means], ignore_index=True)
 
     for col in ['per', 'k', 'i', 'j']:
         df[col] = df[col].astype(int)
