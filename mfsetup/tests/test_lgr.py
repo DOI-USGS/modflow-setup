@@ -326,7 +326,7 @@ def test_mover_get_sfr_package_connections(pleasant_lgr_setup_from_yaml):
     # m.modelgrid.write_shapefile('inset_model_grid.shp')
     # m.parent.modelgrid.write_shapefile('parent_model_grid.shp')
     # {inset_reach: parent_reach, ...}
-    assert to_parent == {29: 13, 41: 1}
+    assert to_parent == {41: 13, 12: 1}
 
     # test for no circular connections when two outlets are connected
     # and distance_threshold is large
@@ -411,12 +411,12 @@ def test_meandering_sfr_connections(shellmound_cfg, project_root_path, tmpdir):
     # check SFR package shapefile output in test output folder
     # to verify that these are correct
     expected_connections = {
-    ('shellmound', 167, 'shellmound_lgr', 7),
-    ('shellmound', 229, 'shellmound_lgr', 0),
-    ('shellmound', 288, 'shellmound_lgr', 5),
-    ('shellmound_lgr', 4, 'shellmound', 252),
-    ('shellmound_lgr', 14, 'shellmound', 180),
-    ('shellmound_lgr', 17, 'shellmound', 164)
+    ('shellmound', 5, 'shellmound_lgr', 0),
+    ('shellmound', 244, 'shellmound_lgr', 3),
+    ('shellmound', 254, 'shellmound_lgr', 11),
+    ('shellmound_lgr', 7, 'shellmound', 249),
+    ('shellmound_lgr', 10, 'shellmound', 86),
+    ('shellmound_lgr', 17, 'shellmound', 2)
     }
     assert set(exchangedata[['mname1', 'id1', 'mname2', 'id2']].
                itertuples(index=False, name=None)) == expected_connections

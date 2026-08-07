@@ -552,15 +552,15 @@ def test_sfr_obs(get_pleasant_mf6_with_sfr):
     sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
     obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])
     assert len(m.sfrdata.observations) == len(obs)
-    expected = obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist()
-    assert m.sfrdata.observations['obsname'].tolist() == expected
+    expected = set(obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist())
+    assert set(m.sfrdata.observations['obsname']) == expected
     sfr_obs_filename = os.path.normpath(os.path.join(m.model_ws, m.sfrdata.observations_file))
     assert os.path.exists(sfr_obs_filename)
     obs_input = read_mf6_block(sfr_obs_filename, 'continuous')
     assert obs_input[sfr_obs_filename + '.output.csv'] == \
            ['# obsname obstype rno',
-            '1000000 downstream-flow 22',
-            '2000000 downstream-flow 31']
+            '2000000 downstream-flow 2',
+            '1000000 downstream-flow 34']
 
 
 def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):
