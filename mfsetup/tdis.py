@@ -836,7 +836,7 @@ def add_date_comments_to_tdis(tdis_file, start_dates, end_dates=None):
     """Add stress period start and end dates to a tdis file as comments;
     add modflow-setup version info to tdis file header.
     """
-    tempfile = tdis_file + '.temp'
+    tempfile = str(tdis_file) + '.temp'
     shutil.copy(tdis_file, tempfile)
     with open(tempfile) as src:
         with open(tdis_file, 'w') as dest:
