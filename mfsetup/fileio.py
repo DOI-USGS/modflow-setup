@@ -94,7 +94,7 @@ def load_modelgrid(filename):
 def load_yml(yml_file):
     """Load yaml file into a dictionary."""
     with open(yml_file) as src:
-        cfg = yaml.load(src, Loader=yaml.Loader)
+        cfg = yaml.safe_load(src)
     return cfg
 
 

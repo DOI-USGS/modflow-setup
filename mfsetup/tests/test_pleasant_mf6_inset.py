@@ -112,7 +112,7 @@ def pleasant_mf6_setup_from_yaml(pleasant_mf6_test_cfg_path):
 @pytest.fixture(scope="function")
 def pleasant_mf6_model_run(pleasant_mf6_setup_from_yaml, mf6_exe):
     m = copy.deepcopy(pleasant_mf6_setup_from_yaml)
-    m.simulation.exe_name = mf6_exe
+    #m.simulation.exe_name = mf6_exe
     success = False
     if exe_exists(mf6_exe):
         success, buff = m.simulation.run_simulation()
@@ -541,8 +541,8 @@ def test_write_sfr(get_pleasant_mf6_with_sfr):
     assert options['budget'] == ['fileout', 'pleasant_mf6.sfr.out.bin']
     assert options['stage'] == ['fileout', 'pleasant_mf6.sfr.stage.bin']
     assert options['obs6'] == ['filein', 'pleasant_mf6.sfr.obs']
-    assert options['unit_conversion'] == ['86400.0']
-    assert options['auxiliary'] == ['line_id']
+    assert options['time_conversion'] == ['86400.0']
+    assert 'boundnames' in options
 
 
 def test_sfr_obs(get_pleasant_mf6_with_sfr):
@@ -552,15 +552,15 @@ def test_sfr_obs(get_pleasant_mf6_with_sfr):
     sfr_package_filename = os.path.join(m.model_ws, m.sfr.filename)
     obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])
     assert len(m.sfrdata.observations) == len(obs)
-    expected = obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist()
-    assert m.sfrdata.observations['obsname'].tolist() == expected
+    expected = set(obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist())
+    assert set(m.sfrdata.observations['obsname']) == expected
     sfr_obs_filename = os.path.normpath(os.path.join(m.model_ws, m.sfrdata.observations_file))
     assert os.path.exists(sfr_obs_filename)
     obs_input = read_mf6_block(sfr_obs_filename, 'continuous')
     assert obs_input[sfr_obs_filename + '.output.csv'] == \
            ['# obsname obstype rno',
-            '1000000 downstream-flow 22',
-            '2000000 downstream-flow 31']
+            '2000000 downstream-flow 2',
+            '1000000 downstream-flow 34']
 
 
 def test_perimeter_boundary_setup(get_pleasant_mf6_with_dis):

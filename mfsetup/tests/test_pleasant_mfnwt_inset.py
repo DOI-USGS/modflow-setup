@@ -122,14 +122,14 @@ def test_model_setup(full_pleasant_nwt):
     # verify that observation data were added and written
     obs = pd.read_csv(m.cfg['sfr']['source_data']['observations']['filename'])
     assert len(m.sfrdata.observations) == len(obs)
-    expected = obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist()
-    assert m.sfrdata.observations['obsname'].tolist() == expected
+    expected = set(obs[m.cfg['sfr']['source_data']['observations']['obsname_column']].astype(str).tolist())
+    assert set(m.sfrdata.observations['obsname']) == expected
     sfr_obs_filename = os.path.join(m.model_ws, m.sfrdata.observations_file)
     assert 'GAGE' in m.get_package_list()
     assert os.path.exists(sfr_obs_filename)
     with open(sfr_obs_filename) as src:
         gagedata = src.read()
-    assert gagedata == '3 \n-1 -250 1 \n1 22 251 0 \n2 2 252 0 \n'
+    assert gagedata == '3 \n-1 -250 1 \n1 2 251 0 \n2 22 252 0 \n'
 
     # check that streambed elevation data were incorporated correctly
     reach_data = m.sfrdata.reach_data

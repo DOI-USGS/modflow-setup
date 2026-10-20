@@ -1301,32 +1301,33 @@ class MFsetupMixin():
                 rivdata.stress_period_data['boundname'] = rivdata.stress_period_data['name']
             dfs.append(rivdata.stress_period_data)
 
-        # set up package from user input
-        df_sd = None
-        if 'source_data' in kwargs:
-            if package == 'wel':
-                dropped_wells_file =\
-                    kwargs.get('output_files', {})\
-                    .get('dropped_wells_file', '{}_dropped_wells.csv').format(self.name)
-                df_sd = setup_wel_data(self,
-                                       source_data=kwargs['source_data'],
-                                       dropped_wells_file=dropped_wells_file)
-            else:
-                df_sd = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs.get('mfsetup_options', dict()))
-            if df_sd is not None and len(df_sd) > 0:
-                dfs.append(df_sd)
-        # set up package from parent model
-        elif self.cfg['parent'].get('default_source_data') and\
-            hasattr(self.parent, package):
-            if package == 'wel':
-                dropped_wells_file =\
-                    kwargs['output_files']['dropped_wells_file'].format(self.name)
-                df_sd = setup_wel_data(self,
-                                       dropped_wells_file=dropped_wells_file)
-            else:
-                print(f'Skipping setup of {package.upper()} Package from parent model-- not implemented.')
-            if df_sd is not None and len(df_sd) > 0:
-                dfs.append(df_sd)
+        if not kwargs.get('mfsetup_options', {}).get('perimeter_only', False):
+            # set up package from user input
+            df_sd = None
+            if 'source_data' in kwargs:
+                if package == 'wel':
+                    dropped_wells_file =\
+                        kwargs.get('output_files', {})\
+                        .get('dropped_wells_file', '{}_dropped_wells.csv').format(self.name)
+                    df_sd = setup_wel_data(self,
+                                        source_data=kwargs['source_data'],
+                                        dropped_wells_file=dropped_wells_file)
+                else:
+                    df_sd = setup_basic_stress_data(self, **kwargs['source_data'], **kwargs.get('mfsetup_options', dict()))
+                if df_sd is not None and len(df_sd) > 0:
+                    dfs.append(df_sd)
+            # set up package from parent model
+            elif self.cfg['parent'].get('default_source_data') and\
+                hasattr(self.parent, package):
+                if package == 'wel':
+                    dropped_wells_file =\
+                        kwargs['output_files']['dropped_wells_file'].format(self.name)
+                    df_sd = setup_wel_data(self,
+                                        dropped_wells_file=dropped_wells_file)
+                else:
+                    print(f'Skipping setup of {package.upper()} Package from parent model-- not implemented.')
+                if df_sd is not None and len(df_sd) > 0:
+                    dfs.append(df_sd)
         if len(dfs) == 0:
             print(f"{package.upper()} package:\n"
                   "No input specified or package configuration file input "

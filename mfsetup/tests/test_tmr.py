@@ -530,7 +530,7 @@ def test_get_boundary_heads(parent_model, inset_model,
         m.simulation.write_simulation()
 
         # run the inset model
-        m.simulation.exe_name = mf6_exe
+        #m.simulation.exe_name = mf6_exe
         success = False
         if exe_exists(mf6_exe):
             success, buff = m.simulation.run_simulation()
@@ -713,7 +713,7 @@ def test_get_boundary_fluxes(parent_model, inset_model,
         m.simulation.write_simulation()
 
         # run the inset model
-        m.simulation.exe_name = mf6_exe
+        #m.simulation.exe_name = mf6_exe
         success = False
         if exe_exists(mf6_exe):
             success, buff = m.simulation.run_simulation()

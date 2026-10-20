@@ -2,13 +2,18 @@
 Release History
 ===============
 
-Version 0.8.0 (2026-02-xx)
+Version 0.8.1 (2026-08-07)
+----------------------------------------
+**Bug Fixes:**
+ * Add perimeter_only option to Well Package block to bypass package setup routine for internal boundary conditions in the case of only perimeter fluxes.
+
+Version 0.8.0 (2026-03-13)
 ----------------------------------------
 **New Features:**
- * Add support for Pandas 3
  * Add support for geopackage input with layernames (specified in format: filename>.gpkg|layername=<layer name> or filename>.gpkg|layer=<layer name>), for example as a way to specify the active model extent (e.g. in the source_data: idomain: block for Modflow 6 models)
 
 **Bug Fixes:**
+ * Add support for Pandas 3
  * fixes to SFR Package setup:
      * re-adjust SFR package layering each time idomain is adjusted, to prevent SFR in inactive cells (SFR reaches with no groundwater connections)
      * write SFR Package shapefiles when MODFLOW input is written, so that the shapefiles reflect the final state of the SFR package
