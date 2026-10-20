@@ -74,11 +74,23 @@ def interp_weights(xyz, uvw, d=2, mask=None):
     if xyz.shape[-1] != d:
         xyz = xyz.T
     t0 = time.time()
-    tri = qhull.Delaunay(xyz)
-    simplex = tri.find_simplex(uvw)
+    # normalize coordinates to reduce aspect ratio issues in 3D
+    # uses same convention as scipy.interpolate.griddata rescale=True:
+    if d == 3:
+        offset = xyz.mean(axis=0)
+        scale = np.ptp(xyz, axis=0)
+        scale[scale == 0] = 1.0  # avoid division by zero
+        xyz_scaled = (xyz - offset) / scale
+        uvw_scaled = (uvw - offset) / scale
+    else:
+        xyz_scaled = xyz
+        uvw_scaled = uvw
+
+    tri = qhull.Delaunay(xyz_scaled)
+    simplex = tri.find_simplex(uvw_scaled)
     vertices = np.take(tri.simplices, simplex, axis=0)
     temp = np.take(tri.transform, simplex, axis=0)
-    delta = uvw - temp[:, d]
+    delta = uvw_scaled - temp[:, d]
     bary = np.einsum('njk,nk->nj', temp[:, :d, :], delta)
     weights = np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
     # round the weights,
