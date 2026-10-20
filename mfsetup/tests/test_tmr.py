@@ -915,3 +915,251 @@ def test_parent_xyzcellfacecenters(parent_model_mf6, inset_model_mf6):
             assert item[i].shape == tmr.parent_xyzcellcenters[i].shape
     # in theory, the actual values returned by parent_xyzcellfacecenters
     # are tested in test_grid.py::test_get_cellface_midpoint
+
+
+@pytest.fixture
+def parent_model_mf6_with_inactive(tmpdir, mf6_exe, test_model_properties):
+    """MF6 parent model with inactive cells (idomain=0) near the inset boundary,
+    to test that inactive cells are excluded from TMR interpolation.
+    """
+    name = 'tmr_par_inact'
+    model_ws = Path(tmpdir) / 'perimeter_bc_demo/parent_inactive'
+    model_ws.mkdir(exist_ok=True, parents=True)
+
+    sim = flopy.mf6.MFSimulation(sim_name=name, sim_ws=str(model_ws))
+    tdis = flopy.mf6.ModflowTdis(sim, time_units='DAYS', nper=1,
+                                perioddata=[(1.0, 1, 1.0)])
+    ims = flopy.mf6.ModflowIms(sim, pname="ims", complexity="MODERATE",
+                    outer_dvclose=1e-4,
+                    outer_maximum=200,
+                    inner_dvclose=1e-4,
+                    inner_maximum=100)
+    model = flopy.mf6.ModflowGwf(sim, modelname=name, newtonoptions='newton')
+
+    h = test_model_properties['h']
+    w = test_model_properties['w']
+    ncells_side = test_model_properties['ncells_side']
+    dx = w / ncells_side
+
+    # create idomain with inactive cells near the inset boundary
+    # The inset model is at offset (1000, 1000) with width 1000 and dx=50
+    # so it occupies parent rows ~20-40, cols ~20-40
+    # Place inactive cells just outside the inset domain but within the
+    # _source_grid_mask buffer (pad=3), so they would participate in
+    # interpolation if not masked out.
+    # Use a small cluster in the corner of the inset's footprint
+    # that won't disrupt flow connectivity.
+    idomain = np.ones((test_model_properties['nlay'], ncells_side, ncells_side), dtype=int)
+    # small inactive cluster at rows 17-18, cols 17-18
+    # (just outside the inset NW corner, within the 3-cell mask buffer)
+    idomain[:, 17:19, 17:19] = 0
+
+    dis = flopy.mf6.ModflowGwfdis(model, nlay=test_model_properties['nlay'],
+                                  nrow=ncells_side, ncol=ncells_side,
+                                  delr=dx, delc=dx,
+                                  top=test_model_properties['top'],
+                                  botm=test_model_properties['botm'],
+                                  idomain=idomain)
+    npf = flopy.mf6.ModflowGwfnpf(model, icelltype=1, k=1.0, k33=1.0, save_flows=True)
+
+    # CHD boundaries (same as regular parent)
+    chd_start_pos = int(ncells_side / 2)
+    nchd_side = ncells_side - chd_start_pos
+    w_heads = list(np.ones((nchd_side)) * test_model_properties['west_bhead_value'])
+    w_heads_i = list(range(chd_start_pos, ncells_side))
+    w_heads_j = [0] * len(w_heads)
+    n_heads = list(np.array(w_heads) - 2.)
+    n_heads_i = [0] * len(n_heads)
+    n_heads_j = w_heads_i
+
+    lake_width = test_model_properties['lake_width']
+    lake_lower_left = ncells_side / 2 - (lake_width / 2 / dx)
+    lake_upper_right = ncells_side / 2 + (lake_width / 2 / dx)
+    lake_heads_i, lake_heads_j = np.meshgrid(np.arange(lake_lower_left, lake_upper_right),
+                                             np.arange(lake_lower_left, lake_upper_right))
+    lake_heads_i = list(lake_heads_i.ravel().astype(int))
+    lake_heads_j = list(lake_heads_j.ravel().astype(int))
+
+    spd = pd.DataFrame({'k': 0,
+                        'i': w_heads_i + n_heads_i + lake_heads_i,
+                        'j': w_heads_j + n_heads_j + lake_heads_j,
+                        'head': w_heads + n_heads + ([test_model_properties['lake_level']] * len(lake_heads_j))
+                        })
+    # remove any CHD cells that fall in the inactive zone
+    spd = spd.loc[idomain[spd['k'], spd['i'], spd['j']] != 0].copy()
+    spd['cellid'] = list(zip(spd['k'], spd['i'], spd['j']))
+    spd_rec = spd[['cellid', 'head']].to_records(index=False)
+
+    start = test_model_properties['top'] * np.ones_like(dis.botm.array)
+    ic = flopy.mf6.ModflowGwfic(model, pname="ic", strt=start)
+    oc = flopy.mf6.ModflowGwfoc(model,
+                                saverecord=[("HEAD", "ALL"), ("BUDGET", "ALL")],
+                                head_filerecord=f"{name}.hds",
+                                budget_filerecord=f"{name}.cbc",
+                                )
+    chd = flopy.mf6.ModflowGwfchd(model, maxbound=len(spd_rec),
+                                   stress_period_data=spd_rec,
+                                   save_flows=True)
+
+    sim.write_simulation()
+    sim.exe_name = mf6_exe
+    success = False
+    if exe_exists(mf6_exe):
+        success, buff = sim.run_simulation()
+        if not success:
+            list_output = '\n'.join(buff)
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+    return model
+
+
+@pytest.fixture
+def parent_model_nwt_with_inactive(tmpdir, mfnwt_exe, test_model_properties):
+    """MFNWT parent model with inactive cells (ibound=0) near the inset boundary,
+    to test that inactive cells are excluded from TMR interpolation.
+    """
+    name = 'tmr_parent_nwt_inactive'
+    model_ws = Path(tmpdir) / 'perimeter_bc_demo/parent_nwt_inactive'
+    model_ws.mkdir(exist_ok=True, parents=True)
+
+    mf = flopy.modflow.Modflow(name, model_ws=str(model_ws), version='mfnwt')
+    nwt = flopy.modflow.ModflowNwt(mf, headtol=1e-4)
+
+    h = test_model_properties['h']
+    w = test_model_properties['w']
+    ncells_side = test_model_properties['ncells_side']
+    dx = w / ncells_side
+    dis = flopy.modflow.ModflowDis(mf, nlay=test_model_properties['nlay'],
+                                   nrow=ncells_side, ncol=ncells_side,
+                                   delr=dx, delc=dx,
+                                   top=test_model_properties['top'],
+                                   botm=test_model_properties['botm'])
+    upw = flopy.modflow.ModflowUpw(mf, laytyp=1, hk=1., vka=1.0, ipakcb=53,
+                                   hdry=-9999)
+
+    # CHD boundaries
+    chd_start_pos = int(ncells_side / 2)
+    nchd_side = ncells_side - chd_start_pos
+    w_heads = list(np.ones((nchd_side)) * test_model_properties['west_bhead_value'])
+    w_heads_i = list(range(chd_start_pos, ncells_side))
+    w_heads_j = [0] * len(w_heads)
+    n_heads = list(np.array(w_heads) - 2.)
+    n_heads_i = [0] * len(n_heads)
+    n_heads_j = w_heads_i
+
+    lake_width = test_model_properties['lake_width']
+    lake_lower_left = ncells_side / 2 - (lake_width / 2 / dx)
+    lake_upper_right = ncells_side / 2 + (lake_width / 2 / dx)
+    lake_heads_i, lake_heads_j = np.meshgrid(np.arange(lake_lower_left, lake_upper_right),
+                                             np.arange(lake_lower_left, lake_upper_right))
+    lake_heads_i = list(lake_heads_i.ravel().astype(int))
+    lake_heads_j = list(lake_heads_j.ravel().astype(int))
+
+    spd = pd.DataFrame({'k': 0,
+                        'i': w_heads_i + n_heads_i + lake_heads_i + [25],
+                        'j': w_heads_j + n_heads_j + lake_heads_j + [25],
+                        'shead': w_heads + n_heads + ([test_model_properties['lake_level']] * len(lake_heads_j)) + [test_model_properties['lake_level']],
+                        'ehead': w_heads + n_heads + ([test_model_properties['lake_level']] * len(lake_heads_j)) + [test_model_properties['lake_level']]
+                        })
+
+    # ibound with inactive cells near inset boundary
+    ibnd = np.ones([test_model_properties['nlay'], ncells_side, ncells_side])
+    ibnd[0, w_heads_i, w_heads_j] = -1
+    ibnd[0, n_heads_i, n_heads_j] = -1
+    # add a constant-head cell inside the spatial window (within inset domain)
+    # to verify it is NOT excluded by the ibound masking
+    ibnd[0, 25, 25] = -1
+    # small inactive cluster at rows 17-18, cols 17-18
+    # (just outside the inset NW corner, within the 3-cell mask buffer)
+    ibnd[:, 17:19, 17:19] = 0
+
+    # remove any CHD cells that fall in the inactive zone
+    spd = spd.loc[ibnd[spd['k'], spd['i'], spd['j']] != 0].copy()
+    spd_rec = flopy.modflow.ModflowChd.get_empty(len(spd))
+    for col in ['k', 'i', 'j', 'shead', 'ehead']:
+        spd_rec[col] = spd[col].values
+
+    start = test_model_properties['top'] * np.ones_like(dis.botm.array)
+    start[0, w_heads_i, w_heads_j] = w_heads
+    start[0, n_heads_i, n_heads_j] = n_heads
+    bas = flopy.modflow.ModflowBas(mf, ibound=ibnd, strt=start)
+    oc = flopy.modflow.ModflowOc(mf,
+                                 stress_period_data={(0, 0): ['save head', 'save budget']})
+    chd = flopy.modflow.ModflowChd(mf, stress_period_data=spd_rec)
+
+    mf.write_input()
+    mf.exe_name = mfnwt_exe
+    success = False
+    if exe_exists(mfnwt_exe):
+        success, buff = mf.run_model()
+        if not success:
+            list_output = '\n'.join(buff)
+    assert success, 'model run did not terminate successfully:\n{}'.format(list_output)
+    return mf
+
+
+def test_source_grid_mask_excludes_inactive_mf6(parent_model_mf6_with_inactive,
+                                                 inset_model_mf6):
+    """Test that _source_grid_mask excludes inactive parent cells (idomain=0)
+    from the interpolation source points for MF6 models."""
+    parent_model = parent_model_mf6_with_inactive
+    m = inset_model_mf6
+    parent_ws = Path(parent_model.model_ws)
+    parent_head_file = parent_ws / f'{parent_model.name}.hds'
+
+    tmr = Tmr(parent_model, m, parent_head_file=parent_head_file,
+              boundary_type='head')
+
+    # verify that the source grid mask excludes inactive cells
+    mask = tmr._source_grid_mask
+    idomain = parent_model.dis.idomain.array
+    # the mask is padded by +2 layers; the interior layers (1:-1) correspond to model layers
+    nlay = idomain.shape[0]
+    mask_interior = mask[1:nlay + 1, :, :]
+    # all cells where idomain==0 should be False in the mask
+    inactive_locs = idomain == 0
+    assert not np.any(mask_interior[inactive_locs]), \
+        "Inactive parent cells (idomain=0) should be excluded from source grid mask"
+
+    # verify that interpolated heads do not contain HNOFLO-like values
+    results = tmr.get_inset_boundary_values(for_external_files=False)
+    assert not results['head'].isna().any()
+    # heads should be physically reasonable (not near HNOFLO sentinel values)
+    assert results['head'].min() > -1000, \
+        "Interpolated heads contain unreasonably low values, possibly from inactive cells"
+
+
+def test_source_grid_mask_excludes_inactive_nwt(parent_model_nwt_with_inactive,
+                                                 inset_model_nwt):
+    """Test that _source_grid_mask excludes inactive parent cells (ibound=0)
+    from the interpolation source points for MODFLOW-NWT models,
+    while keeping constant-head cells (ibound=-1)."""
+    parent_model = parent_model_nwt_with_inactive
+    m = inset_model_nwt
+    parent_ws = Path(parent_model.model_ws)
+    parent_head_file = parent_ws / f'{parent_model.name}.hds'
+
+    tmr = Tmr(parent_model, m, parent_head_file=parent_head_file,
+              boundary_type='head')
+
+    # verify that the source grid mask excludes inactive cells (ibound=0)
+    # but keeps constant-head cells (ibound=-1)
+    mask = tmr._source_grid_mask
+    ibound = parent_model.bas6.ibound.array
+    nlay = ibound.shape[0]
+    mask_interior = mask[1:nlay + 1, :, :]
+
+    # cells where ibound==0 should be False in the mask
+    inactive_locs = ibound == 0
+    assert not np.any(mask_interior[inactive_locs]), \
+        "Inactive parent cells (ibound=0) should be excluded from source grid mask"
+
+    # the constant-head cell at (0, 25, 25) is inside the spatial window
+    # and should be True in the mask (ibound=-1 should NOT be excluded)
+    assert mask_interior[0, 25, 25], \
+        "Constant-head cells (ibound=-1) within the spatial window should remain in the mask"
+
+    # verify that interpolated heads are physically reasonable
+    results = tmr.get_inset_boundary_values(for_external_files=False)
+    assert not results['head'].isna().any()
+    assert results['head'].min() > -1000, \
+        "Interpolated heads contain unreasonably low values, possibly from HNOFLO"

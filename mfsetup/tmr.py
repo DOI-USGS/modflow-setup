@@ -478,6 +478,31 @@ class Tmr:
             # make the mask 3D
             # include extra layer for top and bottom edges of model
             mask3d = np.tile(mask, (self.parent.modelgrid.nlay + 2, 1, 1))
+            # exclude inactive parent cells from the interpolation source points
+            if self.parent.version == 'mf6':
+                parent_idomain = self.parent.dis.idomain.array
+                # idomain may be None or scalar if not explicitly set (all cells active)
+                if parent_idomain is not None and parent_idomain.ndim == 3:
+                    # pad idomain vertically to match the +2 layers in mask3d
+                    # (replicate top and bottom layers for the padding)
+                    parent_idomain_padded = np.pad(
+                        parent_idomain, pad_width=1, mode='edge'
+                        )[:, 1:-1, 1:-1]
+                    # For MF6: idomain=0 is inactive, idomain=-1 is pass-through 
+                    # (no valid heads)
+                    mask3d = mask3d & (parent_idomain_padded > 0)
+            else:
+                parent_ibound = self.parent.bas6.ibound.array
+                # ibound may be None or scalar if not explicitly set (all cells active)
+                if parent_ibound is not None and parent_ibound.ndim == 3:
+                    # pad ibound vertically to match the +2 layers in mask3d
+                    # (replicate top and bottom layers for the padding)
+                    parent_ibound_padded = np.pad(
+                        parent_ibound, pad_width=1, mode='edge'
+                        )[:, 1:-1, 1:-1]
+                    # For MODFLOW-NWT: ibound=0 is inactive (HNOFLO), ibound=-1 
+                    # is constant-head (valid heads)
+                    mask3d = mask3d & (parent_ibound_padded != 0)
             self._source_mask = mask3d
         elif len(self._source_mask.shape) == 2:
             mask3d = np.tile(self._source_mask, (self.parent.modelgrid.nlay + 2, 1, 1))
