@@ -4,6 +4,7 @@ import time
 import flopy
 import numpy as np
 from scipy.interpolate import griddata
+from scipy.spatial import cKDTree
 from scipy.spatial import qhull as qhull
 
 
@@ -101,18 +102,101 @@ def interp_weights(xyz, uvw, d=2, mask=None):
     return vertices, weights
 
 
+def interp_weights_kdtree(xyz, uvw, d=2, k=None):
+    """Compute interpolation weights using KD-tree nearest neighbors
+    with inverse-distance weighting. Faster than Delaunay-based interpolation
+    for 3D point clouds with extreme aspect ratios (e.g., large model grids).
+
+    Parameters
+    ----------
+    xyz : ndarray or tuple
+        x, y, z, ... locations of source data.
+        (shape n source points x ndims)
+    uvw : ndarray or tuple
+        x, y, z, ... locations of where source data will be interpolated
+        (shape n destination points x ndims)
+    d : int
+        Number of dimensions (2 for 2D, 3 for 3D, etc.)
+    k : int, optional
+        Number of nearest neighbors to use. Defaults to d+1
+        (same number of points as a simplex in d dimensions).
+
+    Returns
+    -------
+    indices : ndarray of shape (n destination points, k)
+        Index positions in flattened (1D) xyz array
+    weights : ndarray of shape (n destination points, k)
+        Normalized inverse-distance weights for each neighbor.
+        Weights in each row sum to 1.
+    """
+    if k is None:
+        k = d + 1  # same vertex count as a Delaunay simplex
+
+    print(f'Calculating {d}D interpolation weights (KD-tree, k={k})...')
+    # convert input to ndarrays of the right shape
+    uvw = np.array(uvw)
+    if uvw.shape[-1] != d:
+        uvw = uvw.T
+    xyz = np.array(xyz)
+    if xyz.shape[-1] != d:
+        xyz = xyz.T
+    t0 = time.time()
+
+    # normalize to handle z-anisotropy
+    # uses same convention as scipy.interpolate.griddata rescale=True:
+    # center at mean, scale by peak-to-peak range
+    offset = xyz.mean(axis=0)
+    scale = np.ptp(xyz, axis=0)
+    scale[scale == 0] = 1.0  # avoid division by zero
+    xyz_scaled = (xyz - offset) / scale
+    uvw_scaled = (uvw - offset) / scale
+
+    # build tree and query
+    tree = cKDTree(xyz_scaled)
+    distances, indices = tree.query(uvw_scaled, k=k)
+
+    # compute inverse-distance weights
+    # handle exact matches (distance = 0)
+    if k == 1:
+        # single neighbor: weight is always 1
+        indices = indices.reshape(-1, 1)
+        weights = np.ones((len(indices), 1))
+    else:
+        exact = distances == 0
+        weights = np.zeros_like(distances)
+        if exact.any():
+            # for rows with an exact match, give weight 1 to the first exact match
+            exact_rows = exact.any(axis=1)
+            # for exact match rows, set weight to 1 for the first exact column
+            first_exact = np.argmax(exact[exact_rows], axis=1)
+            weights[exact_rows] = 0
+            weights[exact_rows, first_exact] = 1.0
+            # for rows without exact matches, use IDW
+            non_exact = ~exact_rows
+            if non_exact.any():
+                inv_dist = 1.0 / distances[non_exact]
+                weights[non_exact] = inv_dist / inv_dist.sum(axis=1, keepdims=True)
+        else:
+            inv_dist = 1.0 / distances
+            weights = inv_dist / inv_dist.sum(axis=1, keepdims=True)
+
+    print("finished in {:.2f}s\n".format(time.time() - t0))
+    return indices, weights
+
+
 def interpolate(values, vtx, wts, fill_value='mean'):
     """Apply the interpolation weights to a set of values.
 
     Parameters
     ----------
     values : 1D array of length n source points (same as xyz in interp_weights)
-    vtx : indices returned by interp_weights
-    wts : weights returned by interp_weights
+    vtx : indices returned by interp_weights or interp_weights_kdtree
+    wts : weights returned by interp_weights or interp_weights_kdtree
     fill_value : float
         Value used to fill in for requested points outside of the convex hull
         of the input points (i.e., those with at least one negative weight).
         If not provided, then the default is nan.
+        Not used for KD-tree weights (all weights are positive).
     Returns
     -------
     interpolated values
@@ -331,6 +415,15 @@ class Interpolator:
         Boolean array of same structure as the `source_values` array
         input to the :meth:`~mfsetup.interpolate.Interpolator.interpolate` method,
         with the same number of active values as the size of `xyz`.
+    weight_method : str ('delaunay' or 'kdtree')
+        Method for computing interpolation weights. 'delaunay' uses Delaunay
+        triangulation with barycentric coordinates (exact linear interpolation).
+        'kdtree' uses a KD-tree with inverse-distance weighting from the k
+        nearest neighbors (faster for 3D grids with extreme aspect ratios).
+        By default, 'delaunay'.
+    k : int, optional
+        Number of nearest neighbors for the 'kdtree' method.
+        Defaults to d+1 (same number of vertices as a simplex).
 
     Notes
     -----
@@ -338,11 +431,14 @@ class Interpolator:
     https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids
 
     """
-    def __init__(self, xyz, uvw, d=2, source_values_mask=None):
+    def __init__(self, xyz, uvw, d=2, source_values_mask=None,
+                 weight_method='delaunay', k=None):
 
         self.xyz = xyz
         self.uvw = uvw
         self.d = d
+        self.weight_method = weight_method
+        self.k = k
 
         # properties
         self._interp_weights = None
@@ -353,7 +449,11 @@ class Interpolator:
     def interp_weights(self):
         """Calculate the interpolation weights."""
         if self._interp_weights is None:
-            self._interp_weights = interp_weights(self.xyz, self.uvw, self.d)
+            if self.weight_method == 'kdtree':
+                self._interp_weights = interp_weights_kdtree(
+                    self.xyz, self.uvw, self.d, k=self.k)
+            else:
+                self._interp_weights = interp_weights(self.xyz, self.uvw, self.d)
         return self._interp_weights
 
     @property
