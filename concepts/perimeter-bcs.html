@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.8.1.post5+g92f4049 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=6a370f82"></script>
+      <script src="../_static/documentation_options.js?v=cd1abb07"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -66,6 +66,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#features-and-limitations">Features and Limitations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-input">Configuration input</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#specifying-the-time-discretization">Specifying the time discretization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#choosing-an-interpolation-method">Choosing an interpolation method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#specifying-the-locations-of-perimeter-boundary-cells">Specifying the locations of perimeter boundary cells</a></li>
 </ul>
 </li>
@@ -123,7 +124,7 @@
 <li><p>The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.</p></li>
 <li><p>The parent model may have different length units.</p></li>
 <li><p>The parent model may be of a different MODFLOW version (e.g. MODFLOW 6 inset with a MODFLOW-NWT parent)</p></li>
-<li><p>For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
+<li><p>For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated to the cell centers along the inset model perimeter in the x, y and z directions. Two interpolation methods are available (see <a class="reference internal" href="#choosing-an-interpolation-method"><span class="std std-ref">Choosing an interpolation method</span></a> below): the default barycentric triangular method (similar to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>), and an inverse-distance weighting method based on a KD-tree of nearest neighbors. In either case, there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">LGR capability</span></a> of Modflow-setup can help with this.</p></li>
 <li><p>Specified flux boundaries are currently limited to the parent and inset models being colinear.</p></li>
 <li><p>The perimeter may be irregular. For example, the edge of the model active area may follow a major surface water feature along the opposite side.</p></li>
 <li><p>Specified perimeter heads in MODFLOW-NWT models will have ending heads for each stress period assigned from the starting head of the next stress period (with the last period having the same starting and ending heads). The MODFLOW 6 Constant Head Package only supports assignment of a single head per stress period. This distinction only matters for models where stress periods are subdivided by multiple timesteps.</p></li>
@@ -179,6 +180,26 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">0:</span> <span class="pre">1</span></code> indicates that the first stress period in the inset model aligns with the second stress period in the parent model (stress period 1), etc.</p>
+</section>
+<section id="choosing-an-interpolation-method">
+<h2>Choosing an interpolation method<a class="headerlink" href="#choosing-an-interpolation-method" title="Link to this heading"></a></h2>
+<p>For specified head perimeter boundaries, parent model heads are interpolated to the inset perimeter cell centers in three dimensions. The interpolation method is set with the optional <code class="docutils literal notranslate"><span class="pre">interpolation_method:</span></code> key in the <code class="docutils literal notranslate"><span class="pre">perimeter_boundary:</span></code> sub-block:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">'linear'</span></code> (the default): Delaunay triangulation with barycentric weights, equivalent to linear interpolation with <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html#scipy.interpolate.griddata" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.griddata()</span></code></a>. This is exact for linear head gradients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'kdtree'</span></code>: inverse-distance weighting from the <em>k</em> nearest parent cell centers (via a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.cKDTree.html#scipy.spatial.cKDTree" title="(in SciPy v1.18.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.spatial.cKDTree</span></code></a>). This can be faster and more robust for large 3D parent grids with extreme vertical-to-horizontal aspect ratios, where the triangulation can become ill-conditioned. The optional <code class="docutils literal notranslate"><span class="pre">interpolation_k:</span></code> key sets the number of nearest neighbors to use; by default it is the number of vertices in a simplex (the number of dimensions plus one, i.e. 4 for 3D interpolation). Setting <code class="docutils literal notranslate"><span class="pre">interpolation_k:</span> <span class="pre">1</span></code> gives pure nearest-neighbor interpolation: each inset perimeter cell simply takes the value of the single closest parent cell center. <code class="docutils literal notranslate"><span class="pre">interpolation_k</span></code> must be a positive integer (1 or greater).</p>
+<blockquote>
+<div><p>Input example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">'data/pleasant/pleasant.hds'</span>
+<span class="w">      </span><span class="nt">interpolation_method</span><span class="p">:</span><span class="w"> </span><span class="s">'kdtree'</span>
+<span class="w">      </span><span class="nt">interpolation_k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+<p>Both methods normalize (rescale) the coordinates before computing weights, so that the typically small vertical extent of a model grid relative to its horizontal extent does not bias the interpolation.</p>
 </section>
 <section id="specifying-the-locations-of-perimeter-boundary-cells">
 <h2>Specifying the locations of perimeter boundary cells<a class="headerlink" href="#specifying-the-locations-of-perimeter-boundary-cells" title="Link to this heading"></a></h2>

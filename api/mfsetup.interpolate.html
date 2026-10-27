@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.interpolate module &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
+  <title>mfsetup.interpolate module &mdash; modflow-setup 0.8.1.post5+g92f4049 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=6a370f82"></script>
+      <script src="../_static/documentation_options.js?v=cd1abb07"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -75,6 +75,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.interpolate.Interpolator"><code class="docutils literal notranslate"><span class="pre">Interpolator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.interpolate.get_source_dest_model_xys"><code class="docutils literal notranslate"><span class="pre">get_source_dest_model_xys()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.interpolate.interp_weights"><code class="docutils literal notranslate"><span class="pre">interp_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfsetup.interpolate.interp_weights_kdtree"><code class="docutils literal notranslate"><span class="pre">interp_weights_kdtree()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.interpolate.interpolate"><code class="docutils literal notranslate"><span class="pre">interpolate()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.interpolate.regrid"><code class="docutils literal notranslate"><span class="pre">regrid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mfsetup.interpolate.regrid3d"><code class="docutils literal notranslate"><span class="pre">regrid3d()</span></code></a></li>
@@ -126,7 +127,7 @@
 <span id="mfsetup-interpolate-module"></span><h1>mfsetup.interpolate module<a class="headerlink" href="#module-mfsetup.interpolate" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.interpolate.Interpolator">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">Interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_values_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#Interpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.Interpolator" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">Interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_values_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'delaunay'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#Interpolator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.Interpolator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Speed up barycentric interpolation similar to scipy.interpolate.griddata
 (method=’linear’), by computing the weights once and then re-using them for
@@ -145,6 +146,15 @@ successive interpolation with the same source and destination points.</p>
 <dt><strong>source_values_mask</strong><span class="classifier">boolean array</span></dt><dd><p>Boolean array of same structure as the <cite>source_values</cite> array
 input to the <a class="reference internal" href="#mfsetup.interpolate.Interpolator.interpolate" title="mfsetup.interpolate.Interpolator.interpolate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">interpolate()</span></code></a> method,
 with the same number of active values as the size of <cite>xyz</cite>.</p>
+</dd>
+<dt><strong>weight_method</strong><span class="classifier">str (‘delaunay’ or ‘kdtree’)</span></dt><dd><p>Method for computing interpolation weights. ‘delaunay’ uses Delaunay
+triangulation with barycentric coordinates (exact linear interpolation).
+‘kdtree’ uses a KD-tree with inverse-distance weighting from the k
+nearest neighbors (faster for 3D grids with extreme aspect ratios).
+By default, ‘delaunay’.</p>
+</dd>
+<dt><strong>k</strong><span class="classifier">int, optional</span></dt><dd><p>Number of nearest neighbors for the ‘kdtree’ method.
+Defaults to d+1 (same number of vertices as a simplex).</p>
 </dd>
 </dl>
 </dd>
@@ -241,6 +251,40 @@ across the 3 columns.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="mfsetup.interpolate.interp_weights_kdtree">
+<span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">interp_weights_kdtree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#interp_weights_kdtree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.interp_weights_kdtree" title="Link to this definition"></a></dt>
+<dd><p>Compute interpolation weights using KD-tree nearest neighbors
+with inverse-distance weighting. Faster than Delaunay-based interpolation
+for 3D point clouds with extreme aspect ratios (e.g., large model grids).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>xyz</strong><span class="classifier">ndarray or tuple</span></dt><dd><p>x, y, z, … locations of source data.
+(shape n source points x ndims)</p>
+</dd>
+<dt><strong>uvw</strong><span class="classifier">ndarray or tuple</span></dt><dd><p>x, y, z, … locations of where source data will be interpolated
+(shape n destination points x ndims)</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">int</span></dt><dd><p>Number of dimensions (2 for 2D, 3 for 3D, etc.)</p>
+</dd>
+<dt><strong>k</strong><span class="classifier">int, optional</span></dt><dd><p>Number of nearest neighbors to use. Defaults to d+1
+(same number of points as a simplex in d dimensions).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>indices</strong><span class="classifier">ndarray of shape (n destination points, k)</span></dt><dd><p>Index positions in flattened (1D) xyz array</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">ndarray of shape (n destination points, k)</span></dt><dd><p>Normalized inverse-distance weights for each neighbor.
+Weights in each row sum to 1.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mfsetup.interpolate.interpolate">
 <span class="sig-prename descclassname"><span class="pre">mfsetup.interpolate.</span></span><span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vtx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/interpolate.html#interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.interpolate.interpolate" title="Link to this definition"></a></dt>
 <dd><p>Apply the interpolation weights to a set of values.</p>
@@ -248,11 +292,12 @@ across the 3 columns.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>values</strong><span class="classifier">1D array of length n source points (same as xyz in interp_weights)</span></dt><dd></dd>
-<dt><strong>vtx</strong><span class="classifier">indices returned by interp_weights</span></dt><dd></dd>
-<dt><strong>wts</strong><span class="classifier">weights returned by interp_weights</span></dt><dd></dd>
+<dt><strong>vtx</strong><span class="classifier">indices returned by interp_weights or interp_weights_kdtree</span></dt><dd></dd>
+<dt><strong>wts</strong><span class="classifier">weights returned by interp_weights or interp_weights_kdtree</span></dt><dd></dd>
 <dt><strong>fill_value</strong><span class="classifier">float</span></dt><dd><p>Value used to fill in for requested points outside of the convex hull
 of the input points (i.e., those with at least one negative weight).
-If not provided, then the default is nan.</p>
+If not provided, then the default is nan.
+Not used for KD-tree weights (all weights are positive).</p>
 </dd>
 <dt><strong>Returns</strong></dt><dd></dd>
 <dt><strong>——-</strong></dt><dd></dd>

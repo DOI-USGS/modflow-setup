@@ -11,7 +11,7 @@ Features and Limitations
 * The parent model solution (providing the values for the boundaries) is assumed to align with the inset model time discretization.
 * The parent model may have different length units.
 * The parent model may be of a different MODFLOW version (e.g. MODFLOW 6 inset with a MODFLOW-NWT parent)
-* For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated linearly to the cell centers along the inset model perimeter in the x, y and z directions (using a barycentric triangular method similar to :py:func:`scipy.interpolate.griddata`). However, this means that there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The :ref:`LGR capability <Pleasant Lake test case>` of Modflow-setup can help with this.
+* For specified head perimeter boundaries, the inset model grid need not align with the parent model grid; values from the parent model solution are interpolated to the cell centers along the inset model perimeter in the x, y and z directions. Two interpolation methods are available (see :ref:`Choosing an interpolation method` below): the default barycentric triangular method (similar to :py:func:`scipy.interpolate.griddata`), and an inverse-distance weighting method based on a KD-tree of nearest neighbors. In either case, there may be some mismatch between the parent and inset model solutions along the inset model perimeter, in places where there are abrupt or non-linear head gradients. Boundaries for inset models should always be set sufficiently far away that they do not appreciably impact the model solution in the area(s) of interest. The :ref:`LGR capability <Pleasant Lake test case>` of Modflow-setup can help with this.
 * Specified flux boundaries are currently limited to the parent and inset models being colinear.
 * The perimeter may be irregular. For example, the edge of the model active area may follow a major surface water feature along the opposite side.
 * Specified perimeter heads in MODFLOW-NWT models will have ending heads for each stress period assigned from the starting head of the next stress period (with the last period having the same starting and ending heads). The MODFLOW 6 Constant Head Package only supports assignment of a single head per stress period. This distinction only matters for models where stress periods are subdivided by multiple timesteps.
@@ -70,6 +70,26 @@ By default, inset model stress period 0 is assumed to align with parent model st
     2: 3
 
 where ``0: 1`` indicates that the first stress period in the inset model aligns with the second stress period in the parent model (stress period 1), etc.
+
+
+Choosing an interpolation method
+--------------------------------
+For specified head perimeter boundaries, parent model heads are interpolated to the inset perimeter cell centers in three dimensions. The interpolation method is set with the optional ``interpolation_method:`` key in the ``perimeter_boundary:`` sub-block:
+
+* ``'linear'`` (the default): Delaunay triangulation with barycentric weights, equivalent to linear interpolation with :py:func:`scipy.interpolate.griddata`. This is exact for linear head gradients.
+* ``'kdtree'``: inverse-distance weighting from the *k* nearest parent cell centers (via a :py:class:`scipy.spatial.cKDTree`). This can be faster and more robust for large 3D parent grids with extreme vertical-to-horizontal aspect ratios, where the triangulation can become ill-conditioned. The optional ``interpolation_k:`` key sets the number of nearest neighbors to use; by default it is the number of vertices in a simplex (the number of dimensions plus one, i.e. 4 for 3D interpolation). Setting ``interpolation_k: 1`` gives pure nearest-neighbor interpolation: each inset perimeter cell simply takes the value of the single closest parent cell center. ``interpolation_k`` must be a positive integer (1 or greater).
+
+    Input example:
+
+    .. code-block:: yaml
+
+      chd:
+          perimeter_boundary:
+            parent_head_file: 'data/pleasant/pleasant.hds'
+            interpolation_method: 'kdtree'
+            interpolation_k: 4
+
+Both methods normalize (rescale) the coordinates before computing weights, so that the typically small vertical extent of a model grid relative to its horizontal extent does not bias the interpolation.
 
 
 Specifying the locations of perimeter boundary cells

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.interpolate &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
+  <title>mfsetup.interpolate &mdash; modflow-setup 0.8.1.post5+g92f4049 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=6a370f82"></script>
+      <script src="../../_static/documentation_options.js?v=cd1abb07"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -105,6 +105,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">flopy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">griddata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">cKDTree</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">qhull</span> <span class="k">as</span> <span class="n">qhull</span>
 
 
@@ -180,11 +181,23 @@
     <span class="k">if</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d</span><span class="p">:</span>
         <span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">T</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">tri</span> <span class="o">=</span> <span class="n">qhull</span><span class="o">.</span><span class="n">Delaunay</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
-    <span class="n">simplex</span> <span class="o">=</span> <span class="n">tri</span><span class="o">.</span><span class="n">find_simplex</span><span class="p">(</span><span class="n">uvw</span><span class="p">)</span>
+    <span class="c1"># normalize coordinates to reduce aspect ratio issues in 3D</span>
+    <span class="c1"># uses same convention as scipy.interpolate.griddata rescale=True:</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">scale</span><span class="p">[</span><span class="n">scale</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># avoid division by zero</span>
+        <span class="n">xyz_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">xyz</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale</span>
+        <span class="n">uvw_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">uvw</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xyz_scaled</span> <span class="o">=</span> <span class="n">xyz</span>
+        <span class="n">uvw_scaled</span> <span class="o">=</span> <span class="n">uvw</span>
+
+    <span class="n">tri</span> <span class="o">=</span> <span class="n">qhull</span><span class="o">.</span><span class="n">Delaunay</span><span class="p">(</span><span class="n">xyz_scaled</span><span class="p">)</span>
+    <span class="n">simplex</span> <span class="o">=</span> <span class="n">tri</span><span class="o">.</span><span class="n">find_simplex</span><span class="p">(</span><span class="n">uvw_scaled</span><span class="p">)</span>
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">tri</span><span class="o">.</span><span class="n">simplices</span><span class="p">,</span> <span class="n">simplex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">tri</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="n">simplex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">delta</span> <span class="o">=</span> <span class="n">uvw</span> <span class="o">-</span> <span class="n">temp</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">uvw_scaled</span> <span class="o">-</span> <span class="n">temp</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span>
     <span class="n">bary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">'njk,nk-&gt;nj'</span><span class="p">,</span> <span class="n">temp</span><span class="p">[:,</span> <span class="p">:</span><span class="n">d</span><span class="p">,</span> <span class="p">:],</span> <span class="n">delta</span><span class="p">)</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">bary</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">bary</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
     <span class="c1"># round the weights,</span>
@@ -196,6 +209,91 @@
 
 
 
+<div class="viewcode-block" id="interp_weights_kdtree">
+<a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.interp_weights_kdtree">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">interp_weights_kdtree</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Compute interpolation weights using KD-tree nearest neighbors</span>
+<span class="sd">    with inverse-distance weighting. Faster than Delaunay-based interpolation</span>
+<span class="sd">    for 3D point clouds with extreme aspect ratios (e.g., large model grids).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xyz : ndarray or tuple</span>
+<span class="sd">        x, y, z, ... locations of source data.</span>
+<span class="sd">        (shape n source points x ndims)</span>
+<span class="sd">    uvw : ndarray or tuple</span>
+<span class="sd">        x, y, z, ... locations of where source data will be interpolated</span>
+<span class="sd">        (shape n destination points x ndims)</span>
+<span class="sd">    d : int</span>
+<span class="sd">        Number of dimensions (2 for 2D, 3 for 3D, etc.)</span>
+<span class="sd">    k : int, optional</span>
+<span class="sd">        Number of nearest neighbors to use. Defaults to d+1</span>
+<span class="sd">        (same number of points as a simplex in d dimensions).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    indices : ndarray of shape (n destination points, k)</span>
+<span class="sd">        Index positions in flattened (1D) xyz array</span>
+<span class="sd">    weights : ndarray of shape (n destination points, k)</span>
+<span class="sd">        Normalized inverse-distance weights for each neighbor.</span>
+<span class="sd">        Weights in each row sum to 1.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># same vertex count as a Delaunay simplex</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Calculating </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1">D interpolation weights (KD-tree, k=</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">)...'</span><span class="p">)</span>
+    <span class="c1"># convert input to ndarrays of the right shape</span>
+    <span class="n">uvw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uvw</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">uvw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">uvw</span> <span class="o">=</span> <span class="n">uvw</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="c1"># normalize to handle z-anisotropy</span>
+    <span class="c1"># uses same convention as scipy.interpolate.griddata rescale=True:</span>
+    <span class="c1"># center at mean, scale by peak-to-peak range</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">scale</span><span class="p">[</span><span class="n">scale</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># avoid division by zero</span>
+    <span class="n">xyz_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">xyz</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale</span>
+    <span class="n">uvw_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">uvw</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">scale</span>
+
+    <span class="c1"># build tree and query</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">cKDTree</span><span class="p">(</span><span class="n">xyz_scaled</span><span class="p">)</span>
+    <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">uvw_scaled</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="c1"># compute inverse-distance weights</span>
+    <span class="c1"># handle exact matches (distance = 0)</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># single neighbor: weight is always 1</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">exact</span> <span class="o">=</span> <span class="n">distances</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">exact</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="c1"># for rows with an exact match, give weight 1 to the first exact match</span>
+            <span class="n">exact_rows</span> <span class="o">=</span> <span class="n">exact</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># for exact match rows, set weight to 1 for the first exact column</span>
+            <span class="n">first_exact</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">exact</span><span class="p">[</span><span class="n">exact_rows</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">weights</span><span class="p">[</span><span class="n">exact_rows</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">weights</span><span class="p">[</span><span class="n">exact_rows</span><span class="p">,</span> <span class="n">first_exact</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="c1"># for rows without exact matches, use IDW</span>
+            <span class="n">non_exact</span> <span class="o">=</span> <span class="o">~</span><span class="n">exact_rows</span>
+            <span class="k">if</span> <span class="n">non_exact</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="n">inv_dist</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">distances</span><span class="p">[</span><span class="n">non_exact</span><span class="p">]</span>
+                <span class="n">weights</span><span class="p">[</span><span class="n">non_exact</span><span class="p">]</span> <span class="o">=</span> <span class="n">inv_dist</span> <span class="o">/</span> <span class="n">inv_dist</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inv_dist</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">distances</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">inv_dist</span> <span class="o">/</span> <span class="n">inv_dist</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"finished in </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">indices</span><span class="p">,</span> <span class="n">weights</span></div>
+
+
+
 <div class="viewcode-block" id="interpolate">
 <a class="viewcode-back" href="../../api/mfsetup.interpolate.html#mfsetup.interpolate.interpolate">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">vtx</span><span class="p">,</span> <span class="n">wts</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">'mean'</span><span class="p">):</span>
@@ -204,12 +302,13 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    values : 1D array of length n source points (same as xyz in interp_weights)</span>
-<span class="sd">    vtx : indices returned by interp_weights</span>
-<span class="sd">    wts : weights returned by interp_weights</span>
+<span class="sd">    vtx : indices returned by interp_weights or interp_weights_kdtree</span>
+<span class="sd">    wts : weights returned by interp_weights or interp_weights_kdtree</span>
 <span class="sd">    fill_value : float</span>
 <span class="sd">        Value used to fill in for requested points outside of the convex hull</span>
 <span class="sd">        of the input points (i.e., those with at least one negative weight).</span>
 <span class="sd">        If not provided, then the default is nan.</span>
+<span class="sd">        Not used for KD-tree weights (all weights are positive).</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    interpolated values</span>
@@ -437,6 +536,15 @@
 <span class="sd">        Boolean array of same structure as the `source_values` array</span>
 <span class="sd">        input to the :meth:`~mfsetup.interpolate.Interpolator.interpolate` method,</span>
 <span class="sd">        with the same number of active values as the size of `xyz`.</span>
+<span class="sd">    weight_method : str ('delaunay' or 'kdtree')</span>
+<span class="sd">        Method for computing interpolation weights. 'delaunay' uses Delaunay</span>
+<span class="sd">        triangulation with barycentric coordinates (exact linear interpolation).</span>
+<span class="sd">        'kdtree' uses a KD-tree with inverse-distance weighting from the k</span>
+<span class="sd">        nearest neighbors (faster for 3D grids with extreme aspect ratios).</span>
+<span class="sd">        By default, 'delaunay'.</span>
+<span class="sd">    k : int, optional</span>
+<span class="sd">        Number of nearest neighbors for the 'kdtree' method.</span>
+<span class="sd">        Defaults to d+1 (same number of vertices as a simplex).</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -444,11 +552,14 @@
 <span class="sd">    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids</span>
 
 <span class="sd">    """</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uvw</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">weight_method</span><span class="o">=</span><span class="s1">'delaunay'</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span> <span class="o">=</span> <span class="n">uvw</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight_method</span> <span class="o">=</span> <span class="n">weight_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
 
         <span class="c1"># properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="kc">None</span>
@@ -459,7 +570,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Calculate the interpolation weights."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_method</span> <span class="o">==</span> <span class="s1">'kdtree'</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="n">interp_weights_kdtree</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uvw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span>
 
     <span class="nd">@property</span>
