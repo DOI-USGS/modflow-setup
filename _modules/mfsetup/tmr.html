@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr &mdash; modflow-setup 0.8.1.post5+g92f4049 documentation</title>
+  <title>mfsetup.tmr &mdash; modflow-setup 0.8.1.post13+gb38e857 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=cd1abb07"></script>
+      <script src="../../_static/documentation_options.js?v=11a012c1"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -582,6 +582,31 @@
             <span class="c1"># make the mask 3D</span>
             <span class="c1"># include extra layer for top and bottom edges of model</span>
             <span class="n">mask3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="c1"># exclude inactive parent cells from the interpolation source points</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">'mf6'</span><span class="p">:</span>
+                <span class="n">parent_idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span>
+                <span class="c1"># idomain may be None or scalar if not explicitly set (all cells active)</span>
+                <span class="k">if</span> <span class="n">parent_idomain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_idomain</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="c1"># pad idomain vertically to match the +2 layers in mask3d</span>
+                    <span class="c1"># (replicate top and bottom layers for the padding)</span>
+                    <span class="n">parent_idomain_padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                        <span class="n">parent_idomain</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'edge'</span>
+                        <span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># For MF6: idomain=0 is inactive, idomain=-1 is pass-through </span>
+                    <span class="c1"># (no valid heads)</span>
+                    <span class="n">mask3d</span> <span class="o">=</span> <span class="n">mask3d</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">parent_idomain_padded</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parent_ibound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span>
+                <span class="c1"># ibound may be None or scalar if not explicitly set (all cells active)</span>
+                <span class="k">if</span> <span class="n">parent_ibound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_ibound</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="c1"># pad ibound vertically to match the +2 layers in mask3d</span>
+                    <span class="c1"># (replicate top and bottom layers for the padding)</span>
+                    <span class="n">parent_ibound_padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                        <span class="n">parent_ibound</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'edge'</span>
+                        <span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># For MODFLOW-NWT: ibound=0 is inactive (HNOFLO), ibound=-1 </span>
+                    <span class="c1"># is constant-head (valid heads)</span>
+                    <span class="n">mask3d</span> <span class="o">=</span> <span class="n">mask3d</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">parent_ibound_padded</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span> <span class="o">=</span> <span class="n">mask3d</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">mask3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
