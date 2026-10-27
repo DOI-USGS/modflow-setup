@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic program structure and usage &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>Basic program structure and usage &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="_static/documentation_options.js?v=6a370f82"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -118,14 +118,14 @@
 <section id="setting-up-a-full-model">
 <h2>Setting up a full model<a class="headerlink" href="#setting-up-a-full-model" title="Link to this heading"></a></h2>
 <p>Instances of <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> and <code class="docutils literal notranslate"><span class="pre">MFnwtModel</span></code> can be created by setting up full model from a configuration file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="s1">&#39;config_file.yml&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="s1">'config_file.yml'</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="loading-a-model">
 <h2>Loading a model<a class="headerlink" href="#loading-a-model" title="Link to this heading"></a></h2>
 <p>Instances of <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> and <code class="docutils literal notranslate"><span class="pre">MFnwtModel</span></code> can also be created by loading an existing model that has a configuration file (usually this is a model created by modflow-setup):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;config_file.yml&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'config_file.yml'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In the latter case, the model is simply loaded with flopy and the <code class="docutils literal notranslate"><span class="pre">MF6model</span></code> instance created with the <code class="docutils literal notranslate"><span class="pre">cfg</span></code> dictionary populated from the configuration file, as well as other attributes specific to modflow-setup.</p>
@@ -133,7 +133,7 @@
 <section id="setting-up-individual-packages">
 <h2>Setting up individual packages<a class="headerlink" href="#setting-up-individual-packages" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">.setup_from_yaml</span></code> method above calls individual package setup methods for all of the packages specified in the configuration file. Alternatively, these package setup methods (with contain the suffix “setup”) can be called individually to make or remake a package.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;config_file.yml&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'config_file.yml'</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">setup_dis</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -153,7 +153,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

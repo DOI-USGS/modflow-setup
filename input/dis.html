@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Time and space discretization &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>Time and space discretization &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -135,7 +135,7 @@
 <p>Similar to other packages, input to the Discretization Package follows the structure of MODFLOW and Flopy. For MODFLOW 6 models, the “Options”, “Dimensions” and “Griddata” input blocks are represented as sub-blocks within the <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block. Within these blocks, model inputs can be specified directly, as long as they are consistent with the definition of the model grid. For example, if <code class="docutils literal notranslate"><span class="pre">nlay:</span> <span class="pre">2</span></code> is specified, then the model bottom must be specified as two scalar values, or two <code class="docutils literal notranslate"><span class="pre">nrow</span></code> x <code class="docutils literal notranslate"><span class="pre">ncol</span></code> arrays:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
 <span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">    </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
@@ -150,7 +150,7 @@
 <p>More commonly, only <code class="docutils literal notranslate"><span class="pre">delr</span></code> and <code class="docutils literal notranslate"><span class="pre">delc</span></code> are specified in the <code class="docutils literal notranslate"><span class="pre">griddata:</span></code> block, and geolocated, grid-independent raster surfaces are supplied in a <code class="docutils literal notranslate"><span class="pre">source_data</span></code> sub-block. Modflow-setup then interpolates values from these surfaces to the grid cell centers.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
 <span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">13</span>
 <span class="w">    </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
@@ -160,22 +160,22 @@
 <span class="w">    </span><span class="nt">delc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000.</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">top</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span><span class="w"> </span><span class="c1"># DEM file; path relative to setup script</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/meras_100m_dem.tif'</span><span class="w"> </span><span class="c1"># DEM file; path relative to setup script</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/vkbg_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group (top)</span>
-<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/ucaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer (top)</span>
-<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mccu_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit (top)</span>
-<span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mcaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer (top)</span>
-<span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lccu_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit (top)</span>
-<span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lcaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer (top)</span>
-<span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mwaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer (top)</span>
-<span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/lwaq_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer (top)</span>
-<span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/mdwy_surf.tif&#39;</span><span class="w"> </span><span class="c1"># Midway confining unit (top)</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/vkbg_surf.tif'</span><span class="w"> </span><span class="c1"># Vicksburg-Jackson Group (top)</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/ucaq_surf.tif'</span><span class="w"> </span><span class="c1"># Upper Claiborne aquifer (top)</span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/mccu_surf.tif'</span><span class="w"> </span><span class="c1"># Middle Claiborne confining unit (top)</span>
+<span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/mcaq_surf.tif'</span><span class="w"> </span><span class="c1"># Middle Claiborne aquifer (top)</span>
+<span class="w">        </span><span class="nt">6</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/lccu_surf.tif'</span><span class="w"> </span><span class="c1"># Lower Claiborne confining unit (top)</span>
+<span class="w">        </span><span class="nt">8</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/lcaq_surf.tif'</span><span class="w"> </span><span class="c1"># Lower Claiborne aquifer (top)</span>
+<span class="w">        </span><span class="nt">9</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/mwaq_surf.tif'</span><span class="w"> </span><span class="c1"># Middle Wilcox aquifer (top)</span>
+<span class="w">        </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/lwaq_surf.tif'</span><span class="w"> </span><span class="c1"># Lower Wilcox aquifer (top)</span>
+<span class="w">        </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/mdwy_surf.tif'</span><span class="w"> </span><span class="c1"># Midway confining unit (top)</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">    </span><span class="nt">idomain</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/active_area.gpkg|layername=active_area_poly&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/shps/active_area.gpkg|layername=active_area_poly'</span>
 <span class="w">  </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># layers less than this thickness are converted to vertical pass-through cells</span>
 <span class="w">  </span><span class="nt">drop_thin_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 </pre></div>
@@ -244,9 +244,9 @@
 </section>
 <section id="modflow-2005-ntw-input">
 <h3>MODFLOW-2005/NTW input<a class="headerlink" href="#modflow-2005-ntw-input" title="Link to this heading"></a></h3>
-<p>Specification of <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> blocks is the same for MODFLOW 6 and MODFLOW-2005 style models, except the latter wouldn’t contain an <code class="docutils literal notranslate"><span class="pre">idomain:</span></code> subblock. Specification of other inputs generally follows Flopy (for example, <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>). A <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block equivalent to the first example give would look like:</p>
+<p>Specification of <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> blocks is the same for MODFLOW 6 and MODFLOW-2005 style models, except the latter wouldn’t contain an <code class="docutils literal notranslate"><span class="pre">idomain:</span></code> subblock. Specification of other inputs generally follows Flopy (for example, <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>). A <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block equivalent to the first example give would look like:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
 <span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">  </span><span class="nt">nrow</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
 <span class="w">  </span><span class="nt">ncol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">35</span>
@@ -274,7 +274,7 @@
 <p>In MODFLOW 6, time discretization is specified at the simulation level, it its own Time Discretization (TDIS) Package. In MODFLOW-2005/NWT, time discretization is specified in the Discretization Package. Accordingly, in Modflow-setup, time discretization in specified in the appropriate package block for the model version.</p>
 <section id="specifying-stress-period-information-directly">
 <h3>Specifying stress period information directly<a class="headerlink" href="#specifying-stress-period-information-directly" title="Link to this heading"></a></h3>
-<p>Input to the DIS and TDIS packages follows the MODFLOW structure. For simple steady-state models, time discretization could be specified directly to the DIS or TDIS packages using there respective the Flopy inputs (<a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>; <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mftdis.html#flopy.mf6.modflow.mftdis.ModflowTdis" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowTdis</span></code></a>). This example from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> shows direct specification of stress period information to the Discretization Package:</p>
+<p>Input to the DIS and TDIS packages follows the MODFLOW structure. For simple steady-state models, time discretization could be specified directly to the DIS or TDIS packages using there respective the Flopy inputs (<a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfdis.html#flopy.modflow.mfdis.ModflowDis" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowDis</span></code></a>; <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mftdis.html#flopy.mf6.modflow.mftdis.ModflowTdis" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowTdis</span></code></a>). This example from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> shows direct specification of stress period information to the Discretization Package:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">  </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
@@ -282,13 +282,13 @@
 <span class="w">  </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">25</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1.5</span><span class="p p-Indicator">]</span>
 <span class="w">  </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">True</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">False</span><span class="p p-Indicator">]</span>
-<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify lenuni: 2</span>
-<span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span><span class="w">  </span><span class="c1"># alternatively, specify itmuni: 4</span>
-<span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2011-01-01&#39;</span>
+<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span><span class="w">  </span><span class="c1"># alternatively, specify lenuni: 2</span>
+<span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'days'</span><span class="w">  </span><span class="c1"># alternatively, specify itmuni: 4</span>
+<span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'2011-01-01'</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">top</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/dem10m.tif&#39;</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'plainfieldlakes/source_data/dem10m.tif'</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
 <span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span><span class="w"> </span><span class="c1"># bottom of layer zero in pfl_nwt is positioned at half the thickness of parent layer 1</span>
@@ -301,32 +301,32 @@
 </section>
 <section id="specifying-uniform-stress-periods-frequencies-by-group">
 <h3>Specifying uniform stress periods frequencies by group<a class="headerlink" href="#specifying-uniform-stress-periods-frequencies-by-group" title="Link to this heading"></a></h3>
-<p>For transient models, we often want to combine an initial steady-state period with subsequent transient periods, which may be of variable lengths. To facilitate this, Modflow-setup has a <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block that can in turn contain multiple sub-blocks representing stress period “groups”. Each group in the <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block contains information to generate one or more stress periods at a specified frequency and time datum (for example, months, days, every 7 days, etc.). Input to transient groups is based on the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v3.0.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a> function, where three of the four <code class="docutils literal notranslate"><span class="pre">start_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">freq</span></code> and <code class="docutils literal notranslate"><span class="pre">nper</span></code> parameters must be defined. For example, this sequence of blocks from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> generates an initial steady-state period, followed by a 9 year “spin-up” period between two dates, and then biannual stress periods spanning another specified set of sets. Time-step information is also specified, using the MODFLOW variable names.</p>
+<p>For transient models, we often want to combine an initial steady-state period with subsequent transient periods, which may be of variable lengths. To facilitate this, Modflow-setup has a <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block that can in turn contain multiple sub-blocks representing stress period “groups”. Each group in the <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block contains information to generate one or more stress periods at a specified frequency and time datum (for example, months, days, every 7 days, etc.). Input to transient groups is based on the <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html#pandas.date_range" title="(in pandas v3.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.date_range()</span></code></a> function, where three of the four <code class="docutils literal notranslate"><span class="pre">start_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date_time</span></code>, <code class="docutils literal notranslate"><span class="pre">freq</span></code> and <code class="docutils literal notranslate"><span class="pre">nper</span></code> parameters must be defined. For example, this sequence of blocks from the <a class="reference internal" href="../config-file-gallery.html#configuration-file-gallery"><span class="std std-ref">Configuration File Gallery</span></a> generates an initial steady-state period, followed by a 9 year “spin-up” period between two dates, and then biannual stress periods spanning another specified set of sets. Time-step information is also specified, using the MODFLOW variable names.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">tdis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
-<span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span>
+<span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'days'</span>
+<span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'1998-04-01'</span>
 <span class="w">  </span><span class="nt">perioddata</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># time discretization info can be specified directly under the perioddata key</span>
 <span class="w">    </span><span class="c1"># or in groups of stress periods that are discretized in a similar way</span>
 <span class="w">    </span><span class="nt">group 1</span><span class="p">:</span><span class="w"> </span><span class="c1"># initial steady-state period (steady specified under sto package)</span>
-<span class="w">      </span><span class="c1">#perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq.&quot;</span>
+<span class="w">      </span><span class="c1">#perlen: 1 # Specify perlen as an int or list of lengths in model units, or perlen=None and 3 of start_date, end_date, nper and/or freq."</span>
 <span class="w">      </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># &quot;steady&quot; can be entered here; otherwise the global entry specified in the sto package is used as the default</span>
+<span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># "steady" can be entered here; otherwise the global entry specified in the sto package is used as the default</span>
 <span class="w">      </span><span class="c1"># oc_saverecord: can also be specified by group here; otherwise the global entry specified in the oc package is used as the default</span>
 <span class="w">    </span><span class="nt">group 2</span><span class="p">:</span><span class="w"> </span><span class="c1"># single long period for spin-up of pumping</span>
-<span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span><span class="w">  </span><span class="c1"># can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.</span>
-<span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2007-04-01&#39;</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2007-03-31 would be the last day simulated)</span>
+<span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'1998-04-01'</span><span class="w">  </span><span class="c1"># can be specified by group, otherwise start_date_time for the model (under tdis: options) will be used.</span>
+<span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'2007-04-01'</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2007-03-31 would be the last day simulated)</span>
 <span class="w">      </span><span class="nt">nper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
 <span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="w">    </span><span class="nt">group 3</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2007-04-01&#39;</span>
-<span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2015-10-01&#39;</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2015-09-30 would be the last day simulated)</span>
-<span class="w">      </span><span class="nt">freq</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;6MS&#39;</span><span class="w"> </span><span class="c1"># same as argument to pandas.date_range; (see &quot;Offset Aliases&quot; at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)</span>
+<span class="w">      </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'2007-04-01'</span>
+<span class="w">      </span><span class="nt">end_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'2015-10-01'</span><span class="w">  </span><span class="c1"># model ends at midnight on this date (2015-09-30 would be the last day simulated)</span>
+<span class="w">      </span><span class="nt">freq</span><span class="p">:</span><span class="w"> </span><span class="s">'6MS'</span><span class="w"> </span><span class="c1"># same as argument to pandas.date_range; (see "Offset Aliases" at https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)</span>
 <span class="w">      </span><span class="nt">nstp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 <span class="w">      </span><span class="nt">tsmult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
 <span class="w">      </span><span class="nt">steady</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
@@ -339,16 +339,16 @@
 <p>In some model applications, irregular stress periods may be needed that would require many groups to be specifed using the above <code class="docutils literal notranslate"><span class="pre">perioddata:</span></code> sub-block. In these cases, a stress period data table can be pre-defined and input as a CSV file:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">tdis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
-<span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1998-04-01&#39;</span>
+<span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'days'</span>
+<span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'1998-04-01'</span>
 <span class="w">  </span><span class="nt">perioddata</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/tables/stress_period_data.csv&#39;</span>
-<span class="w">      </span><span class="nt">start_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="w">      </span><span class="nt">steady_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;steady&#39;</span>
-<span class="w">      </span><span class="nt">nstp_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nstp&#39;</span>
-<span class="w">      </span><span class="nt">tsmult_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tsmult&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/tables/stress_period_data.csv'</span>
+<span class="w">      </span><span class="nt">start_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'start_datetime'</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'end_datetime'</span>
+<span class="w">      </span><span class="nt">steady_column</span><span class="p">:</span><span class="w"> </span><span class="s">'steady'</span>
+<span class="w">      </span><span class="nt">nstp_column</span><span class="p">:</span><span class="w"> </span><span class="s">'nstp'</span>
+<span class="w">      </span><span class="nt">tsmult_column</span><span class="p">:</span><span class="w"> </span><span class="s">'tsmult'</span>
 </pre></div>
 </div>
 <p>An example of a valid table is shown below. Note that only the columns listed in the above <code class="docutils literal notranslate"><span class="pre">csvfile:</span></code> block are actually needed. <code class="docutils literal notranslate"><span class="pre">perlen</span></code> and <code class="docutils literal notranslate"><span class="pre">time</span></code> are calculated internally by Modflow-setup; output control (<code class="docutils literal notranslate"><span class="pre">oc</span></code>) can be specified here or in the <code class="docutils literal notranslate"><span class="pre">oc:</span></code> package block.</p>
@@ -595,7 +595,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pleasant Lake Example &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>Pleasant Lake Example &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -16,7 +16,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -138,7 +138,7 @@
 needed, to simulate farfield water-use activity (chiefly irrigated agriculture) in order to delineate a limit of connection, as well as to incorporate distant hydrologic boundaries. Adopting a fine enough discretization for the lake detail throughout the farfield would have resulted in a model with more cells than could be practically managed. To mitigate this, three models were combined: a large regional model built with MODFLOW-NWT (Niswonger et al. 2011), an intermediate MODFLOW 6 model inset
 within the regional model to simulate the irrigated agriculture area, and a refined MODFLOW 6 inset model (nested within the intermediate model) to simulate the lake. Regional groundwater flow and the effects of distant boundaries were simulated with the MODFLOW-NWT model, which was coupled sequentially (one-way) to the MODFLOW 6 models through time-varying specified head boundaries along the intermediate MODFLOW 6 model perimeter. The two MODFLOW 6 models were coupled dynamically (both ways)
 within the groundwater flow solution, allowing for feedback between the models. Estimates of groundwater recharge for the MODFLOW models were provided by a soil water balance code (SWB; Westenbroek et al 2018) simulation that could consider alternative assumptions of climate and land use. Net infiltration estimates from the SWB model were conveyed to the Recharge Packages in the MODFLOW models using the NetCDF functionality in Modflow-setup.</p>
-<p><img alt="54a53bf84156475888c7f1077fbb61f0" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
+<p><img alt="9f4961d77e224f45b22901873345f905" src="https://github.com/aleaf/modflow-setup/blob/develop/docs/source/_static/fig1_pleasant_lake_model.jpg?raw=true" /></p>
 <p><strong>Figure 1</strong>: The full Pleasant Lake model domain with location map, showing the relationship between the regional, intermediate and LGR inset models, as well as the irrigation wells considered.</p>
 <p>Most details of the Fienen et al (2021) model are included here, but to reduce file sizes and execution time, a smaller Modflow-6 simulation domain is used. The smaller domain is for illustration purposes only, and is not intended to be adequate for representing pumping impacts or providing a sufficient distance to the perimeter boundaries.</p>
 <ul class="simple">
@@ -192,7 +192,7 @@ within the groundwater flow solution, allowing for feedback between the models. 
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%capture</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="s1">&#39;pleasant_lgr_parent.yml&#39;</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="s1">'pleasant_lgr_parent.yml'</span><span class="p">)</span>
 <span class="n">m</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -226,7 +226,7 @@ Bounds: (np.float64(553400.0), np.float64(558400.0), np.float64(387800.0), np.fl
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">&#39;plsnt_lgr_inset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">'plsnt_lgr_inset'</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span>
 </pre></div>
 </div>
 </div>
@@ -274,8 +274,8 @@ Bounds: (np.float64(554200.0), np.float64(557600.0), np.float64(388800.0), np.fl
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">&#39;postproc/shps/plsnt_lgr_parent_grid.shp&#39;</span><span class="p">)</span>
-<span class="n">m</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">&#39;plsnt_lgr_inset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">&#39;postproc/shps/plsnt_lgr_inset_grid.shp&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">'postproc/shps/plsnt_lgr_parent_grid.shp'</span><span class="p">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">'plsnt_lgr_inset'</span><span class="p">]</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">'postproc/shps/plsnt_lgr_inset_grid.shp'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -285,11 +285,11 @@ Bounds: (np.float64(554200.0), np.float64(557600.0), np.float64(388800.0), np.fl
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 creating shapely Polygons of grid cells...
-finished in 0.02s
+finished in 0.00s
 
 writing postproc/shps/plsnt_lgr_parent_grid.shp... Done
 creating shapely Polygons of grid cells...
-finished in 0.10s
+finished in 0.13s
 
 writing postproc/shps/plsnt_lgr_inset_grid.shp... Done
 </pre></div></div>
@@ -313,7 +313,7 @@ writing postproc/shps/plsnt_lgr_inset_grid.shp... Done
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%capture</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="s1">&#39;pleasant_lgr_parent.yml&#39;</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="s1">'pleasant_lgr_parent.yml'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -332,7 +332,7 @@ writing postproc/shps/plsnt_lgr_inset_grid.shp... Done
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Pleasant Lake test case version 0.1.post0+g8571531
+Pleasant Lake test case version 0.1.post1+g8ecb076
 Parent model: /home/runner/work/modflow-setup/modflow-setup/examples/data/pleasant/pleasant
 5 layer(s), 25 row(s), 25 column(s)
 delr: [200.00...200.00] undefined
@@ -374,7 +374,7 @@ dict_keys([&#39;metadata&#39;, &#39;simulation&#39;, &#39;model&#39;, &#39;paren
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s1">'dis'</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -428,7 +428,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.8.1
+{&#39;plsnt_lgr_inset&#39;: plsnt_lgr_inset model version 0.8.1.post1+g8ecb076
  Parent model: ./plsnt_lgr_parent
  5 layer(s), 75 row(s), 85 column(s)
  delr: [40.00...40.00] undefined
@@ -455,7 +455,7 @@ defaultdict(dict,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inset</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">&#39;plsnt_lgr_inset&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inset</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">'plsnt_lgr_inset'</span><span class="p">]</span>
 
 <span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">extent</span>
 <span class="n">layer</span> <span class="o">=</span> <span class="mi">0</span>
@@ -464,15 +464,15 @@ defaultdict(dict,
 <span class="n">parent_mv</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">PlotMapView</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">)</span>
 <span class="n">inset_mv</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">PlotMapView</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">inset</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">)</span>
 
-<span class="n">vconn</span> <span class="o">=</span> <span class="n">inset</span><span class="o">.</span><span class="n">lak</span><span class="o">.</span><span class="n">connectiondata</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">inset</span><span class="o">.</span><span class="n">lak</span><span class="o">.</span><span class="n">connectiondata</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="s1">&#39;claktype&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;vertical&#39;</span><span class="p">]</span>
-<span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">cellids_to_kij</span><span class="p">(</span><span class="n">vconn</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">])</span>
+<span class="n">vconn</span> <span class="o">=</span> <span class="n">inset</span><span class="o">.</span><span class="n">lak</span><span class="o">.</span><span class="n">connectiondata</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">inset</span><span class="o">.</span><span class="n">lak</span><span class="o">.</span><span class="n">connectiondata</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="s1">'claktype'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'vertical'</span><span class="p">]</span>
+<span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">cellids_to_kij</span><span class="p">(</span><span class="n">vconn</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">])</span>
 <span class="n">lakeconnections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">inset</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">inset</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
 <span class="n">lakeconnections</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">lakeconnections</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">lakeconnections</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">lakeconnections</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">qmi</span> <span class="o">=</span> <span class="n">inset_mv</span><span class="o">.</span><span class="n">plot_array</span><span class="p">(</span><span class="n">lakeconnections</span><span class="p">)</span>
 
-<span class="c1">#inset_mv.plot_bc(&#39;LAK&#39;, color=&#39;navy&#39;)</span>
-<span class="c1">#parent_mv.plot_bc(&#39;WEL_0&#39;, color=&#39;red&#39;)</span>
+<span class="c1">#inset_mv.plot_bc('LAK', color='navy')</span>
+<span class="c1">#parent_mv.plot_bc('WEL_0', color='red')</span>
 
 <span class="n">lcp</span> <span class="o">=</span> <span class="n">parent_mv</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">lci</span> <span class="o">=</span> <span class="n">inset_mv</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -489,7 +489,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7fbf7766a510&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f7798e13a10&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -509,15 +509,15 @@ defaultdict(dict,
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 <span class="n">xs_line</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">553000</span><span class="p">,</span> <span class="mi">390200</span><span class="p">),</span> <span class="p">(</span><span class="mi">558000</span><span class="p">,</span> <span class="mi">390200</span><span class="p">)]</span>
 <span class="n">xs</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">PlotCrossSection</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
-                                <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="n">xs_line</span><span class="p">},</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                                <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s2">"line"</span><span class="p">:</span> <span class="n">xs_line</span><span class="p">},</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                                 <span class="n">geographic_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">lc</span> <span class="o">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">xs2</span> <span class="o">=</span> <span class="n">flopy</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">PlotCrossSection</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">inset</span><span class="p">,</span>
-                                <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="n">xs_line</span><span class="p">},</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                                <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s2">"line"</span><span class="p">:</span> <span class="n">xs_line</span><span class="p">},</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                                 <span class="n">geographic_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">lc</span> <span class="o">=</span> <span class="n">xs2</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">190</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;../../docs/source/_static/pleasant_lgr_xsection.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">'../../docs/source/_static/pleasant_lgr_xsection.png'</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">'tight'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -580,7 +580,7 @@ INFORMATION: maxbound in (&#39;&#39;, &#39;wel&#39;, &#39;dimensions&#39;) chang
     writing package obs_1...
 SFRmaker v. 0.14.0
 
-Running Flopy v. 3.10.0 diagnostics...
+Running Flopy v. 3.11.0 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -647,7 +647,7 @@ writing /home/runner/work/modflow-setup/modflow-setup/examples/pleasant_lgr/post
 No non-zero values of flow to export!
 SFRmaker v. 0.14.0
 
-Running Flopy v. 3.10.0 diagnostics...
+Running Flopy v. 3.11.0 diagnostics...
 passed.
 
 Checking for continuity in segment and reach numbering...
@@ -761,7 +761,7 @@ and distribution information.
 
  MODFLOW runs in SEQUENTIAL mode
 
- Run start date and time (yyyy/mm/dd hh:mm:ss): 2026/08/07 16:57:41
+ Run start date and time (yyyy/mm/dd hh:mm:ss): 2026/10/27 13:31:28
 
  Writing simulation list file: mfsim.lst
  Using Simulation name file: mfsim.nam
@@ -780,8 +780,8 @@ and distribution information.
     Solving:  Stress period:    12    Time step:     1
     Solving:  Stress period:    13    Time step:     1
 
- Run end date and time (yyyy/mm/dd hh:mm:ss): 2026/08/07 16:57:46
- Elapsed run time:  4.671 Seconds
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2026/10/27 13:31:31
+ Elapsed run time:  2.528 Seconds
 
  Normal termination of simulation.
 </pre></div></div>
@@ -802,9 +802,9 @@ and distribution information.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tmr_parent_headsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="s1">&#39;../data/pleasant/pleasant.hds&#39;</span><span class="p">)</span>
-<span class="n">lgr_parent_headsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="s1">&#39;plsnt_lgr_parent.hds&#39;</span><span class="p">)</span>
-<span class="n">lgr_inset_headsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="s1">&#39;plsnt_lgr_inset.hds&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tmr_parent_headsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="s1">'../data/pleasant/pleasant.hds'</span><span class="p">)</span>
+<span class="n">lgr_parent_headsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="s1">'plsnt_lgr_parent.hds'</span><span class="p">)</span>
+<span class="n">lgr_inset_headsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="s1">'plsnt_lgr_inset.hds'</span><span class="p">)</span>
 
 <span class="c1"># read the head results for the last stress period</span>
 <span class="n">kper</span> <span class="o">=</span> <span class="mi">12</span>
@@ -816,8 +816,8 @@ and distribution information.
 <span class="n">parent_wt</span> <span class="o">=</span> <span class="n">get_water_table</span><span class="p">(</span><span class="n">lgr_parent_hds</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mf">1e30</span><span class="p">)</span>
 
 <span class="c1"># put in the lake level (not included in head output)</span>
-<span class="n">lake_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;lake1.obs.csv&#39;</span><span class="p">)</span>
-<span class="n">stage</span> <span class="o">=</span> <span class="n">lake_results</span><span class="p">[</span><span class="s1">&#39;STAGE&#39;</span><span class="p">][</span><span class="n">kper</span><span class="p">]</span>
+<span class="n">lake_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'lake1.obs.csv'</span><span class="p">)</span>
+<span class="n">stage</span> <span class="o">=</span> <span class="n">lake_results</span><span class="p">[</span><span class="s1">'STAGE'</span><span class="p">][</span><span class="n">kper</span><span class="p">]</span>
 <span class="n">inset_wt</span><span class="p">[</span><span class="n">inset</span><span class="o">.</span><span class="n">lakarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">stage</span>
 </pre></div>
 </div>
@@ -865,9 +865,9 @@ and distribution information.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.labelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.labelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.labelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'axes.labelsize'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'xtick.labelsize'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'ytick.labelsize'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
 
 <span class="n">layer</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">))</span>
@@ -881,21 +881,21 @@ and distribution information.
 <span class="n">parent_mv</span><span class="o">.</span><span class="n">plot_array</span><span class="p">(</span><span class="n">parent_bcs</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 <span class="n">inset_mv</span><span class="o">.</span><span class="n">plot_array</span><span class="p">(</span><span class="n">inset_bcs</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
-<span class="c1">#bdlknc_values = inset.lak.connectiondata.array[&#39;bedleak&#39;]</span>
+<span class="c1">#bdlknc_values = inset.lak.connectiondata.array['bedleak']</span>
 <span class="n">conn</span> <span class="o">=</span> <span class="n">inset</span><span class="o">.</span><span class="n">lak</span><span class="o">.</span><span class="n">connectiondata</span><span class="o">.</span><span class="n">array</span>
-<span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">cellids_to_kij</span><span class="p">(</span><span class="n">conn</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">])</span>
+<span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">cellids_to_kij</span><span class="p">(</span><span class="n">conn</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">])</span>
 <span class="n">bdlknc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">inset</span><span class="o">.</span><span class="n">nlay</span><span class="p">,</span> <span class="n">inset</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span> <span class="n">inset</span><span class="o">.</span><span class="n">ncol</span><span class="p">))</span>
-<span class="n">bdlknc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="s1">&#39;bedleak&#39;</span><span class="p">]</span>
+<span class="n">bdlknc</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="s1">'bedleak'</span><span class="p">]</span>
 <span class="n">bdlknc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">bdlknc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">bdlknc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">bdlknc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">bdlknc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">inset_mv</span><span class="o">.</span><span class="n">plot_array</span><span class="p">(</span><span class="n">bdlknc</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Blues&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">inset_mv</span><span class="o">.</span><span class="n">plot_array</span><span class="p">(</span><span class="n">bdlknc</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">'Blues'</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 
 <span class="c1"># contour the combined inset/parent head results</span>
 <span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">290</span><span class="p">,</span> <span class="mi">315</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">ctr</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">Xi</span><span class="p">,</span> <span class="n">Yi</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="n">levels</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ctr</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">Xi</span><span class="p">,</span> <span class="n">Yi</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="n">levels</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">'b'</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">ctr</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">inline_spacing</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span>
-    <span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)])</span>
+    <span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s2">"w"</span><span class="p">)])</span>
 
 <span class="c1"># plot the grid cell edges</span>
 <span class="n">lcp</span> <span class="o">=</span> <span class="n">parent_mv</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
@@ -904,46 +904,46 @@ and distribution information.
 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Northing, in Wisconsin Transverse Mercator (meters)&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Easting, in Wisconsin Transverse Mercator (meters)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'Northing, in Wisconsin Transverse Mercator (meters)'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'Easting, in Wisconsin Transverse Mercator (meters)'</span><span class="p">)</span>
 
-<span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">555600</span><span class="p">,</span> <span class="mi">390450</span><span class="p">,</span> <span class="s1">&#39;Pleasant</span><span class="se">\n</span><span class="s1">Lake&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;DarkBlue&#39;</span><span class="p">,</span>
-        <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontstyle</span><span class="o">=</span><span class="s1">&#39;italic&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Serif&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">202</span><span class="p">)</span>
-<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">556400</span><span class="p">,</span> <span class="mi">391000</span><span class="p">,</span> <span class="s1">&#39;Chaffee Creek (SFR)&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;DarkGreen&#39;</span><span class="p">,</span>
-        <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontstyle</span><span class="o">=</span><span class="s1">&#39;italic&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Serif&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="n">txt</span><span class="o">.</span><span class="n">set_path_effects</span><span class="p">([</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)])</span>
-<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">556700</span><span class="p">,</span> <span class="mi">388900</span><span class="p">,</span> <span class="s1">&#39;Tagatz</span><span class="se">\n</span><span class="s1">Creek (SFR)&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;DarkGreen&#39;</span><span class="p">,</span>
-        <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontstyle</span><span class="o">=</span><span class="s1">&#39;italic&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Serif&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="n">txt</span><span class="o">.</span><span class="n">set_path_effects</span><span class="p">([</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">555600</span><span class="p">,</span> <span class="mi">390450</span><span class="p">,</span> <span class="s1">'Pleasant</span><span class="se">\n</span><span class="s1">Lake'</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">'left'</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">'top'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'DarkBlue'</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontstyle</span><span class="o">=</span><span class="s1">'italic'</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">'Serif'</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">202</span><span class="p">)</span>
+<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">556400</span><span class="p">,</span> <span class="mi">391000</span><span class="p">,</span> <span class="s1">'Chaffee Creek (SFR)'</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">'left'</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">'top'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'DarkGreen'</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontstyle</span><span class="o">=</span><span class="s1">'italic'</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">'Serif'</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">txt</span><span class="o">.</span><span class="n">set_path_effects</span><span class="p">([</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">'w'</span><span class="p">)])</span>
+<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">556700</span><span class="p">,</span> <span class="mi">388900</span><span class="p">,</span> <span class="s1">'Tagatz</span><span class="se">\n</span><span class="s1">Creek (SFR)'</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">'left'</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">'top'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'DarkGreen'</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fontstyle</span><span class="o">=</span><span class="s1">'italic'</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">'Serif'</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">txt</span><span class="o">.</span><span class="n">set_path_effects</span><span class="p">([</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">'w'</span><span class="p">)])</span>
 
-<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;Littoral zone&quot;</span><span class="p">,</span>
-            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">555450</span><span class="p">,</span> <span class="mi">390100</span><span class="p">),</span> <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
-            <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">555050</span><span class="p">,</span><span class="mi">390100</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
-                  <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
-            <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-|&gt;&quot;</span><span class="p">,</span>
-                            <span class="n">connectionstyle</span><span class="o">=</span><span class="s2">&quot;arc3&quot;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">),</span>
-            <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)],</span>
+<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">"Littoral zone"</span><span class="p">,</span>
+            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">555450</span><span class="p">,</span> <span class="mi">390100</span><span class="p">),</span> <span class="n">xycoords</span><span class="o">=</span><span class="s1">'data'</span><span class="p">,</span>
+            <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">555050</span><span class="p">,</span><span class="mi">390100</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s1">'data'</span><span class="p">,</span>
+                  <span class="n">ha</span><span class="o">=</span><span class="s1">'right'</span><span class="p">,</span>
+            <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">"-|&gt;"</span><span class="p">,</span>
+                            <span class="n">connectionstyle</span><span class="o">=</span><span class="s2">"arc3"</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">'k'</span><span class="p">),</span>
+            <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">'w'</span><span class="p">)],</span>
             <span class="n">zorder</span><span class="o">=</span><span class="mi">203</span>
             <span class="p">)</span>
 <span class="n">txt</span><span class="o">.</span><span class="n">arrow_patch</span><span class="o">.</span><span class="n">set_path_effects</span><span class="p">([</span>
-    <span class="n">patheffects</span><span class="o">.</span><span class="n">Stroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">),</span>
+    <span class="n">patheffects</span><span class="o">.</span><span class="n">Stroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s2">"w"</span><span class="p">),</span>
     <span class="n">patheffects</span><span class="o">.</span><span class="n">Normal</span><span class="p">()])</span>
 
-<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;Profundal zone&quot;</span><span class="p">,</span>
-            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">555600</span><span class="p">,</span> <span class="mi">390100</span><span class="p">),</span> <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
-            <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">555800</span><span class="p">,</span><span class="mi">389500</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
-                  <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
-            <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-|&gt;&quot;</span><span class="p">,</span>
-                            <span class="n">connectionstyle</span><span class="o">=</span><span class="s2">&quot;arc3&quot;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">),</span>
-            <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)],</span>
+<span class="n">txt</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">"Profundal zone"</span><span class="p">,</span>
+            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">555600</span><span class="p">,</span> <span class="mi">390100</span><span class="p">),</span> <span class="n">xycoords</span><span class="o">=</span><span class="s1">'data'</span><span class="p">,</span>
+            <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">555800</span><span class="p">,</span><span class="mi">389500</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s1">'data'</span><span class="p">,</span>
+                  <span class="n">ha</span><span class="o">=</span><span class="s1">'right'</span><span class="p">,</span>
+            <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">"-|&gt;"</span><span class="p">,</span>
+                            <span class="n">connectionstyle</span><span class="o">=</span><span class="s2">"arc3"</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">'k'</span><span class="p">),</span>
+            <span class="n">path_effects</span><span class="o">=</span><span class="p">[</span><span class="n">patheffects</span><span class="o">.</span><span class="n">withStroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">'w'</span><span class="p">)],</span>
             <span class="n">zorder</span><span class="o">=</span><span class="mi">203</span>
             <span class="p">)</span>
 <span class="n">txt</span><span class="o">.</span><span class="n">arrow_patch</span><span class="o">.</span><span class="n">set_path_effects</span><span class="p">([</span>
-    <span class="n">patheffects</span><span class="o">.</span><span class="n">Stroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">),</span>
+    <span class="n">patheffects</span><span class="o">.</span><span class="n">Stroke</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s2">"w"</span><span class="p">),</span>
     <span class="n">patheffects</span><span class="o">.</span><span class="n">Normal</span><span class="p">()])</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;postproc/pdfs/figure_2.pdf&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">'postproc/pdfs/figure_2.pdf'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -962,7 +962,7 @@ and distribution information.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">m</span><span class="p">,</span> <span class="n">inset</span><span class="p">:</span>
-    <span class="n">mfexport</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;postproc/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
+    <span class="n">mfexport</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="sa">f</span><span class="s1">'postproc/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">/'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1063,11 +1063,7 @@ wrote postproc/plsnt_lgr_parent/rasters/recharge_per11.tif
 wrote postproc/plsnt_lgr_parent/rasters/recharge_per12.tif
 
 chd_0 package...
-writing postproc/plsnt_lgr_parent/shps/chd0_stress_period_data.shp... Done
-head:
-boundname:
-Warning, variable: boundname
-Export of non-period data from transientlists not implemented!
+skipped, not implemented yet
 
 obs_0 package...
 skipped, not implemented yet
@@ -1076,11 +1072,7 @@ sfr_0 package...
 writing postproc/plsnt_lgr_parent/shps/plsnt_lgr_parent.sfr.shp... Done
 
 wel_0 package...
-writing postproc/plsnt_lgr_parent/shps/wel0_stress_period_data.shp... Done
-q:
-boundname:
-Warning, variable: boundname
-Export of non-period data from transientlists not implemented!
+skipped, not implemented yet
 
 obs_1 package...
 skipped, not implemented yet
@@ -1188,7 +1180,7 @@ writing postproc/plsnt_lgr_inset/shps/obs1_stress_period_data.shp... Done
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">m</span><span class="p">,</span> <span class="n">inset</span><span class="p">:</span>
-    <span class="n">mfexport</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;postproc/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
+    <span class="n">mfexport</span><span class="o">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="sa">f</span><span class="s1">'postproc/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">/'</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1219,7 +1211,7 @@ skipped, not implemented yet
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

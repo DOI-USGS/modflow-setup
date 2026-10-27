@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>Specifying boundary conditions with the ‘basic’ MODFLOW stress packages &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -151,10 +151,10 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p>Example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
 <span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span>
-<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">'GNIS_NAME'</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -184,18 +184,18 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p>Example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tables/chd_heads.csv'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'comid'</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'start_datetime'</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'end_datetime'</span>
+<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">'head'</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span>
 <span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
 <span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span>
 <span class="w">          </span><span class="c1"># for the initial steady state</span>
-<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span>
-<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="c1"># (default of 'mean' uses all times in input data)</span>
+<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'mean'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2000-01-01'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2017-12-31'</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span>
 <span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span>
 </pre></div>
@@ -223,10 +223,10 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 </ul>
 <p>Example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/meras_100m_dem.tif'</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span>
-<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span>
+<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">'min'</span>
 <span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span>
 </pre></div>
 </div>
@@ -276,7 +276,7 @@ the CHD, DRN, GHB, RCH, RIV and WEL packages. The EVT package is not currently s
 <p>Setting up a Constant Head package with perimeter fluxes from a parent model (Note: an additional <code class="docutils literal notranslate"><span class="pre">source_data</span></code> block can be added to represent other features inside of the model perimeter, as below):</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/pfl.hds&#39;</span>
+<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">'plainfieldlakes/pfl.hds'</span>
 </pre></div>
 </div>
 <p>Setting up a Constant Head package from features specified in a shapefile,
@@ -286,23 +286,23 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span><span class="w"> </span><span class="c1"># shapefile attribute field with include_ids:</span>
 <span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046162</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># features used to form the boundary</span>
-<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">'GNIS_NAME'</span>
 <span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tables/chd_heads.csv'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'comid'</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'start_datetime'</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'end_datetime'</span>
+<span class="w">      </span><span class="nt">head_column</span><span class="p">:</span><span class="w"> </span><span class="s">'head'</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">      </span><span class="c1"># how heads will be aggregated to the model stress periods</span>
 <span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
 <span class="w">          </span><span class="c1"># apply the mean heads across a specified time period</span>
 <span class="w">          </span><span class="c1"># for the initial steady state</span>
-<span class="w">          </span><span class="c1"># (default of &#39;mean&#39; uses all times in input data)</span>
-<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="c1"># (default of 'mean' uses all times in input data)</span>
+<span class="w">          </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'mean'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2000-01-01'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2017-12-31'</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mean</span><span class="w">  </span><span class="c1"># apply the mean heads for the time period of s.p. 1</span>
 <span class="w">          </span><span class="c1">#  the last statistic specified (mean) will also be applied to subsequent periods</span>
 </pre></div>
@@ -333,15 +333,15 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span>
 <span class="w">      </span><span class="c1"># Include all features in the above shapefile,</span>
 <span class="w">      </span><span class="c1"># except those associated with these COMIDs</span>
 <span class="w">      </span><span class="nt">exclude_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046226</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046238</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">17953939</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046140</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">18046162</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span>
 <span class="w">    </span><span class="nt">elev</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/meras_100m_dem.tif'</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span><span class="w">  </span><span class="c1"># in model units</span>
 </pre></div>
 </div>
@@ -371,8 +371,8 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span>
 <span class="w">      </span><span class="c1"># Note: to include all features in a shapefile,</span>
 <span class="w">      </span><span class="c1"># simply omit the include_ids: key</span>
 <span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">18046230</span><span class="p p-Indicator">]</span>
@@ -387,14 +387,14 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="c1"># a csvfile defines transient head values</span>
 <span class="w">    </span><span class="c1"># a raster defines static but spatially varying conductance</span>
 <span class="w">    </span><span class="nt">csvfile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tables/chd_heads.csv&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;comid&#39;</span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="w">      </span><span class="nt">bhead_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;head&#39;</span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tables/chd_heads.csv'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'comid'</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'start_datetime'</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'end_datetime'</span>
+<span class="w">      </span><span class="nt">bhead_column</span><span class="p">:</span><span class="w"> </span><span class="s">'head'</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">      </span><span class="c1"># with no period_stats: block, aggregation defaults</span>
-<span class="w">      </span><span class="c1"># to &#39;mean&#39; for each stress period</span>
+<span class="w">      </span><span class="c1"># to 'mean' for each stress period</span>
 <span class="w">    </span><span class="nt">cond</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># note: a single global value could also be specified here,</span>
 <span class="w">      </span><span class="c1"># as for the Drain Package</span>
@@ -431,17 +431,17 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../mfsetup/tests/data/shellmound/shps/waterbodies.shp'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span>
 <span class="w">      </span><span class="nt">include_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">17953939</span><span class="p p-Indicator">]</span>
 <span class="w">      </span><span class="c1"># option to include feature names from the shapefile</span>
 <span class="w">      </span><span class="c1"># as Modflow boundnames</span>
-<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
+<span class="w">      </span><span class="nt">boundname_column</span><span class="p">:</span><span class="w"> </span><span class="s">'GNIS_NAME'</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/rasters/meras_100m_dem.tif&#39;</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/rasters/meras_100m_dem.tif'</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="w">      </span><span class="c1"># zonal statistic to use in sampling elevations in above GeoTIFF to grid</span>
-<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;min&#39;</span>
+<span class="w">      </span><span class="nt">stat</span><span class="p">:</span><span class="w"> </span><span class="s">'min'</span>
 <span class="w">    </span><span class="nt">cond</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.e+3</span>
 <span class="w">  </span><span class="nt">mfsetup_options</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">default_rbot_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span>
@@ -453,16 +453,16 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/shps/flowlines.shp&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
-<span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
-<span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
-<span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
-<span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
-<span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
-<span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
-<span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/shps/flowlines.shp'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.Lines.from_shapefile</span>
+<span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">'tocomid'</span>
+<span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">'width1'</span>
+<span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">'width2'</span>
+<span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">'elevupsmo'</span>
+<span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">'elevdnsmo'</span>
+<span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">'GNIS_NAME'</span>
+<span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span><span class="w">  </span><span class="c1"># units of source data</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span><span class="w">  </span><span class="c1"># units of source data</span>
 <span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># convert reaches corresponding to these LineString identifiers</span>
 <span class="w">    </span><span class="c1"># (in the flowlines id_column), and all downstream reaches</span>
@@ -524,13 +524,13 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">    </span><span class="nt">print_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">    </span><span class="nt">auto_flow_reduce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="nt">auto_flow_reduce_csv</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;wel_auto_flow_reduce.csv&#39;</span>
+<span class="w">    </span><span class="nt">auto_flow_reduce_csv</span><span class="p">:</span><span class="w"> </span><span class="s">'wel_auto_flow_reduce.csv'</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">csvfiles</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># pumping input from CSV files</span>
-<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="w">                  </span><span class="s">&#39;shellmound/tables/iwum_m3_6M.csv&#39;</span><span class="p p-Indicator">,</span>
-<span class="w">                  </span><span class="s">&#39;shellmound/tables/sp69_pumping_from_meras21_m3.csv&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'shellmound/tables/1998-2007_avg_pumping_from_meras21_m3.csv'</span><span class="p p-Indicator">,</span>
+<span class="w">                  </span><span class="s">'shellmound/tables/iwum_m3_6M.csv'</span><span class="p p-Indicator">,</span>
+<span class="w">                  </span><span class="s">'shellmound/tables/sp69_pumping_from_meras21_m3.csv'</span><span class="p p-Indicator">]</span>
 <span class="w">      </span><span class="c1"># Note: since default names are used for x_col, y_col,</span>
 <span class="w">      </span><span class="c1"># screen_top_col and screen_botm_col;</span>
 <span class="w">      </span><span class="c1"># these entries are not needed, but are shown here</span>
@@ -539,21 +539,21 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">      </span><span class="nt">y_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">y</span><span class="w">  </span><span class="c1"># default y_col name</span>
 <span class="w">      </span><span class="nt">screen_top_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">screen_top</span><span class="w">  </span><span class="c1"># default screen_top name</span>
 <span class="w">      </span><span class="nt">screen_botm_col</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">screen_botm</span><span class="w">  </span><span class="c1"># default screen_botm name</span>
-<span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
-<span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;flux_m3&#39;</span>
-<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;start_datetime&#39;</span>
+<span class="w">      </span><span class="nt">volume_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'days'</span>
+<span class="w">      </span><span class="nt">data_column</span><span class="p">:</span><span class="w"> </span><span class="s">'flux_m3'</span>
+<span class="w">      </span><span class="nt">datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'start_datetime'</span>
 <span class="w">      </span><span class="c1"># end datetimes only for input data that needs upsampling;</span>
 <span class="w">      </span><span class="c1"># see https://aleaf.github.io/modflow-setup/api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period</span>
-<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;end_datetime&#39;</span>
-<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;node&#39;</span>
+<span class="w">      </span><span class="nt">end_datetime_column</span><span class="p">:</span><span class="w"> </span><span class="s">'end_datetime'</span>
+<span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'node'</span>
 <span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w">  </span><span class="c1"># how fluxes will be distributed across model stress periods</span>
 <span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span><span class="w">  </span><span class="c1"># no wells simulated in initial period</span>
-<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># mean pumping rate for period 1 and subsequent periods</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">'mean'</span><span class="w">  </span><span class="c1"># mean pumping rate for period 1 and subsequent periods</span>
 <span class="w">      </span><span class="nt">vertical_flux_distribution</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">across_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># False to put fluxes in one layer</span>
 <span class="w">        </span><span class="c1"># put wells in layer with thickest or most transmissive intersection with well open interval</span>
-<span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;transmissivity&#39;</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span>
+<span class="w">        </span><span class="nt">distribute_by</span><span class="p">:</span><span class="w"> </span><span class="s">'transmissivity'</span><span class="w">  </span><span class="c1"># thickness or transmissivity</span>
 <span class="w">        </span><span class="nt">minimum_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.</span><span class="w">  </span><span class="c1"># layers must be at 10 length units thick to have a well;</span>
 <span class="w">        </span><span class="c1"># (any dropped wells would be recorded in shellmound_dropped_wells.csv)</span>
 </pre></div>
@@ -569,12 +569,12 @@ and time-varing heads specified in a csvfile:</p>
 <div><blockquote>
 <div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
-<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span>
-<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/gis/irregular_boundary.shp'</span>
+<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/shellmound.cbc'</span><span class="w">  </span><span class="c1"># needed for the perimeter boundary setup</span>
+<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/shellmound.dis.grb'</span>
 <span class="w">    </span><span class="c1"># parent model head solution</span>
 <span class="w">    </span><span class="c1"># for determining boundary fluxes based on saturated thickness</span>
-<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span>
+<span class="w">    </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/shellmound.hds'</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -593,10 +593,10 @@ and time-varing heads specified in a csvfile:</p>
 <li><p>vertical discretization is specified with a <code class="docutils literal notranslate"><span class="pre">vertical_flux_distribution:</span></code> block similar to the <code class="docutils literal notranslate"><span class="pre">csvfiles:</span></code> option</p></li>
 <li><p>Example:</p>
 <blockquote>
-<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/master_wu.csv&#39;</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span>
-<span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/wu_points.shp&#39;</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span>
-<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2018-12-31&#39;</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period &#39;mean&#39; to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. &#39;august&#39;)</span>
-<span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;august&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">      </span><span class="nt">water_use</span><span class="p">:</span><span class="w"> </span><span class="s">'plainfieldlakes/source_data/master_wu.csv'</span><span class="w"> </span><span class="c1"># monthly water use rates from WDNR</span>
+<span class="w">      </span><span class="nt">water_use_points</span><span class="p">:</span><span class="w"> </span><span class="s">'plainfieldlakes/source_data/wu_points.shp'</span><span class="w"> </span><span class="c1"># point locations of wells in water_use</span>
+<span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'mean'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2012-01-01'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2018-12-31'</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="c1"># statistic to apply to each stress period 'mean' to average all water use data; &lt;monthname&gt; to average values for a given month across the period (e.g. 'august')</span>
+<span class="nt">                     1</span><span class="p">:</span><span class="w"> </span><span class="s">'august'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="c1"># use August pumping rates during test</span>
 <span class="w">      </span><span class="p p-Indicator">}</span>
 <span class="w"> </span><span class="w w-Error"> </span><span class="nt">output_files</span><span class="p">:</span>
 </pre></div>
@@ -678,10 +678,10 @@ and time-varing heads specified in a csvfile:</p>
 <div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">rech</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="c1"># by stress period</span>
-<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif&#39;</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">'plainfieldlakes/source_data/net_infiltration__2012-01-01_to_2017-12-31__1066_by_1145__SUM__INCHES_PER_YEAR.tif'</span>
 <span class="w">      </span><span class="nt">mult</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.805</span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
-<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;years&#39;</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'inches'</span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'years'</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -725,18 +725,18 @@ and time-varing heads specified in a csvfile:</p>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># resample recharge from NetCDF file with time-series of grids</span>
 <span class="w">    </span><span class="nt">recharge</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc&#39;</span>
-<span class="w">      </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;net_infiltration&#39;</span>
-<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;inches&#39;</span>
-<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/net_infiltration__2000-01-01_to_2017-12-31__414_by_394.nc'</span>
+<span class="w">      </span><span class="nt">variable</span><span class="p">:</span><span class="w"> </span><span class="s">'net_infiltration'</span>
+<span class="w">      </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'inches'</span>
+<span class="w">      </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'days'</span>
 <span class="w">      </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5070</span>
-<span class="w">      </span><span class="nt">resample_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;linear&#39;</span>
+<span class="w">      </span><span class="nt">resample_method</span><span class="p">:</span><span class="w"> </span><span class="s">'linear'</span>
 <span class="w">      </span><span class="nt">period_stats</span><span class="p">:</span>
 <span class="w">        </span><span class="c1"># for the first two stress periods</span>
 <span class="w">        </span><span class="c1"># apply mean recharge rates for dates below</span>
-<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
-<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;mean&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2000-01-01&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;2017-12-31&#39;</span><span class="p p-Indicator">]</span>
-<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mean&#39;</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span>
+<span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'mean'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2000-01-01'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2017-12-31'</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'mean'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2000-01-01'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'2017-12-31'</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="s">'mean'</span><span class="w">  </span><span class="c1"># for periods 2 on, use the mean recharge for that period</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -764,7 +764,7 @@ and time-varing heads specified in a csvfile:</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

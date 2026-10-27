@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>10 Minutes to Modflow-setup &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>10 Minutes to Modflow-setup &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="_static/documentation_options.js?v=6a370f82"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -149,15 +149,15 @@
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="k">def</span><span class="w"> </span><span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Just set up (a shapefile of) the model grid.</span>
-<span class="linenos"> 6</span><span class="sd">    For trying different grid configurations.&quot;&quot;&quot;</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="sd">"""Just set up (a shapefile of) the model grid.</span>
+<span class="linenos"> 6</span><span class="sd">    For trying different grid configurations."""</span>
 <span class="linenos"> 7</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">cfg_file</span><span class="p">)</span>
 <span class="linenos"> 8</span>    <span class="n">m</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
-<span class="linenos"> 9</span>    <span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">&#39;postproc/shps/grid.shp&#39;</span><span class="p">)</span>
+<span class="linenos"> 9</span>    <span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">'postproc/shps/grid.shp'</span><span class="p">)</span>
 <span class="linenos">10</span>
-<span class="linenos">11</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">11</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span>    <span class="n">setup_grid</span><span class="p">(</span><span class="s1">&#39;initial_config_poly.yaml&#39;</span><span class="p">)</span>
+<span class="linenos">13</span>    <span class="n">setup_grid</span><span class="p">(</span><span class="s1">'initial_config_poly.yaml'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Download the file:
@@ -166,13 +166,13 @@
 <p>An initial configuration file for developing a model grid around a pre-defined active area:</p>
 <blockquote>
 <div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">simulation</span><span class="p">:</span>
-<span class="linenos"> 2</span><span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
-<span class="linenos"> 3</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span>
-<span class="linenos"> 4</span><span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;model&#39;</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound'</span>
+<span class="linenos"> 3</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">'mf6'</span>
+<span class="linenos"> 4</span><span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="s">'model'</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nt">model</span><span class="p">:</span>
-<span class="linenos"> 7</span><span class="w">  </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
-<span class="linenos"> 8</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound'</span>
+<span class="linenos"> 8</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound'</span>
 <span class="linenos"> 9</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
 <span class="linenos">10</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="linenos">11</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -183,7 +183,7 @@
 <span class="linenos">16</span><span class="nt">setup_grid</span><span class="p">:</span>
 <span class="linenos">17</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="linenos">18</span><span class="w">    </span><span class="nt">features_shapefile</span><span class="p">:</span>
-<span class="linenos">19</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="linenos">19</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp'</span>
 <span class="linenos">20</span><span class="w">  </span><span class="nt">buffer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="linenos">21</span><span class="w">  </span><span class="nt">dxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># Uniform x, y spacing in meters</span>
 <span class="linenos">22</span><span class="w">  </span><span class="nt">rotation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.</span>
@@ -263,13 +263,13 @@
 <p>Now that we have a set of flowlines and a DEM (and perhaps shapefiles for other surface water boundaries), we can fill out the rest of the configuration file to get an initial working model. Later, additional details such as more layers, a well package, observations, or other features can be added in a stepwise approach (Haitjema, 1995).</p>
 <blockquote>
 <div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="nt">simulation</span><span class="p">:</span>
-<span class="linenos">  2</span><span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
-<span class="linenos">  3</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mf6&#39;</span>
-<span class="linenos">  4</span><span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;model&#39;</span>
+<span class="linenos">  2</span><span class="w">  </span><span class="nt">sim_name</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound'</span>
+<span class="linenos">  3</span><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">'mf6'</span>
+<span class="linenos">  4</span><span class="w">  </span><span class="nt">sim_ws</span><span class="p">:</span><span class="w"> </span><span class="s">'model'</span>
 <span class="linenos">  5</span>
 <span class="linenos">  6</span><span class="nt">model</span><span class="p">:</span>
-<span class="linenos">  7</span><span class="w">  </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
-<span class="linenos">  8</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound&#39;</span>
+<span class="linenos">  7</span><span class="w">  </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound'</span>
+<span class="linenos">  8</span><span class="w">  </span><span class="nt">modelname</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound'</span>
 <span class="linenos">  9</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
 <span class="linenos"> 10</span><span class="w">    </span><span class="nt">print_input</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="linenos"> 11</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -287,7 +287,7 @@
 <span class="linenos"> 23</span><span class="nt">setup_grid</span><span class="p">:</span>
 <span class="linenos"> 24</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="linenos"> 25</span><span class="w">    </span><span class="nt">features_shapefile</span><span class="p">:</span>
-<span class="linenos"> 26</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="linenos"> 26</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp'</span>
 <span class="linenos"> 27</span><span class="w">  </span><span class="nt">buffer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="linenos"> 28</span><span class="w">  </span><span class="nt">dxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">  </span><span class="c1"># Uniform x, y spacing in meters</span>
 <span class="linenos"> 29</span><span class="w">  </span><span class="nt">rotation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.</span>
@@ -297,25 +297,25 @@
 <span class="linenos"> 33</span><span class="nt">dis</span><span class="p">:</span>
 <span class="linenos"> 34</span><span class="w">  </span><span class="nt">remake_top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="linenos"> 35</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos"> 36</span><span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="linenos"> 36</span><span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
 <span class="linenos"> 37</span><span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span>
 <span class="linenos"> 38</span><span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="linenos"> 39</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="linenos"> 40</span><span class="w">    </span><span class="nt">top</span><span class="p">:</span>
-<span class="linenos"> 41</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif&#39;</span>
-<span class="linenos"> 42</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos"> 41</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../mfsetup/tests/data/shellmound/rasters/meras_100m_dem.tif'</span>
+<span class="linenos"> 42</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="linenos"> 43</span><span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
 <span class="linenos"> 44</span><span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
-<span class="linenos"> 45</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/rasters/mdwy_surf.tif&#39;</span>
-<span class="linenos"> 46</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span>
+<span class="linenos"> 45</span><span class="w">        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="s">'../mfsetup/tests/data/shellmound/rasters/mdwy_surf.tif'</span>
+<span class="linenos"> 46</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span>
 <span class="linenos"> 47</span><span class="w">    </span><span class="nt">idomain</span><span class="p">:</span>
 <span class="linenos"> 48</span><span class="w">      </span><span class="c1"># polygon shapefile of model active area</span>
-<span class="linenos"> 49</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
+<span class="linenos"> 49</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../mfsetup/tests/data/shellmound/tmr_parent/gis/irregular_boundary.shp'</span>
 <span class="linenos"> 50</span>
 <span class="linenos"> 51</span><span class="nt">tdis</span><span class="p">:</span>
 <span class="linenos"> 52</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos"> 53</span><span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
-<span class="linenos"> 54</span><span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2020-01-01&#39;</span>
+<span class="linenos"> 53</span><span class="w">    </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'days'</span>
+<span class="linenos"> 54</span><span class="w">    </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'2020-01-01'</span>
 <span class="linenos"> 55</span><span class="w">  </span><span class="nt">perioddata</span><span class="p">:</span>
 <span class="linenos"> 56</span><span class="w">    </span><span class="nt">group 1</span><span class="p">:</span>
 <span class="linenos"> 57</span><span class="w">      </span><span class="nt">perlen</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -353,16 +353,16 @@
 <span class="linenos"> 89</span><span class="w">    </span><span class="nt">save_flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="linenos"> 90</span><span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="linenos"> 91</span><span class="w">    </span><span class="nt">flowlines</span><span class="p">:</span>
-<span class="linenos"> 92</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../mfsetup/tests/data/shellmound/shps/flowlines.shp&#39;</span>
-<span class="linenos"> 93</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;COMID&#39;</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.lines.from_shapefile</span>
-<span class="linenos"> 94</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tocomid&#39;</span>
-<span class="linenos"> 95</span><span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width1&#39;</span>
-<span class="linenos"> 96</span><span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;width2&#39;</span>
-<span class="linenos"> 97</span><span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevupsmo&#39;</span>
-<span class="linenos"> 98</span><span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;elevdnsmo&#39;</span>
-<span class="linenos"> 99</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;GNIS_NAME&#39;</span>
-<span class="linenos">100</span><span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of flowline widths</span>
-<span class="linenos">101</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;feet&#39;</span><span class="w">  </span><span class="c1"># units of flowline elevations</span>
+<span class="linenos"> 92</span><span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../mfsetup/tests/data/shellmound/shps/flowlines.shp'</span>
+<span class="linenos"> 93</span><span class="w">      </span><span class="nt">id_column</span><span class="p">:</span><span class="w"> </span><span class="s">'COMID'</span><span class="w">  </span><span class="c1"># arguments to sfrmaker.lines.from_shapefile</span>
+<span class="linenos"> 94</span><span class="w">      </span><span class="nt">routing_column</span><span class="p">:</span><span class="w"> </span><span class="s">'tocomid'</span>
+<span class="linenos"> 95</span><span class="w">      </span><span class="nt">width1_column</span><span class="p">:</span><span class="w"> </span><span class="s">'width1'</span>
+<span class="linenos"> 96</span><span class="w">      </span><span class="nt">width2_column</span><span class="p">:</span><span class="w"> </span><span class="s">'width2'</span>
+<span class="linenos"> 97</span><span class="w">      </span><span class="nt">up_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">'elevupsmo'</span>
+<span class="linenos"> 98</span><span class="w">      </span><span class="nt">dn_elevation_column</span><span class="p">:</span><span class="w"> </span><span class="s">'elevdnsmo'</span>
+<span class="linenos"> 99</span><span class="w">      </span><span class="nt">name_column</span><span class="p">:</span><span class="w"> </span><span class="s">'GNIS_NAME'</span>
+<span class="linenos">100</span><span class="w">      </span><span class="nt">width_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span><span class="w">  </span><span class="c1"># units of flowline widths</span>
+<span class="linenos">101</span><span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'feet'</span><span class="w">  </span><span class="c1"># units of flowline elevations</span>
 <span class="linenos">102</span><span class="w">  </span><span class="nt">sfrmaker_options</span><span class="p">:</span>
 <span class="linenos">103</span><span class="w">    </span><span class="nt">one_reach_per_cell</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1">#  consolidate SFR reaches to one per i, j location</span>
 <span class="linenos">104</span><span class="w">    </span><span class="nt">to_riv</span><span class="p">:</span><span class="w"> </span><span class="c1"># convert this line and all downstream lines to the RIV package</span>
@@ -370,20 +370,20 @@
 <span class="linenos">106</span>
 <span class="linenos">107</span><span class="nt">oc</span><span class="p">:</span>
 <span class="linenos">108</span><span class="w">  </span><span class="nt">period_options</span><span class="p">:</span>
-<span class="linenos">109</span><span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">109</span><span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">,</span><span class="s">'save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">]</span>
 <span class="linenos">110</span>
 <span class="linenos">111</span><span class="nt">ims</span><span class="p">:</span>
 <span class="linenos">112</span><span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="linenos">113</span><span class="w">    </span><span class="nt">print_option</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span>
-<span class="linenos">114</span><span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;complex&#39;</span>
-<span class="linenos">115</span><span class="w">    </span><span class="nt">csv_output_filerecord</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;solver_out.csv&#39;</span>
+<span class="linenos">113</span><span class="w">    </span><span class="nt">print_option</span><span class="p">:</span><span class="w"> </span><span class="s">'all'</span>
+<span class="linenos">114</span><span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="s">'complex'</span>
+<span class="linenos">115</span><span class="w">    </span><span class="nt">csv_output_filerecord</span><span class="p">:</span><span class="w"> </span><span class="s">'solver_out.csv'</span>
 <span class="linenos">116</span><span class="w">  </span><span class="nt">nonlinear</span><span class="p">:</span>
 <span class="linenos">117</span><span class="w">    </span><span class="nt">outer_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.</span><span class="w">  </span><span class="c1"># m3/d in SFR package</span>
 <span class="linenos">118</span><span class="w">    </span><span class="nt">outer_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
 <span class="linenos">119</span><span class="w">  </span><span class="nt">linear</span><span class="p">:</span>
 <span class="linenos">120</span><span class="w">    </span><span class="nt">inner_maximum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="linenos">121</span><span class="w">    </span><span class="nt">inner_dvclose</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
-<span class="linenos">122</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;relative_rclose&#39;</span><span class="p p-Indicator">]</span>
+<span class="linenos">122</span><span class="w">    </span><span class="nt">rcloserecord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.001</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'relative_rclose'</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 <p>Download the file:
@@ -397,19 +397,19 @@
 <span class="linenos"> 4</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="k">def</span><span class="w"> </span><span class="nf">setup_grid</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
-<span class="linenos"> 7</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Just set up (a shapefile of) the model grid.</span>
-<span class="linenos"> 8</span><span class="sd">    For trying different grid configurations.&quot;&quot;&quot;</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="sd">"""Just set up (a shapefile of) the model grid.</span>
+<span class="linenos"> 8</span><span class="sd">    For trying different grid configurations."""</span>
 <span class="linenos"> 9</span>    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 <span class="linenos">10</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="p">(</span><span class="n">cfg</span><span class="o">=</span><span class="n">cfg_file</span><span class="p">)</span>
 <span class="linenos">11</span>    <span class="n">m</span><span class="o">.</span><span class="n">setup_grid</span><span class="p">()</span>
-<span class="linenos">12</span>    <span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">&#39;postproc/shps/grid.shp&#39;</span><span class="p">)</span>
+<span class="linenos">12</span>    <span class="n">m</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">write_shapefile</span><span class="p">(</span><span class="s1">'postproc/shps/grid.shp'</span><span class="p">)</span>
 <span class="linenos">13</span>    <span class="c1"># Modflow-setup changes the working directory</span>
 <span class="linenos">14</span>    <span class="c1"># to the model workspace; change it back</span>
 <span class="linenos">15</span>    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span><span class="k">def</span><span class="w"> </span><span class="nf">setup_model</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
-<span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up the whole model.&quot;&quot;&quot;</span>
+<span class="linenos">19</span><span class="w">    </span><span class="sd">"""Set up the whole model."""</span>
 <span class="linenos">20</span>    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 <span class="linenos">21</span>    <span class="n">m</span> <span class="o">=</span> <span class="n">MF6model</span><span class="o">.</span><span class="n">setup_from_yaml</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
 <span class="linenos">22</span>    <span class="n">m</span><span class="o">.</span><span class="n">write_input</span><span class="p">()</span>
@@ -417,10 +417,10 @@
 <span class="linenos">24</span>    <span class="k">return</span> <span class="n">m</span>
 <span class="linenos">25</span>
 <span class="linenos">26</span>
-<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
 <span class="linenos">28</span>
-<span class="linenos">29</span>    <span class="c1">#setup_grid(&#39;initial_config_poly.yaml&#39;)</span>
-<span class="linenos">30</span>    <span class="n">setup_model</span><span class="p">(</span><span class="s1">&#39;initial_config_full.yaml&#39;</span><span class="p">)</span>
+<span class="linenos">29</span>    <span class="c1">#setup_grid('initial_config_poly.yaml')</span>
+<span class="linenos">30</span>    <span class="n">setup_model</span><span class="p">(</span><span class="s1">'initial_config_full.yaml'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Download the file:
@@ -441,7 +441,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Initial Conditions &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>Initial Conditions &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -153,8 +153,8 @@
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">griddata</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">strt</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">&#39;filename&#39;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&#39;strt_000.dat&#39;</span><span class="p p-Indicator">}</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">&#39;filename&#39;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&#39;strt_001.dat&#39;</span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">'filename'</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">'strt_000.dat'</span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">'filename'</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">'strt_001.dat'</span><span class="p p-Indicator">}</span>
 </pre></div>
 </div>
 </section>
@@ -164,7 +164,7 @@
 <p>Explicitly setting starting heads to the model top (for example, to override the default behavior with <code class="docutils literal notranslate"><span class="pre">default_source_data</span></code> from a parent model):</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ic</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;from_model_top&#39;</span>
+<span class="w">    </span><span class="nt">strt</span><span class="p">:</span><span class="w"> </span><span class="s">'from_model_top'</span>
 </pre></div>
 </div>
 <p>Setting starting heads from a binary head save file (pathed relative to the configuration file):</p>
@@ -172,7 +172,7 @@
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">strt</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">from_parent</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/pleasant.hds&#39;</span>
+<span class="w">        </span><span class="nt">binaryfile</span><span class="p">:</span><span class="w"> </span><span class="s">'/path/to/pleasant.hds'</span>
 <span class="w">        </span><span class="nt">stress_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 </pre></div>
 </div>
@@ -187,26 +187,26 @@
 <h2>Example script for updating starting heads from a previous run<a class="headerlink" href="#example-script-for-updating-starting-heads-from-a-previous-run" title="Link to this heading"></a></h2>
 <p>The following example script opens MODFLOW binary head results using Flopy, and writes them to external files that can then be input to the IC or BAS6 Packages (for MODFLOW 6 or MODFLOW-NWT models, respectively). If you followed the Modflow-setup defaults to write external files to an <code class="docutils literal notranslate"><span class="pre">external/</span></code> folder, with starting head files named as shown in the script, this will overwrite your previous starting head files, requiring no additional action after running the script.</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;Update model starting heads from previous (initial steady-state) solution</span>
-<span class="linenos"> 2</span><span class="sd">&quot;&quot;&quot;</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">"""Update model starting heads from previous (initial steady-state) solution</span>
+<span class="linenos"> 2</span><span class="sd">"""</span>
 <span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="linenos"> 4</span>
 <span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="linenos"> 6</span><span class="kn">from</span><span class="w"> </span><span class="nn">flopy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">binaryfile</span> <span class="k">as</span> <span class="n">bf</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="n">model_ws</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-<span class="linenos"> 9</span><span class="n">headfile</span> <span class="o">=</span> <span class="n">model_ws</span> <span class="o">/</span> <span class="s1">&#39;model.hds&#39;</span>
-<span class="linenos">10</span><span class="n">starting_heads_file_fmt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_ws</span> <span class="o">/</span> <span class="s1">&#39;external/strt_</span><span class="si">{:03d}</span><span class="s1">.dat&#39;</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="n">model_ws</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">headfile</span> <span class="o">=</span> <span class="n">model_ws</span> <span class="o">/</span> <span class="s1">'model.hds'</span>
+<span class="linenos">10</span><span class="n">starting_heads_file_fmt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_ws</span> <span class="o">/</span> <span class="s1">'external/strt_</span><span class="si">{:03d}</span><span class="s1">.dat'</span><span class="p">)</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>
 <span class="linenos">13</span><span class="n">hdsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="n">headfile</span><span class="p">)</span>
-<span class="linenos">14</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;reading </span><span class="si">{</span><span class="n">headfile</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">)</span>
+<span class="linenos">14</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reading </span><span class="si">{</span><span class="n">headfile</span><span class="si">}</span><span class="s1">...'</span><span class="p">)</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="n">initial_ss_heads</span> <span class="o">=</span> <span class="n">hdsobj</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">kstpkper</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 <span class="linenos">17</span><span class="k">for</span> <span class="n">per</span><span class="p">,</span> <span class="n">layer_heads</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">initial_ss_heads</span><span class="p">):</span>
 <span class="linenos">18</span>    <span class="n">outfile</span> <span class="o">=</span> <span class="n">starting_heads_file_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span><span class="p">)</span>
-<span class="linenos">19</span>    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">starting_heads_file_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span><span class="p">),</span> <span class="n">layer_heads</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="linenos">20</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;updated </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">19</span>    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">starting_heads_file_fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">per</span><span class="p">),</span> <span class="n">layer_heads</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">'</span><span class="si">%.2f</span><span class="s1">'</span><span class="p">)</span>
+<span class="linenos">20</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"updated </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Download the file:
@@ -228,7 +228,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

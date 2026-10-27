@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.discretization module &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>mfsetup.discretization module &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -142,7 +142,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="mfsetup.discretization.ModflowGwfdis">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">mfsetup.discretization.</span></span><span class="sig-name descname"><span class="pre">ModflowGwfdis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mfsetup/discretization.html#ModflowGwfdis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mfsetup.discretization.ModflowGwfdis" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfdis.html#flopy.mf6.modflow.mfgwfdis.ModflowGwfdis" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowGwfdis</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfdis.html#flopy.mf6.modflow.mfgwfdis.ModflowGwfdis" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModflowGwfdis</span></code></a></p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mfsetup.discretization.ModflowGwfdis.thickness">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">thickness</span></span><a class="headerlink" href="#mfsetup.discretization.ModflowGwfdis.thickness" title="Link to this definition"></a></dt>
@@ -495,8 +495,7 @@ greater than a minimum thickness.</p>
 <dd><p>Combine a voxel array (voxel_array), with no-data values and either uniform or non-uniform top
 and bottom elevations, with land-surface elevations (model_top; to form the top of the grid), and
 additional elevation surfaces forming layering below the voxel grid (model_botm).</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>In places where the model_botm elevations are above the lowest voxel elevations,
 the voxels are given priority, and the model_botm elevations reset to equal the lowest voxel elevations
 (effectively giving the underlying layer zero-thickness).</p></li>
@@ -510,7 +509,6 @@ can be created between the top edge of the highest voxel and model_top (extent_t
 elevation can be extended to the highest underlying layer (extend_botm=True), or an additional layer can fill
 the gap between the lowest voxel and highest model_botm (extend_botm=False).</p></li>
 </ul>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -577,7 +575,7 @@ by default 0.01.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tdis &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>mfsetup.tdis &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -99,9 +99,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mfsetup.tdis</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Functions related to temporal discretization</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">calendar</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dt</span>
@@ -122,11 +122,11 @@
 <div class="viewcode-block" id="convert_freq_to_period_start">
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.convert_freq_to_period_start">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">convert_freq_to_period_start</span><span class="p">(</span><span class="n">freq</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;convert pandas frequency to period start&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""convert pandas frequency to period start"""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">freq</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;S&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">freq</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
-                <span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">S&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'M'</span><span class="p">,</span> <span class="s1">'Q'</span><span class="p">,</span> <span class="s1">'A'</span><span class="p">,</span> <span class="s1">'Y'</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">freq</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"S"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">freq</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">S"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">freq</span></div>
 
 
@@ -134,13 +134,13 @@
 <div class="viewcode-block" id="get_parent_stress_periods">
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.get_parent_stress_periods">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_parent_stress_periods</span><span class="p">(</span><span class="n">parent_model</span><span class="p">,</span> <span class="n">nper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                              <span class="n">parent_stress_periods</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+                              <span class="n">parent_stress_periods</span><span class="o">=</span><span class="s1">'all'</span><span class="p">):</span>
 
     <span class="n">parent_sp</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">parent_stress_periods</span><span class="p">)</span>
     <span class="n">parent_model_nper</span> <span class="o">=</span> <span class="n">parent_model</span><span class="o">.</span><span class="n">modeltime</span><span class="o">.</span><span class="n">nper</span>
 
     <span class="c1"># use all stress periods from parent model</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent_sp</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_sp</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent_sp</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'all'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">nper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># or nper &lt; parent_model.nper:</span>
             <span class="n">nper</span> <span class="o">=</span> <span class="n">parent_model_nper</span>
             <span class="n">parent_sp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nper</span><span class="p">))</span>
@@ -193,49 +193,49 @@
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.parse_perioddata_groups">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_perioddata_groups</span><span class="p">(</span><span class="n">perioddata_dict</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reorganize input in perioddata dict into</span>
+<span class="w">    </span><span class="sd">"""Reorganize input in perioddata dict into</span>
 <span class="sd">    a list of groups (dicts).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">perioddata_groups</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;start_date_time&#39;</span><span class="p">:</span> <span class="s1">&#39;1970-01-01&#39;</span>
+        <span class="s1">'start_date_time'</span><span class="p">:</span> <span class="s1">'1970-01-01'</span>
     <span class="p">}</span>
     <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">group0</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-    <span class="n">valid_txt</span> <span class="o">=</span> <span class="s2">&quot;if transient: perlen specified or 3 of start_date_time, &quot;</span> \
-                <span class="s2">&quot;end_date_time, nper or freq;</span><span class="se">\n</span><span class="s2">&quot;</span> \
-                <span class="s2">&quot;if steady: nper or perlen specified. Default perlen &quot;</span> \
-                <span class="s2">&quot;for steady-state periods is 1.&quot;</span>
+    <span class="n">valid_txt</span> <span class="o">=</span> <span class="s2">"if transient: perlen specified or 3 of start_date_time, "</span> \
+                <span class="s2">"end_date_time, nper or freq;</span><span class="se">\n</span><span class="s2">"</span> \
+                <span class="s2">"if steady: nper or perlen specified. Default perlen "</span> \
+                <span class="s2">"for steady-state periods is 1."</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">perioddata_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="s1">&#39;group&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">'group'</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">is_valid_perioddata</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">setup_perioddata_group</span><span class="p">,</span>
-                                           <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">)</span>
+                                           <span class="n">errors</span><span class="o">=</span><span class="s1">'raise'</span><span class="p">)</span>
                 <span class="n">perioddata_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">print_item</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-                <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;perioddata input for </span><span class="si">{}</span><span class="s2"> must have&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="s2">"perioddata input for </span><span class="si">{}</span><span class="s2"> must have"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">valid_txt</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="s1">&#39;perioddata&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">elif</span> <span class="s1">'perioddata'</span> <span class="ow">in</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="n">perioddata_groups</span> <span class="o">+=</span> <span class="n">parse_perioddata_groups</span><span class="p">(</span><span class="n">perioddata_dict</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="o">**</span><span class="n">defaults</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">group0</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">perioddata_groups</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_perioddata</span><span class="p">(</span><span class="n">group0</span><span class="p">):</span>
-            <span class="n">print_item</span><span class="p">(</span><span class="s1">&#39;perioddata:&#39;</span><span class="p">,</span> <span class="n">group0</span><span class="p">)</span>
-            <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;perioddata input must have&quot;</span>
+            <span class="n">print_item</span><span class="p">(</span><span class="s1">'perioddata:'</span><span class="p">,</span> <span class="n">group0</span><span class="p">)</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="s2">"perioddata input must have"</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">valid_txt</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">get_input_arguments</span><span class="p">(</span><span class="n">group0</span><span class="p">,</span> <span class="n">setup_perioddata_group</span><span class="p">)</span>
         <span class="n">perioddata_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">perioddata_groups</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;steady&#39;</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">group</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]}</span>
-            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">group</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">])}</span>
+        <span class="k">if</span> <span class="s1">'steady'</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">])</span> <span class="ow">or</span> <span class="n">group</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">group</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">]}</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">group</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">])}</span>
     <span class="k">return</span> <span class="n">perioddata_groups</span></div>
 
 
@@ -243,13 +243,13 @@
 <div class="viewcode-block" id="setup_perioddata_group">
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.setup_perioddata_group">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">setup_perioddata_group</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">,</span> <span class="n">end_date_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                           <span class="n">nper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">perlen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_time_units</span><span class="o">=</span><span class="s1">&#39;days&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">nper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">perlen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_time_units</span><span class="o">=</span><span class="s1">'days'</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">steady</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
                            <span class="n">nstp</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tsmult</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
-                           <span class="n">oc_saverecord</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;save head last&#39;</span><span class="p">,</span>
-                                              <span class="s1">&#39;save budget last&#39;</span><span class="p">]},</span>
+                           <span class="n">oc_saverecord</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">[</span><span class="s1">'save head last'</span><span class="p">,</span>
+                                              <span class="s1">'save budget last'</span><span class="p">]},</span>
                            <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets up time discretization for a model; outputs a DataFrame with</span>
+<span class="w">    </span><span class="sd">"""Sets up time discretization for a model; outputs a DataFrame with</span>
 <span class="sd">    stress period dates/times and properties. Stress periods can be established</span>
 <span class="sd">    by explicitly specifying perlen as a list of period lengths in</span>
 <span class="sd">    model units. Or, stress periods can be generated via :func:`pandas.date_range`,</span>
@@ -263,19 +263,19 @@
 <span class="sd">        Right bound for generating stress period dates. See :func:`pandas.date_range`.</span>
 <span class="sd">    nper : int, optional</span>
 <span class="sd">        Number of stress periods. Only used if perlen is None, or in combination with freq</span>
-<span class="sd">        if an end_date_time isn&#39;t specified.</span>
+<span class="sd">        if an end_date_time isn't specified.</span>
 <span class="sd">    perlen : sequence or None, optional</span>
 <span class="sd">        A list of stress period lengths in model time units. Or specify as None and</span>
 <span class="sd">        specify 3 of start_date_time, end_date_time, nper and/or freq.</span>
 <span class="sd">    model_time_units : str, optional</span>
-<span class="sd">        &#39;days&#39; or &#39;seconds&#39;.</span>
-<span class="sd">        By default, &#39;days&#39;.</span>
+<span class="sd">        'days' or 'seconds'.</span>
+<span class="sd">        By default, 'days'.</span>
 <span class="sd">    freq : str or DateOffset, default None</span>
 <span class="sd">        For setting up uniform stress periods between a start and end date, or of length nper.</span>
 <span class="sd">        Same as argument to pandas.date_range. Frequency strings can have multiples,</span>
 <span class="sd">        e.g. ‘6MS’ for a 6 month interval on the start of each month.</span>
-<span class="sd">        See the pandas documentation for a list of frequency aliases. Note: Only &quot;start&quot;</span>
-<span class="sd">        frequences (e.g. MS vs M for &quot;month end&quot;) are supported.</span>
+<span class="sd">        See the pandas documentation for a list of frequency aliases. Note: Only "start"</span>
+<span class="sd">        frequences (e.g. MS vs M for "month end") are supported.</span>
 <span class="sd">    steady : dict</span>
 <span class="sd">        Dictionary with zero-based stress periods as keys and boolean values. Similar to MODFLOW-6</span>
 <span class="sd">        input, the information specified for a period will continue to apply until</span>
@@ -331,18 +331,18 @@
 
 <span class="sd">    Specified ``end_date_time`` represents the right bound of the time discretization,</span>
 <span class="sd">    or in other words, the time increment *after* the last time increment to be</span>
-<span class="sd">    simulated. For example, ``end_date_time=&#39;2019-01-01&#39;`` would mean that</span>
-<span class="sd">    ``&#39;2018-12-31&#39;`` is the last date simulated by the model</span>
+<span class="sd">    simulated. For example, ``end_date_time='2019-01-01'`` would mean that</span>
+<span class="sd">    ``'2018-12-31'`` is the last date simulated by the model</span>
 <span class="sd">    (which ends at ``2019-01-01 00:00:00``).</span>
 
 
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">specified_start_datetime</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">start_date_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">specified_start_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date_time</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">end_date_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;If no start_datetime, must specify end_datetime&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'If no start_datetime, must specify end_datetime'</span><span class="p">)</span>
     <span class="n">specified_end_datetime</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">end_date_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">specified_end_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">end_date_time</span><span class="p">)</span>
@@ -362,8 +362,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tsmult</span><span class="p">):</span>
         <span class="n">tsmult</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tsmult</span><span class="p">)</span>
 
-    <span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;Specify perlen as a list of lengths in model units, or</span><span class="se">\n</span><span class="s2">specify 3 &quot;</span> \
-          <span class="s2">&quot;of start_date_time, end_date_time, nper and/or freq.&quot;</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="s2">"Specify perlen as a list of lengths in model units, or</span><span class="se">\n</span><span class="s2">specify 3 "</span> \
+          <span class="s2">"of start_date_time, end_date_time, nper and/or freq."</span>
 
     <span class="c1"># Explicitly specified stress period lengths</span>
     <span class="n">start_datetime</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># datetimes at period starts</span>
@@ -404,10 +404,10 @@
 
     <span class="c1"># Set up datetimes based on 3 of start_date_time, specified_end_datetime, nper and/or freq (scalar perlen)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">nstp</span><span class="p">),</span> <span class="s2">&quot;nstp: </span><span class="si">{}</span><span class="s2">; nstp must be a scalar if perlen &quot;</span> \
-                                  <span class="s2">&quot;is not specified explicitly as a list.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nstp</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tsmult</span><span class="p">),</span> <span class="s2">&quot;tsmult: </span><span class="si">{}</span><span class="s2">; tsmult must be a scalar if perlen &quot;</span> \
-                                  <span class="s2">&quot;is not specified explicitly as a list.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tsmult</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">nstp</span><span class="p">),</span> <span class="s2">"nstp: </span><span class="si">{}</span><span class="s2">; nstp must be a scalar if perlen "</span> \
+                                  <span class="s2">"is not specified explicitly as a list.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nstp</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tsmult</span><span class="p">),</span> <span class="s2">"tsmult: </span><span class="si">{}</span><span class="s2">; tsmult must be a scalar if perlen "</span> \
+                                  <span class="s2">"is not specified explicitly as a list.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tsmult</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
         <span class="n">periods</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">specified_end_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># start_date_time, periods and freq</span>
@@ -415,7 +415,7 @@
             <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">periods</span> <span class="o">=</span> <span class="n">nper</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized input for perlen: </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">perlen</span><span class="p">,</span> <span class="n">txt</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Unrecognized input for perlen: </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">perlen</span><span class="p">,</span> <span class="n">txt</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># specified_end_datetime and freq and periods</span>
             <span class="k">if</span> <span class="n">specified_start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -472,13 +472,13 @@
                 <span class="n">tsmult</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">tsmult</span>
 
     <span class="n">perioddata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-        <span class="s1">&#39;start_datetime&#39;</span><span class="p">:</span> <span class="n">start_datetime</span><span class="p">,</span>
-        <span class="s1">&#39;end_datetime&#39;</span><span class="p">:</span> <span class="n">end_datetime</span><span class="p">,</span>
-        <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
-        <span class="s1">&#39;per&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)),</span>
-        <span class="s1">&#39;perlen&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
-        <span class="s1">&#39;nstp&#39;</span><span class="p">:</span> <span class="n">nstp</span><span class="p">,</span>
-        <span class="s1">&#39;tsmult&#39;</span><span class="p">:</span> <span class="n">tsmult</span><span class="p">,</span>
+        <span class="s1">'start_datetime'</span><span class="p">:</span> <span class="n">start_datetime</span><span class="p">,</span>
+        <span class="s1">'end_datetime'</span><span class="p">:</span> <span class="n">end_datetime</span><span class="p">,</span>
+        <span class="s1">'time'</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+        <span class="s1">'per'</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)),</span>
+        <span class="s1">'perlen'</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+        <span class="s1">'nstp'</span><span class="p">:</span> <span class="n">nstp</span><span class="p">,</span>
+        <span class="s1">'tsmult'</span><span class="p">:</span> <span class="n">tsmult</span><span class="p">,</span>
     <span class="p">})</span>
 
     <span class="c1"># specify steady-state or transient for each period, filling empty</span>
@@ -486,43 +486,43 @@
     <span class="n">issteady</span> <span class="o">=</span> <span class="p">[</span><span class="n">steady</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">)):</span>
         <span class="n">issteady</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">steady</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">issteady</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-    <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">issteady</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">perioddata</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">]</span> <span class="o">=</span> <span class="n">issteady</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">perioddata</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">]</span> <span class="o">=</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
 
     <span class="c1"># set up output control, using previous value to fill empty periods</span>
     <span class="c1"># (same as MF6)</span>
     <span class="n">oclist</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">)):</span>
         <span class="n">oclist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">oclist</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-    <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;oc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">oclist</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">perioddata</span><span class="p">[</span><span class="s1">'oc'</span><span class="p">]</span> <span class="o">=</span> <span class="n">oclist</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 
     <span class="c1"># correct nstp and tsmult to be 1 for steady-state periods</span>
-    <span class="n">perioddata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">perioddata</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">perioddata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">perioddata</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">perioddata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">perioddata</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">'nstp'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">perioddata</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">perioddata</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">'tsmult'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">perioddata</span></div>
 
 
 
 <div class="viewcode-block" id="concat_periodata_groups">
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.concat_periodata_groups">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">concat_periodata_groups</span><span class="p">(</span><span class="n">perioddata_groups</span><span class="p">,</span> <span class="n">time_units</span><span class="o">=</span><span class="s1">&#39;days&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenate multiple perioddata DataFrames, but sort</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">concat_periodata_groups</span><span class="p">(</span><span class="n">perioddata_groups</span><span class="p">,</span> <span class="n">time_units</span><span class="o">=</span><span class="s1">'days'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Concatenate multiple perioddata DataFrames, but sort</span>
 <span class="sd">    result on (absolute) datetimes and increment model time and stress period</span>
-<span class="sd">    numbers accordingly.&quot;&quot;&quot;</span>
+<span class="sd">    numbers accordingly."""</span>
 
     <span class="c1"># update any missing variables in the groups with global variables</span>
     <span class="n">group_dfs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">perioddata_groups</span><span class="p">):</span>
-        <span class="n">group</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;model_time_units&#39;</span><span class="p">:</span> <span class="n">time_units</span><span class="p">,</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">'model_time_units'</span><span class="p">:</span> <span class="n">time_units</span><span class="p">,</span>
                       <span class="p">})</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">setup_perioddata_group</span><span class="p">(</span><span class="o">**</span><span class="n">group</span><span class="p">)</span>
         <span class="n">group_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">group_dfs</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">group_dfs</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">'end_datetime'</span><span class="p">])</span>
     <span class="n">perlen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
-    <span class="n">perlen</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;perlen&#39;</span><span class="p">]</span>
-    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>
-    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+    <span class="n">perlen</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">steady</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">'perlen'</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">'time'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">'per'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
     <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">df</span></div>
 
@@ -534,11 +534,11 @@
                      <span class="n">tdis_perioddata_config</span><span class="p">,</span>
                      <span class="n">default_start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">nper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                     <span class="n">steady</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_units</span><span class="o">=</span><span class="s1">&#39;days&#39;</span><span class="p">,</span>
+                     <span class="n">steady</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_units</span><span class="o">=</span><span class="s1">'days'</span><span class="p">,</span>
                      <span class="n">oc_saverecord</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">parent_stress_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets up the perioddata DataFrame that is used to reference model</span>
+<span class="w">    </span><span class="sd">"""Sets up the perioddata DataFrame that is used to reference model</span>
 <span class="sd">    stress period start and end times to real date time.</span>
 
 <span class="sd">    Parameters</span>
@@ -553,7 +553,7 @@
 <span class="sd">        or ``model.modeltime.start_datetime`` Flopy attribute. Only used</span>
 <span class="sd">        where start_datetime information is missing, for example if a group</span>
 <span class="sd">        for an initial steady-state period in ``tdis_perioddata_config``</span>
-<span class="sd">        doesn&#39;t have a start_datetime: entry. By default, None, in which case</span>
+<span class="sd">        doesn't have a start_datetime: entry. By default, None, in which case</span>
 <span class="sd">        the default start_datetime of 1970-01-01 may be applied by</span>
 <span class="sd">        py:func:`setup_perioddata_group`.</span>
 <span class="sd">    nper : int, optional</span>
@@ -566,7 +566,7 @@
 <span class="sd">        blocks (MODFLOW 6 models) or the dis: block (MODFLOW-2005 models),</span>
 <span class="sd">        and not in perioddata groups.</span>
 <span class="sd">    time_units : str, optional</span>
-<span class="sd">        Model time units, by default &#39;days&#39;.</span>
+<span class="sd">        Model time units, by default 'days'.</span>
 <span class="sd">    oc_saverecord : dict, optional</span>
 <span class="sd">        Output control settings, keyed by stress period. Only</span>
 <span class="sd">        used to record this information in the stress period data table.</span>
@@ -606,54 +606,54 @@
 <span class="sd">        any steady-state periods (at least 1 day). Therefore if the model</span>
 <span class="sd">        has an initial steady-state period with a ``perlen`` of one day,</span>
 <span class="sd">        the elapsed time at the model start date will already be 1 day.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># get start_date_time from parent if available and start_date_time wasn&#39;t specified</span>
-    <span class="c1"># only apply to tdis_perioddata_config if it wasn&#39;t specified there</span>
-    <span class="k">if</span> <span class="n">tdis_perioddata_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;1970-01-01&#39;</span> <span class="ow">and</span> \
-            <span class="n">default_start_datetime</span> <span class="o">!=</span> <span class="s1">&#39;1970-01-01&#39;</span><span class="p">:</span>
-        <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;start_date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_start_datetime</span>
+<span class="sd">    """</span>
+    <span class="c1"># get start_date_time from parent if available and start_date_time wasn't specified</span>
+    <span class="c1"># only apply to tdis_perioddata_config if it wasn't specified there</span>
+    <span class="k">if</span> <span class="n">tdis_perioddata_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'start_datetime'</span><span class="p">,</span> <span class="s1">'1970-01-01'</span><span class="p">)</span> <span class="o">==</span> <span class="s1">'1970-01-01'</span> <span class="ow">and</span> \
+            <span class="n">default_start_datetime</span> <span class="o">!=</span> <span class="s1">'1970-01-01'</span><span class="p">:</span>
+        <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">'start_date_time'</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_start_datetime</span>
 
     <span class="c1"># option to define stress periods in table prior to model build</span>
-    <span class="k">if</span> <span class="s1">&#39;csvfile&#39;</span> <span class="ow">in</span> <span class="n">tdis_perioddata_config</span><span class="p">:</span>
-        <span class="n">csvfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_config_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;csvfile&#39;</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">'csvfile'</span> <span class="ow">in</span> <span class="n">tdis_perioddata_config</span><span class="p">:</span>
+        <span class="n">csvfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_config_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">'csvfile'</span><span class="p">][</span><span class="s1">'filename'</span><span class="p">]</span>
         <span class="n">perioddata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
         <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;start_datetime_column&#39;</span><span class="p">:</span> <span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;end_datetime_column&#39;</span><span class="p">:</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;steady_column&#39;</span><span class="p">:</span> <span class="s1">&#39;steady&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;nstp_column&#39;</span><span class="p">:</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;tsmult_column&#39;</span><span class="p">:</span> <span class="s1">&#39;tsmult&#39;</span>
+            <span class="s1">'start_datetime_column'</span><span class="p">:</span> <span class="s1">'start_datetime'</span><span class="p">,</span>
+            <span class="s1">'end_datetime_column'</span><span class="p">:</span> <span class="s1">'end_datetime'</span><span class="p">,</span>
+            <span class="s1">'steady_column'</span><span class="p">:</span> <span class="s1">'steady'</span><span class="p">,</span>
+            <span class="s1">'nstp_column'</span><span class="p">:</span> <span class="s1">'nstp'</span><span class="p">,</span>
+            <span class="s1">'tsmult_column'</span><span class="p">:</span> <span class="s1">'tsmult'</span>
         <span class="p">}</span>
 
-        <span class="n">csv_config</span> <span class="o">=</span> <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">&#39;csvfile&#39;</span><span class="p">]</span>
+        <span class="n">csv_config</span> <span class="o">=</span> <span class="n">tdis_perioddata_config</span><span class="p">[</span><span class="s1">'csvfile'</span><span class="p">]</span>
         <span class="n">renames</span> <span class="o">=</span> <span class="p">{</span><span class="n">csv_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">v</span>
                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">csv_config</span><span class="p">}</span>
         <span class="n">perioddata</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">renames</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">required_cols</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">required_cols</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> column missing in supplied stress &quot;</span>
-                               <span class="sa">f</span><span class="s2">&quot;period table </span><span class="si">{</span><span class="n">csvfile</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">])</span>
-        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">])</span>
-        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">))</span>
-        <span class="n">perlen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">]</span> <span class="o">-</span>
-                          <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> column missing in supplied stress "</span>
+                               <span class="sa">f</span><span class="s2">"period table </span><span class="si">{</span><span class="n">csvfile</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">'start_datetime'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">'start_datetime'</span><span class="p">])</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">'end_datetime'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">'end_datetime'</span><span class="p">])</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">'per'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">))</span>
+        <span class="n">perlen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">((</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">'end_datetime'</span><span class="p">]</span> <span class="o">-</span>
+                          <span class="n">perioddata</span><span class="p">[</span><span class="s1">'start_datetime'</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span>
                           <span class="n">model</span><span class="o">.</span><span class="n">time_units</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="c1"># set initial steady-state stress period to at least length 1</span>
-        <span class="k">if</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;steady&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">'steady'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">perlen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">perlen</span>
-        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;perlen&#39;</span><span class="p">,</span> <span class="s1">&#39;nstp&#39;</span><span class="p">,</span> <span class="s1">&#39;tsmult&#39;</span><span class="p">,</span> <span class="s1">&#39;steady&#39;</span><span class="p">]</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">'perlen'</span><span class="p">]</span> <span class="o">=</span> <span class="n">perlen</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">'time'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">perlen</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'start_datetime'</span><span class="p">,</span> <span class="s1">'end_datetime'</span><span class="p">,</span> <span class="s1">'time'</span><span class="p">,</span>
+                <span class="s1">'per'</span><span class="p">,</span> <span class="s1">'perlen'</span><span class="p">,</span> <span class="s1">'nstp'</span><span class="p">,</span> <span class="s1">'tsmult'</span><span class="p">,</span> <span class="s1">'steady'</span><span class="p">]</span>
         <span class="c1"># option to supply Output Contorl INstructions as well</span>
-        <span class="k">if</span> <span class="s1">&#39;oc&#39;</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;oc&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">'oc'</span> <span class="ow">in</span> <span class="n">perioddata</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'oc'</span><span class="p">)</span>
         <span class="n">perioddata</span> <span class="o">=</span> <span class="n">perioddata</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
         <span class="c1"># some validation</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;perlen&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">'perlen'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">'time'</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
     <span class="c1"># define stress periods from perioddata group blocks in configuration file</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">perioddata_groups</span> <span class="o">=</span> <span class="n">parse_perioddata_groups</span><span class="p">(</span><span class="n">tdis_perioddata_config</span><span class="p">,</span>
@@ -672,22 +672,22 @@
             <span class="n">parent_sp</span> <span class="o">=</span> <span class="n">get_parent_stress_periods</span><span class="p">(</span><span class="n">parent_model</span><span class="p">,</span> <span class="n">nper</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">),</span>
                                                     <span class="n">parent_stress_periods</span><span class="o">=</span><span class="n">parent_stress_periods</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">model</span><span class="o">.</span><span class="n">_is_lgr</span><span class="p">:</span>
-            <span class="n">parent_sp</span> <span class="o">=</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">parent_sp</span> <span class="o">=</span> <span class="n">perioddata</span><span class="p">[</span><span class="s1">'per'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
         <span class="c1"># add corresponding stress periods in parent model if there are any</span>
-        <span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;parent_sp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_sp</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">)))</span>
+        <span class="n">perioddata</span><span class="p">[</span><span class="s1">'parent_sp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_sp</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">perioddata</span><span class="p">[</span><span class="s1">'per'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perioddata</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">perioddata</span></div>
 
 
 
 <div class="viewcode-block" id="aggregate_dataframe_to_stress_period">
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.aggregate_dataframe_to_stress_period">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">aggregate_dataframe_to_stress_period</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">id_column</span><span class="p">,</span> <span class="n">data_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">aggregate_dataframe_to_stress_period</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">id_column</span><span class="p">,</span> <span class="n">data_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="o">=</span><span class="s1">'datetime'</span><span class="p">,</span>
                                          <span class="n">end_datetime_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">category_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                         <span class="n">start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period_stat</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
-                                         <span class="n">resolve_duplicates_with</span><span class="o">=</span><span class="s1">&#39;raise error&#39;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate time-series data in a DataFrame to a single value representing</span>
+                                         <span class="n">start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period_stat</span><span class="o">=</span><span class="s1">'mean'</span><span class="p">,</span>
+                                         <span class="n">resolve_duplicates_with</span><span class="o">=</span><span class="s1">'raise error'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Aggregate time-series data in a DataFrame to a single value representing</span>
 <span class="sd">    a period defined by a start and end date.</span>
 
 <span class="sd">    Parameters</span>
@@ -722,32 +722,32 @@
 <span class="sd">        and end time are specified in period_stat, the last time in datetime_column is used.</span>
 <span class="sd">        By default, None.</span>
 <span class="sd">    period_stat : str, list, or NoneType</span>
-<span class="sd">        Method for aggregating data. By default, &#39;mean&#39;.</span>
+<span class="sd">        Method for aggregating data. By default, 'mean'.</span>
 
 <span class="sd">        * Strings will be passed to DataFrame.groupby</span>
-<span class="sd">          as the aggregation method. For example, ``&#39;mean&#39;`` would result in DataFrame.groupby().mean().</span>
-<span class="sd">        * If period_stat is None, ``&#39;mean&#39;`` is used.</span>
-<span class="sd">        * Lists of length 2 can be used to specify a statistic for a month (e.g. ``[&#39;mean&#39;, &#39;august&#39;]``),</span>
+<span class="sd">          as the aggregation method. For example, ``'mean'`` would result in DataFrame.groupby().mean().</span>
+<span class="sd">        * If period_stat is None, ``'mean'`` is used.</span>
+<span class="sd">        * Lists of length 2 can be used to specify a statistic for a month (e.g. ``['mean', 'august']``),</span>
 <span class="sd">          or for a time period that can be represented as a single string in pandas.</span>
-<span class="sd">          For example, ``[&#39;mean&#39;, &#39;2014&#39;]`` would average all values in the year 2014; ``[&#39;mean&#39;, &#39;2014-01&#39;]``</span>
+<span class="sd">          For example, ``['mean', '2014']`` would average all values in the year 2014; ``['mean', '2014-01']``</span>
 <span class="sd">          would average all values in January of 2014, etc. Basically, if the string</span>
 <span class="sd">          can be used to slice a DataFrame or Series, it can be used here.</span>
 <span class="sd">        * Lists of length 3 can be used to specify a statistic and a start and end date.</span>
-<span class="sd">          For example, ``[&#39;mean&#39;, &#39;2014-01-01&#39;, &#39;2014-03-31&#39;]`` would average the values for</span>
+<span class="sd">          For example, ``['mean', '2014-01-01', '2014-03-31']`` would average the values for</span>
 <span class="sd">          the first three months of 2014.</span>
-<span class="sd">    resolve_duplicates_with : {&#39;sum&#39;, &#39;mean&#39;, &#39;first&#39;, &#39;raise error&#39;}</span>
+<span class="sd">    resolve_duplicates_with : {'sum', 'mean', 'first', 'raise error'}</span>
 <span class="sd">        Method for reducing duplicates (of times, sites and measured or estimated category).</span>
-<span class="sd">        By default, &#39;raise error&#39; will result in a ValueError if duplicates are encountered.</span>
+<span class="sd">        By default, 'raise error' will result in a ValueError if duplicates are encountered.</span>
 <span class="sd">        Otherwise any aggregate method in pandas can be used (e.g. DataFrame.groupby().&lt;method&gt;())</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    aggregated : DataFrame</span>
 <span class="sd">        Aggregated values. Columns are the same as data, except the time column</span>
-<span class="sd">        is named &#39;start_datetime&#39;. In other words, aggregated periods are represented by</span>
+<span class="sd">        is named 'start_datetime'. In other words, aggregated periods are represented by</span>
 <span class="sd">        their start dates (as opposed to midpoint dates or end dates).</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">datetime_column</span><span class="p">:</span>
@@ -758,7 +758,7 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">period_stat</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">period_stat</span> <span class="o">=</span> <span class="p">[</span><span class="n">period_stat</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">period_stat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">period_stat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span>
+        <span class="n">period_stat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">period_stat</span> <span class="o">=</span> <span class="n">period_stat</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_column</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -785,15 +785,15 @@
             <span class="k">if</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">months</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">or</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">months</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">period_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="n">months</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">period</span><span class="p">)]</span>
 
-            <span class="c1"># stat for a period specified by single string (e.g. &#39;2014&#39;, &#39;2014-01&#39;, etc.)</span>
+            <span class="c1"># stat for a period specified by single string (e.g. '2014', '2014-01', etc.)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">period_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">]</span>
 
         <span class="c1"># no time period in source data specified for statistic; use start/end of current model period</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">period_stat</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">datetime_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> \
-                <span class="s2">&quot;datetime_column needed for &quot;</span> \
-                <span class="s2">&quot;resampling irregular data to model stress periods&quot;</span>
+                <span class="s2">"datetime_column needed for "</span> \
+                <span class="s2">"resampling irregular data to model stress periods"</span>
             <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_string_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">end_datetime_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> \
@@ -807,14 +807,14 @@
             <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">end_datetime</span><span class="p">)</span>
             <span class="c1"># &gt;= includes the start datetime</span>
             <span class="c1"># if there is no end_datetime column, select values that have start_datetimes within the period</span>
-            <span class="c1"># this excludes values that start before the period but don&#39;t have an end date</span>
+            <span class="c1"># this excludes values that start before the period but don't have an end date</span>
             <span class="k">if</span> <span class="n">end_datetime_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                 <span class="n">data_overlaps_period</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">end_datetime</span><span class="p">)</span> <span class="o">&amp;</span> \
                                        <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">start_datetime</span><span class="p">)</span>
             <span class="c1"># if some end_datetimes are missing, assume end_datetime is the period end</span>
             <span class="c1"># this assumes that missing end datetimes indicate pumping that continues to the end of the simulation</span>
             <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_datetime</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s1">'end_datetime'</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_datetime</span>
                 <span class="n">data_overlaps_period</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">end_datetime</span><span class="p">)</span> <span class="o">&amp;</span> \
                                        <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">end_datetime_column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">start_datetime</span><span class="p">)</span>
             <span class="c1"># otherwise, select values with start datetimes that are before the period end</span>
@@ -828,15 +828,15 @@
             <span class="n">period_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_overlaps_period</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># create category column if there is none, to conform to logic below</span>
     <span class="n">categories</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">category_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">category_column</span> <span class="o">=</span> <span class="s1">&#39;category&#39;</span>
-        <span class="n">period_data</span><span class="p">[</span><span class="n">category_column</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;measured&#39;</span>
+        <span class="n">category_column</span> <span class="o">=</span> <span class="s1">'category'</span>
+        <span class="n">period_data</span><span class="p">[</span><span class="n">category_column</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'measured'</span>
     <span class="k">elif</span> <span class="n">category_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">period_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;category_column: </span><span class="si">{}</span><span class="s1"> not in data&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">category_column</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">'category_column: </span><span class="si">{}</span><span class="s1"> not in data'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">category_column</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">categories</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -851,9 +851,9 @@
     <span class="n">aggregated</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">id_column</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">data_column</span> <span class="ow">in</span> <span class="n">data_columns</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">duplicated</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">resolve_duplicates_with</span> <span class="o">==</span> <span class="s1">&#39;raise error&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">resolve_duplicates_with</span> <span class="o">==</span> <span class="s1">'raise error'</span><span class="p">:</span>
                 <span class="n">duplicate_info</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">duplicated</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The following locations are duplicates which need to be resolved:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">duplicate_info</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">'The following locations are duplicates which need to be resolved:</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">duplicate_info</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="n">period_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">by_period</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">datetime_column</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
@@ -867,21 +867,21 @@
     <span class="c1"># for each measurement location, for current stress period</span>
     <span class="k">if</span> <span class="n">categories</span><span class="p">:</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">period_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">id_column</span><span class="p">,</span> <span class="n">category_column</span><span class="p">])</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">&#39;measured&#39;</span><span class="p">,</span> <span class="s1">&#39;estimated&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">'measured'</span><span class="p">,</span> <span class="s1">'estimated'</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                 <span class="n">counts</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">aggregated</span><span class="p">[</span><span class="s1">&#39;n_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col</span><span class="p">)]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+            <span class="n">aggregated</span><span class="p">[</span><span class="s1">'n_</span><span class="si">{}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col</span><span class="p">)]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
     <span class="n">aggregated</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># add datetime back in</span>
-    <span class="n">aggregated</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">start_datetime</span>
+    <span class="n">aggregated</span><span class="p">[</span><span class="s1">'start_datetime'</span><span class="p">]</span> <span class="o">=</span> <span class="n">start</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">start_datetime</span>
     <span class="c1"># enforce consistent datetime dtypes</span>
     <span class="c1"># (otherwise pd.concat of multiple outputs from this function may fail)</span>
-    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">&#39;start_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;end_datetime&#39;</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="s1">'start_datetime'</span><span class="p">,</span> <span class="s1">'end_datetime'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">aggregated</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">aggregated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">aggregated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;datetime64[ns]&#39;</span><span class="p">)</span>
+            <span class="n">aggregated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">aggregated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">'datetime64[ns]'</span><span class="p">)</span>
 
-    <span class="c1"># drop original datetime column, which doesn&#39;t reflect dates for period averages</span>
+    <span class="c1"># drop original datetime column, which doesn't reflect dates for period averages</span>
     <span class="n">drop_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime_column</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">categories</span><span class="p">:</span>  <span class="c1"># drop category column if it was created</span>
         <span class="n">drop_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">category_column</span><span class="p">)</span>
@@ -892,19 +892,19 @@
 
 <div class="viewcode-block" id="aggregate_xarray_to_stress_period">
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.aggregate_xarray_to_stress_period">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">aggregate_xarray_to_stress_period</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">datetime_coords_name</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">aggregate_xarray_to_stress_period</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">datetime_coords_name</span><span class="o">=</span><span class="s1">'time'</span><span class="p">,</span>
                                       <span class="n">start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                      <span class="n">period_stat</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+                                      <span class="n">period_stat</span><span class="o">=</span><span class="s1">'mean'</span><span class="p">):</span>
 
     <span class="n">period_stat</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">period_stat</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">):</span>
-        <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">start_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">start_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">'%Y-%m-</span><span class="si">%d</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_datetime</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">):</span>
-        <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">end_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">end_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">'%Y-%m-</span><span class="si">%d</span><span class="s1">'</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">period_stat</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">period_stat</span> <span class="o">=</span> <span class="p">[</span><span class="n">period_stat</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">period_stat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">period_stat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span>
+        <span class="n">period_stat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'mean'</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">period_stat</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">stat</span> <span class="o">=</span> <span class="n">period_stat</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -921,7 +921,7 @@
             <span class="k">if</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">months</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">or</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">months</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="n">months</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">period</span><span class="p">)]</span><span class="o">.</span><span class="n">values</span>
 
-            <span class="c1"># stat for a period specified by single string (e.g. &#39;2014&#39;, &#39;2014-01&#39;, etc.)</span>
+            <span class="c1"># stat for a period specified by single string (e.g. '2014', '2014-01', etc.)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">period</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
@@ -929,8 +929,8 @@
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">period_stat</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
 
             <span class="k">assert</span> <span class="n">datetime_coords_name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> \
-                <span class="s2">&quot;datetime_column needed for &quot;</span> \
-                <span class="s2">&quot;resampling irregular data to model stress periods&quot;</span>
+                <span class="s2">"datetime_column needed for "</span> \
+                <span class="s2">"resampling irregular data to model stress periods"</span>
             <span class="c1"># not sure if this is needed for xarray</span>
             <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_string_dtype</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">datetime_coords_name</span><span class="p">])</span>
@@ -948,7 +948,7 @@
             <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_datetime</span><span class="p">:</span><span class="n">end_datetime</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
 
     <span class="c1"># compute statistic on data</span>
     <span class="n">aggregated</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">stat</span><span class="p">)(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -960,44 +960,44 @@
 <div class="viewcode-block" id="add_date_comments_to_tdis">
 <a class="viewcode-back" href="../../api/mfsetup.tdis.html#mfsetup.tdis.add_date_comments_to_tdis">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">add_date_comments_to_tdis</span><span class="p">(</span><span class="n">tdis_file</span><span class="p">,</span> <span class="n">start_dates</span><span class="p">,</span> <span class="n">end_dates</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add stress period start and end dates to a tdis file as comments;</span>
+<span class="w">    </span><span class="sd">"""Add stress period start and end dates to a tdis file as comments;</span>
 <span class="sd">    add modflow-setup version info to tdis file header.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tempfile</span> <span class="o">=</span> <span class="n">tdis_file</span> <span class="o">+</span> <span class="s1">&#39;.temp&#39;</span>
+<span class="sd">    """</span>
+    <span class="n">tempfile</span> <span class="o">=</span> <span class="n">tdis_file</span> <span class="o">+</span> <span class="s1">'.temp'</span>
     <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">tdis_file</span><span class="p">,</span> <span class="n">tempfile</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tempfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tdis_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dest</span><span class="p">:</span>
-            <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tdis_file</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">dest</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="s1">''</span>
             <span class="n">read_header</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">src</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">read_header</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
-                        <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;!&#39;</span><span class="p">,</span> <span class="s1">&#39;//&#39;</span><span class="p">}:</span>
+                        <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">'#'</span><span class="p">,</span> <span class="s1">'!'</span><span class="p">,</span> <span class="s1">'//'</span><span class="p">}:</span>
                     <span class="n">header</span> <span class="o">+=</span> <span class="n">line</span>
-                <span class="k">elif</span> <span class="s1">&#39;begin options&#39;</span> <span class="ow">in</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
-                    <span class="k">if</span> <span class="s1">&#39;modflow-setup&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="s1">&#39;flopy&#39;</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">&#39;# via &#39;</span>
+                <span class="k">elif</span> <span class="s1">'begin options'</span> <span class="ow">in</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
+                    <span class="k">if</span> <span class="s1">'modflow-setup'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s1">'flopy'</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">'# via '</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">&#39;# File created by &#39;</span>
-                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">&#39;modflow-setup version </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
-                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">&#39; at {:%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
-                        <span class="n">header</span> <span class="o">+=</span> <span class="n">mfsetup_text</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                            <span class="n">mfsetup_text</span> <span class="o">=</span> <span class="s1">'# File created by '</span>
+                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">'modflow-setup version </span><span class="si">{}</span><span class="s1">'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mfsetup</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+                        <span class="n">mfsetup_text</span> <span class="o">+=</span> <span class="s1">' at {:%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+                        <span class="n">header</span> <span class="o">+=</span> <span class="n">mfsetup_text</span> <span class="o">+</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
                     <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
                     <span class="n">read_header</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="s1">&#39;begin perioddata&#39;</span> <span class="ow">in</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
+                <span class="k">elif</span> <span class="s1">'begin perioddata'</span> <span class="ow">in</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
                     <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="s1">&#39;# perlen nstp tsmult</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="s1">' '</span> <span class="o">+</span> <span class="s1">'# perlen nstp tsmult</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
 
                     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="s1">&#39;end perioddata&#39;</span> <span class="ow">in</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
+                        <span class="k">if</span> <span class="s1">'end perioddata'</span> <span class="ow">in</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
                             <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
                             <span class="k">break</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">line</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;  # period </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">%Y-%m-%d</span><span class="si">}</span><span class="s1">&#39;</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="s1">' '</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">'  # period </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">start_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">%Y-%m-%d</span><span class="si">}</span><span class="s1">'</span>
                             <span class="k">if</span> <span class="n">end_dates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                <span class="n">line</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; to </span><span class="si">{</span><span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">%Y-%m-%d</span><span class="si">}</span><span class="s1">&#39;</span>
-                            <span class="n">line</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                                <span class="n">line</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">' to </span><span class="si">{</span><span class="n">end_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s1">%Y-%m-%d</span><span class="si">}</span><span class="s1">'</span>
+                            <span class="n">line</span> <span class="o">+=</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
                             <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
@@ -1013,7 +1013,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>mfsetup.tmr &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -124,12 +124,12 @@
 <a class="viewcode-back" href="../../api/mfsetup.tmr.html#mfsetup.tmr.get_qx_qy_qz">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_qx_qy_qz</span><span class="p">(</span><span class="n">cell_budget_file</span><span class="p">,</span> <span class="n">binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">cell_connections_df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">version</span><span class="o">=</span><span class="s1">&#39;mf6&#39;</span><span class="p">,</span>
+                 <span class="n">version</span><span class="o">=</span><span class="s1">'mf6'</span><span class="p">,</span>
                  <span class="n">kstpkper</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                  <span class="n">specific_discharge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">headfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">modelgrid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get 2 or 3D arrays of cell by cell flows across the cell faces</span>
+<span class="w">    </span><span class="sd">"""Get 2 or 3D arrays of cell by cell flows across the cell faces</span>
 <span class="sd">    (for structured grid models).</span>
 
 <span class="sd">    Parameters</span>
@@ -156,7 +156,7 @@
 <span class="sd">        === =============================================================</span>
 
 <span class="sd">    version : str</span>
-<span class="sd">        MODFLOW version- &#39;mf6&#39; or other. If not &#39;mf6&#39;, the cell budget output</span>
+<span class="sd">        MODFLOW version- 'mf6' or other. If not 'mf6', the cell budget output</span>
 <span class="sd">        is assumed to be formatted similar to a MODFLOW 2005 style model.</span>
 <span class="sd">    model_top : 2D numpy array of shape (nrow, ncol)</span>
 <span class="sd">        Model top elevations (only needed for modflow 2005 style models without</span>
@@ -181,20 +181,20 @@
 <span class="sd">    -------</span>
 <span class="sd">    Qx, Qy, Qz : tuple of 2 or 3D numpy arrays</span>
 <span class="sd">        Volumetric or specific discharge fluxes across cell faces.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Getting discharge...&#39;</span>
+<span class="sd">    """</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">'Getting discharge...'</span>
     <span class="k">if</span> <span class="n">specific_discharge</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Getting specific discharge...&#39;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">'Getting specific discharge...'</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">ta</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s1">'mf6'</span><span class="p">:</span>
         <span class="c1"># get the cell connections</span>
         <span class="k">if</span> <span class="n">cell_connections_df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">cell_connections_df</span>
         <span class="k">elif</span> <span class="n">binary_grid_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">get_intercell_connections</span><span class="p">(</span><span class="n">binary_grid_file</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must specify a binary_grid_file or cell_connections_df.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Must specify a binary_grid_file or cell_connections_df."</span><span class="p">)</span>
 
         <span class="c1"># get the flows</span>
         <span class="c1"># this constitutes almost all of the execution time for this fn</span>
@@ -204,46 +204,46 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cbb</span> <span class="o">=</span> <span class="n">cell_budget_file</span>
         <span class="n">nlay</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">flowja</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;FLOW-JA-FACE&#39;</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flowja</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;qidx&#39;</span><span class="p">]]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;getting flows from budget file took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">flowja</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">'FLOW-JA-FACE'</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">'q'</span><span class="p">]</span> <span class="o">=</span> <span class="n">flowja</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'qidx'</span><span class="p">]]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"getting flows from budget file took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># get arrays of flow through cell faces</span>
         <span class="c1"># Qx (right face; TODO: confirm direction)</span>
-        <span class="n">rfdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;jn&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;jm&#39;</span><span class="p">])]</span>
-        <span class="n">nlay</span> <span class="o">=</span> <span class="n">rfdf</span><span class="p">[</span><span class="s1">&#39;km&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">rfdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">'jn'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">'jm'</span><span class="p">])]</span>
+        <span class="n">nlay</span> <span class="o">=</span> <span class="n">rfdf</span><span class="p">[</span><span class="s1">'km'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">qx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nlay</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">))</span>
-        <span class="n">qx</span><span class="p">[</span><span class="n">rfdf</span><span class="p">[</span><span class="s1">&#39;kn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">rfdf</span><span class="p">[</span><span class="s1">&#39;in&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">rfdf</span><span class="p">[</span><span class="s1">&#39;jn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">rfdf</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">qx</span><span class="p">[</span><span class="n">rfdf</span><span class="p">[</span><span class="s1">'kn'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">rfdf</span><span class="p">[</span><span class="s1">'in'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">rfdf</span><span class="p">[</span><span class="s1">'jn'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">rfdf</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">values</span>
 
         <span class="c1"># Qy (front face; TODO: confirm direction)</span>
-        <span class="n">ffdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;in&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;im&#39;</span><span class="p">])]</span>
+        <span class="n">ffdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">'in'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">'im'</span><span class="p">])]</span>
         <span class="n">qy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nlay</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">))</span>
-        <span class="n">qy</span><span class="p">[</span><span class="n">ffdf</span><span class="p">[</span><span class="s1">&#39;kn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ffdf</span><span class="p">[</span><span class="s1">&#39;in&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ffdf</span><span class="p">[</span><span class="s1">&#39;jn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ffdf</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">qy</span><span class="p">[</span><span class="n">ffdf</span><span class="p">[</span><span class="s1">'kn'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ffdf</span><span class="p">[</span><span class="s1">'in'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ffdf</span><span class="p">[</span><span class="s1">'jn'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">ffdf</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">values</span>
 
         <span class="c1"># Qz (bottom face; TODO: confirm that this is downward positive)</span>
-        <span class="n">bfdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;kn&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;km&#39;</span><span class="p">])]</span>
+        <span class="n">bfdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">'kn'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">'km'</span><span class="p">])]</span>
         <span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nlay</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">))</span>
-        <span class="n">qz</span><span class="p">[</span><span class="n">bfdf</span><span class="p">[</span><span class="s1">&#39;kn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">bfdf</span><span class="p">[</span><span class="s1">&#39;in&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">bfdf</span><span class="p">[</span><span class="s1">&#39;jn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">bfdf</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">qz</span><span class="p">[</span><span class="n">bfdf</span><span class="p">[</span><span class="s1">'kn'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">bfdf</span><span class="p">[</span><span class="s1">'in'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">bfdf</span><span class="p">[</span><span class="s1">'jn'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">bfdf</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">values</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_budget_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_budget_file</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
             <span class="n">cbb</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">CellBudgetFile</span><span class="p">(</span><span class="n">cell_budget_file</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cbb</span> <span class="o">=</span> <span class="n">cell_budget_file</span>
-        <span class="n">qx</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;flow right face&quot;</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">qy</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;flow front face&quot;</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">qx</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"flow right face"</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">qy</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"flow front face"</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">unique_rec_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">bs</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">bs</span> <span class="ow">in</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_unique_record_names</span><span class="p">()]</span>
-        <span class="k">if</span> <span class="s2">&quot;flow lower face&quot;</span> <span class="ow">in</span> <span class="n">unique_rec_names</span><span class="p">:</span>
-            <span class="n">qz</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;flow lower face&quot;</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">"flow lower face"</span> <span class="ow">in</span> <span class="n">unique_rec_names</span><span class="p">:</span>
+            <span class="n">qz</span> <span class="o">=</span> <span class="n">cbb</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"flow lower face"</span><span class="p">,</span> <span class="n">kstpkper</span><span class="o">=</span><span class="n">kstpkper</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">qy</span><span class="p">)</span>
 
     <span class="c1"># optionally get specific discharge</span>
     <span class="k">if</span> <span class="n">specific_discharge</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">modelgrid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;specific discharge calculations require a modelgrid input&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">'specific discharge calculations require a modelgrid input'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">headfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No headfile object provided - thickness for specific discharge calculations</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
-                <span class="s1">&#39;will be based on the model top rather than the water table&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">'No headfile object provided - thickness for specific discharge calculations</span><span class="se">\n</span><span class="s1">'</span> <span class="o">+</span>
+                <span class="s1">'will be based on the model top rather than the water table'</span><span class="p">)</span>
             <span class="n">thickness</span> <span class="o">=</span> <span class="n">modelgrid</span><span class="o">.</span><span class="n">cell_thickness</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">headfile</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">headfile</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
@@ -279,12 +279,12 @@
         <span class="n">qy</span> <span class="o">/=</span> <span class="n">qy_face_areas</span>
         <span class="n">qz</span> <span class="o">/=</span> <span class="n">qz_face_areas</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ta</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ta</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">qx</span><span class="p">,</span> <span class="n">qy</span><span class="p">,</span> <span class="n">qz</span></div>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Tmr</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Class for general telescopic mesh refinement of a MODFLOW model. Head or</span>
 <span class="sd">    flux fields from parent model are interpolated to boundary cells of</span>
 <span class="sd">    inset model, which may be in any configuration (jagged, rotated, etc.).</span>
@@ -303,28 +303,28 @@
 <span class="sd">        MODFLOW binary cell budget output</span>
 <span class="sd">    parent_binary_grid_file : filepath</span>
 <span class="sd">        MODFLOW 6 binary grid file (``*.grb``)</span>
-<span class="sd">    define_connections : str, {&#39;max_active_extent&#39;, &#39;by_layer&#39;}</span>
+<span class="sd">    define_connections : str, {'max_active_extent', 'by_layer'}</span>
 <span class="sd">        Method for defining perimeter cells where the TMR boundary</span>
-<span class="sd">        condition will be applied. If &#39;max_active_extent&#39;, the</span>
+<span class="sd">        condition will be applied. If 'max_active_extent', the</span>
 <span class="sd">        maximum footprint of the active area (including all cell</span>
 <span class="sd">        locations with at least one layer that is active) will be used.</span>
-<span class="sd">        If &#39;by_layer&#39;, the perimeter of the active area in each layer will be used</span>
-<span class="sd">        (excluding any interior clusters of active cells). The &#39;by_layer&#39;</span>
+<span class="sd">        If 'by_layer', the perimeter of the active area in each layer will be used</span>
+<span class="sd">        (excluding any interior clusters of active cells). The 'by_layer'</span>
 <span class="sd">        option is potentially problematic if some layers have substantial</span>
 <span class="sd">        areas of pinched-out (idomain != 1) cells, which may result</span>
 <span class="sd">        in perimeter boundary condition cells getting placed too close</span>
-<span class="sd">        to the area of interest. By default, &#39;max_active_extent&#39;.</span>
+<span class="sd">        to the area of interest. By default, 'max_active_extent'.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_model</span><span class="p">,</span> <span class="n">inset_model</span><span class="p">,</span>
                  <span class="n">parent_head_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent_cell_budget_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">parent_binary_grid_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">boundary_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inset_parent_period_mapping</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">parent_start_date_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">define_connections_by</span><span class="o">=</span><span class="s1">&#39;max_active_extent&#39;</span><span class="p">,</span>
+                 <span class="n">define_connections_by</span><span class="o">=</span><span class="s1">'max_active_extent'</span><span class="p">,</span>
                  <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent_model</span>
@@ -336,17 +336,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">shapefile</span> <span class="o">=</span> <span class="n">shapefile</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">=</span> <span class="n">boundary_type</span>
         <span class="k">if</span> <span class="n">boundary_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_head_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">=</span> <span class="s1">&#39;head&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">=</span> <span class="s1">'head'</span>
         <span class="k">elif</span> <span class="n">boundary_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parent_cell_budget_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">=</span> <span class="s1">&#39;flux&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">=</span> <span class="s1">'flux'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_start_date_time</span> <span class="o">=</span> <span class="n">parent_start_date_time</span>
 
         <span class="c1"># Path for writing auxilliary output tables</span>
         <span class="c1"># (boundary_cells.shp, etc.)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">,</span> <span class="s1">&#39;_tables_path&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">,</span> <span class="s1">'_tables_path'</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">_tables_path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">model_ws</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;tables&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">model_ws</span><span class="p">)</span> <span class="o">/</span> <span class="s1">'tables'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># properties</span>
@@ -360,10 +360,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">idomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Active area of the inset model.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Active area of the inset model.</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">'mf6'</span><span class="p">:</span>
                 <span class="n">idomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">idomain</span><span class="o">.</span><span class="n">array</span>
                 <span class="k">if</span> <span class="n">idomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">idomain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -375,12 +375,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">inset_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inset_boundary_cells</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">by_layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_connections_by</span> <span class="o">==</span> <span class="s1">&#39;by_layer&#39;</span>
+            <span class="n">by_layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_connections_by</span> <span class="o">==</span> <span class="s1">'by_layer'</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inset_boundary_cells</span><span class="p">(</span><span class="n">by_layer</span><span class="o">=</span><span class="n">by_layer</span><span class="p">)</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">xyzcellcenters</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'z'</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_inset_boundary_cells</span> <span class="o">=</span> <span class="n">df</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inset_boundary_cells</span>
@@ -388,7 +388,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">inset_parent_period_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">nper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">nper</span>
-        <span class="c1"># if mapping between source and dest model periods isn&#39;t specified</span>
+        <span class="c1"># if mapping between source and dest model periods isn't specified</span>
         <span class="c1"># assume one to one mapping of stress periods between models</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inset_parent_period_mapping</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parent_periods</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">nper</span><span class="p">))</span>
@@ -402,10 +402,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">interp_weights_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;For the two main directions of flux (i, j) and the four orientations of</span>
+<span class="w">        </span><span class="sd">"""For the two main directions of flux (i, j) and the four orientations of</span>
 <span class="sd">        inset faces to interpolate to (right.left,top,bottom</span>
 <span class="sd">        we can precalulate the interpolation weights of the combinations to speed up</span>
-<span class="sd">        interpolation&quot;&quot;&quot;</span>
+<span class="sd">        interpolation"""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1"># we need four flux directions for the insets</span>
             <span class="c1"># x, y, z locations of parent model head values for i faces</span>
@@ -416,25 +416,25 @@
 
             <span class="c1"># these are the i-direction fluxes</span>
             <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">&#39;top&#39;</span><span class="p">,</span><span class="s1">&#39;bottom&#39;</span><span class="p">])][[</span><span class="s1">&#39;xface&#39;</span><span class="p">,</span><span class="s1">&#39;yface&#39;</span><span class="p">,</span><span class="s1">&#39;zface&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">&#39;iface&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">((</span><span class="n">ipx</span><span class="p">,</span> <span class="n">ipy</span><span class="p">,</span> <span class="n">ipz</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">&#39;iface&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">'top'</span><span class="p">,</span><span class="s1">'bottom'</span><span class="p">])][[</span><span class="s1">'xface'</span><span class="p">,</span><span class="s1">'yface'</span><span class="p">,</span><span class="s1">'zface'</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">'iface'</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">((</span><span class="n">ipx</span><span class="p">,</span> <span class="n">ipy</span><span class="p">,</span> <span class="n">ipz</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">'iface'</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
 
             <span class="c1"># these are the j-direction fluxes</span>
             <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;right&#39;</span><span class="p">])][[</span><span class="s1">&#39;xface&#39;</span><span class="p">,</span><span class="s1">&#39;yface&#39;</span><span class="p">,</span><span class="s1">&#39;zface&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s1">'left'</span><span class="p">,</span><span class="s1">'right'</span><span class="p">])][[</span><span class="s1">'xface'</span><span class="p">,</span><span class="s1">'yface'</span><span class="p">,</span><span class="s1">'zface'</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">&#39;jface&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">((</span><span class="n">jpx</span><span class="p">,</span> <span class="n">jpy</span><span class="p">,</span> <span class="n">jpz</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">&#39;jface&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">'jface'</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp_weights</span><span class="p">((</span><span class="n">jpx</span><span class="p">,</span> <span class="n">jpy</span><span class="p">,</span> <span class="n">jpz</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span><span class="p">[</span><span class="s1">'jface'</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
 
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp_weights_flux</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">parent_xyzcellcenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, y, z locations of parent cells in a buffered area</span>
+<span class="w">        </span><span class="sd">"""Get x, y, z locations of parent cells in a buffered area</span>
 <span class="sd">        (defined by the _source_grid_mask property) around the</span>
-<span class="sd">        inset model.&quot;&quot;&quot;</span>
+<span class="sd">        inset model."""</span>
         <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">xyzcellcenters</span>
 
         <span class="c1"># add an extra layer on the top and bottom</span>
@@ -464,18 +464,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">parent_xyzcellfacecenters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get x, y, z locations of the centroids of the cell faces</span>
+<span class="w">        </span><span class="sd">"""Get x, y, z locations of the centroids of the cell faces</span>
 <span class="sd">        in the row and column directions in a buffered area</span>
 <span class="sd">        (defined by the _source_grid_mask property) around the</span>
 <span class="sd">        inset model. Analogous to parent_xyzcellcenters, but for</span>
 <span class="sd">        interpolating parent model cell by cell fluxes that are located</span>
 <span class="sd">        at the cell face centers (instead of heads that are located</span>
 <span class="sd">        at the cell centers).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1">#px, py, pz = self.parent.modelgrid.xyzcellcenters</span>
         <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="n">xyzcellfacecenters</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">cellface</span> <span class="ow">in</span> <span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cellface</span> <span class="ow">in</span> <span class="s1">'right'</span><span class="p">,</span> <span class="s1">'bottom'</span><span class="p">:</span>
             <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="n">get_cellface_midpoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
                                                <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span>
                                                <span class="n">cellface</span><span class="p">)</span>
@@ -512,11 +512,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_inset_max_active_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The maximum (2D) footprint of the active area within the inset</span>
+<span class="w">        </span><span class="sd">"""The maximum (2D) footprint of the active area within the inset</span>
 <span class="sd">        model grid, where each i, j location has at least 1 active cell</span>
 <span class="sd">        vertically, excluding any inactive holes that are surrounded by</span>
 <span class="sd">        active cells.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># get the max footprint of active cells</span>
         <span class="n">max_active_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="c1"># fill any holes within the max footprint</span>
@@ -528,8 +528,8 @@
         <span class="c1"># to fill holes, we want to look for clusters of 0s and fill with 1s</span>
         <span class="n">to_fill</span> <span class="o">=</span> <span class="o">~</span><span class="n">max_active_area</span>
         <span class="c1"># pad the array to fill so that exterior inactive cells</span>
-        <span class="c1"># (outside the active area perimeter) aren&#39;t included</span>
-        <span class="n">to_fill</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">to_fill</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;reflect&#39;</span><span class="p">)</span>
+        <span class="c1"># (outside the active area perimeter) aren't included</span>
+        <span class="n">to_fill</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">to_fill</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'reflect'</span><span class="p">)</span>
         <span class="c1"># invert the result to get True values for active cells and filled areas</span>
         <span class="n">filled</span> <span class="o">=</span> <span class="o">~</span><span class="n">find_remove_isolated_cells</span><span class="p">(</span><span class="n">to_fill</span><span class="p">,</span> <span class="n">minimum_cluster_size</span><span class="p">)</span>
         <span class="c1"># de-pad the result</span>
@@ -539,12 +539,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">inset_zone_within_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The footprint of the inset model maximum active area footprint</span>
+<span class="w">        </span><span class="sd">"""The footprint of the inset model maximum active area footprint</span>
 <span class="sd">        (``Tmr._inset_max_active_area``) within the parentmodel grid.</span>
 <span class="sd">        In other words, all parent cells containing one or inset</span>
 <span class="sd">        model cell centers within ``Tmr._inset_max_active_area`` (ones).</span>
 <span class="sd">        Zeros indicate parent cells with no inset cells.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># get the locations of the inset model cells within _inset_max_active_area</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">xyzcellcenters</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_inset_max_active_area</span><span class="p">]</span>
@@ -558,13 +558,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_source_grid_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean array indicating window in parent model grid (subset of cells)</span>
+<span class="w">        </span><span class="sd">"""Boolean array indicating window in parent model grid (subset of cells)</span>
 <span class="sd">        that encompass the inset model domain. Used to speed up interpolation</span>
-<span class="sd">        of parent grid values onto inset grid.&quot;&quot;&quot;</span>
+<span class="sd">        of parent grid values onto inset grid."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nrow</span><span class="p">,</span>
                              <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">ncol</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">,</span> <span class="s1">&#39;parent_mask&#39;</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="p">,</span> <span class="s1">'parent_mask'</span><span class="p">)</span> <span class="ow">and</span> \
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">parent_mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">xcellcenters</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
                 <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">parent_mask</span>
             <span class="k">else</span><span class="p">:</span>
@@ -589,7 +589,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_mask</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_inset_boundary_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">by_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a dataframe of connection information for</span>
+<span class="w">        </span><span class="sd">"""Get a dataframe of connection information for</span>
 <span class="sd">        horizontal boundary cells.</span>
 
 <span class="sd">        Parameters</span>
@@ -601,14 +601,14 @@
 <span class="sd">            False, the maximum footprint of the active area</span>
 <span class="sd">            (including all cell locations with at least one layer that</span>
 <span class="sd">            is active).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">getting perimeter cells...&#39;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">getting perimeter cells...'</span><span class="p">)</span>
         <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">shapefile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">shapefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapefile</span>
         <span class="k">if</span> <span class="n">shapefile</span><span class="p">:</span>
             <span class="n">perimeter</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span>
-            <span class="n">perimeter</span> <span class="o">=</span> <span class="n">perimeter</span><span class="p">[[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]]</span>
+            <span class="n">perimeter</span> <span class="o">=</span> <span class="n">perimeter</span><span class="p">[[</span><span class="s1">'geometry'</span><span class="p">]]</span>
             <span class="c1"># reproject the perimeter shapefile to the model CRS if needed</span>
             <span class="k">if</span> <span class="n">perimeter</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
                 <span class="n">perimeter</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -616,25 +616,25 @@
             <span class="c1"># (so just the cells along the polygon exterior are selected)</span>
             <span class="n">geoms</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">perimeter</span><span class="o">.</span><span class="n">geometry</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;MultiPolygon&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">'MultiPolygon'</span><span class="p">:</span>
                     <span class="n">g</span> <span class="o">=</span> <span class="n">MultiLineString</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">exterior</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">geoms</span><span class="p">])</span>
-                <span class="k">elif</span> <span class="n">g</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">g</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">'Polygon'</span><span class="p">:</span>
                     <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">exterior</span>
                 <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
-            <span class="c1"># add a buffer of 1 cell width so that cells aren&#39;t missed</span>
+            <span class="c1"># add a buffer of 1 cell width so that cells aren't missed</span>
             <span class="c1"># extra cells will get culled later</span>
             <span class="c1"># when only cells along the outer perimeter (max idomain extent)</span>
             <span class="c1"># are selected</span>
             <span class="n">buffer_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delc</span><span class="o">.</span><span class="n">mean</span><span class="p">()])</span>
-            <span class="n">perimeter</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer_dist</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">geoms</span><span class="p">]</span>
+            <span class="n">perimeter</span><span class="p">[</span><span class="s1">'geometry'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer_dist</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">geoms</span><span class="p">]</span>
             <span class="n">grid_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">grid_df</span><span class="p">,</span> <span class="n">perimeter</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s1">&#39;intersects&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">grid_df</span><span class="p">,</span> <span class="n">perimeter</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s1">'intersects'</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">'inner'</span><span class="p">)</span>
             <span class="c1"># add layers</span>
             <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">nlay</span><span class="p">):</span>
                 <span class="n">kdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">kdf</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+                <span class="n">kdf</span><span class="p">[</span><span class="s1">'k'</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
                 <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kdf</span><span class="p">)</span>
             <span class="n">specified_bcells</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
             <span class="c1"># get the active extent in each layer</span>
@@ -655,8 +655,8 @@
             <span class="n">df</span> <span class="o">=</span> <span class="n">get_horizontal_connections</span><span class="p">(</span><span class="n">filled3d</span><span class="p">,</span> <span class="n">connection_info</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="c1"># deincrement rows and columns</span>
             <span class="c1"># so that they reflect positions in the non-padded array</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'i'</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'j'</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">layer_idomain</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">):</span>
@@ -674,11 +674,11 @@
                 <span class="c1"># of the model active area perimeter,</span>
                 <span class="c1"># via a sobel filter</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">get_horizontal_connections</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">connection_info</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">'k'</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
                 <span class="c1"># deincrement rows and columns</span>
                 <span class="c1"># so that they reflect positions in the non-padded array</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">'i'</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">'j'</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
                 <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
 
@@ -686,62 +686,62 @@
             <span class="c1"># with the sobel filter on the outer perimeter</span>
             <span class="c1"># to just the cells specified in the shapefile</span>
             <span class="k">if</span> <span class="n">specified_bcells</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
-                <span class="n">specified_bcells</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">specified_bcells</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">specified_bcells</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">specified_bcells</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
+                <span class="n">specified_bcells</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">specified_bcells</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">specified_bcells</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">specified_bcells</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">cellid</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">specified_bcells</span><span class="o">.</span><span class="n">cellid</span><span class="p">)]</span>
 
         <span class="c1"># add layer top and bottom and idomain information</span>
         <span class="n">layer_tops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">array</span><span class="p">]</span> <span class="o">+</span>
                               <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">])[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer_tops</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;botm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="s1">&#39;BAS6&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">():</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;cellface&#39;</span><span class="p">,</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;botm&#39;</span><span class="p">,</span> <span class="s1">&#39;idomain&#39;</span><span class="p">]]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">'top'</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer_tops</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">'botm'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">dis</span><span class="o">.</span><span class="n">botm</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">'idomain'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">'mf6'</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'idomain'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idomain</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s1">'BAS6'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">get_package_list</span><span class="p">():</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'idomain'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">bas6</span><span class="o">.</span><span class="n">ibound</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">'k'</span><span class="p">,</span> <span class="s1">'i'</span><span class="p">,</span> <span class="s1">'j'</span><span class="p">,</span> <span class="s1">'cellface'</span><span class="p">,</span> <span class="s1">'top'</span><span class="p">,</span> <span class="s1">'botm'</span><span class="p">,</span> <span class="s1">'idomain'</span><span class="p">]]</span>
         <span class="c1"># drop inactive cells</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'idomain'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># get cell polygons from modelgrid</span>
         <span class="c1"># write shapefile of boundary cells with face information</span>
         <span class="n">grid_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">grid_df</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">grid_df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">grid_df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">grid_df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
-        <span class="n">geoms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">grid_df</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">],</span> <span class="n">grid_df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]))</span>
-        <span class="k">if</span> <span class="s1">&#39;cellid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">geoms</span><span class="p">[</span><span class="n">cellid</span><span class="p">]</span> <span class="k">for</span> <span class="n">cellid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">cellid</span><span class="p">]</span>
+        <span class="n">grid_df</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">grid_df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">grid_df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">grid_df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
+        <span class="n">geoms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">grid_df</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">],</span> <span class="n">grid_df</span><span class="p">[</span><span class="s1">'geometry'</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="s1">'cellid'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">'geometry'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">geoms</span><span class="p">[</span><span class="n">cellid</span><span class="p">]</span> <span class="k">for</span> <span class="n">cellid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">cellid</span><span class="p">]</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-        <span class="n">outshp</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="p">,</span> <span class="s1">&#39;boundary_cells.shp&#39;</span><span class="p">)</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;cellid&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">outshp</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;wrote </span><span class="si">{</span><span class="n">outshp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;perimeter cells took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+        <span class="n">outshp</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tables_path</span><span class="p">,</span> <span class="s1">'boundary_cells.shp'</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'cellid'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">outshp</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">outshp</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"perimeter cells took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">df</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_inset_boundary_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">for_external_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">==</span> <span class="s1">&#39;head&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">==</span> <span class="s1">'head'</span><span class="p">:</span>
             <span class="n">check_source_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span><span class="p">])</span>
-            <span class="n">hdsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span><span class="p">)</span>  <span class="c1"># , precision=&#39;single&#39;)</span>
+            <span class="n">hdsobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">HeadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span><span class="p">)</span>  <span class="c1"># , precision='single')</span>
             <span class="n">all_kstpkper</span> <span class="o">=</span> <span class="n">hdsobj</span><span class="o">.</span><span class="n">get_kstpkper</span><span class="p">()</span>
 
             <span class="n">last_steps</span> <span class="o">=</span> <span class="p">{</span><span class="n">kper</span><span class="p">:</span> <span class="n">kstp</span> <span class="k">for</span> <span class="n">kstp</span><span class="p">,</span> <span class="n">kper</span> <span class="ow">in</span> <span class="n">all_kstpkper</span><span class="p">}</span>
 
             <span class="c1"># create an interpolator instance</span>
             <span class="n">cell_centers_interp</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_xyzcellcenters</span><span class="p">,</span>
-                                               <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">'x'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">'z'</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                                                <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
                                                <span class="n">source_values_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_grid_mask</span><span class="p">)</span>
             <span class="c1"># compute the weights</span>
             <span class="n">_</span> <span class="o">=</span> <span class="n">cell_centers_interp</span><span class="o">.</span><span class="n">interp_weights</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">getting perimeter heads...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">getting perimeter heads...'</span><span class="p">)</span>
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">parent_periods</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">inset_per</span><span class="p">,</span> <span class="n">parent_per</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_parent_period_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for stress period </span><span class="si">{</span><span class="n">inset_per</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'for stress period </span><span class="si">{</span><span class="n">inset_per</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">', '</span><span class="p">)</span>
                 <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="c1"># skip getting data if parent period is already represented</span>
                 <span class="c1"># (heads will be reused)</span>
@@ -755,51 +755,51 @@
                 <span class="c1"># so that inset cells above and below the top/bottom cell centers</span>
                 <span class="c1"># will be within the interpolation space</span>
                 <span class="c1"># (parent x, y, z locations already contain this pad; parent_xyzcellcenters)</span>
-                <span class="n">parent_heads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">parent_heads</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">parent_heads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">parent_heads</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'edge'</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># interpolate inset boundary heads from 3D parent head solution</span>
-                <span class="n">heads</span> <span class="o">=</span> <span class="n">cell_centers_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">parent_heads</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+                <span class="n">heads</span> <span class="o">=</span> <span class="n">cell_centers_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">parent_heads</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'linear'</span><span class="p">)</span>
                 <span class="c1">#heads = griddata((px, py, pz), parent_heads.ravel(),</span>
-                <span class="c1">#                  (x, y, z), method=&#39;linear&#39;)</span>
+                <span class="c1">#                  (x, y, z), method='linear')</span>
 
                 <span class="c1"># make a DataFrame of interpolated heads at perimeter cell locations</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inset_per</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;head&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">heads</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">'per'</span><span class="p">]</span> <span class="o">=</span> <span class="n">inset_per</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">'head'</span><span class="p">]</span> <span class="o">=</span> <span class="n">heads</span>
 
                 <span class="c1"># boundary heads must be greater than the cell bottom</span>
                 <span class="c1"># and idomain &gt; 0</span>
-                <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;head&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;botm&#39;</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">loc</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">'head'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">df</span><span class="p">[</span><span class="s1">'botm'</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">'idomain'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
                 <span class="c1"># drop invalid heads (most likely due to dry cells)</span>
-                <span class="n">valid</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;head&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;head&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">1e10</span><span class="p">)</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">'head'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">'head'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">1e10</span><span class="p">)</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
                 <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;took </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"took </span><span class="si">{:.2f}</span><span class="s2">s"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span><span class="p">))</span>
 
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
             <span class="c1"># drop duplicate cells (accounting for stress periods)</span>
             <span class="c1"># (that may have connections in the x and y directions,</span>
             <span class="c1">#  and therefore would be listed twice)</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">per</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
-            <span class="n">duplicates</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cellid&#39;</span><span class="p">])</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">duplicates</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;per&#39;</span><span class="p">,</span> <span class="s1">&#39;head&#39;</span><span class="p">]]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;getting perimeter heads took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">per</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">j</span><span class="p">))</span>
+            <span class="n">duplicates</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">'cellid'</span><span class="p">])</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">duplicates</span><span class="p">,</span> <span class="p">[</span><span class="s1">'k'</span><span class="p">,</span> <span class="s1">'i'</span><span class="p">,</span> <span class="s1">'j'</span><span class="p">,</span> <span class="s1">'per'</span><span class="p">,</span> <span class="s1">'head'</span><span class="p">]]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"getting perimeter heads took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
 
 
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">==</span> <span class="s1">&#39;flux&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_type</span> <span class="o">==</span> <span class="s1">'flux'</span><span class="p">:</span>
             <span class="n">check_source_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell_budget_file</span><span class="p">])</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">'mf6'</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_binary_grid_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Specified flux perimeter boundary requires a parent_binary_grid_file if parent is MF6&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Specified flux perimeter boundary requires a parent_binary_grid_file if parent is MF6'</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">check_source_files</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_binary_grid_file</span><span class="p">])</span>
-            <span class="n">fileobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">CellBudgetFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell_budget_file</span><span class="p">)</span>  <span class="c1"># , precision=&#39;single&#39;)</span>
+            <span class="n">fileobj</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">CellBudgetFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_cell_budget_file</span><span class="p">)</span>  <span class="c1"># , precision='single')</span>
             <span class="n">all_kstpkper</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">get_kstpkper</span><span class="p">()</span>
 
             <span class="n">last_steps</span> <span class="o">=</span> <span class="p">{</span><span class="n">kper</span><span class="p">:</span> <span class="n">kstp</span> <span class="k">for</span> <span class="n">kstp</span><span class="p">,</span> <span class="n">kper</span> <span class="ow">in</span> <span class="n">all_kstpkper</span><span class="p">}</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">getting perimeter fluxes...&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">getting perimeter fluxes...'</span><span class="p">)</span>
             <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">parent_periods</span> <span class="o">=</span> <span class="p">[]</span>
@@ -811,8 +811,8 @@
             <span class="c1"># * need to locate edge faces (x,y,z) based on which faces is out (e.g. left, right, up, down)</span>
 
             <span class="c1"># TODO: refactor self.inset_boundary_cells</span>
-            <span class="c1"># it&#39;s probably not ideal to have self.inset_boundary_cells</span>
-            <span class="c1"># be a &#39;public&#39; attribute that gets modified every stress period</span>
+            <span class="c1"># it's probably not ideal to have self.inset_boundary_cells</span>
+            <span class="c1"># be a 'public' attribute that gets modified every stress period</span>
             <span class="c1"># but without any information tying the current state of it</span>
             <span class="c1"># to a specific stress period. It should either have all stress periods</span>
             <span class="c1"># or the stress period-specific information</span>
@@ -823,39 +823,39 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="c1"># get the locations of the boundary face midpoints</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">get_cellface_midpoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="p">,</span>
-                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;cellface&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
+                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">'k'</span><span class="p">,</span> <span class="s1">'i'</span><span class="p">,</span> <span class="s1">'j'</span><span class="p">,</span> <span class="s1">'cellface'</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'y'</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'z'</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
             <span class="c1"># renaming columns to be clear now x,y,z, is for the outer cell face</span>
-            <span class="c1">#self.inset_boundary_cell_faces.rename(columns={&#39;x&#39;:&#39;xface&#39;,&#39;y&#39;:&#39;yface&#39;,&#39;z&#39;:&#39;zface&#39;}, inplace=True)</span>
+            <span class="c1">#self.inset_boundary_cell_faces.rename(columns={'x':'xface','y':'yface','z':'zface'}, inplace=True)</span>
             <span class="c1"># convert x,y coordinates to model coords from world coords</span>
             <span class="c1">#self.inset_boundary_cell_faces.xface, self.inset_boundary_cell_faces.yface = \</span>
             <span class="c1">#        self.inset.modelgrid.get_local_coords(self.inset_boundary_cell_faces.xface, self.inset_boundary_cell_faces.yface)</span>
             <span class="c1"># calculate the thickness to later get the area</span>
             <span class="c1"># TODO: consider saturated thickness instead, but this would require interpolating parent heads to inset cell locations</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">top</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">botm</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'thickness'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">top</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">botm</span>
             <span class="c1"># populate cell face widths</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-            <span class="n">left_right_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;cellface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">({</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'width'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">left_right_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'cellface'</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">({</span><span class="s1">'left'</span><span class="p">,</span> <span class="s1">'right'</span><span class="p">})</span>
             <span class="c1"># left and right faces are along columns</span>
-            <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_right_faces</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_right_faces</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_right_faces</span><span class="p">,</span> <span class="s1">'i'</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_right_faces</span><span class="p">,</span> <span class="s1">'width'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delc</span><span class="p">[</span><span class="n">rows</span><span class="p">]</span>
             <span class="c1"># top and bottom faces are along rows</span>
-            <span class="n">top_bottom_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;cellface&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">({</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">})</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_bottom_faces</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_bottom_faces</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+            <span class="n">top_bottom_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'cellface'</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">({</span><span class="s1">'top'</span><span class="p">,</span> <span class="s1">'bottom'</span><span class="p">})</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_bottom_faces</span><span class="p">,</span> <span class="s1">'j'</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_bottom_faces</span><span class="p">,</span> <span class="s1">'width'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset</span><span class="o">.</span><span class="n">modelgrid</span><span class="o">.</span><span class="n">delr</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'width'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;face_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">*</span>\
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'face_area'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'width'</span><span class="p">]</span> <span class="o">*</span>\
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'thickness'</span><span class="p">]</span>
             <span class="c1"># pre-seed the area as thickness to later mult by width</span>
-            <span class="c1">#self.inset_boundary_cell_faces[&#39;face_area&#39;] = self.inset_boundary_cell_faces[&#39;thickness&#39;].values</span>
+            <span class="c1">#self.inset_boundary_cell_faces['face_area'] = self.inset_boundary_cell_faces['thickness'].values</span>
             <span class="c1"># placeholder for interpolated values</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;q_interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'q_interp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
             <span class="c1"># placeholder for flux to well package</span>
-            <span class="c1"># self.inset_boundary_cell_faces[&#39;Q&#39;] = np.nan</span>
+            <span class="c1"># self.inset_boundary_cell_faces['Q'] = np.nan</span>
 
             <span class="c1"># make a grid of the spacings</span>
             <span class="c1">#delr_gridi, delc_gridi = np.meshgrid(self.inset.modelgrid.delr, self.inset.modelgrid.delc)</span>
@@ -865,18 +865,18 @@
             <span class="c1">#    currj = self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn].j</span>
             <span class="c1">#    curr_delc = delc_gridi[curri, currj]</span>
             <span class="c1">#    curr_delr = delr_gridi[curri, currj]</span>
-            <span class="c1">#    if cn == &#39;top&#39;:</span>
-            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;yface&#39;] += curr_delc/2</span>
-            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;face_area&#39;] *= curr_delr</span>
-            <span class="c1">#    elif cn == &#39;bottom&#39;:</span>
-            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;yface&#39;] -= curr_delc/2</span>
-            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;face_area&#39;] *= curr_delr</span>
-            <span class="c1">#    if cn == &#39;right&#39;:</span>
-            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;xface&#39;] += curr_delr/2</span>
-            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;face_area&#39;] *= curr_delc</span>
-            <span class="c1">#    elif cn == &#39;left&#39;:</span>
-            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;xface&#39;] -= curr_delr/2</span>
-            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, &#39;face_area&#39;] *= curr_delc</span>
+            <span class="c1">#    if cn == 'top':</span>
+            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] += curr_delc/2</span>
+            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr</span>
+            <span class="c1">#    elif cn == 'bottom':</span>
+            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'yface'] -= curr_delc/2</span>
+            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delr</span>
+            <span class="c1">#    if cn == 'right':</span>
+            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] += curr_delr/2</span>
+            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc</span>
+            <span class="c1">#    elif cn == 'left':</span>
+            <span class="c1">#        #self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'xface'] -= curr_delr/2</span>
+            <span class="c1">#        self.inset_boundary_cell_faces.loc[self.inset_boundary_cell_faces.cellface==cn, 'face_area'] *= curr_delc</span>
 
             <span class="c1">#</span>
             <span class="c1"># Now handle the geometry issues for the parent</span>
@@ -904,9 +904,9 @@
             <span class="c1">#yloc_edge = np.tile(np.atleast_2d(yloc_edge).T,(nlay+2,1,ncol))</span>
 <span class="c1">#</span>
             <span class="c1">## TODO: implement vertical fluxes</span>
-            <span class="c1">#&#39;&#39;&#39; parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \</span>
+            <span class="c1">#''' parent_vface_areas  = np.tile(delc_grid, (nlay,1,1)) * \</span>
             <span class="c1">#                    np.tile(delr_grid, (nlay,1,1))</span>
-            <span class="c1">#&#39;&#39;&#39;</span>
+            <span class="c1">#'''</span>
             <span class="c1">#xloc_center, yloc_center = self.parent.modelgrid.xycenters</span>
 <span class="c1">#</span>
             <span class="c1">## tile out to full dimensions of the grid</span>
@@ -939,10 +939,10 @@
             <span class="c1">##  for zlocations, -1 layers</span>
             <span class="c1">#self.z_kface_parent = zloc.ravel()</span>
 <span class="c1">#</span>
-            <span class="c1">#&#39;&#39;&#39;</span>
+            <span class="c1">#'''</span>
             <span class="c1">## get the perimeter cells and calculate the weights</span>
             <span class="c1">#_ = self.interp_weights_flux</span>
-            <span class="c1">#&#39;&#39;&#39;</span>
+            <span class="c1">#'''</span>
             <span class="c1"># interpolate parent face centers</span>
             <span class="c1"># (where the cell by cell flows and specific discharge values are located)</span>
             <span class="c1"># to inset face centers along the exterior sides of the boundary cells</span>
@@ -954,10 +954,10 @@
             <span class="c1">#py = self.y_iface_parent</span>
             <span class="c1">#pz = self.z_iface_parent</span>
             <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_xyzcellcenters</span>
-            <span class="c1">#px, py, pz = self.parent_xyzcellfacecenters[&#39;bottom&#39;]</span>
+            <span class="c1">#px, py, pz = self.parent_xyzcellfacecenters['bottom']</span>
             <span class="n">iface_interp</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">((</span><span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span><span class="p">),</span>
-                                        <span class="c1">#self.inset_boundary_cell_faces[[&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]].T.values,</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                        <span class="c1">#self.inset_boundary_cell_faces[['x', 'y', 'z']].T.values,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">'x'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">'z'</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                                         <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_grid_mask</span>
                                         <span class="p">)</span>
             <span class="n">_</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interp_weights</span>
@@ -966,27 +966,27 @@
             <span class="c1">#px = self.x_jface_parent</span>
             <span class="c1">#py = self.y_jface_parent</span>
             <span class="c1">#pz = self.z_jface_parent</span>
-            <span class="c1">#px, py, pz = self.parent_xyzcellfacecenters[&#39;right&#39;]</span>
+            <span class="c1">#px, py, pz = self.parent_xyzcellfacecenters['right']</span>
             <span class="c1">#jface_interp = Interpolator((px, py, pz),</span>
-            <span class="c1">#                            #self.inset_boundary_cell_faces[[&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]].T.values,</span>
-            <span class="c1">#                            self.inset_boundary_cells[[&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]].T.values,</span>
+            <span class="c1">#                            #self.inset_boundary_cell_faces[['x', 'y', 'z']].T.values,</span>
+            <span class="c1">#                            self.inset_boundary_cells[['x', 'y', 'z']].T.values,</span>
             <span class="c1">#                            d=3, source_values_mask=self._source_grid_mask</span>
             <span class="c1">#                            )</span>
             <span class="c1">#_ = jface_interp.interp_weights</span>
 
             <span class="c1">#kface_interp = Interpolator((self.x_kface_parent, self.y_kface_parent, self.z_kface_parent),</span>
-            <span class="c1">#                            self.inset_boundary_cells[[&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]].T.values,</span>
+            <span class="c1">#                            self.inset_boundary_cells[['x', 'y', 'z']].T.values,</span>
             <span class="c1">#                            d=3)</span>
             <span class="c1">#_ = kface_interp.interp_weights</span>
 
             <span class="c1"># get a dataframe of cell connections</span>
             <span class="c1"># (that can be reused with subsequent stress periods)</span>
             <span class="n">cell_connections_df</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;mf6&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">'mf6'</span><span class="p">:</span>
                 <span class="n">cell_connections_df</span> <span class="o">=</span> <span class="n">get_intercell_connections</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_binary_grid_file</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">inset_per</span><span class="p">,</span> <span class="n">parent_per</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_parent_period_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for stress period </span><span class="si">{</span><span class="n">inset_per</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'for stress period </span><span class="si">{</span><span class="n">inset_per</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">', '</span><span class="p">)</span>
                 <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="c1"># skip getting data if parent period is already represented</span>
                 <span class="c1"># (heads will be reused)</span>
@@ -1008,15 +1008,15 @@
                 <span class="c1"># pad the two parent flux arrays on the top and bottom</span>
                 <span class="c1"># so that inset cells above and below the top/bottom cell centers</span>
                 <span class="c1"># will be within the interpolation space</span>
-                <span class="n">qx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">qx</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">qy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">qy</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">qz</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;edge&#39;</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">qx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">qx</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'edge'</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">qy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">qy</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'edge'</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">qz</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">'edge'</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
 
-                <span class="c1"># TODO: consider padding or not on top, left, and &quot;top (row-wise)&quot;</span>
+                <span class="c1"># TODO: consider padding or not on top, left, and "top (row-wise)"</span>
                 <span class="c1"># (parent x, y, z locations already contain this pad - see zloc above)</span>
-                <span class="c1">#q_iface = np.pad(q_iface, pad_width=1, mode=&#39;edge&#39;)[:, 1:-1, 1:-1].ravel()</span>
-                <span class="c1">#q_jface = np.pad(q_jface, pad_width=1, mode=&#39;edge&#39;)[:, 1:-1, 1:-1].ravel()</span>
+                <span class="c1">#q_iface = np.pad(q_iface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()</span>
+                <span class="c1">#q_jface = np.pad(q_jface, pad_width=1, mode='edge')[:, 1:-1, 1:-1].ravel()</span>
 
 
                 <span class="c1"># TODO: refactor interpolation to use the new interpolator object - DONE: see above</span>
@@ -1024,10 +1024,10 @@
 
                 <span class="c1"># interpolate inset boundary heads from 3D parent head solution</span>
                 <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-                <span class="n">y_flux</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">qy</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
-                <span class="n">x_flux</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">qx</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
-                <span class="c1"># v_flux = kface_interp.interpolate(qz, method=&#39;linear&#39;)</span>
-                <span class="sa">f</span><span class="s2">&quot;interpolation took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span>
+                <span class="n">y_flux</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">qy</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'linear'</span><span class="p">)</span>
+                <span class="n">x_flux</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">qx</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'linear'</span><span class="p">)</span>
+                <span class="c1"># v_flux = kface_interp.interpolate(qz, method='linear')</span>
+                <span class="sa">f</span><span class="s2">"interpolation took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s"</span>
 
                 <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
@@ -1036,29 +1036,29 @@
                     <span class="c1">#qz_interp=v_flux)</span>
 
                 <span class="c1"># assign q values and flip the sign for flux counter to the CBB convention directions of right and bottom</span>
-                <span class="n">top_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">&#39;top&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_faces</span><span class="p">,</span> <span class="s1">&#39;q_interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_faces</span><span class="p">,</span> <span class="s1">&#39;qy_interp&#39;</span><span class="p">]</span>
-                <span class="n">bottom_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">&#39;bottom&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">bottom_faces</span><span class="p">,</span> <span class="s1">&#39;q_interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">bottom_faces</span><span class="p">,</span> <span class="s1">&#39;qy_interp&#39;</span><span class="p">]</span>
-                <span class="n">left_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">&#39;left&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_faces</span><span class="p">,</span> <span class="s1">&#39;q_interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_faces</span><span class="p">,</span> <span class="s1">&#39;qx_interp&#39;</span><span class="p">]</span>
-                <span class="n">right_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">right_faces</span><span class="p">,</span> <span class="s1">&#39;q_interp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">right_faces</span><span class="p">,</span> <span class="s1">&#39;qx_interp&#39;</span><span class="p">]</span>
+                <span class="n">top_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">'top'</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_faces</span><span class="p">,</span> <span class="s1">'q_interp'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">top_faces</span><span class="p">,</span> <span class="s1">'qy_interp'</span><span class="p">]</span>
+                <span class="n">bottom_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">'bottom'</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">bottom_faces</span><span class="p">,</span> <span class="s1">'q_interp'</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">bottom_faces</span><span class="p">,</span> <span class="s1">'qy_interp'</span><span class="p">]</span>
+                <span class="n">left_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">'left'</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_faces</span><span class="p">,</span> <span class="s1">'q_interp'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">left_faces</span><span class="p">,</span> <span class="s1">'qx_interp'</span><span class="p">]</span>
+                <span class="n">right_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">cellface</span> <span class="o">==</span> <span class="s1">'right'</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">right_faces</span><span class="p">,</span> <span class="s1">'q_interp'</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">right_faces</span><span class="p">,</span> <span class="s1">'qx_interp'</span><span class="p">]</span>
 
                 <span class="c1"># convert specific discharge in inset cells to Q -- flux for well package</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> \
-                    <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;q_interp&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">&#39;face_area&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'q'</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'q_interp'</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[</span><span class="s1">'face_area'</span><span class="p">]</span>
 
 
                 <span class="c1"># make a DataFrame of boundary fluxes at perimeter cell locations</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;j&#39;</span><span class="p">,</span><span class="s1">&#39;idomain&#39;</span><span class="p">,</span><span class="s1">&#39;q&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cell_faces</span><span class="p">[[</span><span class="s1">'k'</span><span class="p">,</span><span class="s1">'i'</span><span class="p">,</span><span class="s1">'j'</span><span class="p">,</span><span class="s1">'idomain'</span><span class="p">,</span><span class="s1">'q'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="c1"># aggregate fluxes by cell</span>
                 <span class="c1"># so that we are accurately compare to the WELL package budget in the listing file</span>
-                <span class="c1">#by_cell = df.groupby(&#39;cellid&#39;).first()</span>
-                <span class="c1">#by_cell[&#39;q&#39;] = df.groupby(&#39;cellid&#39;).sum()[&#39;q&#39;]</span>
+                <span class="c1">#by_cell = df.groupby('cellid').first()</span>
+                <span class="c1">#by_cell['q'] = df.groupby('cellid').sum()['q']</span>
                 <span class="c1">## drop the cellid index</span>
                 <span class="c1">#by_cell.reset_index(drop=True, inplace=True)</span>
-                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;per&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inset_per</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">'per'</span><span class="p">]</span> <span class="o">=</span> <span class="n">inset_per</span>
 
                 <span class="c1"># boundary fluxes must be in active cells</span>
                 <span class="c1"># corresponding parent cells must be active too,</span>
@@ -1066,26 +1066,26 @@
                 <span class="c1"># drop nan fluxes, which will revert these boundary cells to the</span>
                 <span class="c1"># default no-flow condition in MODFLOW</span>
                 <span class="c1"># (consistent with parent model cell being inactive)</span>
-                <span class="n">keep</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;idomain&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+                <span class="n">keep</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">'idomain'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">'q'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
                 <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-                <span class="sa">f</span><span class="s2">&quot;assigning face fluxes took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s&quot;</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s total&quot;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s2">"assigning face fluxes took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s"</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"took </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s total"</span><span class="p">)</span>
 
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
             <span class="c1"># drop duplicate cells (accounting for stress periods)</span>
             <span class="c1"># (that may have connections in the x and y directions,</span>
             <span class="c1">#  and therefore would be listed twice)</span>
-            <span class="c1">#df[&#39;cellid&#39;] = list(zip(df.per, df.k, df.i, df.j))</span>
-            <span class="c1">#duplicates = df.duplicated(subset=[&#39;cellid&#39;])</span>
-            <span class="c1">#df = df.loc[~duplicates, [&#39;k&#39;, &#39;i&#39;, &#39;j&#39;, &#39;per&#39;, &#39;q&#39;]]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;getting perimeter fluxes took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+            <span class="c1">#df['cellid'] = list(zip(df.per, df.k, df.i, df.j))</span>
+            <span class="c1">#duplicates = df.duplicated(subset=['cellid'])</span>
+            <span class="c1">#df = df.loc[~duplicates, ['k', 'i', 'j', 'per', 'q']]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"getting perimeter fluxes took </span><span class="si">{:.2f}</span><span class="s2">s</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
 
         <span class="c1"># convert to one-based and comment out header if df will be written straight to external file</span>
         <span class="k">if</span> <span class="n">for_external_files</span><span class="p">:</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="s1">&#39;#k&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;#k&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">'k'</span><span class="p">:</span> <span class="s1">'#k'</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'#k'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'i'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">'j'</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">df</span>
 </pre></div>
 
@@ -1097,7 +1097,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

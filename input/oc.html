@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MODFLOW Output Control &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>MODFLOW Output Control &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -124,24 +124,24 @@
 <p>Regardless of the model version (MODFLOW-2005-style or MODFLOW 6), output control can be specified in a format similar to native MODFLOW 6 input:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">period_options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
-<span class="w">    </span><span class="nt">15</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">15</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 <p>The above <code class="docutils literal notranslate"><span class="pre">period_options:</span></code> block would save the head and cell budget output on the last timestep of stress periods 0 through 9, and from 15 on, but turn off output saving for stress periods 10 through 14. This behavior is consistent with MODFLOW 6 but differs from MODFLOW-2005, where each stress periods must be explicitly included for output to be written. Other options besides <code class="docutils literal notranslate"><span class="pre">'last'</span></code> include <code class="docutils literal notranslate"><span class="pre">all,</span> <span class="pre">first,</span> <span class="pre">frequency</span> <span class="pre">&lt;frequency&gt;,</span> <span class="pre">and</span> <span class="pre">steps</span> <span class="pre">&lt;steps(&lt;nstp)&gt;</span></code>; see the MODFLOW 6 input instructions for more details.</p>
 </section>
 <section id="output-filenames-and-other-arguments">
 <h2>Output filenames and other arguments<a class="headerlink" href="#output-filenames-and-other-arguments" title="Link to this heading"></a></h2>
-<p>For MODFLOW 6 models, the <code class="docutils literal notranslate"><span class="pre">head_fileout_fmt</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_fileout_fmt</span></code> arguments can also be supplied to tell Flopy where to save the head and cell budget files, and how to name them. Modflow-setup fills any format specifiers (<code class="docutils literal notranslate"><span class="pre">'{}'</span></code>) with the model name, and passes the resulting strings to the <code class="docutils literal notranslate"><span class="pre">head_filerecord</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_filerecord</span></code> arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> constructor.</p>
+<p>For MODFLOW 6 models, the <code class="docutils literal notranslate"><span class="pre">head_fileout_fmt</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_fileout_fmt</span></code> arguments can also be supplied to tell Flopy where to save the head and cell budget files, and how to name them. Modflow-setup fills any format specifiers (<code class="docutils literal notranslate"><span class="pre">'{}'</span></code>) with the model name, and passes the resulting strings to the <code class="docutils literal notranslate"><span class="pre">head_filerecord</span></code> and <code class="docutils literal notranslate"><span class="pre">budget_filerecord</span></code> arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> constructor.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.hds&#39;</span>
-<span class="w">  </span><span class="nt">budget_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{}.cbc&#39;</span>
+<span class="w">  </span><span class="nt">head_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">'{}.hds'</span>
+<span class="w">  </span><span class="nt">budget_fileout_fmt</span><span class="p">:</span><span class="w"> </span><span class="s">'{}.cbc'</span>
 <span class="w">  </span><span class="nt">period_options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'save</span><span class="nv"> </span><span class="s">head</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'save</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">last'</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
-<p>Any other valid arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructors can be supplied as keys in the <code class="docutils literal notranslate"><span class="pre">oc:</span></code> dictionary block. For example:</p>
+<p>Any other valid arguments to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.mf6.modflow.mfgwfoc.html#flopy.mf6.modflow.mfgwfoc.ModflowGwfoc" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.mf6.ModflowGwfoc</span></code></a> and <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructors can be supplied as keys in the <code class="docutils literal notranslate"><span class="pre">oc:</span></code> dictionary block. For example:</p>
 <blockquote>
 <div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">unitnumber</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">14</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">51</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">52</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">53</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">]</span>
@@ -152,10 +152,10 @@
 </section>
 <section id="alternative-stress-period-input-formats">
 <h2>Alternative stress period input formats<a class="headerlink" href="#alternative-stress-period-input-formats" title="Link to this heading"></a></h2>
-<p>As with other arguments, stress period input can also be directly specified in the Flopy input formats. For example, <code class="docutils literal notranslate"><span class="pre">stress_period_data</span></code> could be supplied for a MODFLOW-2005 model as it would be supplied to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructor:</p>
+<p>As with other arguments, stress period input can also be directly specified in the Flopy input formats. For example, <code class="docutils literal notranslate"><span class="pre">stress_period_data</span></code> could be supplied for a MODFLOW-2005 model as it would be supplied to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.modflow.mfoc.html#flopy.modflow.mfoc.ModflowOc" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">flopy.modflow.ModflowOc</span></code></a> constructor:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">oc</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">stress_period_data</span><span class="p">:</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">(0, 1)</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">head&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;save</span><span class="nv"> </span><span class="s">budget&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">(0, 1)</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'save</span><span class="nv"> </span><span class="s">head'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'save</span><span class="nv"> </span><span class="s">budget'</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 </section>
@@ -173,7 +173,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

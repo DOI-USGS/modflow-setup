@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Local grid refinement &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>Local grid refinement &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -117,7 +117,7 @@
 <p>For example, the following “parent” configuration for the <a class="reference internal" href="../config-file-gallery.html#pleasant-lake-test-case"><span class="std std-ref">Pleasant Lake Example</span></a> creates a local refinement model named “<code class="docutils literal notranslate"><span class="pre">pleasant_lgr_inset</span></code>” that spans all layers of the parent model, at the same vertical resolution (1 inset model layer per parent model layer).</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">lgr</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">pleasant_lgr_inset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant_lgr_inset.yml&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'pleasant_lgr_inset.yml'</span>
 <span class="w">      </span><span class="c1"># number of inset layers for each parent layer</span>
 <span class="w">      </span><span class="c1"># this can be an integer (vertically uniform refinement)</span>
 <span class="w">      </span><span class="c1"># a list (with an entry for each parent layer)</span>
@@ -131,9 +131,9 @@
 </a>
 <a class="reference internal image-reference" href="../_images/pleasant_lgr_xsection.png"><img alt="Example of LGR refinement in all layers." src="../_images/pleasant_lgr_xsection.png" width="1200" />
 </a>
-<p>Input from the <code class="docutils literal notranslate"><span class="pre">lgr:</span></code> subblock and the inset model configuration file(s) is passed to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.utils.lgrutil.html#flopy.utils.lgrutil.Lgr" title="(in FloPy v3.11.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flopy</span> <span class="pre">Lgr</span> <span class="pre">Utility</span></code></a>, which helps create input for the GWF Model Exchange Package.</p>
+<p>Input from the <code class="docutils literal notranslate"><span class="pre">lgr:</span></code> subblock and the inset model configuration file(s) is passed to the <a class="reference external" href="https://flopy.readthedocs.io/en/latest/source/flopy.utils.lgrutil.html#flopy.utils.lgrutil.Lgr" title="(in FloPy v3.12.0.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flopy</span> <span class="pre">Lgr</span> <span class="pre">Utility</span></code></a>, which helps create input for the GWF Model Exchange Package.</p>
 <p>Within the context of a Python session, inset model information is stored in a dictionary under an <code class="docutils literal notranslate"><span class="pre">inset</span></code> attribute attached to the parent model. For example, to access a Flopy model object for the above inset model from a parent model named <code class="docutils literal notranslate"><span class="pre">model</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inset_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">&#39;pleasant_lgr_inset&#39;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inset_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inset</span><span class="p">[</span><span class="s1">'pleasant_lgr_inset'</span><span class="p">]</span>
 </pre></div>
 </div>
 <section id="specification-of-vertical-refinement">
@@ -156,7 +156,7 @@
 <p>Parent model layers with 0 specified refinement are excluded from the child model. The list and dictionary inputs above are equivalent, as unlisted layers in the dictionary are assigned default refinement values of 0. Refinement values &gt; 1 result in even subdivision of the parent layers. Similar to one-way coupled inset models, LGR child model layers surfaces can be discretized at the finer child resolution from the original source data. In the example below, a 9-layer child model is set within the top 4 layers of a 5 layer parent model. The parent model <code class="docutils literal notranslate"><span class="pre">lgr:</span></code> configuration block is specified as:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">lgr</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">pleasant_lgr_inset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant_vertical_lgr_inset.yml&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'pleasant_vertical_lgr_inset.yml'</span>
 <span class="w">      </span><span class="c1"># number of inset layers for each parent layer</span>
 <span class="w">      </span><span class="c1"># this can be an integer (vertically uniform refinement)</span>
 <span class="w">      </span><span class="c1"># a list (with an entry for each parent layer)</span>
@@ -168,22 +168,22 @@
 <p>In the child model <code class="docutils literal notranslate"><span class="pre">dis:</span></code> configuration block, raster surfaces that were used to define the parent model layer bottoms are specified at their respective desired locations within the child model grid; Modflow-setup then subdivides these to create the desired layer configuration. The layer specification in the child model <code class="docutils literal notranslate"><span class="pre">dis:</span></code> block must be consistent with the <cite>layer_refinement:</cite> input in the parent model configuration (see below). The image below shows</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">    </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
 <span class="w">  </span><span class="nt">dimensions</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># nrow and ncol are based on the buffer distance and grid spacing</span>
 <span class="w">    </span><span class="nt">nlay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9</span>
 <span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">top</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/dem40m.tif&#39;</span><span class="w"> </span><span class="c1"># DEM file; path relative to setup script</span>
-<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../examples/data/pleasant/source_data/rasters/dem40m.tif'</span><span class="w"> </span><span class="c1"># DEM file; path relative to setup script</span>
+<span class="w">      </span><span class="nt">elevation_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
 <span class="w">    </span><span class="nt">botm</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">filenames</span><span class="p">:</span>
 <span class="w">        </span><span class="c1"># bottom of layer 0 set halfway between layer 1 bottom and model top (layer_refinement[0] == 2)</span>
-<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/botm0.tif&#39;</span><span class="w">  </span><span class="c1"># preprocessed surface for parent model layer 0 bottom</span>
+<span class="w">        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../examples/data/pleasant/source_data/rasters/botm0.tif'</span><span class="w">  </span><span class="c1"># preprocessed surface for parent model layer 0 bottom</span>
 <span class="w">        </span><span class="c1"># bottom of layer 2 set halfway between layers 1 and 3 (layer_refinement[1] == 2)</span>
-<span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/botm1.tif&#39;</span><span class="w">  </span><span class="c1"># preprocessed surface for parent model layer 1 bottom</span>
+<span class="w">        </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../examples/data/pleasant/source_data/rasters/botm1.tif'</span><span class="w">  </span><span class="c1"># preprocessed surface for parent model layer 1 bottom</span>
 <span class="w">        </span><span class="c1"># bottom of layer 4 set halfway between layers 3 and 5 (layer_refinement[2] == 2)</span>
-<span class="w">        </span><span class="nt">5</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;../../../examples/data/pleasant/source_data/rasters/botm2.tif&#39;</span><span class="w">  </span><span class="c1"># preprocessed surface for parent model layer 2 bottom</span>
+<span class="w">        </span><span class="nt">5</span><span class="p">:</span><span class="w"> </span><span class="s">'../../../examples/data/pleasant/source_data/rasters/botm2.tif'</span><span class="w">  </span><span class="c1"># preprocessed surface for parent model layer 2 bottom</span>
 <span class="w">        </span><span class="c1"># bottoms of layers 6 and 7 equally subdivide layers 5 and 8 (layer_refinement[3] == 3)</span>
 <span class="w">        </span><span class="c1"># bottom of layer 8 set from parent model layer 3 bottom</span>
 </pre></div>
@@ -216,7 +216,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 

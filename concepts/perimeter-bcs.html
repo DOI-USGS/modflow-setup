@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.8.1 documentation</title>
+  <title>Specifying perimeter boundary conditions from another model &mdash; modflow-setup 0.8.1.post1+g8ecb076 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec16d22d"></script>
+      <script src="../_static/documentation_options.js?v=6a370f82"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -137,13 +137,13 @@
 <blockquote>
 <div><p>Input example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parent</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pleasant.nam&#39;</span>
-<span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/&#39;</span>
-<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;mfnwt&#39;</span>
-<span class="w">  </span><span class="nt">copy_stress_periods</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;all&#39;</span>
-<span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2012-01-01&#39;</span>
-<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;meters&#39;</span>
-<span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;days&#39;</span>
+<span class="w">  </span><span class="nt">namefile</span><span class="p">:</span><span class="w"> </span><span class="s">'pleasant.nam'</span>
+<span class="w">  </span><span class="nt">model_ws</span><span class="p">:</span><span class="w"> </span><span class="s">'data/pleasant/'</span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">'mfnwt'</span>
+<span class="w">  </span><span class="nt">copy_stress_periods</span><span class="p">:</span><span class="w"> </span><span class="s">'all'</span>
+<span class="w">  </span><span class="nt">start_date_time</span><span class="p">:</span><span class="w"> </span><span class="s">'2012-01-01'</span>
+<span class="w">  </span><span class="nt">length_units</span><span class="p">:</span><span class="w"> </span><span class="s">'meters'</span>
+<span class="w">  </span><span class="nt">time_units</span><span class="p">:</span><span class="w"> </span><span class="s">'days'</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -153,16 +153,16 @@
 <div><p>Input example (specified head):</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">'data/pleasant/pleasant.hds'</span>
 </pre></div>
 </div>
 <p>Input example (specified flux, with optional shapefile defining an irregular perimeter boundary,
 and the MODFLOW 6 binary grid file, which is required for reading the cell budget output from MODFLOW 6 parent models):</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">wel</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
-<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.cbc&#39;</span>
-<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.dis.grb&#39;</span>
+<span class="w">    </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/gis/irregular_boundary.shp'</span>
+<span class="w">    </span><span class="nt">parent_cell_budget_file</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/shellmound.cbc'</span>
+<span class="w">    </span><span class="nt">parent_binary_grid_file</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/shellmound.dis.grb'</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -188,7 +188,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 <div><p>Input example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">'data/pleasant/pleasant.hds'</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -197,7 +197,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 <div><p>Input example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;data/pleasant/pleasant.hds&#39;</span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">'data/pleasant/pleasant.hds'</span>
 <span class="w">      </span><span class="nt">by_layer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 </pre></div>
 </div>
@@ -207,8 +207,8 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 <div><p>Input example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chd</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">perimeter_boundary</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/gis/irregular_boundary.shp&#39;</span>
-<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;shellmound/tmr_parent/shellmound.hds&#39;</span>
+<span class="w">      </span><span class="nt">shapefile</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/gis/irregular_boundary.shp'</span>
+<span class="w">      </span><span class="nt">parent_head_file</span><span class="p">:</span><span class="w"> </span><span class="s">'shellmound/tmr_parent/shellmound.hds'</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -227,7 +227,7 @@ and the MODFLOW 6 binary grid file, which is required for reading the cell budge
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Aug 07, 2026.
+      <span class="lastupdated">Last updated on Oct 27, 2026.
       </span></p>
   </div>
 
