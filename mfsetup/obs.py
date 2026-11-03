@@ -15,6 +15,7 @@ def read_observation_data(f=None, column_info=None,
     xcol = column_info.get('x_location_col', 'x')
     ycol = column_info.get('y_location_col', 'y')
     obstype_col = column_info.get('obstype_col', 'obs_type')
+    layer_col = column_info.get('layer_col', 'layer')
     rename = {xcol: 'x',
               ycol: 'y',
               }
@@ -23,6 +24,9 @@ def read_observation_data(f=None, column_info=None,
         print('    observation type col: {}'.format(obstype_col))
     else:
         print('    no observation type col specified; observations assumed to be heads')
+    if layer_col is not None and layer_col.lower() in df.columns:
+        rename.update({layer_col.lower(): 'layer'})
+        print('    observation layer col: {}'.format(layer_col))
     if column_mappings is not None:
         for k, v in column_mappings.items():
             if not isinstance(v, list):
@@ -50,11 +54,60 @@ def read_observation_data(f=None, column_info=None,
     return df
 
 
+def parse_observation_layers(value, nlay=None):
+    """Parse a user-specified layer value for a head observation into a
+    list of zero-based layer indices.
+
+    Parameters
+    ----------
+    value : scalar, list, or str
+        Layer specification for a single head observation. May be a single
+        layer (e.g. ``2``), a list of layers (e.g. ``[0, 2]``), or a string
+        of one or more layers separated by commas or spaces (e.g. ``"0, 2"``),
+        as might be read from a CSV column.
+    nlay : int, optional
+        Number of model layers. If provided, parsed layers are validated to be
+        within ``range(nlay)``.
+
+    Returns
+    -------
+    layers : list of int or None
+        List of layer indices, or ``None`` if no layer was specified
+        (missing/empty value), indicating that the observation should be
+        placed in all layers.
+    """
+    # no layer specified -> fall back to all layers
+    if value is None:
+        return None
+    if isinstance(value, float) and np.isnan(value):
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+        if value == '' or value.lower() in ('nan', 'none'):
+            return None
+        # allow comma- or whitespace-separated layers in a single string
+        parts = [p for p in value.replace(',', ' ').split()]
+        layers = [int(float(p)) for p in parts]
+    elif isinstance(value, (list, tuple, np.ndarray)):
+        layers = [int(v) for v in value]
+    else:
+        # single numeric value
+        layers = [int(value)]
+    if nlay is not None:
+        invalid = [k for k in layers if k < 0 or k >= nlay]
+        if any(invalid):
+            raise ValueError(
+                "Specified observation layer(s) {} are outside of the model "
+                "layer range (0-{}).".format(invalid, nlay - 1))
+    return layers
+
+
 def setup_head_observations(model, filenames=None,
                             obs_package='hyd', column_mappings=None,
                             obsname_column='obsname',
                             x_location_col='x',
                             y_location_col='y',
+                            layer_col='layer',
                             obsname_character_limit=40,
                             drop_observations=None, iobs_domain=None,
                             **kwargs):
@@ -77,6 +130,7 @@ def setup_head_observations(model, filenames=None,
     default_inputs = {
             'x_location_col': x_location_col,
             'y_location_col': y_location_col,
+            'layer_col': layer_col,
         }
 
     if isinstance(obs_info_files, str):
@@ -120,7 +174,11 @@ def setup_head_observations(model, filenames=None,
         df['intyp'] = ['I' if p == 'BAS' else 'C' for p in df['pckg']]
         df[obsname_column] = df[obsname_column].astype(str).str.lower()
 
-        dfs.append(df[['pckg', 'arr', 'intyp', 'x', 'y', obsname_column, 'file']])
+        columns = ['pckg', 'arr', 'intyp', 'x', 'y', obsname_column, 'file']
+        # carry through a user-specified layer column (heads only)
+        if 'layer' in df.columns:
+            columns.append('layer')
+        dfs.append(df[columns])
     df = pd.concat(dfs, axis=0)
 
     print('\nCulling observations to model area...')
@@ -143,16 +201,37 @@ def setup_head_observations(model, filenames=None,
             duplicated.sum()))
         print(df.loc[duplicated, [obsname_column, 'file']])
 
-    # make sure every head observation is in each layer
+    # expand each head observation across model layers
+    # by default, every head observation is placed in all layers;
+    # if a layer column was supplied (heads only), place the observation
+    # only in the specified layer(s)
+    nlay = model.modelgrid.nlay
     non_heads = df.loc[df.arr != 'HD'].copy()
     heads = df.loc[df.arr == 'HD'].copy()
     heads0 = heads.groupby(obsname_column).first().reset_index()
     heads0[obsname_column] = heads0[obsname_column].astype(str)
-    heads_all_layers = pd.concat([heads0] * model.modelgrid.nlay).sort_values(by=obsname_column)
-    heads_all_layers['klay'] = list(range(model.modelgrid.nlay)) * len(heads0)
-    heads_all_layers[obsname_column] = ['{}'.format(obsname)  # _{:.0f}'.format(obsname, k)
-                                        for obsname, k in zip(heads_all_layers[obsname_column],
-                                                              heads_all_layers['klay'])]
+    # determine the layer(s) for each head observation
+    specified_layers = None
+    if 'layer' in heads0.columns:
+        specified_layers = [parse_observation_layers(value, nlay)
+                            for value in heads0['layer']]
+    head_dfs = []
+    for n, (_, row) in enumerate(heads0.iterrows()):
+        if specified_layers is not None and specified_layers[n] is not None:
+            klayers = specified_layers[n]
+        else:
+            klayers = list(range(nlay))
+        obs_layers = pd.concat([row.to_frame().T] * len(klayers), ignore_index=True)
+        obs_layers['klay'] = klayers
+        head_dfs.append(obs_layers)
+    heads_all_layers = pd.concat(head_dfs, ignore_index=True)
+    heads_all_layers = heads_all_layers.sort_values(by=obsname_column)
+    heads_all_layers[obsname_column] = heads_all_layers[obsname_column].astype(str)
+    # drop the source layer column now that klay has been assigned
+    if 'layer' in heads_all_layers.columns:
+        heads_all_layers.drop('layer', axis=1, inplace=True)
+    if 'layer' in non_heads.columns:
+        non_heads.drop('layer', axis=1, inplace=True)
     df = pd.concat([heads_all_layers, non_heads], axis=0)
 
     # dtypes
