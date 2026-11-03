@@ -248,6 +248,9 @@ obs:
       hydlbl: ['obsprefix', 'obsnme', 'common_name']
     x_location_col: 'x' # x coordinates in wtm
     y_location_col: 'y' # y coordinates in wtm
+    layer_col: 'layer'  # Optional column of layer(s) for each head obs;
+                        # value may be a single (zero-based) layer or a list of layers.
+                        # observations with no specified layer are placed in all layers.
   mfsetup_options:
     allow_obs_in_bc_cells: False
     obsname_character_limit: 40  # modflow 6 limit
