@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Head observations &mdash; modflow-setup 0.8.1.post13+gb38e857 documentation</title>
+  <title>Head observations &mdash; modflow-setup 0.8.1.post17+gd89c5cb documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=11a012c1"></script>
+      <script src="../_static/documentation_options.js?v=548a3c18"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -67,7 +67,10 @@
 <li class="toctree-l2"><a class="reference internal" href="ic.html">Initial Conditions (IC, BAS6)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lak.html">The Lake Package (LAK)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sfr.html">The Streamflow Routing Package (SFR, GAGE)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Head observations (OBS, HYD)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Head observations (OBS, HYD)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-the-layer-s-for-head-observations">Specifying the layer(s) for head observations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="oc.html">     Output Control (OC)</a></li>
 </ul>
 </li>
@@ -114,10 +117,44 @@
              
   <section id="head-observations">
 <h1>Head observations<a class="headerlink" href="#head-observations" title="Link to this heading"></a></h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This page is a work in progress and needs some more work.</p>
+<p>Head observations are set up from one or more CSV tables of observation
+locations, specified in the <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> sub-block of the <code class="docutils literal notranslate"><span class="pre">obs:</span></code> block
+(MODFLOW 6) or the <code class="docutils literal notranslate"><span class="pre">hyd:</span></code> block (MODFLOW-NWT). Each observation location is
+mapped to the model grid from its x, y coordinates. The columns used for the
+x and y coordinates, observation names, and observation type can be configured
+via the <code class="docutils literal notranslate"><span class="pre">source_data:</span></code> block (see the configuration defaults).</p>
+<p>By default, each head observation is created in <strong>every</strong> model layer at its x,
+y location (active cells only). The model output can then be post-processed to
+obtain a simulated head at each observation’s actual open interval. Where the
+open interval spans more than one layer, the head can be computed as a
+transmissivity-weighted average of the heads in those layers.</p>
+<section id="specifying-the-layer-s-for-head-observations">
+<h2>Specifying the layer(s) for head observations<a class="headerlink" href="#specifying-the-layer-s-for-head-observations" title="Link to this heading"></a></h2>
+<p>If the open interval (screened layer) of an observation is known, the
+observation can be restricted to one or more specific layers using a layer
+column in the source data. The column name is configured with the
+<code class="docutils literal notranslate"><span class="pre">layer_col</span></code> option (default: <code class="docutils literal notranslate"><span class="pre">'layer'</span></code>).</p>
+<p>The value in the layer column for a given observation may be either:</p>
+<ul class="simple">
+<li><p>a single (zero-based) layer index, for example <code class="docutils literal notranslate"><span class="pre">2</span></code>, or</p></li>
+<li><p>a list of layer indices, for example <code class="docutils literal notranslate"><span class="pre">0,</span> <span class="pre">2</span></code> (comma- or space-separated
+in a CSV cell), to place the observation in multiple layers.</p></li>
+</ul>
+<p>Observations with no value in the layer column (missing or empty) fall back to
+the default behavior of being placed in all layers.</p>
+<p>For example, given a <code class="docutils literal notranslate"><span class="pre">head_targets.csv</span></code> file with a <code class="docutils literal notranslate"><span class="pre">layer</span></code> column:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">obs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">filenames</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">'data/head_targets.csv'</span>
+<span class="w">    </span><span class="nt">column_mappings</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">obsname</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'obsprefix'</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">'common_name'</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">x_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">'x'</span>
+<span class="w">    </span><span class="nt">y_location_col</span><span class="p">:</span><span class="w"> </span><span class="s">'y'</span>
+<span class="w">    </span><span class="nt">layer_col</span><span class="p">:</span><span class="w"> </span><span class="s">'layer'</span><span class="w">  </span><span class="c1"># optional; 'layer' is the default</span>
+</pre></div>
 </div>
+</section>
 </section>
 
 
@@ -132,7 +169,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Oct 27, 2026.
+      <span class="lastupdated">Last updated on Nov 12, 2026.
       </span></p>
   </div>
 
