@@ -120,6 +120,40 @@ def test_tmr_new(pleasant_model):
     assert results['#k'].min() == 1
 
 
+@pytest.mark.parametrize('kwargs', [
+    {'interpolation_method': 'foo'},
+    {'interpolation_method': 'kdtree', 'interpolation_k': 0},
+    {'interpolation_method': 'kdtree', 'interpolation_k': 2.5},
+])
+def test_tmr_interpolation_input_validation(pleasant_model, kwargs):
+    m = pleasant_model
+    parent_headfile = Path(m.cfg['chd']['perimeter_boundary']['parent_head_file'])
+    with pytest.raises(ValueError):
+        Tmr(m.parent, m, parent_head_file=parent_headfile, **kwargs)
+
+
+def test_tmr_interpolation_method_kdtree(pleasant_model):
+    m = pleasant_model
+    parent_headfile = Path(m.cfg['chd']['perimeter_boundary']['parent_head_file'])
+    linear = Tmr(m.parent, m, parent_head_file=parent_headfile)
+    assert linear.interpolation_method == 'linear'
+    assert linear.interpolation_k is None
+    tmr = Tmr(m.parent, m, parent_head_file=parent_headfile,
+              interpolation_method='kdtree', interpolation_k=1)
+    assert tmr.interpolation_method == 'kdtree'
+    assert tmr.interpolation_k == 1
+    results = tmr.get_inset_boundary_values(for_external_files=False)
+    assert not results['head'].isna().any()
+    # k=1 is pure nearest neighbor; results should differ from linear
+    expected = linear.get_inset_boundary_values(for_external_files=False)
+    # (the number of rows can differ, because cells with heads below
+    # the cell bottom are dropped)
+    merged = results.merge(expected, on=['k', 'i', 'j', 'per'],
+                           suffixes=('_kdtree', '_linear'))
+    assert len(merged) > 0
+    assert not np.allclose(merged['head_kdtree'], merged['head_linear'])
+
+
 def test_get_boundary_cells_shapefile(shellmound_tmr_model_with_dis, test_data_path, tmpdir):
     m = shellmound_tmr_model_with_dis
 
