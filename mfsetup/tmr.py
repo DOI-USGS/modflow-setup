@@ -210,7 +210,20 @@ class Tmr:
         areas of pinched-out (idomain != 1) cells, which may result
         in perimeter boundary condition cells getting placed too close
         to the area of interest. By default, 'max_active_extent'.
-
+    interpolation_method : str, {'linear', 'kdtree'}
+        Method for interpolating parent model values to the inset
+        perimeter cell centers. If 'linear', Delaunay triangulation with
+        barycentric weights is used (similar to
+        :py:func:`scipy.interpolate.griddata`). If 'kdtree', inverse-distance
+        weighting of the *k* nearest parent cell centers is used
+        (via a :py:class:`scipy.spatial.cKDTree`), which can be faster and
+        more robust for large 3D parent grids with extreme vertical-to-horizontal
+        aspect ratios. By default, 'linear'.
+    interpolation_k : int, optional
+        Number of nearest parent cells to use with ``interpolation_method='kdtree'``
+        (ignored for 'linear'). Must be a positive integer; 1 gives pure
+        nearest-neighbor interpolation. By default, the number of vertices
+        in a simplex (the number of dimensions plus one; 4 for 3D interpolation).
     Notes
     -----
     """
@@ -222,7 +235,25 @@ class Tmr:
                  parent_start_date_time=None, source_mask=None,
                  define_connections_by='max_active_extent',
                  shapefile=None,
+                 interpolation_method='linear',
+                 interpolation_k=None,
                  ):
+        if interpolation_method is None:
+            interpolation_method = 'linear'
+        if interpolation_method not in {'linear', 'kdtree'}:
+            raise ValueError(
+                f"Unsupported interpolation_method: {interpolation_method!r}; "
+                "must be 'linear' or 'kdtree'")
+        if interpolation_k is not None:
+            if isinstance(interpolation_k, bool) or \
+                    not isinstance(interpolation_k, (int, np.integer)) or \
+                    interpolation_k < 1:
+                raise ValueError(
+                    'interpolation_k must be a positive integer (1 or greater), '
+                    f'got {interpolation_k!r}')
+            interpolation_k = int(interpolation_k)
+        self.interpolation_method = interpolation_method
+        self.interpolation_k = interpolation_k
         self.parent = parent_model
         self.inset = inset_model
         self.parent_head_file = parent_head_file
@@ -650,10 +681,13 @@ class Tmr:
             last_steps = {kper: kstp for kstp, kper in all_kstpkper}
 
             # create an interpolator instance
+            weight_method = 'kdtree' if self.interpolation_method == 'kdtree' else 'delaunay'
             cell_centers_interp = Interpolator(self.parent_xyzcellcenters,
                                                self.inset_boundary_cells[['x', 'y', 'z']].T.values,
                                                d=3,
-                                               source_values_mask=self._source_grid_mask)
+                                               source_values_mask=self._source_grid_mask,
+                                               weight_method=weight_method,
+                                               k=self.interpolation_k)
             # compute the weights
             _ = cell_centers_interp.interp_weights
 
@@ -876,10 +910,13 @@ class Tmr:
             #pz = self.z_iface_parent
             px, py, pz = self.parent_xyzcellcenters
             #px, py, pz = self.parent_xyzcellfacecenters['bottom']
+            weight_method = 'kdtree' if self.interpolation_method == 'kdtree' else 'delaunay'
             iface_interp = Interpolator((px, py, pz),
                                         #self.inset_boundary_cell_faces[['x', 'y', 'z']].T.values,
                                         self.inset_boundary_cells[['x', 'y', 'z']].T.values,
-                                        d=3, source_values_mask=self._source_grid_mask
+                                        d=3, source_values_mask=self._source_grid_mask,
+                                        weight_method=weight_method,
+                                        k=self.interpolation_k
                                         )
             _ = iface_interp.interp_weights
             # interpolate parent x fluxes (row parallel)
