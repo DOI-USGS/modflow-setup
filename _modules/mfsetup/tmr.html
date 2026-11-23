@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mfsetup.tmr &mdash; modflow-setup 0.8.1.post17+gd89c5cb documentation</title>
+  <title>mfsetup.tmr &mdash; modflow-setup 0.8.1.post19+g53b6b52 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=548a3c18"></script>
+      <script src="../../_static/documentation_options.js?v=e80c2cbb"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -314,7 +314,20 @@
 <span class="sd">        areas of pinched-out (idomain != 1) cells, which may result</span>
 <span class="sd">        in perimeter boundary condition cells getting placed too close</span>
 <span class="sd">        to the area of interest. By default, 'max_active_extent'.</span>
-
+<span class="sd">    interpolation_method : str, {'linear', 'kdtree'}</span>
+<span class="sd">        Method for interpolating parent model values to the inset</span>
+<span class="sd">        perimeter cell centers. If 'linear', Delaunay triangulation with</span>
+<span class="sd">        barycentric weights is used (similar to</span>
+<span class="sd">        :py:func:`scipy.interpolate.griddata`). If 'kdtree', inverse-distance</span>
+<span class="sd">        weighting of the *k* nearest parent cell centers is used</span>
+<span class="sd">        (via a :py:class:`scipy.spatial.cKDTree`), which can be faster and</span>
+<span class="sd">        more robust for large 3D parent grids with extreme vertical-to-horizontal</span>
+<span class="sd">        aspect ratios. By default, 'linear'.</span>
+<span class="sd">    interpolation_k : int, optional</span>
+<span class="sd">        Number of nearest parent cells to use with ``interpolation_method='kdtree'``</span>
+<span class="sd">        (ignored for 'linear'). Must be a positive integer; 1 gives pure</span>
+<span class="sd">        nearest-neighbor interpolation. By default, the number of vertices</span>
+<span class="sd">        in a simplex (the number of dimensions plus one; 4 for 3D interpolation).</span>
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    """</span>
@@ -326,7 +339,25 @@
                  <span class="n">parent_start_date_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">define_connections_by</span><span class="o">=</span><span class="s1">'max_active_extent'</span><span class="p">,</span>
                  <span class="n">shapefile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">interpolation_method</span><span class="o">=</span><span class="s1">'linear'</span><span class="p">,</span>
+                 <span class="n">interpolation_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="p">):</span>
+        <span class="k">if</span> <span class="n">interpolation_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">interpolation_method</span> <span class="o">=</span> <span class="s1">'linear'</span>
+        <span class="k">if</span> <span class="n">interpolation_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">'linear'</span><span class="p">,</span> <span class="s1">'kdtree'</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Unsupported interpolation_method: </span><span class="si">{</span><span class="n">interpolation_method</span><span class="si">!r}</span><span class="s2">; "</span>
+                <span class="s2">"must be 'linear' or 'kdtree'"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">interpolation_k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolation_k</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> \
+                    <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interpolation_k</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> \
+                    <span class="n">interpolation_k</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">'interpolation_k must be a positive integer (1 or greater), '</span>
+                    <span class="sa">f</span><span class="s1">'got </span><span class="si">{</span><span class="n">interpolation_k</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">interpolation_k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interpolation_k</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_method</span> <span class="o">=</span> <span class="n">interpolation_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_k</span> <span class="o">=</span> <span class="n">interpolation_k</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent_model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inset</span> <span class="o">=</span> <span class="n">inset_model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_head_file</span> <span class="o">=</span> <span class="n">parent_head_file</span>
@@ -754,10 +785,13 @@
             <span class="n">last_steps</span> <span class="o">=</span> <span class="p">{</span><span class="n">kper</span><span class="p">:</span> <span class="n">kstp</span> <span class="k">for</span> <span class="n">kstp</span><span class="p">,</span> <span class="n">kper</span> <span class="ow">in</span> <span class="n">all_kstpkper</span><span class="p">}</span>
 
             <span class="c1"># create an interpolator instance</span>
+            <span class="n">weight_method</span> <span class="o">=</span> <span class="s1">'kdtree'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_method</span> <span class="o">==</span> <span class="s1">'kdtree'</span> <span class="k">else</span> <span class="s1">'delaunay'</span>
             <span class="n">cell_centers_interp</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_xyzcellcenters</span><span class="p">,</span>
                                                <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">'x'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">'z'</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                                                <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                                               <span class="n">source_values_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_grid_mask</span><span class="p">)</span>
+                                               <span class="n">source_values_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_grid_mask</span><span class="p">,</span>
+                                               <span class="n">weight_method</span><span class="o">=</span><span class="n">weight_method</span><span class="p">,</span>
+                                               <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation_k</span><span class="p">)</span>
             <span class="c1"># compute the weights</span>
             <span class="n">_</span> <span class="o">=</span> <span class="n">cell_centers_interp</span><span class="o">.</span><span class="n">interp_weights</span>
 
@@ -980,10 +1014,13 @@
             <span class="c1">#pz = self.z_iface_parent</span>
             <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_xyzcellcenters</span>
             <span class="c1">#px, py, pz = self.parent_xyzcellfacecenters['bottom']</span>
+            <span class="n">weight_method</span> <span class="o">=</span> <span class="s1">'kdtree'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_method</span> <span class="o">==</span> <span class="s1">'kdtree'</span> <span class="k">else</span> <span class="s1">'delaunay'</span>
             <span class="n">iface_interp</span> <span class="o">=</span> <span class="n">Interpolator</span><span class="p">((</span><span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">pz</span><span class="p">),</span>
                                         <span class="c1">#self.inset_boundary_cell_faces[['x', 'y', 'z']].T.values,</span>
                                         <span class="bp">self</span><span class="o">.</span><span class="n">inset_boundary_cells</span><span class="p">[[</span><span class="s1">'x'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">'z'</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-                                        <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_grid_mask</span>
+                                        <span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">source_values_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_grid_mask</span><span class="p">,</span>
+                                        <span class="n">weight_method</span><span class="o">=</span><span class="n">weight_method</span><span class="p">,</span>
+                                        <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation_k</span>
                                         <span class="p">)</span>
             <span class="n">_</span> <span class="o">=</span> <span class="n">iface_interp</span><span class="o">.</span><span class="n">interp_weights</span>
             <span class="c1"># interpolate parent x fluxes (row parallel)</span>
@@ -1122,7 +1159,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2019-2026, Modflow-setup developers |.
-      <span class="lastupdated">Last updated on Nov 12, 2026.
+      <span class="lastupdated">Last updated on Nov 23, 2026.
       </span></p>
   </div>
 
